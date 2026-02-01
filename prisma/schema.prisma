@@ -1,0 +1,268 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// =============================================================================
+// ENUMS
+// =============================================================================
+
+/// Status do pipeline de produção do vídeo
+enum VideoStatus {
+  PENDING // Aguardando início
+  SCRIPT_GENERATING // Gerando roteiro
+  SCRIPT_READY // Roteiro pronto
+  AUDIO_GENERATING // Gerando narração
+  AUDIO_READY // Narração pronta
+  IMAGES_GENERATING // Gerando imagens
+  IMAGES_READY // Imagens prontas
+  MOTION_GENERATING // Gerando movimento (vídeo)
+  MOTION_READY // Movimento pronto
+  RENDERING // Renderizando vídeo
+  COMPLETED // Vídeo finalizado
+  FAILED // Falha no pipeline
+  CANCELLED // Cancelado pelo usuário
+}
+
+/// Tipo de provedor de IA usado
+enum AIProvider {
+  OPENAI
+  ANTHROPIC
+  GEMINI
+  ELEVENLABS
+  MIDJOURNEY
+  STABLE_DIFFUSION
+  RUNWAY
+  REPLICATE
+}
+
+// =============================================================================
+// MODELS
+// =============================================================================
+
+/// Projeto de vídeo - entidade principal
+model Video {
+  id     String      @id @default(uuid())
+  title  String      @db.VarChar(255)
+  theme  String      @db.Text
+  status VideoStatus @default(PENDING)
+
+  // Metadados
+  duration Int? // Duração alvo/estimada em segundos
+  language String @default("pt-BR") @db.VarChar(10)
+  style    String @default("documentary") @db.VarChar(50) // documentary, mystery, narrative, educational
+
+  // Opções de Geração
+  voiceId        String? @db.VarChar(100)
+  imageStyle     String? @db.VarChar(50)
+  visualStyle    String? @db.VarChar(50)
+  aspectRatio    String? @db.VarChar(10)
+  enableMotion   Boolean @default(false)
+  imagesApproved Boolean @default(false)
+  videosApproved Boolean @default(false)
+  outputPath     String? @db.VarChar(500)
+  thumbnailPath  String? @db.VarChar(500)
+
+  // Logs e erros
+  errorMessage String? @db.Text
+  pipelineLog  Json? // Array de log entries
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  completedAt DateTime?
+
+  // Relacionamentos inversos
+  script      Script?
+  scenes      Scene[]
+  audioTracks AudioTrack[]
+  executions  PipelineExecution[]
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("videos")
+}
+
+/// Roteiro completo do vídeo
+model Script {
+  id      String @id @default(uuid())
+  videoId String @unique
+  video   Video  @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  // Conteúdo
+  fullText  String @db.Text
+  wordCount Int    @default(0)
+
+  // Proveniência
+  provider   AIProvider
+  modelUsed  String?    @db.VarChar(100)
+  promptUsed String?    @db.Text
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("scripts")
+}
+
+/// Cena individual do vídeo (segmento do roteiro)
+model Scene {
+  id      String @id @default(uuid())
+  videoId String
+  video   Video  @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  // Ordenação
+  order Int
+
+  // Conteúdo
+  narration         String @db.Text // Texto da narração
+  visualDescription String @db.Text // Descrição visual para geração de imagem
+
+  // Timing
+  startTime Float? // Início em segundos
+  endTime   Float? // Fim em segundos
+
+  // Assets gerados
+  images SceneImage[]
+  videos SceneVideo[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([videoId, order])
+  @@index([videoId])
+  @@map("scenes")
+}
+
+/// Imagem gerada para uma cena
+model SceneImage {
+  id      String @id @default(uuid())
+  sceneId String
+  scene   Scene  @relation(fields: [sceneId], references: [id], onDelete: Cascade)
+
+  // Proveniência
+  provider   AIProvider
+  promptUsed String     @db.Text
+
+  // Arquivo
+  filePath String @db.VarChar(500)
+  fileSize Int? // Tamanho em bytes
+  width    Int?
+  height   Int?
+
+  // Variantes (para seleção)
+  isSelected   Boolean @default(false)
+  variantIndex Int     @default(0)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+
+  @@index([sceneId])
+  @@map("scene_images")
+}
+
+/// Vídeo/Motion gerado para uma cena
+model SceneVideo {
+  id      String @id @default(uuid())
+  sceneId String
+  scene   Scene  @relation(fields: [sceneId], references: [id], onDelete: Cascade)
+
+  // Proveniência
+  provider   AIProvider
+  promptUsed String?    @db.Text // Pode ser nulo se for image-to-video
+
+  // Arquivo
+  filePath String @db.VarChar(500)
+  fileSize Int?
+  duration Float? // Duração em segundos
+
+  // Origem
+  sourceImageId String? // ID da SceneImage usada como input (se houver)
+
+  // Variantes
+  isSelected   Boolean @default(false)
+  variantIndex Int     @default(0)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+
+  @@index([sceneId])
+  @@map("scene_videos")
+}
+
+/// Trilha de áudio gerada
+model AudioTrack {
+  id      String @id @default(uuid())
+  videoId String
+  video   Video  @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  // Tipo
+  type String @db.VarChar(50) // "narration", "background_music", "sfx"
+
+  // Proveniência
+  provider AIProvider
+  voiceId  String?    @db.VarChar(100) // ID da voz no ElevenLabs, etc.
+
+  // Arquivo
+  filePath String @db.VarChar(500)
+  fileSize Int?
+  duration Float? // Duração em segundos
+
+  // Timestamps
+  createdAt DateTime @default(now())
+
+  @@index([videoId])
+  @@map("audio_tracks")
+}
+
+/// Configuração de provedores de IA
+model ProviderConfig {
+  id       String     @id @default(uuid())
+  provider AIProvider @unique
+
+  // Configurações
+  apiKey   String  @db.VarChar(500) // Encriptado
+  isActive Boolean @default(true)
+  settings Json? // Configurações específicas do provedor
+
+  // Rate limiting
+  requestsPerMinute Int?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("provider_configs")
+}
+
+/// Logs de execução do pipeline
+model PipelineExecution {
+  id      String @id @default(uuid())
+  videoId String
+  video   Video  @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  // Etapa
+  step   String @db.VarChar(50) // "script", "audio", "images", "render"
+  status String @db.VarChar(20) // "started", "completed", "failed"
+
+  // Detalhes
+  message  String? @db.Text
+  metadata Json?
+
+  // Performance
+  durationMs Int?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+
+  @@index([videoId])
+  @@index([createdAt])
+  @@map("pipeline_executions")
+}
