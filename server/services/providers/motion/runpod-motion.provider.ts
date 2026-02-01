@@ -48,8 +48,10 @@ export class RunPodMotionProvider implements IMotionProvider {
           duration: request.duration || 5,
           aspect_ratio: request.aspectRatio || '16:9',
           // Mapear outros campos que o handler.py espera
+          width: request.aspectRatio === '9:16' ? 576 : 1024,
+          height: request.aspectRatio === '9:16' ? 1024 : 576,
           num_frames: request.duration === 10 ? 50 : 25,
-          fps: 6
+          fps: 10 // Aumentamos para 10 FPS para vídeo mais fluido
         }
       }
 

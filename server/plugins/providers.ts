@@ -41,12 +41,16 @@ export default defineNitroPlugin(() => {
     })
   }
 
-  // Motion Provider (Replicate)
-  if (config.providers.image.apiKey) { // Re-uso a mesma chave do Replicate
+  // Motion Provider (RunPod ou Replicate)
+  if (config.providers.motion.apiKey || config.providers.image.apiKey) {
+    const motionProviderName = config.providers.motion.name || 'replicate'
+    const motionApiKey = config.providers.motion.apiKey || config.providers.image.apiKey
+
     providers.push({
       type: 'motion' as const,
-      name: 'replicate',
-      apiKey: config.providers.image.apiKey
+      name: motionProviderName,
+      apiKey: motionApiKey,
+      endpointId: config.providers.motion.endpointId
     })
   }
 

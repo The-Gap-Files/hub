@@ -41,6 +41,11 @@ export default defineNuxtConfig({
         name: process.env.IMAGE_PROVIDER ?? 'replicate',
         apiKey: process.env.REPLICATE_API_KEY ?? '',
         model: process.env.REPLICATE_IMAGE_MODEL ?? 'stability-ai/sdxl'
+      },
+      motion: {
+        name: process.env.MOTION_PROVIDER ?? 'replicate',
+        apiKey: process.env.RUNPOD_API_KEY ?? process.env.REPLICATE_API_KEY ?? '',
+        endpointId: process.env.RUNPOD_ENDPOINT_ID ?? ''
       }
     },
 

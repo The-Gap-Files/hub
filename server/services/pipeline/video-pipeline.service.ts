@@ -643,8 +643,8 @@ export class VideoPipelineService {
           ...scenes.map((_, i) => ({
             filter: 'scale',
             options: isPortrait 
-              ? '768:1344:force_original_aspect_ratio=decrease,pad=768:1344:(ow-iw)/2:(oh-ih)/2' 
-              : '1344:768:force_original_aspect_ratio=decrease,pad=1344:768:(ow-iw)/2:(oh-ih)/2',
+              ? '768:1344:force_original_aspect_ratio=increase,crop=768:1344,pad=768:1344:(ow-iw)/2:(oh-ih)/2' 
+              : '1344:768:force_original_aspect_ratio=increase,crop=1344:768,pad=1344:768:(ow-iw)/2:(oh-ih)/2',
             inputs: `${i}:v`,
             outputs: `scaled_${i}`
           })),

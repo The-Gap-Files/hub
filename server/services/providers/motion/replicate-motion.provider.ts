@@ -62,7 +62,7 @@ export class ReplicateMotionProvider implements IMotionProvider {
       // Construct response
       const motion: GeneratedMotion = {
         videoBuffer,
-        duration: 4, // Approx 4s for SVD XT (25 frames / 6 fps)
+        duration: request.duration === 10 ? 10 : 5, 
         format: 'mp4'
       }
 
