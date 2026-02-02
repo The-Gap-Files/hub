@@ -39,19 +39,29 @@ export class RunPodMotionProvider implements IMotionProvider {
       const imageBuffer = await fs.readFile(request.imagePath)
       const imageBase64 = imageBuffer.toString('base64')
 
+      // Processar End Image se existir
+      let endImageBase64: string | undefined
+      if (request.endImagePath) {
+        const endImageBuffer = await fs.readFile(request.endImagePath)
+        endImageBase64 = endImageBuffer.toString('base64')
+      }
+
       const url = `https://api.runpod.ai/v2/${this.endpointId}/runsync`
 
       const payload = {
         input: {
           image_base64: imageBase64,
+          end_image_base64: endImageBase64, // Novo campo
           prompt: request.prompt,
           duration: request.duration || 5,
           aspect_ratio: request.aspectRatio || '16:9',
-          // Mapear outros campos que o handler.py espera
-          width: request.aspectRatio === '9:16' ? 576 : 1024,
-          height: request.aspectRatio === '9:16' ? 1024 : 576,
-          num_frames: request.duration === 10 ? 50 : 25,
-          fps: 10 // Aumentamos para 10 FPS para vídeo mais fluido
+          guidance_scale: request.guidanceScale, // Novo campo
+          num_inference_steps: request.numInferenceSteps, // Novo campo
+
+          // Parâmetros otimizados para Wan 2.2
+          width: request.aspectRatio === '9:16' ? 720 : 1280,
+          height: request.aspectRatio === '9:16' ? 1280 : 720,
+          fps: 16 // Wan 2.2 padrão cinemático (o num_frames agora é calculado no worker se duration for enviado)
         }
       }
 
@@ -93,7 +103,7 @@ export class RunPodMotionProvider implements IMotionProvider {
         // (Isso pode acontecer se o worker demorar mais que o timeout do runsync)
         return this.pollJobStatus(data.id)
       }
-      
+
       throw new Error(`RunPod generation failed with status: ${data.status}`)
 
     } catch (error: any) {
@@ -118,7 +128,7 @@ export class RunPodMotionProvider implements IMotionProvider {
       })
 
       const data = await response.json()
-      
+
       if (data.status === 'COMPLETED') {
         const videoBuffer = Buffer.from(data.output.video_base64, 'base64')
         return {

@@ -67,19 +67,10 @@ export class ReplicateImageProvider implements IImageGenerator {
       // Output pode ser string (URL única) ou array de URLs
       const urls = Array.isArray(output) ? output : [output]
 
-      // Baixar imagens
+      // Baixar imagens com retry
       const images: GeneratedImage[] = await Promise.all(
         urls.map(async (url, index) => {
-          const imageResponse = await fetch(url as string)
-          const buffer = Buffer.from(await imageResponse.arrayBuffer())
-
-          return {
-            buffer,
-            width: request.width,
-            height: request.height,
-            seed: request.seed ? request.seed + index : undefined,
-            revisedPrompt: enhancedPrompt
-          }
+          return this.downloadImageWithRetry(url as string, index)
         })
       )
 
@@ -96,6 +87,37 @@ export class ReplicateImageProvider implements IImageGenerator {
       }
       throw new Error(`Replicate error: ${error.message}`)
     }
+  }
+
+  /**
+   * Baixa uma imagem com múltiplas tentativas em caso de falha de rede
+   */
+  private async downloadImageWithRetry(url: string, index: number, retries = 3): Promise<GeneratedImage> {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const imageResponse = await fetch(url)
+        if (!imageResponse.ok) {
+          throw new Error(`HTTP Error ${imageResponse.status}: ${imageResponse.statusText}`)
+        }
+        const buffer = Buffer.from(await imageResponse.arrayBuffer())
+
+        return {
+          buffer,
+          width: 0, // Será preenchido pelo chamador se necessário, ou deixado 0
+          height: 0,
+          seed: undefined,
+          revisedPrompt: undefined // O prompt original é capturado no nível superior se necessário
+        }
+      } catch (error: any) {
+        console.error(`[ReplicateImageProvider] Attempt ${i + 1} failed for URL: ${url}. Error: ${error.message}`)
+        if (i === retries - 1) {
+          throw new Error(`Failed to download image variant ${index + 1} after ${retries} attempts: ${error.message}`)
+        }
+        // Espera curta antes de tentar novamente (500ms, 1000ms, 1500ms)
+        await new Promise(resolve => setTimeout(resolve, 500 * (i + 1)))
+      }
+    }
+    throw new Error('Unreachable code')
   }
 
   /**

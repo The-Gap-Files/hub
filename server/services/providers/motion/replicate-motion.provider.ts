@@ -87,12 +87,24 @@ export class ReplicateMotionProvider implements IMotionProvider {
     }
   }
 
-  private async downloadVideo(url: string): Promise<Buffer> {
-    const response = await fetch(url)
-    if (!response.ok) {
-      throw new Error(`Failed to download video from ${url}: ${response.statusText}`)
+  private async downloadVideo(url: string, retries = 3): Promise<Buffer> {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const response = await fetch(url)
+        if (!response.ok) {
+          throw new Error(`HTTP Error ${response.status}: ${response.statusText}`)
+        }
+        const arrayBuffer = await response.arrayBuffer()
+        return Buffer.from(arrayBuffer)
+      } catch (error: any) {
+        console.error(`[ReplicateMotion] Attempt ${i + 1} failed for URL: ${url}. Error: ${error.message}`)
+        if (i === retries - 1) {
+          throw new Error(`Failed to download motion video after ${retries} attempts: ${error.message}`)
+        }
+        // Espera curta (500ms, 1000ms, 1500ms)
+        await new Promise(resolve => setTimeout(resolve, 500 * (i + 1)))
+      }
     }
-    const arrayBuffer = await response.arrayBuffer()
-    return Buffer.from(arrayBuffer)
+    throw new Error('Unreachable code')
   }
 }

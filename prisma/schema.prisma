@@ -64,6 +64,7 @@ model Video {
   visualStyle    String? @db.VarChar(50)
   aspectRatio    String? @db.VarChar(10)
   enableMotion   Boolean @default(false)
+  scriptApproved Boolean @default(false)
   imagesApproved Boolean @default(false)
   videosApproved Boolean @default(false)
   outputPath     String? @db.VarChar(500)

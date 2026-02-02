@@ -129,14 +129,21 @@ class ProviderManager {
   getMotionProvider(): IMotionProvider {
     if (!this.motionProvider) {
       // Auto-configure fallback if API Key exists in env
-      if (process.env.RUNPOD_API_KEY) {
-        this.motionProvider = createMotionProvider('runpod', process.env.RUNPOD_API_KEY)
+      // Valida se a chave existe e não é uma string vazia (ou literal "")
+      const runpodKey = process.env.RUNPOD_API_KEY?.replace(/"/g, '')
+      const runpodEndpoint = process.env.RUNPOD_ENDPOINT_ID?.replace(/"/g, '')
+      
+      if (runpodKey && runpodEndpoint) {
+        this.motionProvider = createMotionProvider('runpod', runpodKey)
         return this.motionProvider
       }
-      if (process.env.REPLICATE_API_KEY) {
-        this.motionProvider = createMotionProvider('replicate', process.env.REPLICATE_API_KEY)
+      
+      const replicateKey = process.env.REPLICATE_API_KEY?.replace(/"/g, '')
+      if (replicateKey) {
+        this.motionProvider = createMotionProvider('replicate', replicateKey)
         return this.motionProvider
       }
+      
       throw new Error('Motion provider not configured. Call configure() first.')
     }
     return this.motionProvider

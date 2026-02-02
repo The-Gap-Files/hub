@@ -112,12 +112,15 @@ export interface IImageGenerator {
 
 export interface MotionGenerationRequest {
   imagePath: string // Caminho local ou URL da imagem de origem
+  endImagePath?: string // Caminho local ou URL da imagem final (para transição)
   duration?: number // Duração desejada (2-4s geralmente)
   motionBucketId?: number // Intensidade do movimento (1-255, default 127)
   noiseAugStrength?: number // Fidelidade à imagem (0-1, default 0.1)
   prompt?: string // Alguns modelos aceitam prompt de texto auxiliar
   negativePrompt?: string
   aspectRatio?: string // Formato do vídeo (ex: "16:9", "9:16")
+  guidanceScale?: number // Controle de fidelidade ao prompt
+  numInferenceSteps?: number // Número de passos do modelo
 }
 
 export interface GeneratedMotion {

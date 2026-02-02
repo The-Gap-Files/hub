@@ -65,6 +65,8 @@ function getStatusLabel(status: string) {
     AUDIO_READY: 'Áudio Pronto',
     IMAGES_GENERATING: 'Gerando Imagens',
     IMAGES_READY: 'Imagens Prontas',
+    MOTION_GENERATING: 'Dando Vida às Imagens',
+    MOTION_READY: 'Imagens com Vida',
     RENDERING: 'Renderizando',
     COMPLETED: 'Concluído',
     FAILED: 'Falhou',
@@ -132,8 +134,9 @@ function formatDate(dateString: string) {
         <option value="">Todos os status</option>
         <option value="PENDING">Pendente</option>
         <option value="SCRIPT_GENERATING">Gerando Roteiro</option>
-        <option value="AUDIO_GENERATING">Gerando Áudio</option>
         <option value="IMAGES_GENERATING">Gerando Imagens</option>
+        <option value="AUDIO_GENERATING">Gerando Áudio</option>
+        <option value="MOTION_GENERATING">Dando Vida às Imagens</option>
         <option value="RENDERING">Renderizando</option>
         <option value="COMPLETED">Concluído</option>
         <option value="FAILED">Falhou</option>

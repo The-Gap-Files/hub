@@ -45,9 +45,46 @@ watch(() => video.value?.status, (newStatus) => {
 
 const isRendering = ref(false)
 const isApproving = ref(false)
+const isApprovingScript = ref(false)
+const isRefiningScript = ref(false)
 const isApprovingMotion = ref(false)
+const scriptFeedback = ref('')
 const regeneratingScenes = ref<Record<string, boolean>>({})
 const regeneratingMotion = ref<Record<string, boolean>>({})
+
+async function handleApproveScript() {
+  if (isApprovingScript.value) return
+  isApprovingScript.value = true
+  
+  try {
+    await $fetch(`/api/videos/${videoId}/approve-script`, { method: 'POST' } as any)
+    refresh()
+  } catch (err) {
+    console.error('Erro ao aprovar roteiro:', err)
+    alert('Erro ao aprovar roteiro')
+  } finally {
+    isApprovingScript.value = false
+  }
+}
+
+async function handleRefineScript() {
+  if (isRefiningScript.value || !scriptFeedback.value.trim()) return
+  isRefiningScript.value = true
+  
+  try {
+    await $fetch(`/api/videos/${videoId}/refine-script`, { 
+      method: 'POST',
+      body: { feedback: scriptFeedback.value }
+    } as any)
+    scriptFeedback.value = ''
+    refresh()
+  } catch (err) {
+    console.error('Erro ao refinar roteiro:', err)
+    alert('Erro ao refinar roteiro')
+  } finally {
+    isRefiningScript.value = false
+  }
+}
 
 async function handleApproveImages() {
   if (isApproving.value) return
@@ -144,6 +181,8 @@ function getStatusLabel(status: string) {
     AUDIO_READY: 'Áudio Pronto',
     IMAGES_GENERATING: 'Gerando Imagens',
     IMAGES_READY: 'Imagens Prontas',
+    MOTION_GENERATING: 'Dando Vida às Imagens',
+    MOTION_READY: 'Imagens com Vida',
     RENDERING: 'Renderizando',
     COMPLETED: 'Concluído',
     FAILED: 'Falhou',
@@ -235,18 +274,18 @@ function getStatusLabel(status: string) {
               📝 Roteiro
             </button>
             <button 
-              :class="['tab-btn', { active: activeTab === 'audio' }]" 
-              @click="activeTab = 'audio'"
-              :disabled="!video.audioTracks?.length"
-            >
-              🔊 Áudio
-            </button>
-            <button 
               :class="['tab-btn', { active: activeTab === 'images' }]" 
               @click="activeTab = 'images'"
               :disabled="!video.scenes?.some(s => s.images?.length > 0)"
             >
               🖼️ Imagens
+            </button>
+            <button 
+              :class="['tab-btn', { active: activeTab === 'audio' }]" 
+              @click="activeTab = 'audio'"
+              :disabled="!video.audioTracks?.length"
+            >
+              🔊 Áudio
             </button>
             <button 
               :class="['tab-btn', { active: activeTab === 'motion' }]" 
@@ -266,6 +305,38 @@ function getStatusLabel(status: string) {
           <div class="tab-content">
             <!-- SCRIPT TAB -->
             <div v-if="activeTab === 'script'" class="script-view">
+              <!-- Script Review Banner -->
+              <div v-if="video.status === 'SCRIPT_READY' && !video.scriptApproved" class="approval-banner script-approval">
+                <div class="approval-content">
+                  <h3>✍️ Roteiro Pronto para Revisão</h3>
+                  <p>Leia o roteiro abaixo. Você pode aprovar para gerar as imagens ou solicitar modificações se algo não estiver do seu agrado.</p>
+                  
+                  <div class="refine-input-group">
+                    <input 
+                      v-model="scriptFeedback" 
+                      type="text" 
+                      placeholder="Ex: Deixe o tom mais dramático / Remova a menção a X..."
+                      class="refine-input"
+                      @keyup.enter="handleRefineScript"
+                    >
+                    <button 
+                      class="btn-secondary" 
+                      :disabled="isRefiningScript || !scriptFeedback.trim()"
+                      @click="handleRefineScript"
+                    >
+                      {{ isRefiningScript ? 'Refinando...' : '🔄 Solicitar Mudança' }}
+                    </button>
+                  </div>
+                </div>
+                <button 
+                  class="btn-primary" 
+                  :disabled="isApprovingScript"
+                  @click="handleApproveScript"
+                >
+                  {{ isApprovingScript ? 'Processando...' : '✅ Aprovar Roteiro' }}
+                </button>
+              </div>
+
               <div v-if="video.script" class="script-container">
                 <div v-for="scene in video.scenes" :key="scene.id" class="scene-item">
                   <div class="scene-header">
@@ -390,14 +461,14 @@ function getStatusLabel(status: string) {
             <div class="progress-steps">
                <!-- Usando uma lógica simplificada baseada no status, já que pipeline.progress não existe no schema atual -->
               <div 
-                v-for="(step, index) in ['Script', 'Audio', 'Images', 'Movimento', 'Render']" 
+                v-for="(step, index) in ['Roteiro', 'Imagens', 'Áudio', 'Vida às Imagens', 'Render']" 
                 :key="step"
                 :class="['step-item', { 
-                  completed: ['SCRIPT_READY', 'AUDIO_READY', 'IMAGES_READY', 'MOTION_READY', 'COMPLETED'].includes(video.status) && index === 0 ||
-                             ['AUDIO_READY', 'IMAGES_READY', 'MOTION_READY', 'COMPLETED'].includes(video.status) && index <= 1 ||
-                             ['IMAGES_READY', 'MOTION_READY', 'COMPLETED'].includes(video.status) && index <= 2 ||
-                             ['MOTION_READY', 'COMPLETED'].includes(video.status) && index <= 3 ||
-                             video.status === 'COMPLETED',
+                  completed: (index === 0 && ['SCRIPT_READY', 'IMAGES_READY', 'AUDIO_READY', 'MOTION_READY', 'COMPLETED'].includes(video.status)) ||
+                             (index === 1 && ['IMAGES_READY', 'AUDIO_READY', 'MOTION_READY', 'COMPLETED'].includes(video.status)) ||
+                             (index === 2 && ['AUDIO_READY', 'MOTION_READY', 'COMPLETED'].includes(video.status)) ||
+                             (index === 3 && ['MOTION_READY', 'COMPLETED'].includes(video.status)) ||
+                             (index === 4 && video.status === 'COMPLETED'),
                   active: getStatusLabel(video.status).includes(step)
                 }]"
               >
@@ -731,6 +802,28 @@ function getStatusLabel(status: string) {
 .approval-content h3 {
   color: var(--color-primary);
   margin-bottom: 4px;
+}
+
+.refine-input-group {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+  width: 100%;
+}
+
+.refine-input {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+  font-size: 0.875rem;
+}
+
+.refine-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
 }
 
 .approval-content p {

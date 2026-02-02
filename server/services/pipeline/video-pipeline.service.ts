@@ -22,8 +22,27 @@ import ffmpeg from 'fluent-ffmpeg'
 import ffmpegInstaller from '@ffmpeg-installer/ffmpeg'
 import { VISUAL_STYLES, getStyleTags } from '../../utils/constants/visual-styles'
 
+import { createRequire } from 'node:module'
+const require = createRequire(import.meta.url)
+
 // Configurar o caminho do executável do ffmpeg
 ffmpeg.setFfmpegPath(ffmpegInstaller.path)
+
+// Tentar configurar o ffprobe se o pacote estiver disponível
+try {
+  const ffprobeInstaller = require('@ffprobe-installer/ffprobe')
+  let ffprobePath = ffprobeInstaller.path.replace('app.asar', 'app.asar.unpacked')
+  
+  // No Windows, garantir que o caminho use barras invertidas se necessário ou vice-versa
+  if (process.platform === 'win32' && !ffprobePath.endsWith('.exe')) {
+    ffprobePath += '.exe'
+  }
+
+  ffmpeg.setFfprobePath(ffprobePath)
+  console.log('[TheGapFiles] FFprobe path set:', ffprobePath)
+} catch (e) {
+  console.warn('[TheGapFiles] ffprobe-installer not found or could not be required')
+}
 
 export interface PipelineOptions {
   theme: string
@@ -35,6 +54,7 @@ export interface PipelineOptions {
   visualStyle?: string
   aspectRatio?: '9:16' | '16:9'
   enableMotion?: boolean
+  additionalContext?: string
 }
 
 export interface PipelineResult {
@@ -107,7 +127,16 @@ export class VideoPipelineService {
         await this.logExecution(videoId!, 'script', 'completed', 'Roteiro gerado com sucesso.')
       }
 
-      // 3. Gerar imagens (se não aprovado e se não existirem cenas com imagens)
+      // 3. Aguardar aprovação do roteiro
+      if (!video?.scriptApproved) {
+        return {
+          videoId: videoId!,
+          status: 'completed',
+          message: 'Roteiro pronto para revisão. Aprove para prosseguir com Imagens, Áudio e Motion.'
+        }
+      }
+
+      // 4. Gerar imagens (se não aprovado e se não existirem cenas com imagens)
       const scenesWithImages = await prisma.scene.findMany({
         where: { videoId: videoId! },
         include: { images: true }
@@ -305,7 +334,60 @@ export class VideoPipelineService {
   }
 
   /**
-   * Converte o roteiro em áudio narrado
+   * Refina o roteiro com base no feedback do usuário
+   */
+  async refineScript(videoId: string, feedback: string) {
+    const startTime = Date.now()
+    
+    await this.updateStatus(videoId, 'SCRIPT_GENERATING')
+    await this.logExecution(videoId, 'script', 'started', `Refinando roteiro com feedback: ${feedback.substring(0, 50)}...`)
+
+    // 1. Limpar cenas e roteiro antigos
+    await prisma.scene.deleteMany({ where: { videoId } })
+    await prisma.script.deleteMany({ where: { videoId } })
+
+    // 2. Gerar novo roteiro com o feedback como contexto adicional
+    const options = await prisma.video.findUnique({ where: { id: videoId } })
+    if (!options) throw new Error('Vídeo não encontrado')
+
+    const pipelineOptions: PipelineOptions = {
+      theme: options.theme,
+      language: options.language,
+      targetDuration: options.duration || 300,
+      style: options.style as any,
+      visualStyle: options.visualStyle || undefined,
+      additionalContext: feedback // Injetar feedback aqui
+    }
+
+    await this.generateScript(videoId, pipelineOptions)
+    
+    await this.updateStatus(videoId, 'SCRIPT_READY')
+    await this.logExecution(videoId, 'script', 'completed', 'Roteiro refinado com sucesso.', Date.now() - startTime)
+  }
+
+  /**
+   * Aprova o roteiro e continua o pipeline
+   */
+  async approveScript(videoId: string) {
+    await prisma.video.update({
+      where: { id: videoId },
+      data: { scriptApproved: true }
+    })
+    
+    await this.logExecution(videoId, 'script', 'completed', 'Roteiro aprovado pelo usuário.')
+    
+    // Continuar o pipeline
+    const video = await prisma.video.findUnique({ where: { id: videoId } })
+    if (video) {
+      this.execute({
+        theme: video.theme,
+        enableMotion: video.enableMotion
+      }, videoId)
+    }
+  }
+
+  /**
+   * Converte o roteiro em áudio narrado (processando cena por cena para maior precisão)
    */
   private async generateAudio(
     videoId: string,
@@ -319,6 +401,11 @@ export class VideoPipelineService {
       select: { language: true, voiceId: true }
     })
 
+    const scenes = await prisma.scene.findMany({
+      where: { videoId },
+      orderBy: { order: 'asc' }
+    })
+
     const ttsProvider = providerManager.getTTSProvider()
     const config = useRuntimeConfig()
     
@@ -328,35 +415,67 @@ export class VideoPipelineService {
                            config.providers?.tts?.voiceId || 
                            'pNInz6obpgDQGcFmaJgB'
 
-    const request: TTSRequest = {
-      text,
-      voiceId: selectedVoiceId,
-      language: options.language || video?.language || 'pt-BR'
+    const audioBuffers: Buffer[] = []
+    let currentTime = 0
+
+    // Pasta para áudios individuais (opcional, para cache ou debug)
+    const audioDir = path.resolve('storage', 'audio', videoId)
+    const scenesAudioDir = path.join(audioDir, 'scenes')
+    await fs.mkdir(scenesAudioDir, { recursive: true })
+
+    for (const [index, scene] of scenes.entries()) {
+      await this.logExecution(videoId, 'audio', 'started', `Sintetizando áudio para a cena ${index + 1} de ${scenes.length}...`)
+      
+      const request: TTSRequest = {
+        text: scene.narration,
+        voiceId: selectedVoiceId,
+        language: options.language || video?.language || 'pt-BR'
+      }
+
+      const result = await ttsProvider.synthesize(request)
+      
+      // Salvar áudio da cena temporariamente para pegar duração real
+      const sceneAudioPath = path.join(scenesAudioDir, `scene_${scene.order}.mp3`)
+      await fs.writeFile(sceneAudioPath, result.audioBuffer)
+      
+      // Pegar duração real (ou usar a estimativa se o ffprobe falhar)
+      const preciseDuration = await this.getAudioDuration(sceneAudioPath)
+      const duration = preciseDuration > 0 ? preciseDuration : result.duration
+
+      // Atualizar cena com tempos exatos para sincronização
+      await prisma.scene.update({
+        where: { id: scene.id },
+        data: {
+          startTime: currentTime,
+          endTime: currentTime + duration
+        }
+      })
+
+      audioBuffers.push(result.audioBuffer)
+      currentTime += duration
     }
 
-    const result = await ttsProvider.synthesize(request)
+    // Concatenar todos os áudios em um único arquivo de narração usando FFmpeg (mais robusto que concatenar buffers)
+    const finalAudioPath = path.join(audioDir, 'narration.mp3')
+    await this.concatenateAudioFiles(
+      scenes.map(s => path.join(scenesAudioDir, `scene_${s.order}.mp3`)),
+      finalAudioPath
+    )
 
-    // Salvar arquivo de áudio
-    const outputDir = path.resolve('storage', 'audio', videoId)
-    await fs.mkdir(outputDir, { recursive: true })
+    // Pegar a duração real do arquivo final para o banco
+    const realTotalDuration = await this.getAudioDuration(finalAudioPath)
+    const totalDuration = realTotalDuration > 0 ? realTotalDuration : currentTime
 
-    const fileName = 'narration.mp3'
-    const audioPath = path.join(outputDir, fileName)
-    const publicPath = `/storage/audio/${videoId}/${fileName}` // Para acesso via URL se servir estático depois
-
-    // Salvar no disco
-    await fs.writeFile(audioPath, result.audioBuffer)
-
-    // Registrar no banco
+    // Registrar trilha principal no banco
     await prisma.audioTrack.create({
       data: {
         videoId,
         type: 'narration',
         provider: ttsProvider.getName().toUpperCase() as 'ELEVENLABS',
-        voiceId: request.voiceId,
-        filePath: audioPath,
-        fileSize: result.audioBuffer.length,
-        duration: result.duration
+        voiceId: selectedVoiceId,
+        filePath: finalAudioPath,
+        fileSize: (await fs.stat(finalAudioPath)).size,
+        duration: totalDuration
       }
     })
 
@@ -364,11 +483,43 @@ export class VideoPipelineService {
       videoId,
       'audio',
       'completed',
-      `Generated ${result.duration}s of audio`,
+      `Generated ${totalDuration.toFixed(2)}s of narrated audio across ${scenes.length} scenes.`,
       Date.now() - startTime
     )
 
-    return result
+    return { audioBuffer: await fs.readFile(finalAudioPath), duration: totalDuration }
+  }
+
+  /**
+   * Concatena múltiplos arquivos de áudio usando FFmpeg
+   */
+  private async concatenateAudioFiles(filePaths: string[], outputPath: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const command = ffmpeg()
+      filePaths.forEach(path => command.input(path))
+      
+      command
+        .on('error', reject)
+        .on('end', () => resolve())
+        .mergeToFile(outputPath, path.dirname(outputPath))
+    })
+  }
+
+  /**
+   * Obtém a duração real de um arquivo de áudio usando ffprobe
+   */
+  private async getAudioDuration(filePath: string): Promise<number> {
+    return new Promise((resolve) => {
+      ffmpeg.ffprobe(filePath, (err, metadata) => {
+        if (err) {
+          console.error(`[FFprobe] Error reading duration for ${filePath}:`, err.message)
+          // Fallback: estimativa baseada no tamanho do arquivo (MP3 ~128kbps = 16KB/s)
+          // Ou retornar 0 e deixar o chamador lidar
+          return resolve(0)
+        }
+        resolve(metadata.format.duration || 0)
+      })
+    })
   }
 
   /**
@@ -505,10 +656,15 @@ export class VideoPipelineService {
         // Para Image-to-Video, o prompt deve focar no conteúdo da cena.
         const motionPrompt = scene.visualDescription
 
+        // Usar a duração real do áudio da cena se disponível, senão padrão de 5s
+        const realDuration = (scene.endTime && scene.startTime !== null) 
+          ? Math.ceil(scene.endTime - scene.startTime) 
+          : 5
+
         const request: MotionGenerationRequest = {
           imagePath: sourceImage.filePath,
           prompt: motionPrompt,
-          duration: 5, // Kling v2.5 usa 5 ou 10
+          duration: realDuration,
           aspectRatio: selectedAspectRatio
         }
 
@@ -611,26 +767,30 @@ export class VideoPipelineService {
       ? firstImage.width < firstImage.height
       : video.aspectRatio === '9:16'
 
-    // Calcular duração de cada cena (proporcional ao tempo do áudio)
-    const sceneDuration = totalAudioDuration / scenes.length
-
     return new Promise((resolve, reject) => {
       const command = ffmpeg()
 
-      // 1. Adicionar cada imagem como um input com loop e duração
-      // 1. Adicionar cada asset como um input com loop/stream e duração
-      scenes.forEach((scene) => {
-        const videoClip = scene.videos[0] // Assume isSelected condition from include
+      // 1. Adicionar cada asset como um input com loop/stream e duração real baseada no áudio
+      scenes.forEach((scene, index) => {
+        const videoClip = scene.videos[0]
         const image = scene.images[0]
+        
+        // Calcular duração real da cena baseada nos tempos do áudio salvos anteriormente
+        let duration = (scene.endTime && scene.startTime !== null) 
+          ? (scene.endTime - scene.startTime) 
+          : (totalAudioDuration / scenes.length) // fallback para divisão igual
+
+        // Se for a última cena, adicionar um pequeno buffer (0.5s) para garantir que o áudio não corte
+        if (index === scenes.length - 1) {
+          duration += 0.5
+        }
 
         if (videoClip) {
-          // inputOptions devem vir ANTES do input no fluent-ffmpeg? 
-          // Não, fluent-ffmpeg: .input(file).inputOptions(...) aplica options a esse input
           command.input(videoClip.filePath)
-            .inputOptions(['-stream_loop -1', `-t ${sceneDuration}`])
+            .inputOptions(['-stream_loop -1', `-t ${duration}`])
         } else if (image) {
           command.input(image.filePath)
-            .inputOptions(['-loop 1', `-t ${sceneDuration}`])
+            .inputOptions(['-loop 1', `-t ${duration}`])
         }
       })
 
@@ -668,7 +828,6 @@ export class VideoPipelineService {
           `-map ${scenes.length}:a`, // O áudio é o index N
           '-c:v libx264',
           '-r 30',
-          '-shortest', // Garante que termine junto com o áudio
           '-y'         // Sobrescrever arquivo se existir
         ])
         .on('start', (cmd: string) => console.log('[FFmpeg] Rendering started:', cmd))

@@ -42,15 +42,24 @@ export default defineNitroPlugin(() => {
   }
 
   // Motion Provider (RunPod ou Replicate)
-  if (config.providers.motion.apiKey || config.providers.image.apiKey) {
-    const motionProviderName = config.providers.motion.name || 'replicate'
-    const motionApiKey = config.providers.motion.apiKey || config.providers.image.apiKey
+  // Só configura RunPod se tiver Endpoint ID e API Key. Caso contrário, tenta Replicate.
+  const motionProviderName = config.providers.motion.name?.toLowerCase()
+  const runpodKey = config.providers.motion.apiKey || process.env.RUNPOD_API_KEY
+  const runpodEndpoint = config.providers.motion.endpointId || process.env.RUNPOD_ENDPOINT_ID
 
+  if (motionProviderName === 'runpod' && runpodKey && runpodEndpoint) {
     providers.push({
       type: 'motion' as const,
-      name: motionProviderName,
-      apiKey: motionApiKey,
-      endpointId: config.providers.motion.endpointId
+      name: 'runpod',
+      apiKey: runpodKey,
+      endpointId: runpodEndpoint
+    })
+  } else if (config.providers.image.apiKey || process.env.REPLICATE_API_KEY) {
+    // Fallback para Replicate (usando a chave de imagem se a de motion for vazia)
+    providers.push({
+      type: 'motion' as const,
+      name: 'replicate',
+      apiKey: config.providers.image.apiKey || process.env.REPLICATE_API_KEY || ''
     })
   }
 
