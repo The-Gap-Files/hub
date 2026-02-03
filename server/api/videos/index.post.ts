@@ -16,6 +16,7 @@ const CreateVideoSchema = z.object({
   voiceId: z.string().optional(),
   imageStyle: z.enum(['cinematic', 'photorealistic', 'artistic', 'documentary']).default('cinematic'),
   visualStyle: z.string().optional().default('epictok'),
+  seedId: z.string().uuid().optional(), // ID da seed a usar
   aspectRatio: z.enum(['9:16', '16:9']).optional().default('16:9'),
   enableMotion: z.boolean().default(false),
   mustInclude: z.string().optional(),
@@ -57,6 +58,7 @@ export default defineEventHandler(async (event) => {
       voiceId: options.voiceId,
       imageStyle: options.imageStyle,
       visualStyle: options.visualStyle,
+      seedId: options.seedId, // Seed selecionada
       aspectRatio: options.aspectRatio,
       enableMotion: options.enableMotion,
       mustInclude: options.mustInclude,

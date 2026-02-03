@@ -67,8 +67,12 @@ model Video {
   scriptApproved Boolean @default(false)
   imagesApproved Boolean @default(false)
   videosApproved Boolean @default(false)
-  outputPath     String? @db.VarChar(500)
-  thumbnailPath  String? @db.VarChar(500)
+
+  // Vídeo final renderizado (comprimido com gzip)
+  outputData     Bytes? // BYTEA comprimido
+  outputMimeType String? @db.VarChar(50) // video/mp4
+  outputSize     Int? // Tamanho antes da compressão
+  thumbnailPath  String? @db.VarChar(500) // Thumbnail continua em arquivo (pequeno)
 
   // Diretrizes de conteúdo
   mustInclude String? @db.Text // O que deve ter no roteiro
@@ -89,6 +93,10 @@ model Video {
   audioTracks AudioTrack[]
   executions  PipelineExecution[]
 
+  // Seed usada neste vídeo
+  seedId String?
+  seed   Seed?   @relation("VideoSeed", fields: [seedId], references: [id], onDelete: SetNull)
+
   @@index([status])
   @@index([createdAt])
   @@map("videos")
@@ -101,6 +109,7 @@ model Script {
   video   Video  @relation(fields: [videoId], references: [id], onDelete: Cascade)
 
   // Conteúdo
+  summary   String @db.Text // Sinopse expandida da história (2-3 parágrafos)
   fullText  String @db.Text
   wordCount Int    @default(0)
 
@@ -126,8 +135,9 @@ model Scene {
   order Int
 
   // Conteúdo
-  narration         String @db.Text // Texto da narração
-  visualDescription String @db.Text // Descrição visual para geração de imagem
+  narration         String  @db.Text // Texto da narração
+  visualDescription String  @db.Text // Descrição visual para geração de imagem
+  audioDescription  String? @db.Text // Descrição de SFX/Atmosfera sonora
 
   // Timing
   startTime Float? // Início em segundos
@@ -156,11 +166,12 @@ model SceneImage {
   provider   AIProvider
   promptUsed String     @db.Text
 
-  // Arquivo
-  filePath String @db.VarChar(500)
-  fileSize Int? // Tamanho em bytes
-  width    Int?
-  height   Int?
+  // Dados (comprimido com gzip)
+  fileData     Bytes? // BYTEA comprimido
+  mimeType     String? @db.VarChar(50) // image/png, image/jpeg
+  originalSize Int? // Tamanho antes da compressão
+  width        Int?
+  height       Int?
 
   // Variantes (para seleção)
   isSelected   Boolean @default(false)
@@ -183,10 +194,11 @@ model SceneVideo {
   provider   AIProvider
   promptUsed String?    @db.Text // Pode ser nulo se for image-to-video
 
-  // Arquivo
-  filePath String @db.VarChar(500)
-  fileSize Int?
-  duration Float? // Duração em segundos
+  // Dados (comprimido com gzip)
+  fileData     Bytes? // BYTEA comprimido
+  mimeType     String? @db.VarChar(50) // video/mp4
+  originalSize Int? // Tamanho antes da compressão
+  duration     Float? // Duração em segundos
 
   // Origem
   sourceImageId String? // ID da SceneImage usada como input (se houver)
@@ -215,10 +227,11 @@ model AudioTrack {
   provider AIProvider
   voiceId  String?    @db.VarChar(100) // ID da voz no ElevenLabs, etc.
 
-  // Arquivo
-  filePath String @db.VarChar(500)
-  fileSize Int?
-  duration Float? // Duração em segundos
+  // Dados (comprimido com gzip)
+  fileData     Bytes? // BYTEA comprimido
+  mimeType     String? @db.VarChar(50) // audio/mpeg, audio/wav
+  originalSize Int? // Tamanho antes da compressão
+  duration     Float? // Duração em segundos
 
   // Timestamps
   createdAt DateTime @default(now())
@@ -272,16 +285,29 @@ model PipelineExecution {
   @@map("pipeline_executions")
 }
 
-/// Estilos visuais disponíveis para geração de imagens
+/// Estilos visuais disponíveis para geração de imagens e vídeos
 model VisualStyle {
   id          String @id @default(uuid())
   name        String @db.VarChar(100)
   description String @db.Text
-  tags        String @db.Text // Tags para o prompt de geração
+
+  // Estilo base (ex: "Cinematic 35mm", "Dark Fantasy", "Studio Ghibli")
+  baseStyle String @db.Text
+
+  // Tags categorizadas para WAN 2.2
+  lightingTags    String @db.Text // Ex: "warm golden hour light, soft volumetric rays"
+  atmosphereTags  String @db.Text // Ex: "mysterious, epic, dreamlike"
+  compositionTags String @db.Text // Ex: "wide establishing shot, low angle"
+
+  // Tags gerais (mantido para compatibilidade e detalhes extras)
+  tags String @db.Text
 
   // Ordenação e visibilidade
   order    Int     @default(0)
   isActive Boolean @default(true)
+
+  // Relacionamentos
+  seeds Seed[]
 
   // Timestamps
   createdAt DateTime @default(now())
@@ -308,4 +334,44 @@ model ScriptStyle {
 
   @@index([isActive, order])
   @@map("script_styles")
+}
+
+/// Seeds para geração de imagens/vídeos (receitas visuais)
+model Seed {
+  id String @id @default(uuid())
+
+  // Identificação
+  name        String  @db.VarChar(100)
+  description String? @db.Text
+
+  // Valor da seed
+  value Int
+
+  // Relacionamento OBRIGATÓRIO com estilo visual
+  visualStyleId String
+  visualStyle   VisualStyle @relation(fields: [visualStyleId], references: [id], onDelete: Cascade)
+
+  // Contexto de uso
+  category String? @db.VarChar(50)
+  tags     String? @db.Text
+
+  // Metadados
+  usageCount Int     @default(0)
+  isDefault  Boolean @default(false)
+  isActive   Boolean @default(true)
+
+  // Preview (opcional)
+  previewUrl String? @db.VarChar(500)
+
+  // Relacionamento com vídeos que usaram esta seed
+  videos Video[] @relation("VideoSeed")
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([visualStyleId, value])
+  @@index([visualStyleId, isActive])
+  @@index([isDefault])
+  @@map("seeds")
 }

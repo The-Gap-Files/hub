@@ -4,6 +4,10 @@ import { z } from 'zod'
 const updateStyleSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   description: z.string().min(1).optional(),
+  baseStyle: z.string().min(1).optional(),
+  lightingTags: z.string().min(1).optional(),
+  atmosphereTags: z.string().min(1).optional(),
+  compositionTags: z.string().min(1).optional(),
   tags: z.string().min(1).optional(),
   order: z.number().int().min(0).optional(),
   isActive: z.boolean().optional()

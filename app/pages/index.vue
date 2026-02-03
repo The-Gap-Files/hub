@@ -121,10 +121,10 @@ function formatDate(dateString: string) {
         </div>
         <p class="tagline">Video Automation Engine</p>
       </div>
-      <button class="btn-primary" @click="showCreateModal = true">
+      <NuxtLink to="/videos/new" class="btn-primary">
         <span class="icon">+</span>
         Novo Vídeo
-      </button>
+      </NuxtLink>
     </header>
 
     <ClientOnly>

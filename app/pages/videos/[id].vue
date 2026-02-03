@@ -51,6 +51,9 @@ const isApprovingMotion = ref(false)
 const scriptFeedback = ref('')
 const regeneratingScenes = ref<Record<string, boolean>>({})
 const regeneratingMotion = ref<Record<string, boolean>>({})
+const selectedImageUrl = ref<string | null>(null)
+const closeLightbox = () => selectedImageUrl.value = null
+const openLightbox = (sceneId: string) => selectedImageUrl.value = `/api/scenes/${sceneId}/image`
 
 async function handleApproveScript() {
   if (isApprovingScript.value) return
@@ -190,6 +193,16 @@ function getStatusLabel(status: string) {
   }
   return labels[status] ?? status
 }
+
+const downloadVideo = () => {
+  if (video.value?.id) {
+    const url = `/api/videos/${video.value.id}/download`
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `video-${video.value.id}.mp4`
+    link.click()
+  }
+}
 </script>
 
 <template>
@@ -264,255 +277,265 @@ function getStatusLabel(status: string) {
 
       <!-- Main Columns -->
       <div class="details-grid">
-        <!-- Left: Tabs & Content -->
-        <main class="main-content">
-          <nav class="tabs-nav">
-            <button 
-              :class="['tab-btn', { active: activeTab === 'script' }]" 
-              @click="activeTab = 'script'"
-            >
-              📝 Roteiro
-            </button>
-            <button 
-              :class="['tab-btn', { active: activeTab === 'images' }]" 
-              @click="activeTab = 'images'"
-              :disabled="!video.scenes?.some(s => s.images?.length > 0)"
-            >
-              🖼️ Imagens
-            </button>
-            <button 
-              :class="['tab-btn', { active: activeTab === 'audio' }]" 
-              @click="activeTab = 'audio'"
-              :disabled="!video.audioTracks?.length"
-            >
-              🔊 Áudio
-            </button>
-            <button 
-              :class="['tab-btn', { active: activeTab === 'motion' }]" 
-              @click="activeTab = 'motion'"
-              :disabled="!video.enableMotion || !['MOTION_GENERATING', 'MOTION_READY', 'RENDERING', 'COMPLETED'].includes(video.status)"
-            >
-              ✨ Vida às Imagens
-            </button>
-            <button 
-              :class="['tab-btn', { active: activeTab === 'logs' }]" 
-              @click="activeTab = 'logs'"
-            >
-              ⚙️ Logs
-            </button>
-          </nav>
-
-          <div class="tab-content">
-            <!-- SCRIPT TAB -->
-            <div v-if="activeTab === 'script'" class="script-view">
-              <!-- Script Review Banner -->
-              <div v-if="video.status === 'SCRIPT_READY' && !video.scriptApproved" class="approval-banner script-approval">
-                <div class="approval-content">
-                  <h3>✍️ Roteiro Pronto para Revisão</h3>
-                  <p>Leia o roteiro abaixo. Você pode aprovar para gerar as imagens ou solicitar modificações se algo não estiver do seu agrado.</p>
-                  
-                  <div class="refine-input-group">
-                    <input 
-                      v-model="scriptFeedback" 
-                      type="text" 
-                      placeholder="Ex: Deixe o tom mais dramático / Remova a menção a X..."
-                      class="refine-input"
-                      @keyup.enter="handleRefineScript"
-                    >
-                    <button 
-                      class="btn-secondary" 
-                      :disabled="isRefiningScript || !scriptFeedback.trim()"
-                      @click="handleRefineScript"
-                    >
-                      {{ isRefiningScript ? 'Refinando...' : '🔄 Solicitar Mudança' }}
-                    </button>
-                  </div>
-                </div>
-                <button 
-                  class="btn-primary" 
-                  :disabled="isApprovingScript"
-                  @click="handleApproveScript"
-                >
-                  {{ isApprovingScript ? 'Processando...' : '✅ Aprovar Roteiro' }}
-                </button>
-              </div>
-
-              <div v-if="video.script" class="script-container">
-                <div v-for="scene in video.scenes" :key="scene.id" class="scene-item">
-                  <div class="scene-header">
-                    <span class="scene-number">Cena {{ scene.order }}</span>
-                  </div>
-                  <div class="scene-body">
-                    <div class="visual-desc">
-                      <strong>Visual:</strong> {{ scene.visualDescription }}
-                    </div>
-                    <div class="narration-text">
-                      <strong>Narração:</strong> {{ scene.narration }}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div v-else class="empty-tab">
-                <p>Roteiro ainda não gerado.</p>
-              </div>
-            </div>
-
-            <!-- AUDIO TAB -->
-            <div v-if="activeTab === 'audio'" class="audio-view">
-              <div v-for="track in video.audioTracks || []" :key="track.id" class="audio-track">
-                <h3>Faixa de Narração</h3>
-                <audio controls class="audio-player">
-                  <source :src="`/api/storage/audio/${video.id}/narration.mp3`" type="audio/mpeg">
-                  Seu navegador não suporta o elemento de áudio.
-                </audio>
-                <div class="track-info">
-                  <span>Duração: {{ (track.duration || 0).toFixed(1) }}s</span>
-                  <span>Voz: Rachel (ElevenLabs)</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- IMAGES TAB -->
-            <div v-if="activeTab === 'images'" class="images-view">
-              <div class="images-grid">
-                <div v-for="scene in video.scenes || []" :key="scene.id" class="scene-images">
-                  <h4>Cena {{ scene.order }}</h4>
-                  <div class="image-gallery">
-                    <div v-for="img in scene.images" :key="img.id" class="image-card">
-                      <!-- Usando path relativo para servir via endpoint de storage -->
-                      <img :src="`/api/storage/images/${video.id}/${img.filePath.split(/[\\\/]/).pop()}`" alt="Cena gerada">
-                      <div class="image-overlay">
-                        <button 
-                          v-if="!video.imagesApproved"
-                          class="btn-mini" 
-                          :disabled="regeneratingScenes[scene.id]"
-                          @click="handleRegenerateImage(scene.id)"
-                        >
-                          {{ regeneratingScenes[scene.id] ? '⌛' : '🔄 Regerar' }}
-                        </button>
-                      </div>
-                      <p class="img-prompt">{{ img.promptUsed }}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- MOTION TAB -->
-            <div v-if="activeTab === 'motion'" class="motion-view">
-              <div class="motion-grid">
-                <div v-for="scene in video.scenes || []" :key="scene.id" class="scene-motion">
-                  <h4>Cena {{ scene.order }}</h4>
-                  
-                  <div v-if="scene.videos?.length > 0" class="motion-gallery">
-                    <div v-for="motion in scene.videos" :key="motion.id" class="motion-card">
-                      <video controls class="motion-video">
-                        <source :src="`/api/storage/images/${video.id}/${motion.filePath.split(/[\\\/]/).pop()}`" type="video/mp4">
-                        Seu navegador não suporta o elemento de vídeo.
-                      </video>
-                      <div class="image-overlay">
-                        <button 
-                          v-if="!video.videosApproved"
-                          class="btn-mini" 
-                          :disabled="regeneratingMotion[scene.id]"
-                          @click="handleRegenerateMotion(scene.id)"
-                        >
-                          {{ regeneratingMotion[scene.id] ? '⌛' : '🔄 Regerar Motion' }}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div v-else class="motion-empty">
-                    <div class="motion-placeholder">
-                      <span>⚠️ Sem vídeo</span>
-                    </div>
-                    <button 
-                      v-if="!video.videosApproved"
-                      class="btn-secondary btn-sm" 
-                      :disabled="regeneratingMotion[scene.id]"
-                      @click="handleRegenerateMotion(scene.id)"
-                    >
-                      {{ regeneratingMotion[scene.id] ? 'Gerando...' : 'Gerar Motion' }}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- LOGS TAB -->
-            <div v-if="activeTab === 'logs'" class="logs-view">
-              <div class="terminal-logs">
-                <div v-for="log in logs" :key="log.id" class="log-entry">
-                  <span class="log-time">{{ new Date(log.createdAt).toLocaleTimeString() }}</span>
-                  <span :class="['log-status', log.status]">{{ log.status.toUpperCase() }}</span>
-                  <span class="log-step">[{{ log.step }}]</span>
-                  <span class="log-message">{{ log.message }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
-
-        <!-- Right: Progress Sidebar -->
+        <!-- Progress Sidebar (Now interactive and visual) -->
         <aside class="sidebar">
-          <div class="progress-card">
-            <h3>Progresso do Pipeline</h3>
-            <div class="progress-steps">
-               <!-- Usando uma lógica simplificada baseada no status, já que pipeline.progress não existe no schema atual -->
+          <div class="progress-card glass">
+            <h3 class="sidebar-title">Status da Produção</h3>
+            <div class="progress-steps-vertical">
               <div 
-                v-for="(step, index) in ['Roteiro', 'Imagens', 'Áudio', 'Vida às Imagens', 'Render']" 
-                :key="step"
-                :class="['step-item', { 
-                  completed: (index === 0 && ['SCRIPT_READY', 'IMAGES_READY', 'AUDIO_READY', 'MOTION_READY', 'COMPLETED'].includes(video.status)) ||
-                             (index === 1 && ['IMAGES_READY', 'AUDIO_READY', 'MOTION_READY', 'COMPLETED'].includes(video.status)) ||
-                             (index === 2 && ['AUDIO_READY', 'MOTION_READY', 'COMPLETED'].includes(video.status)) ||
-                             (index === 3 && ['MOTION_READY', 'COMPLETED'].includes(video.status)) ||
-                             (index === 4 && video.status === 'COMPLETED'),
-                  active: getStatusLabel(video.status).includes(step)
+                v-for="(step, index) in [
+                  { id: 'script', label: 'Roteiro', status: ['SCRIPT_READY', 'IMAGES_READY', 'AUDIO_READY', 'MOTION_READY', 'COMPLETED'] },
+                  { id: 'images', label: 'Imagens', status: ['IMAGES_READY', 'AUDIO_READY', 'MOTION_READY', 'COMPLETED'] },
+                  { id: 'audio', label: 'Narração', status: ['AUDIO_READY', 'MOTION_READY', 'COMPLETED'] },
+                  { id: 'motion', label: 'Animação', status: ['MOTION_READY', 'COMPLETED'] },
+                  { id: 'render', label: 'Exportação', status: ['COMPLETED'] }
+                ]" 
+                :key="step.id"
+                :class="['step-v-item', { 
+                  completed: step.status.includes(video.status),
+                  active: getStatusLabel(video.status).includes(step.label),
+                  processing: video.status.includes(step.id.toUpperCase()) && !step.status.includes(video.status)
                 }]"
               >
-                <div class="step-indicator">
-                  <span>{{ index + 1 }}</span>
+                <div class="step-v-indicator">
+                  <div class="dot"></div>
+                  <div v-if="index < 4" class="connector"></div>
                 </div>
-                <span>{{ step }}</span>
+                <div class="step-v-content">
+                  <span class="step-label">{{ step.label }}</span>
+                  <span class="step-status-text">{{ step.status.includes(video.status) ? 'Concluído' : (getStatusLabel(video.status).includes(step.label) ? 'Em andamento...' : 'Aguardando') }}</span>
+                </div>
               </div>
             </div>
-          </div>
-          
-          <div class="render-actions" style="margin-bottom: var(--space-md);">
-            <button 
-              class="btn-secondary full-width" 
-              :disabled="isRendering || !video.scenes?.length"
-              @click="handleReRender"
-            >
-              {{ isRendering ? 'Renderizando...' : '🔄 Re-renderizar Vídeo' }}
-            </button>
-          </div>
-          
-          <div v-if="video.status === 'COMPLETED'" class="download-card">
-            <a 
-              :href="`/api/storage/output/${video.id}/final.mp4`" 
-              download
-              class="btn-primary full-width text-center"
-              style="text-decoration: none; display: block;"
-            >
-              ⬇ Baixar Vídeo Final
-            </a>
+
+            <!-- Action Area Inside Sidebar -->
+            <div class="sidebar-actions">
+              <button 
+                v-if="video.status === 'COMPLETED'"
+                class="btn-primary full-width glow-pulse"
+                @click="downloadVideo"
+              >
+                <span class="icon">🎬</span> Baixar Vídeo Final
+              </button>
+              
+              <button 
+                class="btn-outline full-width" 
+                :disabled="isRendering || !video.scenes?.length"
+                @click="handleReRender"
+              >
+                <span class="icon">🔄</span> {{ isRendering ? 'Renderizando...' : 'Re-renderizar' }}
+              </button>
+            </div>
           </div>
         </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+          <header class="content-header">
+            <nav class="premium-tabs glass">
+              <button 
+                v-for="tab in [
+                  { id: 'script', label: 'Roteiro', iconPath: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' },
+                  { id: 'images', label: 'Cenários', iconPath: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z', disabled: !video.scenes?.some(s => s.images?.length > 0) },
+                  { id: 'audio', label: 'Áudio', iconPath: 'M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z', disabled: !video.audioTracks?.length },
+                  { id: 'motion', label: 'Motion', iconPath: 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z', disabled: !video.enableMotion || !['MOTION_GENERATING', 'MOTION_READY', 'RENDERING', 'COMPLETED'].includes(video.status) },
+                  { id: 'logs', label: 'Logs', iconPath: 'M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' }
+                ]"
+                :key="tab.id"
+                :class="['premium-tab-btn', { active: activeTab === tab.id }]" 
+                :disabled="tab.disabled"
+                @click="activeTab = tab.id as any"
+              >
+                <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path :d="tab.iconPath" />
+                </svg>
+                <span class="tab-label">{{ tab.label }}</span>
+                <div class="tab-indicator"></div>
+              </button>
+            </nav>
+          </header>
+
+          <section class="tab-viewport glass-card">
+            <Transition name="fade-slide" mode="out-in">
+              <div :key="activeTab" class="tab-panel">
+                <!-- SCRIPT TAB -->
+                <div v-if="activeTab === 'script'" class="script-explorer">
+                  <!-- Approval Card Floating -->
+                  <div v-if="video.status === 'SCRIPT_READY' && !video.scriptApproved" class="glass-alert info-alert">
+                    <div class="alert-body">
+                      <div class="alert-icon">✍️</div>
+                      <div class="alert-text">
+                        <h4>Roteiro Gerado</h4>
+                        <p>Revise a narrativa histórica e o tom do mistério abaixo.</p>
+                      </div>
+                    </div>
+                    <div class="alert-actions">
+                      <div class="input-glow-group">
+                        <input v-model="scriptFeedback" placeholder="Feedback para refinamento..." @keyup.enter="handleRefineScript" />
+                        <button class="btn-ghost" :disabled="isRefiningScript" @click="handleRefineScript">Refinar</button>
+                      </div>
+                      <button class="btn-primary" :disabled="isApprovingScript" @click="handleApproveScript">Aprovar e Avançar</button>
+                    </div>
+                  </div>
+
+                  <div class="scenes-list">
+                    <div v-for="scene in video.scenes" :key="scene.id" class="premium-scene-card">
+                      <div class="scene-meta">Cena {{ scene.order }}</div>
+                      <div class="scene-grid">
+                        <div class="scene-narration">
+                          <p class="quote">"{{ scene.narration }}"</p>
+                        </div>
+                        <div class="scene-visual">
+                          <span class="label">VISUAL</span>
+                          <p>{{ scene.visualDescription }}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- IMAGES TAB -->
+                <div v-if="activeTab === 'images'" class="gallery-explorer">
+                  <div v-if="video.status === 'IMAGES_READY' && !video.imagesApproved" class="glass-alert info-alert sticky-alert">
+                    <div class="alert-body">
+                      <div class="alert-icon">📸</div>
+                      <div class="alert-text">
+                        <h4>Visual Ready</h4>
+                        <p>Aprove para prosseguir com o áudio e movimento.</p>
+                      </div>
+                    </div>
+                    <button class="btn-primary" :disabled="isApproving" @click="handleApproveImages">Aprovar Cenários</button>
+                  </div>
+
+                  <div class="images-masonry">
+                    <div v-for="scene in video.scenes" :key="scene.id" class="image-box compact">
+                      <div class="image-wrapper" @click="openLightbox(scene.id)">
+                        <img :src="`/api/scenes/${scene.id}/image`" loading="lazy" />
+                        <div class="image-hover">
+                          <div class="hover-actions">
+                            <button class="btn-icon-blur mini" title="Regerar" @click.stop="handleRegenerateImage(scene.id)">🔄</button>
+                            <button class="btn-icon-blur mini" title="Zoom">🔍</button>
+                          </div>
+                          <div class="hover-info">Cena {{ scene.order }}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- LIGHTBOX OVERLAY -->
+                <Teleport to="body">
+                  <Transition name="fade">
+                    <div v-if="selectedImageUrl" class="lightbox-overlay" @click="closeLightbox">
+                      <div class="lightbox-content" @click.stop>
+                        <button class="lightbox-close" @click="closeLightbox">×</button>
+                        <img :src="selectedImageUrl" class="lightbox-img" />
+                      </div>
+                    </div>
+                  </Transition>
+                </Teleport>
+
+                <!-- AUDIO TAB -->
+                <div v-if="activeTab === 'audio'" class="audio-explorer">
+                  <div class="audio-hero-card">
+                    <div class="audio-waves">
+                      <div v-for="i in 20" :key="i" class="wave-bar" :style="{ height: Math.random() * 100 + '%' }"></div>
+                    </div>
+                    <div v-for="track in (video.audioTracks as any[]) || []" :key="track.id" class="audio-interface">
+                      <h2 class="voice-name">Voz: Rachel (Cinematic)</h2>
+                      <audio controls>
+                        <source :src="`/api/videos/${video.id}/audio`" type="audio/mpeg">
+                      </audio>
+                      <div class="audio-stats">
+                        <span>{{ (track.duration || 0).toFixed(1) }}s</span>
+                        <div class="status-dot success"></div>
+                        <span>Masterizado</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- MOTION TAB -->
+                <div v-if="activeTab === 'motion'" class="motion-explorer">
+                  <div v-if="video.status === 'MOTION_READY' && !video.videosApproved" class="glass-alert info-alert sticky-alert">
+                    <div class="alert-body">
+                      <div class="alert-icon">✨</div>
+                      <div class="alert-text">
+                        <h4>Motion Synthesis Complete</h4>
+                        <p>Finalize para iniciar a renderização cinematográfica.</p>
+                      </div>
+                    </div>
+                    <button class="btn-primary" :disabled="isApprovingMotion" @click="handleApproveMotion">Aprovar e Renderizar</button>
+                  </div>
+
+                  <div class="motion-grid-modern">
+                    <div v-for="scene in video.scenes" :key="scene.id" class="motion-box">
+                      <header class="box-header">Cena {{ scene.order }}</header>
+                      <div v-if="scene.videos?.length" class="video-container">
+                        <video controls preload="metadata">
+                          <source :src="`/api/scenes/${scene.id}/video`" type="video/mp4">
+                        </video>
+                        <button v-if="!video.videosApproved" class="float-regen" @click="handleRegenerateMotion(scene.id)">🔄</button>
+                      </div>
+                      <div v-else class="motion-placeholder">
+                        <div class="spinner"></div>
+                        <p>Aguardando síntese...</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- LOGS TAB -->
+                <div v-if="activeTab === 'logs'" class="logs-explorer">
+                  <div class="terminal-container">
+                    <div class="terminal-header">
+                      <div class="term-dots"><span></span><span></span><span></span></div>
+                      <div class="term-title">pipeline_session.log</div>
+                    </div>
+                    <div class="terminal-body">
+                      <div v-for="log in logs" :key="log.id" class="log-line">
+                        <span class="l-time">{{ new Date(log.createdAt).toLocaleTimeString() }}</span>
+                        <span :class="['l-status', log.status]">{{ log.status }}</span>
+                        <span class="l-msg"><span class="l-step">{{ log.step }}:</span> {{ log.message }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Transition>
+          </section>
+        </main>
       </div>
+
     </div>
   </div>
 </template>
 
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Outfit:wght@400;600;700&display=swap');
+</style>
+
 <style scoped>
+/* =============================================================================
+   CINEMATIC DASHBOARD - THE GAP FILES HUB
+   UX PRO MAX CONSOLIDATED STYLES
+   ============================================================================= */
+
 .video-details {
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto;
   padding: var(--space-xl);
+  font-family: 'Outfit', sans-serif;
+  animation: fadeIn 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  color: var(--color-text);
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Header & Typography */
 .details-header {
   display: flex;
   justify-content: space-between;
@@ -525,11 +548,12 @@ function getStatusLabel(status: string) {
   text-decoration: none;
   font-weight: 500;
   transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.btn-back:hover {
-  color: var(--color-primary);
-}
+.btn-back:hover { color: var(--color-primary); }
 
 .header-info {
   display: flex;
@@ -538,329 +562,395 @@ function getStatusLabel(status: string) {
 }
 
 .video-id {
-  font-family: monospace;
+  font-family: 'Fira Code', monospace;
   color: var(--color-text-muted);
-  font-size: 0.875rem;
-}
-
-.title-section {
-  margin-bottom: var(--space-2xl);
+  font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 4px 8px;
+  border-radius: 4px;
 }
 
 .main-title {
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: 2.8rem;
+  font-weight: 800;
   margin-bottom: var(--space-xs);
   background: var(--gradient-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  letter-spacing: -0.02em;
 }
 
 .theme-text {
   color: var(--color-text-muted);
-  font-size: 1.125rem;
+  font-size: 1.1rem;
+  margin-bottom: var(--space-2xl);
 }
 
+/* Grid Layout */
 .details-grid {
   display: grid;
-  grid-template-columns: 1fr 300px;
+  grid-template-columns: 320px 1fr;
+  gap: var(--space-2xl);
+  align-items: start;
+}
+
+/* Glass Primitives */
+.glass {
+  background: rgba(18, 18, 26, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-card {
+  background: rgba(13, 13, 18, 0.4);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+/* Sidebar Pipeline */
+.sidebar {
+  position: sticky;
+  top: var(--space-xl);
+  z-index: 10;
+}
+
+.progress-card {
+  padding: var(--space-xl);
+  border-radius: var(--radius-xl);
+}
+
+.sidebar-title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-xl);
+  font-weight: 700;
+}
+
+.progress-steps-vertical {
+  display: flex;
+  flex-direction: column;
+}
+
+.step-v-item {
+  display: flex;
+  gap: var(--space-lg);
+  padding-bottom: var(--space-xl);
+  position: relative;
+  opacity: 0.35;
+  transition: all 0.4s ease;
+}
+
+.step-v-item.completed, 
+.step-v-item.active { 
+  opacity: 1; 
+}
+
+.step-v-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 14px;
+}
+
+.step-v-indicator .dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--color-bg-elevated);
+  border: 2px solid var(--color-border);
+  z-index: 2;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.step-v-indicator .connector {
+  width: 2px;
+  flex-grow: 1;
+  background: var(--color-border);
+  margin-top: 4px;
+  margin-bottom: -14px;
+}
+
+.step-v-item.completed .dot {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+}
+
+.step-v-item.active .dot {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+  animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.3); opacity: 1; }
+}
+
+.step-v-item.completed .connector { background: var(--color-success); }
+
+.step-label {
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+.step-status-text {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  font-family: 'Fira Code', monospace;
+}
+
+/* Premium Tabs (FIXED) */
+.premium-tabs {
+  display: flex;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 8px;
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-xl);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.premium-tab-btn {
+  flex: 1;
+  padding: var(--space-md) var(--space-sm);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+}
+
+.premium-tab-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--color-text);
+}
+
+.premium-tab-btn.active {
+  background: var(--color-bg-elevated) !important;
+  color: var(--color-primary) !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.tab-icon-svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2;
+  transition: transform 0.3s ease;
+}
+
+.premium-tab-btn.active .tab-icon-svg {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.5));
+}
+
+.tab-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.premium-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 30%;
+  right: 30%;
+  height: 2px;
+  background: var(--color-primary);
+  box-shadow: 0 -2px 10px var(--color-primary);
+  border-radius: 2px;
+}
+
+/* Content Viewport */
+.tab-viewport {
+  min-height: 700px;
+}
+
+.tab-panel {
+  padding: var(--space-xl);
+  animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Image Storyboard */
+.images-masonry {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: var(--space-xl);
 }
 
-/* Tabs */
-.tabs-nav {
-  display: flex;
-  gap: var(--space-sm);
-  margin-bottom: var(--space-lg);
-  border-bottom: 1px solid var(--color-border);
-  padding-bottom: 2px;
-}
-
-.tab-btn {
-  padding: var(--space-sm) var(--space-lg);
-  background: transparent;
-  border: none;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s;
-  border-bottom: 2px solid transparent;
-}
-
-.tab-btn:hover:not(:disabled) {
-  color: var(--color-text);
-}
-
-.tab-btn.active {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
-}
-
-.tab-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-/* Content Areas */
-.tab-content {
-  background: var(--color-bg-card);
+.image-box.compact {
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
-  padding: var(--space-lg);
-  min-height: 400px;
-}
-
-/* Script View */
-.scene-item {
-  background: var(--color-bg-elevated);
-  margin-bottom: var(--space-md);
-  padding: var(--space-md);
-  border-radius: var(--radius-md);
-  border-left: 3px solid var(--color-primary);
-}
-
-.scene-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: var(--space-sm);
-  font-size: 0.875rem;
-  color: var(--color-text-muted);
-}
-
-.scene-body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-}
-
-.visual-desc, .narration-text {
-  line-height: 1.5;
-}
-
-/* Audio View */
-.audio-track {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-  align-items: center;
-  padding: var(--space-xl);
-}
-
-.audio-player {
-  width: 100%;
-  max-width: 600px;
-}
-
-/* Motion View */
-.motion-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: var(--space-lg);
-}
-
-.scene-motion {
-  background: var(--color-bg-elevated);
-  padding: var(--space-md);
-  border-radius: var(--radius-md);
-}
-
-.motion-gallery {
-  margin-top: var(--space-sm);
-}
-
-.motion-video {
-  width: 100%;
-  border-radius: var(--radius-sm);
   background: #000;
-}
-
-.motion-card {
+  cursor: zoom-in;
+  overflow: hidden;
   position: relative;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.motion-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-md);
+.image-box.compact:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: var(--color-primary);
+  box-shadow: 0 25px 50px rgba(0,0,0,0.7), 0 0 20px rgba(139, 92, 246, 0.2);
+  z-index: 5;
 }
 
-.motion-placeholder {
+.image-wrapper img {
   width: 100%;
-  aspect-ratio: 16/9;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px dashed var(--color-border);
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text-muted);
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.btn-sm {
-  padding: 4px 12px;
-  font-size: 0.8125rem;
+.image-box.compact:hover img {
+  transform: scale(1.15);
 }
 
-/* Logs View */
-.terminal-logs {
-  background: #000;
-  padding: var(--space-md);
-  border-radius: var(--radius-md);
-  font-family: monospace;
-  font-size: 0.875rem;
-  max-height: 500px;
-  overflow-y: auto;
-}
-
-.log-entry {
-  display: flex;
-  gap: var(--space-md);
-  padding: 4px 0;
-  border-bottom: 1px solid #222;
-}
-
-.log-time { color: #666; }
-.log-step { color: #888; }
-.log-status.started { color: #3b82f6; }
-.log-status.completed { color: #10b981; }
-.log-status.failed { color: #ef4444; }
-
-/* Sidebar */
-.progress-card {
-  background: var(--color-bg-card);
-  padding: var(--space-lg);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
-}
-
-.progress-steps {
-  margin-top: var(--space-lg);
+.image-hover {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 40%, transparent 100%);
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  justify-content: flex-end;
+  padding: var(--space-lg);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.step-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  opacity: 0.5;
-}
-
-.step-item.active,
-.step-item.completed {
+.image-box.compact:hover .image-hover {
   opacity: 1;
 }
 
-.step-indicator {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border);
+.hover-actions {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+.btn-icon-blur.mini {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(20, 20, 25, 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
+  transition: all 0.2s ease;
 }
 
-.step-item.completed .step-indicator {
-  background: var(--color-success);
-  color: black;
-  border-color: var(--color-success);
-}
-
-.step-item.active .step-indicator {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-
-.error-banner, .approval-banner {
-  margin-top: var(--space-lg);
-  padding: var(--space-md);
-  border-radius: var(--radius-md);
-}
-
-.error-banner {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid var(--color-error);
-  color: var(--color-error);
-}
-
-.approval-banner {
-  background: rgba(139, 92, 246, 0.1);
-  border: 1px solid var(--color-primary);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--space-lg);
-}
-
-.approval-content h3 {
-  color: var(--color-primary);
-  margin-bottom: 4px;
-}
-
-.refine-input-group {
-  display: flex;
-  gap: var(--space-sm);
-  margin-top: var(--space-md);
-  width: 100%;
-}
-
-.refine-input {
-  flex: 1;
-  padding: 8px 12px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-  background: var(--color-bg-elevated);
-  color: var(--color-text);
-  font-size: 0.875rem;
-}
-
-.refine-input:focus {
-  outline: none;
-  border-color: var(--color-primary);
-}
-
-.approval-content p {
-  font-size: 0.875rem;
-  color: var(--color-text-muted);
-}
-
-.image-card {
-  position: relative;
-}
-
-.image-overlay {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  display: flex;
-  gap: 4px;
-}
-
-.btn-mini {
-  padding: 4px 8px;
-  background: rgba(0, 0, 0, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: white;
-  border-radius: var(--radius-sm);
-  font-size: 0.75rem;
-  cursor: pointer;
-  backdrop-filter: blur(4px);
-  transition: all 0.2s;
-}
-
-.btn-mini:hover:not(:disabled) {
+.btn-icon-blur.mini:hover {
   background: var(--color-primary);
   border-color: var(--color-primary);
+  transform: scale(1.1) rotate(5deg);
 }
 
-.full-width {
-  width: 100%;
+/* Lightbox */
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(15px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xl);
+}
+
+.lightbox-content {
+  position: relative;
+  max-width: 95%;
+  max-height: 90vh;
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 100px rgba(139, 92, 246, 0.25);
+  overflow: hidden;
+}
+
+.lightbox-img {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 25px;
+  right: 25px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  font-size: 30px;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+/* Utilities */
+.btn-primary.glow-pulse {
+  background: var(--gradient-primary);
+  box-shadow: 0 0 25px rgba(139, 92, 246, 0.4);
+}
+
+.btn-outline {
+  background: transparent !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text) !important;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.btn-outline:hover {
+  border-color: var(--color-primary) !important;
+  background: rgba(139, 92, 246, 0.05) !important;
+}
+
+.full-width { width: 100%; }
+
+/* Transitions */
+.fade-slide-enter-active, .fade-slide-leave-active { transition: all 0.3s ease; }
+.fade-slide-enter-from { opacity: 0; transform: translateX(20px); }
+.fade-slide-leave-to { opacity: 0; transform: translateX(-20px); }
+
+.fade-enter-active, .fade-leave-active { transition: opacity 0.4s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+
+/* Global conflict resolution */
+:deep(button) {
+  background-color: transparent;
 }
 </style>

@@ -128,6 +128,7 @@ export const useVideoStore = defineStore('videos', {
       voiceId: string
       imageStyle: 'cinematic' | 'photorealistic' | 'artistic' | 'documentary'
       visualStyle: string
+      seedId: string // ID da seed a usar
       aspectRatio: '9:16' | '16:9'
       enableMotion: boolean
       mustInclude: string

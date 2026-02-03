@@ -33,10 +33,18 @@ export class RunPodMotionProvider implements IMotionProvider {
     }
 
     try {
-      console.log(`[RunPodMotion] Generating video from image: ${request.imagePath}`)
+      console.log(`[RunPodMotion] Generating video from image`)
 
-      // Ler a imagem e converter para Base64
-      const imageBuffer = await fs.readFile(request.imagePath)
+      // Usar buffer se disponível, senão ler do path
+      let imageBuffer: Buffer
+      if (request.imageBuffer) {
+        imageBuffer = request.imageBuffer
+      } else if (request.imagePath) {
+        imageBuffer = await fs.readFile(request.imagePath)
+      } else {
+        throw new Error('Either imageBuffer or imagePath must be provided')
+      }
+
       const imageBase64 = imageBuffer.toString('base64')
 
       let endImageBase64: string | undefined

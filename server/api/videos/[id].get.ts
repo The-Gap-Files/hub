@@ -18,20 +18,90 @@ export default defineEventHandler(async (event) => {
 
   const video = await prisma.video.findUnique({
     where: { id },
-    include: {
-      script: true,
+    select: {
+      id: true,
+      title: true,
+      theme: true,
+      status: true,
+      duration: true,
+      language: true,
+      style: true,
+      voiceId: true,
+      imageStyle: true,
+      visualStyle: true,
+      aspectRatio: true,
+      enableMotion: true,
+      scriptApproved: true,
+      imagesApproved: true,
+      videosApproved: true,
+      seedId: true,
+      thumbnailPath: true,
+      errorMessage: true,
+      createdAt: true,
+      updatedAt: true,
+      completedAt: true,
+      outputMimeType: true,
+      outputSize: true,
+      script: {
+        select: {
+          id: true,
+          fullText: true,
+          wordCount: true,
+          provider: true,
+          modelUsed: true,
+          createdAt: true
+        }
+      },
       scenes: {
-        include: {
+        select: {
+          id: true,
+          order: true,
+          narration: true,
+          visualDescription: true,
+          startTime: true,
+          endTime: true,
           images: {
-            where: { isSelected: true }
+            where: { isSelected: true },
+            select: {
+              id: true,
+              promptUsed: true,
+              isSelected: true,
+              variantIndex: true,
+              mimeType: true,
+              originalSize: true,
+              width: true,
+              height: true,
+              createdAt: true
+            }
           },
           videos: {
-            where: { isSelected: true }
+            where: { isSelected: true },
+            select: {
+              id: true,
+              promptUsed: true,
+              isSelected: true,
+              variantIndex: true,
+              mimeType: true,
+              originalSize: true,
+              duration: true,
+              createdAt: true
+            }
           }
         },
         orderBy: { order: 'asc' }
       },
-      audioTracks: true
+      audioTracks: {
+        select: {
+          id: true,
+          type: true,
+          provider: true,
+          voiceId: true,
+          mimeType: true,
+          originalSize: true,
+          duration: true,
+          createdAt: true
+        }
+      }
     }
   })
 
@@ -42,10 +112,19 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Buscar logs do pipeline
+  // Buscar logs do pipeline - limitar campos para evitar JSON pesado
   const pipelineLogs = await prisma.pipelineExecution.findMany({
     where: { videoId: id },
-    orderBy: { createdAt: 'desc' }
+    select: {
+      id: true,
+      step: true,
+      status: true,
+      message: true,
+      durationMs: true,
+      createdAt: true
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 50 // Limitar quantidade de logs
   })
 
   return {

@@ -13,23 +13,35 @@ export interface ScriptGenerationRequest {
   language: string
   targetDuration: number // em segundos
   style?: string // ID do estilo de roteiro
+  scriptStyleDescription?: string // Descrição do estilo de roteiro do banco
   scriptStyleInstructions?: string // Instruções do estilo de roteiro do banco
   visualStyle?: string
-  visualStyleDescription?: string // Descrição do estilo visual do banco
+  visualStyleDescription?: string // Descrição do estilo visual do banco (deprecated, usar campos abaixo)
+
+  // Campos categorizados do estilo visual (para WAN 2.2)
+  visualBaseStyle?: string
+  visualLightingTags?: string
+  visualAtmosphereTags?: string
+  visualCompositionTags?: string
+  visualGeneralTags?: string
+
   additionalContext?: string
   mustInclude?: string // O que deve ter no roteiro
   mustExclude?: string // O que NÃO deve ter no roteiro
+  wordsPerScene?: number // Número alvo de palavras por cena (ritmo)
 }
 
 export interface ScriptScene {
   order: number
   narration: string
   visualDescription: string
+  audioDescription?: string // Descrição de SFX ou atmosfera sonora
   estimatedDuration: number // em segundos
 }
 
 export interface ScriptGenerationResponse {
   title: string
+  summary: string // Sinopse expandida da história (2-3 parágrafos)
   fullText: string
   scenes: ScriptScene[]
   wordCount: number
@@ -115,7 +127,8 @@ export interface IImageGenerator {
 // =============================================================================
 
 export interface MotionGenerationRequest {
-  imagePath: string // Caminho local ou URL da imagem de origem
+  imagePath?: string // Caminho local ou URL da imagem de origem (deprecated)
+  imageBuffer?: Buffer // Buffer da imagem (preferido)
   endImagePath?: string // Caminho local ou URL da imagem final (para transição)
   duration?: number // Duração desejada (2-4s geralmente)
   motionBucketId?: number // Intensidade do movimento (1-255, default 127)

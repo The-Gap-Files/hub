@@ -35,6 +35,11 @@
             <span class="nav-label">Estilos de Roteiro</span>
           </NuxtLink>
 
+          <NuxtLink to="/settings/seeds" class="nav-item" active-class="active">
+            <span class="nav-icon">🌱</span>
+            <span class="nav-label">Seeds</span>
+          </NuxtLink>
+
           <NuxtLink to="/settings/providers" class="nav-item" active-class="active">
             <span class="nav-icon">⚙️</span>
             <span class="nav-label">Provedores IA</span>

@@ -198,22 +198,20 @@ export class VideoPipelineService {
       // 6. Renderizar vídeo
       await this.updateStatus(videoId!, 'RENDERING')
       await this.logExecution(videoId!, 'render', 'started', 'Iniciando montagem e renderização final do vídeo...')
-      const outputPath = await this.renderVideo(videoId!)
+      await this.renderVideo(videoId!)
 
       // 7. Finalizar
       await prisma.video.update({
         where: { id: videoId! },
         data: {
           status: 'COMPLETED',
-          outputPath,
           completedAt: new Date()
         }
       })
 
       return {
         videoId: videoId,
-        status: 'completed',
-        outputPath
+        status: 'completed'
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
@@ -241,22 +239,20 @@ export class VideoPipelineService {
    */
   async reprocessRender(videoId: string): Promise<PipelineResult> {
     try {
-      await this.updateStatus(videoId, 'RENDERING')
-      const outputPath = await this.renderVideo(videoId)
+      await this.logExecution(videoId, 'render', 'started', 'Renderizando vídeo...')
+      await this.renderVideo(videoId)
 
       await prisma.video.update({
         where: { id: videoId },
         data: {
           status: 'COMPLETED',
-          outputPath,
           completedAt: new Date()
         }
       })
 
       return {
         videoId,
-        status: 'completed',
-        outputPath
+        status: 'completed'
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
@@ -282,22 +278,40 @@ export class VideoPipelineService {
       select: { theme: true, language: true, duration: true, style: true, visualStyle: true, mustInclude: true, mustExclude: true }
     })
 
-    // Buscar descrição do estilo visual do banco
+    // Buscar estilo visual completo do banco (com campos categorizados)
     const selectedVisualStyle = options.visualStyle || video?.visualStyle
-    let visualStyleDescription: string | undefined
+    let visualStyleData: {
+      description: string
+      baseStyle: string
+      lightingTags: string
+      atmosphereTags: string
+      compositionTags: string
+      tags: string
+    } | undefined
+
     if (selectedVisualStyle) {
       const styleFromDb = await prisma.visualStyle.findFirst({
         where: {
           id: selectedVisualStyle,
           isActive: true
         },
-        select: { description: true }
+        select: {
+          description: true,
+          baseStyle: true,
+          lightingTags: true,
+          atmosphereTags: true,
+          compositionTags: true,
+          tags: true
+        }
       })
-      visualStyleDescription = styleFromDb?.description
+      if (styleFromDb) {
+        visualStyleData = styleFromDb
+      }
     }
 
     // Buscar instruções do estilo de roteiro do banco
     const selectedScriptStyle = options.style || video?.style
+    let scriptStyleDescription: string | undefined
     let scriptStyleInstructions: string | undefined
     if (selectedScriptStyle) {
       const scriptStyleFromDb = await prisma.scriptStyle.findFirst({
@@ -305,8 +319,9 @@ export class VideoPipelineService {
           id: selectedScriptStyle,
           isActive: true
         },
-        select: { instructions: true }
+        select: { description: true, instructions: true }
       })
+      scriptStyleDescription = scriptStyleFromDb?.description
       scriptStyleInstructions = scriptStyleFromDb?.instructions
     }
 
@@ -315,9 +330,15 @@ export class VideoPipelineService {
       language: options.language || video?.language || 'pt-BR',
       targetDuration: options.targetDuration || video?.duration || 300,
       style: selectedScriptStyle || 'documentary',
+      scriptStyleDescription: scriptStyleDescription,
       scriptStyleInstructions: scriptStyleInstructions,
       visualStyle: selectedVisualStyle || undefined,
-      visualStyleDescription: visualStyleDescription,
+      visualStyleDescription: visualStyleData?.description, // Mantido para compatibilidade
+      visualBaseStyle: visualStyleData?.baseStyle,
+      visualLightingTags: visualStyleData?.lightingTags,
+      visualAtmosphereTags: visualStyleData?.atmosphereTags,
+      visualCompositionTags: visualStyleData?.compositionTags,
+      visualGeneralTags: visualStyleData?.tags,
       mustInclude: options.mustInclude || video?.mustInclude || undefined,
       mustExclude: options.mustExclude || video?.mustExclude || undefined
     }
@@ -329,6 +350,7 @@ export class VideoPipelineService {
     await prisma.script.create({
       data: {
         videoId,
+        summary: result.summary,
         fullText: result.fullText,
         wordCount: result.wordCount,
         provider: result.provider.toUpperCase() as 'OPENAI' | 'ANTHROPIC' | 'GEMINI',
@@ -344,7 +366,8 @@ export class VideoPipelineService {
           videoId,
           order: scene.order,
           narration: scene.narration,
-          visualDescription: scene.visualDescription
+          visualDescription: scene.visualDescription,
+          audioDescription: scene.audioDescription
         }
       })
     }
@@ -499,18 +522,28 @@ export class VideoPipelineService {
     const realTotalDuration = await this.getAudioDuration(finalAudioPath)
     const totalDuration = realTotalDuration > 0 ? realTotalDuration : currentTime
 
-    // Registrar trilha principal no banco
+    // Ler arquivo final e comprimir
+    const finalAudioBuffer = await fs.readFile(finalAudioPath)
+    const { bufferToBytes, getMimeType } = await import('../../utils/compression')
+    const compressedData = await bufferToBytes(finalAudioBuffer)
+    const mimeType = getMimeType(finalAudioBuffer)
+
+    // Registrar trilha principal no banco (BYTEA comprimido)
     await prisma.audioTrack.create({
       data: {
         videoId,
         type: 'narration',
         provider: ttsProvider.getName().toUpperCase() as 'ELEVENLABS',
         voiceId: selectedVoiceId,
-        filePath: finalAudioPath,
-        fileSize: (await fs.stat(finalAudioPath)).size,
+        fileData: new Uint8Array(compressedData),
+        mimeType: mimeType,
+        originalSize: finalAudioBuffer.length,
         duration: totalDuration
       }
     })
+
+    // Limpar arquivos temporários
+    await fs.rm(audioDir, { recursive: true, force: true })
 
     await this.logExecution(
       videoId,
@@ -520,7 +553,7 @@ export class VideoPipelineService {
       Date.now() - startTime
     )
 
-    return { audioBuffer: await fs.readFile(finalAudioPath), duration: totalDuration }
+    return { audioBuffer: finalAudioBuffer, duration: totalDuration }
   }
 
   /**
@@ -556,14 +589,19 @@ export class VideoPipelineService {
   }
 
   /**
-   * Gera imagens para cada cena do vídeo
-   */
+ * Gera imagens para cada cena do vídeo
+ */
   private async generateImages(videoId: string, options: PipelineOptions) {
     const startTime = Date.now()
 
     const video = await prisma.video.findUnique({
       where: { id: videoId },
-      select: { visualStyle: true, aspectRatio: true, imageStyle: true }
+      select: {
+        visualStyle: true,
+        aspectRatio: true,
+        imageStyle: true,
+        seedId: true // Buscar seed do vídeo
+      }
     })
 
     const scenes = await prisma.scene.findMany({
@@ -577,6 +615,16 @@ export class VideoPipelineService {
     const selectedVisualStyle = options.visualStyle || video?.visualStyle
     const selectedAspectRatio = options.aspectRatio || (video?.aspectRatio as '9:16' | '16:9') || '16:9'
     const selectedImageStyle = options.imageStyle || (video?.imageStyle as any) || 'cinematic'
+
+    // Buscar seed do banco se o vídeo tiver uma
+    let seedValue: number | undefined
+    if (video?.seedId) {
+      const seedFromDb = await prisma.seed.findUnique({
+        where: { id: video.seedId },
+        select: { value: true }
+      })
+      seedValue = seedFromDb?.value
+    }
 
     // Obter as tags do estilo visual selecionado do banco de dados
     let visualStyleTags = ''
@@ -594,7 +642,7 @@ export class VideoPipelineService {
     // Definir dimensões baseadas no aspect ratio
     const isPortrait = selectedAspectRatio === '9:16'
 
-    // Para SDXL no Replicate, é melhor usar os nomes de aspect ratio se possível, 
+    // Para SDXL no Replicate, é melhor usar os nomes de aspect ratio se possível,
     // ou garantir que as dimensões batam com o que o modelo espera.
     // Se aspect_ratio for passado, alguns modelos ignoram width/height.
     const width = isPortrait ? 768 : 1344
@@ -614,32 +662,30 @@ export class VideoPipelineService {
         height,
         aspectRatio: selectedAspectRatio,
         style: selectedImageStyle,
-        numVariants: 1
+        numVariants: 1,
+        seed: seedValue // Passar seed para o provider
       }
 
       const result = await imageProvider.generate(request)
 
-      // Salvar cada imagem gerada
+      // Salvar cada imagem gerada no banco (BYTEA comprimido)
       for (let j = 0; j < result.images.length; j++) {
         const image = result.images[j]
         if (!image) continue
 
-        const outputDir = path.resolve('storage', 'images', videoId)
-        await fs.mkdir(outputDir, { recursive: true })
-
-        const fileName = `scene_${scene.order}_v${j}.png`
-        const imagePath = path.join(outputDir, fileName)
-
-        // Salvar no disco
-        await fs.writeFile(imagePath, image.buffer)
+        // Comprimir e detectar MIME type
+        const { bufferToBytes, getMimeType } = await import('../../utils/compression')
+        const compressedData = await bufferToBytes(image.buffer)
+        const mimeType = getMimeType(image.buffer)
 
         await prisma.sceneImage.create({
           data: {
             sceneId: scene.id,
             provider: result.provider.toUpperCase() as 'REPLICATE' | 'STABLE_DIFFUSION',
             promptUsed: image.revisedPrompt ?? fullPrompt,
-            filePath: imagePath,
-            fileSize: image.buffer.length,
+            fileData: new Uint8Array(compressedData),
+            mimeType: mimeType,
+            originalSize: image.buffer.length,
             width: image.width,
             height: image.height,
             isSelected: j === 0,
@@ -648,6 +694,18 @@ export class VideoPipelineService {
         })
       }
       await this.logExecution(videoId, 'images', 'completed', `Imagem gerada para a cena ${i + 1}.`)
+    }
+
+    // Incrementar usageCount da seed após uso bem-sucedido
+    if (video?.seedId) {
+      await prisma.seed.update({
+        where: { id: video.seedId },
+        data: {
+          usageCount: {
+            increment: 1
+          }
+        }
+      })
     }
 
     await this.logExecution(
@@ -705,7 +763,7 @@ export class VideoPipelineService {
 
       const motionPromises = batch.map(async ([index, scene]) => {
         const sourceImage = scene.images[0]
-        if (!sourceImage) return
+        if (!sourceImage || !sourceImage.fileData) return
 
         await this.logExecution(videoId, 'motion', 'started', `Gerando movimento para a cena ${index + 1} de ${scenes.length}...`)
 
@@ -717,8 +775,12 @@ export class VideoPipelineService {
           ? Math.ceil(scene.endTime - scene.startTime)
           : 5
 
+        // Descomprimir imagem do banco
+        const { bytesToBuffer } = await import('../../utils/compression')
+        const imageBuffer = await bytesToBuffer(Buffer.from(sourceImage.fileData))
+
         const request: MotionGenerationRequest = {
-          imagePath: sourceImage.filePath,
+          imageBuffer: imageBuffer, // Passar buffer em vez de path
           prompt: motionPrompt,
           duration: realDuration,
           aspectRatio: selectedAspectRatio
@@ -728,20 +790,19 @@ export class VideoPipelineService {
           const result = await motionProvider.generate(request)
           const videoBuffer = result.video.videoBuffer
 
-          const outputDir = path.resolve('storage', 'images', videoId)
-          const fileName = `scene_${scene.order}_motion.mp4`
-          const videoPath = path.join(outputDir, fileName)
-
-          // Salvar no disco
-          await fs.writeFile(videoPath, videoBuffer)
+          // Comprimir vídeo e salvar no banco
+          const { bufferToBytes, getMimeType } = await import('../../utils/compression')
+          const compressedData = await bufferToBytes(videoBuffer)
+          const mimeType = getMimeType(videoBuffer)
 
           // Salvar no banco
           await prisma.sceneVideo.create({
             data: {
               sceneId: scene.id,
               provider: result.provider.toUpperCase() as 'REPLICATE',
-              filePath: videoPath,
-              fileSize: videoBuffer.length,
+              fileData: new Uint8Array(compressedData),
+              mimeType: mimeType,
+              originalSize: videoBuffer.length,
               duration: result.video.duration,
               sourceImageId: sourceImage.id,
               isSelected: true
@@ -770,135 +831,188 @@ export class VideoPipelineService {
   }
 
   /**
-   * Renderiza o vídeo final usando FFmpeg
-   */
-  private async renderVideo(videoId: string): Promise<string> {
+ * Renderiza o vídeo final usando FFmpeg
+ */
+  private async renderVideo(videoId: string): Promise<void> {
     const startTime = Date.now()
 
-    const outputDir = path.resolve('storage', 'output', videoId)
-    await fs.mkdir(outputDir, { recursive: true })
-    const outputPath = path.join(outputDir, 'final.mp4')
+    // Diretório temporário para renderização
+    const tempDir = path.resolve('storage', 'temp', videoId, 'render')
+    await fs.mkdir(tempDir, { recursive: true })
 
-    // 1. Buscar dados necessários
-    const video = await prisma.video.findUnique({
-      where: { id: videoId },
-      include: {
-        scenes: {
-          include: {
-            images: { where: { isSelected: true } },
-            videos: { where: { isSelected: true } }
+    try {
+      // 1. Buscar dados necessários
+      const video = await prisma.video.findUnique({
+        where: { id: videoId },
+        include: {
+          scenes: {
+            include: {
+              images: { where: { isSelected: true } },
+              videos: { where: { isSelected: true } }
+            },
+            orderBy: { order: 'asc' }
           },
-          orderBy: { order: 'asc' }
-        },
-        audioTracks: {
-          where: { type: 'narration' },
-          orderBy: { createdAt: 'desc' },
-          take: 1
-        }
-      }
-    })
-
-    if (!video || !video.audioTracks[0]) {
-      throw new Error('Video data or audio track not found for rendering')
-    }
-
-    const audioTrack = video.audioTracks[0]
-    const audioPath = audioTrack.filePath
-    const totalAudioDuration = audioTrack.duration || 0
-
-    // 2. Preparar cenas e tempos
-    const scenes = video.scenes.filter(s => s.images.length > 0)
-    if (scenes.length === 0) {
-      throw new Error('No images found to render video')
-    }
-
-    const firstScene = scenes[0]!
-    const firstImage = firstScene.images[0]
-    if (!firstImage) {
-      throw new Error('First scene has no selected image')
-    }
-
-    // Detectar formato baseado na primeira imagem, com fallback para o banco
-    const isPortrait = (firstImage.width && firstImage.height)
-      ? firstImage.width < firstImage.height
-      : video.aspectRatio === '9:16'
-
-    return new Promise((resolve, reject) => {
-      const command = ffmpeg()
-
-      // 1. Adicionar cada asset como um input com loop/stream e duração real baseada no áudio
-      scenes.forEach((scene, index) => {
-        const videoClip = scene.videos[0]
-        const image = scene.images[0]
-
-        // Calcular duração real da cena baseada nos tempos do áudio salvos anteriormente
-        let duration = (scene.endTime && scene.startTime !== null)
-          ? (scene.endTime - scene.startTime)
-          : (totalAudioDuration / scenes.length) // fallback para divisão igual
-
-        // Se for a última cena, adicionar um pequeno buffer (0.5s) para garantir que o áudio não corte
-        if (index === scenes.length - 1) {
-          duration += 0.5
-        }
-
-        if (videoClip) {
-          command.input(videoClip.filePath)
-            .inputOptions(['-stream_loop -1', `-t ${duration}`])
-        } else if (image) {
-          command.input(image.filePath)
-            .inputOptions(['-loop 1', `-t ${duration}`])
+          audioTracks: {
+            where: { type: 'narration' },
+            orderBy: { createdAt: 'desc' },
+            take: 1
+          }
         }
       })
 
-      // 2. Adicionar o áudio como último input (sem loop)
-      command.input(audioPath)
+      if (!video || !video.audioTracks[0]) {
+        throw new Error('Video data or audio track not found for rendering')
+      }
 
-      command
-        .complexFilter([
-          // 1. Escalar imagens para garantir tamanho uniforme (caso mude o formato entre cenas)
-          ...scenes.map((_, i) => ({
-            filter: 'scale',
-            options: isPortrait
-              ? '768:1344:force_original_aspect_ratio=increase,crop=768:1344,pad=768:1344:(ow-iw)/2:(oh-ih)/2'
-              : '1344:768:force_original_aspect_ratio=increase,crop=1344:768,pad=1344:768:(ow-iw)/2:(oh-ih)/2',
-            inputs: `${i}:v`,
-            outputs: `scaled_${i}`
-          })),
-          // 2. Concatenar os fluxos de vídeo processados
-          {
-            filter: 'concat',
-            options: { n: scenes.length, v: 1, a: 0 },
-            inputs: scenes.map((_, i) => `scaled_${i}`),
-            outputs: 'v'
-          },
-          // 3. Forçar o formato de pixel para compatibilidade universal (H.264)
-          {
-            filter: 'format',
-            options: 'yuv420p',
-            inputs: 'v',
-            outputs: 'final_v'
+      const audioTrack = video.audioTracks[0]
+      const totalAudioDuration = audioTrack.duration || 0
+
+      // 2. Descomprimir áudio do banco para arquivo temporário
+      if (!audioTrack.fileData) {
+        throw new Error('Audio track has no data')
+      }
+      const { bytesToBuffer } = await import('../../utils/compression')
+      const audioBuffer = await bytesToBuffer(Buffer.from(audioTrack.fileData))
+      const audioPath = path.join(tempDir, 'narration.mp3')
+      await fs.writeFile(audioPath, audioBuffer)
+
+      // 3. Preparar cenas e tempos
+      const scenes = video.scenes.filter(s => s.images.length > 0)
+      if (scenes.length === 0) {
+        throw new Error('No images found to render video')
+      }
+
+      const firstScene = scenes[0]!
+      const firstImage = firstScene.images[0]
+      if (!firstImage) {
+        throw new Error('First scene has no selected image')
+      }
+
+      // Detectar formato baseado na primeira imagem, com fallback para o banco
+      const isPortrait = (firstImage.width && firstImage.height)
+        ? firstImage.width < firstImage.height
+        : video.aspectRatio === '9:16'
+
+      // 4. Descomprimir assets (imagens/vídeos) para arquivos temporários
+      const scenePaths: string[] = []
+      for (const [index, scene] of scenes.entries()) {
+        const videoClip = scene.videos[0]
+        const image = scene.images[0]
+
+        if (videoClip && videoClip.fileData) {
+          const videoBuffer = await bytesToBuffer(Buffer.from(videoClip.fileData))
+          const videoPath = path.join(tempDir, `scene_${index}.mp4`)
+          await fs.writeFile(videoPath, videoBuffer)
+          scenePaths.push(videoPath)
+        } else if (image && image.fileData) {
+          const imageBuffer = await bytesToBuffer(Buffer.from(image.fileData))
+          const imagePath = path.join(tempDir, `scene_${index}.png`)
+          await fs.writeFile(imagePath, imageBuffer)
+          scenePaths.push(imagePath)
+        } else {
+          throw new Error(`Scene ${index} has no valid asset`)
+        }
+      }
+
+      // 5. Renderizar vídeo
+      const outputPath = path.join(tempDir, 'final.mp4')
+
+      await new Promise<void>((resolve, reject) => {
+        const command = ffmpeg()
+
+        // Adicionar cada asset como um input com loop/stream e duração real baseada no áudio
+        scenes.forEach((scene, index) => {
+          const videoClip = scene.videos[0]
+          const image = scene.images[0]
+
+          // Calcular duração real da cena baseada nos tempos do áudio salvos anteriormente
+          let duration = (scene.endTime && scene.startTime !== null)
+            ? (scene.endTime - scene.startTime)
+            : (totalAudioDuration / scenes.length) // fallback para divisão igual
+
+          // Se for a última cena, adicionar um pequeno buffer (0.5s) para garantir que o áudio não corte
+          if (index === scenes.length - 1) {
+            duration += 0.5
           }
-        ])
-        .outputOptions([
-          '-map [final_v]',
-          `-map ${scenes.length}:a`, // O áudio é o index N
-          '-c:v libx264',
-          '-r 30',
-          '-y'         // Sobrescrever arquivo se existir
-        ])
-        .on('start', (cmd: string) => console.log('[FFmpeg] Rendering started:', cmd))
-        .on('error', (err: Error) => {
-          console.error('[FFmpeg] Rendering error:', err)
-          reject(err)
+
+          if (videoClip && scenePaths[index]) {
+            command.input(scenePaths[index]!)
+              .inputOptions(['-stream_loop -1', `-t ${duration}`])
+          } else if (image && scenePaths[index]) {
+            command.input(scenePaths[index]!)
+              .inputOptions(['-loop 1', `-t ${duration}`])
+          }
         })
-        .on('end', async () => {
-          const duration = Date.now() - startTime
-          console.log(`[FFmpeg] Rendering completed in ${duration}ms`)
-          await this.logExecution(videoId, 'render', 'completed', `Video rendered in ${duration}ms`, duration)
-          resolve(outputPath)
-        })
-        .save(outputPath)
-    })
+
+        // Adicionar o áudio como último input (sem loop)
+        command.input(audioPath)
+
+        command
+          .complexFilter([
+            // 1. Escalar imagens para garantir tamanho uniforme (caso mude o formato entre cenas)
+            ...scenes.map((_, i) => ({
+              filter: 'scale',
+              options: isPortrait
+                ? '768:1344:force_original_aspect_ratio=increase,crop=768:1344,pad=768:1344:(ow-iw)/2:(oh-ih)/2'
+                : '1344:768:force_original_aspect_ratio=increase,crop=1344:768,pad=1344:768:(ow-iw)/2:(oh-ih)/2',
+              inputs: `${i}:v`,
+              outputs: `scaled_${i}`
+            })),
+            // 2. Concatenar os fluxos de vídeo processados
+            {
+              filter: 'concat',
+              options: { n: scenes.length, v: 1, a: 0 },
+              inputs: scenes.map((_, i) => `scaled_${i}`),
+              outputs: 'v'
+            },
+            // 3. Forçar o formato de pixel para compatibilidade universal (H.264)
+            {
+              filter: 'format',
+              options: 'yuv420p',
+              inputs: 'v',
+              outputs: 'final_v'
+            }
+          ])
+          .outputOptions([
+            '-map [final_v]',
+            `-map ${scenes.length}:a`, // O áudio é o index N
+            '-c:v libx264',
+            '-r 30',
+            '-y'         // Sobrescrever arquivo se existir
+          ])
+          .on('start', (cmd: string) => console.log('[FFmpeg] Rendering started:', cmd))
+          .on('error', (err: Error) => {
+            console.error('[FFmpeg] Rendering error:', err)
+            reject(err)
+          })
+          .on('end', async () => {
+            const duration = Date.now() - startTime
+            console.log(`[FFmpeg] Rendering completed in ${duration}ms`)
+            await this.logExecution(videoId, 'render', 'completed', `Video rendered in ${duration}ms`, duration)
+            resolve()
+          })
+          .save(outputPath)
+      })
+
+      // 6. Comprimir vídeo final e salvar no banco
+      const finalVideoBuffer = await fs.readFile(outputPath)
+      const { bufferToBytes, getMimeType } = await import('../../utils/compression')
+      const compressedData = await bufferToBytes(finalVideoBuffer)
+      const mimeType = getMimeType(finalVideoBuffer)
+
+      await prisma.video.update({
+        where: { id: videoId },
+        data: {
+          outputData: new Uint8Array(compressedData),
+          outputMimeType: mimeType,
+          outputSize: finalVideoBuffer.length
+        }
+      })
+
+    } finally {
+      // 7. Limpar arquivos temporários
+      await fs.rm(tempDir, { recursive: true, force: true }).catch(() => { })
+    }
   }
 
   /**
@@ -940,9 +1054,6 @@ export class VideoPipelineService {
     const image = result.images[0]
 
     if (image) {
-      const outputDir = path.resolve('storage', 'images', video.id)
-      await fs.mkdir(outputDir, { recursive: true })
-
       // Desmarcar imagens anteriores desta cena
       await prisma.sceneImage.updateMany({
         where: { sceneId },
@@ -955,18 +1066,19 @@ export class VideoPipelineService {
         data: { isSelected: false }
       })
 
-      const fileName = `scene_${scene.order}_v${Date.now()}.png`
-      const imagePath = path.join(outputDir, fileName)
-      await fs.writeFile(imagePath, image.buffer)
-      console.log(`[VideoPipeline] New image saved to: ${imagePath}`)
+      // Comprimir e salvar no banco
+      const { bufferToBytes, getMimeType } = await import('../../utils/compression')
+      const compressedData = await bufferToBytes(image.buffer)
+      const mimeType = getMimeType(image.buffer)
 
       await prisma.sceneImage.create({
         data: {
           sceneId: scene.id,
           provider: result.provider.toUpperCase() as 'REPLICATE',
           promptUsed: image.revisedPrompt ?? fullPrompt,
-          filePath: imagePath,
-          fileSize: image.buffer.length,
+          fileData: new Uint8Array(compressedData),
+          mimeType: mimeType,
+          originalSize: image.buffer.length,
           width: image.width,
           height: image.height,
           isSelected: true
@@ -992,13 +1104,17 @@ export class VideoPipelineService {
 
     if (!scene) throw new Error('Cena não encontrada')
     const sourceImage = scene.images[0]
-    if (!sourceImage) throw new Error('Imagem de origem não encontrada para esta cena')
+    if (!sourceImage || !sourceImage.fileData) throw new Error('Imagem de origem não encontrada para esta cena')
 
     const video = scene.video
     const motionProvider = providerManager.getMotionProvider()
 
+    // Descomprimir imagem do banco
+    const { bytesToBuffer, bufferToBytes, getMimeType } = await import('../../utils/compression')
+    const imageBuffer = await bytesToBuffer(Buffer.from(sourceImage.fileData))
+
     const request: MotionGenerationRequest = {
-      imagePath: sourceImage.filePath,
+      imageBuffer: imageBuffer, // Passar buffer em vez de path
       prompt: scene.visualDescription,
       duration: 5,
       aspectRatio: (video.aspectRatio as any) || '16:9'
@@ -1007,26 +1123,23 @@ export class VideoPipelineService {
     const result = await motionProvider.generate(request)
     const videoBuffer = result.video.videoBuffer
 
-    const outputDir = path.resolve('storage', 'images', video.id)
-    await fs.mkdir(outputDir, { recursive: true })
-
     // Desmarcar vídeos anteriores desta cena
     await prisma.sceneVideo.updateMany({
       where: { sceneId },
       data: { isSelected: false }
     })
 
-    const fileName = `scene_${scene.order}_motion_${Date.now()}.mp4`
-    const videoPath = path.join(outputDir, fileName)
-    await fs.writeFile(videoPath, videoBuffer)
-    console.log(`[VideoPipeline] New motion video saved to: ${videoPath}`)
+    // Comprimir e salvar no banco
+    const compressedData = await bufferToBytes(videoBuffer)
+    const mimeType = getMimeType(videoBuffer)
 
     await prisma.sceneVideo.create({
       data: {
         sceneId: scene.id,
         provider: result.provider.toUpperCase() as 'REPLICATE',
-        filePath: videoPath,
-        fileSize: videoBuffer.length,
+        fileData: new Uint8Array(compressedData),
+        mimeType: mimeType,
+        originalSize: videoBuffer.length,
         duration: result.video.duration,
         sourceImageId: sourceImage.id,
         isSelected: true

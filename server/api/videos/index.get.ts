@@ -55,7 +55,10 @@ export default defineEventHandler(async (event) => {
 
   return {
     success: true,
-    data: videos,
+    data: videos.map(video => ({
+      ...video,
+      downloadUrl: video.status === 'COMPLETED' ? `/api/videos/${video.id}/download` : null
+    })),
     pagination: {
       page: params.page,
       limit: params.limit,

@@ -31,11 +31,10 @@ export class ReplicateMotionProvider implements IMotionProvider {
 
   async generate(request: MotionGenerationRequest): Promise<MotionGenerationResponse> {
     try {
-      console.log(`[ReplicateMotion] Generating video from image: ${request.imagePath}`)
+      console.log(`[ReplicateMotion] Generating video from image`)
 
-      // Prepare input
-      // We pass the buffer directly to the Replicate SDK, which handles the upload
-      const imageBuffer = await fs.readFile(request.imagePath)
+      // Prepare input - usar buffer se disponível, senão ler do path
+      const imageBuffer = request.imageBuffer || await fs.readFile(request.imagePath!)
 
       const input = {
         image: imageBuffer,

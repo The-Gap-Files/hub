@@ -3,6 +3,10 @@ interface VisualStyle {
   id: string
   name: string
   description: string
+  baseStyle: string
+  lightingTags: string
+  atmosphereTags: string
+  compositionTags: string
   tags: string
   order: number
   isActive: boolean
@@ -20,6 +24,10 @@ const isSubmitting = ref(false)
 const formData = ref({
   name: '',
   description: '',
+  baseStyle: '',
+  lightingTags: '',
+  atmosphereTags: '',
+  compositionTags: '',
   tags: '',
   order: 0,
   isActive: true
@@ -30,6 +38,10 @@ function openCreateModal() {
   formData.value = {
     name: '',
     description: '',
+    baseStyle: '',
+    lightingTags: '',
+    atmosphereTags: '',
+    compositionTags: '',
     tags: '',
     order: styles.value.length,
     isActive: true
@@ -42,6 +54,10 @@ function openEditModal(style: VisualStyle) {
   formData.value = {
     name: style.name,
     description: style.description,
+    baseStyle: style.baseStyle,
+    lightingTags: style.lightingTags,
+    atmosphereTags: style.atmosphereTags,
+    compositionTags: style.compositionTags,
     tags: style.tags,
     order: style.order,
     isActive: style.isActive
@@ -185,13 +201,57 @@ async function toggleActive(style: VisualStyle) {
             <textarea
               v-model="formData.description"
               required
-              rows="3"
+              rows="2"
               placeholder="Descreva o estilo visual..."
             ></textarea>
           </div>
 
           <div class="form-group">
-            <label>Tags (separadas por vírgula)</label>
+            <label>Estilo Base</label>
+            <input
+              v-model="formData.baseStyle"
+              type="text"
+              required
+              placeholder="Ex: Cinematic 2D illustration, Studio Ghibli style"
+            />
+            <small>Ancoragem do estilo (define o "cérebro" do modelo)</small>
+          </div>
+
+          <div class="form-group">
+            <label>Iluminação (narrativa)</label>
+            <textarea
+              v-model="formData.lightingTags"
+              required
+              rows="2"
+              placeholder="Ex: warm golden hour light, soft volumetric rays filtering through clouds"
+            ></textarea>
+            <small>Descreva a iluminação de forma narrativa</small>
+          </div>
+
+          <div class="form-group">
+            <label>Atmosfera (narrativa)</label>
+            <textarea
+              v-model="formData.atmosphereTags"
+              required
+              rows="2"
+              placeholder="Ex: dreamlike, nostalgic, epic adventure"
+            ></textarea>
+            <small>Descreva a atmosfera e o mood</small>
+          </div>
+
+          <div class="form-group">
+            <label>Composição (narrativa)</label>
+            <textarea
+              v-model="formData.compositionTags"
+              required
+              rows="2"
+              placeholder="Ex: wide establishing shot, low angle emphasizing vastness"
+            ></textarea>
+            <small>Descreva ângulos de câmera e enquadramento</small>
+          </div>
+
+          <div class="form-group">
+            <label>Tags Gerais (separadas por vírgula)</label>
             <textarea
               v-model="formData.tags"
               required
@@ -475,6 +535,14 @@ async function toggleActive(style: VisualStyle) {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.form-group small {
+  display: block;
+  margin-top: var(--space-xs);
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  font-style: italic;
 }
 
 .form-row {

@@ -12,7 +12,11 @@ const VISUAL_STYLES = [
     id: 'epictok',
     name: 'Epictok Imersivo',
     description: 'Estilo de ilustração 2D vintage, tipo Studio Ghibli e Eyvind Earle.',
-    tags: 'digital 2D illustration, flat cell shading, inked outlines, vintage poster aesthetic, ligne claire style, Studio Ghibli background art, Eyvind Earle style, fantasy adventure concept art, classic RPG illustration, matte painting, textured paper effect, low detail faces, high contrast lighting, muted colors, earthy palette, desaturated tones, sepia undertones, dramatic sky lighting, backlit clouds, golden hour',
+    baseStyle: 'Cinematic 2D illustration, Studio Ghibli background art style, Eyvind Earle inspired',
+    lightingTags: 'warm golden hour light, soft volumetric rays filtering through clouds, dramatic backlighting, muted warm tones',
+    atmosphereTags: 'dreamlike, nostalgic, epic adventure, serene yet mysterious',
+    compositionTags: 'wide establishing shot, low angle emphasizing vastness, textured paper effect',
+    tags: 'flat cell shading, inked outlines, vintage poster aesthetic, ligne claire style, fantasy adventure concept art, classic RPG illustration, matte painting, low detail faces, high contrast lighting, earthy palette, desaturated tones, sepia undertones',
     order: 1,
     isActive: true
   },
@@ -20,7 +24,11 @@ const VISUAL_STYLES = [
     id: 'gta6',
     name: 'GTA 6 Vibes',
     description: 'Estilo vibrante com cores saturadas e iluminação de Miami.',
-    tags: 'vibrant colors, saturated, Miami sunset lighting, modern high-budget game aesthetic, photorealistic, cinematic, neon lights, urban, tropical, palm trees, ocean view, luxury cars, modern architecture',
+    baseStyle: 'Cinematic photorealistic, modern AAA game aesthetic, GTA VI style',
+    lightingTags: 'vibrant Miami sunset, neon lights reflecting on wet surfaces, warm tropical golden hour',
+    atmosphereTags: 'energetic, luxurious, urban tropical paradise, high-octane',
+    compositionTags: 'dynamic camera movement, establishing wide shots of cityscape, low angle hero shots',
+    tags: 'saturated colors, photorealistic, neon lights, urban, tropical, palm trees swaying, ocean view, luxury cars gleaming, modern architecture',
     order: 2,
     isActive: true
   },
@@ -28,7 +36,11 @@ const VISUAL_STYLES = [
     id: 'cyberpunk',
     name: 'Cyberpunk Neon',
     description: 'Estilo futurista com neon, chuva e tecnologia avançada.',
-    tags: 'cyberpunk, neon, futuristic, rain, colorful lights, advanced technology, dark atmosphere, blade runner style, sci-fi, dystopian, holographic displays, flying cars, megacity',
+    baseStyle: 'Cinematic cyberpunk, Blade Runner inspired, dark sci-fi',
+    lightingTags: 'neon lights cutting through rain, volumetric fog with colorful reflections, dramatic chiaroscuro',
+    atmosphereTags: 'dystopian, mysterious, tech-noir, rain-soaked melancholy',
+    compositionTags: 'low angle looking up at megastructures, rain droplets on camera lens, holographic displays floating',
+    tags: 'futuristic, advanced technology, dark atmosphere, sci-fi, holographic displays, flying cars passing by, megacity',
     order: 3,
     isActive: true
   },
@@ -36,7 +48,11 @@ const VISUAL_STYLES = [
     id: 'oil-painting',
     name: 'Pintura a Óleo',
     description: 'Estilo de pintura a óleo clássica com pinceladas visíveis.',
-    tags: 'oil painting, classic art style, visible brush strokes, canvas texture, renaissance style, baroque, impressionist, artistic, painterly, traditional art, museum quality',
+    baseStyle: 'Classic oil painting, renaissance and baroque style, museum quality',
+    lightingTags: 'soft natural window light, chiaroscuro dramatic shadows, warm candlelight glow',
+    atmosphereTags: 'timeless, contemplative, classical elegance, artistic reverence',
+    compositionTags: 'traditional portrait framing, close-up with shallow depth, painterly brush strokes visible',
+    tags: 'visible brush strokes, canvas texture, impressionist touches, artistic, painterly, traditional art',
     order: 4,
     isActive: true
   },
@@ -44,7 +60,11 @@ const VISUAL_STYLES = [
     id: 'photorealistic',
     name: 'Fotorrealista',
     description: 'Estilo fotorrealista como fotografia de cinema em alta resolução.',
-    tags: 'photorealistic, cinematic photography, high resolution, DSLR, professional camera, 4K, 8K, ultra detailed, realistic lighting, depth of field, bokeh, film grain',
+    baseStyle: 'Cinematic photorealistic, ARRI Alexa 65mm, professional cinema camera',
+    lightingTags: 'natural realistic lighting, soft bokeh in background, film grain texture, depth of field',
+    atmosphereTags: 'authentic, immersive, documentary realism, cinematic presence',
+    compositionTags: 'shallow depth of field, cinematic aspect ratio, professional framing',
+    tags: 'ultra detailed, realistic lighting, 4K, 8K, DSLR quality, professional camera work',
     order: 5,
     isActive: true
   }
@@ -53,33 +73,33 @@ const VISUAL_STYLES = [
 const SCRIPT_STYLES = [
   {
     id: 'documentary',
-    name: 'Documentário',
-    description: 'Estilo documental sério e investigativo, focado em fatos e evidências.',
-    instructions: 'Adote um tom documental sério e investigativo.',
+    name: 'Documentário Investigativo',
+    description: 'Estilo documental sério e investigativo, focado em fatos e evidências com voz autoritária.',
+    instructions: 'Adote um tom documental sério e investigativo, com uma voz autoritária no estilo de "jornalismo gonzo". Priorize fatos duros entremeados com especulações instigantes. Use frases curtas e diretas. Mantenha o ritmo rápido.',
     order: 1,
     isActive: true
   },
   {
     id: 'mystery',
-    name: 'Mistério',
-    description: 'Estilo misterioso com tensão crescente e revelações graduais.',
-    instructions: 'Crie tensão e mistério, com revelações graduais.',
+    name: 'Mistério Suspense',
+    description: 'Estilo misterioso com tensão crescente, pausas dramáticas e sussurros teóricos.',
+    instructions: 'Crie tensão constante com pausas dramáticas e sussurros teóricos. Use revelações graduais e termine cenas com perguntas implícitas. Mantenha o espectador em desequilíbrio informativo. Foco em mistério e sensação de "segredo proibido".',
     order: 2,
     isActive: true
   },
   {
-    id: 'narrative',
-    name: 'Narrativo',
-    description: 'Estilo de narrativa envolvente com arco dramático claro.',
-    instructions: 'Conte uma história envolvente com arco narrativo claro.',
+    id: 'epic',
+    name: 'Épico Filosófico',
+    description: 'Estilo grandioso e questionador, conectando eventos históricos a reflexões sobre a realidade.',
+    instructions: 'Seja grandioso, questionador da realidade e profundo. Conecte eventos passados a implicações filosóficas e existenciais. Use um tom de "revelação cósmica". Eleve o tema histórico a uma dimensão épica e atemporal.',
     order: 3,
     isActive: true
   },
   {
-    id: 'educational',
-    name: 'Educacional',
-    description: 'Estilo educativo e acessível, explicando conceitos complexos de forma simples.',
-    instructions: 'Seja informativo mas acessível, explicando conceitos complexos.',
+    id: 'narrative',
+    name: 'Narrativo Imersivo',
+    description: 'Estilo de narrativa envolvente com arco dramático claro e foco em storytelling emocional.',
+    instructions: 'Conte uma história envolvente com arco narrativo claro (Gancho → Desenvolvimento → Clímax → Resolução). Alterne entre fatos e emoções humanas. Use descrições sensoriais (cheiros, texturas, temperatura) para criar imersão total.',
     order: 4,
     isActive: true
   }
