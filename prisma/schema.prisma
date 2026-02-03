@@ -70,6 +70,10 @@ model Video {
   outputPath     String? @db.VarChar(500)
   thumbnailPath  String? @db.VarChar(500)
 
+  // Diretrizes de conteúdo
+  mustInclude String? @db.Text // O que deve ter no roteiro
+  mustExclude String? @db.Text // O que NÃO deve ter no roteiro
+
   // Logs e erros
   errorMessage String? @db.Text
   pipelineLog  Json? // Array de log entries
@@ -266,4 +270,42 @@ model PipelineExecution {
   @@index([videoId])
   @@index([createdAt])
   @@map("pipeline_executions")
+}
+
+/// Estilos visuais disponíveis para geração de imagens
+model VisualStyle {
+  id          String @id @default(uuid())
+  name        String @db.VarChar(100)
+  description String @db.Text
+  tags        String @db.Text // Tags para o prompt de geração
+
+  // Ordenação e visibilidade
+  order    Int     @default(0)
+  isActive Boolean @default(true)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, order])
+  @@map("visual_styles")
+}
+
+/// Estilos de roteiro disponíveis para geração de scripts
+model ScriptStyle {
+  id           String @id @default(uuid())
+  name         String @db.VarChar(100)
+  description  String @db.Text
+  instructions String @db.Text // Instruções para o prompt de geração
+
+  // Ordenação e visibilidade
+  order    Int     @default(0)
+  isActive Boolean @default(true)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, order])
+  @@map("script_styles")
 }

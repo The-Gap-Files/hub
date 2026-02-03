@@ -124,12 +124,14 @@ export const useVideoStore = defineStore('videos', {
     async createVideo(theme: string, options: Partial<{
       language: string
       targetDuration: number
-      style: 'documentary' | 'mystery' | 'narrative' | 'educational'
+      style: string // Agora aceita ID do estilo de roteiro do banco
       voiceId: string
       imageStyle: 'cinematic' | 'photorealistic' | 'artistic' | 'documentary'
       visualStyle: string
       aspectRatio: '9:16' | '16:9'
       enableMotion: boolean
+      mustInclude: string
+      mustExclude: string
     }> = {}) {
       this.loading = true
       this.error = null

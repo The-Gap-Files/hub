@@ -20,7 +20,6 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import ffmpeg from 'fluent-ffmpeg'
 import ffmpegInstaller from '@ffmpeg-installer/ffmpeg'
-import { VISUAL_STYLES, getStyleTags } from '../../utils/constants/visual-styles'
 
 import { createRequire } from 'node:module'
 const require = createRequire(import.meta.url)
@@ -32,7 +31,7 @@ ffmpeg.setFfmpegPath(ffmpegInstaller.path)
 try {
   const ffprobeInstaller = require('@ffprobe-installer/ffprobe')
   let ffprobePath = ffprobeInstaller.path.replace('app.asar', 'app.asar.unpacked')
-  
+
   // No Windows, garantir que o caminho use barras invertidas se necessário ou vice-versa
   if (process.platform === 'win32' && !ffprobePath.endsWith('.exe')) {
     ffprobePath += '.exe'
@@ -48,13 +47,15 @@ export interface PipelineOptions {
   theme: string
   language?: string
   targetDuration?: number
-  style?: 'documentary' | 'mystery' | 'narrative' | 'educational'
+  style?: string // Agora aceita ID do estilo de roteiro do banco
   voiceId?: string
   imageStyle?: 'cinematic' | 'photorealistic' | 'artistic' | 'documentary'
   visualStyle?: string
   aspectRatio?: '9:16' | '16:9'
   enableMotion?: boolean
   additionalContext?: string
+  mustInclude?: string
+  mustExclude?: string
 }
 
 export interface PipelineResult {
@@ -278,15 +279,47 @@ export class VideoPipelineService {
 
     const video = await prisma.video.findUnique({
       where: { id: videoId },
-      select: { theme: true, language: true, duration: true, style: true, visualStyle: true }
+      select: { theme: true, language: true, duration: true, style: true, visualStyle: true, mustInclude: true, mustExclude: true }
     })
+
+    // Buscar descrição do estilo visual do banco
+    const selectedVisualStyle = options.visualStyle || video?.visualStyle
+    let visualStyleDescription: string | undefined
+    if (selectedVisualStyle) {
+      const styleFromDb = await prisma.visualStyle.findFirst({
+        where: {
+          id: selectedVisualStyle,
+          isActive: true
+        },
+        select: { description: true }
+      })
+      visualStyleDescription = styleFromDb?.description
+    }
+
+    // Buscar instruções do estilo de roteiro do banco
+    const selectedScriptStyle = options.style || video?.style
+    let scriptStyleInstructions: string | undefined
+    if (selectedScriptStyle) {
+      const scriptStyleFromDb = await prisma.scriptStyle.findFirst({
+        where: {
+          id: selectedScriptStyle,
+          isActive: true
+        },
+        select: { instructions: true }
+      })
+      scriptStyleInstructions = scriptStyleFromDb?.instructions
+    }
 
     const request: ScriptGenerationRequest = {
       theme: options.theme || video?.theme || '',
       language: options.language || video?.language || 'pt-BR',
       targetDuration: options.targetDuration || video?.duration || 300,
-      style: options.style || (video?.style as any) || 'documentary',
-      visualStyle: options.visualStyle || video?.visualStyle || undefined
+      style: selectedScriptStyle || 'documentary',
+      scriptStyleInstructions: scriptStyleInstructions,
+      visualStyle: selectedVisualStyle || undefined,
+      visualStyleDescription: visualStyleDescription,
+      mustInclude: options.mustInclude || video?.mustInclude || undefined,
+      mustExclude: options.mustExclude || video?.mustExclude || undefined
     }
 
     const scriptProvider = providerManager.getScriptProvider()
@@ -338,7 +371,7 @@ export class VideoPipelineService {
    */
   async refineScript(videoId: string, feedback: string) {
     const startTime = Date.now()
-    
+
     await this.updateStatus(videoId, 'SCRIPT_GENERATING')
     await this.logExecution(videoId, 'script', 'started', `Refinando roteiro com feedback: ${feedback.substring(0, 50)}...`)
 
@@ -360,7 +393,7 @@ export class VideoPipelineService {
     }
 
     await this.generateScript(videoId, pipelineOptions)
-    
+
     await this.updateStatus(videoId, 'SCRIPT_READY')
     await this.logExecution(videoId, 'script', 'completed', 'Roteiro refinado com sucesso.', Date.now() - startTime)
   }
@@ -373,9 +406,9 @@ export class VideoPipelineService {
       where: { id: videoId },
       data: { scriptApproved: true }
     })
-    
+
     await this.logExecution(videoId, 'script', 'completed', 'Roteiro aprovado pelo usuário.')
-    
+
     // Continuar o pipeline
     const video = await prisma.video.findUnique({ where: { id: videoId } })
     if (video) {
@@ -408,12 +441,12 @@ export class VideoPipelineService {
 
     const ttsProvider = providerManager.getTTSProvider()
     const config = useRuntimeConfig()
-    
+
     // Prioridade: Options > Banco > Runtime Config > Fallback fixo
-    const selectedVoiceId = options.voiceId || 
-                           video?.voiceId || 
-                           config.providers?.tts?.voiceId || 
-                           'pNInz6obpgDQGcFmaJgB'
+    const selectedVoiceId = options.voiceId ||
+      video?.voiceId ||
+      config.providers?.tts?.voiceId ||
+      'pNInz6obpgDQGcFmaJgB'
 
     const audioBuffers: Buffer[] = []
     let currentTime = 0
@@ -425,7 +458,7 @@ export class VideoPipelineService {
 
     for (const [index, scene] of scenes.entries()) {
       await this.logExecution(videoId, 'audio', 'started', `Sintetizando áudio para a cena ${index + 1} de ${scenes.length}...`)
-      
+
       const request: TTSRequest = {
         text: scene.narration,
         voiceId: selectedVoiceId,
@@ -433,11 +466,11 @@ export class VideoPipelineService {
       }
 
       const result = await ttsProvider.synthesize(request)
-      
+
       // Salvar áudio da cena temporariamente para pegar duração real
       const sceneAudioPath = path.join(scenesAudioDir, `scene_${scene.order}.mp3`)
       await fs.writeFile(sceneAudioPath, result.audioBuffer)
-      
+
       // Pegar duração real (ou usar a estimativa se o ffprobe falhar)
       const preciseDuration = await this.getAudioDuration(sceneAudioPath)
       const duration = preciseDuration > 0 ? preciseDuration : result.duration
@@ -497,7 +530,7 @@ export class VideoPipelineService {
     return new Promise((resolve, reject) => {
       const command = ffmpeg()
       filePaths.forEach(path => command.input(path))
-      
+
       command
         .on('error', reject)
         .on('end', () => resolve())
@@ -545,12 +578,22 @@ export class VideoPipelineService {
     const selectedAspectRatio = options.aspectRatio || (video?.aspectRatio as '9:16' | '16:9') || '16:9'
     const selectedImageStyle = options.imageStyle || (video?.imageStyle as any) || 'cinematic'
 
-    // Obter as tags do estilo visual selecionado
-    const visualStyleTags = selectedVisualStyle ? getStyleTags(selectedVisualStyle) : ''
+    // Obter as tags do estilo visual selecionado do banco de dados
+    let visualStyleTags = ''
+    if (selectedVisualStyle) {
+      const styleFromDb = await prisma.visualStyle.findFirst({
+        where: {
+          id: selectedVisualStyle,
+          isActive: true
+        },
+        select: { tags: true }
+      })
+      visualStyleTags = styleFromDb?.tags || ''
+    }
 
     // Definir dimensões baseadas no aspect ratio
     const isPortrait = selectedAspectRatio === '9:16'
-    
+
     // Para SDXL no Replicate, é melhor usar os nomes de aspect ratio se possível, 
     // ou garantir que as dimensões batam com o que o modelo espera.
     // Se aspect_ratio for passado, alguns modelos ignoram width/height.
@@ -637,16 +680,29 @@ export class VideoPipelineService {
 
     const motionProvider = providerManager.getMotionProvider()
     const selectedVisualStyle = options.visualStyle || video?.visualStyle
-    const styleTags = selectedVisualStyle ? getStyleTags(selectedVisualStyle) : ''
+
+    // Buscar tags do banco de dados
+    let styleTags = ''
+    if (selectedVisualStyle) {
+      const styleFromDb = await prisma.visualStyle.findFirst({
+        where: {
+          id: selectedVisualStyle,
+          isActive: true
+        },
+        select: { tags: true }
+      })
+      styleTags = styleFromDb?.tags || ''
+    }
+
     const selectedAspectRatio = options.aspectRatio || (video?.aspectRatio as '9:16' | '16:9') || '16:9'
 
     // Limitar concorrência para evitar rate limits em vídeos longos
-    const BATCH_SIZE = 5 
+    const BATCH_SIZE = 5
     const sceneEntries = Array.from(scenes.entries())
-    
+
     for (let i = 0; i < sceneEntries.length; i += BATCH_SIZE) {
       const batch = sceneEntries.slice(i, i + BATCH_SIZE)
-      
+
       const motionPromises = batch.map(async ([index, scene]) => {
         const sourceImage = scene.images[0]
         if (!sourceImage) return
@@ -657,8 +713,8 @@ export class VideoPipelineService {
         const motionPrompt = scene.visualDescription
 
         // Usar a duração real do áudio da cena se disponível, senão padrão de 5s
-        const realDuration = (scene.endTime && scene.startTime !== null) 
-          ? Math.ceil(scene.endTime - scene.startTime) 
+        const realDuration = (scene.endTime && scene.startTime !== null)
+          ? Math.ceil(scene.endTime - scene.startTime)
           : 5
 
         const request: MotionGenerationRequest = {
@@ -774,10 +830,10 @@ export class VideoPipelineService {
       scenes.forEach((scene, index) => {
         const videoClip = scene.videos[0]
         const image = scene.images[0]
-        
+
         // Calcular duração real da cena baseada nos tempos do áudio salvos anteriormente
-        let duration = (scene.endTime && scene.startTime !== null) 
-          ? (scene.endTime - scene.startTime) 
+        let duration = (scene.endTime && scene.startTime !== null)
+          ? (scene.endTime - scene.startTime)
           : (totalAudioDuration / scenes.length) // fallback para divisão igual
 
         // Se for a última cena, adicionar um pequeno buffer (0.5s) para garantir que o áudio não corte
@@ -802,8 +858,8 @@ export class VideoPipelineService {
           // 1. Escalar imagens para garantir tamanho uniforme (caso mude o formato entre cenas)
           ...scenes.map((_, i) => ({
             filter: 'scale',
-            options: isPortrait 
-              ? '768:1344:force_original_aspect_ratio=increase,crop=768:1344,pad=768:1344:(ow-iw)/2:(oh-ih)/2' 
+            options: isPortrait
+              ? '768:1344:force_original_aspect_ratio=increase,crop=768:1344,pad=768:1344:(ow-iw)/2:(oh-ih)/2'
               : '1344:768:force_original_aspect_ratio=increase,crop=1344:768,pad=1344:768:(ow-iw)/2:(oh-ih)/2',
             inputs: `${i}:v`,
             outputs: `scaled_${i}`
@@ -928,7 +984,7 @@ export class VideoPipelineService {
     console.log(`[VideoPipeline] Regenerating motion for scene: ${sceneId}`)
     const scene = await prisma.scene.findUnique({
       where: { id: sceneId },
-      include: { 
+      include: {
         video: true,
         images: { where: { isSelected: true } }
       }

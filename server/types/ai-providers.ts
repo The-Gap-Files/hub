@@ -12,9 +12,13 @@ export interface ScriptGenerationRequest {
   theme: string
   language: string
   targetDuration: number // em segundos
-  style?: 'documentary' | 'mystery' | 'narrative' | 'educational'
+  style?: string // ID do estilo de roteiro
+  scriptStyleInstructions?: string // Instruções do estilo de roteiro do banco
   visualStyle?: string
+  visualStyleDescription?: string // Descrição do estilo visual do banco
   additionalContext?: string
+  mustInclude?: string // O que deve ter no roteiro
+  mustExclude?: string // O que NÃO deve ter no roteiro
 }
 
 export interface ScriptScene {

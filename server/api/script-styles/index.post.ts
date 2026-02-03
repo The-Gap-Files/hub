@@ -1,0 +1,49 @@
+import { prisma } from '../../utils/prisma'
+import { z } from 'zod'
+
+const createStyleSchema = z.object({
+  name: z.string().min(1, 'Nome é obrigatório').max(100),
+  description: z.string().min(1, 'Descrição é obrigatória'),
+  instructions: z.string().min(1, 'Instruções são obrigatórias'),
+  order: z.number().int().min(0).optional(),
+  isActive: z.boolean().optional()
+})
+
+export default defineEventHandler(async (event) => {
+  try {
+    const body = await readBody(event)
+
+    // Validação
+    const validated = createStyleSchema.parse(body)
+
+    // Criar estilo
+    const style = await prisma.scriptStyle.create({
+      data: {
+        name: validated.name,
+        description: validated.description,
+        instructions: validated.instructions,
+        order: validated.order ?? 0,
+        isActive: validated.isActive ?? true
+      }
+    })
+
+    return {
+      success: true,
+      data: style
+    }
+  } catch (error: any) {
+    if (error.name === 'ZodError') {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Dados inválidos',
+        data: error.errors
+      })
+    }
+
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Erro ao criar estilo de roteiro',
+      data: { error: error.message }
+    })
+  }
+})

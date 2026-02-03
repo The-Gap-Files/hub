@@ -8,7 +8,7 @@ import type {
 
 /**
  * RunPod Motion Provider
- * Consome um worker customizado no RunPod Serverless que retorna o vídeo em Base64
+ * Consome o worker 'wlsdml1114/generate_video' (Wan2.2 ComfyUI) no RunPod.
  */
 export class RunPodMotionProvider implements IMotionProvider {
   private apiKey: string
@@ -24,7 +24,7 @@ export class RunPodMotionProvider implements IMotionProvider {
   }
 
   getName(): string {
-    return 'RunPod Serverless (Custom Worker)'
+    return 'RunPod Serverless (Wan2.2 - wlsdml1114)'
   }
 
   async generate(request: MotionGenerationRequest): Promise<MotionGenerationResponse> {
@@ -35,37 +35,41 @@ export class RunPodMotionProvider implements IMotionProvider {
     try {
       console.log(`[RunPodMotion] Generating video from image: ${request.imagePath}`)
 
-      // Ler a imagem e converter para Base64 para enviar ao worker
+      // Ler a imagem e converter para Base64
       const imageBuffer = await fs.readFile(request.imagePath)
       const imageBase64 = imageBuffer.toString('base64')
 
-      // Processar End Image se existir
       let endImageBase64: string | undefined
       if (request.endImagePath) {
         const endImageBuffer = await fs.readFile(request.endImagePath)
         endImageBase64 = endImageBuffer.toString('base64')
       }
 
+      // Nosso worker suporta 'end_image_base64' para transições.
       const url = `https://api.runpod.ai/v2/${this.endpointId}/runsync`
 
+      // Mapeamento de Payload para o Worker wlsdml1114/generate_video
       const payload = {
         input: {
           image_base64: imageBase64,
-          end_image_base64: endImageBase64, // Novo campo
-          prompt: request.prompt,
-          duration: request.duration || 5,
-          aspect_ratio: request.aspectRatio || '16:9',
-          guidance_scale: request.guidanceScale, // Novo campo
-          num_inference_steps: request.numInferenceSteps, // Novo campo
+          end_image_base64: endImageBase64, // O nosso worker suporta end_image!
 
-          // Parâmetros otimizados para Wan 2.2
+          prompt: request.prompt,
+          negative_prompt: request.negativePrompt || 'blurry, low quality, distorted, watermark',
+
+          // Resolução Wan2.2
           width: request.aspectRatio === '9:16' ? 720 : 1280,
           height: request.aspectRatio === '9:16' ? 1280 : 720,
-          fps: 16 // Wan 2.2 padrão cinemático (o num_frames agora é calculado no worker se duration for enviado)
+
+          // Parâmetros Diffusers (Padrão do nosso handler.py)
+          num_frames: request.duration === 10 ? 161 : 81,
+          num_inference_steps: request.numInferenceSteps || 40,
+          guidance_scale: request.guidanceScale || 5.0,
+          fps: 16
         }
       }
 
-      console.log(`[RunPodMotion] Calling RunPod endpoint: ${this.endpointId}`)
+      console.log(`[RunPodMotion] Calling RunPod endpoint: ${this.endpointId} (Wan2.2 ComfyUI)`)
 
       const response = await fetch(url, {
         method: 'POST',
@@ -83,28 +87,15 @@ export class RunPodMotionProvider implements IMotionProvider {
 
       const data = await response.json()
 
+      // Tratamento da Resposta
       if (data.status === 'COMPLETED') {
-        // O worker retorna video_base64
-        const videoBuffer = Buffer.from(data.output.video_base64, 'base64')
-
-        const motion: GeneratedMotion = {
-          videoBuffer,
-          duration: data.output.duration || 4,
-          format: 'mp4'
-        }
-
-        return {
-          video: motion,
-          provider: 'RUNPOD',
-          model: 'custom-video-worker'
-        }
+        return this.processCompletedJob(data)
       } else if (data.status === 'IN_QUEUE' || data.status === 'IN_PROGRESS') {
-        // Caso o runsync demore e retorne um job ID em vez do resultado direto
-        // (Isso pode acontecer se o worker demorar mais que o timeout do runsync)
+        // Polling para jobs demorados
         return this.pollJobStatus(data.id)
       }
 
-      throw new Error(`RunPod generation failed with status: ${data.status}`)
+      throw new Error(`RunPod generation failed with initial status: ${data.status}`)
 
     } catch (error: any) {
       console.error('[RunPodMotion] Error:', error)
@@ -113,15 +104,42 @@ export class RunPodMotionProvider implements IMotionProvider {
   }
 
   /**
+   * Processa o resultado de um job bem-sucedido
+   */
+  private processCompletedJob(data: any): MotionGenerationResponse {
+    // O worker wlsdml1114 retorna: output: { message: "Video generated successfully", video_base64: "..." }
+    // As vezes retorna video_url se configurado bucket S3, mas base64 é o padrão sem bucket.
+
+    if (!data.output || !data.output.video_base64) {
+      console.error("RunPod Output:", JSON.stringify(data.output).substring(0, 200))
+      throw new Error("RunPod job completed but output is missing 'video_base64'")
+    }
+
+    const videoBuffer = Buffer.from(data.output.video_base64, 'base64')
+
+    const motion: GeneratedMotion = {
+      videoBuffer,
+      duration: 5, // Estimado (Wan2.2 gera ~5s com 81 frames)
+      format: 'mp4'
+    }
+
+    return {
+      video: motion,
+      provider: 'RUNPOD',
+      model: 'wan-2.2-comfy-worker'
+    }
+  }
+
+  /**
    * Faz polling para obter o resultado caso o runsync não retorne imediatamente
    */
   private async pollJobStatus(jobId: string): Promise<MotionGenerationResponse> {
     const statusUrl = `https://api.runpod.ai/v2/${this.endpointId}/status/${jobId}`
-    console.log(`[RunPodMotion] Job in progress. Polling status for: ${jobId}`)
+    console.log(`[RunPodMotion] Job assigned (${jobId}). Polling status...`)
 
-    // Tentar por até 2 minutos
-    for (let i = 0; i < 24; i++) {
-      await new Promise(resolve => setTimeout(resolve, 5000)) // Esperar 5s
+    // Loop de polling (timeout de 5 minutos = 60 * 5s)
+    for (let i = 0; i < 60; i++) {
+      await new Promise(resolve => setTimeout(resolve, 5000))
 
       const response = await fetch(statusUrl, {
         headers: { 'Authorization': `Bearer ${this.apiKey}` }
@@ -130,20 +148,13 @@ export class RunPodMotionProvider implements IMotionProvider {
       const data = await response.json()
 
       if (data.status === 'COMPLETED') {
-        const videoBuffer = Buffer.from(data.output.video_base64, 'base64')
-        return {
-          video: {
-            videoBuffer,
-            duration: data.output.duration || 4,
-            format: 'mp4'
-          },
-          provider: 'RUNPOD',
-          model: 'custom-video-worker'
-        }
+        return this.processCompletedJob(data)
       }
 
       if (data.status === 'FAILED' || data.status === 'CANCELLED') {
-        throw new Error(`RunPod job ${jobId} failed with status: ${data.status}`)
+        // Tentar extrair erro detalhado
+        const errorMsg = data.error || JSON.stringify(data)
+        throw new Error(`RunPod job ${jobId} failed: ${errorMsg}`)
       }
     }
 

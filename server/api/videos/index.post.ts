@@ -12,12 +12,14 @@ const CreateVideoSchema = z.object({
   theme: z.string().min(10, 'O tema deve ter pelo menos 10 caracteres'),
   language: z.string().default('pt-BR'),
   targetDuration: z.number().min(60).max(1800).default(300),
-  style: z.enum(['documentary', 'mystery', 'narrative', 'educational']).default('documentary'),
+  style: z.string().default('documentary'), // Agora aceita ID do estilo de roteiro
   voiceId: z.string().optional(),
   imageStyle: z.enum(['cinematic', 'photorealistic', 'artistic', 'documentary']).default('cinematic'),
   visualStyle: z.string().optional().default('epictok'),
   aspectRatio: z.enum(['9:16', '16:9']).optional().default('16:9'),
-  enableMotion: z.boolean().default(false)
+  enableMotion: z.boolean().default(false),
+  mustInclude: z.string().optional(),
+  mustExclude: z.string().optional()
 })
 
 export default defineEventHandler(async (event) => {
@@ -57,6 +59,8 @@ export default defineEventHandler(async (event) => {
       visualStyle: options.visualStyle,
       aspectRatio: options.aspectRatio,
       enableMotion: options.enableMotion,
+      mustInclude: options.mustInclude,
+      mustExclude: options.mustExclude,
       status: 'PENDING'
     }
   })

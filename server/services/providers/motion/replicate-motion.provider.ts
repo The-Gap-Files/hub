@@ -9,7 +9,8 @@ import type {
 
 /**
  * Replicate Motion Provider
- * Uses Kling v2.5 Turbo Pro via Replicate API
+ * Uses Wan Video 2.2 I2V Fast via Replicate API
+ * Model: wan-video/wan-2.2-i2v-fast (PrunaAI optimized version)
  */
 export class ReplicateMotionProvider implements IMotionProvider {
   private client: Replicate
@@ -20,12 +21,12 @@ export class ReplicateMotionProvider implements IMotionProvider {
       throw new Error('Replicate API key is required')
     }
     this.client = new Replicate({ auth: config.apiKey })
-    // Default to Kling v2.5 Turbo Pro as requested by user
-    this.model = config.model || 'kwaivgi/kling-v2.5-turbo-pro'
+    // Default to Wan Video 2.2 I2V Fast
+    this.model = config.model || 'wan-video/wan-2.2-i2v-fast'
   }
 
   getName(): string {
-    return 'Replicate (Kling v2.5)'
+    return 'Replicate (Wan Video 2.2 Fast)'
   }
 
   async generate(request: MotionGenerationRequest): Promise<MotionGenerationResponse> {
@@ -37,11 +38,15 @@ export class ReplicateMotionProvider implements IMotionProvider {
       const imageBuffer = await fs.readFile(request.imagePath)
 
       const input = {
-        prompt: request.prompt || 'Bring this image to life with natural movement',
-        start_image: imageBuffer,
-        duration: request.duration === 10 ? 10 : 5,
-        aspect_ratio: request.aspectRatio || '16:9',
-        negative_prompt: request.negativePrompt || 'deformed, distorted, flickering, static, low quality'
+        image: imageBuffer,
+        prompt: request.prompt || 'Natural, smooth camera movement. Cinematic lighting.',
+        num_frames: request.duration === 10 ? 121 : 81, // 81 frames = ~5s @ 16fps, 121 frames = ~7.5s @ 16fps
+        resolution: '480p', // 480p = 832x480px (16:9) ou 480x832px (9:16)
+        frames_per_second: 16,
+        go_fast: true, // Usa otimização PrunaAI
+        sample_shift: 12, // Default recomendado
+        interpolate_output: false,
+        disable_safety_checker: false
       }
 
       console.log(`[ReplicateMotion] Using model: ${this.model}`)
@@ -62,7 +67,7 @@ export class ReplicateMotionProvider implements IMotionProvider {
       // Construct response
       const motion: GeneratedMotion = {
         videoBuffer,
-        duration: request.duration === 10 ? 10 : 5, 
+        duration: request.duration === 10 ? 10 : 5,
         format: 'mp4'
       }
 

@@ -60,23 +60,12 @@ export class OpenAIScriptProvider implements IScriptGenerator {
   }
 
   private buildSystemPrompt(request: ScriptGenerationRequest): string {
-    const styleInstructions: Record<string, string> = {
-      documentary: 'Adote um tom documental sério e investigativo.',
-      mystery: 'Crie tensão e mistério, com revelações graduais.',
-      narrative: 'Conte uma história envolvente com arco narrativo claro.',
-      educational: 'Seja informativo mas acessível, explicando conceitos complexos.'
-    }
+    // Usar instruções do estilo de roteiro vinda do banco de dados
+    const scriptStylePrompt = request.scriptStyleInstructions || 'Adote um tom documental sério e investigativo.'
 
-    const visualStyleInstructions: Record<string, string> = {
-      epictok: 'O estilo visual deve ser uma ilustração 2D digital com traços de tinta (inked outlines), sombreamento plano (flat cell shading) e estética de pôster vintage. Use uma paleta de cores terrosas e tons dessaturados. A vibe deve lembrar as artes de fundo do Studio Ghibli e o estilo de Eyvind Earle.',
-      gta6: 'O estilo visual deve ser vibrante, com cores saturadas, iluminação de pôr do sol de Miami e estética de jogo moderno de alto orçamento.',
-      cyberpunk: 'O estilo visual deve ser neon, futurista, com chuva, luzes coloridas e tecnologia avançada.',
-      'oil-painting': 'O estilo visual deve parecer uma pintura a óleo clássica, com pinceladas visíveis e textura de tela.',
-      photorealistic: 'O estilo visual deve ser fotorrealista, como se fosse uma fotografia de cinema em alta resolução.'
-    }
-
-    const visualStylePrompt = request.visualStyle
-      ? visualStyleInstructions[request.visualStyle] ?? ''
+    // Usar a descrição do estilo visual vinda do banco de dados
+    const visualStylePrompt = request.visualStyleDescription
+      ? `O estilo visual deve ser: ${request.visualStyleDescription}`
       : ''
 
     return `Você é o roteirista principal do "The Gap Files" (A Lacuna), um canal focado em história proibida, mistérios e o "lado oculto" da realidade.
@@ -96,7 +85,7 @@ ESTRUTURA OBRIGATÓRIA DO ROTEIRO:
 VOCABULÁRIO DE PODER (POWER WORDS):
 Incorpore palavras que geram autoridade e mistério: *Revelado, Proibido, Classificado, Antigo, Verdade, Protocolo, Ecos, Omitido (Redacted), Arquivo.*
 
-${styleInstructions[request.style ?? 'documentary']}
+${scriptStylePrompt}
 ${visualStylePrompt ? `DIRETRIZ VISUAL OBRIGATÓRIA (Mantenha a coerência em todas as cenas): ${visualStylePrompt}` : ''}
 
 IMPORTANTE: Retorne SEMPRE um JSON válido com a seguinte estrutura:
@@ -125,12 +114,21 @@ As descrições visuais devem ser CINEMATOGRÁFICAS e EMOCTIVAS:
 
   private buildUserPrompt(request: ScriptGenerationRequest): string {
     const durationMinutes = Math.round(request.targetDuration / 60)
-    const durationText = request.targetDuration >= 60 
+    const durationText = request.targetDuration >= 60
       ? `${durationMinutes} minutos (${request.targetDuration} segundos)`
       : `${request.targetDuration} segundos`
-    
+
     // Calcular número ideal de cenas baseado em blocos de 5 segundos (duração do motion)
     const idealSceneCount = Math.ceil(request.targetDuration / 5)
+
+    // Construir diretrizes
+    let guidelines = ''
+    if (request.mustInclude) {
+      guidelines += `\n\nO que DEVE estar no roteiro:\n${request.mustInclude}`
+    }
+    if (request.mustExclude) {
+      guidelines += `\n\nO que NÃO deve estar no roteiro:\n${request.mustExclude}`
+    }
 
     return `Crie um roteiro em ${request.language} sobre o tema: "${request.theme}"
 
@@ -144,8 +142,8 @@ Requisitos CRÍTICOS de Duração e Ritmo:
 - Se o tempo for longo, aprofunde-se nos detalhes, evidências e ramificações do tema.
 - Cada cena deve ter uma descrição visual cinematográfica única.
 - O tom deve ser ${request.style ?? 'documentary'}.
-
-${request.additionalContext ? `Contexto adicional: ${request.additionalContext}` : ''}`
+${guidelines}
+${request.additionalContext ? `\nContexto adicional: ${request.additionalContext}` : ''}`
   }
 
   private parseResponse(content: {

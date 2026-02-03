@@ -1,25 +1,45 @@
 <script setup lang="ts">
 // useVideoStore é auto-importado pelo @pinia/nuxt na pasta stores/
 
+interface VisualStyle {
+  id: string
+  name: string
+  description: string
+  tags: string
+  order: number
+  isActive: boolean
+}
+
+interface ScriptStyle {
+  id: string
+  name: string
+  description: string
+  instructions: string
+  order: number
+  isActive: boolean
+}
+
 // Inicializamos a store como null e pegamos ela no onMounted
 // Isso garante que o erro getActivePinia() não ocorra no SSR do Nuxt
 const videoStore = ref<ReturnType<typeof useVideoStore> | null>(null)
 
 const showCreateModal = ref(false)
 const newVideoTheme = ref('')
-const newVideoStyle = ref<'documentary' | 'mystery' | 'narrative' | 'educational'>('documentary')
+const newVideoMustInclude = ref('')
+const newVideoMustExclude = ref('')
+const newVideoStyle = ref('documentary') // Agora usa ID do estilo
 const newVideoVisualStyle = ref('epictok')
 const newVideoAspectRatio = ref<'9:16' | '16:9'>('16:9')
 const newVideoDuration = ref(185) // 3 minutos e pouco padrão
 const enableMotion = ref(false)
 
-const VISUAL_STYLES = [
-  { id: 'epictok', name: 'Epictok Imersivo' },
-  { id: 'gta6', name: 'Estilo GTA VI' },
-  { id: 'cyberpunk', name: 'Cyberpunk Futurista' },
-  { id: 'oil-painting', name: 'Pintura a Óleo' },
-  { id: 'photorealistic', name: 'Fotorrealista' }
-]
+// Buscar estilos visuais da API
+const { data: stylesData } = await useFetch<{ success: boolean; data: VisualStyle[] }>('/api/visual-styles')
+const visualStyles = computed(() => stylesData.value?.data?.filter(s => s.isActive) || [])
+
+// Buscar estilos de roteiro da API
+const { data: scriptStylesData } = await useFetch<{ success: boolean; data: ScriptStyle[] }>('/api/script-styles')
+const scriptStyles = computed(() => scriptStylesData.value?.data?.filter(s => s.isActive) || [])
 
 onMounted(() => {
   videoStore.value = useVideoStore()
@@ -36,10 +56,14 @@ async function handleCreateVideo() {
       visualStyle: newVideoVisualStyle.value,
       aspectRatio: newVideoAspectRatio.value,
       enableMotion: enableMotion.value,
-      targetDuration: newVideoDuration.value
+      targetDuration: newVideoDuration.value,
+      mustInclude: newVideoMustInclude.value.trim() || undefined,
+      mustExclude: newVideoMustExclude.value.trim() || undefined
     })
     showCreateModal.value = false
     newVideoTheme.value = ''
+    newVideoMustInclude.value = ''
+    newVideoMustExclude.value = ''
   } catch {
     // Erro já tratado no store
   }
@@ -261,19 +285,38 @@ function formatDate(dateString: string) {
             </div>
 
             <div class="form-group">
+              <label for="mustInclude">O que DEVE ter no roteiro (opcional)</label>
+              <textarea
+                id="mustInclude"
+                v-model="newVideoMustInclude"
+                placeholder="Ex: Mencionar a teoria de Graham Hancock, falar sobre as câmaras secretas, incluir dados sobre a construção..."
+                rows="3"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="mustExclude">O que NÃO deve ter no roteiro (opcional)</label>
+              <textarea
+                id="mustExclude"
+                v-model="newVideoMustExclude"
+                placeholder="Ex: Não mencionar alienígenas, evitar teorias conspiratórias extremas, não falar sobre Atlântida..."
+                rows="3"
+              />
+            </div>
+
+            <div class="form-group">
               <label for="style">Estilo do Roteiro</label>
               <select id="style" v-model="newVideoStyle">
-                <option value="documentary">Documentário</option>
-                <option value="mystery">Mistério</option>
-                <option value="narrative">Narrativo</option>
-                <option value="educational">Educacional</option>
+                <option v-for="s in scriptStyles" :key="s.id" :value="s.id">
+                  {{ s.name }}
+                </option>
               </select>
             </div>
 
             <div class="form-group">
               <label for="visualStyle">Estilo Visual (Imagens)</label>
               <select id="visualStyle" v-model="newVideoVisualStyle">
-                <option v-for="s in VISUAL_STYLES" :key="s.id" :value="s.id">
+                <option v-for="s in visualStyles" :key="s.id" :value="s.id">
                   {{ s.name }}
                 </option>
               </select>
@@ -654,6 +697,8 @@ function formatDate(dateString: string) {
   justify-content: center;
   z-index: 1000;
   backdrop-filter: blur(4px);
+  padding: var(--space-lg);
+  overflow-y: auto;
 }
 
 .modal {
@@ -661,9 +706,13 @@ function formatDate(dateString: string) {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   width: 100%;
-  max-width: 500px;
+  max-width: 600px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
   box-shadow: var(--shadow-lg);
   animation: modalIn 200ms ease;
+  margin: auto;
 }
 
 @keyframes modalIn {
@@ -683,6 +732,7 @@ function formatDate(dateString: string) {
   align-items: center;
   padding: var(--space-lg);
   border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
 }
 
 .modal-header h2 {
@@ -715,6 +765,9 @@ function formatDate(dateString: string) {
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 .form-group {
@@ -830,5 +883,6 @@ input:checked + .slider:before {
   display: flex;
   justify-content: flex-end;
   gap: var(--space-md);
+  flex-shrink: 0;
 }
 </style>
