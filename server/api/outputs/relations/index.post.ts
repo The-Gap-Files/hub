@@ -32,11 +32,11 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Verificar se outputs pertencem ao mesmo document
-  if (mainOutput.documentId !== relatedOutput.documentId) {
+  // Verificar se outputs pertencem ao mesmo dossier
+  if (mainOutput.dossierId !== relatedOutput.dossierId) {
     throw createError({
       statusCode: 422,
-      message: 'Outputs must belong to the same document'
+      message: 'Outputs must belong to the same dossier'
     })
   }
 

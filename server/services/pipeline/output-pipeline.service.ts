@@ -191,8 +191,8 @@ export class OutputPipelineService {
       language: output.language || 'pt-BR',
       narrationLanguage: output.narrationLanguage || 'pt-BR',
       
-      // dossier SOURCES (RICO)
-      sourceDossier: dossier.sourceText,
+      // DOSSIER SOURCES (RICO)
+      sourceDocument: dossier.sourceText,
       
       // Fontes secundárias
       additionalSources: dossier.sources?.map((s: any) => ({
