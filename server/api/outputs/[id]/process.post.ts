@@ -1,5 +1,5 @@
-import { outputPipelineService } from '../../../services/pipeline/output-pipeline.service'
-import { prisma } from '../../../utils/prisma'
+import { outputPipelineService } from '../../../../services/pipeline/output-pipeline.service'
+import { prisma } from '../../../../utils/prisma'
 
 export default defineEventHandler(async (event) => {
   const outputId = getRouterParam(event, 'id')

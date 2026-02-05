@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { prisma } from '../../../utils/prisma'
+import { prisma } from '../../../../utils/prisma'
 
 const CreateNoteSchema = z.object({
   content: z.string().min(1),

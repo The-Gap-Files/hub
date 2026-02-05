@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { prisma } from '../../utils/prisma'
+import { prisma } from '../../../utils/prisma'
 
 const CreateRelationSchema = z.object({
   mainOutputId: z.string().uuid(),
