@@ -12,7 +12,8 @@
     "db:init": "tsx scripts/init-db.ts",
     "db:migrate": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev",
-    "db:reset": "prisma migrate reset"
+    "db:reset": "prisma migrate reset",
+    "test": "vitest run"
   },
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
@@ -35,9 +36,15 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@nuxt/test-utils": "^3.23.0",
     "@types/fluent-ffmpeg": "^2.1.28",
     "@types/node": "^25.1.0",
+    "@vitest/ui": "^4.0.18",
+    "happy-dom": "^20.5.0",
+    "nitropack": "^2.13.1",
     "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18",
     "vue-tsc": "^3.2.4"
   }
 }

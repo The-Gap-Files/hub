@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,9 +6,334 @@ datasource db {
   provider = "postgresql"
 }
 
-// =============================================================================
-// ENUMS
-// =============================================================================
+/// Dossiê - centro do sistema, contém todos materiais de research e pode gerar múltiplos outputs
+model Dossier {
+  id           String          @id @default(uuid())
+  title        String          @db.VarChar(255)
+  sourceText   String
+  theme        String
+  researchData Json?
+  tags         String[]
+  category     String?         @db.VarChar(50)
+  isProcessed  Boolean         @default(false)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  images       DossierImage[]
+  notes        DossierNote[]
+  sources      DossierSource[]
+  outputs      Output[]
+
+  @@index([category])
+  @@index([createdAt])
+  @@index([isProcessed])
+  @@map("dossiers")
+}
+
+/// Fonte secundária do dossiê (artigo, paper, citação)
+model DossierSource {
+  id         String   @id @default(uuid())
+  dossierId  String
+  title      String   @db.VarChar(255)
+  content    String
+  sourceType String   @db.VarChar(50)
+  url        String?  @db.VarChar(500)
+  author     String?  @db.VarChar(255)
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+  dossier    Dossier  @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+
+  @@index([dossierId])
+  @@index([sourceType])
+  @@map("dossier_sources")
+}
+
+/// Imagem de referência do dossiê
+model DossierImage {
+  id          String   @id @default(uuid())
+  dossierId   String
+  description String
+  imageData   Bytes?
+  mimeType    String?  @db.VarChar(50)
+  url         String?  @db.VarChar(500)
+  tags        String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  dossier     Dossier  @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+
+  @@index([dossierId])
+  @@map("dossier_images")
+}
+
+/// Nota de research/insight do usuário
+model DossierNote {
+  id        String   @id @default(uuid())
+  dossierId String
+  content   String
+  noteType  String?  @db.VarChar(50)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  dossier   Dossier  @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+
+  @@index([dossierId])
+  @@index([noteType])
+  @@map("dossier_notes")
+}
+
+/// Output gerado a partir de um dossiê (vídeo, thread, post, etc.)
+model Output {
+  id                String              @id @default(uuid())
+  outputType        OutputType
+  format            String              @db.VarChar(50)
+  title             String?             @db.VarChar(255)
+  duration          Int?
+  aspectRatio       String?             @db.VarChar(10)
+  platform          String?             @db.VarChar(50)
+  targetWPM         Int?                @default(150)
+  language          String              @default("pt-BR") @db.VarChar(10)
+  narrationLanguage String              @default("pt-BR") @db.VarChar(10)
+  voiceId           String?             @db.VarChar(100)
+  enableMotion      Boolean             @default(false)
+  mustInclude       String?
+  mustExclude       String?
+  scriptStyleId     String?
+  visualStyleId     String?
+  seedId            String?
+  status            OutputStatus        @default(PENDING)
+  scriptApproved    Boolean             @default(false)
+  imagesApproved    Boolean             @default(false)
+  videosApproved    Boolean             @default(false)
+  outputData        Bytes?
+  outputMimeType    String?             @db.VarChar(50)
+  outputSize        Int?
+  thumbnailPath     String?             @db.VarChar(500)
+  errorMessage      String?
+  pipelineLog       Json?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  completedAt       DateTime?
+  dossierId         String
+  audioTracks       AudioTrack[]
+  relationsFrom     OutputRelation[]    @relation("MainOutput")
+  relationsTo       OutputRelation[]    @relation("RelatedOutput")
+  dossier           Dossier             @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+  scriptStyle       ScriptStyle?        @relation(fields: [scriptStyleId], references: [id])
+  seed              Seed?               @relation("OutputSeed", fields: [seedId], references: [id])
+  visualStyle       VisualStyle?        @relation(fields: [visualStyleId], references: [id])
+  executions        PipelineExecution[]
+  scenes            Scene[]
+  script            Script?
+
+  @@index([dossierId])
+  @@index([outputType])
+  @@index([platform])
+  @@index([status])
+  @@index([createdAt])
+  @@map("outputs")
+}
+
+/// Relação entre outputs (ex: teaser → full)
+model OutputRelation {
+  id              String   @id @default(uuid())
+  mainOutputId    String
+  relatedOutputId String
+  relationType    String   @db.VarChar(50)
+  createdAt       DateTime @default(now())
+  mainOutput      Output   @relation("MainOutput", fields: [mainOutputId], references: [id], onDelete: Cascade)
+  relatedOutput   Output   @relation("RelatedOutput", fields: [relatedOutputId], references: [id], onDelete: Cascade)
+
+  @@unique([mainOutputId, relatedOutputId])
+  @@index([relationType])
+  @@map("output_relations")
+}
+
+/// Roteiro completo do output
+model Script {
+  id         String     @id @default(uuid())
+  outputId   String     @unique
+  summary    String
+  fullText   String
+  wordCount  Int        @default(0)
+  provider   AIProvider
+  modelUsed  String?    @db.VarChar(100)
+  promptUsed String?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  output     Output     @relation(fields: [outputId], references: [id], onDelete: Cascade)
+
+  @@map("scripts")
+}
+
+/// Cena individual do output
+model Scene {
+  id                String       @id @default(uuid())
+  outputId          String
+  order             Int
+  narration         String
+  visualDescription String
+  audioDescription  String?
+  startTime         Float?
+  endTime           Float?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  images            SceneImage[]
+  videos            SceneVideo[]
+  output            Output       @relation(fields: [outputId], references: [id], onDelete: Cascade)
+
+  @@index([outputId])
+  @@index([outputId, order])
+  @@map("scenes")
+}
+
+/// Imagem gerada para uma cena
+model SceneImage {
+  id           String     @id @default(uuid())
+  sceneId      String
+  provider     AIProvider
+  promptUsed   String
+  fileData     Bytes?
+  mimeType     String?    @db.VarChar(50)
+  originalSize Int?
+  width        Int?
+  height       Int?
+  isSelected   Boolean    @default(false)
+  variantIndex Int        @default(0)
+  createdAt    DateTime   @default(now())
+  scene        Scene      @relation(fields: [sceneId], references: [id], onDelete: Cascade)
+
+  @@index([sceneId])
+  @@map("scene_images")
+}
+
+/// Vídeo/Motion gerado para uma cena
+model SceneVideo {
+  id            String     @id @default(uuid())
+  sceneId       String
+  provider      AIProvider
+  promptUsed    String?
+  fileData      Bytes?
+  mimeType      String?    @db.VarChar(50)
+  originalSize  Int?
+  duration      Float?
+  sourceImageId String?
+  isSelected    Boolean    @default(false)
+  variantIndex  Int        @default(0)
+  createdAt     DateTime   @default(now())
+  scene         Scene      @relation(fields: [sceneId], references: [id], onDelete: Cascade)
+
+  @@index([sceneId])
+  @@map("scene_videos")
+}
+
+/// Trilha de áudio gerada
+model AudioTrack {
+  id           String     @id @default(uuid())
+  outputId     String
+  type         String     @db.VarChar(50)
+  provider     AIProvider
+  voiceId      String?    @db.VarChar(100)
+  fileData     Bytes?
+  mimeType     String?    @db.VarChar(50)
+  originalSize Int?
+  duration     Float?
+  createdAt    DateTime   @default(now())
+  output       Output     @relation(fields: [outputId], references: [id], onDelete: Cascade)
+
+  @@index([outputId])
+  @@map("audio_tracks")
+}
+
+/// Configuração de provedores de IA
+model ProviderConfig {
+  id                String     @id @default(uuid())
+  provider          AIProvider @unique
+  apiKey            String     @db.VarChar(500)
+  isActive          Boolean    @default(true)
+  settings          Json?
+  requestsPerMinute Int?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  @@map("provider_configs")
+}
+
+/// Logs de execução do pipeline
+model PipelineExecution {
+  id         String   @id @default(uuid())
+  outputId   String
+  step       String   @db.VarChar(50)
+  status     String   @db.VarChar(20)
+  message    String?
+  metadata   Json?
+  durationMs Int?
+  createdAt  DateTime @default(now())
+  output     Output   @relation(fields: [outputId], references: [id], onDelete: Cascade)
+
+  @@index([outputId])
+  @@index([createdAt])
+  @@map("pipeline_executions")
+}
+
+/// Estilos visuais disponíveis para geração de imagens e vídeos
+model VisualStyle {
+  id              String   @id @default(uuid())
+  name            String   @db.VarChar(100)
+  description     String
+  baseStyle       String
+  lightingTags    String
+  atmosphereTags  String
+  compositionTags String
+  tags            String
+  order           Int      @default(0)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  outputs         Output[]
+  seeds           Seed[]
+
+  @@index([isActive, order])
+  @@map("visual_styles")
+}
+
+/// Estilos de roteiro disponíveis para geração de scripts
+model ScriptStyle {
+  id           String   @id @default(uuid())
+  name         String   @db.VarChar(100)
+  description  String
+  instructions String
+  order        Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  outputs      Output[]
+
+  @@index([isActive, order])
+  @@map("script_styles")
+}
+
+/// Seeds para geração de imagens/vídeos (receitas visuais)
+model Seed {
+  id            String      @id @default(uuid())
+  name          String      @db.VarChar(100)
+  description   String?
+  value         Int
+  visualStyleId String
+  category      String?     @db.VarChar(50)
+  tags          String?
+  usageCount    Int         @default(0)
+  isDefault     Boolean     @default(false)
+  isActive      Boolean     @default(true)
+  previewUrl    String?     @db.VarChar(500)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  outputs       Output[]    @relation("OutputSeed")
+  visualStyle   VisualStyle @relation(fields: [visualStyleId], references: [id], onDelete: Cascade)
+
+  @@unique([visualStyleId, value])
+  @@index([visualStyleId, isActive])
+  @@index([isDefault])
+  @@map("seeds")
+}
 
 /// Tipo de provedor de IA usado
 enum AIProvider {
@@ -27,524 +349,20 @@ enum AIProvider {
 
 /// Tipo de output gerado a partir de um documento
 enum OutputType {
-  VIDEO_TEASER // Vídeo curto (15-60s) para TikTok/Shorts
-  VIDEO_FULL // Vídeo longo (5-20min) para YouTube
-  TWITTER_THREAD // Thread do Twitter
-  LINKEDIN_POST // Post do LinkedIn
-  INSTAGRAM_POST // Post/Carrossel do Instagram
-  PODCAST_EPISODE // Episódio de podcast
-  BLOG_ARTICLE // Artigo de blog
+  VIDEO_TEASER
+  VIDEO_FULL
+  TWITTER_THREAD
+  LINKEDIN_POST
+  INSTAGRAM_POST
+  PODCAST_EPISODE
+  BLOG_ARTICLE
 }
 
 /// Status de geração do output
 enum OutputStatus {
-  PENDING // Aguardando início
-  GENERATING // Em processamento
-  COMPLETED // Geração concluída
-  FAILED // Falha na geração
-  CANCELLED // Cancelado pelo usuário
-}
-
-// =============================================================================
-// MODELS - DOCUMENT-FIRST ARCHITECTURE
-// =============================================================================
-
-/// Dossiê - centro do sistema, contém todos materiais de research e pode gerar múltiplos outputs
-model Dossier {
-  id String @id @default(uuid())
-
-  // Conteúdo principal
-  title      String @db.VarChar(255)
-  sourceText String @db.Text // Texto principal do dossiê
-  theme      String @db.Text // Tema/tópico principal
-
-  // Research estruturada (extraída automaticamente ou manual)
-  researchData Json? // { facts: [], dates: [], people: [], locations: [] }
-
-  // Metadados
-  tags     String[] // Tags para categorização e busca
-  category String?  @db.VarChar(50) // "true-crime", "história", "ciência", etc.
-
-  // Status de processamento
-  isProcessed Boolean @default(false) // Se já foi analisado/estruturado pela IA
-
-  // Relacionamentos
-  sources DossierSource[] // Textos secundários (artigos, papers)
-  images  DossierImage[] // Imagens de referência
-  notes   DossierNote[] // Notas e insights do usuário
-  outputs Output[] // Outputs gerados (vídeos, threads, posts)
-
-  // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([category])
-  @@index([createdAt])
-  @@index([isProcessed])
-  @@map("dossiers")
-}
-
-/// Fonte secundária do dossiê (artigo, paper, citação)
-model DossierSource {
-  id        String  @id @default(uuid())
-  dossierId String
-  dossier   Dossier @relation(fields: [dossierId], references: [id], onDelete: Cascade)
-
-  // Conteúdo
-  title      String  @db.VarChar(255)
-  content    String  @db.Text
-  sourceType String  @db.VarChar(50) // "article", "paper", "quote", "transcript"
-  url        String? @db.VarChar(500) // URL original se houver
-  author     String? @db.VarChar(255)
-
-  // Ordenação
-  order Int @default(0)
-
-  // Timestamps
-  createdAt DateTime @default(now())
-
-  @@index([dossierId])
-  @@index([sourceType])
-  @@map("dossier_sources")
-}
-
-/// Imagem de referência do dossiê
-model DossierImage {
-  id        String  @id @default(uuid())
-  dossierId String
-  dossier   Dossier @relation(fields: [dossierId], references: [id], onDelete: Cascade)
-
-  // Conteúdo
-  description String  @db.Text // Descrição da imagem
-  imageData   Bytes? // BYTEA comprimido (se armazenada localmente)
-  mimeType    String? @db.VarChar(50) // image/png, image/jpeg
-  url         String? @db.VarChar(500) // URL se imagem externa
-
-  // Metadados visuais
-  tags String? @db.Text // Tags para busca/categorização
-
-  // Ordenação
-  order Int @default(0)
-
-  // Timestamps
-  createdAt DateTime @default(now())
-
-  @@index([dossierId])
-  @@map("dossier_images")
-}
-
-/// Nota de research/insight do usuário
-model DossierNote {
-  id        String  @id @default(uuid())
-  dossierId String
-  dossier   Dossier @relation(fields: [dossierId], references: [id], onDelete: Cascade)
-
-  // Conteúdo
-  content  String  @db.Text
-  noteType String? @db.VarChar(50) // "insight", "connection", "question", "idea"
-
-  // Ordenação
-  order Int @default(0)
-
-  // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([dossierId])
-  @@index([noteType])
-  @@map("dossier_notes")
-}
-
-/// Output gerado a partir de um dossiê (vídeo, thread, post, etc.)
-model Output {
-  id String @id @default(uuid())
-
-  // Relacionamento com dossiê fonte
-  dossierId String
-  dossier   Dossier @relation(fields: [dossierId], references: [id], onDelete: Cascade)
-
-  // Tipo e formato
-  outputType OutputType // VIDEO_TEASER, VIDEO_FULL, etc.
-  format     String     @db.VarChar(50) // "teaser", "full", "short", "long"
-
-  // Especificações (para vídeos)
-  title       String? @db.VarChar(255)
-  duration    Int? // Duração alvo em segundos
-  aspectRatio String? @db.VarChar(10) // "9:16", "16:9"
-  platform    String? @db.VarChar(50) // "tiktok", "youtube", "instagram"
-
-  // Configurações de geração
-  targetWPM         Int?    @default(150) // Velocidade de fala alvo
-  language          String  @default("pt-BR") @db.VarChar(10)
-  narrationLanguage String  @default("pt-BR") @db.VarChar(10)
-  voiceId           String? @db.VarChar(100)
-  enableMotion      Boolean @default(false)
-
-  // Diretrizes de conteúdo
-  mustInclude String? @db.Text
-  mustExclude String? @db.Text
-
-  // Estilos (relacionamentos)
-  scriptStyleId String?
-  scriptStyle   ScriptStyle? @relation(fields: [scriptStyleId], references: [id], onDelete: SetNull)
-  visualStyleId String?
-  visualStyle   VisualStyle? @relation(fields: [visualStyleId], references: [id], onDelete: SetNull)
-  seedId        String?
-  seed          Seed?        @relation("OutputSeed", fields: [seedId], references: [id], onDelete: SetNull)
-
-  // Status do pipeline
-  status         OutputStatus @default(PENDING)
-  scriptApproved Boolean      @default(false)
-  imagesApproved Boolean      @default(false)
-  videosApproved Boolean      @default(false)
-
-  // Conteúdo gerado
-  script      Script?
-  scenes      Scene[]
-  audioTracks AudioTrack[]
-  executions  PipelineExecution[]
-
-  // Output final (se vídeo)
-  outputData     Bytes? // BYTEA comprimido
-  outputMimeType String? @db.VarChar(50)
-  outputSize     Int? // Tamanho antes da compressão
-  thumbnailPath  String? @db.VarChar(500)
-
-  // Relação com outros outputs
-  relationsFrom OutputRelation[] @relation("MainOutput")
-  relationsTo   OutputRelation[] @relation("RelatedOutput")
-
-  // Logs
-  errorMessage String? @db.Text
-  pipelineLog  Json?
-
-  // Timestamps
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  completedAt DateTime?
-
-  @@index([dossierId])
-  @@index([outputType])
-  @@index([platform])
-  @@index([status])
-  @@index([createdAt])
-  @@map("outputs")
-}
-
-/// Relação entre outputs (ex: teaser → full)
-model OutputRelation {
-  id String @id @default(uuid())
-
-  // Output principal (ex: teaser)
-  mainOutputId String
-  mainOutput   Output @relation("MainOutput", fields: [mainOutputId], references: [id], onDelete: Cascade)
-
-  // Output relacionado (ex: full video)
-  relatedOutputId String
-  relatedOutput   Output @relation("RelatedOutput", fields: [relatedOutputId], references: [id], onDelete: Cascade)
-
-  // Tipo de relação
-  relationType String @db.VarChar(50) // "teaser_to_full", "full_to_teaser", "cross_platform"
-
-  // Timestamps
-  createdAt DateTime @default(now())
-
-  @@unique([mainOutputId, relatedOutputId])
-  @@index([relationType])
-  @@map("output_relations")
-}
-
-// =============================================================================
-// MODELS - LEGACY (DEPRECATED - Mantido apenas para referência)
-// =============================================================================
-// 
-// NOTA: Model Video foi REMOVIDO nesta branch.
-// Sistema agora usa 100% Document-First (Document → Output).
-// Se precisar migrar dados antigos, usar script de migração separado.
-//
-
-/// Roteiro completo do output
-model Script {
-  id String @id @default(uuid())
-
-  // Relacionamento com Output
-  outputId String @unique
-  output   Output @relation(fields: [outputId], references: [id], onDelete: Cascade)
-
-  // Conteúdo
-  summary   String @db.Text // Sinopse expandida da história (2-3 parágrafos)
-  fullText  String @db.Text
-  wordCount Int    @default(0)
-
-  // Proveniência
-  provider   AIProvider
-  modelUsed  String?    @db.VarChar(100)
-  promptUsed String?    @db.Text
-
-  // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("scripts")
-}
-
-/// Cena individual do output
-model Scene {
-  id String @id @default(uuid())
-
-  // Relacionamento com Output
-  outputId String
-  output   Output @relation(fields: [outputId], references: [id], onDelete: Cascade)
-
-  // Ordenação
-  order Int
-
-  // Conteúdo
-  narration         String  @db.Text // Texto da narração
-  visualDescription String  @db.Text // Descrição visual para geração de imagem
-  audioDescription  String? @db.Text // Descrição de SFX/Atmosfera sonora
-
-  // Timing
-  startTime Float? // Início em segundos
-  endTime   Float? // Fim em segundos
-
-  // Assets gerados
-  images SceneImage[]
-  videos SceneVideo[]
-
-  // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([outputId])
-  @@index([outputId, order])
-  @@map("scenes")
-}
-
-/// Imagem gerada para uma cena
-model SceneImage {
-  id      String @id @default(uuid())
-  sceneId String
-  scene   Scene  @relation(fields: [sceneId], references: [id], onDelete: Cascade)
-
-  // Proveniência
-  provider   AIProvider
-  promptUsed String     @db.Text
-
-  // Dados (comprimido com gzip)
-  fileData     Bytes? // BYTEA comprimido
-  mimeType     String? @db.VarChar(50) // image/png, image/jpeg
-  originalSize Int? // Tamanho antes da compressão
-  width        Int?
-  height       Int?
-
-  // Variantes (para seleção)
-  isSelected   Boolean @default(false)
-  variantIndex Int     @default(0)
-
-  // Timestamps
-  createdAt DateTime @default(now())
-
-  @@index([sceneId])
-  @@map("scene_images")
-}
-
-/// Vídeo/Motion gerado para uma cena
-model SceneVideo {
-  id      String @id @default(uuid())
-  sceneId String
-  scene   Scene  @relation(fields: [sceneId], references: [id], onDelete: Cascade)
-
-  // Proveniência
-  provider   AIProvider
-  promptUsed String?    @db.Text // Pode ser nulo se for image-to-video
-
-  // Dados (comprimido com gzip)
-  fileData     Bytes? // BYTEA comprimido
-  mimeType     String? @db.VarChar(50) // video/mp4
-  originalSize Int? // Tamanho antes da compressão
-  duration     Float? // Duração em segundos
-
-  // Origem
-  sourceImageId String? // ID da SceneImage usada como input (se houver)
-
-  // Variantes
-  isSelected   Boolean @default(false)
-  variantIndex Int     @default(0)
-
-  // Timestamps
-  createdAt DateTime @default(now())
-
-  @@index([sceneId])
-  @@map("scene_videos")
-}
-
-/// Trilha de áudio gerada
-model AudioTrack {
-  id String @id @default(uuid())
-
-  // Relacionamento com Output
-  outputId String
-  output   Output @relation(fields: [outputId], references: [id], onDelete: Cascade)
-
-  // Tipo
-  type String @db.VarChar(50) // "narration", "background_music", "sfx"
-
-  // Proveniência
-  provider AIProvider
-  voiceId  String?    @db.VarChar(100) // ID da voz no ElevenLabs, etc.
-
-  // Dados (comprimido com gzip)
-  fileData     Bytes? // BYTEA comprimido
-  mimeType     String? @db.VarChar(50) // audio/mpeg, audio/wav
-  originalSize Int? // Tamanho antes da compressão
-  duration     Float? // Duração em segundos
-
-  // Timestamps
-  createdAt DateTime @default(now())
-
-  @@index([outputId])
-  @@map("audio_tracks")
-}
-
-/// Configuração de provedores de IA
-model ProviderConfig {
-  id       String     @id @default(uuid())
-  provider AIProvider @unique
-
-  // Configurações
-  apiKey   String  @db.VarChar(500) // Encriptado
-  isActive Boolean @default(true)
-  settings Json? // Configurações específicas do provedor
-
-  // Rate limiting
-  requestsPerMinute Int?
-
-  // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("provider_configs")
-}
-
-/// Logs de execução do pipeline
-model PipelineExecution {
-  id String @id @default(uuid())
-
-  // Relacionamento com Output
-  outputId String
-  output   Output @relation(fields: [outputId], references: [id], onDelete: Cascade)
-
-  // Etapa
-  step   String @db.VarChar(50) // "script", "audio", "images", "render"
-  status String @db.VarChar(20) // "started", "completed", "failed"
-
-  // Detalhes
-  message  String? @db.Text
-  metadata Json?
-
-  // Performance
-  durationMs Int?
-
-  // Timestamps
-  createdAt DateTime @default(now())
-
-  @@index([outputId])
-  @@index([createdAt])
-  @@map("pipeline_executions")
-}
-
-/// Estilos visuais disponíveis para geração de imagens e vídeos
-model VisualStyle {
-  id          String @id @default(uuid())
-  name        String @db.VarChar(100)
-  description String @db.Text
-
-  // Estilo base (ex: "Cinematic 35mm", "Dark Fantasy", "Studio Ghibli")
-  baseStyle String @db.Text
-
-  // Tags categorizadas para WAN 2.2
-  lightingTags    String @db.Text // Ex: "warm golden hour light, soft volumetric rays"
-  atmosphereTags  String @db.Text // Ex: "mysterious, epic, dreamlike"
-  compositionTags String @db.Text // Ex: "wide establishing shot, low angle"
-
-  // Tags gerais (mantido para compatibilidade e detalhes extras)
-  tags String @db.Text
-
-  // Ordenação e visibilidade
-  order    Int     @default(0)
-  isActive Boolean @default(true)
-
-  // Relacionamentos
-  seeds   Seed[]
-  outputs Output[] // Outputs usando este estilo visual
-
-  // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([isActive, order])
-  @@map("visual_styles")
-}
-
-/// Estilos de roteiro disponíveis para geração de scripts
-model ScriptStyle {
-  id           String @id @default(uuid())
-  name         String @db.VarChar(100)
-  description  String @db.Text
-  instructions String @db.Text // Instruções para o prompt de geração
-
-  // Ordenação e visibilidade
-  order    Int     @default(0)
-  isActive Boolean @default(true)
-
-  // Relacionamentos
-  outputs Output[] // Outputs usando este estilo de roteiro
-
-  // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([isActive, order])
-  @@map("script_styles")
-}
-
-/// Seeds para geração de imagens/vídeos (receitas visuais)
-model Seed {
-  id String @id @default(uuid())
-
-  // Identificação
-  name        String  @db.VarChar(100)
-  description String? @db.Text
-
-  // Valor da seed
-  value Int
-
-  // Relacionamento OBRIGATÓRIO com estilo visual
-  visualStyleId String
-  visualStyle   VisualStyle @relation(fields: [visualStyleId], references: [id], onDelete: Cascade)
-
-  // Contexto de uso
-  category String? @db.VarChar(50)
-  tags     String? @db.Text
-
-  // Metadados
-  usageCount Int     @default(0)
-  isDefault  Boolean @default(false)
-  isActive   Boolean @default(true)
-
-  // Preview (opcional)
-  previewUrl String? @db.VarChar(500)
-
-  // Relacionamento com outputs que usaram esta seed
-  outputs Output[] @relation("OutputSeed")
-
-  // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([visualStyleId, value])
-  @@index([visualStyleId, isActive])
-  @@index([isDefault])
-  @@map("seeds")
+  PENDING
+  GENERATING
+  COMPLETED
+  FAILED
+  CANCELLED
 }
