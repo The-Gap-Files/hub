@@ -47,7 +47,7 @@ export default defineEventHandler(async (event) => {
     data: {
       documentId,
       description: data.description,
-      imageData: imageBuffer,
+      imageData: imageBuffer as any,
       mimeType: data.mimeType,
       url: data.url,
       tags: data.tags,
