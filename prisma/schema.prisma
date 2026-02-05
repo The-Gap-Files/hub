@@ -42,11 +42,240 @@ enum AIProvider {
   REPLICATE
 }
 
+/// Tipo de output gerado a partir de um documento
+enum OutputType {
+  VIDEO_TEASER // Vídeo curto (15-60s) para TikTok/Shorts
+  VIDEO_FULL // Vídeo longo (5-20min) para YouTube
+  TWITTER_THREAD // Thread do Twitter
+  LINKEDIN_POST // Post do LinkedIn
+  INSTAGRAM_POST // Post/Carrossel do Instagram
+  PODCAST_EPISODE // Episódio de podcast
+  BLOG_ARTICLE // Artigo de blog
+}
+
+/// Status de geração do output
+enum OutputStatus {
+  PENDING // Aguardando início
+  GENERATING // Em processamento
+  COMPLETED // Geração concluída
+  FAILED // Falha na geração
+  CANCELLED // Cancelado pelo usuário
+}
+
 // =============================================================================
-// MODELS
+// MODELS - DOCUMENT-FIRST ARCHITECTURE
 // =============================================================================
 
-/// Projeto de vídeo - entidade principal
+/// Documento fonte - centro do sistema, pode gerar múltiplos outputs
+model Document {
+  id String @id @default(uuid())
+
+  // Conteúdo principal
+  title      String @db.VarChar(255)
+  sourceText String @db.Text // Texto principal do documento
+  theme      String @db.Text // Tema/tópico principal
+
+  // Research estruturada (extraída automaticamente ou manual)
+  researchData Json? // { facts: [], dates: [], people: [], locations: [] }
+
+  // Metadados
+  tags     String[] // Tags para categorização e busca
+  category String?  @db.VarChar(50) // "true-crime", "história", "ciência", etc.
+
+  // Status de processamento
+  isProcessed Boolean @default(false) // Se já foi analisado/estruturado pela IA
+
+  // Relacionamentos
+  sources DocumentSource[] // Textos secundários (artigos, papers)
+  images  DocumentImage[] // Imagens de referência
+  notes   DocumentNote[] // Notas e insights do usuário
+  outputs Output[] // Outputs gerados (vídeos, threads, posts)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([createdAt])
+  @@index([isProcessed])
+  @@map("documents")
+}
+
+/// Texto secundário (artigo, paper, citação)
+model DocumentSource {
+  id         String   @id @default(uuid())
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  // Conteúdo
+  title      String  @db.VarChar(255)
+  content    String  @db.Text
+  sourceType String  @db.VarChar(50) // "article", "paper", "quote", "transcript"
+  url        String? @db.VarChar(500) // URL original se houver
+  author     String? @db.VarChar(255)
+
+  // Ordenação
+  order Int @default(0)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+
+  @@index([documentId])
+  @@index([sourceType])
+  @@map("document_sources")
+}
+
+/// Imagem de referência para o documento
+model DocumentImage {
+  id         String   @id @default(uuid())
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  // Conteúdo
+  description String  @db.Text // Descrição da imagem
+  imageData   Bytes? // BYTEA comprimido (se armazenada localmente)
+  mimeType    String? @db.VarChar(50) // image/png, image/jpeg
+  url         String? @db.VarChar(500) // URL se imagem externa
+
+  // Metadados visuais
+  tags String? @db.Text // Tags para busca/categorização
+
+  // Ordenação
+  order Int @default(0)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+
+  @@index([documentId])
+  @@map("document_images")
+}
+
+/// Nota de research/insight do usuário
+model DocumentNote {
+  id         String   @id @default(uuid())
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  // Conteúdo
+  content  String  @db.Text
+  noteType String? @db.VarChar(50) // "insight", "connection", "question", "idea"
+
+  // Ordenação
+  order Int @default(0)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([documentId])
+  @@index([noteType])
+  @@map("document_notes")
+}
+
+/// Output gerado a partir de um documento (vídeo, thread, post, etc.)
+model Output {
+  id String @id @default(uuid())
+
+  // Relacionamento com documento fonte
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  // Tipo e formato
+  outputType OutputType // VIDEO_TEASER, VIDEO_FULL, etc.
+  format     String     @db.VarChar(50) // "teaser", "full", "short", "long"
+
+  // Especificações (para vídeos)
+  title       String? @db.VarChar(255)
+  duration    Int? // Duração alvo em segundos
+  aspectRatio String? @db.VarChar(10) // "9:16", "16:9"
+  platform    String? @db.VarChar(50) // "tiktok", "youtube", "instagram"
+
+  // Configurações de geração
+  targetWPM         Int?    @default(150) // Velocidade de fala alvo
+  language          String  @default("pt-BR") @db.VarChar(10)
+  narrationLanguage String  @default("pt-BR") @db.VarChar(10)
+  voiceId           String? @db.VarChar(100)
+  enableMotion      Boolean @default(false)
+
+  // Diretrizes de conteúdo
+  mustInclude String? @db.Text
+  mustExclude String? @db.Text
+
+  // Estilos (relacionamentos)
+  scriptStyleId String?
+  scriptStyle   ScriptStyle? @relation(fields: [scriptStyleId], references: [id], onDelete: SetNull)
+  visualStyleId String?
+  visualStyle   VisualStyle? @relation(fields: [visualStyleId], references: [id], onDelete: SetNull)
+  seedId        String?
+  seed          Seed?        @relation("OutputSeed", fields: [seedId], references: [id], onDelete: SetNull)
+
+  // Status do pipeline
+  status         OutputStatus @default(PENDING)
+  scriptApproved Boolean      @default(false)
+  imagesApproved Boolean      @default(false)
+  videosApproved Boolean      @default(false)
+
+  // Conteúdo gerado
+  script      Script?
+  scenes      Scene[]
+  audioTracks AudioTrack[]
+  executions  PipelineExecution[]
+
+  // Output final (se vídeo)
+  outputData     Bytes? // BYTEA comprimido
+  outputMimeType String? @db.VarChar(50)
+  outputSize     Int? // Tamanho antes da compressão
+  thumbnailPath  String? @db.VarChar(500)
+
+  // Relação com outros outputs
+  relationsFrom OutputRelation[] @relation("MainOutput")
+  relationsTo   OutputRelation[] @relation("RelatedOutput")
+
+  // Logs
+  errorMessage String? @db.Text
+  pipelineLog  Json?
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  completedAt DateTime?
+
+  @@index([documentId])
+  @@index([outputType])
+  @@index([platform])
+  @@index([status])
+  @@index([createdAt])
+  @@map("outputs")
+}
+
+/// Relação entre outputs (ex: teaser → full)
+model OutputRelation {
+  id String @id @default(uuid())
+
+  // Output principal (ex: teaser)
+  mainOutputId String
+  mainOutput   Output @relation("MainOutput", fields: [mainOutputId], references: [id], onDelete: Cascade)
+
+  // Output relacionado (ex: full video)
+  relatedOutputId String
+  relatedOutput   Output @relation("RelatedOutput", fields: [relatedOutputId], references: [id], onDelete: Cascade)
+
+  // Tipo de relação
+  relationType String @db.VarChar(50) // "teaser_to_full", "full_to_teaser", "cross_platform"
+
+  // Timestamps
+  createdAt DateTime @default(now())
+
+  @@unique([mainOutputId, relatedOutputId])
+  @@index([relationType])
+  @@map("output_relations")
+}
+
+// =============================================================================
+// MODELS - LEGACY (MANTIDO PARA BACKWARD COMPATIBILITY)
+// =============================================================================
+
+/// Projeto de vídeo - entidade principal (LEGACY - usar Output para novos)
 model Video {
   id     String      @id @default(uuid())
   title  String      @db.VarChar(255)
@@ -105,11 +334,16 @@ model Video {
   @@map("videos")
 }
 
-/// Roteiro completo do vídeo
+/// Roteiro completo (para Output ou Video legacy)
 model Script {
-  id      String @id @default(uuid())
-  videoId String @unique
-  video   Video  @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  id String @id @default(uuid())
+
+  // Relacionamento com Output (novo) OU Video (legacy)
+  outputId String? @unique
+  output   Output? @relation(fields: [outputId], references: [id], onDelete: Cascade)
+
+  videoId String? @unique
+  video   Video?  @relation(fields: [videoId], references: [id], onDelete: Cascade)
 
   // Conteúdo
   summary   String @db.Text // Sinopse expandida da história (2-3 parágrafos)
@@ -128,11 +362,16 @@ model Script {
   @@map("scripts")
 }
 
-/// Cena individual do vídeo (segmento do roteiro)
+/// Cena individual (para Output ou Video legacy)
 model Scene {
-  id      String @id @default(uuid())
-  videoId String
-  video   Video  @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  id String @id @default(uuid())
+
+  // Relacionamento com Output (novo) OU Video (legacy)
+  outputId String?
+  output   Output? @relation(fields: [outputId], references: [id], onDelete: Cascade)
+
+  videoId String?
+  video   Video?  @relation(fields: [videoId], references: [id], onDelete: Cascade)
 
   // Ordenação
   order Int
@@ -154,8 +393,10 @@ model Scene {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([videoId, order])
+  @@index([outputId])
   @@index([videoId])
+  @@index([outputId, order])
+  @@index([videoId, order])
   @@map("scenes")
 }
 
@@ -217,11 +458,16 @@ model SceneVideo {
   @@map("scene_videos")
 }
 
-/// Trilha de áudio gerada
+/// Trilha de áudio gerada (para Output ou Video legacy)
 model AudioTrack {
-  id      String @id @default(uuid())
-  videoId String
-  video   Video  @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  id String @id @default(uuid())
+
+  // Relacionamento com Output (novo) OU Video (legacy)
+  outputId String?
+  output   Output? @relation(fields: [outputId], references: [id], onDelete: Cascade)
+
+  videoId String?
+  video   Video?  @relation(fields: [videoId], references: [id], onDelete: Cascade)
 
   // Tipo
   type String @db.VarChar(50) // "narration", "background_music", "sfx"
@@ -239,6 +485,7 @@ model AudioTrack {
   // Timestamps
   createdAt DateTime @default(now())
 
+  @@index([outputId])
   @@index([videoId])
   @@map("audio_tracks")
 }
@@ -263,11 +510,16 @@ model ProviderConfig {
   @@map("provider_configs")
 }
 
-/// Logs de execução do pipeline
+/// Logs de execução do pipeline (para Output ou Video legacy)
 model PipelineExecution {
-  id      String @id @default(uuid())
-  videoId String
-  video   Video  @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  id String @id @default(uuid())
+
+  // Relacionamento com Output (novo) OU Video (legacy)
+  outputId String?
+  output   Output? @relation(fields: [outputId], references: [id], onDelete: Cascade)
+
+  videoId String?
+  video   Video?  @relation(fields: [videoId], references: [id], onDelete: Cascade)
 
   // Etapa
   step   String @db.VarChar(50) // "script", "audio", "images", "render"
@@ -283,6 +535,7 @@ model PipelineExecution {
   // Timestamps
   createdAt DateTime @default(now())
 
+  @@index([outputId])
   @@index([videoId])
   @@index([createdAt])
   @@map("pipeline_executions")
@@ -310,7 +563,8 @@ model VisualStyle {
   isActive Boolean @default(true)
 
   // Relacionamentos
-  seeds Seed[]
+  seeds   Seed[]
+  outputs Output[] // Outputs usando este estilo visual
 
   // Timestamps
   createdAt DateTime @default(now())
@@ -330,6 +584,9 @@ model ScriptStyle {
   // Ordenação e visibilidade
   order    Int     @default(0)
   isActive Boolean @default(true)
+
+  // Relacionamentos
+  outputs Output[] // Outputs usando este estilo de roteiro
 
   // Timestamps
   createdAt DateTime @default(now())
@@ -366,8 +623,9 @@ model Seed {
   // Preview (opcional)
   previewUrl String? @db.VarChar(500)
 
-  // Relacionamento com vídeos que usaram esta seed
-  videos Video[] @relation("VideoSeed")
+  // Relacionamento com vídeos/outputs que usaram esta seed
+  videos  Video[]  @relation("VideoSeed")
+  outputs Output[] @relation("OutputSeed")
 
   // Timestamps
   createdAt DateTime @default(now())
