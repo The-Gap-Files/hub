@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
       include: {
         _count: {
           select: {
-            videos: true
+            outputs: true
           }
         }
       },

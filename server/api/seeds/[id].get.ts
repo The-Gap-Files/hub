@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
             description: true
           }
         },
-        videos: {
+        outputs: {
           select: {
             id: true,
             title: true,

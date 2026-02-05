@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
       include: {
         _count: {
           select: {
-            videos: true
+            outputs: true
           }
         }
       }
@@ -29,8 +29,8 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Se tem vídeos vinculados, fazer soft delete
-    if (existing._count.videos > 0) {
+    // Se tem outputs vinculados, fazer soft delete
+    if (existing._count.outputs > 0) {
       const updated = await prisma.seed.update({
         where: { id },
         data: {
@@ -40,12 +40,12 @@ export default defineEventHandler(async (event) => {
 
       return {
         success: true,
-        message: `Seed desativada (${existing._count.videos} vídeos vinculados)`,
+        message: `Seed desativada (${existing._count.outputs} outputs vinculados)`,
         data: updated
       }
     }
 
-    // Se não tem vídeos, deletar permanentemente
+    // Se não tem outputs, deletar permanentemente
     await prisma.seed.delete({
       where: { id }
     })
