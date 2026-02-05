@@ -51,9 +51,16 @@ const isApprovingMotion = ref(false)
 const scriptFeedback = ref('')
 const regeneratingScenes = ref<Record<string, boolean>>({})
 const regeneratingMotion = ref<Record<string, boolean>>({})
+const imageTimestamps = ref<Record<string, number>>({}) // Cache-busting para imagens
 const selectedImageUrl = ref<string | null>(null)
 const closeLightbox = () => selectedImageUrl.value = null
-const openLightbox = (sceneId: string) => selectedImageUrl.value = `/api/scenes/${sceneId}/image`
+
+// Helper para gerar URL de imagem com cache-busting
+const getImageUrl = (sceneId: string) => {
+  const timestamp = imageTimestamps.value[sceneId] || Date.now()
+  return `/api/scenes/${sceneId}/image?t=${timestamp}`
+}
+const openLightbox = (sceneId: string) => selectedImageUrl.value = getImageUrl(sceneId)
 
 async function handleApproveScript() {
   if (isApprovingScript.value) return
@@ -110,6 +117,8 @@ async function handleRegenerateImage(sceneId: string) {
   
   try {
     await $fetch(`/api/scenes/${sceneId}/regenerate`, { method: 'POST' } as any)
+    // Atualizar timestamp para forçar reload da imagem
+    imageTimestamps.value[sceneId] = Date.now()
     refresh()
   } catch (err) {
     console.error('Erro ao regenerar imagem:', err)
@@ -244,35 +253,9 @@ const downloadVideo = () => {
           <p>{{ video.errorMessage || 'Verifique os logs para mais detalhes' }}</p>
         </div>
 
-        <!-- Approval Banner -->
-        <div v-if="video.status === 'IMAGES_READY' && !video.imagesApproved" class="approval-banner">
-          <div class="approval-content">
-            <h3>📸 Imagens Prontas para Revisão</h3>
-            <p>Verifique as imagens abaixo. Se estiver tudo OK, clique em aprovar para gerar a narração (ElevenLabs) e o movimento (Replicate), que são as etapas de maior custo.</p>
-          </div>
-          <button 
-            class="btn-primary" 
-            :disabled="isApproving"
-            @click="handleApproveImages"
-          >
-            {{ isApproving ? 'Processando...' : '✅ Aprovar Imagens e Gerar Vídeo' }}
-          </button>
-        </div>
 
-        <!-- Motion Approval Banner -->
-        <div v-if="video.status === 'MOTION_READY' && !video.videosApproved" class="approval-banner motion-approval">
-          <div class="approval-content">
-            <h3>✨ Vídeos de Movimento Prontos</h3>
-            <p>Revise as animações de cada cena na aba "Vida às Imagens". Se estiver satisfeito, aprove para realizar a renderização final do vídeo.</p>
-          </div>
-          <button 
-            class="btn-primary" 
-            :disabled="isApprovingMotion"
-            @click="handleApproveMotion"
-          >
-            {{ isApprovingMotion ? 'Processando...' : '🎬 Aprovar e Renderizar Final' }}
-          </button>
-        </div>
+
+
       </section>
 
       <!-- Main Columns -->
@@ -361,20 +344,61 @@ const downloadVideo = () => {
                 <!-- SCRIPT TAB -->
                 <div v-if="activeTab === 'script'" class="script-explorer">
                   <!-- Approval Card Floating -->
-                  <div v-if="video.status === 'SCRIPT_READY' && !video.scriptApproved" class="glass-alert info-alert">
-                    <div class="alert-body">
-                      <div class="alert-icon">✍️</div>
-                      <div class="alert-text">
-                        <h4>Roteiro Gerado</h4>
-                        <p>Revise a narrativa histórica e o tom do mistério abaixo.</p>
+                  <div v-if="video.status === 'SCRIPT_READY' && !video.scriptApproved" class="script-approval-card">
+                    <div class="approval-header">
+                      <div class="approval-badge">
+                        <span class="badge-icon">✍️</span>
+                        <span class="badge-text">Roteiro Gerado</span>
+                      </div>
+                      <div class="approval-subtitle">
+                        Revise a narrativa histórica e o tom do mistério abaixo.
                       </div>
                     </div>
-                    <div class="alert-actions">
-                      <div class="input-glow-group">
-                        <input v-model="scriptFeedback" placeholder="Feedback para refinamento..." @keyup.enter="handleRefineScript" />
-                        <button class="btn-ghost" :disabled="isRefiningScript" @click="handleRefineScript">Refinar</button>
+                    
+                    <div class="approval-actions-grid">
+                      <div class="feedback-section">
+                        <label class="feedback-label">Feedback para Refinamento (Opcional)</label>
+                        <div class="feedback-input-wrapper">
+                          <textarea 
+                            v-model="scriptFeedback" 
+                            placeholder="Ex: Adicione mais tensão no início, reduza a cena 3..."
+                            rows="3"
+                            class="feedback-textarea"
+                            @keydown.ctrl.enter="handleRefineScript"
+                          />
+                          <button 
+                            class="btn-refine" 
+                            :disabled="isRefiningScript || !scriptFeedback.trim()" 
+                            @click="handleRefineScript"
+                          >
+                            <span v-if="isRefiningScript">🔄 Refinando...</span>
+                            <span v-else>🎨 Refinar Roteiro</span>
+                          </button>
+                        </div>
                       </div>
-                      <button class="btn-primary" :disabled="isApprovingScript" @click="handleApproveScript">Aprovar e Avançar</button>
+                      
+                      <div class="approval-cta">
+                        <button 
+                          class="btn-approve-primary" 
+                          :disabled="isApprovingScript" 
+                          @click="handleApproveScript"
+                        >
+                          <span class="btn-icon">✅</span>
+                          <span class="btn-text">{{ isApprovingScript ? 'Aprovando...' : 'Aprovar e Continuar' }}</span>
+                        </button>
+                        <p class="approval-hint">Próximo: Geração de Imagens e Áudio</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Summary Section (NEW) -->
+                  <div v-if="video.script?.summary" class="script-summary-card glass-elevated">
+                    <div class="summary-header">
+                      <span class="summary-icon">📄</span>
+                      <h3>Sinopse da História</h3>
+                    </div>
+                    <div class="summary-content">
+                      <p>{{ video.script.summary }}</p>
                     </div>
                   </div>
 
@@ -382,12 +406,24 @@ const downloadVideo = () => {
                     <div v-for="scene in video.scenes" :key="scene.id" class="premium-scene-card">
                       <div class="scene-meta">Cena {{ scene.order }}</div>
                       <div class="scene-grid">
+                        <!-- Narration -->
                         <div class="scene-narration">
+                          <span class="field-icon">💬</span>
                           <p class="quote">"{{ scene.narration }}"</p>
                         </div>
+                        
+                        <!-- Visual Description -->
                         <div class="scene-visual">
+                          <span class="field-icon">🎨</span>
                           <span class="label">VISUAL</span>
                           <p>{{ scene.visualDescription }}</p>
+                        </div>
+
+                        <!-- Audio Description (NEW) -->
+                        <div v-if="scene.audioDescription" class="scene-audio">
+                          <span class="field-icon">🔊</span>
+                          <span class="label">SFX/ATMOSFERA</span>
+                          <p class="audio-tech">{{ scene.audioDescription }}</p>
                         </div>
                       </div>
                     </div>
@@ -396,21 +432,42 @@ const downloadVideo = () => {
 
                 <!-- IMAGES TAB -->
                 <div v-if="activeTab === 'images'" class="gallery-explorer">
-                  <div v-if="video.status === 'IMAGES_READY' && !video.imagesApproved" class="glass-alert info-alert sticky-alert">
-                    <div class="alert-body">
-                      <div class="alert-icon">📸</div>
-                      <div class="alert-text">
-                        <h4>Visual Ready</h4>
-                        <p>Aprove para prosseguir com o áudio e movimento.</p>
+                  <div v-if="video.status === 'IMAGES_READY' && !video.imagesApproved" class="images-approval-card">
+                    <div class="approval-header">
+                      <div class="approval-badge">
+                        <span class="badge-icon">📸</span>
+                        <span class="badge-text">Imagens Prontas para Revisão</span>
+                      </div>
+                      <div class="approval-subtitle">
+                        Verifique as imagens abaixo. Se estiver tudo OK, clique em aprovar para gerar a narração (ElevenLabs) e o movimento (Replicate), que são as etapas de maior custo.
                       </div>
                     </div>
-                    <button class="btn-primary" :disabled="isApproving" @click="handleApproveImages">Aprovar Cenários</button>
+                    
+                    <div class="approval-actions-single">
+                      <div class="cost-warning">
+                        <span class="warning-icon">⚠️</span>
+                        <div class="warning-content">
+                          <strong>Atenção aos Custos:</strong>
+                          <p>Áudio (ElevenLabs) + Motion (Replicate) são as etapas mais caras. Certifique-se de que as imagens estão corretas antes de prosseguir.</p>
+                        </div>
+                      </div>
+                      
+                      <button 
+                        class="btn-approve-primary" 
+                        :disabled="isApproving" 
+                        @click="handleApproveImages"
+                      >
+                        <span class="btn-icon">✅</span>
+                        <span class="btn-text">{{ isApproving ? 'Aprovando...' : 'Aprovar e Gerar Áudio + Motion' }}</span>
+                      </button>
+                      <p class="approval-hint">Próximo: Narração Cinematográfica + Animação das Cenas</p>
+                    </div>
                   </div>
 
                   <div class="images-masonry">
                     <div v-for="scene in video.scenes" :key="scene.id" class="image-box compact">
                       <div class="image-wrapper" @click="openLightbox(scene.id)">
-                        <img :src="`/api/scenes/${scene.id}/image`" loading="lazy" />
+                        <img :src="getImageUrl(scene.id)" :key="imageTimestamps[scene.id]" loading="lazy" />
                         <div class="image-hover">
                           <div class="hover-actions">
                             <button class="btn-icon-blur mini" title="Regerar" @click.stop="handleRegenerateImage(scene.id)">🔄</button>
@@ -457,15 +514,36 @@ const downloadVideo = () => {
 
                 <!-- MOTION TAB -->
                 <div v-if="activeTab === 'motion'" class="motion-explorer">
-                  <div v-if="video.status === 'MOTION_READY' && !video.videosApproved" class="glass-alert info-alert sticky-alert">
-                    <div class="alert-body">
-                      <div class="alert-icon">✨</div>
-                      <div class="alert-text">
-                        <h4>Motion Synthesis Complete</h4>
-                        <p>Finalize para iniciar a renderização cinematográfica.</p>
+                  <div v-if="video.status === 'MOTION_READY' && !video.videosApproved" class="motion-approval-card">
+                    <div class="approval-header">
+                      <div class="approval-badge">
+                        <span class="badge-icon">✨</span>
+                        <span class="badge-text">Vídeos de Movimento Prontos</span>
+                      </div>
+                      <div class="approval-subtitle">
+                        Revise as animações de cada cena abaixo. Se estiver satisfeito, aprove para realizar a renderização final do vídeo.
                       </div>
                     </div>
-                    <button class="btn-primary" :disabled="isApprovingMotion" @click="handleApproveMotion">Aprovar e Renderizar</button>
+                    
+                    <div class="approval-actions-single">
+                      <div class="render-info">
+                        <span class="info-icon">🎬</span>
+                        <div class="info-content">
+                          <strong>Renderização Final:</strong>
+                          <p>O vídeo será montado com narração sincronizada, motion graphics e transições cinematográficas.</p>
+                        </div>
+                      </div>
+                      
+                      <button 
+                        class="btn-approve-primary" 
+                        :disabled="isApprovingMotion" 
+                        @click="handleApproveMotion"
+                      >
+                        <span class="btn-icon">🎬</span>
+                        <span class="btn-text">{{ isApprovingMotion ? 'Processando...' : 'Aprovar e Renderizar Final' }}</span>
+                      </button>
+                      <p class="approval-hint">Próximo: Exportação do Vídeo Completo</p>
+                    </div>
                   </div>
 
                   <div class="motion-grid-modern">
@@ -780,7 +858,30 @@ const downloadVideo = () => {
 
 /* Content Viewport */
 .tab-viewport {
-  min-height: 700px;
+  max-height: 70vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-radius: var(--radius-xl);
+}
+
+/* Custom Scrollbar */
+.tab-viewport::-webkit-scrollbar {
+  width: 8px;
+}
+
+.tab-viewport::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 4px;
+}
+
+.tab-viewport::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.3);
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.tab-viewport::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.5);
 }
 
 .tab-panel {
@@ -953,4 +1054,415 @@ const downloadVideo = () => {
 :deep(button) {
   background-color: transparent;
 }
+
+/* Script Summary Card (NEW) */
+.script-summary-card {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(16, 185, 129, 0.05) 100%);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl);
+  margin-bottom: var(--space-2xl);
+  backdrop-filter: blur(10px);
+  animation: slideIn 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Script Approval Card (REDESIGNED) */
+.script-approval-card {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.12) 0%, rgba(59, 130, 246, 0.08) 100%);
+  border: 2px solid rgba(139, 92, 246, 0.3);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl);
+  margin-bottom: var(--space-2xl);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.15);
+  animation: slideIn 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.approval-header {
+  margin-bottom: var(--space-xl);
+}
+
+.approval-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  background: rgba(139, 92, 246, 0.2);
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-md);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+}
+
+.badge-icon {
+  font-size: 1.2rem;
+  filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.6));
+}
+
+.badge-text {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-primary);
+}
+
+.approval-subtitle {
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.approval-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-xl);
+}
+
+@media (min-width: 1024px) {
+  .approval-actions-grid {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.feedback-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.feedback-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+}
+
+.feedback-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.feedback-textarea {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  color: var(--color-text);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  resize: vertical;
+  transition: all 0.3s ease;
+}
+
+.feedback-textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background: rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.feedback-textarea::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.6;
+}
+
+.btn-refine {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-text);
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  align-self: flex-start;
+}
+
+.btn-refine:hover:not(:disabled) {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+}
+
+.btn-refine:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.approval-cta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  gap: var(--space-sm);
+}
+
+.btn-approve-primary {
+  background: var(--gradient-primary);
+  border: none;
+  color: white;
+  padding: var(--space-lg) var(--space-xl);
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+}
+
+.btn-approve-primary:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(139, 92, 246, 0.6);
+}
+
+.btn-approve-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-icon {
+  font-size: 1.2rem;
+}
+
+.btn-text {
+  letter-spacing: 0.02em;
+}
+
+.approval-hint {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin: 0;
+  opacity: 0.8;
+}
+
+/* Images Approval Card */
+.images-approval-card {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(16, 185, 129, 0.08) 100%);
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl);
+  margin-bottom: var(--space-2xl);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.15);
+  animation: slideIn 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Motion Approval Card */
+.motion-approval-card {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.12) 0%, rgba(139, 92, 246, 0.08) 100%);
+  border: 2px solid rgba(236, 72, 153, 0.3);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl);
+  margin-bottom: var(--space-2xl);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(236, 72, 153, 0.15);
+  animation: slideIn 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.approval-actions-single {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  align-items: stretch;
+}
+
+.cost-warning,
+.render-info {
+  display: flex;
+  gap: var(--space-md);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+}
+
+.render-info {
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.warning-icon,
+.info-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 8px rgba(255, 193, 7, 0.6));
+}
+
+.info-icon {
+  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
+}
+
+.warning-content,
+.info-content {
+  flex: 1;
+}
+
+.warning-content strong,
+.info-content strong {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text);
+  margin-bottom: var(--space-xs);
+}
+
+.warning-content p,
+.info-content p {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+
+.summary-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.summary-icon {
+  width: 28px;
+  height: 28px;
+  color: var(--color-primary);
+  filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.4));
+}
+
+.summary-header h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.summary-content p {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--color-text);
+  margin: 0;
+  white-space: pre-line;
+}
+
+/* Scene Field Icons (NEW) */
+.field-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-muted);
+  margin-right: var(--space-sm);
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+/* Scenes Content Styles */
+.premium-scene-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  margin-bottom: var(--space-lg);
+  transition: all 0.3s ease;
+}
+
+.premium-scene-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(139, 92, 246, 0.3);
+  transform: translateX(4px);
+}
+
+.scene-meta {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-primary);
+  margin-bottom: var(--space-md);
+  opacity: 0.8;
+}
+
+.scene-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-lg);
+}
+
+@media (min-width: 1024px) {
+  .scene-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.scene-narration,
+.scene-visual,
+.scene-audio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-lg);
+  border-radius: var(--radius-md);
+}
+
+.scene-narration {
+  border-left: 3px solid var(--color-primary);
+  background: rgba(139, 92, 246, 0.05);
+  grid-column: 1 / -1; /* Narração ocupa a largura total pra destaque */
+}
+
+.scene-visual {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.scene-audio {
+  background: rgba(16, 185, 129, 0.05);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.field-icon {
+  font-size: 1.2rem;
+  margin-bottom: var(--space-xs);
+}
+
+.quote {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  font-weight: 500;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+
+.scene-audio .label {
+  color: var(--color-success);
+}
+
+.audio-tech {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+
 </style>

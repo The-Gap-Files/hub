@@ -29,8 +29,23 @@ export class OpenAIScriptProvider implements IScriptGenerator {
   }
 
   async generate(request: ScriptGenerationRequest): Promise<ScriptGenerationResponse> {
+    console.log('[OpenAI Script] 🎬 Iniciando geração de roteiro...')
+    console.log('[OpenAI Script] Tema:', request.theme)
+    console.log('[OpenAI Script] Modelo:', this.model)
+
     const systemPrompt = this.buildSystemPrompt(request)
     const userPrompt = this.buildUserPrompt(request)
+
+    // Log dos prompts para conferência técnica (conforme solicitado pelo usuário)
+    console.log('--- [DEBUG] OPENAI SYSTEM PROMPT START ---')
+    console.log(systemPrompt)
+    console.log('--- [DEBUG] OPENAI SYSTEM PROMPT END ---')
+    console.log('--- [DEBUG] OPENAI USER PROMPT START ---')
+    console.log(userPrompt)
+    console.log('--- [DEBUG] OPENAI USER PROMPT END ---')
+
+    console.log('[OpenAI Script] 📤 Enviando request para OpenAI API...')
+    const startTime = Date.now()
 
     const response = await fetch(`${this.baseUrl}/chat/completions`, {
       method: 'POST',
@@ -49,33 +64,58 @@ export class OpenAIScriptProvider implements IScriptGenerator {
       })
     })
 
+    const elapsed = ((Date.now() - startTime) / 1000).toFixed(2)
+    console.log(`[OpenAI Script] 📥 Resposta recebida em ${elapsed}s`)
+
     if (!response.ok) {
       const error = await response.text()
+      console.error('[OpenAI Script] ❌ Erro na API:', response.status, error)
       throw new Error(`OpenAI API error: ${response.status} - ${error}`)
     }
 
+    console.log('[OpenAI Script] 🔍 Processando JSON retornado...')
     const data = await response.json()
     const content = JSON.parse(data.choices[0].message.content)
+
+    console.log('[OpenAI Script] ✅ Roteiro gerado com sucesso!')
+    console.log('[OpenAI Script] Título:', content.title)
+    console.log('[OpenAI Script] Número de cenas:', content.scenes?.length || 0)
+
+    // Validação pós-geração
+    const expectedScenes = Math.ceil(request.targetDuration / 5)
+    const actualScenes = content.scenes?.length || 0
+    const expectedDuration = expectedScenes * 5
+    const actualDuration = actualScenes * 5
+
+    if (actualScenes !== expectedScenes) {
+      console.warn(`[OpenAI Script] ⚠️ AVISO: Número de cenas incorreto!`)
+      console.warn(`[OpenAI Script]    Esperado: ${expectedScenes} cenas`)
+      console.warn(`[OpenAI Script]    Recebido: ${actualScenes} cenas`)
+      console.warn(`[OpenAI Script]    Diferença: ${actualScenes - expectedScenes} cenas`)
+    }
+
+    if (actualDuration !== request.targetDuration) {
+      console.warn(`[OpenAI Script] ⚠️ AVISO: Duração total incorreta!`)
+      console.warn(`[OpenAI Script]    Esperado: ${request.targetDuration}s`)
+      console.warn(`[OpenAI Script]    Recebido: ${actualDuration}s`)
+      console.warn(`[OpenAI Script]    Diferença: ${actualDuration - request.targetDuration}s`)
+    }
 
     return this.parseResponse(content)
   }
 
   private buildSystemPrompt(request: ScriptGenerationRequest): string {
-    // Construir prompt de estilo de roteiro usando descrição + instruções
-    let scriptStylePrompt = ''
-    if (request.scriptStyleDescription && request.scriptStyleInstructions) {
-      scriptStylePrompt = `${request.scriptStyleDescription}\n${request.scriptStyleInstructions}`
-    } else if (request.scriptStyleInstructions) {
-      scriptStylePrompt = request.scriptStyleInstructions
+    // 1. Instruções do Estilo de Roteiro (Vindas do Banco de Dados)
+    let styleInstructions = ''
+    if (request.scriptStyleInstructions) {
+      styleInstructions = request.scriptStyleInstructions
     } else {
-      scriptStylePrompt = 'Adote um tom documental sério e investigativo.'
+      styleInstructions = 'Adote um tom documental sério e investigativo.'
     }
 
-    // Construir instruções visuais (Sempre estruturadas)
+    // 2. Construir instruções visuais (Sempre estruturadas)
     let visualInstructions = ''
-
     if (request.visualBaseStyle) {
-      // Se vier do banco estruturado, usa o que o usuário escolheu
       visualInstructions = buildVisualInstructionsForScript({
         baseStyle: request.visualBaseStyle,
         lightingTags: request.visualLightingTags || '',
@@ -84,10 +124,8 @@ export class OpenAIScriptProvider implements IScriptGenerator {
         generalTags: request.visualGeneralTags
       })
     } else if (request.visualStyleDescription) {
-      // Fallback para descrição antiga (string única)
       visualInstructions = `DIRETRIZ VISUAL OBRIGATÓRIA: ${request.visualStyleDescription}`
     } else {
-      // FALLBACK TOTAL: Se não tiver nada, usa o padrão cinematográfico do canal
       visualInstructions = buildVisualInstructionsForScript({
         baseStyle: 'Cinematic Mystery Documentary',
         lightingTags: 'Chiaroscuro, dramatic volumetric lighting, shadows dancing',
@@ -97,68 +135,59 @@ export class OpenAIScriptProvider implements IScriptGenerator {
       })
     }
 
-    // Definir intervalo de palavras baseado no pedido ou padrão (13 palavras ~ 5s)
-    const targetWords = request.wordsPerScene || 13
-    const minWords = Math.max(8, targetWords - 2)
-    const maxWords = targetWords + 2
+    // 3. Calcular restrições de tempo/palavras
+    const targetWPM = request.targetWPM || 150
+    const wordsPerScene = Math.round((targetWPM / 60) * 5)
+    const minWords = Math.max(8, wordsPerScene - 2)
+    const maxWords = wordsPerScene + 2
     const wordRange = `${minWords}-${maxWords}`
 
-    return `Você é o roteirista principal do "The Gap Files" (A Lacuna), um mestre em storytelling cinematográfico e retenção viral. Seu objetivo é criar narrativas que evocam a sensação de "acesso a um arquivo secreto".
-
-FÓRMULA DE RETENÇÃO "GAP GLITCH":
-1. O GANCHO CRÍTICO (0-3s): Você tem apenas 3 segundos para parar o scroll. Comece "in media res" ou com uma contradição chocante. Use: Mistério (Feature) → Verdade Oculta (Benefit) → Exclusividade (Outcome).
-2. PATTERN INTERRUPT: Cada cena de 5 segundos deve ser um choque visual/narrativo diferente da anterior. Mantenha o espectador em desequilíbrio informativo.
-3. MICRO-HOOKS: Termine frases ou cenas com perguntas implícitas. Nunca entregue a verdade completa até o clímax.
-4. SINCRONIA DE 5 SEGUNDOS: Narrações rítmicas de ${wordRange} palavras para caberem perfeitamente nos clipes.
-
-DIRETRIZES VISUAIS & SENSORIAIS:
-Além da técnica, inclua a "Camada Sensorial" nas suas descrições visuais:
-- Descreva não apenas o que se vê, mas o sentimento, texturas, cheiros ou temperatura da cena (ex: "o frio úmido de uma tumba", "o cheiro de ozônio de uma máquina antiga").
-- Mantenha o formato: [ESTILO BASE], [CENA COM AÇÃO SENSORIAL], [COMPOSIÇÃO], [ILUMINAÇÃO], [DETALHES EM MOVIMENTO].
-
-SOUND DESIGN (IMERSÃO SONORA):
-Descreva a atmosfera sonora (SFX/Ambience) em inglês técnico para cada cena.
-
-ESTRUTURA DO ROTEIRO:
-1. Gancho (0-10s): Foco total na fórmula Gap Glitch.
-2. A Promessa: Estabeleça o contexto com Power Words, prometendo uma revelação que mudará perspectivas.
-3. Desenvolvimento (A Investigação): Detalhes com ritmo, alternando fatos duros e especulações. Frases curtas.
-4. Clímax/Twist (A Virada): Conecte o passado ao presente de forma surpreendente.
-5. CTA (Estilo Redacted): Finalize com: "A história tem buracos. Nós os preenchemos."
-
-VOCABULÁRIO DE PODER (OBRIGATÓRIO):
-Revelado, Proibido, Classificado, Antigo, Verdade, Protocolo, Ecos, Redigido (Redacted), Arquivo.
+    // 4. Montar Prompt Final
+    return `Você é um roteirista mestre em storytelling cinematográfico e retenção viral.
 
 ---
-ESTILO DE NARRATIVA REQUISITADO:
-${scriptStylePrompt}
+ESTILO NARRATIVO E PERSONA:
+${styleInstructions}
+
+---
+DIRETRIZES TÉCNICAS:
+- SINCRONIA: Narrações rítmicas de ${wordRange} palavras por cena para caberem em 5 segundos.
+- SOUND DESIGN: Descreva a atmosfera sonora (SFX/Ambience) em inglês técnico para cada cena.
+- CAMADA SENSORIAL: Nas descrições visuais, inclua sentimentos, texturas e atmosfera (ex: "frio úmido", "cheiro de ozônio").
 
 ---
 ${visualInstructions}
 
 ---
-IMPORTANTE: Retorne SEMPRE um JSON válido:
+FORMATO DE SAÍDA (JSON OBRIGATÓRIO):
+Retorne SEMPRE um JSON válido com esta estrutura:
 {
-  "title": "Título Impactante (Estilo Redacted)",
-  "summary": "Sinopse expandida da história em 2-3 parágrafos. Deve contextualizar o tema, apresentar o mistério central, e dar pistas sobre a revelação sem spoilar completamente o clímax. Use um tom envolvente e misterioso.",
+  "title": "Título Impactante",
+  "summary": "Sinopse expandida (2-3 parágrafos) que contextualize a história de forma intrigante.",
   "scenes": [
     {
       "order": 1,
-      "narration": "Texto TTS (${wordRange} palavras).",
-      "visualDescription": "Prompt técnico + sensorial detalhado.",
-      "audioDescription": "SFX/Atmosfera em inglês.",
+      "narration": "Texto da narração (${wordRange} palavras).",
+      "visualDescription": "Prompt técnico + sensorial detalhado para geração de imagem.",
+      "audioDescription": "SFX/Atmosfera sonora em inglês.",
       "estimatedDuration": 5
     }
   ]
 }
 
-REGRAS ADICIONAIS:
-- O campo summary deve ser uma sinopse expandida (2-3 parágrafos) que contextualize a história de forma intrigante e profunda.
-- O campo visualDescription deve ser rico o suficiente para modelos como Flux ou WAN 2.2.
-- A narração deve soar como um segredo compartilhado, nunca como uma aula expositiva.`
+REGRAS FINAIS:
+- A narração deve soar natural e envolvente, seguindo a identidade definida acima.
+- O campo visualDescription deve ser rico e detalhado para modelos de IA de ponta.`
   }
 
   private buildUserPrompt(request: ScriptGenerationRequest): string {
+    // Calcular restrições de tempo/palavras
+    const targetWPM = request.targetWPM || 150
+    const wordsPerScene = Math.round((targetWPM / 60) * 5)
+    const minWords = Math.max(8, wordsPerScene - 2)
+    const maxWords = wordsPerScene + 2
+    const wordRange = `${minWords}-${maxWords}`
+
     const durationMinutes = Math.round(request.targetDuration / 60)
     const durationText = request.targetDuration >= 60
       ? `${durationMinutes} minutos (${request.targetDuration} segundos)`
@@ -170,31 +199,41 @@ REGRAS ADICIONAIS:
     // Construir diretrizes
     let guidelines = ''
     if (request.mustInclude) {
-      guidelines += `\n\nO que DEVE estar no roteiro:\n${request.mustInclude}`
+      guidelines += `\n\n[DIRETRIZ CRÍTICA - DEVE INCLUIR]:\n${request.mustInclude}`
     }
     if (request.mustExclude) {
-      guidelines += `\n\nO que NÃO deve estar no roteiro:\n${request.mustExclude}`
+      guidelines += `\n\n[DIRETRIZ CRÍTICA - NÃO PODE CONTER]:\n${request.mustExclude}`
     }
 
-    const targetWords = request.wordsPerScene || 13
-    const minWords = Math.max(8, targetWords - 2)
-    const maxWords = targetWords + 2
-    const wordRange = `${minWords}-${maxWords}`
+    // Construir instrução base
+    let baseInstruction = `Crie um roteiro em ${request.language} sobre o tema: "${request.theme}"`
 
-    return `Crie um roteiro em ${request.language} sobre o tema: "${request.theme}"
+    // Se houver documento fonte, adicionar instrução específica
+    if (request.additionalContext) {
+      baseInstruction += `\n\n📄 DOCUMENTO FONTE (use como base para o roteiro):\n${request.additionalContext}\n\nIMPORTANTE: Use o conteúdo acima como base principal. Extraia os pontos-chave, fatos e narrativa deste documento para criar o roteiro. NÃO invente informações que não estejam no documento.`
+    }
+
+    return `${baseInstruction}
+
+⚠️ ATENÇÃO: VOCÊ DEVE GERAR EXATAMENTE ${idealSceneCount} CENAS. NÃO MENOS, NÃO MAIS. ⚠️
 
 Requisitos CRÍTICOS de Duração e Ritmo:
 - O roteiro DEVE ter uma duração total o mais próxima possível de: ${durationText}.
-- Divida o roteiro em aproximadamente ${idealSceneCount} cenas.
-- Cada cena deve ter uma narração curta de ${wordRange} palavras (aproximadamente 5 segundos de fala).
-- É VITAL que a narração de cada cena não ultrapasse esse limite de ${maxWords} palavras, para manter a sincronia perfeita com os clipes de vídeo.
+- NÚMERO DE CENAS OBRIGATÓRIO: ${idealSceneCount} cenas (${request.targetDuration} segundos ÷ 5 segundos por cena = ${idealSceneCount} cenas)
+- Cada cena deve ter uma narração curta de EXATAMENTE ${wordRange} palavras (para durar 5 segundos).
+- É VITAL que a narração de cada cena não ultrapasse esse limite de ${maxWords} palavras.
 - NÃO gere roteiros significativamente mais curtos ou mais longos que o solicitado.
 - Se o tempo for curto (ex: 60s), seja extremamente direto e impactante.
-- Se o tempo for longo, aprofunde-se nos detalhes, evidências e ramificações do tema.
-- Cada cena deve herdar uma descrição visual cinematográfica única.
+- Se o tempo for longo (${request.targetDuration}s), aprofunde-se nos detalhes, evidências e ramificações do tema.
+- Cada cena deve ter uma descrição visual cinematográfica única.
 - O tom deve ser ${request.style ?? 'documentary'}.
 ${guidelines}
-${request.additionalContext ? `\nContexto adicional: ${request.additionalContext}` : ''}`
+
+🔴 VALIDAÇÃO FINAL OBRIGATÓRIA:
+Antes de retornar o JSON, CONTE quantas cenas você gerou no array "scenes".
+Se o número for DIFERENTE de ${idealSceneCount}, você DEVE adicionar ou remover cenas até ter EXATAMENTE ${idealSceneCount} cenas.
+NÚMERO EXATO DE CENAS ESPERADO: ${idealSceneCount}
+`
   }
 
   private parseResponse(content: {

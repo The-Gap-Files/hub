@@ -54,9 +54,12 @@ model Video {
   status VideoStatus @default(PENDING)
 
   // Metadados
-  duration Int? // Duração alvo/estimada em segundos
-  language String @default("pt-BR") @db.VarChar(10)
-  style    String @default("documentary") @db.VarChar(50) // documentary, mystery, narrative, educational
+  duration          Int?    @default(185) // Duração alvo/estimada em segundos
+  targetWPM         Int?    @default(150) // Velocidade de fala alvo (Words Per Minute): 120 (lenta), 150 (média), 180 (rápida)
+  language          String  @default("pt-BR") @db.VarChar(10)
+  narrationLanguage String  @default("pt-BR") @db.VarChar(10) // Idioma da narração (pode ser diferente do idioma do roteiro)
+  style             String  @default("documentary") @db.VarChar(50) // documentary, mystery, narrative, educational
+  sourceDocument    String? @db.Text // Documento/história base fornecido pelo usuário
 
   // Opções de Geração
   voiceId        String? @db.VarChar(100)

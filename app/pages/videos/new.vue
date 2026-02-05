@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useNotification } from '~/utils/useNotification'
+
 interface VisualStyle {
   id: string
   name: string
@@ -26,6 +28,7 @@ interface Seed {
 }
 
 const router = useRouter()
+const notification = useNotification()
 
 // Buscar estilos visuais
 const { data: stylesData } = await useFetch<{ success: boolean; data: VisualStyle[] }>('/api/visual-styles')
@@ -38,12 +41,15 @@ const scriptStyles = computed(() => scriptStylesData.value?.data?.filter(s => s.
 // Form data - PRECISA SER DEFINIDO ANTES de usar em useFetch
 const formData = ref({
   theme: '',
+  narrationLanguage: 'pt-BR',
+  sourceDocument: '',
   scriptStyle: '',
   visualStyle: '',
   seedMode: 'default' as 'default' | 'specific' | 'random',
   seedId: '',
   aspectRatio: '16:9' as '9:16' | '16:9',
   duration: 185,
+  targetWPM: 150, // Velocidade de fala: 120 (lenta), 150 (média), 180 (rápida)
   enableMotion: false,
   mustInclude: '',
   mustExclude: ''
@@ -95,12 +101,15 @@ async function handleSubmit() {
       method: 'POST',
       body: {
         theme: formData.value.theme,
+        narrationLanguage: formData.value.narrationLanguage,
+        sourceDocument: formData.value.sourceDocument.trim() || undefined,
         style: formData.value.scriptStyle,
         visualStyle: formData.value.visualStyle,
         seedId: formData.value.seedMode === 'random' ? undefined : formData.value.seedId || undefined,
         aspectRatio: formData.value.aspectRatio,
         enableMotion: formData.value.enableMotion,
         targetDuration: formData.value.duration,
+        targetWPM: formData.value.targetWPM,
         mustInclude: formData.value.mustInclude.trim() || undefined,
         mustExclude: formData.value.mustExclude.trim() || undefined
       }
@@ -109,7 +118,7 @@ async function handleSubmit() {
     // Redirecionar para home
     router.push('/')
   } catch (error: any) {
-    alert(error.message || 'Erro ao criar vídeo')
+    notification.error(error.message || 'Erro ao criar vídeo')
   } finally {
     isSubmitting.value = false
   }
@@ -145,6 +154,38 @@ function cancel() {
             placeholder="Ex: A Conspiração de Roswell"
           />
           <small>Sobre o que será o vídeo? Seja específico.</small>
+        </div>
+      </div>
+
+      <!-- Idioma e Documento Fonte -->
+      <div class="form-section">
+        <h2>🌍 Idioma e Conteúdo Base</h2>
+        
+        <div class="form-group">
+          <label>Idioma da Narração *</label>
+          <select v-model="formData.narrationLanguage" required>
+            <option value="pt-BR">🇧🇷 Português (Brasil)</option>
+            <option value="en-US">🇺🇸 English (US)</option>
+            <option value="es-ES">🇪🇸 Español (España)</option>
+            <option value="es-MX">🇲🇽 Español (México)</option>
+            <option value="fr-FR">🇫🇷 Français</option>
+            <option value="de-DE">🇩🇪 Deutsch</option>
+            <option value="it-IT">🇮🇹 Italiano</option>
+            <option value="ja-JP">🇯🇵 日本語</option>
+            <option value="ko-KR">🇰🇷 한국어</option>
+            <option value="zh-CN">🇨🇳 中文 (简体)</option>
+          </select>
+          <small>Em qual idioma será a narração do vídeo?</small>
+        </div>
+
+        <div class="form-group">
+          <label>Documento/História Base (Opcional)</label>
+          <textarea
+            v-model="formData.sourceDocument"
+            rows="8"
+            placeholder="Cole aqui um documento, artigo, história ou qualquer texto que você queira que a IA use como base para criar o roteiro. A IA irá extrair os pontos principais e criar uma narrativa cinematográfica a partir deste conteúdo."
+          ></textarea>
+          <small>Se fornecido, a IA criará o roteiro baseado neste conteúdo ao invés de pesquisar sobre o tema</small>
         </div>
       </div>
 
@@ -259,6 +300,29 @@ function cancel() {
             />
             <small>{{ Math.floor(formData.duration / 60) }}min {{ formData.duration % 60 }}s</small>
           </div>
+        </div>
+
+        <div class="form-group">
+          <label>Velocidade de Fala (WPM - Words Per Minute)</label>
+          <div class="wpm-control">
+            <div class="wpm-slider-wrapper">
+              <input
+                v-model.number="formData.targetWPM"
+                type="range"
+                min="120"
+                max="180"
+                step="10"
+                class="wpm-slider"
+              />
+              <div class="wpm-labels">
+                <span :class="{ active: formData.targetWPM <= 130 }">🐢 Lenta</span>
+                <span :class="{ active: formData.targetWPM > 130 && formData.targetWPM < 170 }">⚡ Média</span>
+                <span :class="{ active: formData.targetWPM >= 170 }">🚀 Rápida</span>
+              </div>
+            </div>
+            <div class="wpm-value">{{ formData.targetWPM }} WPM</div>
+          </div>
+          <small>Controla o ritmo da narração. Lenta (120-130), Média (140-160), Rápida (170-180)</small>
         </div>
 
         <div class="form-group">
@@ -574,4 +638,99 @@ function cancel() {
   background: var(--color-bg-elevated);
   border-color: var(--color-primary);
 }
+
+/* WPM Control */
+.wpm-control {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+.wpm-slider-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.wpm-slider {
+  width: 100%;
+  height: 8px;
+  background: linear-gradient(to right, 
+    rgba(139, 92, 246, 0.2) 0%, 
+    rgba(139, 92, 246, 0.4) 50%, 
+    rgba(139, 92, 246, 0.6) 100%
+  );
+  border-radius: var(--radius-full);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.wpm-slider::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
+  transition: all 0.2s ease;
+}
+
+.wpm-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.6);
+}
+
+.wpm-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
+  transition: all 0.2s ease;
+}
+
+.wpm-slider::-moz-range-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.6);
+}
+
+.wpm-labels {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 var(--space-xs);
+}
+
+.wpm-labels span {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  transition: all 0.3s ease;
+  opacity: 0.5;
+}
+
+.wpm-labels span.active {
+  color: var(--color-primary);
+  font-weight: 700;
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.wpm-value {
+  min-width: 80px;
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: var(--radius-md);
+  color: var(--color-primary);
+  font-weight: 700;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
 </style>

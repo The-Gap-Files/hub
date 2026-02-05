@@ -28,7 +28,8 @@ export interface ScriptGenerationRequest {
   additionalContext?: string
   mustInclude?: string // O que deve ter no roteiro
   mustExclude?: string // O que NÃO deve ter no roteiro
-  wordsPerScene?: number // Número alvo de palavras por cena (ritmo)
+  targetWPM?: number // Velocidade de fala alvo (Words Per Minute): 120 (lenta), 150 (média), 180 (rápida)
+  wordsPerScene?: number // Número alvo de palavras por cena (calculado a partir de targetWPM)
 }
 
 export interface ScriptScene {

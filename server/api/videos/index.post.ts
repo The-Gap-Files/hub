@@ -10,8 +10,11 @@ import { VideoPipelineService } from '../../services/pipeline/video-pipeline.ser
 
 const CreateVideoSchema = z.object({
   theme: z.string().min(10, 'O tema deve ter pelo menos 10 caracteres'),
+  narrationLanguage: z.string().default('pt-BR'),
+  sourceDocument: z.string().optional(),
   language: z.string().default('pt-BR'),
   targetDuration: z.number().min(60).max(1800).default(300),
+  targetWPM: z.number().min(100).max(200).default(150),
   style: z.string().default('documentary'), // Agora aceita ID do estilo de roteiro
   voiceId: z.string().optional(),
   imageStyle: z.enum(['cinematic', 'photorealistic', 'artistic', 'documentary']).default('cinematic'),
@@ -52,6 +55,8 @@ export default defineEventHandler(async (event) => {
     data: {
       title: `Novo vídeo: ${options.theme.substring(0, 50)}...`,
       theme: options.theme,
+      narrationLanguage: options.narrationLanguage,
+      sourceDocument: options.sourceDocument,
       language: options.language,
       style: options.style,
       duration: options.targetDuration,

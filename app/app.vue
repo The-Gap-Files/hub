@@ -2,6 +2,7 @@
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>
+  <NotificationToast />
 </template>
 
 <style>
@@ -35,6 +36,7 @@
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.6);
   --shadow-glow: 0 0 20px rgba(139, 92, 246, 0.3);
   
   /* Typography */
@@ -53,6 +55,7 @@
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
   --radius-xl: 1rem;
+  --radius-full: 9999px;
   
   /* Transitions */
   --transition-fast: 150ms ease;

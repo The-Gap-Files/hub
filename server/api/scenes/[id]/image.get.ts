@@ -44,10 +44,11 @@ export default defineEventHandler(async (event) => {
 
   const imageBuffer = await bytesToBuffer(Buffer.from(image.fileData))
 
-  // Definir headers
+  // Definir headers (sem cache para permitir regeneração)
   setHeader(event, 'Content-Type', image.mimeType || 'image/png')
   setHeader(event, 'Content-Length', imageBuffer.length)
-  setHeader(event, 'Cache-Control', 'public, max-age=31536000')
+  setHeader(event, 'Cache-Control', 'no-cache, must-revalidate')
+  setHeader(event, 'ETag', image.id) // Usar ID da imagem como ETag para controle de versão
 
   return imageBuffer
 })

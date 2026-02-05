@@ -45,6 +45,7 @@ export default defineEventHandler(async (event) => {
       script: {
         select: {
           id: true,
+          summary: true,
           fullText: true,
           wordCount: true,
           provider: true,
@@ -58,6 +59,7 @@ export default defineEventHandler(async (event) => {
           order: true,
           narration: true,
           visualDescription: true,
+          audioDescription: true,
           startTime: true,
           endTime: true,
           images: {

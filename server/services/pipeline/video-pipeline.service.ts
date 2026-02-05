@@ -161,12 +161,20 @@ export class VideoPipelineService {
         }
       }
 
-      // 4. Gerar áudio
-      await this.updateStatus(videoId!, 'AUDIO_GENERATING')
-      await this.logExecution(videoId!, 'audio', 'started', 'Iniciando síntese de voz...')
-      await this.generateAudio(videoId!, script!.fullText, effectiveOptions)
-      await this.updateStatus(videoId!, 'AUDIO_READY')
-      await this.logExecution(videoId!, 'audio', 'completed', 'Narração de áudio concluída.')
+      // 4. Gerar áudio (se não existir)
+      const existingAudio = await prisma.audioTrack.findFirst({
+        where: { videoId: videoId!, type: 'narration' }
+      })
+
+      if (!existingAudio) {
+        await this.updateStatus(videoId!, 'AUDIO_GENERATING')
+        await this.logExecution(videoId!, 'audio', 'started', 'Iniciando síntese de voz...')
+        await this.generateAudio(videoId!, script!.fullText, effectiveOptions)
+        await this.updateStatus(videoId!, 'AUDIO_READY')
+        await this.logExecution(videoId!, 'audio', 'completed', 'Narração de áudio concluída.')
+      } else {
+        await this.logExecution(videoId!, 'audio', 'completed', 'Áudio já existe. Reutilizando narração existente.')
+      }
 
       // 5. Gerar movimento (Opcional)
       if (effectiveOptions.enableMotion) {
@@ -275,7 +283,18 @@ export class VideoPipelineService {
 
     const video = await prisma.video.findUnique({
       where: { id: videoId },
-      select: { theme: true, language: true, duration: true, style: true, visualStyle: true, mustInclude: true, mustExclude: true }
+      select: {
+        theme: true,
+        language: true,
+        narrationLanguage: true,
+        sourceDocument: true,
+        duration: true,
+        targetWPM: true,
+        style: true,
+        visualStyle: true,
+        mustInclude: true,
+        mustExclude: true
+      }
     })
 
     // Buscar estilo visual completo do banco (com campos categorizados)
@@ -329,6 +348,7 @@ export class VideoPipelineService {
       theme: options.theme || video?.theme || '',
       language: options.language || video?.language || 'pt-BR',
       targetDuration: options.targetDuration || video?.duration || 300,
+      targetWPM: video?.targetWPM || 150, // Velocidade de fala padrão: 150 WPM (média)
       style: selectedScriptStyle || 'documentary',
       scriptStyleDescription: scriptStyleDescription,
       scriptStyleInstructions: scriptStyleInstructions,
@@ -339,6 +359,7 @@ export class VideoPipelineService {
       visualAtmosphereTags: visualStyleData?.atmosphereTags,
       visualCompositionTags: visualStyleData?.compositionTags,
       visualGeneralTags: visualStyleData?.tags,
+      additionalContext: video?.sourceDocument || options.additionalContext,
       mustInclude: options.mustInclude || video?.mustInclude || undefined,
       mustExclude: options.mustExclude || video?.mustExclude || undefined
     }
@@ -454,7 +475,7 @@ export class VideoPipelineService {
 
     const video = await prisma.video.findUnique({
       where: { id: videoId },
-      select: { language: true, voiceId: true }
+      select: { narrationLanguage: true, voiceId: true }
     })
 
     const scenes = await prisma.scene.findMany({
@@ -485,7 +506,7 @@ export class VideoPipelineService {
       const request: TTSRequest = {
         text: scene.narration,
         voiceId: selectedVoiceId,
-        language: options.language || video?.language || 'pt-BR'
+        language: options.language || video?.narrationLanguage || 'pt-BR'
       }
 
       const result = await ttsProvider.synthesize(request)
@@ -920,7 +941,10 @@ export class VideoPipelineService {
       await new Promise<void>((resolve, reject) => {
         const command = ffmpeg()
 
-        // Adicionar cada asset como um input com loop/stream e duração real baseada no áudio
+        // Armazenar metadados de cada cena para aplicar filtros
+        const sceneMetadata: Array<{ duration: number; videoClipDuration?: number; isVideo: boolean }> = []
+
+        // Adicionar cada asset como um input com duração real baseada no áudio
         scenes.forEach((scene, index) => {
           const videoClip = scene.videos[0]
           const image = scene.images[0]
@@ -936,9 +960,14 @@ export class VideoPipelineService {
           }
 
           if (videoClip && scenePaths[index]) {
+            // Para vídeos, armazenar duração original para calcular velocidade
+            const videoClipDuration = videoClip.duration || 5 // Padrão 5s se não tiver
+            sceneMetadata.push({ duration, videoClipDuration, isVideo: true })
+
+            // Não usar loop, vamos ajustar a velocidade depois
             command.input(scenePaths[index]!)
-              .inputOptions(['-stream_loop -1', `-t ${duration}`])
           } else if (image && scenePaths[index]) {
+            sceneMetadata.push({ duration, isVideo: false })
             command.input(scenePaths[index]!)
               .inputOptions(['-loop 1', `-t ${duration}`])
           }
@@ -949,23 +978,90 @@ export class VideoPipelineService {
 
         command
           .complexFilter([
-            // 1. Escalar imagens para garantir tamanho uniforme (caso mude o formato entre cenas)
+            // 1. Ajustar velocidade dos vídeos para sincronizar com áudio
+            ...scenes.map((_, i) => {
+              const metadata = sceneMetadata[i]
+              if (!metadata) return [] // Segurança: pular se não houver metadata
+
+              const filters: any[] = []
+
+              if (metadata.isVideo && metadata.videoClipDuration) {
+                // Calcular fator de velocidade: quanto precisa acelerar/desacelerar
+                const speedFactor = metadata.videoClipDuration / metadata.duration
+
+                if (speedFactor > 1.05) {
+                  // Vídeo é mais longo que o áudio → acelerar (máx 1.5x)
+                  const clampedSpeed = Math.min(speedFactor, 1.5)
+                  filters.push({
+                    filter: 'setpts',
+                    options: `${1 / clampedSpeed}*PTS`,
+                    inputs: `${i}:v`,
+                    outputs: `adjusted_${i}`
+                  })
+                } else if (speedFactor < 0.95) {
+                  // Vídeo é mais curto que o áudio → desacelerar (mín 0.5x)
+                  const clampedSpeed = Math.max(speedFactor, 0.5)
+                  filters.push({
+                    filter: 'setpts',
+                    options: `${1 / clampedSpeed}*PTS`,
+                    inputs: `${i}:v`,
+                    outputs: `adjusted_${i}`
+                  })
+                } else {
+                  // Diferença mínima (< 5%) → não ajustar
+                  filters.push({
+                    filter: 'null',
+                    inputs: `${i}:v`,
+                    outputs: `adjusted_${i}`
+                  })
+                }
+
+                // Trim para garantir duração exata
+                filters.push({
+                  filter: 'trim',
+                  options: { duration: metadata.duration },
+                  inputs: `adjusted_${i}`,
+                  outputs: `trimmed_${i}`
+                })
+
+                // Resetar PTS após trim
+                filters.push({
+                  filter: 'setpts',
+                  options: 'PTS-STARTPTS',
+                  inputs: `trimmed_${i}`,
+                  outputs: `final_${i}`
+                })
+              } else {
+                // Para imagens, apenas passar adiante
+                filters.push({
+                  filter: 'null',
+                  inputs: `${i}:v`,
+                  outputs: `final_${i}`
+                })
+              }
+
+              return filters
+            }).flat(),
+
+            // 2. Escalar para garantir tamanho uniforme
             ...scenes.map((_, i) => ({
               filter: 'scale',
               options: isPortrait
                 ? '768:1344:force_original_aspect_ratio=increase,crop=768:1344,pad=768:1344:(ow-iw)/2:(oh-ih)/2'
                 : '1344:768:force_original_aspect_ratio=increase,crop=1344:768,pad=1344:768:(ow-iw)/2:(oh-ih)/2',
-              inputs: `${i}:v`,
+              inputs: `final_${i}`,
               outputs: `scaled_${i}`
             })),
-            // 2. Concatenar os fluxos de vídeo processados
+
+            // 3. Concatenar os fluxos de vídeo processados
             {
               filter: 'concat',
               options: { n: scenes.length, v: 1, a: 0 },
               inputs: scenes.map((_, i) => `scaled_${i}`),
               outputs: 'v'
             },
-            // 3. Forçar o formato de pixel para compatibilidade universal (H.264)
+
+            // 4. Forçar o formato de pixel para compatibilidade universal (H.264)
             {
               filter: 'format',
               options: 'yuv420p',
