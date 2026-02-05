@@ -274,25 +274,36 @@ export class OutputPipelineService {
     })
 
     for (const scene of scenes) {
+      const isPortrait = output.aspectRatio === '9:16'
+      const width = isPortrait ? 768 : 1344
+      const height = isPortrait ? 1344 : 768
+
       const request: ImageGenerationRequest = {
         prompt: scene.visualDescription,
+        width,
+        height,
         aspectRatio: output.aspectRatio || '16:9',
         style: output.visualStyle?.baseStyle || 'cinematic',
-        seed: output.seed?.value
+        seed: output.seed?.value,
+        numVariants: 1
       }
 
       const imageResponse = await imageProvider.generate(request)
+
+      // Pegar primeira imagem gerada
+      const firstImage = imageResponse.images[0]
+      if (!firstImage) continue
 
       await prisma.sceneImage.create({
         data: {
           sceneId: scene.id,
           provider: imageProvider.name as any,
           promptUsed: scene.visualDescription,
-          fileData: imageResponse.imageData,
-          mimeType: imageResponse.mimeType || 'image/png',
-          originalSize: imageResponse.imageData.length,
-          width: imageResponse.width,
-          height: imageResponse.height,
+          fileData: firstImage.buffer,
+          mimeType: 'image/png',
+          originalSize: firstImage.buffer.length,
+          width: firstImage.width,
+          height: firstImage.height,
           isSelected: true,
           variantIndex: 0
         }
@@ -312,7 +323,7 @@ export class OutputPipelineService {
       language: output.narrationLanguage || 'pt-BR'
     }
 
-    const audioResponse = await ttsProvider.generate(request)
+    const audioResponse = await ttsProvider.synthesize(request)
 
     await prisma.audioTrack.create({
       data: {
@@ -320,9 +331,9 @@ export class OutputPipelineService {
         type: 'narration',
         provider: ttsProvider.name as any,
         voiceId: output.voiceId,
-        fileData: audioResponse.audioData,
-        mimeType: audioResponse.mimeType || 'audio/mpeg',
-        originalSize: audioResponse.audioData.length,
+        fileData: audioResponse.audioBuffer,
+        mimeType: 'audio/mpeg',
+        originalSize: audioResponse.audioBuffer.length,
         duration: audioResponse.duration
       }
     })
@@ -348,9 +359,10 @@ export class OutputPipelineService {
       if (!selectedImage?.fileData) continue
 
       const request: MotionGenerationRequest = {
-        imageData: selectedImage.fileData,
+        imageBuffer: selectedImage.fileData,
         prompt: scene.visualDescription,
-        duration: 5
+        duration: 5,
+        aspectRatio: output.aspectRatio || '16:9'
       }
 
       const videoResponse = await motionProvider.generate(request)
@@ -360,10 +372,10 @@ export class OutputPipelineService {
           sceneId: scene.id,
           provider: motionProvider.name as any,
           promptUsed: scene.visualDescription,
-          fileData: videoResponse.videoData,
-          mimeType: videoResponse.mimeType || 'video/mp4',
-          originalSize: videoResponse.videoData.length,
-          duration: videoResponse.duration || 5,
+          fileData: videoResponse.video.videoBuffer,
+          mimeType: 'video/mp4',
+          originalSize: videoResponse.video.videoBuffer.length,
+          duration: videoResponse.video.duration || 5,
           sourceImageId: selectedImage.id,
           isSelected: true,
           variantIndex: 0

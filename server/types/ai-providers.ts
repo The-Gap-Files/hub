@@ -11,11 +11,13 @@
 export interface ScriptGenerationRequest {
   theme: string
   language: string
+  narrationLanguage?: string // Idioma da narração (pode ser diferente do roteiro)
   targetDuration: number // em segundos
   style?: string // ID do estilo de roteiro
   scriptStyleDescription?: string // Descrição do estilo de roteiro do banco
   scriptStyleInstructions?: string // Instruções do estilo de roteiro do banco
   visualStyle?: string
+  visualStyleName?: string // Nome do estilo visual
   visualStyleDescription?: string // Descrição do estilo visual do banco (deprecated, usar campos abaixo)
 
   // Campos categorizados do estilo visual (para WAN 2.2)
@@ -24,6 +26,17 @@ export interface ScriptGenerationRequest {
   visualAtmosphereTags?: string
   visualCompositionTags?: string
   visualGeneralTags?: string
+
+  // Document-First: Múltiplas fontes de conteúdo
+  sourceDocument?: string // Documento principal (backward compatibility)
+  additionalSources?: Array<{ title: string; content: string; type: string }> // Fontes secundárias
+  userNotes?: string[] // Notas e insights do usuário
+  visualReferences?: string[] // Descrições de imagens de referência
+  researchData?: any // Dados estruturados (fatos, datas, pessoas)
+  
+  // Output-specific
+  outputType?: string // VIDEO_TEASER, VIDEO_FULL, etc.
+  format?: string // "teaser", "full"
 
   additionalContext?: string
   mustInclude?: string // O que deve ter no roteiro
