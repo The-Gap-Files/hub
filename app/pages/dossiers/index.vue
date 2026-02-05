@@ -2,7 +2,7 @@
   <div class="container mx-auto p-6">
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-3xl font-bold">Dossiers</h1>
-      <NuxtLink to="/Dossiers/new" class="btn btn-primary">
+      <NuxtLink to="/dossiers/new" class="btn btn-primary">
         + Novo Dossier
       </NuxtLink>
     </div>
@@ -13,17 +13,17 @@
 
     <div v-else-if="Dossiers.length === 0" class="text-center py-12">
       <p class="text-gray-500">Nenhum Dossier criado ainda.</p>
-      <NuxtLink to="/Dossiers/new" class="btn btn-primary mt-4">
+      <NuxtLink to="/dossiers/new" class="btn btn-primary mt-4">
         Criar Primeiro Dossier
       </NuxtLink>
     </div>
 
     <div v-else class="grid gap-4">
       <div
-        v-for="doc in Dossiers"
-        :key="doc.id"
+        v-for="dossier in dossiers"
+        :key="dossier.id"
         class="border rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer"
-        @click="navigateTo(`/Dossiers/${doc.id}`)"
+        @click="navigateTo(`/dossiers/${dossier.id}`)"
       >
         <div class="flex justify-between items-start">
           <div class="flex-1">
@@ -85,7 +85,7 @@
 </template>
 
 <script setup lang="ts">
-const Dossiers = ref<any[]>([])
+const dossiers = ref<any[]>([])
 const loading = ref(true)
 const page = ref(1)
 const pageSize = ref(20)
@@ -94,13 +94,13 @@ const total = ref(0)
 async function loadDossiers() {
   loading.value = true
   try {
-    const response = await $fetch('/api/Dossiers', {
+    const response = await $fetch('/api/dossiers', {
       query: { page: page.value, pageSize: pageSize.value }
     })
-    Dossiers.value = response.Dossiers
+    dossiers.value = response.dossiers
     total.value = response.total
   } catch (error) {
-    console.error('Erro ao carregar Dossiers:', error)
+    console.error('Erro ao carregar dossiers:', error)
   } finally {
     loading.value = false
   }
