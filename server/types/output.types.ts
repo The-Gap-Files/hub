@@ -39,7 +39,7 @@ export interface CreateOutputRelationDTO {
 
 export interface OutputResponse {
   id: string
-  documentId: string
+  dossierId: string
   outputType: OutputType
   format: string
   title?: string
@@ -57,7 +57,7 @@ export interface OutputResponse {
 }
 
 export interface OutputWithRelationsResponse extends OutputResponse {
-  document: {
+  dossier: {
     id: string
     title: string
     theme: string
@@ -81,3 +81,4 @@ export interface CreateOutputsResponse {
   outputs: OutputResponse[]
   total: number
 }
+

@@ -1,6 +1,6 @@
 <template>
   <div class="container mx-auto p-6 max-w-4xl">
-    <h1 class="text-3xl font-bold mb-6">Novo Document</h1>
+    <h1 class="text-3xl font-bold mb-6">Novo Dossier</h1>
 
     <form @submit.prevent="handleSubmit" class="space-y-6">
       <!-- Título -->
@@ -70,7 +70,7 @@
           required
           rows="15"
           class="w-full p-3 border rounded font-mono text-sm"
-          placeholder="Cole aqui o texto principal do documento (artigo, história, etc.)"
+          placeholder="Cole aqui o texto principal do Dossiero (artigo, história, etc.)"
         ></textarea>
         <p class="text-sm text-gray-500 mt-1">
           {{ formData.sourceText.length }} caracteres
@@ -84,9 +84,9 @@
           :disabled="submitting"
           class="btn btn-primary flex-1"
         >
-          {{ submitting ? 'Criando...' : 'Criar Document' }}
+          {{ submitting ? 'Criando...' : 'Criar Dossier' }}
         </button>
-        <NuxtLink to="/documents" class="btn btn-secondary">
+        <NuxtLink to="/Dossiers" class="btn btn-secondary">
           Cancelar
         </NuxtLink>
       </div>
@@ -119,7 +119,7 @@ async function handleSubmit() {
 
   submitting.value = true
   try {
-    const document = await $fetch('/api/documents', {
+    const Dossier = await $fetch('/api/Dossiers', {
       method: 'POST',
       body: {
         title: formData.value.title,
@@ -130,13 +130,14 @@ async function handleSubmit() {
       }
     })
 
-    // Redirecionar para página do document
-    await navigateTo(`/documents/${document.id}`)
+    // Redirecionar para página do Dossier
+    await navigateTo(`/Dossiers/${Dossier.id}`)
   } catch (error: any) {
-    console.error('Erro ao criar document:', error)
-    alert(error.data?.message || 'Erro ao criar document')
+    console.error('Erro ao criar Dossier:', error)
+    alert(error.data?.message || 'Erro ao criar Dossier')
   } finally {
     submitting.value = false
   }
 }
 </script>
+

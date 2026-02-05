@@ -8,24 +8,24 @@ const CreateNoteSchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  const documentId = getRouterParam(event, 'id')
+  const dossierId = getRouterParam(event, 'id')
 
-  if (!documentId) {
+  if (!dossierId) {
     throw createError({
       statusCode: 400,
-      message: 'Document ID is required'
+      message: 'Dossier ID is required'
     })
   }
 
-  // Verificar se document existe
-  const document = await prisma.document.findUnique({
-    where: { id: documentId }
+  // Verificar se dossier existe
+  const dossier = await prisma.dossier.findUnique({
+    where: { id: dossierId }
   })
 
-  if (!document) {
+  if (!dossier) {
     throw createError({
       statusCode: 404,
-      message: 'Document not found'
+      message: 'Dossier not found'
     })
   }
 
@@ -34,9 +34,9 @@ export default defineEventHandler(async (event) => {
   const data = CreateNoteSchema.parse(body)
 
   // Criar note
-  const note = await prisma.documentNote.create({
+  const note = await prisma.dossierNote.create({
     data: {
-      documentId,
+      dossierId,
       ...data
     }
   })

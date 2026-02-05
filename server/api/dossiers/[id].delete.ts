@@ -6,12 +6,12 @@ export default defineEventHandler(async (event) => {
   if (!id) {
     throw createError({
       statusCode: 400,
-      message: 'Document ID is required'
+      message: 'Dossier ID is required'
     })
   }
 
-  // Verificar se document existe
-  const existing = await prisma.document.findUnique({
+  // Verificar se dossier existe
+  const existing = await prisma.dossier.findUnique({
     where: { id },
     include: {
       _count: {
@@ -23,23 +23,23 @@ export default defineEventHandler(async (event) => {
   if (!existing) {
     throw createError({
       statusCode: 404,
-      message: 'Document not found'
+      message: 'Dossier not found'
     })
   }
 
   // Verificar se tem outputs (aviso)
   if (existing._count.outputs > 0) {
     // Ainda permite deletar (cascade), mas loga warning
-    console.warn(`Deleting document ${id} with ${existing._count.outputs} outputs`)
+    console.warn(`Deleting dossier ${id} with ${existing._count.outputs} outputs`)
   }
 
-  // Deletar document (cascade deleta outputs, sources, images, notes)
-  await prisma.document.delete({
+  // Deletar dossier (cascade deleta outputs, sources, images, notes)
+  await prisma.dossier.delete({
     where: { id }
   })
 
   return {
     success: true,
-    message: 'Document deleted successfully'
+    message: 'Dossier deleted successfully'
   }
 })

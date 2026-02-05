@@ -1,7 +1,7 @@
 import { prisma } from '../../utils/prisma'
-import type { DocumentListResponse } from '../../types/document.types'
+import type { DossierListResponse } from '../../types/dossier.types'
 
-export default defineEventHandler(async (event): Promise<DocumentListResponse> => {
+export default defineEventHandler(async (event): Promise<DossierListResponse> => {
   // Query params
   const query = getQuery(event)
   const page = Number(query.page) || 1
@@ -14,9 +14,9 @@ export default defineEventHandler(async (event): Promise<DocumentListResponse> =
     where.category = category
   }
 
-  // Get documents with counts
-  const [documents, total] = await Promise.all([
-    prisma.document.findMany({
+  // Get dossiers with counts
+  const [dossiers, total] = await Promise.all([
+    prisma.dossier.findMany({
       where,
       orderBy: { createdAt: 'desc' },
       skip: (page - 1) * pageSize,
@@ -32,11 +32,11 @@ export default defineEventHandler(async (event): Promise<DocumentListResponse> =
         }
       }
     }),
-    prisma.document.count({ where })
+    prisma.dossier.count({ where })
   ])
 
   return {
-    documents: documents.map((doc: any) => ({
+    dossiers: dossiers.map((doc: any) => ({
       id: doc.id,
       title: doc.title,
       sourceText: doc.sourceText,
@@ -57,3 +57,4 @@ export default defineEventHandler(async (event): Promise<DocumentListResponse> =
     pageSize
   }
 })
+

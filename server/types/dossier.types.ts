@@ -1,10 +1,10 @@
-import type { Document, DocumentSource, DocumentImage, DocumentNote } from '@prisma/client'
+import type { Dossier, DossierSource, DossierImage, DossierNote } from '@prisma/client'
 
 // =============================================================================
 // DTOs - CREATE
 // =============================================================================
 
-export interface CreateDocumentDTO {
+export interface CreateDossierDTO {
   title: string
   sourceText: string
   theme: string
@@ -12,7 +12,7 @@ export interface CreateDocumentDTO {
   category?: string
 }
 
-export interface CreateDocumentSourceDTO {
+export interface CreateDossierSourceDTO {
   title: string
   content: string
   sourceType: 'article' | 'paper' | 'quote' | 'transcript'
@@ -21,7 +21,7 @@ export interface CreateDocumentSourceDTO {
   order?: number
 }
 
-export interface CreateDocumentImageDTO {
+export interface CreateDossierImageDTO {
   description: string
   imageData?: Buffer
   mimeType?: string
@@ -30,7 +30,7 @@ export interface CreateDocumentImageDTO {
   order?: number
 }
 
-export interface CreateDocumentNoteDTO {
+export interface CreateDossierNoteDTO {
   content: string
   noteType?: 'insight' | 'connection' | 'question' | 'idea'
   order?: number
@@ -40,7 +40,7 @@ export interface CreateDocumentNoteDTO {
 // DTOs - UPDATE
 // =============================================================================
 
-export interface UpdateDocumentDTO {
+export interface UpdateDossierDTO {
   title?: string
   sourceText?: string
   theme?: string
@@ -54,7 +54,7 @@ export interface UpdateDocumentDTO {
 // DTOs - RESPONSE
 // =============================================================================
 
-export interface DocumentResponse {
+export interface DossierResponse {
   id: string
   title: string
   sourceText: string
@@ -73,14 +73,14 @@ export interface DocumentResponse {
   outputsCount?: number
 }
 
-export interface DocumentWithRelationsResponse extends DocumentResponse {
-  sources: DocumentSource[]
-  images: DocumentImage[]
-  notes: DocumentNote[]
+export interface DossierWithRelationsResponse extends DossierResponse {
+  sources: DossierSource[]
+  images: DossierImage[]
+  notes: DossierNote[]
 }
 
-export interface DocumentListResponse {
-  documents: DocumentResponse[]
+export interface DossierListResponse {
+  dossiers: DossierResponse[]
   total: number
   page: number
   pageSize: number

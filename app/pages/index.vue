@@ -1,6 +1,6 @@
 <script setup lang="ts">
-// Redirecionar para /documents (novo sistema Document-First)
-await navigateTo('/documents', { replace: true })
+// Redirecionar para /dossiers (novo sistema Document-First)
+await navigateTo('/dossiers', { replace: true })
 </script>
 
 <template>
@@ -525,3 +525,4 @@ input:checked + .slider:before {
   flex-shrink: 0;
 }
 </style>
+

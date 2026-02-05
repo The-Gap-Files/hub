@@ -49,13 +49,13 @@ enum OutputStatus {
 // MODELS - DOCUMENT-FIRST ARCHITECTURE
 // =============================================================================
 
-/// Documento fonte - centro do sistema, pode gerar múltiplos outputs
-model Document {
+/// Dossiê - centro do sistema, contém todos materiais de research e pode gerar múltiplos outputs
+model Dossier {
   id String @id @default(uuid())
 
   // Conteúdo principal
   title      String @db.VarChar(255)
-  sourceText String @db.Text // Texto principal do documento
+  sourceText String @db.Text // Texto principal do dossiê
   theme      String @db.Text // Tema/tópico principal
 
   // Research estruturada (extraída automaticamente ou manual)
@@ -69,9 +69,9 @@ model Document {
   isProcessed Boolean @default(false) // Se já foi analisado/estruturado pela IA
 
   // Relacionamentos
-  sources DocumentSource[] // Textos secundários (artigos, papers)
-  images  DocumentImage[] // Imagens de referência
-  notes   DocumentNote[] // Notas e insights do usuário
+  sources DossierSource[] // Textos secundários (artigos, papers)
+  images  DossierImage[] // Imagens de referência
+  notes   DossierNote[] // Notas e insights do usuário
   outputs Output[] // Outputs gerados (vídeos, threads, posts)
 
   // Timestamps
@@ -81,14 +81,14 @@ model Document {
   @@index([category])
   @@index([createdAt])
   @@index([isProcessed])
-  @@map("documents")
+  @@map("dossiers")
 }
 
-/// Texto secundário (artigo, paper, citação)
-model DocumentSource {
-  id         String   @id @default(uuid())
-  documentId String
-  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+/// Fonte secundária do dossiê (artigo, paper, citação)
+model DossierSource {
+  id        String  @id @default(uuid())
+  dossierId String
+  dossier   Dossier @relation(fields: [dossierId], references: [id], onDelete: Cascade)
 
   // Conteúdo
   title      String  @db.VarChar(255)
@@ -103,16 +103,16 @@ model DocumentSource {
   // Timestamps
   createdAt DateTime @default(now())
 
-  @@index([documentId])
+  @@index([dossierId])
   @@index([sourceType])
-  @@map("document_sources")
+  @@map("dossier_sources")
 }
 
-/// Imagem de referência para o documento
-model DocumentImage {
-  id         String   @id @default(uuid())
-  documentId String
-  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+/// Imagem de referência do dossiê
+model DossierImage {
+  id        String  @id @default(uuid())
+  dossierId String
+  dossier   Dossier @relation(fields: [dossierId], references: [id], onDelete: Cascade)
 
   // Conteúdo
   description String  @db.Text // Descrição da imagem
@@ -129,15 +129,15 @@ model DocumentImage {
   // Timestamps
   createdAt DateTime @default(now())
 
-  @@index([documentId])
-  @@map("document_images")
+  @@index([dossierId])
+  @@map("dossier_images")
 }
 
 /// Nota de research/insight do usuário
-model DocumentNote {
-  id         String   @id @default(uuid())
-  documentId String
-  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+model DossierNote {
+  id        String  @id @default(uuid())
+  dossierId String
+  dossier   Dossier @relation(fields: [dossierId], references: [id], onDelete: Cascade)
 
   // Conteúdo
   content  String  @db.Text
@@ -150,18 +150,18 @@ model DocumentNote {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([documentId])
+  @@index([dossierId])
   @@index([noteType])
-  @@map("document_notes")
+  @@map("dossier_notes")
 }
 
-/// Output gerado a partir de um documento (vídeo, thread, post, etc.)
+/// Output gerado a partir de um dossiê (vídeo, thread, post, etc.)
 model Output {
   id String @id @default(uuid())
 
-  // Relacionamento com documento fonte
-  documentId String
-  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  // Relacionamento com dossiê fonte
+  dossierId String
+  dossier   Dossier @relation(fields: [dossierId], references: [id], onDelete: Cascade)
 
   // Tipo e formato
   outputType OutputType // VIDEO_TEASER, VIDEO_FULL, etc.
@@ -223,7 +223,7 @@ model Output {
   updatedAt   DateTime  @updatedAt
   completedAt DateTime?
 
-  @@index([documentId])
+  @@index([dossierId])
   @@index([outputType])
   @@index([platform])
   @@index([status])

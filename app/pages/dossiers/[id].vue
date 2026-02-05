@@ -1,18 +1,18 @@
 <template>
   <div class="container mx-auto p-6 max-w-6xl">
     <div v-if="loading" class="text-center py-12">
-      <p>Carregando document...</p>
+      <p>Carregando dossier...</p>
     </div>
 
-    <div v-else-if="document" class="space-y-6">
+    <div v-else-if="dossier" class="space-y-6">
       <!-- Header -->
       <div class="flex justify-between items-start">
         <div>
-          <h1 class="text-3xl font-bold">{{ document.title }}</h1>
-          <p class="text-gray-600 mt-2">{{ document.theme }}</p>
+          <h1 class="text-3xl font-bold">{{ dossier.title }}</h1>
+          <p class="text-gray-600 mt-2">{{ dossier.theme }}</p>
           <div class="flex gap-2 mt-2">
             <span
-              v-for="tag in document.tags"
+              v-for="tag in dossier.tags"
               :key="tag"
               class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded"
             >
@@ -20,7 +20,7 @@
             </span>
           </div>
         </div>
-        <NuxtLink to="/documents" class="btn btn-secondary">
+        <NuxtLink to="/dossiers" class="btn btn-secondary">
           ← Voltar
         </NuxtLink>
       </div>
@@ -48,7 +48,7 @@
                 : 'border-transparent text-gray-500 hover:text-gray-700'
             ]"
           >
-            Outputs ({{ document.outputsCount || 0 }})
+            Outputs ({{ dossier.outputsCount || 0 }})
           </button>
         </nav>
       </div>
@@ -59,18 +59,18 @@
         <div class="border rounded-lg p-6">
           <h3 class="font-semibold text-lg mb-4">Texto Principal</h3>
           <div class="bg-gray-50 p-4 rounded max-h-96 overflow-y-auto">
-            <pre class="whitespace-pre-wrap text-sm">{{ document.sourceText }}</pre>
+            <pre class="whitespace-pre-wrap text-sm">{{ dossier.sourceText }}</pre>
           </div>
         </div>
 
         <!-- Fontes Secundárias -->
         <div class="border rounded-lg p-6">
           <h3 class="font-semibold text-lg mb-4">
-            Fontes Secundárias ({{ document.sources?.length || 0 }})
+            Fontes Secundárias ({{ dossier.sources?.length || 0 }})
           </h3>
-          <div v-if="document.sources && document.sources.length > 0" class="space-y-3">
+          <div v-if="dossier.sources && dossier.sources.length > 0" class="space-y-3">
             <div
-              v-for="source in document.sources"
+              v-for="source in dossier.sources"
               :key="source.id"
               class="border-l-4 border-blue-500 pl-4"
             >
@@ -85,11 +85,11 @@
         <!-- Imagens de Referência -->
         <div class="border rounded-lg p-6">
           <h3 class="font-semibold text-lg mb-4">
-            Imagens de Referência ({{ document.images?.length || 0 }})
+            Imagens de Referência ({{ dossier.images?.length || 0 }})
           </h3>
-          <div v-if="document.images && document.images.length > 0" class="grid grid-cols-2 gap-4">
+          <div v-if="dossier.images && dossier.images.length > 0" class="grid grid-cols-2 gap-4">
             <div
-              v-for="image in document.images"
+              v-for="image in dossier.images"
               :key="image.id"
               class="border rounded p-3"
             >
@@ -102,11 +102,11 @@
         <!-- Notas de Research -->
         <div class="border rounded-lg p-6">
           <h3 class="font-semibold text-lg mb-4">
-            Notas de Research ({{ document.notes?.length || 0 }})
+            Notas de Research ({{ dossier.notes?.length || 0 }})
           </h3>
-          <div v-if="document.notes && document.notes.length > 0" class="space-y-2">
+          <div v-if="dossier.notes && dossier.notes.length > 0" class="space-y-2">
             <div
-              v-for="note in document.notes"
+              v-for="note in dossier.notes"
               :key="note.id"
               class="bg-yellow-50 border-l-4 border-yellow-400 p-3"
             >
@@ -196,21 +196,21 @@
 
 <script setup lang="ts">
 const route = useRoute()
-const documentId = route.params.id as string
+const dossierId = route.params.id as string
 
-const document = ref<any>(null)
+const dossier = ref<any>(null)
 const loading = ref(true)
 const activeTab = ref<'content' | 'outputs'>('content')
 const showOutputGenerator = ref(false)
 const selectedOutputs = ref<string[]>([])
 const generatingOutputs = ref(false)
 
-async function loadDocument() {
+async function loadDossier() {
   loading.value = true
   try {
-    document.value = await $fetch(`/api/documents/${documentId}`)
+    dossier.value = await $fetch(`/api/dossiers/${dossierId}`)
   } catch (error) {
-    console.error('Erro ao carregar document:', error)
+    console.error('Erro ao carregar dossier:', error)
   } finally {
     loading.value = false
   }
@@ -259,7 +259,7 @@ async function generateOutputs() {
     })
 
     // Criar outputs
-    const response = await $fetch(`/api/documents/${documentId}/outputs`, {
+    const response = await $fetch(`/api/dossiers/${dossierId}/outputs`, {
       method: 'POST',
       body: { outputs: outputConfigs }
     })
@@ -271,8 +271,8 @@ async function generateOutputs() {
     // Mudar para tab de outputs
     activeTab.value = 'outputs'
 
-    // Recarregar document
-    await loadDocument()
+    // Recarregar dossier
+    await loadDossier()
 
     alert(`${response.total} output(s) criado(s) com sucesso!`)
   } catch (error: any) {
@@ -284,6 +284,6 @@ async function generateOutputs() {
 }
 
 onMounted(() => {
-  loadDocument()
+  loadDossier()
 })
 </script>

@@ -2,7 +2,7 @@
  * Output Pipeline Service
  * 
  * Orquestra todo o fluxo de criação de output (vídeo, thread, post, etc.)
- * a partir de um Document.
+ * a partir de um dossier.
  * 
  * Suporta:
  * - VIDEO_TEASER (15-60s, vertical, cliffhanger)
@@ -39,11 +39,11 @@ export class OutputPipelineService {
    */
   async execute(outputId: string): Promise<OutputPipelineResult> {
     try {
-      // 1. Carregar Output com Document e todas as relações
+      // 1. Carregar Output com dossier e todas as relações
       const output = await prisma.output.findUnique({
         where: { id: outputId },
         include: {
-          document: {
+          dossier: {
             include: {
               sources: { orderBy: { order: 'asc' } },
               images: { orderBy: { order: 'asc' } },
@@ -179,36 +179,36 @@ export class OutputPipelineService {
   }
 
   /**
-   * Gera roteiro com contexto rico do Document
+   * Gera roteiro com contexto rico do dossier
    */
   private async generateScript(outputId: string, output: any) {
     const scriptProvider = providerManager.getScriptProvider()
-    const document = output.document
+    const dossier = output.dossier
 
     // Construir prompt com TODAS as fontes
     const promptContext: ScriptGenerationRequest = {
-      theme: document.theme,
+      theme: dossier.theme,
       language: output.language || 'pt-BR',
       narrationLanguage: output.narrationLanguage || 'pt-BR',
       
-      // DOCUMENT SOURCES (RICO)
-      sourceDocument: document.sourceText,
+      // dossier SOURCES (RICO)
+      sourceDossier: dossier.sourceText,
       
       // Fontes secundárias
-      additionalSources: document.sources?.map((s: any) => ({
+      additionalSources: dossier.sources?.map((s: any) => ({
         title: s.title,
         content: s.content,
         type: s.sourceType
       })) || [],
       
       // Insights do usuário
-      userNotes: document.notes?.map((n: any) => n.content) || [],
+      userNotes: dossier.notes?.map((n: any) => n.content) || [],
       
       // Referências visuais (descrições)
-      visualReferences: document.images?.map((i: any) => i.description) || [],
+      visualReferences: dossier.images?.map((i: any) => i.description) || [],
       
       // Dados estruturados
-      researchData: document.researchData,
+      researchData: dossier.researchData,
       
       // Configuração de duração e tipo
       targetDuration: output.duration || 300,
@@ -419,3 +419,4 @@ export class OutputPipelineService {
 }
 
 export const outputPipelineService = new OutputPipelineService()
+

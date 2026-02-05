@@ -1,29 +1,29 @@
 <template>
   <div class="container mx-auto p-6">
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-3xl font-bold">Documents</h1>
-      <NuxtLink to="/documents/new" class="btn btn-primary">
-        + Novo Document
+      <h1 class="text-3xl font-bold">Dossiers</h1>
+      <NuxtLink to="/Dossiers/new" class="btn btn-primary">
+        + Novo Dossier
       </NuxtLink>
     </div>
 
     <div v-if="loading" class="text-center py-12">
-      <p>Carregando documents...</p>
+      <p>Carregando Dossiers...</p>
     </div>
 
-    <div v-else-if="documents.length === 0" class="text-center py-12">
-      <p class="text-gray-500">Nenhum document criado ainda.</p>
-      <NuxtLink to="/documents/new" class="btn btn-primary mt-4">
-        Criar Primeiro Document
+    <div v-else-if="Dossiers.length === 0" class="text-center py-12">
+      <p class="text-gray-500">Nenhum Dossier criado ainda.</p>
+      <NuxtLink to="/Dossiers/new" class="btn btn-primary mt-4">
+        Criar Primeiro Dossier
       </NuxtLink>
     </div>
 
     <div v-else class="grid gap-4">
       <div
-        v-for="doc in documents"
+        v-for="doc in Dossiers"
         :key="doc.id"
         class="border rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer"
-        @click="navigateTo(`/documents/${doc.id}`)"
+        @click="navigateTo(`/Dossiers/${doc.id}`)"
       >
         <div class="flex justify-between items-start">
           <div class="flex-1">
@@ -85,22 +85,22 @@
 </template>
 
 <script setup lang="ts">
-const documents = ref<any[]>([])
+const Dossiers = ref<any[]>([])
 const loading = ref(true)
 const page = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
 
-async function loadDocuments() {
+async function loadDossiers() {
   loading.value = true
   try {
-    const response = await $fetch('/api/documents', {
+    const response = await $fetch('/api/Dossiers', {
       query: { page: page.value, pageSize: pageSize.value }
     })
-    documents.value = response.documents
+    Dossiers.value = response.Dossiers
     total.value = response.total
   } catch (error) {
-    console.error('Erro ao carregar documents:', error)
+    console.error('Erro ao carregar Dossiers:', error)
   } finally {
     loading.value = false
   }
@@ -108,10 +108,11 @@ async function loadDocuments() {
 
 function changePage(newPage: number) {
   page.value = newPage
-  loadDocuments()
+  loadDossiers()
 }
 
 onMounted(() => {
-  loadDocuments()
+  loadDossiers()
 })
 </script>
+

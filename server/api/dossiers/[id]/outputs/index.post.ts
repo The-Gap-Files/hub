@@ -29,24 +29,24 @@ const CreateOutputsSchema = z.object({
 })
 
 export default defineEventHandler(async (event): Promise<CreateOutputsResponse> => {
-  const documentId = getRouterParam(event, 'id')
+  const dossierId = getRouterParam(event, 'id')
 
-  if (!documentId) {
+  if (!dossierId) {
     throw createError({
       statusCode: 400,
-      message: 'Document ID is required'
+      message: 'Dossier ID is required'
     })
   }
 
-  // Verificar se document existe
-  const document = await prisma.document.findUnique({
-    where: { id: documentId }
+  // Verificar se dossier existe
+  const dossier = await prisma.dossier.findUnique({
+    where: { id: dossierId }
   })
 
-  if (!document) {
+  if (!dossier) {
     throw createError({
       statusCode: 404,
-      message: 'Document not found'
+      message: 'Dossier not found'
     })
   }
 
@@ -59,7 +59,7 @@ export default defineEventHandler(async (event): Promise<CreateOutputsResponse> 
     data.outputs.map((outputData: any) =>
       prisma.output.create({
         data: {
-          documentId,
+          dossierId,
           outputType: outputData.outputType,
           format: outputData.format,
           title: outputData.title,
@@ -85,7 +85,7 @@ export default defineEventHandler(async (event): Promise<CreateOutputsResponse> 
   return {
     outputs: outputs.map((output: any) => ({
       id: output.id,
-      documentId: output.documentId,
+      dossierId: output.dossierId,
       outputType: output.outputType,
       format: output.format,
       title: output.title || undefined,

@@ -15,9 +15,9 @@
           <span class="nav-label">Dashboard</span>
         </NuxtLink>
 
-        <NuxtLink to="/documents" class="nav-item" active-class="active">
+        <NuxtLink to="/dossiers" class="nav-item" active-class="active">
           <span class="nav-icon">📁</span>
-          <span class="nav-label">Documents</span>
+          <span class="nav-label">Dossiers</span>
         </NuxtLink>
 
         <div class="nav-divider"></div>
@@ -230,3 +230,4 @@
   }
 }
 </style>
+
