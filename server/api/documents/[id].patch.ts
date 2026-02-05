@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { prisma } from '~/server/utils/prisma'
-import type { UpdateDocumentDTO, DocumentResponse } from '~/server/types/document.types'
+import { prisma } from '../../utils/prisma'
+import type { UpdateDocumentDTO, DocumentResponse } from '../../types/document.types'
 
 // Schema de validação
 const UpdateDocumentSchema = z.object({

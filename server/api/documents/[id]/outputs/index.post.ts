@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { prisma } from '~/server/utils/prisma'
-import type { CreateOutputsDTO, CreateOutputsResponse } from '~/server/types/output.types'
+import { prisma } from '../../../utils/prisma'
+import type { CreateOutputsDTO, CreateOutputsResponse } from '../../../types/output.types'
 
 // Schema de validação
 const OutputTypeEnum = z.enum(['VIDEO_TEASER', 'VIDEO_FULL', 'TWITTER_THREAD', 'LINKEDIN_POST', 'INSTAGRAM_POST', 'PODCAST_EPISODE', 'BLOG_ARTICLE'])
@@ -56,7 +56,7 @@ export default defineEventHandler(async (event): Promise<CreateOutputsResponse> 
 
   // Criar outputs em batch
   const outputs = await prisma.$transaction(
-    data.outputs.map((outputData) =>
+    data.outputs.map((outputData: any) =>
       prisma.output.create({
         data: {
           documentId,
@@ -83,7 +83,7 @@ export default defineEventHandler(async (event): Promise<CreateOutputsResponse> 
   )
 
   return {
-    outputs: outputs.map((output) => ({
+    outputs: outputs.map((output: any) => ({
       id: output.id,
       documentId: output.documentId,
       outputType: output.outputType,

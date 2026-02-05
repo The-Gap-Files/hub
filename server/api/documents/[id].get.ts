@@ -1,5 +1,5 @@
-import { prisma } from '~/server/utils/prisma'
-import type { DocumentWithRelationsResponse } from '~/server/types/document.types'
+import { prisma } from '../../utils/prisma'
+import type { DocumentWithRelationsResponse } from '../../types/document.types'
 
 export default defineEventHandler(async (event): Promise<DocumentWithRelationsResponse> => {
   const id = getRouterParam(event, 'id')

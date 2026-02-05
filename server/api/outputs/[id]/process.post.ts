@@ -1,5 +1,5 @@
-import { outputPipelineService } from '~/server/services/pipeline/output-pipeline.service'
-import { prisma } from '~/server/utils/prisma'
+import { outputPipelineService } from '../../../services/pipeline/output-pipeline.service'
+import { prisma } from '../../../utils/prisma'
 
 export default defineEventHandler(async (event) => {
   const outputId = getRouterParam(event, 'id')
@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Disparar pipeline em background (não bloqueia request)
-  outputPipelineService.execute(outputId).catch((error) => {
+  outputPipelineService.execute(outputId).catch((error: any) => {
     console.error(`[OutputPipeline] Error processing ${outputId}:`, error)
   })
 

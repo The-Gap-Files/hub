@@ -1,5 +1,5 @@
-import { prisma } from '~/server/utils/prisma'
-import type { DocumentListResponse } from '~/server/types/document.types'
+import { prisma } from '../../utils/prisma'
+import type { DocumentListResponse } from '../../types/document.types'
 
 export default defineEventHandler(async (event): Promise<DocumentListResponse> => {
   // Query params
@@ -36,7 +36,7 @@ export default defineEventHandler(async (event): Promise<DocumentListResponse> =
   ])
 
   return {
-    documents: documents.map((doc) => ({
+    documents: documents.map((doc: any) => ({
       id: doc.id,
       title: doc.title,
       sourceText: doc.sourceText,

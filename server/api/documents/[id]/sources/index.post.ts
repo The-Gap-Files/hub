@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { prisma } from '~/server/utils/prisma'
+import { prisma } from '../../../utils/prisma'
 
 const CreateSourceSchema = z.object({
   title: z.string().min(1).max(255),

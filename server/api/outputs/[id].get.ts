@@ -1,5 +1,5 @@
-import { prisma } from '~/server/utils/prisma'
-import type { OutputWithRelationsResponse } from '~/server/types/output.types'
+import { prisma } from '../../utils/prisma'
+import type { OutputWithRelationsResponse } from '../../types/output.types'
 
 export default defineEventHandler(async (event): Promise<OutputWithRelationsResponse> => {
   const id = getRouterParam(event, 'id')
@@ -74,7 +74,7 @@ export default defineEventHandler(async (event): Promise<OutputWithRelationsResp
     document: output.document,
     scriptStyle: output.scriptStyle || undefined,
     visualStyle: output.visualStyle || undefined,
-    relatedOutputs: output.relationsFrom.map((rel) => ({
+    relatedOutputs: output.relationsFrom.map((rel: any) => ({
       id: rel.relatedOutput.id,
       outputType: rel.relatedOutput.outputType,
       relationType: rel.relationType

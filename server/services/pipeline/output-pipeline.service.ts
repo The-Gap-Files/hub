@@ -239,9 +239,9 @@ export class OutputPipelineService {
       data: {
         outputId,
         summary: scriptResponse.summary || '',
-        fullText: scriptResponse.text,
-        wordCount: scriptResponse.text.split(/\s+/).length,
-        provider: scriptProvider.name as any,
+        fullText: scriptResponse.fullText,
+        wordCount: scriptResponse.wordCount,
+        provider: scriptProvider.getName() as any,
         modelUsed: scriptResponse.model,
         promptUsed: JSON.stringify(promptContext)
       }
@@ -297,9 +297,9 @@ export class OutputPipelineService {
       await prisma.sceneImage.create({
         data: {
           sceneId: scene.id,
-          provider: imageProvider.name as any,
+          provider: imageProvider.getName() as any,
           promptUsed: scene.visualDescription,
-          fileData: firstImage.buffer,
+          fileData: Buffer.from(firstImage.buffer) as any,
           mimeType: 'image/png',
           originalSize: firstImage.buffer.length,
           width: firstImage.width,
@@ -329,9 +329,9 @@ export class OutputPipelineService {
       data: {
         outputId,
         type: 'narration',
-        provider: ttsProvider.name as any,
+        provider: ttsProvider.getName() as any,
         voiceId: output.voiceId,
-        fileData: audioResponse.audioBuffer,
+        fileData: Buffer.from(audioResponse.audioBuffer) as any,
         mimeType: 'audio/mpeg',
         originalSize: audioResponse.audioBuffer.length,
         duration: audioResponse.duration
@@ -359,7 +359,7 @@ export class OutputPipelineService {
       if (!selectedImage?.fileData) continue
 
       const request: MotionGenerationRequest = {
-        imageBuffer: selectedImage.fileData,
+        imageBuffer: Buffer.from(selectedImage.fileData!) as any,
         prompt: scene.visualDescription,
         duration: 5,
         aspectRatio: output.aspectRatio || '16:9'
@@ -370,9 +370,9 @@ export class OutputPipelineService {
       await prisma.sceneVideo.create({
         data: {
           sceneId: scene.id,
-          provider: motionProvider.name as any,
+          provider: motionProvider.getName() as any,
           promptUsed: scene.visualDescription,
-          fileData: videoResponse.video.videoBuffer,
+          fileData: Buffer.from(videoResponse.video.videoBuffer) as any,
           mimeType: 'video/mp4',
           originalSize: videoResponse.video.videoBuffer.length,
           duration: videoResponse.video.duration || 5,
