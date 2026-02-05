@@ -15,9 +15,9 @@
           <span class="nav-label">Dashboard</span>
         </NuxtLink>
 
-        <NuxtLink to="/videos" class="nav-item" active-class="active">
-          <span class="nav-icon">🎥</span>
-          <span class="nav-label">Vídeos</span>
+        <NuxtLink to="/documents" class="nav-item" active-class="active">
+          <span class="nav-icon">📁</span>
+          <span class="nav-label">Documents</span>
         </NuxtLink>
 
         <div class="nav-divider"></div>
