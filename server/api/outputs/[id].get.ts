@@ -15,7 +15,7 @@ export default defineEventHandler(async (event): Promise<OutputWithRelationsResp
   const output = await prisma.output.findUnique({
     where: { id },
     include: {
-      document: {
+      dossier: {
         select: {
           id: true,
           title: true,
@@ -56,7 +56,7 @@ export default defineEventHandler(async (event): Promise<OutputWithRelationsResp
 
   return {
     id: output.id,
-    documentId: output.documentId,
+    dossierId: output.dossierId,
     outputType: output.outputType,
     format: output.format,
     title: output.title || undefined,
@@ -71,13 +71,13 @@ export default defineEventHandler(async (event): Promise<OutputWithRelationsResp
     createdAt: output.createdAt,
     updatedAt: output.updatedAt,
     completedAt: output.completedAt || undefined,
-    document: output.document,
+    dossier: output.dossier,
     scriptStyle: output.scriptStyle || undefined,
     visualStyle: output.visualStyle || undefined,
-    relatedOutputs: output.relationsFrom.map((rel: any) => ({
+    relatedOutputs: output.relationsFrom?.map((rel: any) => ({
       id: rel.relatedOutput.id,
       outputType: rel.relatedOutput.outputType,
       relationType: rel.relationType
-    }))
+    })) || []
   }
 })
