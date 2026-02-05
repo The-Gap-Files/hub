@@ -119,7 +119,7 @@ async function handleSubmit() {
 
   submitting.value = true
   try {
-    const Dossier = await $fetch('/api/Dossiers', {
+    const dossier = await $fetch('/api/dossiers', {
       method: 'POST',
       body: {
         title: formData.value.title,
@@ -130,11 +130,11 @@ async function handleSubmit() {
       }
     })
 
-    // Redirecionar para página do Dossier
-    await navigateTo(`/Dossiers/${Dossier.id}`)
+    // Redirecionar para página do dossier
+    await navigateTo(`/dossiers/${dossier.id}`)
   } catch (error: any) {
-    console.error('Erro ao criar Dossier:', error)
-    alert(error.data?.message || 'Erro ao criar Dossier')
+    console.error('Erro ao criar dossier:', error)
+    alert(error.data?.message || 'Erro ao criar dossier')
   } finally {
     submitting.value = false
   }

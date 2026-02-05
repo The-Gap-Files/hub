@@ -27,19 +27,19 @@
       >
         <div class="flex justify-between items-start">
           <div class="flex-1">
-            <h3 class="text-xl font-semibold mb-2">{{ doc.title }}</h3>
-            <p class="text-gray-600 mb-2 line-clamp-2">{{ doc.theme }}</p>
+            <h3 class="text-xl font-semibold mb-2">{{ dossier.title }}</h3>
+            <p class="text-gray-600 mb-2 line-clamp-2">{{ dossier.theme }}</p>
             
             <div class="flex gap-4 text-sm text-gray-500">
-              <span>📄 {{ doc.sourcesCount || 0 }} fontes</span>
-              <span>🖼️ {{ doc.imagesCount || 0 }} imagens</span>
-              <span>📝 {{ doc.notesCount || 0 }} notas</span>
-              <span>🎬 {{ doc.outputsCount || 0 }} outputs</span>
+              <span>📄 {{ dossier.sourcesCount || 0 }} fontes</span>
+              <span>🖼️ {{ dossier.imagesCount || 0 }} imagens</span>
+              <span>📝 {{ dossier.notesCount || 0 }} notas</span>
+              <span>🎬 {{ dossier.outputsCount || 0 }} outputs</span>
             </div>
 
-            <div v-if="doc.tags && doc.tags.length > 0" class="flex gap-2 mt-3">
+            <div v-if="dossier.tags && dossier.tags.length > 0" class="flex gap-2 mt-3">
               <span
-                v-for="tag in doc.tags"
+                v-for="tag in dossier.tags"
                 :key="tag"
                 class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded"
               >
@@ -49,12 +49,12 @@
           </div>
 
           <div class="text-right text-sm text-gray-500">
-            <p>{{ new Date(doc.createdAt).toLocaleDateString('pt-BR') }}</p>
+            <p>{{ new Date(dossier.createdAt).toLocaleDateString('pt-BR') }}</p>
             <span
-              v-if="doc.category"
+              v-if="dossier.category"
               class="inline-block mt-2 px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
             >
-              {{ doc.category }}
+              {{ dossier.category }}
             </span>
           </div>
         </div>
