@@ -8,11 +8,11 @@
     </div>
 
     <div v-if="loading" class="text-center py-12">
-      <p>Carregando Dossiers...</p>
+      <p>Carregando dossiers...</p>
     </div>
 
-    <div v-else-if="Dossiers.length === 0" class="text-center py-12">
-      <p class="text-gray-500">Nenhum Dossier criado ainda.</p>
+    <div v-else-if="dossiers.length === 0" class="text-center py-12">
+      <p class="text-gray-500">Nenhum dossier criado ainda.</p>
       <NuxtLink to="/dossiers/new" class="btn btn-primary mt-4">
         Criar Primeiro Dossier
       </NuxtLink>
