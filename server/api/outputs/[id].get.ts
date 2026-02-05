@@ -12,7 +12,7 @@ export default defineEventHandler(async (event): Promise<OutputWithRelationsResp
   }
 
   // Buscar output com relações
-  const output = await prisma.output.findUnique({
+  const output: any = await prisma.output.findUnique({
     where: { id },
     include: {
       dossier: {
@@ -22,18 +22,8 @@ export default defineEventHandler(async (event): Promise<OutputWithRelationsResp
           theme: true
         }
       },
-      scriptStyle: {
-        select: {
-          id: true,
-          name: true
-        }
-      },
-      visualStyle: {
-        select: {
-          id: true,
-          name: true
-        }
-      },
+      scriptStyle: true,
+      visualStyle: true,
       relationsFrom: {
         include: {
           relatedOutput: {
