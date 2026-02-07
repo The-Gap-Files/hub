@@ -8,20 +8,24 @@ datasource db {
 
 /// Dossiê - centro do sistema, contém todos materiais de research e pode gerar múltiplos outputs
 model Dossier {
-  id           String          @id @default(uuid())
-  title        String          @db.VarChar(255)
-  sourceText   String
-  theme        String
-  researchData Json?
-  tags         String[]
-  category     String?         @db.VarChar(50)
-  isProcessed  Boolean         @default(false)
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
-  images       DossierImage[]
-  notes        DossierNote[]
-  sources      DossierSource[]
-  outputs      Output[]
+  id                     String          @id @default(uuid())
+  title                  String          @db.VarChar(255)
+  sourceText             String
+  theme                  String
+  researchData           Json?
+  tags                   String[]
+  category               String?         @db.VarChar(50)
+  isProcessed            Boolean         @default(false)
+  visualIdentityContext  String?         @db.VarChar(500) // Contexto visual do dossier
+  preferredVisualStyleId String?
+  preferredSeedId        String?
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+  images                 DossierImage[]
+  notes                  DossierNote[]
+  sources                DossierSource[]
+  outputs                Output[]
+  preferredSeed          Seed?           @relation("DossierPreferredSeed", fields: [preferredSeedId], references: [id], onDelete: SetNull)
 
   @@index([category])
   @@index([createdAt])
@@ -82,47 +86,52 @@ model DossierNote {
 
 /// Output gerado a partir de um dossiê (vídeo, thread, post, etc.)
 model Output {
-  id                String              @id @default(uuid())
-  outputType        OutputType
-  format            String              @db.VarChar(50)
-  title             String?             @db.VarChar(255)
-  duration          Int?
-  aspectRatio       String?             @db.VarChar(10)
-  platform          String?             @db.VarChar(50)
-  targetWPM         Int?                @default(150)
-  language          String              @default("pt-BR") @db.VarChar(10)
-  narrationLanguage String              @default("pt-BR") @db.VarChar(10)
-  voiceId           String?             @db.VarChar(100)
-  enableMotion      Boolean             @default(false)
-  mustInclude       String?
-  mustExclude       String?
-  scriptStyleId     String?
-  visualStyleId     String?
-  seedId            String?
-  status            OutputStatus        @default(PENDING)
-  scriptApproved    Boolean             @default(false)
-  imagesApproved    Boolean             @default(false)
-  videosApproved    Boolean             @default(false)
-  outputData        Bytes?
-  outputMimeType    String?             @db.VarChar(50)
-  outputSize        Int?
-  thumbnailPath     String?             @db.VarChar(500)
-  errorMessage      String?
-  pipelineLog       Json?
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  completedAt       DateTime?
-  dossierId         String
-  audioTracks       AudioTrack[]
-  relationsFrom     OutputRelation[]    @relation("MainOutput")
-  relationsTo       OutputRelation[]    @relation("RelatedOutput")
-  dossier           Dossier             @relation(fields: [dossierId], references: [id], onDelete: Cascade)
-  scriptStyle       ScriptStyle?        @relation(fields: [scriptStyleId], references: [id])
-  seed              Seed?               @relation("OutputSeed", fields: [seedId], references: [id])
-  visualStyle       VisualStyle?        @relation(fields: [visualStyleId], references: [id])
-  executions        PipelineExecution[]
-  scenes            Scene[]
-  script            Script?
+  id                 String              @id @default(uuid())
+  outputType         OutputType
+  format             String              @db.VarChar(50)
+  title              String?             @db.VarChar(255)
+  duration           Int?
+  aspectRatio        String?             @db.VarChar(10)
+  platform           String?             @db.VarChar(50)
+  targetWPM          Int                 @default(150)
+  language           String              @default("pt-BR") @db.VarChar(10)
+  narrationLanguage  String              @default("pt-BR") @db.VarChar(10)
+  voiceId            String?             @db.VarChar(100)
+  enableMotion       Boolean             @default(false)
+  objective          String?             // Objetivo editorial: diretriz narrativa que governa a geração do roteiro
+  mustInclude        String?
+  mustExclude        String?
+  scriptStyleId      String?
+  visualStyleId      String?
+  seedId             String?
+  status             OutputStatus        @default(PENDING)
+  scriptApproved     Boolean             @default(false)
+  imagesApproved     Boolean             @default(false)
+  bgmApproved        Boolean             @default(false)
+  audioApproved      Boolean             @default(false)
+  videosApproved     Boolean             @default(false)
+  outputData         Bytes?
+  outputMimeType     String?             @db.VarChar(50)
+  outputSize         Int?
+  captionedVideoData Bytes?
+  captionedVideoSize Int?
+  thumbnailPath      String?             @db.VarChar(500)
+  outputPath         String?             @db.VarChar(500)
+  errorMessage       String?
+  pipelineLog        Json?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  completedAt        DateTime?
+  dossierId          String
+  audioTracks        AudioTrack[]
+  relationsFrom      OutputRelation[]    @relation("MainOutput")
+  relationsTo        OutputRelation[]    @relation("RelatedOutput")
+  dossier            Dossier             @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+  seed               Seed?               @relation("OutputSeed", fields: [seedId], references: [id], onDelete: SetNull)
+  executions         PipelineExecution[]
+  scenes             Scene[]
+  script             Script?
+  costLogs           CostLog[]
 
   @@index([dossierId])
   @@index([outputType])
@@ -149,17 +158,20 @@ model OutputRelation {
 
 /// Roteiro completo do output
 model Script {
-  id         String     @id @default(uuid())
-  outputId   String     @unique
-  summary    String
-  fullText   String
-  wordCount  Int        @default(0)
-  provider   AIProvider
-  modelUsed  String?    @db.VarChar(100)
-  promptUsed String?
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  output     Output     @relation(fields: [outputId], references: [id], onDelete: Cascade)
+  id                       String                 @id @default(uuid())
+  outputId                 String                 @unique
+  summary                  String
+  fullText                 String
+  wordCount                Int                    @default(0)
+  provider                 AIProvider
+  modelUsed                String?                @db.VarChar(100)
+  promptUsed               String?
+  backgroundMusicPrompt    String?                // Prompt Stable Audio 2.5 para música única (TikTok/Instagram)
+  backgroundMusicVolume    Float?                 // Volume em dB para mixagem (-24 a -6)
+  createdAt                DateTime               @default(now())
+  updatedAt                DateTime               @updatedAt
+  output                   Output                 @relation(fields: [outputId], references: [id], onDelete: Cascade)
+  backgroundMusicTracks    BackgroundMusicTrack[] // Lista de tracks com timestamps (YouTube Cinematic)
 
   @@map("scripts")
 }
@@ -174,15 +186,33 @@ model Scene {
   audioDescription  String?
   startTime         Float?
   endTime           Float?
+  estimatedDuration Float        @default(5)
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
   images            SceneImage[]
   videos            SceneVideo[]
+  audioTracks       AudioTrack[]
   output            Output       @relation(fields: [outputId], references: [id], onDelete: Cascade)
 
   @@index([outputId])
   @@index([outputId, order])
   @@map("scenes")
+}
+
+/// Track de música de fundo com timestamps (para vídeos longos YouTube)
+model BackgroundMusicTrack {
+  id          String   @id @default(uuid())
+  scriptId    String
+  prompt      String   // Prompt Stable Audio 2.5 (gênero, instrumentos, BPM, mood)
+  volume      Float    @default(-18) // Volume em dB para mixagem (-24 a -6)
+  startTime   Float    // Tempo de início em segundos
+  endTime     Float?   // Tempo de fim em segundos (null = até o final)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  script      Script   @relation(fields: [scriptId], references: [id], onDelete: Cascade)
+
+  @@index([scriptId])
+  @@map("background_music_tracks")
 }
 
 /// Imagem gerada para uma cena
@@ -229,6 +259,7 @@ model SceneVideo {
 model AudioTrack {
   id           String     @id @default(uuid())
   outputId     String
+  sceneId      String?
   type         String     @db.VarChar(50)
   provider     AIProvider
   voiceId      String?    @db.VarChar(100)
@@ -236,10 +267,13 @@ model AudioTrack {
   mimeType     String?    @db.VarChar(50)
   originalSize Int?
   duration     Float?
+  alignment    Json?      /// Word-level timestamps do ElevenLabs: [{word, startTime, endTime}]
   createdAt    DateTime   @default(now())
   output       Output     @relation(fields: [outputId], references: [id], onDelete: Cascade)
+  scene        Scene?     @relation(fields: [sceneId], references: [id], onDelete: SetNull)
 
   @@index([outputId])
+  @@index([sceneId])
   @@map("audio_tracks")
 }
 
@@ -274,65 +308,41 @@ model PipelineExecution {
   @@map("pipeline_executions")
 }
 
-/// Estilos visuais disponíveis para geração de imagens e vídeos
-model VisualStyle {
-  id              String   @id @default(uuid())
-  name            String   @db.VarChar(100)
-  description     String
-  baseStyle       String
-  lightingTags    String
-  atmosphereTags  String
-  compositionTags String
-  tags            String
-  order           Int      @default(0)
-  isActive        Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  outputs         Output[]
-  seeds           Seed[]
-
-  @@index([isActive, order])
-  @@map("visual_styles")
-}
-
-/// Estilos de roteiro disponíveis para geração de scripts
-model ScriptStyle {
-  id           String   @id @default(uuid())
-  name         String   @db.VarChar(100)
-  description  String
-  instructions String
-  order        Int      @default(0)
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  outputs      Output[]
-
-  @@index([isActive, order])
-  @@map("script_styles")
-}
+/// NOTA: VisualStyle e ScriptStyle foram migrados para constantes em
+/// server/constants/visual-styles.ts e server/constants/script-styles.ts
+/// Os campos scriptStyleId e visualStyleId agora armazenam slugs de string.
 
 /// Seeds para geração de imagens/vídeos (receitas visuais)
 model Seed {
-  id            String      @id @default(uuid())
-  name          String      @db.VarChar(100)
-  description   String?
-  value         Int
-  visualStyleId String
-  category      String?     @db.VarChar(50)
-  tags          String?
-  usageCount    Int         @default(0)
-  isDefault     Boolean     @default(false)
-  isActive      Boolean     @default(true)
-  previewUrl    String?     @db.VarChar(500)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  outputs       Output[]    @relation("OutputSeed")
-  visualStyle   VisualStyle @relation(fields: [visualStyleId], references: [id], onDelete: Cascade)
+  id                  String    @id @default(uuid())
+  value               Int       @unique
+  usageCount          Int       @default(0)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  outputs             Output[]  @relation("OutputSeed")
+  preferredByDossiers Dossier[] @relation("DossierPreferredSeed")
 
-  @@unique([visualStyleId, value])
-  @@index([visualStyleId, isActive])
-  @@index([isDefault])
   @@map("seeds")
+}
+
+/// Log de custos de API - append-only ledger desacoplado dos artefatos
+model CostLog {
+  id        String   @id @default(uuid())
+  outputId  String
+  resource  String   @db.VarChar(50)  /// "script" | "image" | "narration" | "bgm" | "motion"
+  action    String   @db.VarChar(20)  /// "create" | "recreate"
+  provider  String   @db.VarChar(30)  /// "REPLICATE" | "ELEVENLABS" | "OPENAI"
+  model     String?  @db.VarChar(100) /// ex: "black-forest-labs/flux-schnell"
+  cost      Float                     /// Custo em USD
+  metadata  Json?                     /// Dados de cálculo: predict_time, characters, tokens, etc
+  detail    String?  @db.VarChar(255) /// Descrição legível: "Scene 3/12 - image generation"
+  createdAt DateTime @default(now())
+  output    Output   @relation(fields: [outputId], references: [id], onDelete: Restrict)
+
+  @@index([outputId])
+  @@index([resource])
+  @@index([createdAt])
+  @@map("cost_logs")
 }
 
 /// Tipo de provedor de IA usado

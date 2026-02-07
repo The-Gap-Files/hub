@@ -49,7 +49,7 @@ describe('Dossier Attachments API', () => {
         data: {
           dossierId,
           description: 'Foto de Trento em 1475',
-          imageData: compressedData,
+          imageData: compressedData as any,
           mimeType: 'image/png',
           tags: 'história, mapa'
         }

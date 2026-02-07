@@ -26,7 +26,7 @@ export class ReplicateMotionProvider implements IMotionProvider {
   }
 
   getName(): string {
-    return 'Replicate (Wan Video 2.2 Fast)'
+    return 'REPLICATE'
   }
 
   async generate(request: MotionGenerationRequest): Promise<MotionGenerationResponse> {
@@ -50,8 +50,13 @@ export class ReplicateMotionProvider implements IMotionProvider {
 
       console.log(`[ReplicateMotion] Using model: ${this.model}`)
 
-      // Execute generation
-      const output = await this.client.run(this.model as any, { input })
+      // Execute generation - capturando predict_time via progress callback
+      let predictTime: number | undefined
+      const output = await this.client.run(this.model as any, { input }, (prediction: any) => {
+        if (prediction.metrics?.predict_time) {
+          predictTime = prediction.metrics.predict_time
+        }
+      })
 
       // Output is typically a URL string or array of strings
       const videoUrl = Array.isArray(output) ? output[0] : (output as unknown as string)
@@ -70,10 +75,13 @@ export class ReplicateMotionProvider implements IMotionProvider {
         format: 'mp4'
       }
 
+      console.log(`[ReplicateMotion] predict_time: ${predictTime?.toFixed(2) ?? 'N/A'}s`)
+
       return {
         video: motion,
         provider: 'REPLICATE',
-        model: this.model
+        model: this.model,
+        predictTime
       }
 
     } catch (error: any) {

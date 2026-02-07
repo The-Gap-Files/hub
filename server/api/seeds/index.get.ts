@@ -1,25 +1,9 @@
 import { prisma } from '../../utils/prisma'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async () => {
   try {
-    const query = getQuery(event)
-    const visualStyleId = query.visualStyleId as string | undefined
-    const isActive = query.isActive === 'true' ? true : query.isActive === 'false' ? false : undefined
-    const isDefault = query.isDefault === 'true' ? true : undefined
-
     const seeds = await prisma.seed.findMany({
-      where: {
-        ...(visualStyleId && { visualStyleId }),
-        ...(isActive !== undefined && { isActive }),
-        ...(isDefault !== undefined && { isDefault })
-      },
       include: {
-        visualStyle: {
-          select: {
-            id: true,
-            name: true
-          }
-        },
         _count: {
           select: {
             outputs: true
@@ -27,7 +11,6 @@ export default defineEventHandler(async (event) => {
         }
       },
       orderBy: [
-        { isDefault: 'desc' },
         { usageCount: 'desc' },
         { createdAt: 'desc' }
       ]

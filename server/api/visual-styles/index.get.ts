@@ -1,23 +1,12 @@
-import { prisma } from '../../utils/prisma'
+import { getVisualStylesList } from '../../constants/visual-styles'
 
-export default defineEventHandler(async (event) => {
-  try {
-    const styles = await prisma.visualStyle.findMany({
-      orderBy: [
-        { order: 'asc' },
-        { createdAt: 'asc' }
-      ]
-    })
-
-    return {
-      success: true,
-      data: styles
-    }
-  } catch (error: any) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Erro ao buscar estilos visuais',
-      data: { error: error.message }
-    })
+/**
+ * GET /api/visual-styles
+ * Retorna todos os estilos visuais ativos (constantes, não mais do DB).
+ */
+export default defineEventHandler(() => {
+  return {
+    success: true,
+    data: getVisualStylesList()
   }
 })

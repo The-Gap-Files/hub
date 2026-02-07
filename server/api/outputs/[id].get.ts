@@ -1,4 +1,6 @@
 import { prisma } from '../../utils/prisma'
+import { getVisualStyleById } from '../../constants/visual-styles'
+import { getScriptStyleById } from '../../constants/script-styles'
 import type { OutputWithRelationsResponse } from '../../types/output.types'
 
 export default defineEventHandler(async (event): Promise<OutputWithRelationsResponse> => {
@@ -22,8 +24,67 @@ export default defineEventHandler(async (event): Promise<OutputWithRelationsResp
           theme: true
         }
       },
-      scriptStyle: true,
-      visualStyle: true,
+      script: {
+        include: {
+          backgroundMusicTracks: true
+        }
+      },
+      audioTracks: {
+        select: {
+          id: true,
+          type: true,
+          provider: true,
+          voiceId: true,
+          mimeType: true,
+          originalSize: true,
+          duration: true,
+          createdAt: true
+        }
+      },
+      scenes: {
+        orderBy: { order: 'asc' },
+        include: {
+          images: {
+            select: {
+              id: true,
+              provider: true,
+              promptUsed: true,
+              mimeType: true,
+              originalSize: true,
+              width: true,
+              height: true,
+              isSelected: true,
+              variantIndex: true,
+              createdAt: true
+            }
+          },
+          videos: {
+            select: {
+              id: true,
+              provider: true,
+              promptUsed: true,
+              mimeType: true,
+              originalSize: true,
+              duration: true,
+              isSelected: true,
+              variantIndex: true,
+              createdAt: true
+            }
+          },
+          audioTracks: {
+            select: {
+              id: true,
+              type: true,
+              provider: true,
+              voiceId: true,
+              mimeType: true,
+              originalSize: true,
+              duration: true,
+              createdAt: true
+            }
+          }
+        }
+      },
       relationsFrom: {
         include: {
           relatedOutput: {
@@ -53,17 +114,29 @@ export default defineEventHandler(async (event): Promise<OutputWithRelationsResp
     duration: output.duration || undefined,
     aspectRatio: output.aspectRatio || undefined,
     platform: output.platform || undefined,
+    enableMotion: output.enableMotion,
     status: output.status,
     scriptApproved: output.scriptApproved,
     imagesApproved: output.imagesApproved,
+    bgmApproved: output.bgmApproved,
+    audioApproved: output.audioApproved,
     videosApproved: output.videosApproved,
+    hasBgm: output.audioTracks?.some((a: any) => a.type === 'background_music') || false,
     errorMessage: output.errorMessage || undefined,
     createdAt: output.createdAt,
     updatedAt: output.updatedAt,
     completedAt: output.completedAt || undefined,
+    hasVideo: !!output.outputData,
+    outputMimeType: output.outputMimeType || undefined,
+    outputSize: output.outputSize || 0,
+    hasCaptionedVideo: !!output.captionedVideoData,
+    captionedVideoSize: output.captionedVideoSize || 0,
     dossier: output.dossier,
-    scriptStyle: output.scriptStyle || undefined,
-    visualStyle: output.visualStyle || undefined,
+    scriptStyle: output.scriptStyleId ? getScriptStyleById(output.scriptStyleId) : undefined,
+    visualStyle: output.visualStyleId ? getVisualStyleById(output.visualStyleId) : undefined,
+    script: output.script || undefined,
+    audioTracks: output.audioTracks || [],
+    scenes: output.scenes || [],
     relatedOutputs: output.relationsFrom?.map((rel: any) => ({
       id: rel.relatedOutput.id,
       outputType: rel.relatedOutput.outputType,

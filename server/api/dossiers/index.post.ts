@@ -8,13 +8,35 @@ const CreateDossierSchema = z.object({
   sourceText: z.string().min(10),
   theme: z.string().min(3),
   tags: z.array(z.string()).optional().default([]),
-  category: z.string().max(50).optional()
+  category: z.string().max(50).optional(),
+  visualIdentityContext: z.string().max(500).optional(),
+  preferredVisualStyleId: z.string().optional().transform(val => val === '' ? undefined : val),
+  preferredSeedId: z.union([z.string().uuid(), z.literal('')]).optional().transform(val => val === '' ? undefined : val)
 })
 
 export default defineEventHandler(async (event): Promise<DossierResponse> => {
   // Validar request body
   const body = await readBody(event)
+  console.log('DEBUG DOSSIER PAYLOAD:', JSON.stringify(body, null, 2))
   const data = CreateDossierSchema.parse(body) as CreateDossierDTO
+
+  let preferredSeedId = data.preferredSeedId
+
+  // Se escolheu estilo mas não escolheu seed, gerar uma fixa agora
+  if (data.preferredVisualStyleId && !preferredSeedId) {
+    const randomValue = Math.floor(Math.random() * 2147483647)
+    const seedRecord = await prisma.seed.upsert({
+      where: {
+        value: randomValue
+      },
+      update: { usageCount: { increment: 1 } },
+      create: {
+        value: randomValue,
+        usageCount: 1
+      }
+    })
+    preferredSeedId = seedRecord.id
+  }
 
   // Criar dossier
   const dossier = await prisma.dossier.create({
@@ -24,6 +46,9 @@ export default defineEventHandler(async (event): Promise<DossierResponse> => {
       theme: data.theme,
       tags: data.tags || [],
       category: data.category,
+      visualIdentityContext: data.visualIdentityContext,
+      preferredVisualStyleId: data.preferredVisualStyleId,
+      preferredSeedId: preferredSeedId,
       isProcessed: false
     }
   })
@@ -37,9 +62,11 @@ export default defineEventHandler(async (event): Promise<DossierResponse> => {
     researchData: dossier.researchData,
     tags: dossier.tags,
     category: dossier.category || undefined,
+    visualIdentityContext: dossier.visualIdentityContext,
+    preferredVisualStyleId: dossier.preferredVisualStyleId,
+    preferredSeedId: dossier.preferredSeedId,
     isProcessed: dossier.isProcessed,
     createdAt: dossier.createdAt,
     updatedAt: dossier.updatedAt
   }
 })
-

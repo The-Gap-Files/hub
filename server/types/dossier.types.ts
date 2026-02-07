@@ -10,12 +10,15 @@ export interface CreateDossierDTO {
   theme: string
   tags?: string[]
   category?: string
+  visualIdentityContext?: string
+  preferredVisualStyleId?: string
+  preferredSeedId?: string
 }
 
 export interface CreateDossierSourceDTO {
   title: string
   content: string
-  sourceType: 'article' | 'paper' | 'quote' | 'transcript'
+  sourceType: 'url' | 'text'
   url?: string
   author?: string
   order?: number
@@ -32,7 +35,7 @@ export interface CreateDossierImageDTO {
 
 export interface CreateDossierNoteDTO {
   content: string
-  noteType?: 'insight' | 'connection' | 'question' | 'idea'
+  noteType?: 'insight' | 'curiosity' | 'data' | 'todo'
   order?: number
 }
 
@@ -48,6 +51,9 @@ export interface UpdateDossierDTO {
   category?: string
   researchData?: any
   isProcessed?: boolean
+  visualIdentityContext?: string
+  preferredVisualStyleId?: string
+  preferredSeedId?: string
 }
 
 // =============================================================================
@@ -62,10 +68,13 @@ export interface DossierResponse {
   researchData?: any
   tags: string[]
   category?: string
+  visualIdentityContext?: string | null
+  preferredVisualStyleId?: string | null
+  preferredSeedId?: string | null
   isProcessed: boolean
   createdAt: Date
   updatedAt: Date
-  
+
   // Counts
   sourcesCount?: number
   imagesCount?: number

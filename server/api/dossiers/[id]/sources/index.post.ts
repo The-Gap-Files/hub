@@ -4,8 +4,8 @@ import { prisma } from '../../../../utils/prisma'
 const CreateSourceSchema = z.object({
   title: z.string().min(1).max(255),
   content: z.string().min(1),
-  sourceType: z.enum(['article', 'paper', 'quote', 'transcript']),
-  url: z.string().url().optional(),
+  sourceType: z.enum(['url', 'text']),
+  url: z.union([z.string().url(), z.literal('')]).optional().transform(v => v || undefined),
   author: z.string().max(255).optional(),
   order: z.number().int().min(0).optional().default(0)
 })

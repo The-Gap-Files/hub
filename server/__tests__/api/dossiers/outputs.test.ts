@@ -47,9 +47,9 @@ describe('Dossier Outputs API', () => {
       ))
 
       expect(results).toHaveLength(2)
-      expect(results[0].outputType).toBe('VIDEO_TEASER')
-      expect(results[1].outputType).toBe('VIDEO_FULL')
-      expect(results[0].status).toBe('PENDING')
+      expect(results[0]!.outputType).toBe('VIDEO_TEASER')
+      expect(results[1]!.outputType).toBe('VIDEO_FULL')
+      expect(results[0]!.status).toBe('PENDING')
     })
   })
 

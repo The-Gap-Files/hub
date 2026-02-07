@@ -18,7 +18,8 @@ export default defineNitroPlugin(() => {
     providers.push({
       type: 'script' as const,
       name: config.providers.script.name,
-      apiKey: config.providers.script.apiKey
+      apiKey: config.providers.script.apiKey,
+      model: config.providers.script.model
     })
   }
 

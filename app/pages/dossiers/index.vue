@@ -1,90 +1,145 @@
 <template>
-  <div class="container mx-auto p-6">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-3xl font-bold">Dossiers</h1>
-      <NuxtLink to="/dossiers/new" class="btn btn-primary">
-        + Novo Dossier
+  <div class="container mx-auto p-8 max-w-7xl">
+    <header class="flex flex-col md:flex-row justify-between items-end gap-6 mb-16 relative group">
+      <div class="absolute -inset-x-8 -top-8 h-40 bg-gradient-to-b from-primary/5 to-transparent blur-3xl opacity-50"></div>
+      
+      <div class="relative space-y-2">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-glow">
+            <Library :size="24" />
+          </div>
+          <span class="mono-label tracking-[0.4em] text-primary/60">Intelligence Hub</span>
+        </div>
+        <h1 class="text-6xl font-black text-white tracking-tighter uppercase italic leading-none">
+          Dossiers
+        </h1>
+        <p class="text-zinc-500 font-medium max-w-md">Nexus central de inteligência e vetores de produção documental.</p>
+      </div>
+
+      <NuxtLink to="/dossiers/new" class="btn-primary !px-10 !py-4 shadow-glow group/btn">
+        <span class="flex items-center gap-3">
+          <FilePlus :size="20" class="group-hover/btn:rotate-90 transition-transform duration-500" />
+          INICIAR NOVA INVESTIGAÇÃO
+        </span>
       </NuxtLink>
+    </header>
+
+    <div v-if="loading" class="flex flex-col items-center justify-center py-40 space-y-6">
+      <div class="relative">
+        <div class="w-16 h-16 border-4 border-primary/10 border-t-primary rounded-full animate-spin"></div>
+        <div class="absolute inset-0 flex items-center justify-center">
+          <div class="w-2 h-2 bg-primary rounded-full animate-ping"></div>
+        </div>
+      </div>
+      <p class="mono-label !text-xs text-primary animate-pulse tracking-[0.3em]">DECIPHERING_DATABASE...</p>
     </div>
 
-    <div v-if="loading" class="text-center py-12">
-      <p>Carregando dossiers...</p>
+    <div v-else-if="dossiers.length === 0" class="flex flex-col items-center justify-center py-40 border-2 border-dashed border-white/5 rounded-[40px] bg-white/[0.01]">
+       <div class="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-8 text-white/5">
+         <FolderOpen :size="48" />
+       </div>
+       <h3 class="text-2xl font-black text-white/30 uppercase italic mb-2">Shadow Void</h3>
+       <p class="mono-label opacity-40 italic max-w-xs text-center">Nenhum rastro de inteligência encontrado nos servidores locais.</p>
+       <NuxtLink to="/dossiers/new" class="btn-secondary mt-10 !px-12">
+         Forjar Investigação
+       </NuxtLink>
     </div>
 
-    <div v-else-if="dossiers.length === 0" class="text-center py-12">
-      <p class="text-gray-500">Nenhum dossier criado ainda.</p>
-      <NuxtLink to="/dossiers/new" class="btn btn-primary mt-4">
-        Criar Primeiro Dossier
-      </NuxtLink>
-    </div>
-
-    <div v-else class="grid gap-4">
+    <div v-else class="grid gap-6">
       <div
         v-for="dossier in dossiers"
         :key="dossier.id"
-        class="border rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer"
+        class="glass-card group relative p-8 hover:border-primary/50 transition-all duration-700 cursor-pointer overflow-hidden"
         @click="navigateTo(`/dossiers/${dossier.id}`)"
       >
-        <div class="flex justify-between items-start">
-          <div class="flex-1">
-            <h3 class="text-xl font-semibold mb-2">{{ dossier.title }}</h3>
-            <p class="text-gray-600 mb-2 line-clamp-2">{{ dossier.theme }}</p>
-            
-            <div class="flex gap-4 text-sm text-gray-500">
-              <span>📄 {{ dossier.sourcesCount || 0 }} fontes</span>
-              <span>🖼️ {{ dossier.imagesCount || 0 }} imagens</span>
-              <span>📝 {{ dossier.notesCount || 0 }} notas</span>
-              <span>🎬 {{ dossier.outputsCount || 0 }} outputs</span>
+        <!-- Background Reveal (Cinematic) -->
+        <div class="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+        
+        <div class="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+          <div class="flex-1 space-y-4">
+            <div class="flex items-center gap-3">
+              <span class="mono-label px-2 py-0.5 bg-primary/10 border border-primary/20 rounded-md text-primary group-hover:bg-primary group-hover:text-white transition-all">ID: {{ dossier.id.slice(0, 8) }}</span>
+              <span v-if="dossier.category" class="mono-label text-zinc-600 group-hover:text-zinc-400 transition-colors">{{ dossier.category }}</span>
+              <span class="text-zinc-800">•</span>
+              <span class="mono-label text-zinc-600">{{ new Date(dossier.createdAt).toLocaleDateString('pt-BR') }}</span>
             </div>
-
-            <div v-if="dossier.tags && dossier.tags.length > 0" class="flex gap-2 mt-3">
-              <span
-                v-for="tag in dossier.tags"
-                :key="tag"
-                class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded"
-              >
-                {{ tag }}
-              </span>
+            
+            <div>
+              <h3 class="text-3xl font-black text-white tracking-tighter uppercase italic group-hover:text-primary transition-colors leading-none mb-3">
+                {{ dossier.title }}
+              </h3>
+              <p class="text-zinc-500 font-medium line-clamp-2 max-w-3xl leading-relaxed">
+                {{ dossier.theme }}
+              </p>
+            </div>
+            
+            <div class="flex flex-wrap gap-6 pt-2">
+              <div class="flex items-center gap-2 group/stat">
+                <Database :size="14" class="text-zinc-700 group-hover/stat:text-white transition-colors" />
+                <span class="mono-label !text-[10px] text-zinc-500 group-hover/stat:text-white transition-colors">{{ dossier.sourcesCount || 0 }} <span class="opacity-30">fontes</span></span>
+              </div>
+              <div class="flex items-center gap-2 group/stat">
+                <ImageIcon :size="14" class="text-zinc-700 group-hover/stat:text-white transition-colors" />
+                <span class="mono-label !text-[10px] text-zinc-500 group-hover/stat:text-white transition-colors">{{ dossier.imagesCount || 0 }} <span class="opacity-30">assets</span></span>
+              </div>
+              <div class="flex items-center gap-2 group/stat">
+                <Brain :size="14" class="text-zinc-700 group-hover/stat:text-white transition-colors" />
+                <span class="mono-label !text-[10px] text-zinc-500 group-hover/stat:text-white transition-colors">{{ dossier.notesCount || 0 }} <span class="opacity-30">insights</span></span>
+              </div>
+              <div class="flex items-center gap-2 group/stat border-l border-white/5 pl-6">
+                <Film :size="14" class="text-primary group-hover/stat:text-primary-foreground transition-colors" />
+                <span class="mono-label !text-[10px] text-primary group-hover/stat:text-primary transition-colors">{{ dossier.outputsCount || 0 }} <span class="opacity-40 uppercase">renders</span></span>
+              </div>
             </div>
           </div>
 
-          <div class="text-right text-sm text-gray-500">
-            <p>{{ new Date(dossier.createdAt).toLocaleDateString('pt-BR') }}</p>
-            <span
-              v-if="dossier.category"
-              class="inline-block mt-2 px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
-            >
-              {{ dossier.category }}
-            </span>
+          <div class="flex gap-2 self-end md:self-center opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-500">
+            <div class="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-white shadow-glow">
+              <ChevronRight :size="24" />
+            </div>
           </div>
         </div>
+        
+        <!-- Animated Scanline on Hover -->
+        <div class="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-5 transition-opacity duration-1000 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]"></div>
       </div>
     </div>
 
-    <!-- Paginação -->
-    <div v-if="total > pageSize" class="flex justify-center gap-2 mt-6">
+    <!-- Paginação (Cyber Matrix Style) -->
+    <div v-if="total > pageSize" class="flex justify-center items-center gap-6 mt-20">
       <button
         @click="changePage(page - 1)"
         :disabled="page === 1"
-        class="btn btn-sm"
+        class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white disabled:opacity-20 hover:bg-white/10 transition-all"
       >
-        Anterior
+        <ChevronLeft :size="20" />
       </button>
-      <span class="py-2 px-4">
-        Página {{ page }} de {{ Math.ceil(total / pageSize) }}
-      </span>
+      
+      <div class="flex flex-col items-center">
+        <span class="mono-label !text-[10px] text-primary tracking-[0.2em]">Matrix Sector</span>
+        <span class="text-lg font-black text-white italic">
+           {{ page }} / {{ Math.ceil(total / pageSize) }}
+        </span>
+      </div>
+
       <button
         @click="changePage(page + 1)"
         :disabled="page >= Math.ceil(total / pageSize)"
-        class="btn btn-sm"
+        class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white disabled:opacity-20 hover:bg-white/10 transition-all"
       >
-        Próxima
+        <ChevronRight :size="20" />
       </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { 
+  Library, FilePlus, Database, Image as ImageIcon, 
+  Brain, Film, ChevronRight, FolderOpen,
+  ChevronLeft
+} from 'lucide-vue-next'
+
 const dossiers = ref<any[]>([])
 const loading = ref(true)
 const page = ref(1)
@@ -97,8 +152,8 @@ async function loadDossiers() {
     const response = await $fetch('/api/dossiers', {
       query: { page: page.value, pageSize: pageSize.value }
     })
-    dossiers.value = response.dossiers
-    total.value = response.total
+    dossiers.value = (response as any).dossiers
+    total.value = (response as any).total
   } catch (error) {
     console.error('Erro ao carregar dossiers:', error)
   } finally {
@@ -107,6 +162,7 @@ async function loadDossiers() {
 }
 
 function changePage(newPage: number) {
+  if (newPage < 1 || newPage > Math.ceil(total.value / pageSize.value)) return
   page.value = newPage
   loadDossiers()
 }

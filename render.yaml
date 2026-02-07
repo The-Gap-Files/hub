@@ -1,0 +1,55 @@
+# Render.com Blueprint
+# https://render.com/docs/blueprint-spec
+
+services:
+  # The Gap Files Hub - Web Service
+  - type: web
+    name: thegapfiles-hub
+    env: docker
+    dockerfilePath: ./Dockerfile
+    region: oregon # ou 'ohio', 'frankfurt', 'singapore'
+    plan: starter # ou 'standard', 'pro'
+    
+    # Build settings
+    dockerContext: .
+    
+    # Environment variables
+    envVars:
+      - key: NODE_ENV
+        value: production
+      
+      - key: DATABASE_URL
+        fromDatabase:
+          name: thegapfiles-db
+          property: connectionString
+      
+      - key: NUXT_PUBLIC_API_BASE
+        sync: false # Configurar manualmente no dashboard
+      
+      - key: REPLICATE_API_TOKEN
+        sync: false # Configurar manualmente no dashboard
+      
+      - key: OPENAI_API_KEY
+        sync: false # Configurar manualmente no dashboard
+    
+    # Health check
+    healthCheckPath: /api/health
+    
+    # Auto-deploy
+    autoDeploy: true
+    
+    # Recursos
+    disk:
+      name: whisper-models
+      mountPath: /root/.cache
+      sizeGB: 5 # Para armazenar modelos Whisper
+
+# Database
+databases:
+  - name: thegapfiles-db
+    databaseName: thegapfiles
+    plan: starter # ou 'standard', 'pro'
+    region: oregon
+    
+    # PostgreSQL version
+    ipAllowList: [] # Vazio = acesso público (protegido por senha)

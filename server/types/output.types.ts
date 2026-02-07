@@ -16,6 +16,7 @@ export interface CreateOutputDTO {
   narrationLanguage?: string
   voiceId?: string
   enableMotion?: boolean
+  objective?: string
   mustInclude?: string
   mustExclude?: string
   scriptStyleId?: string
@@ -49,11 +50,20 @@ export interface OutputResponse {
   status: OutputStatus
   scriptApproved: boolean
   imagesApproved: boolean
+  bgmApproved: boolean
+  audioApproved: boolean
   videosApproved: boolean
+  hasBgm: boolean
   errorMessage?: string
   createdAt: Date
   updatedAt: Date
   completedAt?: Date
+  hasVideo?: boolean
+  outputMimeType?: string
+  outputSize?: number
+  hasCaptionedVideo?: boolean
+  captionedVideoSize?: number
+  enableMotion: boolean
 }
 
 export interface OutputWithRelationsResponse extends OutputResponse {
@@ -70,6 +80,9 @@ export interface OutputWithRelationsResponse extends OutputResponse {
     id: string
     name: string
   }
+  script?: any
+  audioTracks?: any[]
+  scenes?: any[]
   relatedOutputs?: {
     id: string
     outputType: OutputType

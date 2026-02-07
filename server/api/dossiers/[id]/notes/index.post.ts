@@ -3,7 +3,7 @@ import { prisma } from '../../../../utils/prisma'
 
 const CreateNoteSchema = z.object({
   content: z.string().min(1),
-  noteType: z.enum(['insight', 'connection', 'question', 'idea']).optional(),
+  noteType: z.enum(['insight', 'curiosity', 'data', 'todo']).optional(),
   order: z.number().int().min(0).optional().default(0)
 })
 

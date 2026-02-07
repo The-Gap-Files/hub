@@ -13,13 +13,6 @@ export default defineEventHandler(async (event) => {
     const seed = await prisma.seed.findUnique({
       where: { id },
       include: {
-        visualStyle: {
-          select: {
-            id: true,
-            name: true,
-            description: true
-          }
-        },
         outputs: {
           select: {
             id: true,
@@ -39,7 +32,7 @@ export default defineEventHandler(async (event) => {
     if (!seed) {
       throw createError({
         statusCode: 404,
-        statusMessage: 'Seed não encontrada'
+        statusMessage: 'DNA não encontrado'
       })
     }
 
@@ -54,7 +47,7 @@ export default defineEventHandler(async (event) => {
 
     throw createError({
       statusCode: 500,
-      statusMessage: 'Erro ao buscar seed',
+      statusMessage: 'Erro ao buscar DNA',
       data: { error: error.message }
     })
   }

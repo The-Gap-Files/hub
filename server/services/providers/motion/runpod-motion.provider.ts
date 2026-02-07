@@ -24,7 +24,7 @@ export class RunPodMotionProvider implements IMotionProvider {
   }
 
   getName(): string {
-    return 'RunPod Serverless (Wan2.2 - wlsdml1114)'
+    return 'REPLICATE'
   }
 
   async generate(request: MotionGenerationRequest): Promise<MotionGenerationResponse> {

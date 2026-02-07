@@ -10,58 +10,27 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Verificar se existe
-    const existing = await prisma.seed.findUnique({
-      where: { id },
-      include: {
-        _count: {
-          select: {
-            outputs: true
-          }
-        }
-      }
-    })
-
-    if (!existing) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: 'Seed não encontrada'
-      })
-    }
-
-    // Se tem outputs vinculados, fazer soft delete
-    if (existing._count.outputs > 0) {
-      const updated = await prisma.seed.update({
-        where: { id },
-        data: {
-          isActive: false
-        }
-      })
-
-      return {
-        success: true,
-        message: `Seed desativada (${existing._count.outputs} outputs vinculados)`,
-        data: updated
-      }
-    }
-
-    // Se não tem outputs, deletar permanentemente
+    // Deletar permanentemente
+    // Prisma cuidará das referências (SetNull) conforme configurado no schema
     await prisma.seed.delete({
       where: { id }
     })
 
     return {
       success: true,
-      message: 'Seed deletada permanentemente'
+      message: 'DNA removido permanentemente do repositório'
     }
   } catch (error: any) {
-    if (error.statusCode) {
-      throw error
+    if (error.code === 'P2025') { // Prisma Record not found
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'DNA não encontrado no repositório'
+      })
     }
 
     throw createError({
       statusCode: 500,
-      statusMessage: 'Erro ao deletar seed',
+      statusMessage: 'Erro ao remover DNA',
       data: { error: error.message }
     })
   }

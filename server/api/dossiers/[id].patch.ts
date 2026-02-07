@@ -10,7 +10,10 @@ const UpdateDossierSchema = z.object({
   tags: z.array(z.string()).optional(),
   category: z.string().max(50).optional(),
   researchData: z.any().optional(),
-  isProcessed: z.boolean().optional()
+  isProcessed: z.boolean().optional(),
+  visualIdentityContext: z.string().max(500).optional(),
+  preferredVisualStyleId: z.string().optional().transform(val => val === '' ? undefined : val),
+  preferredSeedId: z.union([z.string().uuid(), z.literal('')]).optional().transform(val => val === '' ? undefined : val)
 })
 
 export default defineEventHandler(async (event): Promise<DossierResponse> => {
@@ -39,10 +42,28 @@ export default defineEventHandler(async (event): Promise<DossierResponse> => {
     })
   }
 
+  // Preparar dados de atualização resolvendo seed automática se necessário
+  const updateData: any = { ...data }
+
+  if (data.preferredVisualStyleId && !data.preferredSeedId) {
+    const randomValue = Math.floor(Math.random() * 2147483647)
+    const seedRecord = await prisma.seed.upsert({
+      where: {
+        value: randomValue
+      },
+      update: { usageCount: { increment: 1 } },
+      create: {
+        value: randomValue,
+        usageCount: 1
+      }
+    })
+    updateData.preferredSeedId = seedRecord.id
+  }
+
   // Atualizar dossier
   const dossier = await prisma.dossier.update({
     where: { id },
-    data
+    data: updateData
   })
 
   return {
@@ -53,6 +74,9 @@ export default defineEventHandler(async (event): Promise<DossierResponse> => {
     researchData: dossier.researchData,
     tags: dossier.tags,
     category: dossier.category || undefined,
+    visualIdentityContext: dossier.visualIdentityContext,
+    preferredVisualStyleId: dossier.preferredVisualStyleId,
+    preferredSeedId: dossier.preferredSeedId,
     isProcessed: dossier.isProcessed,
     createdAt: dossier.createdAt,
     updatedAt: dossier.updatedAt

@@ -15,7 +15,8 @@ export default defineNuxtConfig({
   },
 
   modules: [
-    '@pinia/nuxt'
+    '@pinia/nuxt',
+    '@nuxtjs/tailwindcss'
   ],
 
   // Configurações do runtime
@@ -28,9 +29,13 @@ export default defineNuxtConfig({
     // Provedores de IA
     providers: {
       script: {
-        name: process.env.SCRIPT_PROVIDER ?? 'openai',
-        apiKey: process.env.OPENAI_API_KEY ?? '',
-        model: process.env.OPENAI_MODEL ?? 'gpt-4-turbo-preview'
+        name: process.env.SCRIPT_PROVIDER ?? 'anthropic',
+        apiKey: process.env.SCRIPT_PROVIDER === 'openai'
+          ? (process.env.OPENAI_API_KEY ?? '')
+          : (process.env.ANTHROPIC_API_KEY ?? ''),
+        model: process.env.SCRIPT_PROVIDER === 'openai'
+          ? (process.env.OPENAI_MODEL ?? 'gpt-4o')
+          : (process.env.ANTHROPIC_MODEL ?? 'claude-opus-4-6')
       },
       tts: {
         name: process.env.TTS_PROVIDER ?? 'elevenlabs',

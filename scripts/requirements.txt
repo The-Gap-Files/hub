@@ -1,0 +1,12 @@
+# Whisper Local Transcription Dependencies
+# Usando openai-whisper (versão oficial, mais fácil de instalar)
+
+# OpenAI Whisper - Versão oficial
+openai-whisper==20231117
+
+# Dependências automáticas:
+# - torch (PyTorch)
+# - tqdm
+# - more-itertools
+# - tiktoken
+# - numba (opcional, para aceleração)

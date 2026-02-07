@@ -1,764 +1,433 @@
 <script setup lang="ts">
+import { 
+  Database, Dna, Plus, Trash2, 
+  Shuffle, X, Hash, Activity, Zap, Search,
+  Eye, Image
+} from 'lucide-vue-next'
+
 interface Seed {
   id: string
-  name: string
-  description: string | null
   value: number
-  visualStyleId: string
-  category: string | null
-  tags: string | null
   usageCount: number
-  isDefault: boolean
-  isActive: boolean
-  previewUrl: string | null
   createdAt: string
   updatedAt: string
-  visualStyle: {
-    id: string
-    name: string
+  _count: {
+    outputs: number
   }
-  _count?: {
-    videos: number
-  }
-}
-
-interface VisualStyle {
-  id: string
-  name: string
-  seeds: Seed[]
 }
 
 const { data: seedsData, refresh: refreshSeeds } = await useFetch<{ success: boolean; data: Seed[] }>('/api/seeds')
-const { data: stylesData } = await useFetch<{ success: boolean; data: any[] }>('/api/visual-styles')
 
-// Agrupar seeds por estilo visual
-const groupedSeeds = computed(() => {
+const searchQuery = ref('')
+const filteredSeeds = computed(() => {
   const seeds = seedsData.value?.data || []
-  const styles = stylesData.value?.data || []
+  if (!searchQuery.value) return seeds
   
-  return styles.map(style => ({
-    id: style.id,
-    name: style.name,
-    seeds: seeds.filter(s => s.visualStyleId === style.id)
-  })).filter(group => group.seeds.length > 0)
+  const query = searchQuery.value.toLowerCase()
+  return seeds.filter(s => s.value.toString().includes(query))
 })
 
-const showCreateModal = ref(false)
-const showEditModal = ref(false)
-const showVideosModal = ref(false)
-const editingSeed = ref<Seed | null>(null)
-const selectedSeed = ref<Seed | null>(null)
+const showModal = ref(false)
 const isSubmitting = ref(false)
 
 const formData = ref({
-  name: '',
-  description: '',
-  value: 0,
-  visualStyleId: '',
-  category: '',
-  tags: '',
-  isDefault: false,
-  isActive: true
+  value: 0
 })
 
 function openCreateModal() {
-  editingSeed.value = null
   formData.value = {
-    name: '',
-    description: '',
-    value: Math.floor(Math.random() * 1000000),
-    visualStyleId: '',
-    category: '',
-    tags: '',
-    isDefault: false,
-    isActive: true
+    value: Math.floor(Math.random() * 2147483647)
   }
-  showCreateModal.value = true
-}
-
-function openEditModal(seed: Seed) {
-  editingSeed.value = seed
-  formData.value = {
-    name: seed.name,
-    description: seed.description || '',
-    value: seed.value,
-    visualStyleId: seed.visualStyleId,
-    category: seed.category || '',
-    tags: seed.tags || '',
-    isDefault: seed.isDefault,
-    isActive: seed.isActive
-  }
-  showEditModal.value = true
+  showModal.value = true
 }
 
 function closeModal() {
-  showCreateModal.value = false
-  showEditModal.value = false
-  showVideosModal.value = false
-  editingSeed.value = null
-  selectedSeed.value = null
+  showModal.value = false
 }
 
 function generateRandomSeed() {
-  formData.value.value = Math.floor(Math.random() * 1000000)
+  formData.value.value = Math.floor(Math.random() * 2147483647)
 }
 
 async function handleSubmit() {
   if (isSubmitting.value) return
-  
+  isSubmitting.value = true
   try {
-    isSubmitting.value = true
-    
-    if (editingSeed.value) {
-      // Atualizar
-      await $fetch(`/api/seeds/${editingSeed.value.id}`, {
-        method: 'PUT',
-        body: formData.value
-      })
-    } else {
-      // Criar
-      await $fetch('/api/seeds', {
-        method: 'POST',
-        body: formData.value
-      })
-    }
-    
+    await $fetch('/api/seeds', {
+      method: 'POST',
+      body: formData.value
+    })
     await refreshSeeds()
     closeModal()
   } catch (error: any) {
-    alert(error.data?.message || 'Erro ao salvar seed')
+    alert(error.data?.message || 'Erro ao registrar DNA')
   } finally {
     isSubmitting.value = false
   }
 }
 
 async function handleDelete(seed: Seed) {
-  if (!confirm(`Deletar seed "${seed.name}"?`)) return
+  if (!confirm(`Remover DNA #${seed.value} do repositório?`)) return
+  try {
+    await $fetch(`/api/seeds/${seed.id}`, { method: 'DELETE' })
+    await refreshSeeds()
+  } catch (error: any) {
+    alert(error.data?.message || 'Erro ao deletar DNA')
+  }
+}
+
+// Modal de Amostras
+interface SeedSample {
+  id: string
+  dataUrl: string
+  width: number | null
+  height: number | null
+  createdAt: string
+  promptUsed: string
+  outputTitle: string | null
+}
+
+const showSamplesModal = ref(false)
+const selectedSeed = ref<Seed | null>(null)
+const samplesData = ref<SeedSample[]>([])
+const isLoadingSamples = ref(false)
+const selectedSampleIndex = ref<number | null>(null)
+
+async function openSamplesModal(seed: Seed) {
+  selectedSeed.value = seed
+  showSamplesModal.value = true
+  isLoadingSamples.value = true
+  samplesData.value = []
   
   try {
-    await $fetch(`/api/seeds/${seed.id}`, {
-      method: 'DELETE'
-    })
-    await refreshSeeds()
+    const response = await $fetch<{ success: boolean; data: { seed: Seed; samples: SeedSample[] } }>(`/api/seeds/${seed.id}/samples`)
+    samplesData.value = response.data.samples
   } catch (error: any) {
-    alert(error.data?.message || 'Erro ao deletar seed')
+    alert(error.data?.message || 'Erro ao carregar amostras')
+    showSamplesModal.value = false
+  } finally {
+    isLoadingSamples.value = false
   }
 }
 
-async function setAsDefault(seed: Seed) {
-  try {
-    await $fetch(`/api/seeds/${seed.id}`, {
-      method: 'PUT',
-      body: { isDefault: true }
-    })
-    await refreshSeeds()
-  } catch (error: any) {
-    alert(error.data?.message || 'Erro ao definir como padrão')
+function closeSamplesModal() {
+  showSamplesModal.value = false
+  selectedSeed.value = null
+  samplesData.value = []
+  selectedSampleIndex.value = null
+}
+
+function openLightbox(index: number) {
+  selectedSampleIndex.value = index
+}
+
+function closeLightbox() {
+  selectedSampleIndex.value = null
+}
+
+function nextImage() {
+  if (selectedSampleIndex.value !== null && selectedSampleIndex.value < samplesData.value.length - 1) {
+    selectedSampleIndex.value++
   }
 }
 
-async function openVideosModal(seed: Seed) {
-  selectedSeed.value = seed
-  showVideosModal.value = true
+function prevImage() {
+  if (selectedSampleIndex.value !== null && selectedSampleIndex.value > 0) {
+    selectedSampleIndex.value--
+  }
 }
+
+const currentSample = computed(() => {
+  if (selectedSampleIndex.value !== null) {
+    return samplesData.value[selectedSampleIndex.value]
+  }
+  return null
+})
+
+
+// Keyboard navigation
+onMounted(() => {
+  const handleKeyPress = (e: KeyboardEvent) => {
+    if (selectedSampleIndex.value !== null) {
+      if (e.key === 'ArrowRight') nextImage()
+      else if (e.key === 'ArrowLeft') prevImage()
+      else if (e.key === 'Escape') closeLightbox()
+    }
+    if (showSamplesModal.value && e.key === 'Escape' && selectedSampleIndex.value === null) {
+      closeSamplesModal()
+    }
+  }
+  
+  window.addEventListener('keydown', handleKeyPress)
+  
+  onUnmounted(() => {
+    window.removeEventListener('keydown', handleKeyPress)
+  })
+})
+
+
 </script>
 
 <template>
-  <div class="page">
-    <div class="page-header">
-      <div>
-        <h1>Seeds</h1>
-        <p>Gerencie receitas visuais (combinações de seed + estilo visual)</p>
-      </div>
-      <button class="btn-primary" @click="openCreateModal">
-        <span>+</span> Nova Seed
-      </button>
-    </div>
-
-    <div class="content">
-      <div v-if="groupedSeeds.length === 0" class="empty-state">
-        <p>Nenhuma seed cadastrada</p>
-        <button class="btn-primary" @click="openCreateModal">Criar primeira seed</button>
-      </div>
-
-      <div v-for="group in groupedSeeds" :key="group.id" class="style-group">
-        <div class="group-header">
-          <h2>📁 {{ group.name }}</h2>
-          <span class="count">{{ group.seeds.length }} seed{{ group.seeds.length !== 1 ? 's' : '' }}</span>
-        </div>
-
-        <div class="seeds-list">
-          <div v-for="seed in group.seeds" :key="seed.id" class="seed-card">
-            <div class="seed-header">
-              <div class="seed-title">
-                <span v-if="seed.isDefault" class="default-badge">🌟 Padrão</span>
-                <h3>{{ seed.name }}</h3>
-              </div>
-              <div class="seed-actions">
-                <button class="btn-icon" @click="openVideosModal(seed)" title="Ver vídeos">
-                  🎬
-                </button>
-                <button class="btn-icon" @click="openEditModal(seed)" title="Editar">
-                  ✏️
-                </button>
-                <button v-if="!seed.isDefault" class="btn-icon" @click="setAsDefault(seed)" title="Definir como padrão">
-                  ⭐
-                </button>
-                <button class="btn-icon btn-danger" @click="handleDelete(seed)" title="Deletar">
-                  🗑️
-                </button>
-              </div>
+  <div class="min-h-screen bg-oled-black pb-20 selection:bg-emerald-500/30">
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl animate-in fade-in duration-1000">
+      <header class="flex flex-col md:flex-row justify-between items-end gap-6 mb-16 relative group">
+        <div class="absolute -inset-x-8 -top-8 h-40 bg-gradient-to-b from-emerald-500/5 to-transparent blur-3xl opacity-50"></div>
+        
+        <div class="relative space-y-2">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)]">
+              <Database :size="24" />
             </div>
-
-            <div class="seed-info">
-              <div class="seed-value">Valor: <strong>{{ seed.value }}</strong></div>
-              <div v-if="seed.description" class="seed-description">{{ seed.description }}</div>
-              <div class="seed-meta">
-                <span>Usado {{ seed.usageCount }} vez{{ seed.usageCount !== 1 ? 'es' : '' }}</span>
-                <span v-if="seed.category">{{ seed.category }}</span>
-                <span v-if="seed.tags" class="tags">{{ seed.tags }}</span>
-              </div>
-            </div>
+            <span class="mono-label tracking-[0.4em] text-emerald-500/60 font-black">Genetic Registry</span>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal Criar -->
-    <div v-if="showCreateModal" class="modal-overlay" @click.self="closeModal">
-      <div class="modal">
-        <div class="modal-header">
-          <h2>Nova Seed</h2>
-          <button class="btn-close" @click="closeModal">✕</button>
+          <h1 class="text-6xl font-black text-white tracking-tighter uppercase italic leading-none">
+            Repositório de <span class="text-emerald-500">DNA</span>
+          </h1>
+          <p class="text-zinc-500 font-medium max-w-md">Catálogo de constantes numéricas universais para replicação estética.</p>
         </div>
 
-        <form @submit.prevent="handleSubmit" class="modal-body">
-          <div class="form-group">
-            <label>Nome *</label>
-            <input
-              v-model="formData.name"
-              type="text"
-              required
-              maxlength="100"
-              placeholder="Ex: Cyberpunk Noturno Épico"
+        <div class="flex items-center gap-4">
+          <div class="relative group/search">
+            <Search :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 group-focus-within/search:text-emerald-500 transition-colors" />
+            <input 
+              v-model="searchQuery"
+              type="text" 
+              placeholder="Localizar valor..." 
+              class="bg-white/5 border border-white/10 rounded-xl px-12 py-4 text-white text-xs outline-none focus:border-emerald-500/50 transition-all w-64"
             />
           </div>
-
-          <div class="form-group">
-            <label>Descrição</label>
-            <textarea
-              v-model="formData.description"
-              rows="2"
-              placeholder="Descreva o que esta seed gera..."
-            ></textarea>
-          </div>
-
-          <div class="form-group">
-            <label>Valor da Seed *</label>
-            <div class="input-with-button">
-              <input
-                v-model.number="formData.value"
-                type="number"
-                required
-                min="0"
-              />
-              <button type="button" class="btn-secondary" @click="generateRandomSeed">
-                🎲 Aleatório
-              </button>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Estilo Visual *</label>
-            <select v-model="formData.visualStyleId" required>
-              <option value="">Selecione...</option>
-              <option v-for="style in stylesData?.data" :key="style.id" :value="style.id">
-                {{ style.name }}
-              </option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>Categoria</label>
-            <input
-              v-model="formData.category"
-              type="text"
-              maxlength="50"
-              placeholder="Ex: urban, nature, portrait"
-            />
-          </div>
-
-          <div class="form-group">
-            <label>Tags (separadas por vírgula)</label>
-            <textarea
-              v-model="formData.tags"
-              rows="2"
-              placeholder="Ex: epic, low-angle, neon"
-            ></textarea>
-          </div>
-
-          <div class="form-row">
-            <label class="checkbox-label">
-              <input type="checkbox" v-model="formData.isActive" />
-              Ativo
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" v-model="formData.isDefault" />
-              Definir como padrão
-            </label>
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn-secondary" @click="closeModal">Cancelar</button>
-            <button type="submit" class="btn-primary" :disabled="isSubmitting">
-              {{ isSubmitting ? 'Salvando...' : 'Criar Seed' }}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Modal Editar -->
-    <div v-if="showEditModal" class="modal-overlay" @click.self="closeModal">
-      <div class="modal">
-        <div class="modal-header">
-          <h2>Editar Seed</h2>
-          <button class="btn-close" @click="closeModal">✕</button>
+          <button @click="openCreateModal" class="btn-primary !bg-emerald-600 !hover:bg-emerald-500 !px-10 !py-4 shadow-[0_0_20px_rgba(16,185,129,0.3)] group/btn">
+            <span class="flex items-center gap-3">
+              <Dna :size="20" class="group-hover/btn:scale-125 transition-transform duration-500" />
+              REGISTRAR DNA
+            </span>
+          </button>
         </div>
+      </header>
 
-        <form @submit.prevent="handleSubmit" class="modal-body">
-          <div class="form-group">
-            <label>Nome *</label>
-            <input
-              v-model="formData.name"
-              type="text"
-              required
-              maxlength="100"
-            />
-          </div>
-
-          <div class="form-group">
-            <label>Descrição</label>
-            <textarea
-              v-model="formData.description"
-              rows="2"
-            ></textarea>
-          </div>
-
-          <div class="form-group">
-            <label>Valor da Seed *</label>
-            <div class="input-with-button">
-              <input
-                v-model.number="formData.value"
-                type="number"
-                required
-                min="0"
-              />
-              <button type="button" class="btn-secondary" @click="generateRandomSeed">
-                🎲 Aleatório
-              </button>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Categoria</label>
-            <input
-              v-model="formData.category"
-              type="text"
-              maxlength="50"
-            />
-          </div>
-
-          <div class="form-group">
-            <label>Tags</label>
-            <textarea
-              v-model="formData.tags"
-              rows="2"
-            ></textarea>
-          </div>
-
-          <div class="form-row">
-            <label class="checkbox-label">
-              <input type="checkbox" v-model="formData.isActive" />
-              Ativo
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" v-model="formData.isDefault" />
-              Definir como padrão
-            </label>
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn-secondary" @click="closeModal">Cancelar</button>
-            <button type="submit" class="btn-primary" :disabled="isSubmitting">
-              {{ isSubmitting ? 'Salvando...' : 'Salvar' }}
-            </button>
-          </div>
-        </form>
+      <!-- Grid de DNAs -->
+      <div v-if="filteredSeeds.length === 0" class="flex flex-col items-center justify-center py-40 border-2 border-dashed border-white/5 rounded-[40px] bg-white/[0.01]">
+         <div class="w-20 h-20 bg-emerald-500/5 rounded-full flex items-center justify-center mb-8 text-emerald-500/20">
+           <Hash :size="48" />
+         </div>
+         <h3 class="text-2xl font-black text-white/30 uppercase italic mb-2">Vazio</h3>
+         <p class="mono-label opacity-40 italic max-w-xs text-center">Nenhuma constante numérica registrada no sistema.</p>
       </div>
-    </div>
 
-    <!-- Modal Ver Vídeos -->
-    <div v-if="showVideosModal && selectedSeed" class="modal-overlay" @click.self="closeModal">
-      <div class="modal">
-        <div class="modal-header">
-          <h2>Vídeos usando "{{ selectedSeed.name }}"</h2>
-          <button class="btn-close" @click="closeModal">✕</button>
+      <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 animate-in slide-in-from-bottom-10 duration-700">
+        <div
+          v-for="seed in filteredSeeds"
+          :key="seed.id"
+          class="glass-card group flex flex-col p-6 border-white/5 hover:border-emerald-500/50 transition-all duration-300 relative overflow-hidden"
+        >
+          <div class="flex justify-between items-start mb-4">
+             <div class="w-8 h-8 rounded-lg bg-zinc-900 border border-white/5 flex items-center justify-center text-zinc-600 group-hover:text-emerald-500 transition-colors">
+                <Hash :size="16" />
+             </div>
+             <button @click="handleDelete(seed)" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-red-500 hover:text-white border border-white/10 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                <Trash2 :size="14" />
+             </button>
+          </div>
+
+          <div class="space-y-1 mb-4 text-left">
+            <span class="text-2xl font-mono font-black text-white group-hover:text-emerald-400 transition-colors tracking-tight">
+              {{ seed.value }}
+            </span>
+          </div>
+
+          <div class="mt-auto flex items-center justify-between pt-4 border-t border-white/5">
+             <div class="flex items-center gap-2">
+                <Activity :size="10" class="text-zinc-700" />
+                <span class="mono-label !text-[8px] text-zinc-500">{{ seed._count.outputs }} <span class="opacity-40">USOS</span></span>
+             </div>
+             <button 
+               @click="openSamplesModal(seed)"
+               class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 text-emerald-500 transition-all group/view opacity-0 group-hover:opacity-100"
+             >
+               <Eye :size="12" class="group-hover/view:scale-110 transition-transform" />
+               <span class="mono-label !text-[7px] font-black">VER</span>
+             </button>
+          </div>
+
+          <!-- Scanline -->
+          <div class="absolute inset-x-0 bottom-0 h-0.5 bg-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
         </div>
+      </div>
 
-        <div class="modal-body">
-          <p class="info-text">
-            💡 Estes vídeos usaram a mesma combinação de estilo + seed e ficaram visualmente consistentes!
-          </p>
+      <!-- Modal de Registro -->
+      <Teleport to="body">
+        <div v-if="showModal"
+          class="fixed inset-0 bg-black/95 backdrop-blur-2xl flex items-center justify-center z-[100] p-4"
+          @click.self="closeModal">
           
-          <div class="videos-list">
-            <p>Carregando vídeos...</p>
+          <div class="glass-card max-w-sm w-full relative animate-in zoom-in-95 duration-300 border-emerald-500/20 shadow-[0_0_50px_rgba(16,185,129,0.15)] flex flex-col p-10">
+            <button @click="closeModal" class="absolute top-6 right-6 text-white/30 hover:text-white transition-colors">
+              <X :size="24" stroke-width="1.5" />
+            </button>
+
+            <header class="mb-8 text-left">
+               <div class="flex items-center gap-2 text-emerald-500 mb-1">
+                 <Zap :size="14" />
+                 <span class="mono-label text-emerald-500 font-black !text-[8px]">New DNA Entry</span>
+               </div>
+               <h2 class="text-2xl font-black text-white uppercase italic tracking-tighter">Registrar DNA</h2>
+            </header>
+
+            <form @submit.prevent="handleSubmit" class="space-y-6 text-left">
+              <div class="space-y-2">
+                <label class="mono-label !text-zinc-500 !text-[9px]">Valor Matemático (Seed)</label>
+                <div class="flex gap-2">
+                   <div class="relative flex-1">
+                      <Hash :size="16" class="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" />
+                      <input v-model.number="formData.value" type="number" required class="w-full bg-white/[0.03] border border-white/10 rounded-xl px-12 py-4 text-emerald-500 font-mono text-xs focus:border-emerald-500 outline-none transition-all" />
+                   </div>
+                   <button type="button" @click="generateRandomSeed" class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-500 hover:text-emerald-500 hover:border-emerald-500 transition-all">
+                      <Shuffle :size="18" />
+                   </button>
+                </div>
+              </div>
+
+              <button type="submit" :disabled="isSubmitting" class="btn-primary !bg-emerald-600 !hover:bg-emerald-500 w-full py-4 shadow-[0_0_30px_rgba(16,185,129,0.2)] font-black uppercase text-xs tracking-widest mt-4">
+                <span v-if="!isSubmitting">ADICIONAR DNA</span>
+                <span v-else class="animate-pulse">WRITING...</span>
+              </button>
+            </form>
           </div>
         </div>
-      </div>
+      </Teleport>
+
+      <!-- Modal de Amostras -->
+      <Teleport to="body">
+        <div v-if="showSamplesModal"
+          class="fixed inset-0 bg-black/95 backdrop-blur-2xl flex items-center justify-center z-[100] p-4 overflow-y-auto"
+          @click.self="closeSamplesModal">
+          
+          <div class="glass-card max-w-6xl w-full relative animate-in zoom-in-95 duration-300 border-emerald-500/20 shadow-[0_0_50px_rgba(16,185,129,0.15)] flex flex-col p-8 my-8">
+            <button @click="closeSamplesModal" class="absolute top-6 right-6 text-white/30 hover:text-white transition-colors z-10">
+              <X :size="24" stroke-width="1.5" />
+            </button>
+
+            <header class="mb-8 text-left">
+               <div class="flex items-center gap-2 text-emerald-500 mb-1">
+                 <Image :size="14" />
+                 <span class="mono-label text-emerald-500 font-black !text-[8px]">Visual Samples</span>
+               </div>
+               <h2 class="text-3xl font-black text-white uppercase italic tracking-tighter">
+                 DNA #{{ selectedSeed?.value }}
+               </h2>
+               <p class="text-zinc-500 text-sm mt-2">Amostras de imagens geradas com este DNA</p>
+            </header>
+
+            <!-- Loading State -->
+            <div v-if="isLoadingSamples" class="flex flex-col items-center justify-center py-20">
+              <div class="w-16 h-16 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin mb-4"></div>
+              <p class="mono-label text-zinc-500">LOADING SAMPLES...</p>
+            </div>
+
+            <!-- Empty State -->
+            <div v-else-if="samplesData.length === 0" class="flex flex-col items-center justify-center py-20 border-2 border-dashed border-white/5 rounded-2xl">
+              <div class="w-16 h-16 bg-emerald-500/5 rounded-full flex items-center justify-center mb-4 text-emerald-500/20">
+                <Image :size="32" />
+              </div>
+              <h3 class="text-xl font-black text-white/30 uppercase italic mb-2">Sem Amostras</h3>
+              <p class="mono-label opacity-40 italic text-center max-w-xs">Nenhuma imagem foi gerada com este DNA ainda.</p>
+            </div>
+
+            <!-- Gallery Grid -->
+            <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div
+                v-for="(sample, index) in samplesData"
+                :key="sample.id"
+                @click="openLightbox(index)"
+                class="group relative aspect-square rounded-xl overflow-hidden bg-zinc-900 border border-white/5 hover:border-emerald-500/50 transition-all duration-300 cursor-pointer"
+              >
+                <img 
+                  :src="sample.dataUrl" 
+                  :alt="`Sample ${index + 1}`"
+                  class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                
+                <!-- Overlay -->
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div class="absolute bottom-0 left-0 right-0 p-3">
+                    <p class="text-[8px] text-white/60 font-mono line-clamp-2">{{ sample.promptUsed }}</p>
+                  </div>
+                </div>
+
+                <!-- Hover Icon -->
+                <div class="absolute top-2 right-2 w-8 h-8 rounded-lg bg-emerald-500/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Eye :size="16" class="text-white" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Teleport>
+
+      <!-- Lightbox -->
+      <Teleport to="body">
+        <div v-if="currentSample"
+          class="fixed inset-0 bg-black/98 backdrop-blur-3xl flex items-center justify-center z-[110]"
+          @click.self="closeLightbox">
+          
+          <!-- Close Button -->
+          <button @click="closeLightbox" class="absolute top-6 right-6 text-white/50 hover:text-white transition-colors z-20">
+            <X :size="32" stroke-width="1.5" />
+          </button>
+
+          <!-- Navigation Buttons -->
+          <button 
+            v-if="selectedSampleIndex !== null && selectedSampleIndex > 0"
+            @click="prevImage"
+            class="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white transition-all z-20"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+          </button>
+
+          <button 
+            v-if="selectedSampleIndex !== null && selectedSampleIndex < samplesData.length - 1"
+            @click="nextImage"
+            class="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white transition-all z-20"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </button>
+
+          <!-- Image Container -->
+          <div class="max-w-7xl max-h-[90vh] w-full h-full flex flex-col items-center justify-center p-8">
+            <img 
+              :src="currentSample.dataUrl" 
+              :alt="`Sample ${(selectedSampleIndex ?? 0) + 1}`"
+              class="max-w-full max-h-full object-contain rounded-2xl shadow-[0_0_100px_rgba(16,185,129,0.3)]"
+            />
+            
+            <!-- Image Info -->
+            <div class="mt-6 max-w-3xl w-full glass-card p-6 border-emerald-500/20">
+              <div class="flex items-center justify-between mb-3">
+                <span class="mono-label text-emerald-500 !text-[9px]">
+                  {{ (selectedSampleIndex ?? 0) + 1 }} / {{ samplesData.length }}
+                </span>
+                <span class="text-[8px] text-zinc-600 font-mono">
+                  {{ new Date(currentSample.createdAt).toLocaleString() }}
+                </span>
+              </div>
+              
+              <p class="text-xs text-white/80 font-mono leading-relaxed mb-2">
+                {{ currentSample.promptUsed }}
+              </p>
+              
+              <div v-if="currentSample.outputTitle" class="flex items-center gap-2 pt-3 border-t border-white/5">
+                <span class="mono-label !text-[8px] text-zinc-600">OUTPUT:</span>
+                <span class="text-[10px] text-emerald-500 font-medium">{{ currentSample.outputTitle }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Teleport>
     </div>
   </div>
 </template>
-
-<style scoped>
-.page {
-  padding: var(--space-xl);
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: var(--space-xl);
-}
-
-.page-header h1 {
-  font-size: 2rem;
-  color: var(--color-text);
-  margin-bottom: var(--space-xs);
-}
-
-.page-header p {
-  color: var(--color-text-muted);
-}
-
-.content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xl);
-}
-
-.empty-state {
-  text-align: center;
-  padding: var(--space-2xl);
-  background: var(--color-bg-elevated);
-  border-radius: var(--radius-lg);
-  border: 2px dashed var(--color-border);
-}
-
-.style-group {
-  background: var(--color-bg-elevated);
-  border-radius: var(--radius-lg);
-  padding: var(--space-lg);
-}
-
-.group-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-lg);
-  padding-bottom: var(--space-md);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.group-header h2 {
-  font-size: 1.25rem;
-  color: var(--color-text);
-}
-
-.count {
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
-}
-
-.seeds-list {
-  display: grid;
-  gap: var(--space-md);
-}
-
-.seed-card {
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--space-lg);
-  transition: all var(--transition-base);
-}
-
-.seed-card:hover {
-  border-color: var(--color-primary);
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.1);
-}
-
-.seed-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: var(--space-md);
-}
-
-.seed-title {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-}
-
-.default-badge {
-  font-size: 0.75rem;
-  color: var(--color-warning);
-  font-weight: 600;
-}
-
-.seed-title h3 {
-  font-size: 1.1rem;
-  color: var(--color-text);
-}
-
-.seed-actions {
-  display: flex;
-  gap: var(--space-xs);
-}
-
-.seed-info {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-}
-
-.seed-value {
-  font-size: 0.9rem;
-  color: var(--color-text-muted);
-}
-
-.seed-value strong {
-  color: var(--color-primary);
-  font-family: 'Courier New', monospace;
-}
-
-.seed-description {
-  color: var(--color-text);
-  font-size: 0.9rem;
-}
-
-.seed-meta {
-  display: flex;
-  gap: var(--space-md);
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-}
-
-.tags {
-  font-style: italic;
-}
-
-/* Modal */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: var(--space-lg);
-}
-
-.modal {
-  background: var(--color-bg-elevated);
-  border-radius: var(--radius-lg);
-  max-width: 600px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--space-lg);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.modal-header h2 {
-  font-size: 1.5rem;
-  color: var(--color-text);
-}
-
-.btn-close {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: transparent;
-  color: var(--color-text-muted);
-  font-size: 1.5rem;
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-base);
-}
-
-.btn-close:hover {
-  background: var(--color-bg-card);
-  color: var(--color-text);
-}
-
-.modal-body {
-  padding: var(--space-lg);
-}
-
-.form-group {
-  margin-bottom: var(--space-lg);
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: var(--space-sm);
-  color: var(--color-text);
-  font-weight: 500;
-}
-
-.form-group input[type="text"],
-.form-group input[type="number"],
-.form-group select,
-.form-group textarea {
-  width: 100%;
-  padding: var(--space-md);
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  color: var(--color-text);
-  font-family: inherit;
-  font-size: 0.9rem;
-  transition: all var(--transition-base);
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-}
-
-.input-with-button {
-  display: flex;
-  gap: var(--space-sm);
-}
-
-.input-with-button input {
-  flex: 1;
-}
-
-.form-row {
-  display: flex;
-  gap: var(--space-lg);
-  margin-bottom: var(--space-lg);
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  color: var(--color-text);
-  cursor: pointer;
-}
-
-.checkbox-label input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--space-md);
-  padding-top: var(--space-lg);
-  border-top: 1px solid var(--color-border);
-}
-
-.info-text {
-  padding: var(--space-md);
-  background: var(--color-bg-card);
-  border-left: 3px solid var(--color-primary);
-  border-radius: var(--radius-sm);
-  margin-bottom: var(--space-lg);
-  color: var(--color-text-muted);
-}
-
-.videos-list {
-  padding: var(--space-lg);
-  text-align: center;
-  color: var(--color-text-muted);
-}
-
-/* Buttons */
-.btn-primary,
-.btn-secondary,
-.btn-icon {
-  padding: var(--space-sm) var(--space-lg);
-  border: none;
-  border-radius: var(--radius-md);
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-base);
-}
-
-.btn-primary {
-  background: var(--color-primary);
-  color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: var(--color-primary-hover);
-  transform: translateY(-1px);
-}
-
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  background: var(--color-bg-card);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-}
-
-.btn-secondary:hover {
-  background: var(--color-bg-elevated);
-}
-
-.btn-icon {
-  padding: var(--space-xs) var(--space-sm);
-  background: transparent;
-  border: 1px solid var(--color-border);
-  font-size: 1rem;
-}
-
-.btn-icon:hover {
-  background: var(--color-bg-elevated);
-  border-color: var(--color-primary);
-}
-
-.btn-danger:hover {
-  background: var(--color-error);
-  border-color: var(--color-error);
-  color: white;
-}
-</style>

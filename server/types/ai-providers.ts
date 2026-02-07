@@ -33,15 +33,22 @@ export interface ScriptGenerationRequest {
   userNotes?: string[] // Notas e insights do usuário
   visualReferences?: string[] // Descrições de imagens de referência
   researchData?: any // Dados estruturados (fatos, datas, pessoas)
-  
+
   // Output-specific
   outputType?: string // VIDEO_TEASER, VIDEO_FULL, etc.
   format?: string // "teaser", "full"
 
+  // Suporte Multimodal
+  images?: Array<{
+    data: string | Buffer // Base64 ou Buffer
+    mimeType: string
+    title?: string
+  }>
+
   additionalContext?: string
   mustInclude?: string // O que deve ter no roteiro
   mustExclude?: string // O que NÃO deve ter no roteiro
-  targetWPM?: number // Velocidade de fala alvo (Words Per Minute): 120 (lenta), 150 (média), 180 (rápida)
+  targetWPM?: number // Velocidade de fala alvo (Words Per Minute): 120 (lenta), 150 (média), 180 ( rápida)
   wordsPerScene?: number // Número alvo de palavras por cena (calculado a partir de targetWPM)
 }
 
@@ -53,15 +60,36 @@ export interface ScriptScene {
   estimatedDuration: number // em segundos
 }
 
+export interface BackgroundMusic {
+  prompt: string // Prompt para Stable Audio 2.5 (gênero, instrumentos, BPM, mood)
+  volume: number // Volume em dB para mixagem (-24 a -6)
+}
+
+export interface BackgroundMusicTrack {
+  prompt: string // Prompt para Stable Audio 2.5 (gênero, instrumentos, BPM, mood)
+  volume: number // Volume em dB para mixagem (-24 a -6)
+  startTime: number // Tempo de início em segundos
+  endTime: number | null // Tempo de fim em segundos (null = até o final)
+}
+
 export interface ScriptGenerationResponse {
   title: string
   summary: string // Sinopse expandida da história (2-3 parágrafos)
   fullText: string
   scenes: ScriptScene[]
+  backgroundMusic?: BackgroundMusic // Música única para todo o vídeo (TikTok/Instagram) - Regra: "video todo"
+  backgroundMusicTracks?: BackgroundMusicTrack[] // Lista de tracks com timestamps (YouTube Cinematic)
   wordCount: number
   estimatedDuration: number
   provider: string
   model: string
+
+  // Token usage real retornado pela API (para cálculo de custo preciso)
+  usage?: {
+    inputTokens: number
+    outputTokens: number
+    totalTokens: number
+  }
 }
 
 export interface IScriptGenerator {
@@ -82,16 +110,47 @@ export interface TTSRequest {
   similarity?: number // 0 a 1
 }
 
+/** Alignment de caracteres retornado pelo ElevenLabs /with-timestamps */
+export interface TTSCharacterAlignment {
+  characters: string[]
+  character_start_times_seconds: number[]
+  character_end_times_seconds: number[]
+}
+
+/** Word-level timestamps derivados do alignment de caracteres */
+export interface TTSWordTiming {
+  word: string
+  startTime: number   // em segundos
+  endTime: number     // em segundos
+}
+
 export interface TTSResponse {
   audioBuffer: Buffer
   duration: number // em segundos
   provider: string
   format: 'mp3' | 'wav' | 'ogg'
+
+  /** Alignment por caractere (direto da API ElevenLabs /with-timestamps) */
+  alignment?: TTSCharacterAlignment | null
+
+  /** Word-level timestamps derivados do alignment de caracteres */
+  wordTimings?: TTSWordTiming[] | null
+}
+
+export interface VoiceListOptions {
+  cursor?: string
+  pageSize?: number
+  search?: string
+}
+
+export interface VoiceListResponse {
+  voices: VoiceOption[]
+  nextCursor?: string
 }
 
 export interface ITTSProvider {
   synthesize(request: TTSRequest): Promise<TTSResponse>
-  getAvailableVoices(): Promise<VoiceOption[]>
+  getAvailableVoices(options?: VoiceListOptions): Promise<VoiceListResponse>
   getName(): string
 }
 
@@ -129,6 +188,7 @@ export interface ImageGenerationResponse {
   images: GeneratedImage[]
   provider: string
   model: string
+  predictTime?: number // Tempo real de GPU em segundos (retornado pela API)
 }
 
 export interface IImageGenerator {
@@ -165,6 +225,7 @@ export interface MotionGenerationResponse {
   video: GeneratedMotion
   provider: string
   model: string
+  predictTime?: number // Tempo real de GPU em segundos (retornado pela API)
 }
 
 export interface IMotionProvider {
@@ -229,10 +290,36 @@ export interface IVideoRenderer {
 }
 
 // =============================================================================
+// MUSIC GENERATION (Stable Audio 2.5 via Replicate)
+// =============================================================================
+
+export interface MusicGenerationRequest {
+  prompt: string           // Descrição técnica da música (vem direto da LangChain)
+  duration: number         // Duração em segundos (máximo 190s)
+  seed?: number            // Para reprodutibilidade
+  steps?: number           // 4-8 (qualidade vs velocidade)
+  cfgScale?: number        // 1-25 (aderência ao prompt)
+}
+
+export interface MusicGenerationResponse {
+  audioBuffer: Buffer
+  duration: number         // Duração real do áudio gerado
+  format: 'mp3' | 'wav'
+  provider: string
+  model: string
+  predictTime?: number     // Tempo real de GPU em segundos (retornado pela API)
+}
+
+export interface IMusicProvider {
+  generate(request: MusicGenerationRequest): Promise<MusicGenerationResponse>
+  getName(): string
+}
+
+// =============================================================================
 // PROVIDER FACTORY
 // =============================================================================
 
-export type ProviderType = 'script' | 'tts' | 'image' | 'video' | 'motion'
+export type ProviderType = 'script' | 'tts' | 'image' | 'video' | 'motion' | 'music'
 
 export interface ProviderConfig {
   type: ProviderType

@@ -25,12 +25,12 @@ export class ReplicateImageProvider implements IImageGenerator {
     this.client = new Replicate({
       auth: config.apiKey
     })
-    // SDXL é mais compatível, FLUX Schnell é mais rápido
-    this.model = config.model ?? 'stability-ai/sdxl'
+    // FLUX Schnell é o estado da arte para velocidade/qualidade
+    this.model = config.model ?? 'black-forest-labs/flux-schnell'
   }
 
   getName(): string {
-    return 'replicate'
+    return 'REPLICATE'
   }
 
   async generate(request: ImageGenerationRequest): Promise<ImageGenerationResponse> {
@@ -58,11 +58,16 @@ export class ReplicateImageProvider implements IImageGenerator {
         input.aspect_ratio = request.aspectRatio || "1:1"
         // Alguns modelos (como FLUX) ignoram width/height se aspect_ratio não for custom
         // Mas podemos passar 'resolution' para garantir qualidade
-        input.resolution = "1 MP" 
+        input.resolution = "1 MP"
       }
 
-      const output: any = await this.client.run(this.model as any, { input })
-      console.log(`[ReplicateImageProvider] Replicate returned ${Array.isArray(output) ? output.length : 1} image(s)`)
+      let predictTime: number | undefined
+      const output: any = await this.client.run(this.model as any, { input }, (prediction: any) => {
+        if (prediction.metrics?.predict_time) {
+          predictTime = prediction.metrics.predict_time
+        }
+      })
+      console.log(`[ReplicateImageProvider] Replicate returned ${Array.isArray(output) ? output.length : 1} image(s)${predictTime ? ` (predict_time: ${predictTime.toFixed(2)}s)` : ''}`)
 
       // Output pode ser string (URL única) ou array de URLs
       const urls = Array.isArray(output) ? output : [output]
@@ -77,7 +82,8 @@ export class ReplicateImageProvider implements IImageGenerator {
       return {
         images,
         provider: 'replicate',
-        model: this.model
+        model: this.model,
+        predictTime
       }
     } catch (error: any) {
       console.error('[ReplicateImageProvider] Error:', error)
