@@ -94,6 +94,7 @@ COPY --from=node-deps /app/node_modules ./node_modules
 COPY --from=builder /app/.output ./.output
 COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/server/skills ./server/skills
 
 # Copiar package.json para scripts
 COPY package*.json ./

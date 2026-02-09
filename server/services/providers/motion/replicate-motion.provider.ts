@@ -7,10 +7,21 @@ import type {
   GeneratedMotion
 } from '../../../types/ai-providers'
 
+/** Wan 2.2 5B: num_frames entre 81-121 (5s-7.5s @ 16fps) */
+const FPS = 16
+const MIN_FRAMES = 81
+const MAX_FRAMES = 121
+
+function durationToNumFrames(durationSeconds: number): number {
+  const frames = Math.round(durationSeconds * FPS)
+  return Math.min(MAX_FRAMES, Math.max(MIN_FRAMES, frames))
+}
+
 /**
  * Replicate Motion Provider
- * Uses Wan Video 2.2 I2V Fast via Replicate API
- * Model: wan-video/wan-2.2-i2v-fast (PrunaAI optimized version)
+ * Uses Wan Video 2.2 I2V Fast via Replicate API (image-to-video)
+ * Model: wan-video/wan-2.2-i2v-fast
+ * Schema: required prompt+image; num_frames 81-121, resolution 480p|720p, sample_shift 1-20, etc.
  */
 export class ReplicateMotionProvider implements IMotionProvider {
   private client: Replicate
@@ -21,7 +32,6 @@ export class ReplicateMotionProvider implements IMotionProvider {
       throw new Error('Replicate API key is required')
     }
     this.client = new Replicate({ auth: config.apiKey })
-    // Default to Wan Video 2.2 I2V Fast
     this.model = config.model || 'wan-video/wan-2.2-i2v-fast'
   }
 
@@ -33,24 +43,24 @@ export class ReplicateMotionProvider implements IMotionProvider {
     try {
       console.log(`[ReplicateMotion] Generating video from image`)
 
-      // Prepare input - usar buffer se disponível, senão ler do path
       const imageBuffer = request.imageBuffer || await fs.readFile(request.imagePath!)
+      const durationSeconds = request.duration ?? 5
+      const numFrames = durationToNumFrames(durationSeconds)
 
+      // Input conforme schema wan-video/wan-2.2-i2v-fast (sem negative_prompt, aspect_ratio, optimize_prompt)
       const input = {
         image: imageBuffer,
         prompt: request.prompt || 'Natural, smooth camera movement. Cinematic lighting.',
-        num_frames: request.duration === 10 ? 121 : 81, // 81 frames = ~5s @ 16fps, 121 frames = ~7.5s @ 16fps
-        resolution: '480p', // 480p = 832x480px (16:9) ou 480x832px (9:16)
+        num_frames: numFrames,
+        resolution: '480p' as const,
         frames_per_second: 16,
-        go_fast: true, // Usa otimização PrunaAI
-        sample_shift: 12, // Default recomendado
-        interpolate_output: false,
+        go_fast: true,
+        sample_shift: 12,
         disable_safety_checker: false
       }
 
-      console.log(`[ReplicateMotion] Using model: ${this.model}`)
+      console.log(`[ReplicateMotion] Using model: ${this.model}, num_frames: ${numFrames} (~${(numFrames / FPS).toFixed(1)}s)`)
 
-      // Execute generation - capturando predict_time via progress callback
       let predictTime: number | undefined
       const output = await this.client.run(this.model as any, { input }, (prediction: any) => {
         if (prediction.metrics?.predict_time) {
@@ -58,20 +68,16 @@ export class ReplicateMotionProvider implements IMotionProvider {
         }
       })
 
-      // Output is typically a URL string or array of strings
       const videoUrl = Array.isArray(output) ? output[0] : (output as unknown as string)
-
       if (!videoUrl) {
         throw new Error('No video URL returned from Replicate')
       }
 
-      // Download the video content
       const videoBuffer = await this.downloadVideo(videoUrl)
 
-      // Construct response
       const motion: GeneratedMotion = {
         videoBuffer,
-        duration: request.duration === 10 ? 10 : 5,
+        duration: numFrames / FPS,
         format: 'mp4'
       }
 

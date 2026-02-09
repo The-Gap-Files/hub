@@ -4,6 +4,7 @@ import { costLogService } from '../../../services/cost-log.service'
 import { validateReplicatePricing, PricingNotConfiguredError } from '../../../constants/pricing'
 import { getVisualStyleById } from '../../../constants/visual-styles'
 import type { ImageGenerationRequest } from '../../../types/ai-providers'
+import { ContentRestrictedError } from '../../../services/providers/image/replicate-image.provider'
 
 export default defineEventHandler(async (event) => {
   const sceneId = getRouterParam(event, 'id')
@@ -30,12 +31,10 @@ export default defineEventHandler(async (event) => {
   console.log(`[API] Regenerating image for Scene ${sceneId}`)
 
   // 2. Configurar Provider
-  // Tenta pegar o provider configurado ou fallback para replicate (como no pipeline)
   let imageProvider
   try {
     imageProvider = providerManager.getImageProvider()
   } catch (e) {
-    // Fallback de emergência igual ao pipeline se não estiver init
     const key = process.env.REPLICATE_API_KEY?.replace(/"/g, '')
     if (key) {
       const { createImageProvider } = await import('../../../services/providers')
@@ -46,7 +45,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // 2.1 Validar pricing antes de gastar dinheiro
-  const imageModel = (imageProvider as any).model || 'black-forest-labs/flux-schnell'
+  const imageModel = (imageProvider as any).model || 'luma/photon-flash'
   try {
     validateReplicatePricing(imageModel)
   } catch (err: any) {
@@ -60,51 +59,60 @@ export default defineEventHandler(async (event) => {
     throw err
   }
 
-  // 3. Preparar Request
+  // 3. Preparar Request — prompt completo vem do roteiro (ou override do body)
   const isPortrait = output.aspectRatio === '9:16'
   const width = isPortrait ? 768 : 1344
   const height = isPortrait ? 1344 : 768
 
-  // Construir prompt enriquecido com tags do estilo visual
-  const basePrompt = body.prompt || scene.visualDescription
-  let enhancedPrompt = basePrompt
   const vs = output.visualStyleId ? getVisualStyleById(output.visualStyleId) : undefined
 
-  if (vs) {
-    const tags = [
-      vs.lightingTags,
-      vs.atmosphereTags,
-      vs.compositionTags,
-      vs.tags
-    ].filter(t => t && t.trim().length > 0).join(', ')
-
-    const parts = []
-    // Base Style é a âncora principal
-    if (vs.baseStyle) parts.push(vs.baseStyle)
-    parts.push(basePrompt)
-    if (tags) parts.push(tags)
-
-    enhancedPrompt = parts.join(', ')
-  }
+  const promptToUse = body.prompt ?? scene.visualDescription
 
   const request: ImageGenerationRequest = {
-    prompt: enhancedPrompt,
+    prompt: promptToUse,
     width,
     height,
     aspectRatio: output.aspectRatio || '16:9',
-    style: vs?.baseStyle as any || 'cinematic',
-    seed: body.seed || undefined, // Permite novo seed aleatório se não passar
+    style: (vs?.baseStyle as any) || 'cinematic',
+    seed: body.seed || undefined,
     numVariants: 1
   }
 
-  // 4. Gerar
-  const response = await imageProvider.generate(request)
+  console.log(`[API] 🖼️ [DEBUG] Regenerar imagem — Scene ${sceneId} — prompt completo:\n${request.prompt}`)
+
+  // 4. Gerar (com detecção de safety filter)
+  let response
+  try {
+    response = await imageProvider.generate(request)
+  } catch (err: any) {
+    if (err instanceof ContentRestrictedError) {
+      // Atualizar status da cena para restrita (persistir a tentativa)
+      await prisma.scene.update({
+        where: { id: sceneId },
+        data: {
+          imageStatus: 'restricted',
+          imageRestrictionReason: err.message
+        }
+      })
+
+      throw createError({
+        statusCode: 422,
+        data: {
+          code: 'CONTENT_RESTRICTED',
+          prompt: promptToUse,
+          reason: err.message
+        },
+        message: `O prompt foi rejeitado pelo filtro de conteúdo do modelo de imagem. Tente editar o prompt para usar termos mais abstratos.`
+      })
+    }
+    throw err
+  }
+
   const generated = response.images[0]
 
   if (!generated) throw createError({ statusCode: 500, message: 'No image generated' })
 
-  // 5. Salvar no Banco
-  // Desmarcar anteriores como selecionadas?
+  // 5. Salvar no Banco — desmarcar anteriores como selecionadas
   await prisma.sceneImage.updateMany({
     where: { sceneId },
     data: { isSelected: false }
@@ -125,14 +133,23 @@ export default defineEventHandler(async (event) => {
     }
   })
 
+  // 6. Limpar status de restrição da cena (regeneração com sucesso)
+  await prisma.scene.update({
+    where: { id: sceneId },
+    data: {
+      imageStatus: 'generated',
+      imageRestrictionReason: null
+    }
+  })
+
   // Registrar custo da regeneração de imagem (fire-and-forget)
   costLogService.logReplicateImage({
     outputId: output.id,
-    model: response.model || 'black-forest-labs/flux-schnell',
+    model: response.model || 'luma/photon-flash',
     numImages: 1,
     action: 'recreate',
     detail: `Scene image regeneration (single)`
-  }).catch(() => {})
+  }).catch(() => { })
 
   return newImage
 })

@@ -22,12 +22,16 @@ import { getVisualStyleById } from '../../constants/visual-styles'
 import { getScriptStyleById } from '../../constants/script-styles'
 import { providerManager } from '../providers'
 import { costLogService } from '../cost-log.service'
+import { formatOutlineForPrompt } from '../story-architect.service'
+import type { StoryOutline } from '../story-architect.service'
+import { getClassificationById } from '../../constants/intelligence-classifications'
 import { validateReplicatePricing } from '../../constants/pricing'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import ffmpeg from 'fluent-ffmpeg'
 import ffmpegInstaller from '@ffmpeg-installer/ffmpeg'
 import { videoPipelineService } from './video-pipeline.service'
+import { createPipelineLogger } from '../../utils/pipeline-logger'
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path)
 
@@ -44,11 +48,17 @@ export class OutputPipelineService {
    * Executa o pipeline completo para um Output
    */
   async execute(outputId: string): Promise<OutputPipelineResult> {
-    console.log(`[OutputPipeline] 🚀 Render Requested for ${outputId}`)
+    const log = createPipelineLogger({ stage: 'Pipeline', outputId })
+    log.info('Render solicitado; validando aprovações.')
     try {
       const output = await this.loadOutputContext(outputId)
 
-      console.log(`[OutputPipeline] 🔍 Validating Approvals: Script=${output.scriptApproved}, Images=${output.imagesApproved}, Audio=${output.audioApproved}, Motion=${output.enableMotion ? output.videosApproved : 'N/A'}`)
+      log.info('Aprovações', {
+        script: output.scriptApproved,
+        images: output.imagesApproved,
+        audio: output.audioApproved,
+        motion: output.enableMotion ? output.videosApproved : 'N/A'
+      })
 
       // Validate Approvals
       if (!output.scriptApproved) throw new Error("Aprovação pendente: Roteiro")
@@ -95,11 +105,12 @@ export class OutputPipelineService {
 
     if (!output) throw new Error('Output não encontrado')
 
-    // Resolver estilos a partir das constantes (não mais do DB)
+    // Resolver estilos e classificação a partir das constantes (não mais do DB)
     const scriptStyle = output.scriptStyleId ? getScriptStyleById(output.scriptStyleId) : undefined
     const visualStyle = output.visualStyleId ? getVisualStyleById(output.visualStyleId) : undefined
+    const classification = output.classificationId ? getClassificationById(output.classificationId) : undefined
 
-    return { ...output, scriptStyle, visualStyle }
+    return { ...output, scriptStyle, visualStyle, classification }
   }
 
   /**
@@ -143,6 +154,12 @@ export class OutputPipelineService {
       // Dados estruturados
       researchData: dossier.researchData,
 
+      // Classificação temática (no output) + orientação musical e visual
+      dossierCategory: output.classificationId || undefined,
+      musicGuidance: output.classificationId ? getClassificationById(output.classificationId)?.musicGuidance : undefined,
+      musicMood: output.classificationId ? getClassificationById(output.classificationId)?.musicMood : undefined,
+      visualGuidance: output.classificationId ? getClassificationById(output.classificationId)?.visualGuidance : undefined,
+
       // Configuração de duração e tipo
       targetDuration: output.duration || 300,
       targetWPM: output.targetWPM || 150,
@@ -155,12 +172,17 @@ export class OutputPipelineService {
       scriptStyleDescription: output.scriptStyle?.description,
       scriptStyleInstructions: output.scriptStyle?.instructions,
 
-      // Estilo visual (resolvido das constantes)
+      // Estilo visual (resolvido das constantes) — tags completas para o roteiro incorporar no visualDescription
       visualStyleName: output.visualStyle?.name,
       visualStyleDescription: output.visualStyle?.description,
+      visualBaseStyle: output.visualStyle?.baseStyle || undefined,
+      visualLightingTags: output.visualStyle?.lightingTags || undefined,
+      visualAtmosphereTags: output.visualStyle?.atmosphereTags || undefined,
+      visualCompositionTags: output.visualStyle?.compositionTags || undefined,
+      visualGeneralTags: output.visualStyle?.tags || undefined,
 
       // Objetivo Editorial (diretriz narrativa prioritária)
-      additionalContext: output.objective 
+      additionalContext: output.objective
         ? `🎯 OBJETIVO EDITORIAL (CRÍTICO - GOVERNA TODA A NARRATIVA):\n${output.objective}`
         : undefined,
 
@@ -168,6 +190,23 @@ export class OutputPipelineService {
       mustInclude: output.mustInclude || undefined,
       mustExclude: output.mustExclude || undefined
     }
+
+    // ─── Story Architect: plano narrativo é etapa isolada e deve estar aprovado ───
+    if (!output.storyOutline) {
+      throw new Error(
+        'Plano narrativo não gerado. Gere o plano (Story Architect) na etapa anterior e valide antes de criar o roteiro.'
+      )
+    }
+    if (!output.storyOutlineApproved) {
+      throw new Error(
+        'Plano narrativo pendente de aprovação. Aprove o plano narrativo antes de gerar o roteiro.'
+      )
+    }
+
+    const outlineData = output.storyOutline as StoryOutline
+    promptContext.storyOutline = formatOutlineForPrompt(outlineData)
+    const scriptLog = createPipelineLogger({ stage: 'Outline', outputId })
+    scriptLog.info(`Plano narrativo aprovado: ${outlineData.risingBeats?.length || 0} beats.`)
 
     // Gerar roteiro
     const scriptResponse = await scriptProvider.generate(promptContext)
@@ -182,7 +221,7 @@ export class OutputPipelineService {
       usage: scriptResponse.usage,
       action: 'create',
       detail: `Script generation - ${scriptResponse.wordCount} words, ${scriptResponse.scenes?.length || 0} scenes`
-    }).catch(() => {})
+    }).catch(() => { })
 
     // Salvar roteiro
     const script = await prisma.script.create({
@@ -228,8 +267,8 @@ export class OutputPipelineService {
           scriptId: script.id,
           prompt: track.prompt,
           volume: track.volume,
-          startTime: track.startTime,
-          endTime: track.endTime
+          startScene: track.startScene,
+          endScene: track.endScene
         }))
       })
     }
@@ -241,13 +280,14 @@ export class OutputPipelineService {
    * Gera imagens para as cenas
    */
   public async generateImages(outputId: string) {
+    const log = createPipelineLogger({ stage: 'Images', outputId })
     const output = await this.loadOutputContext(outputId)
     try {
       const imageProvider = providerManager.getImageProvider()
-      console.log(`[OutputPipeline] 🖼️ Image Provider obtained: ${imageProvider.getName()}`)
+      log.info(`Provedor de imagens: ${imageProvider.getName()}.`)
 
       // Validar pricing antes de gastar dinheiro
-      const imageModel = (imageProvider as any).model || 'black-forest-labs/flux-schnell'
+      const imageModel = (imageProvider as any).model || 'luma/photon-flash'
       validateReplicatePricing(imageModel)
 
       const scenes = await prisma.scene.findMany({
@@ -255,74 +295,41 @@ export class OutputPipelineService {
         orderBy: { order: 'asc' }
       })
 
-      console.log(`[OutputPipeline] 🎬 Found ${scenes.length} scenes for image generation`)
+      log.info(`${scenes.length} cenas para gerar imagens.`)
 
-      const CONCURRENCY_LIMIT = 3 // Limite para evitar rate limits agressivos
+      const CONCURRENCY_LIMIT = 50 // Envio em lotes de 50 ao Replicate
       const sceneChunks = []
       for (let i = 0; i < scenes.length; i += CONCURRENCY_LIMIT) {
         sceneChunks.push(scenes.slice(i, i + CONCURRENCY_LIMIT))
       }
 
+      let restrictedCount = 0
+      let successCount = 0
+      let errorCount = 0
+
       for (const chunk of sceneChunks) {
-        await Promise.all(chunk.map(async (scene, chunkIndex) => {
+        const results = await Promise.allSettled(chunk.map(async (scene, chunkIndex) => {
           const absoluteIndex = scenes.indexOf(scene)
-          console.log(`[OutputPipeline] 📸 Processing Scene ${absoluteIndex + 1}/${scenes.length} (ID: ${scene.id})...`)
+          log.step(`Cena ${absoluteIndex + 1}/${scenes.length}`, `sceneId=${scene.id}`)
 
           const isPortrait = output.aspectRatio === '9:16'
           const width = isPortrait ? 768 : 1344
           const height = isPortrait ? 1344 : 768
 
-          // NOVO: Merge inteligente de prompts com GPT
-          let enhancedPrompt = scene.visualDescription
-          const vs = output.visualStyle
-
-          if (vs) {
-            try {
-              // Importar serviço de merge
-              const { promptMergerService } = await import('../prompt-merger.service')
-
-              // Fazer merge inteligente
-              enhancedPrompt = await promptMergerService.mergePrompt({
-                sceneDescription: scene.visualDescription,
-                visualStyle: {
-                  baseStyle: vs.baseStyle || undefined,
-                  lightingTags: vs.lightingTags || undefined,
-                  atmosphereTags: vs.atmosphereTags || undefined,
-                  compositionTags: vs.compositionTags || undefined,
-                  tags: vs.tags || undefined
-                }
-              })
-
-              console.log(`[OutputPipeline] 🎨 Prompt merged: "${enhancedPrompt.substring(0, 80)}..."`)
-            } catch (error) {
-              console.error('[OutputPipeline] ❌ Prompt merge failed, using fallback:', error)
-
-              // Fallback: concatenação manual
-              const tags = [
-                vs.lightingTags,
-                vs.atmosphereTags,
-                vs.compositionTags,
-                vs.tags
-              ].filter(t => t && t.trim().length > 0).join(', ')
-
-              const parts = []
-              if (vs.baseStyle) parts.push(vs.baseStyle)
-              parts.push(scene.visualDescription)
-              if (tags) parts.push(tags)
-
-              enhancedPrompt = parts.join(', ')
-            }
-          }
-
+          // Descrição visual vem completa do roteiro (já incorpora estilo + tema); sem merge.
+          // NÃO enviar baseStyle como style — o visualDescription já contém a âncora de estilo
+          // embutida pela LLM (instrução de buildVisualInstructionsForScript). Caso contrário,
+          // enhancePrompt() preporá o baseStyle novamente, causando duplicação.
           const request: ImageGenerationRequest = {
-            prompt: enhancedPrompt,
+            prompt: scene.visualDescription,
             width,
             height,
             aspectRatio: output.aspectRatio || '16:9',
-            style: (output.visualStyle?.baseStyle as any) || 'cinematic',
             seed: output.seed?.value,
             numVariants: 1
           }
+
+          log.step(`Cena ${absoluteIndex + 1}/${scenes.length}`, `prompt: ${request.prompt.slice(0, 80)}...`)
 
           const imageResponse = await imageProvider.generate(request)
           const firstImage = imageResponse.images[0]
@@ -346,20 +353,78 @@ export class OutputPipelineService {
           // Registrar custo da imagem (fire-and-forget)
           costLogService.logReplicateImage({
             outputId,
-            model: imageResponse.model || 'black-forest-labs/flux-schnell',
+            model: imageResponse.model || 'luma/photon-flash',
             numImages: imageResponse.images.length,
             action: 'create',
             detail: `Scene ${absoluteIndex + 1}/${scenes.length} - image generation${imageResponse.predictTime ? ` (${imageResponse.predictTime.toFixed(1)}s GPU)` : ''}`
-          }).catch(() => {})
+          }).catch(() => { })
         }))
+
+        // Processar resultados do allSettled
+        for (let i = 0; i < results.length; i++) {
+          const result = results[i]!
+          const scene = chunk[i]!
+          const absoluteIndex = scenes.indexOf(scene)
+
+          if (result.status === 'fulfilled') {
+            successCount++
+          } else if (result.status === 'rejected') {
+            const error = (result as PromiseRejectedResult).reason
+            const { ContentRestrictedError } = await import('../providers/image/replicate-image.provider')
+
+            if (error instanceof ContentRestrictedError) {
+              restrictedCount++
+              log.warn(`Cena ${absoluteIndex + 1} RESTRITA pelo filtro de conteúdo: ${error.message.slice(0, 100)}`)
+
+              // Marcar a cena como restrita no banco
+              await prisma.scene.update({
+                where: { id: scene.id },
+                data: {
+                  imageStatus: 'restricted',
+                  imageRestrictionReason: error.message
+                }
+              })
+            } else {
+              errorCount++
+              log.error(`Cena ${absoluteIndex + 1} falhou (erro não-safety): ${error?.message?.slice(0, 100) || error}`)
+
+              // Marcar como erro genérico
+              await prisma.scene.update({
+                where: { id: scene.id },
+                data: {
+                  imageStatus: 'error',
+                  imageRestrictionReason: error?.message?.slice(0, 500) || 'Unknown error'
+                }
+              })
+            }
+          }
+        }
+      }
+
+      // Marcar cenas que geraram com sucesso
+      const generatedSceneIds = await prisma.sceneImage.findMany({
+        where: { scene: { outputId } },
+        select: { sceneId: true }
+      })
+      const generatedIds = new Set(generatedSceneIds.map(s => s.sceneId))
+      for (const scene of scenes) {
+        if (generatedIds.has(scene.id) && !['restricted', 'error'].includes(scene.imageStatus || '')) {
+          await prisma.scene.update({
+            where: { id: scene.id },
+            data: { imageStatus: 'generated' }
+          })
+        }
+      }
+
+      log.info(`Geração de imagens concluída: ${successCount} OK, ${restrictedCount} restritas, ${errorCount} erros.`)
+
+      if (restrictedCount > 0) {
+        log.warn(`⚠️ ${restrictedCount} cena(s) foram bloqueadas pelo filtro de conteúdo. O usuário pode revisar e regenerar na tela de checagem.`)
       }
     }
-
-    // Atualizar status para imagens aprovadas (ou pendente de revisão se quisermos passo manual)
-    // Por enquanto, vamos marcar output.imagesApproved = false (padrão) mas o processo terminou
     catch (error) {
-      console.error(`[OutputPipeline] ❌ Error generating images:`, error)
-      throw error // Repassar erro para o handler principal
+      log.error('Erro ao gerar imagens.', error)
+      throw error
     }
   }
 
@@ -369,8 +434,9 @@ export class OutputPipelineService {
    * YouTube Cinematic: N tracks com timestamps
    */
   public async generateBackgroundMusic(outputId: string) {
+    const log = createPipelineLogger({ stage: 'BGM', outputId })
     const output = await this.loadOutputContext(outputId)
-    console.log(`[OutputPipeline] 🎵 generateBackgroundMusic for Output ${outputId}`)
+    log.info('Gerando música de fundo.')
 
     // Buscar script com dados de música
     const script = await prisma.script.findUnique({
@@ -388,7 +454,7 @@ export class OutputPipelineService {
     })
 
     if (existingBgm) {
-      console.log('[OutputPipeline] ⏭️ Background music already exists. Skipping.')
+      log.info('BGM já existe; pulando.')
       return
     }
 
@@ -407,7 +473,7 @@ export class OutputPipelineService {
     let totalNarrationDuration = 0
     if (narrationTracks.length > 0) {
       totalNarrationDuration = narrationTracks.reduce((acc, t) => acc + (t.duration || 5), 0)
-      console.log(`[OutputPipeline] 🎵 Duração real da narração: ${totalNarrationDuration.toFixed(2)}s (${narrationTracks.length} cenas)`)
+      log.info(`Duração real da narração: ${totalNarrationDuration.toFixed(2)}s (${narrationTracks.length} cenas).`)
     }
 
     // Usar duração real da narração, fallback para duração estimada do output
@@ -415,15 +481,14 @@ export class OutputPipelineService {
       ? Math.ceil(totalNarrationDuration)
       : (output.duration || 120)
 
-    console.log(`[OutputPipeline] 🎵 Duração da música: ${videoDuration}s (baseada na narração real)`)
+    log.info(`Duração alvo da música: ${videoDuration}s (baseada na narração).`)
 
     // CASO 1: Música única para todo o vídeo (TikTok/Instagram)
     if (script.backgroundMusicPrompt) {
       const duration = Math.min(190, videoDuration) // Stable Audio max: 190s
 
-      console.log(`[OutputPipeline] 🎵 Gerando música única (video todo): ${duration}s`)
-      console.log(`[OutputPipeline] 🎵 Prompt: "${script.backgroundMusicPrompt}"`)
-      console.log(`[OutputPipeline] 🎵 Volume: ${script.backgroundMusicVolume}dB`)
+      log.step('Música única (vídeo todo)', `${duration}s — volume ${script.backgroundMusicVolume}dB`)
+      log.info(`Prompt BGM: "${(script.backgroundMusicPrompt || '').slice(0, 60)}..."`)
 
       const request: MusicGenerationRequest = {
         prompt: script.backgroundMusicPrompt,
@@ -452,27 +517,36 @@ export class OutputPipelineService {
         audioDuration: duration,
         action: 'create',
         detail: `Background music (full video) - ${duration}s audio`
-      }).catch(() => {})
+      }).catch(() => { })
 
-      console.log(`[OutputPipeline] ✅ Background music gerada! ${(musicResponse.audioBuffer.length / 1024).toFixed(0)}KB`)
+      log.info(`BGM gerada: ${(musicResponse.audioBuffer.length / 1024).toFixed(0)} KB.`)
     }
 
-    // CASO 2: Múltiplas tracks com timestamps (YouTube Cinematic)
+    // CASO 2: Múltiplas tracks por segmento de cenas (YouTube Cinematic)
     else if (script.backgroundMusicTracks && script.backgroundMusicTracks.length > 0) {
-      console.log(`[OutputPipeline] 🎵 Gerando ${script.backgroundMusicTracks.length} tracks de background music`)
+      log.info(`${script.backgroundMusicTracks.length} track(s) de BGM (por cena).`)
+
+      // Montar array com duração real de cada cena (da narração)
+      const sceneDurations = narrationTracks.map((t: any) => t.duration || 5)
+      const totalScenes = sceneDurations.length
 
       for (const track of script.backgroundMusicTracks) {
-        const trackDuration = track.endTime 
-          ? Math.min(190, track.endTime - track.startTime)
-          : Math.min(190, videoDuration - track.startTime)
+        const start = track.startScene || 0
+        const end = track.endScene !== null && track.endScene !== undefined ? track.endScene : totalScenes - 1
 
-        console.log(`[OutputPipeline] 🎵 Track: ${track.startTime}s → ${track.endTime || 'Fim'} (${trackDuration}s)`)
-        console.log(`[OutputPipeline] 🎵 Prompt: "${track.prompt}"`)
-        console.log(`[OutputPipeline] 🎵 Volume: ${track.volume}dB`)
+        // Somar durações reais das cenas neste segmento
+        const segmentDuration = sceneDurations
+          .slice(start, end + 1)
+          .reduce((acc: number, d: number) => acc + d, 0)
+
+        const trackDuration = Math.min(190, Math.ceil(segmentDuration))
+
+        log.step(`Track cenas ${start}→${end}`, `${end - start + 1} cenas, ${trackDuration}s, ${track.volume}dB`)
+        log.info(`Prompt: "${(track.prompt || '').slice(0, 50)}..."`)
 
         const request: MusicGenerationRequest = {
           prompt: track.prompt,
-          duration: Math.round(trackDuration)
+          duration: trackDuration
         }
 
         const musicResponse = await musicProvider.generate(request)
@@ -494,15 +568,15 @@ export class OutputPipelineService {
           outputId,
           model: musicResponse.model || 'stability-ai/stable-audio-2.5',
           predictTime: musicResponse.predictTime,
-          audioDuration: Math.round(trackDuration),
+          audioDuration: trackDuration,
           action: 'create',
-          detail: `BGM track ${track.startTime}s→${track.endTime || 'end'} - ${Math.round(trackDuration)}s audio`
-        }).catch(() => {})
+          detail: `BGM track scenes ${start}→${end} - ${trackDuration}s audio`
+        }).catch(() => { })
 
-        console.log(`[OutputPipeline] ✅ Track gerada! ${(musicResponse.audioBuffer.length / 1024).toFixed(0)}KB`)
+        log.info(`Track gerada: ${(musicResponse.audioBuffer.length / 1024).toFixed(0)} KB.`)
       }
     } else {
-      console.log('[OutputPipeline] ⚠️ Nenhum prompt de background music encontrado no script.')
+      log.warn('Nenhum prompt de BGM no script; pulando.')
     }
   }
 
@@ -593,7 +667,7 @@ export class OutputPipelineService {
             characterCount: scene.narration.length,
             action: 'create',
             detail: `Scene ${scene.order + 1} narration - ${scene.narration.length} chars`
-          }).catch(() => {})
+          }).catch(() => { })
         } else {
           costLogService.logReplicateTTS({
             outputId,
@@ -602,7 +676,7 @@ export class OutputPipelineService {
             characterCount: scene.narration.length,
             action: 'create',
             detail: `Scene ${scene.order + 1} narration via Replicate - ${scene.narration.length} chars`
-          }).catch(() => {})
+          }).catch(() => { })
         }
       }))
     }
@@ -657,20 +731,18 @@ export class OutputPipelineService {
     const output = await this.loadOutputContext(outputId)
     const motionProvider = providerManager.getMotionProvider()
 
-    // Validar pricing antes de gastar dinheiro
     const motionModel = (motionProvider as any).model || 'wan-video/wan-2.2-i2v-fast'
     validateReplicatePricing(motionModel)
     const scenes = await prisma.scene.findMany({
       where: { outputId },
       include: {
-        images: {
-          where: { isSelected: true }
-        }
+        images: { where: { isSelected: true } },
+        audioTracks: { where: { type: 'scene_narration' } }
       },
       orderBy: { order: 'asc' }
     })
 
-    const CONCURRENCY_LIMIT = 15 // Motion em batch de 15
+    const CONCURRENCY_LIMIT = 50 // Motion em batch de 50
     const sceneChunks = []
     for (let i = 0; i < scenes.length; i += CONCURRENCY_LIMIT) {
       sceneChunks.push(scenes.slice(i, i + CONCURRENCY_LIMIT))
@@ -681,14 +753,15 @@ export class OutputPipelineService {
         const selectedImage = scene.images[0]
         if (!selectedImage?.fileData) return
 
+        const durationSeconds = scene.audioTracks[0]?.duration ?? scene.estimatedDuration ?? 5
         const request: MotionGenerationRequest = {
           imageBuffer: Buffer.from(selectedImage.fileData!) as any,
           prompt: scene.visualDescription,
-          duration: 5,
+          duration: durationSeconds,
           aspectRatio: output.aspectRatio || '16:9'
         }
 
-        console.log(`[OutputPipeline] 🎞️ Generating motion for scene ${scene.order + 1}`)
+        console.log(`[OutputPipeline] 🎞️ Generating motion for scene ${scene.order + 1} (duration: ${durationSeconds.toFixed(1)}s)`)
         const videoResponse = await motionProvider.generate(request)
 
         await prisma.sceneVideo.create({
@@ -714,25 +787,142 @@ export class OutputPipelineService {
           numVideos: 1,
           action: 'create',
           detail: `Scene ${scene.order + 1}/${scenes.length} - motion generation`
-        }).catch(() => {})
+        }).catch(() => { })
       }))
     }
+  }
+
+  /**
+   * Regenera motion (image-to-video) para UMA cena específica.
+   * Usado no fluxo de correções pós-renderização.
+   * 
+   * Fluxo:
+   *   1. Busca a cena e a imagem selecionada
+   *   2. Desmarca vídeos anteriores
+   *   3. Gera novo motion via provider
+   *   4. Salva novo SceneVideo como selecionado
+   */
+  public async regenerateSceneMotion(sceneId: string) {
+    console.log(`[OutputPipeline] 🔄 Regenerating motion for Scene ${sceneId}`)
+
+    // 1. Buscar cena com imagem selecionada e output pai
+    const scene = await prisma.scene.findUnique({
+      where: { id: sceneId },
+      include: {
+        images: { where: { isSelected: true } },
+        audioTracks: { where: { type: 'scene_narration' } },
+        output: { include: { seed: true } }
+      }
+    })
+
+    if (!scene) throw new Error('Cena não encontrada')
+    if (!scene.images[0]?.fileData) throw new Error('Cena não possui imagem selecionada para gerar motion')
+
+    const output = scene.output
+    const selectedImage = scene.images[0]
+
+    // 2. Obter provider de motion
+    const motionProvider = providerManager.getMotionProvider()
+
+    // Validar pricing
+    const motionModel = (motionProvider as any).model || 'wan-video/wan-2.2-i2v-fast'
+    validateReplicatePricing(motionModel)
+
+    // 3. Desmarcar vídeos anteriores desta cena
+    await prisma.sceneVideo.updateMany({
+      where: { sceneId },
+      data: { isSelected: false }
+    })
+
+    const durationSeconds = scene.audioTracks[0]?.duration ?? scene.estimatedDuration ?? 5
+    const request: MotionGenerationRequest = {
+      imageBuffer: Buffer.from(selectedImage.fileData!) as any,
+      prompt: scene.visualDescription,
+      duration: durationSeconds,
+      aspectRatio: output.aspectRatio || '16:9'
+    }
+
+    console.log(`[OutputPipeline] 🎞️ Generating motion for scene ${scene.order + 1} (${sceneId}, duration: ${durationSeconds.toFixed(1)}s)`)
+    const videoResponse = await motionProvider.generate(request)
+
+    // 5. Salvar novo SceneVideo
+    const newVideo = await prisma.sceneVideo.create({
+      data: {
+        sceneId,
+        provider: motionProvider.getName() as any,
+        promptUsed: scene.visualDescription,
+        fileData: Buffer.from(videoResponse.video.videoBuffer) as any,
+        mimeType: 'video/mp4',
+        originalSize: videoResponse.video.videoBuffer.length,
+        duration: videoResponse.video.duration || 5,
+        sourceImageId: selectedImage.id,
+        isSelected: true,
+        variantIndex: 0
+      }
+    })
+
+    // 6. Registrar custo (fire-and-forget)
+    costLogService.logReplicateMotion({
+      outputId: output.id,
+      model: videoResponse.model || 'wan-video/wan-2.2-i2v-fast',
+      predictTime: videoResponse.predictTime,
+      numVideos: 1,
+      action: 'recreate',
+      detail: `Scene ${scene.order + 1} - motion regeneration (correction)`
+    }).catch(() => { })
+
+    console.log(`[OutputPipeline] ✅ Motion regenerated for Scene ${sceneId}`)
+
+    return newVideo
+  }
+
+  /**
+   * Entra em modo correção: reseta flags de aprovação (imagens e motion)
+   * para permitir edição pós-renderização.
+   * 
+   * Mantém: script, áudio, BGM (não precisam mudar)
+   * Reseta: imagesApproved, videosApproved, status → PENDING
+   */
+  public async enterCorrectionMode(outputId: string) {
+    console.log(`[OutputPipeline] 🔧 Entering correction mode for Output ${outputId}`)
+
+    const output = await prisma.output.findUnique({ where: { id: outputId } })
+    if (!output) throw new Error('Output não encontrado')
+
+    if (output.status !== 'COMPLETED' && output.status !== 'FAILED') {
+      throw new Error('Somente outputs com status COMPLETED ou FAILED podem entrar em modo correção')
+    }
+
+    // Resetar flags visuais mantendo script, áudio e BGM
+    const updated = await prisma.output.update({
+      where: { id: outputId },
+      data: {
+        status: 'PENDING',
+        imagesApproved: false,
+        videosApproved: false
+      }
+    })
+
+    await this.logExecution(outputId, 'correction', 'started', 'Entrou em modo correção - imagens e motion desbloqueados para edição')
+
+    return updated
   }
 
   /**
    * Renderiza vídeo final usando o VideoPipelineService
    */
   private async renderVideo(outputId: string) {
-    console.log(`[OutputPipeline] 🎬 Iniciando renderização final para ${outputId}...`)
+    const log = createPipelineLogger({ stage: 'Pipeline', outputId })
+    log.info('Iniciando renderização final (FFmpeg).')
     await this.logExecution(outputId, 'render', 'started', 'Iniciando renderização FFmpeg...')
 
     const result = await videoPipelineService.renderVideo(outputId)
 
     if (result.success) {
-      console.log(`[OutputPipeline] ✅ Vídeo renderizado e salvo no banco com sucesso.`)
+      log.info('Vídeo renderizado e salvo no banco.')
       await this.logExecution(outputId, 'render', 'completed', 'Vídeo renderizado e salvo no banco.')
     } else {
-      console.error(`[OutputPipeline] ❌ Erro na renderização: ${result.error}`)
+      log.error('Erro na renderização.', result.error)
       await this.logExecution(outputId, 'render', 'failed', `Erro: ${result.error}`)
       throw new Error(`Falha na renderização: ${result.error}`)
     }

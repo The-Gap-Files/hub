@@ -1,0 +1,312 @@
+/**
+ * Gera 4 thumbnails candidatas para o output.
+ * 
+ * Fluxo:
+ * 1. LLM (Claude Haiku) gera 4 prompts de imagem + hook texts
+ * 2. Combina prompt + hook text → Photon Flash gera a thumbnail direta (com texto no prompt)
+ * 3. Salva as 4 candidatas no banco
+ * 4. Registra CostLog
+ * 
+ * NOTA: Modelos de difusão podem errar texto. O usuário aceita esse risco
+ * em troca de tipografia mais orgânica e integrada à imagem.
+ */
+
+import { prisma } from '../../../utils/prisma'
+import { getThumbnailDimensions } from '../../../utils/thumbnail-prompt-builder'
+import { loadSkill } from '../../../utils/skill-loader'
+import { validateReplicatePricing, PricingNotConfiguredError } from '../../../constants/pricing'
+import { costLogService } from '../../../services/cost-log.service'
+import { ChatAnthropic } from '@langchain/anthropic'
+import { SystemMessage, HumanMessage } from '@langchain/core/messages'
+import Replicate from 'replicate'
+
+// Modelo leve/barato só para gerar prompts de imagem
+const THUMBNAIL_PROMPT_MODEL = process.env.ANTHROPIC_MODEL_THUMBNAIL || 'claude-3-5-haiku-20241022'
+
+// Modelo de imagem para thumbnails
+const THUMBNAIL_IMAGE_MODEL = 'luma/photon-flash'
+
+interface ThumbnailPromptResult {
+  imagePrompt: string
+  hookText: string
+}
+
+export default defineEventHandler(async (event) => {
+  const id = getRouterParam(event, 'id')
+  if (!id) throw createError({ statusCode: 400, message: 'ID obrigatório' })
+
+  // Hook text sugerido pelo usuário (opcional)
+  const body = await readBody(event).catch(() => ({}))
+  const userHookText = (body?.hookText || '').trim().toUpperCase().slice(0, 40)
+
+  const output = await prisma.output.findUnique({
+    where: { id },
+    include: {
+      script: true,
+      scenes: {
+        orderBy: { order: 'asc' },
+        select: { order: true, narration: true, visualDescription: true }
+      },
+      dossier: { select: { theme: true } }
+    }
+  })
+
+  if (!output) throw createError({ statusCode: 404, message: 'Output não encontrado' })
+  if (output.status !== 'COMPLETED' && output.status !== 'RENDERED') {
+    throw createError({
+      statusCode: 422,
+      message: 'O vídeo precisa estar completo para gerar thumbnails. Aprove o render primeiro.'
+    })
+  }
+
+  // Validar pricing
+  try {
+    validateReplicatePricing(THUMBNAIL_IMAGE_MODEL)
+  } catch (err: any) {
+    if (err instanceof PricingNotConfiguredError) {
+      throw createError({
+        statusCode: 422,
+        data: { code: 'PRICING_NOT_CONFIGURED', model: err.model },
+        message: err.message
+      })
+    }
+    throw err
+  }
+
+  // ═══════════════════════════════════════════════════
+  // PASSO 1: LLM gera 4 prompts + hook texts
+  // ═══════════════════════════════════════════════════
+  const title = output.title || (output.dossier as { theme?: string })?.theme || 'Vídeo'
+  const summary = output.script?.summary || ''
+  const dims = getThumbnailDimensions(output.aspectRatio)
+
+  const scenes = output.scenes
+  const sceneContext = scenes
+    .slice(0, 12)
+    .map((s, i) => `Cena ${i + 1}: Visual: ${s.visualDescription} | Narração: "${s.narration?.slice(0, 100)}"`)
+    .join('\n')
+
+  const thumbnailSkill = loadSkill('thumbnail-creation')
+
+  const systemPrompt = `${thumbnailSkill}
+
+---
+Você é um especialista em criar thumbnails virais para canais de mistério/true crime/conspirações no YouTube.
+Plataforma: ${output.platform || 'YouTube'}
+Aspecto: ${dims.aspectRatio} (${dims.width}x${dims.height})
+
+REGRAS PARA PROMPTS DE IMAGEM:
+- Gere prompts em INGLÊS (os modelos de imagem são treinados em inglês)
+- Cada prompt deve ter entre 40 e 100 palavras
+- Os prompts são para o modelo Luma Photon Flash (geração fotorrealística de alta qualidade)
+- O texto/hook DEVE ser incluído no prompt como parte da composição visual
+- Descreva o texto como elemento visual: tamanho, cor, posição, estilo (bold, glowing, etc)
+- Foque em composição visual dramática: close-ups extremos, iluminação cinematográfica, contraste alto
+- Tons ESCUROS e sombrios funcionam melhor (texto claro sobre fundo escuro)
+
+COMO INCLUIR O HOOK TEXT NO PROMPT:
+- Integre o texto como elemento visual da cena
+- Exemplo: "...with bold red text reading 'ELE SABIA DEMAIS' overlaid at the bottom, glowing letters..."
+- Use descrições visuais do texto: "large white impact font text", "neon red glowing letters", etc
+- O texto deve ser CURTO (máximo 4 palavras) para o modelo renderizar melhor
+
+REGRAS PARA HOOK TEXT:
+- Escreva em PORTUGUÊS BRASILEIRO e MAIÚSCULAS
+- MÁXIMO 4 palavras
+- Deve gerar CURIOSIDADE EXTREMA, URGÊNCIA ou CHOQUE
+- Exemplos: "NÃO ASSISTA SOZINHO", "ELE SABIA DEMAIS", "PROVAS DESTRUÍDAS", "O QUE ESCONDERAM?", "A MENTIRA FINAL"
+- Cada hook deve ter um ângulo DIFERENTE da história`
+
+  const hookInstruction = userHookText
+    ? `\n\n⚠️ OBRIGATÓRIO: A PRIMEIRA thumbnail (índice 0) DEVE usar exatamente este hook text: "${userHookText}"
+As outras 3 thumbnails podem ter hooks criados por você.`
+    : ''
+
+  const userPrompt = `Crie 4 thumbnails para este vídeo:
+
+TÍTULO: ${title}
+RESUMO: ${summary}
+
+CENAS DO VÍDEO:
+${sceneContext || '(sem cenas disponíveis)'}
+
+Cada thumbnail deve capturar um ângulo diferente:
+1. O momento mais impactante / revelação dramática
+2. A emoção central / conexão humana  
+3. O conflito / tensão principal
+4. A curiosidade / mistério que atrai o clique
+
+IMPORTANTE: O "imagePrompt" deve INCLUIR o hookText como elemento visual da cena.
+Exemplo: "Dark extreme close-up of a terrified face illuminated by candlelight, with bold red glowing text reading 'ELE SABIA DEMAIS' overlaid at the bottom, cinematic horror atmosphere"${hookInstruction}
+
+Retorne APENAS um JSON array com 4 objetos:
+[
+  { "imagePrompt": "Extreme close-up of a shadowy figure... with bold red text reading 'HOOK AQUI' at the bottom...", "hookText": "HOOK AQUI" },
+  ...
+]`
+
+  const apiKey = process.env.ANTHROPIC_API_KEY
+  if (!apiKey) throw createError({ statusCode: 500, message: 'ANTHROPIC_API_KEY não configurada' })
+
+  const model = new ChatAnthropic({
+    anthropicApiKey: apiKey,
+    modelName: THUMBNAIL_PROMPT_MODEL,
+    temperature: 0.9,
+    maxTokens: 2000
+  })
+
+  console.log(`[Thumbnails] 🎨 Gerando prompts + hooks via ${THUMBNAIL_PROMPT_MODEL}...`)
+
+  const llmResponse = await model.invoke([
+    new SystemMessage(systemPrompt),
+    new HumanMessage(userPrompt)
+  ])
+
+  // Parsear o JSON da resposta
+  const responseText = typeof llmResponse.content === 'string'
+    ? llmResponse.content
+    : (llmResponse.content as Array<{ type: string; text?: string }>)?.find(c => c.type === 'text')?.text || ''
+
+  let thumbnailData: ThumbnailPromptResult[]
+  try {
+    const jsonMatch = responseText.match(/\[[\s\S]*\]/)
+    thumbnailData = JSON.parse(jsonMatch?.[0] || '[]')
+    if (!Array.isArray(thumbnailData) || thumbnailData.length === 0) throw new Error('Array vazio')
+    thumbnailData = thumbnailData.filter(t => t.imagePrompt && t.hookText)
+  } catch {
+    console.warn('[Thumbnails] ⚠️ Falha no parse JSON, tentando fallback')
+    const lines = responseText.split('\n').filter((l: string) => l.trim().length > 20).slice(0, 4)
+    thumbnailData = lines.map(line => ({
+      imagePrompt: line,
+      hookText: ''
+    }))
+  }
+
+  thumbnailData = thumbnailData.slice(0, 4)
+  console.log(`[Thumbnails] ✅ ${thumbnailData.length} prompts gerados pela LLM`)
+  thumbnailData.forEach((t, i) => {
+    console.log(`[Thumbnails]   ${i + 1}. 🖼️  "${t.imagePrompt.slice(0, 80)}..."`)
+    console.log(`[Thumbnails]      🔤 Hook: "${t.hookText}"`)
+  })
+
+  // ═══════════════════════════════════════════════════
+  // PASSO 2: Gerar thumbnails via Photon Flash (com texto no prompt)
+  // ═══════════════════════════════════════════════════
+  const replicateApiKey = process.env.REPLICATE_API_KEY?.replace(/"/g, '')
+  if (!replicateApiKey) {
+    throw createError({ statusCode: 500, message: 'REPLICATE_API_KEY não configurada' })
+  }
+  const replicate = new Replicate({ auth: replicateApiKey })
+
+  const aspectRatio = mapAspectRatio(dims.aspectRatio)
+
+  const candidates: { base64: string; prompt: string; hookText: string }[] = []
+
+  for (const [index, thumb] of thumbnailData.entries()) {
+    try {
+      console.log(`[Thumbnails] 📸 [${index + 1}/4] Photon Flash: "${thumb.imagePrompt.slice(0, 70)}..."`)
+
+      const replicateOutput = await replicate.run(THUMBNAIL_IMAGE_MODEL as `${string}/${string}`, {
+        input: {
+          prompt: thumb.imagePrompt,
+          aspect_ratio: aspectRatio
+        }
+      })
+
+      const imageUrl = extractOutputUrl(replicateOutput)
+
+      if (!imageUrl) {
+        console.warn(`[Thumbnails] ⚠️ [${index + 1}/4] Sem URL. Pulando.`)
+        continue
+      }
+
+      const imageResponse = await fetch(imageUrl)
+      if (!imageResponse.ok) {
+        console.warn(`[Thumbnails] ⚠️ [${index + 1}/4] Falha ao baixar: HTTP ${imageResponse.status}`)
+        continue
+      }
+      const imageBuffer = Buffer.from(new Uint8Array(await imageResponse.arrayBuffer()))
+
+      candidates.push({
+        base64: imageBuffer.toString('base64'),
+        prompt: thumb.imagePrompt,
+        hookText: thumb.hookText
+      })
+      console.log(`[Thumbnails] ✅ [${index + 1}/4] Thumbnail gerada (${(imageBuffer.length / 1024).toFixed(0)}KB)`)
+
+    } catch (error: any) {
+      console.error(`[Thumbnails] ❌ [${index + 1}/4] Erro: ${error.message}`)
+    }
+  }
+
+  if (candidates.length === 0) {
+    throw createError({
+      statusCode: 500,
+      message: 'Nenhuma thumbnail foi gerada com sucesso. Tente novamente.'
+    })
+  }
+
+  // ═══════════════════════════════════════════════════
+  // PASSO 3: Salvar candidatas
+  // ═══════════════════════════════════════════════════
+  await prisma.output.update({
+    where: { id },
+    data: {
+      thumbnailCandidates: candidates,
+      thumbnailData: null
+    }
+  })
+
+  // ═══════════════════════════════════════════════════
+  // PASSO 4: Registrar custos (fire-and-forget)
+  // ═══════════════════════════════════════════════════
+  const llmUsage = llmResponse.usage_metadata
+  costLogService.logThumbnailGeneration({
+    outputId: id,
+    imageModel: THUMBNAIL_IMAGE_MODEL,
+    numImages: candidates.length,
+    llmModel: THUMBNAIL_PROMPT_MODEL,
+    llmProvider: 'ANTHROPIC',
+    llmUsage: llmUsage ? {
+      inputTokens: llmUsage.input_tokens,
+      outputTokens: llmUsage.output_tokens
+    } : undefined
+  })
+
+  return {
+    success: true,
+    count: candidates.length,
+    model: THUMBNAIL_IMAGE_MODEL,
+    hooks: candidates.map(c => c.hookText),
+    message: `${candidates.length} thumbnails geradas via Photon Flash com hook text integrado.`
+  }
+})
+
+// =============================================================================
+// UTILS
+// =============================================================================
+
+/** Extrai URL do output do Replicate (FileOutput, array, ou string) */
+function extractOutputUrl(output: any): string | null {
+  if (Array.isArray(output)) {
+    const first = output[0]
+    if (!first) return null
+    return typeof first === 'string' ? first : (first?.url?.() || String(first))
+  }
+  if (typeof output === 'string') return output
+  return output?.url?.() || null
+}
+
+/** Mapeia aspect ratio para formato aceito pelo Photon Flash */
+function mapAspectRatio(aspectRatio: string): string {
+  const mapping: Record<string, string> = {
+    '16:9': '16:9',
+    '9:16': '9:16',
+    '1:1': '1:1',
+    '4:3': '4:3',
+    '3:4': '3:4',
+    '21:9': '21:9',
+    '9:21': '9:21'
+  }
+  return mapping[aspectRatio] || '16:9'
+}

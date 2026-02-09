@@ -11,7 +11,19 @@ export default defineNuxtConfig({
   ssr: false,
 
   app: {
-    buildAssetsDir: '_nuxt/'
+    buildAssetsDir: '_nuxt/',
+    head: {
+      title: 'The Gap Files — Hub',
+      meta: [
+        { charset: 'utf-8' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        { name: 'description', content: 'Hub de produção de conteúdo The Gap Files' }
+      ],
+      link: [
+        { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' },
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+      ]
+    }
   },
 
   modules: [
@@ -35,7 +47,7 @@ export default defineNuxtConfig({
           : (process.env.ANTHROPIC_API_KEY ?? ''),
         model: process.env.SCRIPT_PROVIDER === 'openai'
           ? (process.env.OPENAI_MODEL ?? 'gpt-4o')
-          : (process.env.ANTHROPIC_MODEL ?? 'claude-opus-4-6')
+          : (process.env.ANTHROPIC_MODEL_SCRIPT ?? process.env.ANTHROPIC_MODEL ?? 'claude-sonnet-4-20250514')
       },
       tts: {
         name: process.env.TTS_PROVIDER ?? 'elevenlabs',

@@ -166,6 +166,7 @@ const newNote = ref({
 const noteTypes = [
   { id: 'insight', label: 'Insight Neural', bullet: 'bg-blue-400' },
   { id: 'curiosity', label: 'Curiosidade', bullet: 'bg-purple-400' },
+  { id: 'research', label: 'Pesquisa', bullet: 'bg-cyan-400' },
   { id: 'data', label: 'Dados Brutos', bullet: 'bg-emerald-400' },
   { id: 'todo', label: 'Sub-Task', bullet: 'bg-rose-400' },
 ]
@@ -250,6 +251,7 @@ function getNoteTypeClass(type: string) {
     case 'insight': return 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
     case 'data': return 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
     case 'curiosity': return 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+    case 'research': return 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
     case 'todo': return 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
     default: return 'bg-white/10 text-white/50 border border-white/20'
   }
@@ -260,6 +262,7 @@ function getNoteTypeBulletClass(type: string) {
     case 'insight': return 'bg-blue-400 shadow-[0_0_8px_#60a5fa]'
     case 'data': return 'bg-emerald-400 shadow-[0_0_8px_#34d399]'
     case 'curiosity': return 'bg-purple-400 shadow-[0_0_8px_#c084fc]'
+    case 'research': return 'bg-cyan-400 shadow-[0_0_8px_#22d3ee]'
     case 'todo': return 'bg-rose-400 shadow-[0_0_8px_#fb7185]'
     default: return 'bg-white/50 shadow-none'
   }

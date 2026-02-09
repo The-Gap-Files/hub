@@ -13,7 +13,29 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY
 })
 
-const MERGE_MODEL = process.env.ANTHROPIC_MERGE_MODEL || 'claude-3-5-haiku-20241022'
+const MERGE_MODEL = process.env.ANTHROPIC_MODEL_MERGE || process.env.ANTHROPIC_MERGE_MODEL || 'claude-haiku-4-5'
+
+// Semáforo para limitar chamadas concorrentes ao Haiku (evita 429 rate limit)
+const MAX_CONCURRENT = 5
+let activeCalls = 0
+const waitQueue: Array<() => void> = []
+
+function acquireSlot(): Promise<void> {
+  if (activeCalls < MAX_CONCURRENT) {
+    activeCalls++
+    return Promise.resolve()
+  }
+  return new Promise<void>(resolve => waitQueue.push(resolve))
+}
+
+function releaseSlot(): void {
+  if (waitQueue.length > 0) {
+    const next = waitQueue.shift()!
+    next()
+  } else {
+    activeCalls--
+  }
+}
 
 export interface PromptMergeRequest {
   sceneDescription: string
@@ -26,23 +48,33 @@ export interface PromptMergeRequest {
   }
 }
 
+export interface PromptMergeResult {
+  mergedPrompt: string
+  usage?: { inputTokens: number; outputTokens: number; totalTokens: number }
+  model?: string
+}
+
 export class PromptMergerService {
   /**
-   * Faz merge inteligente do prompt da cena com as tags do estilo visual
+   * Faz merge inteligente do prompt da cena com as tags do estilo visual.
+   * Retorna mergedPrompt + usage/model quando Claude é usado (para CostLog).
    */
-  async mergePrompt(request: PromptMergeRequest): Promise<string> {
+  async mergePrompt(request: PromptMergeRequest): Promise<PromptMergeResult> {
+    await acquireSlot()
     try {
       return await this.claudeMerge(request)
     } catch (error) {
       console.warn('[PromptMerger] Claude merge failed, using manual fallback:', error)
-      return this.manualMerge(request)
+      return { mergedPrompt: this.manualMerge(request) }
+    } finally {
+      releaseSlot()
     }
   }
 
   /**
    * Merge usando Claude Haiku (inteligente, remove redundâncias)
    */
-  private async claudeMerge(request: PromptMergeRequest): Promise<string> {
+  private async claudeMerge(request: PromptMergeRequest): Promise<PromptMergeResult> {
     const { sceneDescription, visualStyle } = request
 
     // Coletar elementos do estilo
@@ -90,8 +122,16 @@ Merge these into a single optimized prompt:`
       throw new Error('Claude returned empty response')
     }
 
-    console.log(`[PromptMerger] ✅ Claude merge successful (${MERGE_MODEL})`)
-    return mergedPrompt
+    const usage = response.usage
+      ? {
+          inputTokens: response.usage.input_tokens,
+          outputTokens: response.usage.output_tokens,
+          totalTokens: response.usage.input_tokens + response.usage.output_tokens
+        }
+      : undefined
+
+    console.log(`[PromptMerger] ✅ Merge successful (${MERGE_MODEL})`)
+    return { mergedPrompt, usage, model: MERGE_MODEL }
   }
 
   /**

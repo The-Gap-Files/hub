@@ -74,25 +74,31 @@ export function buildVisualInstructionsForScript(
   return `
 DIRETRIZES VISUAIS OBRIGATÓRIAS (Estilo: ${styleData.baseStyle}):
 
-As descrições visuais devem ser CINEMATOGRÁFICAS e EMOTIVAS, seguindo este estilo:
+Each visualDescription must be a COMPLETE, STANDALONE image-generation prompt in English. It will be sent directly to the image model with no further processing or merge. You MUST incorporate the visual style (base, lighting, atmosphere, composition) into each scene description in natural language.
 
-**Iluminação**: ${styleData.lightingTags}
-- Use verbos no gerúndio para descrever luz em movimento (ex: "light filtering through", "shadows dancing")
+**CRITICAL — Âncora de estilo:** Start EVERY visualDescription with the exact base style phrase (or its full wording). For example, if the style is "Cinematic 2D illustration, Studio Ghibli art style dark variant, painterly anime aesthetic, moody and atmospheric", the first phrase of each prompt MUST include that same anchor so the image model keeps a consistent look. Do not shorten to just "Cinematic 2D illustration"; include the full style identifier (e.g. "Studio Ghibli", "painterly anime") when provided.
 
-**Atmosfera**: ${styleData.atmosphereTags}
-- Mescle a atmosfera com elementos físicos da cena
+**Lighting**: ${styleData.lightingTags}
+- Use gerund verbs for light in motion (e.g. "light filtering through", "shadows dancing")
 
-**Composição**: ${styleData.compositionTags}
-- Especifique ângulos de câmera e enquadramento
+**Atmosphere**: ${styleData.atmosphereTags}
+- Blend atmosphere with physical elements of the scene
 
-**Ação Suave**: Sempre inclua elementos em movimento sutil:
-- Partículas flutuando (dust dancing, snow falling, embers floating)
-- Elementos naturais (leaves rustling, water rippling, fabric swaying)
-- Detalhes humanos (eyes blinking, breath visible, hair moving)
+**Composition**: ${styleData.compositionTags}
+- Specify camera angles and framing
 
-**Formato da Descrição Visual**:
-"[ESTILO BASE], [DESCRIÇÃO DA CENA COM AÇÃO], [COMPOSIÇÃO], [ILUMINAÇÃO + ATMOSFERA], [DETALHES EM MOVIMENTO]"
+**Soft motion**: Include subtle motion (dust, leaves, breath, fabric) when it fits the scene.
 
-Exemplo: "Cinematic 2D illustration, ancient temple ruins with vines growing over stone pillars, wide establishing shot from low angle, warm golden hour light filtering through clouds creating a dreamlike atmosphere, dust particles dancing in the light beams"
+**Anatomy and grounded scene (reduce AI artifacts):**
+- When the scene shows a character or human figure, include in the prompt: correct anatomy, two hands, proportional head and body, single figure. If the framing is partial (e.g. bust, hands only), describe it explicitly (e.g. "figure from waist up", "hands only holding document") so the model does not produce cut-off or floating bodies by mistake.
+- Keep every element in the scene grounded in the narrative and theme: no floating objects or random elements that do not belong to the story. For real history, true crime, or documentary tone: no fantasy, no magic, no superhero poses or powers; keep the scene plausible and anchored to the period and mood. Only add supernatural or stylized flight/magic if the story and genre explicitly call for it.
+
+**Thematic cues (apply when relevant to the story):**
+- When the story involves religious holidays or specific dates (e.g. Holy Week, Easter, Holy Thursday), add subtle visual cues in visualDescription: church or cathedral visible, empty or solemn streets, quiet morning light, period-appropriate religious context.
+- When the theme is conspiracy, paranoia, or "being watched", consider in visualDescription: implied surveillance, shadows suggesting observation, architecture of power (e.g. tribunals, corridors), hidden documents, feeling of unease.
+
+**Format**: One continuous prompt per scene: "[BASE STYLE ANCHOR], [SCENE DESCRIPTION WITH ACTION], [COMPOSITION], [LIGHTING + ATMOSPHERE], [MOTION DETAILS]"
+
+Example: "Cinematic 2D illustration, Studio Ghibli art style dark variant, painterly anime aesthetic, ancient temple ruins with vines growing over stone pillars, wide establishing shot from low angle, warm golden hour light filtering through clouds creating a dreamlike atmosphere, dust particles dancing in the light beams"
 `.trim()
 }

@@ -2,7 +2,7 @@
  * Analyze Insights Service
  * 
  * Usa LangChain + Structured Output para analisar o conteúdo do dossiê
- * e gerar automaticamente insights neurais e curiosidades.
+ * e gerar automaticamente insights neurais, curiosidades e dados de pesquisa.
  */
 
 import { z } from 'zod'
@@ -15,12 +15,12 @@ import { SystemMessage, HumanMessage } from '@langchain/core/messages'
 // =============================================================================
 
 const InsightItemSchema = z.object({
-  content: z.string().describe('O texto do insight ou curiosidade, escrito de forma clara e concisa'),
-  noteType: z.enum(['insight', 'curiosity']).describe('insight = conexão analítica, padrão narrativo ou ângulo editorial. curiosity = fato surpreendente, contradição ou ponto pouco explorado')
+  content: z.string().describe('O texto do insight, curiosidade ou dado de pesquisa, escrito de forma clara e concisa'),
+  noteType: z.enum(['insight', 'curiosity', 'research']).describe('insight = conexão analítica, padrão narrativo ou ângulo editorial. curiosity = fato surpreendente, contradição ou ponto pouco explorado. research = dado de pesquisa estruturado: fato verificável, estatística, data, nome ou referência documental')
 })
 
 const AnalysisResponseSchema = z.object({
-  items: z.array(InsightItemSchema).min(1).max(15).describe('Lista de insights e curiosidades extraídos do material')
+  items: z.array(InsightItemSchema).min(1).max(15).describe('Lista de insights, curiosidades e dados de pesquisa extraídos do material')
 })
 
 type AnalysisResponse = z.infer<typeof AnalysisResponseSchema>
@@ -38,7 +38,7 @@ export interface AnalyzeInsightsRequest {
 }
 
 export interface AnalyzeInsightsResult {
-  items: Array<{ content: string; noteType: 'insight' | 'curiosity' }>
+  items: Array<{ content: string; noteType: 'insight' | 'curiosity' | 'research' }>
   usage?: { inputTokens: number; outputTokens: number; totalTokens: number }
   provider: string
   model: string
@@ -59,9 +59,10 @@ export async function analyzeInsights(
   let structuredLlm: any
 
   if (providerName === 'anthropic') {
+    const insightsModel = process.env.ANTHROPIC_MODEL_INSIGHTS || providerConfig.model || 'claude-sonnet-4-20250514'
     const model = new ChatAnthropic({
       anthropicApiKey: providerConfig.apiKey,
-      modelName: providerConfig.model ?? 'claude-sonnet-4-20250514',
+      modelName: insightsModel,
       temperature: 0.8,
       maxTokens: 4096
     })
@@ -85,7 +86,10 @@ export async function analyzeInsights(
   const systemPrompt = buildSystemPrompt()
   const userPrompt = buildUserPrompt(request)
 
-  console.log('[AnalyzeInsights] 📤 Enviando para', providerName, '...')
+  const resolvedModel = providerName === 'anthropic'
+    ? (process.env.ANTHROPIC_MODEL_INSIGHTS || providerConfig.model || 'claude-sonnet-4-20250514')
+    : (providerConfig.model || 'gpt-4o-mini')
+  console.log(`[AnalyzeInsights] 📤 Enviando para ${providerName} (${resolvedModel})...`)
 
   const messages = [
     new SystemMessage(systemPrompt),
@@ -110,7 +114,8 @@ export async function analyzeInsights(
 
     const insights = content.items.filter(i => i.noteType === 'insight').length
     const curiosities = content.items.filter(i => i.noteType === 'curiosity').length
-    console.log(`[AnalyzeInsights] 💡 ${insights} insights + 🔍 ${curiosities} curiosidades`)
+    const research = content.items.filter(i => i.noteType === 'research').length
+    console.log(`[AnalyzeInsights] 💡 ${insights} insights + 🔍 ${curiosities} curiosidades + 📊 ${research} dados de pesquisa`)
 
     return {
       items: content.items,
@@ -129,9 +134,9 @@ export async function analyzeInsights(
 // =============================================================================
 
 function buildSystemPrompt(): string {
-  return `Você é um analista de inteligência editorial especializado em extrair insights profundos e curiosidades surpreendentes de material bruto.
+  return `Você é um analista de inteligência editorial especializado em extrair insights profundos, curiosidades surpreendentes e dados de pesquisa estruturados de material bruto.
 
-Sua função é analisar o dossiê fornecido (documento principal + fontes secundárias + notas existentes) e retornar uma lista de descobertas divididas em duas categorias:
+Sua função é analisar o dossiê fornecido (documento principal + fontes secundárias + notas existentes) e retornar uma lista de descobertas divididas em três categorias:
 
 ## INSIGHT NEURAL (noteType: "insight")
 - Conexões não-óbvias entre informações do material
@@ -147,9 +152,18 @@ Sua função é analisar o dossiê fornecido (documento principal + fontes secun
 - Elementos que geram engajamento e retenção do público
 - Pontos que provocam reflexão ou debate
 
+## DADO DE PESQUISA (noteType: "research")
+- Fatos verificáveis e objetivos (nomes, datas, locais)
+- Estatísticas e números concretos mencionados no material
+- Referências documentais ou bibliográficas
+- Linhas do tempo e sequências cronológicas
+- Atores-chave e suas relações (quem, o quê, quando, onde)
+- Dados que servem como base factual para roteiros e scripts
+
 ## REGRAS:
-- Gere entre 4 e 10 itens no total
-- Balance entre insights e curiosidades (não precisa ser 50/50, depende do material)
+- Gere entre 6 e 15 itens no total
+- Balance entre as três categorias (priorize o que o material oferece)
+- Gere pelo menos 2 itens de cada categoria quando possível
 - Cada item deve ser autocontido e compreensível isoladamente
 - Escreva em português brasileiro
 - Seja específico — evite generalidades vagas
@@ -157,19 +171,51 @@ Sua função é analisar o dossiê fornecido (documento principal + fontes secun
 - Priorize descobertas que agreguem valor à produção de conteúdo`
 }
 
+// =============================================================================
+// TRUNCAMENTO INTELIGENTE
+// =============================================================================
+
+/** Limite seguro de tokens para o prompt (deixa margem para system prompt + output) */
+const MAX_PROMPT_TOKENS = 150_000
+const CHARS_PER_TOKEN = 4
+
+function estimateTokens(text: string): number {
+  return Math.ceil(text.length / CHARS_PER_TOKEN)
+}
+
+function truncateText(text: string, maxTokens: number): string {
+  const maxChars = maxTokens * CHARS_PER_TOKEN
+  if (text.length <= maxChars) return text
+  return text.slice(0, maxChars) + '\n\n[... CONTEÚDO TRUNCADO POR LIMITE DE CONTEXTO ...]'
+}
+
 function buildUserPrompt(request: AnalyzeInsightsRequest): string {
-  let prompt = `Analise o seguinte dossiê e extraia insights neurais e curiosidades:\n\n`
+  // Budget allocation: documento principal (60%), fontes (25%), notas+imagens (15%)
+  const docBudget = Math.floor(MAX_PROMPT_TOKENS * 0.60)
+  const sourcesBudget = Math.floor(MAX_PROMPT_TOKENS * 0.25)
+  const metaBudget = Math.floor(MAX_PROMPT_TOKENS * 0.15)
+
+  let prompt = `Analise o seguinte dossiê e extraia insights neurais, curiosidades e dados de pesquisa:\n\n`
 
   prompt += `📋 TEMA: ${request.theme}\n\n`
-  prompt += `📄 DOCUMENTO PRINCIPAL:\n${request.sourceText}\n\n`
 
+  // Documento principal (com truncamento se necessário)
+  const truncatedDoc = truncateText(request.sourceText, docBudget)
+  prompt += `📄 DOCUMENTO PRINCIPAL:\n${truncatedDoc}\n\n`
+
+  // Fontes secundárias (distribui budget entre elas)
   if (request.sources && request.sources.length > 0) {
+    const perSourceBudget = Math.floor(sourcesBudget / request.sources.length)
     prompt += `📚 FONTES SECUNDÁRIAS:\n`
     request.sources.forEach((source, i) => {
-      prompt += `[${i + 1}] (${source.sourceType}) ${source.title}\n${source.content}\n---\n`
+      const truncatedContent = truncateText(source.content, perSourceBudget)
+      prompt += `[${i + 1}] (${source.sourceType}) ${source.title}\n${truncatedContent}\n---\n`
     })
     prompt += '\n'
   }
+
+  // Imagens e notas existentes (usa budget de meta)
+  let metaUsed = 0
 
   if (request.images && request.images.length > 0) {
     prompt += `🖼️ IMAGENS DE REFERÊNCIA (descrições):\n`
@@ -177,17 +223,22 @@ function buildUserPrompt(request: AnalyzeInsightsRequest): string {
       prompt += `[${i + 1}] ${img.description}\n`
     })
     prompt += '\n'
+    metaUsed += estimateTokens(request.images.map(i => i.description).join('\n'))
   }
 
   if (request.existingNotes && request.existingNotes.length > 0) {
-    prompt += `🧠 NOTAS JÁ EXISTENTES (NÃO repetir estes):\n`
-    request.existingNotes.forEach((note, i) => {
-      prompt += `[${i + 1}] (${note.noteType}) ${note.content}\n`
-    })
-    prompt += '\n'
+    const notesRemaining = metaBudget - metaUsed
+    const notesText = request.existingNotes.map((note, i) => `[${i + 1}] (${note.noteType}) ${note.content}`).join('\n')
+    const truncatedNotes = truncateText(notesText, notesRemaining)
+    prompt += `🧠 NOTAS JÁ EXISTENTES (NÃO repetir estes):\n${truncatedNotes}\n\n`
   }
 
-  prompt += `\nRetorne os insights e curiosidades no formato JSON estruturado.`
+  prompt += `\nRetorne os insights, curiosidades e dados de pesquisa no formato JSON estruturado.`
+
+  // Log de diagnóstico
+  const totalTokens = estimateTokens(prompt)
+  const wasTruncated = truncatedDoc.includes('[... CONTEÚDO TRUNCADO')
+  console.log(`[AnalyzeInsights] 📏 Prompt: ~${totalTokens.toLocaleString()} tokens estimados${wasTruncated ? ' (TRUNCADO)' : ''}`)
 
   return prompt
 }

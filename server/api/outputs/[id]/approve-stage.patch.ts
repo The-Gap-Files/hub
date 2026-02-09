@@ -15,6 +15,9 @@ export default defineEventHandler(async (event) => {
   const updateData: any = {}
 
   switch (stage) {
+    case 'STORY_OUTLINE':
+      updateData.storyOutlineApproved = approved
+      break
     case 'SCRIPT':
       updateData.scriptApproved = approved
       break
@@ -30,13 +33,31 @@ export default defineEventHandler(async (event) => {
     case 'MOTION':
       updateData.videosApproved = approved // Flag existente no schema é videosApproved
       break
+    case 'RENDER':
+      updateData.renderApproved = approved
+      if (approved) {
+        updateData.status = 'COMPLETED'
+        updateData.completedAt = new Date()
+      }
+      break
     default:
       throw createError({ statusCode: 400, message: 'Invalid Stage' })
   }
 
   const output = await prisma.output.update({
     where: { id },
-    data: updateData
+    data: updateData,
+    select: {
+      id: true,
+      status: true,
+      storyOutlineApproved: true,
+      scriptApproved: true,
+      imagesApproved: true,
+      audioApproved: true,
+      bgmApproved: true,
+      videosApproved: true,
+      renderApproved: true
+    }
   })
 
   return { success: true, output }

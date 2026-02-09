@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
   // Validar pricing ANTES de disparar background
   try {
     const imageProvider = providerManager.getImageProvider()
-    const imageModel = (imageProvider as any).model || 'black-forest-labs/flux-schnell'
+    const imageModel = (imageProvider as any).model || 'luma/photon-flash'
     validateReplicatePricing(imageModel)
   } catch (err: any) {
     if (err instanceof PricingNotConfiguredError) {

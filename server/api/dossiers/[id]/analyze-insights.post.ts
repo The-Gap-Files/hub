@@ -7,6 +7,7 @@
 
 import { prisma } from '../../../utils/prisma'
 import { analyzeInsights } from '../../../services/analyze-insights.service'
+import { costLogService } from '../../../services/cost-log.service'
 
 export default defineEventHandler(async (event) => {
   const dossierId = getRouterParam(event, 'id')
@@ -90,6 +91,15 @@ export default defineEventHandler(async (event) => {
     )
 
     console.log(`[AnalyzeInsights] 💾 ${createdNotes.length} notas salvas no dossiê ${dossierId}`)
+
+    // Registrar custo da análise neural (fire-and-forget)
+    costLogService.logInsightsGeneration({
+      dossierId,
+      provider: result.provider,
+      model: result.model,
+      usage: result.usage,
+      detail: 'Análise neural – insights e curiosidades'
+    }).catch(err => console.error('[AnalyzeInsights] CostLog:', err))
 
     return {
       success: true,

@@ -21,11 +21,12 @@ import {
 // TIPOS
 // =============================================================================
 
-export type CostResource = 'script' | 'image' | 'narration' | 'bgm' | 'motion'
+export type CostResource = 'outline' | 'script' | 'image' | 'narration' | 'bgm' | 'motion' | 'insights' | 'thumbnail'
 export type CostAction = 'create' | 'recreate'
 
 export interface CostLogEntry {
-  outputId: string
+  outputId?: string
+  dossierId?: string
   resource: CostResource
   action: CostAction
   provider: string
@@ -49,7 +50,8 @@ class CostLogService {
     try {
       await prisma.costLog.create({
         data: {
-          outputId: entry.outputId,
+          outputId: entry.outputId ?? undefined,
+          dossierId: entry.dossierId ?? undefined,
           resource: entry.resource,
           action: entry.action,
           provider: entry.provider,
@@ -230,6 +232,114 @@ class CostLogService {
   }
 
   /**
+   * Registra custo de geração de plano narrativo (outline) via LLM (Story Architect).
+   * Usa tokens reais da API quando disponíveis, senão estima (~4 chars = 1 token).
+   */
+  async logOutlineGeneration(params: {
+    outputId: string
+    provider: string
+    model: string
+    inputCharacters: number
+    outputCharacters: number
+    usage?: {
+      inputTokens: number
+      outputTokens: number
+      totalTokens: number
+    }
+    action?: CostAction
+    detail?: string
+  }): Promise<void> {
+    let cost: number
+    let inputTokens: number
+    let outputTokens: number
+    let isRealUsage: boolean
+
+    if (params.usage && params.usage.inputTokens > 0) {
+      cost = calculateLLMCost(params.model, params.usage.inputTokens, params.usage.outputTokens)
+      inputTokens = params.usage.inputTokens
+      outputTokens = params.usage.outputTokens
+      isRealUsage = true
+    } else {
+      cost = estimateLLMCost(params.model, params.inputCharacters, params.outputCharacters)
+      inputTokens = Math.ceil(params.inputCharacters / 4)
+      outputTokens = Math.ceil(params.outputCharacters / 4)
+      isRealUsage = false
+    }
+
+    await this.log({
+      outputId: params.outputId,
+      resource: 'outline',
+      action: params.action || 'create',
+      provider: params.provider,
+      model: params.model,
+      cost,
+      metadata: {
+        input_tokens: inputTokens,
+        output_tokens: outputTokens,
+        total_tokens: inputTokens + outputTokens,
+        real_usage: isRealUsage,
+        input_characters: params.inputCharacters,
+        output_characters: params.outputCharacters
+      },
+      detail: params.detail
+    })
+  }
+
+  /**
+   * Registra custo da análise neural (insights/curiosidades) no nível do dossier.
+   * Usa tokens reais da API quando disponíveis.
+   */
+  async logInsightsGeneration(params: {
+    dossierId: string
+    provider: string
+    model: string
+    inputCharacters?: number
+    outputCharacters?: number
+    usage?: {
+      inputTokens: number
+      outputTokens: number
+      totalTokens: number
+    }
+    action?: CostAction
+    detail?: string
+  }): Promise<void> {
+    let cost: number
+    let inputTokens: number
+    let outputTokens: number
+    let isRealUsage: boolean
+
+    if (params.usage && params.usage.inputTokens > 0) {
+      cost = calculateLLMCost(params.model, params.usage.inputTokens, params.usage.outputTokens)
+      inputTokens = params.usage.inputTokens
+      outputTokens = params.usage.outputTokens
+      isRealUsage = true
+    } else if (params.inputCharacters != null && params.outputCharacters != null) {
+      cost = estimateLLMCost(params.model, params.inputCharacters, params.outputCharacters)
+      inputTokens = Math.ceil(params.inputCharacters / 4)
+      outputTokens = Math.ceil(params.outputCharacters / 4)
+      isRealUsage = false
+    } else {
+      return
+    }
+
+    await this.log({
+      dossierId: params.dossierId,
+      resource: 'insights',
+      action: params.action || 'create',
+      provider: params.provider,
+      model: params.model,
+      cost,
+      metadata: {
+        input_tokens: inputTokens,
+        output_tokens: outputTokens,
+        total_tokens: inputTokens + outputTokens,
+        real_usage: isRealUsage
+      },
+      detail: params.detail
+    })
+  }
+
+  /**
    * Registra custo de geração de script via LLM (OpenAI ou Anthropic)
    * Usa tokens reais da API quando disponíveis, senão estima (~4 chars = 1 token)
    */
@@ -284,6 +394,122 @@ class CostLogService {
       },
       detail: params.detail
     })
+  }
+
+  /**
+   * Registra custo do merge de prompts (etapa de imagens) via LLM.
+   * Lançado como resource 'image' para que o custo do merge some ao custo da geração de imagens.
+   */
+  async logImagePromptMerge(params: {
+    outputId: string
+    provider: string
+    model: string
+    inputCharacters: number
+    outputCharacters: number
+    usage?: {
+      inputTokens: number
+      outputTokens: number
+      totalTokens: number
+    }
+    action?: CostAction
+    detail?: string
+  }): Promise<void> {
+    let cost: number
+    let inputTokens: number
+    let outputTokens: number
+    let isRealUsage: boolean
+
+    if (params.usage && params.usage.inputTokens > 0) {
+      cost = calculateLLMCost(params.model, params.usage.inputTokens, params.usage.outputTokens)
+      inputTokens = params.usage.inputTokens
+      outputTokens = params.usage.outputTokens
+      isRealUsage = true
+    } else {
+      cost = estimateLLMCost(params.model, params.inputCharacters, params.outputCharacters)
+      inputTokens = Math.ceil(params.inputCharacters / 4)
+      outputTokens = Math.ceil(params.outputCharacters / 4)
+      isRealUsage = false
+    }
+
+    await this.log({
+      outputId: params.outputId,
+      resource: 'image',
+      action: params.action || 'create',
+      provider: params.provider,
+      model: params.model,
+      cost,
+      metadata: {
+        input_tokens: inputTokens,
+        output_tokens: outputTokens,
+        total_tokens: inputTokens + outputTokens,
+        real_usage: isRealUsage,
+        input_characters: params.inputCharacters,
+        output_characters: params.outputCharacters,
+        step: 'prompt_merge'
+      },
+      detail: params.detail
+    })
+  }
+
+  /**
+   * Registra custo de geração de thumbnails.
+   * Inclui custo das imagens (Replicate) e opcionalmente da LLM (geração de prompts).
+   */
+  async logThumbnailGeneration(params: {
+    outputId: string
+    imageModel: string
+    numImages: number
+    llmModel?: string
+    llmProvider?: string
+    llmUsage?: {
+      inputTokens: number
+      outputTokens: number
+    }
+    action?: CostAction
+  }): Promise<void> {
+    // 1. Custo das imagens geradas
+    const imageCost = calculateReplicateOutputCost(params.imageModel, params.numImages)
+    if (imageCost !== null) {
+      await this.log({
+        outputId: params.outputId,
+        resource: 'thumbnail',
+        action: params.action || 'create',
+        provider: 'REPLICATE',
+        model: params.imageModel,
+        cost: imageCost,
+        metadata: {
+          num_images: params.numImages,
+          cost_per_image: imageCost / params.numImages,
+          step: 'image_generation'
+        },
+        detail: `${params.numImages} thumbnails via ${params.imageModel}`
+      })
+    }
+
+    // 2. Custo da LLM que gerou os prompts (se disponível)
+    if (params.llmModel && params.llmUsage) {
+      const llmCost = calculateLLMCost(
+        params.llmModel,
+        params.llmUsage.inputTokens,
+        params.llmUsage.outputTokens
+      )
+      await this.log({
+        outputId: params.outputId,
+        resource: 'thumbnail',
+        action: params.action || 'create',
+        provider: params.llmProvider || 'ANTHROPIC',
+        model: params.llmModel,
+        cost: llmCost,
+        metadata: {
+          input_tokens: params.llmUsage.inputTokens,
+          output_tokens: params.llmUsage.outputTokens,
+          total_tokens: params.llmUsage.inputTokens + params.llmUsage.outputTokens,
+          real_usage: true,
+          step: 'prompt_generation'
+        },
+        detail: `Prompt generation via ${params.llmModel}`
+      })
+    }
   }
 
   /**
@@ -354,22 +580,30 @@ class CostLogService {
   }
 
   /**
-   * Custo total de um dossier (todos outputs via join)
+   * Custo total de um dossier (outputs + custos no nível do dossier, ex: análise neural)
    */
   async getDossierCost(dossierId: string) {
-    const outputs = await prisma.output.findMany({
-      where: { dossierId },
-      select: {
-        id: true,
-        title: true,
-        status: true,
-        costLogs: {
-          orderBy: { createdAt: 'asc' }
+    const [outputs, dossierLogs] = await Promise.all([
+      prisma.output.findMany({
+        where: { dossierId },
+        select: {
+          id: true,
+          title: true,
+          status: true,
+          costLogs: {
+            orderBy: { createdAt: 'asc' }
+          }
         }
-      }
-    })
+      }),
+      prisma.costLog.findMany({
+        where: { dossierId },
+        orderBy: { createdAt: 'asc' }
+      })
+    ])
 
-    let grandTotal = 0
+    const dossierLevelTotal = dossierLogs.reduce((sum, log) => sum + log.cost, 0)
+
+    let grandTotal = dossierLevelTotal
     const outputCosts = outputs.map(output => {
       const total = output.costLogs.reduce((sum, log) => sum + log.cost, 0)
       grandTotal += total
@@ -385,6 +619,7 @@ class CostLogService {
     return {
       dossierId,
       grandTotal,
+      dossierLevelCost: dossierLevelTotal,
       outputs: outputCosts
     }
   }

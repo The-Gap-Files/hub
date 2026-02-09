@@ -8,7 +8,6 @@ const CreateDossierSchema = z.object({
   sourceText: z.string().min(10),
   theme: z.string().min(3),
   tags: z.array(z.string()).optional().default([]),
-  category: z.string().max(50).optional(),
   visualIdentityContext: z.string().max(500).optional(),
   preferredVisualStyleId: z.string().optional().transform(val => val === '' ? undefined : val),
   preferredSeedId: z.union([z.string().uuid(), z.literal('')]).optional().transform(val => val === '' ? undefined : val)
@@ -45,7 +44,6 @@ export default defineEventHandler(async (event): Promise<DossierResponse> => {
       sourceText: data.sourceText,
       theme: data.theme,
       tags: data.tags || [],
-      category: data.category,
       visualIdentityContext: data.visualIdentityContext,
       preferredVisualStyleId: data.preferredVisualStyleId,
       preferredSeedId: preferredSeedId,
@@ -61,7 +59,6 @@ export default defineEventHandler(async (event): Promise<DossierResponse> => {
     theme: dossier.theme,
     researchData: dossier.researchData,
     tags: dossier.tags,
-    category: dossier.category || undefined,
     visualIdentityContext: dossier.visualIdentityContext,
     preferredVisualStyleId: dossier.preferredVisualStyleId,
     preferredSeedId: dossier.preferredSeedId,

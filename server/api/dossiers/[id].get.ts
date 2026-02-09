@@ -1,4 +1,5 @@
 import { prisma } from '../../utils/prisma'
+import { costLogService } from '../../services/cost-log.service'
 import type { DossierWithRelationsResponse } from '../../types/dossier.types'
 
 export default defineEventHandler(async (event): Promise<DossierWithRelationsResponse> => {
@@ -39,6 +40,8 @@ export default defineEventHandler(async (event): Promise<DossierWithRelationsRes
     })
   }
 
+  const costs = await costLogService.getDossierCost(id)
+
   return {
     id: dossier.id,
     title: dossier.title,
@@ -46,7 +49,6 @@ export default defineEventHandler(async (event): Promise<DossierWithRelationsRes
     theme: dossier.theme,
     researchData: dossier.researchData,
     tags: dossier.tags,
-    category: dossier.category || undefined,
     visualIdentityContext: dossier.visualIdentityContext,
     preferredVisualStyleId: dossier.preferredVisualStyleId,
     preferredSeedId: dossier.preferredSeedId,
@@ -54,6 +56,7 @@ export default defineEventHandler(async (event): Promise<DossierWithRelationsRes
     createdAt: dossier.createdAt,
     updatedAt: dossier.updatedAt,
     outputsCount: dossier._count.outputs,
+    totalOutputsCost: costs.grandTotal,
     sources: dossier.sources,
     images: dossier.images,
     notes: dossier.notes

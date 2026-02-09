@@ -1,4 +1,5 @@
 import { prisma } from '../../../utils/prisma'
+import { createPipelineLogger } from '../../../utils/pipeline-logger'
 import { CaptionService, type SceneCaptionData } from '../../../services/caption.service'
 import { getRecommendedStyle, CAPTION_STYLES, type CaptionStyleId } from '../../../constants/caption-styles'
 
@@ -15,6 +16,8 @@ import { getRecommendedStyle, CAPTION_STYLES, type CaptionStyleId } from '../../
  * Body (opcional):
  *   - styleId: CaptionStyleId  → Estilo da legenda (default: recomendado por aspect ratio)
  *   - force: boolean           → Reprocessar mesmo se já tem legendas
+ *   - logoOnly: boolean        → Apenas overlay da logo (sem legendas); ignora cenas
+ *   - replaceMaster: boolean   → Se true, substitui outputData pelo vídeo com legendas/logo (vídeo “normal” vira a versão final)
  */
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
@@ -26,7 +29,9 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Buscar output com cenas e áudios
+  const body = await readBody(event).catch(() => ({}))
+  const logoOnly = !!body?.logoOnly
+
   const output = await prisma.output.findUnique({
     where: { id },
     select: {
@@ -36,7 +41,7 @@ export default defineEventHandler(async (event) => {
       captionedVideoData: true,
       aspectRatio: true,
       platform: true,
-      scenes: {
+      scenes: logoOnly ? undefined : {
         orderBy: { order: 'asc' },
         select: {
           id: true,
@@ -59,26 +64,61 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Validar se o vídeo está completo
-  if (output.status !== 'COMPLETED' || !output.outputData) {
+  if ((output.status !== 'COMPLETED' && output.status !== 'RENDERED') || !output.outputData) {
     throw createError({
       statusCode: 400,
-      message: 'O vídeo precisa estar renderizado antes de adicionar legendas'
+      message: 'O vídeo precisa estar renderizado (outputData no banco) antes de adicionar legendas ou logo.'
     })
   }
+  const videoData = output.outputData
 
-  // Ler body
-  const body = await readBody(event)
-
-  // Verificar se já tem legendas (permitir reprocessamento com force)
-  if (output.captionedVideoData && !body?.force) {
+  if (!logoOnly && output.captionedVideoData && !body?.force) {
     throw createError({
       statusCode: 409,
       message: 'Este vídeo já possui legendas. Use force=true para reprocessar.'
     })
   }
 
-  // Validar cenas
+  const replaceMaster = !!body?.replaceMaster
+
+  const log = createPipelineLogger({ stage: 'AddCaptions', outputId: id })
+
+  // Modo apenas logo: overlay da logo no vídeo master
+  if (logoOnly) {
+    try {
+      const captionService = new CaptionService()
+      const videoBuffer = Buffer.from(videoData)
+      const resultBuffer = await captionService.applyLogoOnly(videoBuffer)
+      const captionedUint8Array = new Uint8Array(resultBuffer)
+      await prisma.output.update({
+        where: { id },
+        data: {
+          captionedVideoData: captionedUint8Array,
+          captionedVideoSize: captionedUint8Array.length,
+          ...(replaceMaster && {
+            outputData: captionedUint8Array,
+            outputSize: captionedUint8Array.length
+          })
+        }
+      })
+      const sizeMB = (resultBuffer.length / 1024 / 1024).toFixed(2)
+      log.info(`Logo aplicada (logoOnly): ${sizeMB} MB. ${replaceMaster ? 'Master substituído.' : ''}`)
+      return {
+        success: true,
+        message: 'Logo aplicada com sucesso',
+        logoOnly: true,
+        size: resultBuffer.length,
+        sizeInMB: parseFloat(sizeMB)
+      }
+    } catch (error) {
+      log.error('Erro ao aplicar logo.', error)
+      throw createError({
+        statusCode: 500,
+        message: `Erro ao aplicar logo: ${error instanceof Error ? error.message : 'Erro desconhecido'}`
+      })
+    }
+  }
+
   if (!output.scenes || output.scenes.length === 0) {
     throw createError({
       statusCode: 400,
@@ -87,7 +127,7 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    console.log(`[AddCaptions] Iniciando processo para output ${id}`)
+    log.info('Iniciando processo de legendas.')
 
     // Determinar estilo
     const recommendedStyle = getRecommendedStyle(
@@ -100,16 +140,21 @@ export default defineEventHandler(async (event) => {
       : recommendedStyle
 
     const style = CAPTION_STYLES[styleId]
-    console.log(`[AddCaptions] Aspect Ratio: ${output.aspectRatio}`)
-    console.log(`[AddCaptions] Plataforma: ${output.platform || 'não definida'}`)
-    console.log(`[AddCaptions] Estilo recomendado: ${recommendedStyle}`)
-    console.log(`[AddCaptions] Estilo selecionado: ${style.name} (${styleId})`)
-    console.log(`[AddCaptions] Efeito: ${style.effect}`)
-    if (body?.force) console.log('[AddCaptions] Reprocessando legendas (force=true)')
+    log.info('Config', {
+      aspectRatio: output.aspectRatio,
+      platform: output.platform || 'não definida',
+      recommendedStyle,
+      styleId,
+      styleName: style.name,
+      effect: style.effect,
+      force: !!body?.force
+    })
 
     // Construir dados das cenas para o serviço de legendas
     // Prioridade de timing: wordTimings (ElevenLabs) > ffprobe (duração real) > estimativa
-    const sceneCaptionData: SceneCaptionData[] = output.scenes
+    type SceneWithTracks = { order: number; narration: string; audioTracks: Array<{ duration: number; fileData: Buffer | null; alignment: unknown }> }
+    const scenesWithTracks = output.scenes as unknown as SceneWithTracks[]
+    const sceneCaptionData: SceneCaptionData[] = scenesWithTracks
       .filter(scene => scene.narration && scene.audioTracks[0])
       .map(scene => {
         const track = scene.audioTracks[0]!
@@ -120,7 +165,7 @@ export default defineEventHandler(async (event) => {
           : undefined
 
         if (wordTimings) {
-          console.log(`[AddCaptions] Cena ${scene.order + 1}: ${wordTimings.length} word timings do ElevenLabs`)
+          log.step(`Cena ${scene.order + 1}`, `${wordTimings.length} word timings (ElevenLabs)`)
         }
 
         return {
@@ -141,11 +186,11 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    console.log(`[AddCaptions] ${sceneCaptionData.length} cenas com narração + áudio`)
+    log.info(`${sceneCaptionData.length} cenas com narração + áudio.`)
 
     // Carregar vídeo do banco
-    const videoBuffer = Buffer.from(output.outputData)
-    console.log(`[AddCaptions] Vídeo carregado: ${(videoBuffer.length / 1024 / 1024).toFixed(2)} MB`)
+    const videoBuffer = Buffer.from(videoData)
+    log.info(`Vídeo carregado: ${(videoBuffer.length / 1024 / 1024).toFixed(2)} MB.`)
 
     // Gerar legendas (sem Whisper!)
     const captionService = new CaptionService()
@@ -157,18 +202,22 @@ export default defineEventHandler(async (event) => {
 
     // Salvar no banco
     const captionedUint8Array = new Uint8Array(result.captionedBuffer)
-    console.log('[AddCaptions] Salvando vídeo legendado no banco...')
+    log.info('Salvando vídeo legendado no banco.')
 
     await prisma.output.update({
       where: { id },
       data: {
         captionedVideoData: captionedUint8Array,
-        captionedVideoSize: captionedUint8Array.length
+        captionedVideoSize: captionedUint8Array.length,
+        ...(replaceMaster && {
+          outputData: captionedUint8Array,
+          outputSize: captionedUint8Array.length
+        })
       }
     })
 
     const sizeMB = (result.captionedBuffer.length / 1024 / 1024).toFixed(2)
-    console.log(`[AddCaptions] Legendas adicionadas com sucesso! ${sizeMB} MB`)
+    log.info(`Legendas adicionadas: ${sizeMB} MB. ${replaceMaster ? 'Master substituído.' : ''}`)
 
     return {
       success: true,
@@ -184,7 +233,7 @@ export default defineEventHandler(async (event) => {
       sizeInMB: parseFloat(sizeMB)
     }
   } catch (error) {
-    console.error('[AddCaptions] Erro ao processar legendas:', error)
+    log.error('Erro ao processar legendas.', error)
 
     // Se for um createError, re-throw sem embrulhar
     if ((error as any).statusCode) throw error

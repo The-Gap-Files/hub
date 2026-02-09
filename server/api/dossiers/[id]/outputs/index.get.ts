@@ -1,6 +1,7 @@
 import { prisma } from '../../../../utils/prisma'
 import { getVisualStyleById } from '../../../../constants/visual-styles'
 import { getScriptStyleById } from '../../../../constants/script-styles'
+import { getClassificationById } from '../../../../constants/intelligence-classifications'
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
@@ -28,6 +29,8 @@ export default defineEventHandler(async (event) => {
       imagesApproved: true,
       audioApproved: true,
       videosApproved: true,
+      renderApproved: true,
+      bgmApproved: true,
       enableMotion: true,
       errorMessage: true,
       createdAt: true,
@@ -39,6 +42,9 @@ export default defineEventHandler(async (event) => {
       outputSize: true,
       scriptStyleId: true,
       visualStyleId: true,
+      classificationId: true,
+      script: { select: { id: true } },
+      costLogs: { select: { cost: true } },
       relationsTo: {
         select: {
           id: true,
@@ -62,11 +68,17 @@ export default defineEventHandler(async (event) => {
   })
 
   return outputs.map((output: any) => {
+    const classification = output.classificationId ? getClassificationById(output.classificationId) : undefined
     const scriptStyle = output.scriptStyleId ? getScriptStyleById(output.scriptStyleId) : undefined
     const visualStyle = output.visualStyleId ? getVisualStyleById(output.visualStyleId) : undefined
+    const { script, costLogs, ...rest } = output
+    const totalCost = (costLogs || []).reduce((sum: number, log: { cost: number }) => sum + log.cost, 0)
     return {
-      ...output,
-      hasVideo: output.status === 'COMPLETED',
+      ...rest,
+      totalCost,
+      hasScript: !!script,
+      hasVideo: output.status === 'COMPLETED' || output.status === 'RENDERED',
+      classification: classification ? { id: classification.id, label: classification.label } : undefined,
       scriptStyle: scriptStyle ? { id: scriptStyle.id, name: scriptStyle.name } : undefined,
       visualStyle: visualStyle ? { id: visualStyle.id, name: visualStyle.name } : undefined,
       relatedOutputs: [

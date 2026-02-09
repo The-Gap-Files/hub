@@ -1,6 +1,6 @@
 <template>
   <div class="oled-theme">
-    <NuxtLoadingIndicator color="var(--primary)" />
+    <NuxtLoadingIndicator color="#FA5401" />
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>

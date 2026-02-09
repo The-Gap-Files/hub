@@ -8,12 +8,13 @@
         <div>
           <h3 class="text-xl font-black text-white tracking-tighter uppercase italic">Master Renders</h3>
           <p class="mono-label !text-[9px] opacity-40">{{ outputs.length }} arquivos gerados no pipeline</p>
+          <p v-if="totalCost > 0" class="mono-label !text-[10px] text-emerald-400/90 mt-1">Custo total: {{ formatCost(totalCost) }}</p>
         </div>
       </div>
-      <button @click="$emit('openGenerator')" class="btn-primary !px-8 !py-3 !text-[10px] tracking-widest font-black uppercase">
+      <a :href="`/dossiers/${dossierId}/produce`" class="btn-primary !px-8 !py-3 !text-[10px] tracking-widest font-black uppercase inline-flex items-center gap-2">
         <Zap :size="16" />
         Novo Vetor
-      </button>
+      </a>
     </div>
 
     <div v-if="loading" class="flex flex-col items-center justify-center py-32 space-y-4">
@@ -87,21 +88,26 @@
                 <span class="mono-label !text-[8px] text-zinc-500">{{ output.aspectRatio }}</span>
               </div>
             </div>
-            <div class="text-right">
+            <div class="text-right flex flex-col items-end gap-1">
               <p class="mono-label !text-[10px] text-primary">{{ output.duration }}s</p>
               <p class="text-[8px] font-mono text-zinc-600 uppercase">DURATION</p>
+              <p v-if="output.totalCost != null && output.totalCost > 0" class="mono-label !text-[10px] text-emerald-400/90 mt-1">{{ formatCost(output.totalCost) }}</p>
+              <p v-if="output.totalCost != null && output.totalCost > 0" class="text-[8px] font-mono text-zinc-600 uppercase">CUSTO</p>
             </div>
           </div>
 
-          <!-- Injected Styles Badges -->
+          <!-- Constantes: Classificação + Roteiro + Visual (rastreabilidade) -->
           <div class="flex flex-wrap gap-2 mb-8">
-            <div v-if="output.scriptStyleId" class="flex items-center gap-1.5 px-2 py-1 rounded-md bg-blue-500/10 border border-blue-500/20">
-              <ScrollText :size="10" class="text-blue-400" />
-              <span class="mono-label !text-[8px] !lowercase text-blue-300">{{ output.scriptStyleId }}</span>
+            <div v-if="output.classification" class="flex items-center gap-1.5 px-2 py-1 rounded-md bg-amber-500/10 border border-amber-500/20">
+              <span class="mono-label !text-[8px] text-amber-300">{{ output.classification.label }}</span>
             </div>
-            <div v-if="output.visualStyleId" class="flex items-center gap-1.5 px-2 py-1 rounded-md bg-purple-500/10 border border-purple-500/20">
+            <div v-if="output.scriptStyle" class="flex items-center gap-1.5 px-2 py-1 rounded-md bg-blue-500/10 border border-blue-500/20">
+              <ScrollText :size="10" class="text-blue-400" />
+              <span class="mono-label !text-[8px] text-blue-300">{{ output.scriptStyle.name }}</span>
+            </div>
+            <div v-if="output.visualStyle" class="flex items-center gap-1.5 px-2 py-1 rounded-md bg-purple-500/10 border border-purple-500/20">
               <Zap :size="10" class="text-purple-400" />
-              <span class="mono-label !text-[8px] !lowercase text-purple-300">{{ output.visualStyleId }}</span>
+              <span class="mono-label !text-[8px] text-purple-300">{{ output.visualStyle.name }}</span>
             </div>
           </div>
 
@@ -168,6 +174,20 @@
                   </button>
                </div>
             </template>
+
+            <!-- Clonar roteiro: novo output no mesmo dossier com script + cenas copiados -->
+            <div v-if="output.hasScript || output.scriptApproved" class="col-span-2 pt-2 border-t border-white/5">
+              <button 
+                type="button"
+                class="w-full py-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:border-primary/30 hover:text-primary text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                :disabled="cloningId === output.id"
+                @click="cloneOutput(output)"
+              >
+                <Copy v-if="cloningId !== output.id" :size="14" />
+                <span v-else class="w-3 h-3 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                {{ cloningId === output.id ? 'CLONANDO...' : 'CLONAR ROTEIRO' }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -192,7 +212,7 @@
 <script setup lang="ts">
 import { 
   Film, Zap, Download, ExternalLink, PlayCircle, 
-  AlertTriangle, ScrollText, XCircle 
+  AlertTriangle, ScrollText, XCircle, Copy 
 } from 'lucide-vue-next'
 
 const props = defineProps<{
@@ -201,6 +221,11 @@ const props = defineProps<{
 
 const outputs = ref<any[]>([])
 const loading = ref(true)
+
+const totalCost = computed(() => {
+  return (outputs.value || []).reduce((sum, o) => sum + (Number(o.totalCost) || 0), 0)
+})
+const cloningId = ref<string | null>(null)
 let pollTimer: any = null
 
 async function loadOutputs() {
@@ -245,12 +270,37 @@ function formatOutputType(type: string) {
   return type.replace('VIDEO_', '').replace('_', ' ')
 }
 
+function formatCost(totalCost: number): string {
+  if (totalCost >= 0.01) return `$${totalCost.toFixed(2)}`
+  if (totalCost > 0) return `$${totalCost.toFixed(4)}`
+  return '$0.00'
+}
+
 function downloadOutput(output: any) {
   window.open(`/api/outputs/${output.id}/download`, '_blank')
 }
 
 async function retryOutput(output: any) {
   alert('Re-injeção de pipeline ainda não liberada no core.')
+}
+
+async function cloneOutput(output: any) {
+  if (!output.hasScript && !output.scriptApproved) return
+  if (!confirm('Clonar o roteiro deste output? Será criado um novo output neste dossier com o mesmo roteiro e cenas. Imagens e áudio serão gerados depois.')) return
+
+  cloningId.value = output.id
+  try {
+    const res = await $fetch<{ output: { id: string } }>(`/api/outputs/${output.id}/clone`, { method: 'POST' })
+    await loadOutputs()
+    if (res?.output?.id) {
+      navigateTo(`/outputs/${res.output.id}`)
+    }
+  } catch (err: any) {
+    const msg = err?.data?.message || err?.message || 'Erro ao clonar roteiro.'
+    alert(msg)
+  } finally {
+    cloningId.value = null
+  }
 }
 
 // Polling simplificado para atualizar status de processamento

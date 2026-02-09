@@ -2,24 +2,16 @@
   <div class="flex min-h-screen bg-[#050508] font-sans selection:bg-primary/30">
     <!-- Cyber Sidebar -->
     <aside class="fixed inset-y-0 left-0 w-72 bg-[#0A0A0F]/90 backdrop-blur-2xl border-r border-white/5 z-50 flex flex-col pt-10 shadow-[20px_0_50px_rgba(0,0,0,0.5)]">
-      <!-- Logo Section -->
-      <div class="px-8 mb-16 group cursor-pointer" @click="goHome">
-        <div class="flex flex-col">
-          <div class="flex items-center gap-3 mb-1">
-            <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-glow group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-500">
-              <Film :size="20" />
-            </div>
-            <div class="flex flex-col">
-               <span class="mono-label !text-[8px] tracking-[0.5em] text-primary/60">System Overdrive</span>
-               <div class="flex items-center gap-1.5 mt-0.5">
-                 <div class="w-1 h-1 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_5px_#10b981]"></div>
-                 <span class="text-[7px] font-mono text-emerald-500/80 uppercase tracking-widest">Core Online</span>
-               </div>
-            </div>
-          </div>
-          <h1 class="text-2xl font-black text-white tracking-widest uppercase italic group-hover:text-primary transition-colors flex items-center gap-2">
-            THE GAP <span class="text-primary drop-shadow-[0_0_10px_rgba(59,130,246,0.3)]">FILES</span>
-          </h1>
+      <!-- Logo Section - The Gap Files brand (ui-ux-pro-max: correct brand logos) -->
+      <div class="px-6 mb-16 group cursor-pointer" @click="goHome">
+        <div class="flex flex-col gap-2">
+          <img
+            src="/logo.svg"
+            alt="The Gap Files"
+            class="h-[120px] w-auto object-contain transition-opacity duration-300 group-hover:opacity-90"
+            width="120"
+            height="120"
+          />
         </div>
       </div>
 
@@ -111,7 +103,7 @@
 
 <script setup lang="ts">
 import { 
-  Film, LayoutDashboard, Library,
+  LayoutDashboard, Library,
   Database, Zap, User, Settings,
   ChevronRight
 } from 'lucide-vue-next'
@@ -126,7 +118,7 @@ const goHome = () => router.push('/')
 }
 
 .nav-icon {
-  @apply transition-all duration-500 group-hover:scale-110 group-hover:text-primary group-hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.3)];
+  @apply transition-all duration-500 group-hover:scale-110 group-hover:text-primary group-hover:drop-shadow-[0_0_8px_rgba(250,84,1,0.3)];
 }
 
 .nav-text {
@@ -134,11 +126,11 @@ const goHome = () => router.push('/')
 }
 
 .nav-item.active {
-  @apply bg-white/5 text-primary shadow-[inset_0_0_20px_rgba(59,130,246,0.03)];
+  @apply bg-white/5 text-primary shadow-[inset_0_0_20px_rgba(250,84,1,0.03)];
 }
 
 .nav-item.active .nav-icon {
-  @apply text-primary scale-110 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)];
+  @apply text-primary scale-110 drop-shadow-[0_0_8px_rgba(250,84,1,0.5)];
 }
 
 .nav-item.active .nav-text {
@@ -146,7 +138,7 @@ const goHome = () => router.push('/')
 }
 
 .active-indicator {
-  @apply absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-0 bg-primary rounded-r-full transition-all duration-700 opacity-0 shadow-[0_0_15px_#3b82f6];
+  @apply absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-0 bg-primary rounded-r-full transition-all duration-700 opacity-0 shadow-[0_0_15px_#FA5401];
 }
 
 .nav-item.active .active-indicator {

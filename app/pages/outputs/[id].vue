@@ -3,7 +3,7 @@
     <!-- Background FX -->
     <div class="fixed inset-0 pointer-events-none">
       <div class="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] opacity-20 animate-pulse-slow"></div>
-      <div class="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] opacity-20"></div>
+      <div class="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] opacity-20"></div>
       <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
     </div>
 
@@ -52,7 +52,7 @@
           </div>
 
           <!-- Quick Actions -->
-          <div class="flex gap-4">
+          <div class="flex gap-4 flex-wrap">
              <button v-if="output.status === 'COMPLETED'" @click="downloadMaster" class="btn-primary flex items-center gap-2">
                <Download :size="16" />
                BAIXAR MASTER
@@ -62,9 +62,20 @@
                RETRY
              </button>
 
+             <!-- BOTAO MODO CORREÇÃO -->
+             <button 
+                v-if="output.status === 'COMPLETED' && !correctionMode"
+                @click="enterCorrectionMode"
+                :disabled="enteringCorrections"
+                class="btn-secondary flex items-center gap-2 text-xs border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
+              >
+                <Wrench :size="16" :class="enteringCorrections ? 'animate-spin' : ''" />
+                <span>{{ enteringCorrections ? 'ATIVANDO...' : 'MODO CORREÇÃO' }}</span>
+              </button>
+
              <!-- BOTAO RENDERIZAR NOVAMENTE -->
              <button 
-                v-if="output.status === 'COMPLETED' || output.status === 'FAILED'"
+                v-if="(output.status === 'COMPLETED' || output.status === 'RENDERED' || output.status === 'FAILED') && !correctionMode"
                 @click="renderAgain"
                 :disabled="rendering"
                 class="btn-secondary flex items-center gap-2 text-xs"
@@ -74,6 +85,48 @@
               </button>
           </div>
         </header>
+
+        <!-- Barra de contexto fixa: Summary + Métricas + Constantes (visível em todas as etapas) — ui-ux-pro-max -->
+        <div 
+          class="sticky top-0 z-30 -mx-6 px-6 py-4 mb-8 rounded-2xl border border-white/10 bg-[#0A0A0A]/95 backdrop-blur-xl shadow-lg transition-colors duration-200"
+          role="region"
+          aria-label="Resumo e constantes do output"
+        >
+          <div class="flex flex-col gap-4 sm:gap-0 sm:flex-row sm:items-center sm:justify-between sm:flex-wrap">
+            <!-- Summary (uma linha) -->
+            <div class="min-w-0 flex-1 sm:max-w-xl">
+              <p class="mono-label text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Summary</p>
+              <p class="text-sm text-zinc-300 italic leading-relaxed truncate" :title="output.script?.summary || output.dossier?.theme">
+                {{ output.script?.summary || output.dossier?.theme || '—' }}
+              </p>
+            </div>
+            <!-- Métricas: Duration, Word count, Scene count -->
+            <div class="flex items-center gap-6 sm:gap-8 flex-shrink-0">
+              <div>
+                <p class="mono-label text-[9px] text-zinc-500 uppercase tracking-widest mb-0.5">Duration</p>
+                <p class="text-lg font-mono font-bold text-white">{{ output.script?.estimatedDuration || output.duration }}s</p>
+              </div>
+              <div>
+                <p class="mono-label text-[9px] text-zinc-500 uppercase tracking-widest mb-0.5">Word count</p>
+                <p class="text-lg font-mono font-bold text-white">{{ output.script?.wordCount ?? '—' }} <span class="text-zinc-500 text-sm font-normal">words</span></p>
+              </div>
+              <div>
+                <p class="mono-label text-[9px] text-zinc-500 uppercase tracking-widest mb-0.5">Scene count</p>
+                <p class="text-lg font-mono font-bold text-white">{{ output.scenes?.length ?? 0 }} <span class="text-zinc-500 text-sm font-normal">scenes</span></p>
+              </div>
+            </div>
+            <!-- Constantes escolhidas -->
+            <div class="flex flex-wrap items-center gap-2 sm:gap-3 pt-2 sm:pt-0 border-t border-white/5 sm:border-t-0 sm:border-l sm:border-white/10 sm:pl-6">
+              <span class="mono-label text-[9px] text-zinc-500 uppercase tracking-widest w-full sm:w-auto mb-0.5 sm:mb-0">Constantes escolhidas</span>
+              <div class="flex flex-wrap items-center gap-2">
+                <span v-if="output.classification" class="inline-flex items-center px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-200 text-xs font-medium transition-colors duration-200 hover:bg-amber-500/15 cursor-default">{{ output.classification.label }}</span>
+                <span v-if="output.scriptStyle" class="inline-flex items-center px-3 py-1.5 rounded-xl bg-primary/10 border border-primary/20 text-primary text-xs font-medium transition-colors duration-200 hover:bg-primary/15 cursor-default">{{ output.scriptStyle.name }}</span>
+                <span v-if="output.visualStyle" class="inline-flex items-center px-3 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-200 text-xs font-medium transition-colors duration-200 hover:bg-purple-500/15 cursor-default">{{ output.visualStyle.name }}</span>
+                <span v-if="!output.classification && !output.scriptStyle && !output.visualStyle" class="text-zinc-500 text-xs italic">Nenhuma</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <!-- Final Video Player -->
         <div v-if="output.status === 'COMPLETED' || output.hasVideo" class="mb-12">
@@ -93,66 +146,618 @@
             </div>
         </div>
 
-        <!-- Captioned Video Section -->
-        <div v-if="output.status === 'COMPLETED' && output.hasVideo" class="mb-12">
-            <div class="glass-card overflow-hidden rounded-3xl border-secondary/20 shadow-2xl shadow-secondary/5">
-                <!-- Se já tem legendas, mostra o player -->
-                <div v-if="output.hasCaptionedVideo">
-                    <video 
-                        controls 
-                        class="w-full aspect-video bg-black"
-                        :class="output.aspectRatio === '9:16' ? 'max-h-[70vh] object-contain' : ''"
-                        :src="`/api/outputs/${outputId}/captioned-video`"
-                    ></video>
-                    <div class="p-4 bg-secondary/10 flex items-center justify-between text-[10px] mono-label text-secondary">
-                        <span class="flex items-center gap-2">
-                            <CheckCircle2 :size="12" /> VÍDEO COM LEGENDAS ESTILIZADAS
-                        </span>
-                        <div class="flex items-center gap-4">
-                            <span>{{ output.outputMimeType }} • {{ (output.captionedVideoSize / 1024 / 1024).toFixed(2) }} MB</span>
-                            <button
-                                @click="reprocessCaptions"
-                                :disabled="addingCaptions"
-                                class="px-4 py-1.5 bg-secondary/20 border border-secondary/30 text-secondary rounded-lg hover:bg-secondary/30 hover:scale-105 transition-all flex items-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
-                            >
-                                <span v-if="addingCaptions" class="animate-spin w-3 h-3 border-2 border-secondary/30 border-t-secondary rounded-full"></span>
-                                <RefreshCw v-else :size="12" />
-                                {{ addingCaptions ? 'PROCESSANDO...' : 'REPROCESSAR' }}
-                            </button>
-                        </div>
+        <!-- Opções extras (após vídeo completo) -->
+        <div v-if="(output.status === 'COMPLETED' || output.status === 'RENDERED') && !correctionMode" class="mb-12 p-6 rounded-2xl border border-white/10 bg-white/5">
+          <h3 class="text-sm font-bold text-zinc-300 mb-4 flex items-center gap-2">
+            <Star :size="16" class="text-amber-400" />
+            Opções extras
+            <!-- Custos reais já gastos nessas opções -->
+            <span v-if="getExtraCost('thumbnail') > 0 || getExtraCost('social_kit') > 0" class="text-[9px] text-zinc-600 font-normal ml-auto flex items-center gap-1.5 font-mono">
+              <DollarSign :size="10" />
+              <span v-if="getExtraCost('thumbnail') > 0" class="text-amber-400/60">
+                Thumbnails: {{ formatCost(getExtraCost('thumbnail')) }}
+              </span>
+              <span v-if="getExtraCost('thumbnail') > 0 && getExtraCost('social_kit') > 0" class="text-zinc-700">•</span>
+              <span v-if="getExtraCost('social_kit') > 0" class="text-violet-400/60">
+                Social Kit: {{ formatCost(getExtraCost('social_kit')) }}
+              </span>
+            </span>
+          </h3>
+          <div class="flex flex-col gap-4">
+            <!-- Criar thumbnails -->
+            <div>
+              <div v-if="!output.thumbnailCandidates?.length && !output.hasThumbnail" class="space-y-3">
+                <!-- Hook text sugerido -->
+                <div class="flex items-center gap-2">
+                  <input
+                    v-model="thumbnailHookText"
+                    type="text"
+                    maxlength="40"
+                    placeholder="Hook text sugerido (ex: ELE SABIA DEMAIS)"
+                    class="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-amber-500/50 uppercase tracking-wider"
+                  />
+                  <button
+                    @click="generateThumbnails"
+                    :disabled="generatingThumbnails"
+                    class="btn-secondary flex items-center gap-2 text-amber-400 border-amber-500/30 hover:bg-amber-500/10 shrink-0 cursor-pointer"
+                  >
+                    <ImageIcon :size="16" :class="generatingThumbnails ? 'animate-spin' : ''" />
+                    {{ generatingThumbnails ? 'Gerando...' : 'Criar thumbnails' }}
+                  </button>
+                </div>
+                <p class="text-[10px] text-zinc-500">Gera 4 opções via Photon Flash + Claude Haiku. O hook text é opcional.</p>
+              </div>
+              <!-- Grid de thumbnails candidatas -->
+              <div v-else-if="output.thumbnailCandidates?.length" class="space-y-3">
+                <p class="text-xs text-zinc-400">Clique para ampliar e confirmar:</p>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <button
+                    v-for="(cand, idx) in output.thumbnailCandidates"
+                    :key="idx"
+                    @click="openThumbnailPreview(Number(idx))"
+                    class="relative aspect-video rounded-xl overflow-hidden border-2 border-white/10 transition-all hover:border-primary hover:scale-[1.02] cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary group"
+                  >
+                    <img :src="`data:image/png;base64,${cand.base64}`" :alt="`Thumbnail ${Number(idx) + 1}`" class="w-full h-full object-cover" />
+                    <span v-if="cand.hookText" class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent px-2 py-1.5 text-[9px] font-black text-white uppercase tracking-wider text-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      {{ cand.hookText }}
+                    </span>
+                  </button>
+                </div>
+              </div>
+              <!-- Thumbnail selecionada -->
+              <div v-else-if="output.hasThumbnail" class="flex flex-col sm:flex-row sm:items-center gap-4">
+                <div class="flex items-center gap-3">
+                  <button
+                    @click="showSelectedThumbnail = true"
+                    class="w-32 aspect-video rounded-lg overflow-hidden border-2 border-emerald-500/30 hover:border-emerald-400 transition-all hover:scale-105 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500 group relative"
+                  >
+                    <img :src="`/api/outputs/${outputId}/thumbnail?t=${thumbnailVersion}`" alt="Thumbnail escolhida" class="w-full h-full object-cover" />
+                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                      <Eye :size="20" class="text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
                     </div>
+                  </button>
+                  <span class="text-xs text-emerald-400">Thumbnail selecionada</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button
+                    @click="removeThumbnail"
+                    :disabled="removingThumbnail"
+                    class="btn-secondary flex items-center gap-2 text-zinc-400 border-zinc-600/50 hover:border-red-500/50 hover:text-red-400 text-xs"
+                  >
+                    {{ removingThumbnail ? 'Removendo...' : 'Remover' }}
+                  </button>
+                  <button
+                    @click="generateThumbnails"
+                    :disabled="generatingThumbnails"
+                    class="btn-secondary flex items-center gap-2 text-amber-400 border-amber-500/30 hover:bg-amber-500/10 text-xs"
+                  >
+                    <ImageIcon :size="14" :class="generatingThumbnails ? 'animate-spin' : ''" />
+                    {{ generatingThumbnails ? 'Gerando...' : 'Gerar novamente' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Social Media Kit -->
+            <div class="border-t border-white/5 pt-4">
+              <!-- Botão gerar -->
+              <button
+                v-if="!output.socialKit"
+                @click="generateSocialKit"
+                :disabled="generatingSocialKit"
+                class="btn-secondary flex items-center gap-2 text-violet-400 border-violet-500/30 hover:bg-violet-500/10 cursor-pointer"
+              >
+                <Share2 :size="16" :class="generatingSocialKit ? 'animate-spin' : ''" />
+                {{ generatingSocialKit ? 'Gerando kit de publicação...' : 'Gerar Social Media Kit' }}
+              </button>
+              <p v-if="!output.socialKit" class="text-[10px] text-zinc-500 mt-1">Títulos, descrições e hashtags otimizados para YouTube, TikTok, Shorts e Instagram via Claude Haiku.</p>
+
+              <!-- Kit gerado -->
+              <div v-if="output.socialKit" class="space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-violet-300 flex items-center gap-2">
+                    <Share2 :size="14" />
+                    Social Media Kit
+                  </span>
+                  <div class="flex items-center gap-2">
+                    <button
+                      @click="generateSocialKit"
+                      :disabled="generatingSocialKit"
+                      class="text-[10px] text-zinc-500 hover:text-violet-400 transition-colors cursor-pointer"
+                    >
+                      {{ generatingSocialKit ? 'Gerando...' : 'Regerar' }}
+                    </button>
+                  </div>
                 </div>
 
-                <!-- Se não tem legendas, mostra botão para processar -->
-                <div v-else class="p-8 bg-gradient-to-br from-secondary/5 to-transparent border-t border-secondary/10">
-                    <div class="flex flex-col md:flex-row items-center justify-between gap-6">
-                        <div>
-                            <h3 class="text-lg font-bold text-secondary flex items-center gap-2 mb-2">
-                                <Subtitles :size="20" />
-                                Legendas Automáticas
-                            </h3>
-                            <p class="text-zinc-400 text-sm max-w-xl">
-                                Adicione legendas estilizadas ao seu vídeo com efeitos TikTok, Instagram Reels e YouTube. Sincronização automática com a narração das cenas.
-                            </p>
-                        </div>
-                        
-                        <button 
-                            @click="addCaptions"
-                            :disabled="addingCaptions"
-                            class="px-8 py-4 bg-secondary text-black font-black uppercase tracking-widest rounded-xl hover:bg-secondary/90 hover:scale-105 transition-all shadow-glow-secondary flex items-center gap-3 disabled:opacity-50 disabled:pointer-events-none"
-                        >
-                            <span v-if="addingCaptions" class="animate-spin w-4 h-4 border-2 border-black/30 border-t-black rounded-full"></span>
-                            <Subtitles v-else :size="20" />
-                            {{ addingCaptions ? 'PROCESSANDO...' : 'INSERIR LEGENDA' }}
-                        </button>
-                    </div>
+                <!-- Tabs de plataformas -->
+                <div class="flex gap-1 bg-black/30 rounded-lg p-1">
+                  <button
+                    v-for="tab in socialKitTabs"
+                    :key="tab.key"
+                    @click="activeSocialTab = tab.key"
+                    :class="[
+                      'px-3 py-1.5 text-[11px] font-bold rounded-md transition-all cursor-pointer',
+                      activeSocialTab === tab.key
+                        ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30'
+                        : 'text-zinc-500 hover:text-zinc-300'
+                    ]"
+                  >
+                    {{ tab.label }}
+                  </button>
                 </div>
+
+                <!-- Conteúdo da aba ativa -->
+                <div v-if="activeSocialContent" class="space-y-3">
+                  <!-- Título -->
+                  <div class="bg-black/20 rounded-xl p-3 border border-white/5">
+                    <div class="flex items-center justify-between mb-1.5">
+                      <span class="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Título</span>
+                      <button @click="copySocialField(activeSocialContent.title)" class="text-[10px] text-zinc-600 hover:text-violet-400 transition-colors cursor-pointer">
+                        Copiar
+                      </button>
+                    </div>
+                    <p class="text-sm text-white font-medium">{{ activeSocialContent.title }}</p>
+                  </div>
+
+                  <!-- Descrição -->
+                  <div class="bg-black/20 rounded-xl p-3 border border-white/5">
+                    <div class="flex items-center justify-between mb-1.5">
+                      <span class="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Descrição</span>
+                      <button @click="copySocialField(activeSocialContent.description)" class="text-[10px] text-zinc-600 hover:text-violet-400 transition-colors cursor-pointer">
+                        Copiar
+                      </button>
+                    </div>
+                    <p class="text-xs text-zinc-300 whitespace-pre-line leading-relaxed">{{ activeSocialContent.description }}</p>
+                  </div>
+
+                  <!-- Hashtags -->
+                  <div class="bg-black/20 rounded-xl p-3 border border-white/5">
+                    <div class="flex items-center justify-between mb-1.5">
+                      <span class="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Hashtags</span>
+                      <button @click="copySocialField(activeSocialContent.hashtags?.join(' '))" class="text-[10px] text-zinc-600 hover:text-violet-400 transition-colors cursor-pointer">
+                        Copiar todas
+                      </button>
+                    </div>
+                    <div class="flex flex-wrap gap-1.5">
+                      <span
+                        v-for="tag in activeSocialContent.hashtags"
+                        :key="tag"
+                        class="px-2 py-0.5 bg-violet-500/10 border border-violet-500/20 rounded text-[10px] text-violet-300 font-medium"
+                      >
+                        {{ tag }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- SEO Tags -->
+                <div v-if="output.socialKit?.seoTags?.length" class="bg-black/20 rounded-xl p-3 border border-white/5">
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">SEO Tags</span>
+                    <button @click="copySocialField(output.socialKit.seoTags.join(', '))" class="text-[10px] text-zinc-600 hover:text-violet-400 transition-colors cursor-pointer">
+                      Copiar
+                    </button>
+                  </div>
+                  <div class="flex flex-wrap gap-1.5">
+                    <span
+                      v-for="tag in output.socialKit.seoTags"
+                      :key="tag"
+                      class="px-2 py-0.5 bg-zinc-800 border border-white/5 rounded text-[10px] text-zinc-400"
+                    >
+                      {{ tag }}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
         </div>
 
-        <!-- Pipeline Progress (6 Stages) -->
-        <div class="mb-12 grid grid-cols-6 gap-3 p-1 bg-white/5 rounded-2xl border border-white/5">
-           <div class="pipeline-step" :class="getStepClass(output.scriptApproved, true)">
+        <!-- Thumbnail Preview Modal -->
+        <div v-if="selectedThumbnailIdx !== null && output?.thumbnailCandidates?.[selectedThumbnailIdx]" @click.self="selectedThumbnailIdx = null" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div class="bg-zinc-900 border border-white/10 p-6 rounded-2xl max-w-4xl w-full shadow-2xl space-y-6">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-bold text-white">Preview da thumbnail</h3>
+              <span v-if="output.thumbnailCandidates[selectedThumbnailIdx]?.hookText" class="px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-lg text-amber-300 text-xs font-bold uppercase tracking-wider">
+                🔤 {{ output.thumbnailCandidates[selectedThumbnailIdx].hookText }}
+              </span>
+            </div>
+            <div class="relative aspect-video rounded-xl overflow-hidden border border-white/10 bg-black/50">
+              <img :src="`data:image/png;base64,${output.thumbnailCandidates[selectedThumbnailIdx]?.base64}`" alt="Thumbnail" class="w-full h-full object-contain" />
+            </div>
+            <div class="flex items-center justify-end gap-3">
+              <button @click="selectedThumbnailIdx = null" class="px-4 py-2 text-xs font-bold text-zinc-500 hover:text-white transition-colors">
+                CANCELAR
+              </button>
+              <button @click="selectThumbnail(selectedThumbnailIdx!)" :disabled="selectingThumbnail" class="btn-primary px-4 py-2 text-xs font-bold flex items-center gap-2">
+                <span v-if="selectingThumbnail" class="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full"></span>
+                {{ selectingThumbnail ? 'Salvando...' : 'CONFIRMAR' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lightbox: Thumbnail selecionada (visualização detalhada) -->
+        <div v-if="showSelectedThumbnail && output?.hasThumbnail" @click.self="showSelectedThumbnail = false" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-6 animate-in fade-in duration-200">
+          <div class="bg-zinc-900/95 border border-white/10 p-4 rounded-2xl shadow-2xl max-h-[85vh] flex flex-col gap-3">
+            <!-- Header compacto -->
+            <div class="flex items-center justify-between shrink-0">
+              <span class="text-sm font-bold text-white flex items-center gap-2">
+                <ImageIcon :size="14" class="text-emerald-400" />
+                Thumbnail
+              </span>
+              <button @click="showSelectedThumbnail = false" class="p-1.5 rounded-lg hover:bg-white/10 transition-colors text-zinc-400 hover:text-white cursor-pointer">
+                <X :size="16" />
+              </button>
+            </div>
+
+            <!-- Imagem com altura máxima limitada -->
+            <div class="relative rounded-xl overflow-hidden border border-white/10 bg-black/50 flex-1 min-h-0">
+              <img :src="`/api/outputs/${outputId}/thumbnail?t=${thumbnailVersion}`" alt="Thumbnail selecionada" class="max-h-[60vh] w-auto mx-auto object-contain" />
+            </div>
+
+            <!-- Ações compactas -->
+            <div class="flex items-center justify-between gap-2 shrink-0">
+              <div class="flex items-center gap-2">
+                <button
+                  @click="removeThumbnail(); showSelectedThumbnail = false"
+                  :disabled="removingThumbnail"
+                  class="px-3 py-1.5 text-[11px] font-bold text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/10 transition-colors cursor-pointer"
+                >
+                  {{ removingThumbnail ? 'Removendo...' : 'Remover' }}
+                </button>
+                <button
+                  @click="generateThumbnails(); showSelectedThumbnail = false"
+                  :disabled="generatingThumbnails"
+                  class="px-3 py-1.5 text-[11px] font-bold text-amber-400 border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-colors flex items-center gap-1.5 cursor-pointer"
+                >
+                  <ImageIcon :size="12" :class="generatingThumbnails ? 'animate-spin' : ''" />
+                  {{ generatingThumbnails ? 'Gerando...' : 'Gerar novamente' }}
+                </button>
+              </div>
+              <a
+                :href="`/api/outputs/${outputId}/thumbnail?t=${thumbnailVersion}`"
+                download="thumbnail.png"
+                class="btn-primary px-3 py-1.5 text-[11px] font-bold flex items-center gap-1.5 cursor-pointer"
+              >
+                <Download :size="12" />
+                DOWNLOAD
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- ════════════════════════════════════════════════════════════════════ -->
+        <!-- CORRECTION MODE: Seção de Correções Pós-Renderização -->
+        <!-- ════════════════════════════════════════════════════════════════════ -->
+        <div v-if="correctionMode" class="mb-12">
+          <!-- Correction Header Banner -->
+          <div class="bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-red-500/10 border border-amber-500/30 rounded-3xl p-8 mb-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-[80px]"></div>
+            <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+              <div>
+                <h2 class="text-2xl font-black text-amber-200 flex items-center gap-3 mb-2">
+                  <Wrench :size="24" class="text-amber-500" />
+                  Modo Correção Ativo
+                </h2>
+                <p class="text-amber-200/60 text-sm max-w-2xl">
+                  Corrija imagens com defeitos e reprocesse o motion das cenas afetadas. 
+                  Após as correções, aprove as imagens e o motion para re-renderizar o vídeo.
+                </p>
+                <div class="flex items-center gap-4 mt-4">
+                  <div class="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-lg text-xs text-amber-300/80">
+                    <ImageIcon :size="12" />
+                    <span>{{ correctedScenes.size }} cena(s) com imagem corrigida</span>
+                  </div>
+                  <div class="flex items-center gap-2 px-3 py-1.5 bg-pink-500/10 border border-pink-500/20 rounded-lg text-xs text-pink-300/80">
+                    <Clapperboard :size="12" />
+                    <span>{{ motionRegeneratedScenes.size }} motion(s) reprocessado(s)</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="flex flex-col gap-3">
+                <!-- Botão para sair do modo correção sem salvar -->
+                <button 
+                  @click="exitCorrectionMode"
+                  class="px-6 py-3 bg-white/5 border border-white/10 text-zinc-400 hover:text-white hover:border-white/30 font-bold uppercase tracking-widest rounded-xl transition-all flex items-center gap-2 text-xs"
+                >
+                  <X :size="16" />
+                  CANCELAR
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Correction Scenes Grid -->
+          <div class="space-y-6">
+            <div v-for="scene in output.scenes" :key="'correction-' + scene.id" 
+              class="glass-card rounded-2xl border-white/5 overflow-hidden transition-all"
+              :class="{ 
+                'border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.1)]': correctedScenes.has(scene.id),
+                'border-pink-500/30': motionRegeneratedScenes.has(scene.id) && !correctedScenes.has(scene.id)
+              }"
+            >
+              <!-- Scene Header -->
+              <div class="px-6 py-4 bg-white/5 border-b border-white/5 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-mono font-bold text-zinc-400">
+                    {{ scene.order + 1 }}
+                  </div>
+                  <span class="mono-label text-zinc-500">CENA {{ scene.order + 1 }}</span>
+                  <span class="text-zinc-600 text-xs">{{ scene.estimatedDuration }}s</span>
+                  
+                  <!-- Status badges -->
+                  <span v-if="scene.imageStatus === 'restricted'" 
+                    class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-red-500/20 text-red-400 animate-pulse">
+                    🔴 Restrita
+                  </span>
+                  <span v-else-if="scene.imageStatus === 'error'" 
+                    class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-orange-500/20 text-orange-400">
+                    ⚠️ Erro
+                  </span>
+                  <span v-else-if="correctedScenes.has(scene.id) && !motionRegeneratedScenes.has(scene.id)" 
+                    class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-amber-500/20 text-amber-400 animate-pulse">
+                    Motion pendente
+                  </span>
+                  <span v-else-if="correctedScenes.has(scene.id) && motionRegeneratedScenes.has(scene.id)" 
+                    class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-emerald-500/20 text-emerald-400">
+                    Corrigida
+                  </span>
+                </div>
+                
+                <p class="text-zinc-500 text-xs max-w-md truncate italic">
+                  "{{ scene.narration?.substring(0, 80) }}..."
+                </p>
+              </div>
+
+              <!-- Scene Content: Image + Motion side by side -->
+              <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- COLUNA 1: Imagem -->
+                <div class="space-y-3">
+                  <h4 class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-purple-400/80">
+                    <ImageIcon :size="12" /> Imagem da Cena
+                  </h4>
+                  
+                  <!-- Image Preview -->
+                  <div v-if="getSelectedImage(scene)">
+                    <div class="aspect-video bg-black rounded-xl overflow-hidden border border-white/10 transition-all relative">
+                      <img 
+                        :src="`/api/scene-images/${getSelectedImage(scene).id}?t=${imageVersions[scene.id] || 0}`" 
+                        class="w-full h-full object-cover"
+                        loading="lazy"
+                        alt="Scene Image"
+                      />
+                      <!-- Zoom button (canto superior direito) -->
+                      <button 
+                        @click.stop="openImage(getSelectedImage(scene).id)"
+                        class="absolute top-2 right-2 p-2 bg-black/60 backdrop-blur rounded-lg text-white/70 hover:text-white hover:bg-black/80 transition-all z-10"
+                        title="Ampliar imagem"
+                      >
+                        <Eye :size="16" />
+                      </button>
+                    </div>
+                    
+                    <!-- Regenerate Image Button -->
+                    <button 
+                      @click.stop="regenerateImageCorrection(scene)"
+                      :disabled="!!regeneratingSceneId"
+                      class="mt-3 w-full px-4 py-3 bg-purple-500/10 border border-purple-500/30 text-purple-300 hover:bg-purple-500/20 hover:text-purple-200 rounded-xl transition-all flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider disabled:opacity-50 disabled:pointer-events-none"
+                    >
+                      <span v-if="regeneratingSceneId === scene.id" class="animate-spin w-4 h-4 border-2 border-purple-300/30 border-t-purple-300 rounded-full"></span>
+                      <RotateCw v-else :size="14" />
+                      {{ regeneratingSceneId === scene.id ? 'GERANDO NOVA IMAGEM...' : 'REGENERAR IMAGEM' }}
+                    </button>
+                  </div>
+                  <!-- Cena RESTRITA pelo filtro de conteúdo -->
+                  <div v-else-if="scene.imageStatus === 'restricted'" class="space-y-3">
+                    <div class="aspect-video bg-red-500/5 rounded-xl flex flex-col items-center justify-center border border-dashed border-red-500/30 text-center p-6 gap-3">
+                      <ShieldAlert :size="32" class="text-red-400/60" />
+                      <p class="text-sm font-bold text-red-300">Imagem bloqueada pelo filtro de conteúdo</p>
+                      <p class="text-[10px] text-red-300/50 max-w-sm">
+                        O modelo rejeitou o prompt visual por conter termos sensíveis. 
+                        Você pode tentar novamente com o mesmo prompt ou editá-lo abaixo.
+                      </p>
+                    </div>
+
+                    <!-- Prompt original que foi bloqueado -->
+                    <div class="bg-red-500/5 p-3 rounded-lg border border-red-500/10">
+                      <div class="flex items-center justify-between mb-1.5">
+                        <h4 class="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-red-400/60">
+                          <AlertTriangle :size="10" /> Prompt Bloqueado
+                        </h4>
+                      </div>
+                      <textarea
+                        v-model="restrictedPromptEdits[scene.id]"
+                        class="w-full bg-black/40 border border-red-500/20 rounded-lg p-2.5 text-xs text-white/80 leading-relaxed focus:border-red-500/50 focus:outline-none resize-y min-h-[60px]"
+                        rows="3"
+                        :placeholder="scene.visualDescription"
+                      ></textarea>
+                    </div>
+
+                    <!-- Botões de retry -->
+                    <div class="flex gap-2">
+                      <button
+                        @click.stop="retryRestrictedImage(scene, 'same')"
+                        :disabled="!!regeneratingSceneId"
+                        class="flex-1 px-4 py-3 bg-red-500/10 border border-red-500/30 text-red-300 hover:bg-red-500/20 hover:text-red-200 rounded-xl transition-all flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                      >
+                        <span v-if="regeneratingSceneId === scene.id" class="animate-spin w-4 h-4 border-2 border-red-300/30 border-t-red-300 rounded-full"></span>
+                        <RotateCw v-else :size="14" />
+                        {{ regeneratingSceneId === scene.id ? 'TENTANDO...' : 'TENTAR NOVAMENTE' }}
+                      </button>
+                      <button
+                        v-if="restrictedPromptEdits[scene.id] && restrictedPromptEdits[scene.id] !== scene.visualDescription"
+                        @click.stop="retryRestrictedImage(scene, 'edited')"
+                        :disabled="!!regeneratingSceneId"
+                        class="flex-1 px-4 py-3 bg-purple-500/10 border border-purple-500/30 text-purple-300 hover:bg-purple-500/20 hover:text-purple-200 rounded-xl transition-all flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                      >
+                        <Edit :size="14" />
+                        ENVIAR EDITADO
+                      </button>
+                    </div>
+                  </div>
+                  <!-- Sem imagem (genérico) -->
+                  <div v-else class="aspect-video bg-white/5 rounded-xl flex items-center justify-center border border-dashed border-white/10 text-zinc-600 text-sm">
+                    Sem imagem
+                  </div>
+
+                  <!-- Image History (thumbnails das versões anteriores) -->
+                  <div v-if="scene.images?.length > 1" class="mt-2">
+                    <span class="text-[9px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5 block">Histórico</span>
+                    <div class="flex gap-2 overflow-x-auto pb-1">
+                      <div 
+                        v-for="img in scene.images.filter((i: any) => !i.isSelected)" 
+                        :key="img.id"
+                        class="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden border border-white/10 hover:border-white/30 cursor-pointer opacity-50 hover:opacity-100 transition-all"
+                        @click="openImage(img.id)"
+                      >
+                        <img 
+                          :src="`/api/scene-images/${img.id}`" 
+                          class="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Visual Description (editável no modo correção) -->
+                  <div class="bg-primary/5 p-3 rounded-lg border border-primary/10">
+                    <div class="flex items-center justify-between mb-1.5">
+                      <h4 class="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-primary/60">
+                        <Eye :size="10" /> Visual Prompt
+                      </h4>
+                      <button 
+                        v-if="!editingPromptSceneId || editingPromptSceneId !== scene.id"
+                        @click="startEditPrompt(scene)"
+                        class="text-[9px] text-primary/40 hover:text-primary/70 transition-colors flex items-center gap-1 uppercase tracking-wider"
+                      >
+                        <Edit :size="10" /> Editar
+                      </button>
+                      <div v-else class="flex items-center gap-2">
+                        <button @click="cancelEditPrompt(scene)" class="text-[9px] text-zinc-500 hover:text-white transition-colors uppercase tracking-wider">
+                          Cancelar
+                        </button>
+                        <button @click="saveEditPrompt(scene)" class="text-[9px] text-primary hover:text-primary/80 transition-colors uppercase tracking-wider font-bold">
+                          Salvar
+                        </button>
+                      </div>
+                    </div>
+                    <textarea 
+                      v-if="editingPromptSceneId === scene.id"
+                      v-model="editingPromptText"
+                      class="w-full bg-black/40 border border-primary/20 rounded-lg p-2.5 text-xs text-white/80 leading-relaxed focus:border-primary/50 focus:outline-none resize-y min-h-[60px]"
+                      rows="3"
+                    ></textarea>
+                    <p v-else class="text-xs text-zinc-300/80 leading-relaxed">{{ scene.visualDescription }}</p>
+                  </div>
+                </div>
+
+                <!-- COLUNA 2: Motion -->
+                <div class="space-y-3">
+                  <h4 class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-pink-400/80">
+                    <Clapperboard :size="12" /> Motion da Cena
+                  </h4>
+                  
+                  <!-- Motion Preview -->
+                  <div v-if="getSelectedVideo(scene)" class="relative group/video">
+                    <div class="aspect-video bg-black rounded-xl overflow-hidden border border-white/10 hover:border-pink-500/30 transition-all">
+                      <video 
+                        controls loop
+                        class="w-full h-full object-cover"
+                        :src="`/api/scene-videos/${getSelectedVideo(scene).id}/stream?t=${motionVersions[scene.id] || 0}`"
+                        :key="'motion-' + scene.id + '-' + (motionVersions[scene.id] || 0)"
+                      ></video>
+                      <div class="absolute bottom-2 right-2 px-2 py-1 bg-black/60 backdrop-blur rounded text-[8px] text-white/80 font-mono pointer-events-none">
+                        {{ getSelectedVideo(scene).provider }} • {{ getSelectedVideo(scene).duration?.toFixed(1) }}s
+                      </div>
+                    </div>
+                    
+                    <!-- Regenerate Motion Button -->
+                    <button 
+                      @click="regenerateMotionCorrection(scene)"
+                      :disabled="!!regeneratingMotionSceneId"
+                      class="mt-3 w-full px-4 py-3 bg-pink-500/10 border border-pink-500/30 text-pink-300 hover:bg-pink-500/20 hover:text-pink-200 rounded-xl transition-all flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider disabled:opacity-50 disabled:pointer-events-none"
+                    >
+                      <span v-if="regeneratingMotionSceneId === scene.id" class="animate-spin w-4 h-4 border-2 border-pink-300/30 border-t-pink-300 rounded-full"></span>
+                      <RotateCw v-else :size="14" />
+                      {{ regeneratingMotionSceneId === scene.id ? 'REPROCESSANDO MOTION...' : 'REGENERAR MOTION' }}
+                    </button>
+                  </div>
+                  <div v-else class="relative">
+                    <div class="aspect-video bg-pink-500/5 rounded-xl flex flex-col items-center justify-center gap-3 border border-dashed border-pink-500/20 text-pink-500/50">
+                      <Clapperboard :size="32" class="opacity-40" />
+                      <span class="text-xs uppercase tracking-wider">{{ output.enableMotion ? 'Sem motion gerado' : 'Motion desabilitado' }}</span>
+                    </div>
+
+                    <!-- Generate Motion Button (quando não tem) -->
+                    <button 
+                      v-if="output.enableMotion && scene.images?.length > 0"
+                      @click="regenerateMotionCorrection(scene)"
+                      :disabled="!!regeneratingMotionSceneId"
+                      class="mt-3 w-full px-4 py-3 bg-pink-500/10 border border-pink-500/30 text-pink-300 hover:bg-pink-500/20 hover:text-pink-200 rounded-xl transition-all flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider disabled:opacity-50 disabled:pointer-events-none"
+                    >
+                      <span v-if="regeneratingMotionSceneId === scene.id" class="animate-spin w-4 h-4 border-2 border-pink-300/30 border-t-pink-300 rounded-full"></span>
+                      <Zap v-else :size="14" />
+                      {{ regeneratingMotionSceneId === scene.id ? 'GERANDO MOTION...' : 'GERAR MOTION' }}
+                    </button>
+                  </div>
+
+                  <!-- Warning: imagem corrigida mas motion não reprocessado -->
+                  <div v-if="correctedScenes.has(scene.id) && !motionRegeneratedScenes.has(scene.id) && output.enableMotion"
+                    class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg flex items-start gap-2"
+                  >
+                    <AlertTriangle :size="14" class="text-amber-400 shrink-0 mt-0.5" />
+                    <p class="text-amber-200/70 text-xs">
+                      A imagem foi corrigida mas o motion ainda usa a imagem anterior. 
+                      <strong>Reprocesse o motion</strong> para sincronizar.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Correction Actions Footer -->
+          <div class="mt-8 bg-gradient-to-r from-emerald-500/10 to-transparent border border-emerald-500/30 p-8 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+              <h3 class="text-xl font-bold text-emerald-200 flex items-center gap-2 mb-2">
+                <CheckCircle2 :size="20" class="text-emerald-500" />
+                Finalizar Correções
+              </h3>
+              <p class="text-emerald-200/60 text-sm max-w-xl">
+                Quando terminar as correções, aprove para re-renderizar o vídeo com as cenas atualizadas.
+                <span v-if="pendingMotionScenes.length > 0" class="text-amber-400">
+                  Atenção: {{ pendingMotionScenes.length }} cena(s) com imagem corrigida sem motion reprocessado.
+                </span>
+              </p>
+            </div>
+            <button 
+              @click="finishCorrectionsAndRender"
+              :disabled="rendering || pendingMotionScenes.length > 0"
+              class="px-8 py-4 bg-emerald-500 text-white font-black uppercase tracking-widest rounded-xl hover:bg-emerald-400 hover:scale-105 transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] flex items-center gap-3 disabled:opacity-50 disabled:pointer-events-none"
+            >
+              <span v-if="rendering" class="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full"></span>
+              <Zap v-else :size="20" />
+              {{ rendering ? 'RENDERIZANDO...' : 'APROVAR E RE-RENDERIZAR' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Pipeline Progress (8 Stages): Plano narrativo → Roteiro → Visual → ... -->
+        <div class="mb-12 grid grid-cols-8 gap-3 p-1 bg-white/5 rounded-2xl border border-white/5">
+           <div class="pipeline-step" :class="getStepClass(output.storyOutlineApproved, true)">
+             <Map :size="16" />
+             <span class="text-[9px] font-black tracking-widest">Plano</span>
+             <span v-if="getStepCost('outline') > 0" class="text-[8px] font-mono text-amber-400/70">
+               {{ formatCost(getStepCost('outline')) }}
+               <span v-if="isEstimatedCost('outline')" class="text-amber-500/50" title="Custo estimado (tokens reais indisponíveis)">~</span>
+             </span>
+             <div v-if="output.storyOutlineApproved" class="absolute top-2 right-2 text-emerald-400"><CheckCircle2 :size="12"/></div>
+           </div>
+
+           <div class="pipeline-step" :class="getStepClass(output.scriptApproved, output.storyOutlineApproved)">
              <ScrollText :size="16" />
              <span class="text-[9px] font-black tracking-widest">Roteiro</span>
              <span v-if="getStepCost('script') > 0" class="text-[8px] font-mono text-amber-400/70">
@@ -190,9 +795,16 @@
              <div v-if="output.videosApproved" class="absolute top-2 right-2 text-emerald-400"><CheckCircle2 :size="12"/></div>
            </div>
 
-           <div class="pipeline-step" :class="getStepClass(output.status === 'COMPLETED', output.videosApproved)">
+           <div class="pipeline-step" :class="getStepClass(output.hasVideo, canRenderMaster || output.hasVideo)">
              <Film :size="16" />
              <span class="text-[9px] font-black tracking-widest">Render</span>
+             <div v-if="output.hasVideo" class="absolute top-2 right-2 text-emerald-400"><CheckCircle2 :size="12"/></div>
+           </div>
+
+           <div class="pipeline-step" :class="getStepClass(output.status === 'COMPLETED', output.hasVideo)">
+             <CheckCircle2 :size="16" />
+             <span class="text-[9px] font-black tracking-widest">Final</span>
+             <div v-if="output.status === 'COMPLETED'" class="absolute top-2 right-2 text-emerald-400"><CheckCircle2 :size="12"/></div>
            </div>
         </div>
 
@@ -230,15 +842,243 @@
            </div>
         </div>
 
-        <!-- Script Generating Placeholder (Status: PENDING/PROCESSING & No Script) -->
-        <div v-if="!output.script && output.status !== 'FAILED'" class="mb-12 bg-zinc-500/5 border border-zinc-500/20 p-8 rounded-3xl flex flex-col items-center justify-center gap-4 text-center py-16 animate-pulse">
+        <!-- Plano gerado, aguardando aprovação: botão no início da etapa (acima do plano narrativo). Só na etapa Plano (sem roteiro). -->
+        <div v-if="isPlanoStage && !output.script && output.status !== 'FAILED' && output.storyOutline && !output.storyOutlineApproved" class="mb-12 p-4 rounded-3xl border border-amber-500/30 bg-amber-500/5">
+            <div class="flex justify-center mb-4">
+              <button 
+                @click="approveStoryOutline"
+                :disabled="approving"
+                class="px-8 py-4 bg-amber-500 text-black font-black uppercase tracking-widest rounded-xl hover:bg-amber-400 transition-all flex items-center gap-3 disabled:opacity-50"
+              >
+                <span v-if="approving" class="animate-spin w-5 h-5 border-2 border-black/30 border-t-black rounded-full"></span>
+                <CheckCircle2 v-else :size="20" />
+                {{ approving ? 'Processando...' : 'APROVAR PLANO' }}
+              </button>
+            </div>
+            <p class="text-amber-200 text-sm text-center">Plano narrativo gerado. Aprove-o para liberar a geração do roteiro.</p>
+        </div>
+
+        <!-- ════════════════════════════════════════════════════════════════════ -->
+        <!-- STORY OUTLINE: Plano Narrativo (Story Architect) — só na etapa Plano (sem roteiro ainda) -->
+        <!-- Não exibir quando já existe roteiro (etapa Roteiro ou posterior). -->
+        <!-- ════════════════════════════════════════════════════════════════════ -->
+        <div v-if="isPlanoStage && output.storyOutline && !output.script" class="mb-12">
+          <div class="glass-card rounded-3xl border-cyan-500/20 overflow-hidden">
+            <!-- Header -->
+            <div class="px-8 py-6 bg-gradient-to-r from-cyan-500/10 to-transparent border-b border-cyan-500/10 flex items-center justify-between cursor-pointer" @click="outlineExpanded = !outlineExpanded">
+              <div class="flex items-center gap-3">
+                <div class="p-2 bg-cyan-500/20 rounded-xl">
+                  <Map :size="20" class="text-cyan-400" />
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold text-cyan-200">Plano Narrativo</h3>
+                  <p class="text-cyan-300/40 text-xs">Story Architect • {{ output.storyOutline.risingBeats?.length || 0 }} beats • Arco: {{ output.storyOutline.emotionalArc }}</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <button 
+                  v-if="!output.storyOutlineApproved"
+                  @click.stop="approveStoryOutline"
+                  :disabled="approving"
+                  class="px-4 py-2 bg-amber-500/20 border border-amber-500/40 text-amber-300 hover:bg-amber-500/30 rounded-lg transition-all flex items-center gap-2 text-xs font-bold uppercase tracking-wider"
+                >
+                  <CheckCircle2 :size="14" />
+                  Aprovar plano
+                </button>
+                <button 
+                  @click.stop="showOutlineFeedbackModal = true"
+                  :disabled="regeneratingOutline"
+                  class="px-4 py-2 bg-white/5 border border-white/10 text-zinc-400 hover:text-white hover:border-cyan-500/50 rounded-lg transition-all flex items-center gap-2 text-xs font-bold uppercase tracking-wider"
+                >
+                  <RotateCw :size="14" :class="regeneratingOutline ? 'animate-spin' : ''" />
+                  Replanejar
+                </button>
+                <component :is="outlineExpanded ? ChevronUp : ChevronDown" :size="20" class="text-cyan-400/50" />
+              </div>
+            </div>
+
+            <!-- Body (Collapsible) -->
+            <div v-if="outlineExpanded" class="p-8 space-y-6">
+              <!-- Hook -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-red-500/5 p-5 rounded-2xl border border-red-500/10">
+                  <h4 class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-red-400/80 mb-3">
+                    <Zap :size="12" /> Hook Strategy
+                  </h4>
+                  <p class="text-sm text-red-200/70 leading-relaxed mb-3">{{ output.storyOutline.hookStrategy }}</p>
+                  <div class="bg-black/30 p-3 rounded-lg border border-red-500/10">
+                    <p class="text-sm text-white/80 italic font-serif">"{{ output.storyOutline.hookCandidate }}"</p>
+                  </div>
+                </div>
+
+                <div class="bg-primary/5 p-5 rounded-2xl border border-primary/10">
+                  <h4 class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/80 mb-3">
+                    <Target :size="12" /> Setup / Promise
+                  </h4>
+                  <p class="text-sm text-zinc-300/90 leading-relaxed">{{ output.storyOutline.promiseSetup }}</p>
+                </div>
+              </div>
+
+              <!-- Rising Beats -->
+              <div class="bg-amber-500/5 p-5 rounded-2xl border border-amber-500/10">
+                <h4 class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-amber-400/80 mb-4">
+                  <TrendingUp :size="12" /> Beats de Revelação ({{ output.storyOutline.risingBeats?.length }})
+                </h4>
+                <div class="space-y-3">
+                  <div v-for="(beat, idx) in output.storyOutline.risingBeats" :key="idx" class="flex gap-4 items-start">
+                    <div class="w-7 h-7 rounded-full bg-amber-500/20 flex items-center justify-center text-xs font-mono font-bold text-amber-300 shrink-0 mt-0.5">
+                      {{ beat.order || (Number(idx) + 1) }}
+                    </div>
+                    <div class="flex-1">
+                      <p class="text-sm text-white/80">{{ beat.revelation }}</p>
+                      <p class="text-xs text-amber-300/50 mt-1 italic">→ Levanta: "{{ beat.newQuestion }}"</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Climax + Resolution -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-purple-500/5 p-5 rounded-2xl border border-purple-500/10">
+                  <h4 class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-purple-400/80 mb-3">
+                    <Star :size="12" /> Clímax
+                  </h4>
+                  <div class="flex items-center gap-2 mb-3">
+                    <span class="px-2 py-1 bg-purple-500/20 rounded text-[9px] font-bold text-purple-300 uppercase">{{ output.storyOutline.climaxFormula }}</span>
+                  </div>
+                  <p class="text-sm text-purple-200/70 leading-relaxed">{{ output.storyOutline.climaxMoment }}</p>
+                </div>
+
+                <div class="bg-emerald-500/5 p-5 rounded-2xl border border-emerald-500/10">
+                  <h4 class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-400/80 mb-3">
+                    <CheckCircle2 :size="12" /> Resolução
+                  </h4>
+                  <ul class="space-y-1 mb-3">
+                    <li v-for="(point, idx) in output.storyOutline.resolutionPoints" :key="idx" class="text-sm text-emerald-200/70 flex gap-2">
+                      <span class="text-emerald-500">•</span> {{ point }}
+                    </li>
+                  </ul>
+                  <p class="text-xs text-emerald-300/40 italic">{{ output.storyOutline.resolutionAngle }}</p>
+                </div>
+              </div>
+
+              <!-- Emotional Arc + Tone -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-pink-500/5 p-4 rounded-2xl border border-pink-500/10">
+                  <h4 class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-pink-400/80 mb-2">
+                    <Heart :size="12" /> Arco Emocional
+                  </h4>
+                  <p class="text-sm text-pink-200/70">{{ output.storyOutline.emotionalArc }}</p>
+                </div>
+                <div class="bg-zinc-500/5 p-4 rounded-2xl border border-zinc-500/10">
+                  <h4 class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-400/80 mb-2">
+                    <Volume2 :size="12" /> Progressão de Tom
+                  </h4>
+                  <p class="text-sm text-zinc-200/70">{{ output.storyOutline.toneProgression }}</p>
+                </div>
+              </div>
+
+              <!-- Scene Distribution -->
+              <div class="bg-cyan-500/5 p-4 rounded-2xl border border-cyan-500/10">
+                <h4 class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-cyan-400/80 mb-3">
+                  <BarChart3 :size="12" /> Distribuição de Cenas
+                </h4>
+                <div class="flex flex-wrap gap-3">
+                  <div v-for="(count, segment) in output.storyOutline.segmentDistribution" :key="segment" class="flex items-center gap-2 px-3 py-1.5 bg-black/30 rounded-lg">
+                    <span class="text-[9px] font-bold uppercase tracking-widest text-cyan-300/60">{{ segment }}</span>
+                    <span class="text-sm font-mono font-bold text-white">{{ count }}</span>
+                    <span class="text-[9px] text-cyan-400/40">cenas</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Outline Feedback Modal -->
+        <div v-if="showOutlineFeedbackModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div class="bg-zinc-900 border border-cyan-500/20 p-8 rounded-2xl max-w-lg w-full shadow-2xl space-y-6">
+            <h3 class="text-xl font-bold flex items-center gap-2">
+              <Map :size="20" class="text-cyan-400" />
+              Replanejar Narrativa
+            </h3>
+            <p class="text-sm text-zinc-400">
+              O que gostaria de mudar no plano narrativo? O Story Architect vai gerar um novo outline com sua direção.
+            </p>
+            
+            <textarea 
+              v-model="outlineFeedback"
+              class="w-full h-32 bg-black/50 border border-white/10 rounded-xl p-4 text-sm focus:border-cyan-500 focus:outline-none resize-none"
+              placeholder="Ex: O clímax deveria focar na conexão política, não na evidência forense. Quero mais tensão no hook..."
+              autofocus
+            ></textarea>
+
+            <div class="flex justify-end gap-3 pt-2">
+              <button @click="showOutlineFeedbackModal = false" class="px-4 py-2 text-xs font-bold text-zinc-500 hover:text-white transition-colors">
+                CANCELAR
+              </button>
+              <button 
+                @click="confirmRegenerateOutline"
+                :disabled="regeneratingOutline"
+                class="px-6 py-2 bg-cyan-500 text-black font-bold text-xs rounded-lg hover:bg-cyan-400 transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                <span v-if="regeneratingOutline" class="animate-spin w-3 h-3 border-2 border-black/30 border-t-black rounded-full"></span>
+                REPLANEJAR
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Etapa 0: Plano narrativo (Story Architect) — isolada antes do roteiro -->
+        <div v-if="isPlanoStage && output.status !== 'FAILED' && !output.storyOutline" class="mb-12 bg-cyan-500/5 border border-cyan-500/20 p-8 rounded-3xl flex flex-col items-center justify-center gap-6 text-center py-16">
+            <Map :size="48" class="text-cyan-500/70 mb-2" />
+            <h3 class="text-xl font-bold text-cyan-200">Etapa 1: Plano Narrativo</h3>
+            <p class="text-zinc-400 text-sm max-w-md">Gere o plano da história (Story Architect) e valide antes de criar o roteiro. O plano define hook, beats, clímax e distribuição de cenas.</p>
+            <div class="w-full max-w-xl text-left">
+              <label class="block text-cyan-300/80 text-xs font-bold uppercase tracking-wider mb-2">Sugestões para o plano (opcional)</label>
+              <textarea 
+                v-model="outlineSuggestions"
+                class="w-full h-28 bg-black/40 border border-cyan-500/20 rounded-xl p-4 text-sm text-zinc-200 placeholder-zinc-500 focus:border-cyan-500/50 focus:outline-none resize-y"
+                placeholder="Ex: Focar no mistério, tom mais sombrio, incluir reviravolta no meio, ênfase no personagem X..."
+              />
+              <p class="mt-1.5 text-zinc-500 text-xs">Suas sugestões serão enviadas ao Story Architect para orientar o plano e reduzir a necessidade de refazer.</p>
+            </div>
+            <button 
+              @click="generateOutlineThenReload"
+              :disabled="generatingOutline"
+              class="px-8 py-4 bg-cyan-500 text-black font-black uppercase tracking-widest rounded-xl hover:bg-cyan-400 transition-all flex items-center gap-3 disabled:opacity-50"
+            >
+              <span v-if="generatingOutline" class="animate-spin w-5 h-5 border-2 border-black/30 border-t-black rounded-full"></span>
+              <Zap v-else :size="20" />
+              {{ generatingOutline ? 'GERANDO PLANO...' : 'GERAR PLANO NARRATIVO' }}
+            </button>
+        </div>
+
+        <!-- Plano aprovado, sem roteiro ainda: botão Gerar roteiro -->
+        <div v-else-if="isPlanoStage && output.status !== 'FAILED' && output.storyOutlineApproved" class="mb-12 bg-emerald-500/5 border border-emerald-500/20 p-8 rounded-3xl flex flex-col items-center justify-center gap-6 text-center py-16">
+            <CheckCircle2 :size="48" class="text-emerald-500/70 mb-2" />
+            <h3 class="text-xl font-bold text-emerald-200">Plano aprovado</h3>
+            <p class="text-zinc-400 text-sm max-w-md">Agora você pode gerar o roteiro com base no plano narrativo validado.</p>
+            <button 
+              @click="startGenerateScript"
+              :disabled="generatingStage === 'SCRIPT'"
+              class="px-8 py-4 bg-emerald-500 text-black font-black uppercase tracking-widest rounded-xl hover:bg-emerald-400 transition-all flex items-center gap-3 disabled:opacity-50"
+            >
+              <span v-if="generatingStage === 'SCRIPT'" class="animate-spin w-5 h-5 border-2 border-black/30 border-t-black rounded-full"></span>
+              <ScrollText v-else :size="20" />
+              {{ generatingStage === 'SCRIPT' ? 'GERANDO ROTEIRO...' : 'GERAR ROTEIRO' }}
+            </button>
+        </div>
+
+        <!-- Script Generating Placeholder (Status: PENDING/PROCESSING & No Script, mas já disparou geração) -->
+        <div v-if="isPlanoStage && output.status !== 'FAILED' && generatingStage === 'SCRIPT'" class="mb-12 bg-zinc-500/5 border border-zinc-500/20 p-8 rounded-3xl flex flex-col items-center justify-center gap-4 text-center py-16 animate-pulse">
             <ScrollText :size="48" class="text-zinc-600 mb-2" />
             <h3 class="text-xl font-bold text-zinc-400">Gerando Roteiro...</h3>
-            <p class="text-zinc-500 text-sm max-w-md">A IA está criando a narrativa baseada no tema do Dossier. Isso pode levar alguns segundos.</p>
+            <p class="text-zinc-500 text-sm max-w-md">A IA está criando a narrativa baseada no plano aprovado. Isso pode levar alguns segundos.</p>
         </div>
 
         <!-- Script Approval Section -->
-        <div v-if="output.script && !output.scriptApproved" class="mb-12 bg-gradient-to-br from-orange-500/10 to-transparent border border-orange-500/30 p-8 rounded-3xl relative overflow-hidden group">
+        <div v-if="isRoteiroStage" class="mb-12 bg-gradient-to-br from-orange-500/10 to-transparent border border-orange-500/30 p-8 rounded-3xl relative overflow-hidden group">
            <div class="absolute inset-0 bg-orange-500/5 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
            <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
               <div>
@@ -345,17 +1185,17 @@
                   Estágio 3: Narração (Áudio)
                 </h3>
                 <div v-if="allScenesHaveAudio">
-                    <p class="text-blue-200/60 text-sm max-w-xl">
+                    <p class="text-zinc-300/80 text-sm max-w-xl">
                         Narração gerada para todas as {{ output.scenes?.length }} cenas. Ouça abaixo e aprove.
                     </p>
                 </div>
                 <div v-else-if="output.scenes?.some((s:any) => s.audioTracks?.some((a:any) => a.type === 'scene_narration'))">
-                    <p class="text-blue-200/60 text-sm max-w-xl animate-pulse">
+                    <p class="text-zinc-300/80 text-sm max-w-xl animate-pulse">
                         Gerando narração... {{ output.scenes?.filter((s:any) => s.audioTracks?.some((a:any) => a.type === 'scene_narration')).length }}/{{ output.scenes?.length }} cenas prontas.
                     </p>
                 </div>
                 <div v-else>
-                     <p class="text-blue-200/60 text-sm max-w-xl">
+                     <p class="text-zinc-300/80 text-sm max-w-xl">
                         Imagens aprovadas. Agora gere a narração para cada cena.
                     </p>
                 </div>
@@ -401,51 +1241,92 @@
 
         <!-- 4. BGM Approval Section -->
         <div v-if="output.audioApproved && !output.bgmApproved" class="mb-12 bg-gradient-to-br from-emerald-500/10 to-transparent border border-emerald-500/30 p-8 rounded-3xl relative overflow-hidden group">
-           <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-              <div>
-                <h3 class="text-xl font-bold text-emerald-200 flex items-center gap-2 mb-2">
-                  <Radio :size="20" class="text-emerald-500" />
-                  Estágio 4: Background Music
-                </h3>
-                <div v-if="output.hasBgm">
-                    <p class="text-emerald-200/60 text-sm max-w-xl mb-3">
-                        Música de fundo gerada com duração baseada na narração real. Ouça abaixo e aprove para liberar o Motion.
-                    </p>
-                    <audio controls class="w-full max-w-md" :src="`/api/outputs/${outputId}/bgm-audio`"></audio>
+           <div class="relative z-10 flex flex-col gap-6">
+              <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                  <h3 class="text-xl font-bold text-emerald-200 flex items-center gap-2 mb-2">
+                    <Radio :size="20" class="text-emerald-500" />
+                    Estágio 4: Background Music
+                  </h3>
+                  <div v-if="bgmTracks.length > 0">
+                      <p class="text-emerald-200/60 text-sm max-w-xl">
+                        {{ bgmTracks.length === 1 ? 'Música de fundo gerada' : `${bgmTracks.length} tracks de música geradas` }} com duração baseada na narração real. Ouça {{ bgmTracks.length > 1 ? 'cada uma' : '' }} abaixo e aprove para liberar o Motion.
+                      </p>
+                  </div>
+                  <div v-else>
+                       <p class="text-emerald-200/60 text-sm max-w-xl">
+                          Narração aprovada. Agora gere a música de fundo (Stable Audio 2.5) com duração exata baseada no áudio da narração.
+                      </p>
+                      <p v-if="output.script?.backgroundMusicPrompt" class="text-emerald-300/40 text-xs mt-2 italic">
+                        Prompt: "{{ output.script.backgroundMusicPrompt }}"
+                      </p>
+                      <div v-else-if="output.script?.backgroundMusicTracks?.length" class="mt-2 space-y-1">
+                        <p class="text-emerald-300/40 text-xs italic">
+                          {{ output.script.backgroundMusicTracks.length }} tracks planejadas no roteiro
+                        </p>
+                      </div>
+                  </div>
                 </div>
-                <div v-else>
-                     <p class="text-emerald-200/60 text-sm max-w-xl">
-                        Narração aprovada. Agora gere a música de fundo (Stable Audio 2.5) com duração exata baseada no áudio da narração.
-                    </p>
-                    <p v-if="output.script?.backgroundMusicPrompt" class="text-emerald-300/40 text-xs mt-2 italic">
-                      Prompt: "{{ output.script.backgroundMusicPrompt }}"
-                    </p>
+
+                 <!-- Action Buttons -->
+                <div class="flex gap-3 shrink-0">
+                  <button v-if="bgmTracks.length > 0"
+                      @click="approveBgm"
+                      :disabled="approving"
+                      class="px-8 py-4 bg-emerald-500 text-white font-black uppercase tracking-widest rounded-xl hover:bg-emerald-400 hover:scale-105 transition-all shadow-glow-emerald flex items-center gap-3 disabled:opacity-50"
+                  >
+                      <span v-if="approving" class="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full"></span>
+                      <CheckCircle2 v-else :size="20" />
+                      {{ approving ? 'Processando...' : 'APROVAR MÚSICA' }}
+                  </button>
+
+                  <button 
+                      @click="generateBgm"
+                      :disabled="generatingStage === 'BGM'"
+                      :class="bgmTracks.length > 0 ? 'px-6 py-4 bg-white/5 border border-white/10 text-zinc-400 hover:text-white hover:border-emerald-500/50' : 'px-8 py-4 bg-emerald-500 text-white shadow-glow-emerald hover:bg-emerald-400 hover:scale-105'"
+                      class="font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-3 disabled:opacity-50 disabled:pointer-events-none text-sm"
+                    >
+                       <span v-if="generatingStage === 'BGM'" class="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full"></span>
+                       <RotateCw v-else-if="bgmTracks.length > 0" :size="16" />
+                       <Zap v-else :size="20" />
+                       {{ generatingStage === 'BGM' ? 'GERANDO...' : (bgmTracks.length > 0 ? 'REFAZER' : 'GERAR MÚSICA') }}
+                  </button>
                 </div>
               </div>
 
-               <!-- Action Buttons -->
-              <div class="flex gap-3">
-                <button v-if="output.hasBgm"
-                    @click="approveBgm"
-                    :disabled="approving"
-                    class="px-8 py-4 bg-emerald-500 text-white font-black uppercase tracking-widest rounded-xl hover:bg-emerald-400 hover:scale-105 transition-all shadow-glow-emerald flex items-center gap-3 disabled:opacity-50"
+              <!-- BGM Tracks Players -->
+              <div v-if="bgmTracks.length > 0" class="space-y-4">
+                <div 
+                  v-for="(track, idx) in bgmTracks" 
+                  :key="track.id" 
+                  class="bg-black/20 p-5 rounded-2xl border border-emerald-500/10 hover:border-emerald-500/20 transition-all"
                 >
-                    <span v-if="approving" class="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full"></span>
-                    <CheckCircle2 v-else :size="20" />
-                    {{ approving ? 'Processando...' : 'APROVAR MÚSICA' }}
-                </button>
+                  <div class="flex items-center gap-3 mb-3">
+                    <div class="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-xs font-mono font-bold text-emerald-300">
+                      {{ Number(idx) + 1 }}
+                    </div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span v-if="getBgmTrackMeta(Number(idx))" class="text-[9px] px-2 py-1 bg-emerald-500/20 rounded text-emerald-300 font-mono">
+                        Cenas {{ getBgmTrackMeta(Number(idx)).startScene }} → {{ getBgmTrackMeta(Number(idx)).endScene !== null && getBgmTrackMeta(Number(idx)).endScene !== undefined ? getBgmTrackMeta(Number(idx)).endScene : 'Fim' }}
+                      </span>
+                      <span v-else-if="bgmTracks.length === 1" class="text-[9px] px-2 py-1 bg-emerald-500/20 rounded text-emerald-300 font-mono uppercase tracking-widest">Video Todo</span>
+                      <span class="text-[9px] px-2 py-1 bg-emerald-500/10 rounded text-emerald-400/60 font-mono">{{ track.duration ? `${track.duration.toFixed(1)}s` : '—' }}</span>
+                      <span class="text-[9px] px-2 py-1 bg-emerald-500/10 rounded text-emerald-400/60 font-mono">{{ getBgmTrackMeta(Number(idx))?.volume || output.script?.backgroundMusicVolume || -18 }}dB</span>
+                    </div>
+                  </div>
 
-                <button 
-                    @click="generateBgm"
-                    :disabled="generatingStage === 'BGM'"
-                    :class="output.hasBgm ? 'px-6 py-4 bg-white/5 border border-white/10 text-zinc-400 hover:text-white hover:border-emerald-500/50' : 'px-8 py-4 bg-emerald-500 text-white shadow-glow-emerald hover:bg-emerald-400 hover:scale-105'"
-                    class="font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-3 disabled:opacity-50 disabled:pointer-events-none text-sm"
-                  >
-                     <span v-if="generatingStage === 'BGM'" class="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full"></span>
-                     <RotateCw v-else-if="output.hasBgm" :size="16" />
-                     <Zap v-else :size="20" />
-                     {{ generatingStage === 'BGM' ? 'GERANDO...' : (output.hasBgm ? 'REFAZER' : 'GERAR MÚSICA') }}
-                </button>
+                  <!-- Prompt -->
+                  <p v-if="getBgmTrackPrompt(Number(idx))" class="text-xs text-emerald-200/60 leading-relaxed italic mb-3">
+                    {{ getBgmTrackPrompt(Number(idx)) }}
+                  </p>
+
+                  <!-- Audio Player -->
+                  <audio 
+                    controls 
+                    class="w-full h-10 opacity-70 hover:opacity-100 transition-opacity" 
+                    :src="`/api/audio-tracks/${track.id}/stream`"
+                  ></audio>
+                </div>
               </div>
            </div>
         </div>
@@ -502,8 +1383,8 @@
            </div>
         </div>
 
-        <!-- 5. Render Trigger (Final) -->
-        <div v-if="canRenderMaster" class="mb-12 bg-gradient-to-br from-emerald-500/10 to-transparent border border-emerald-500/30 p-8 rounded-3xl relative overflow-hidden group">
+        <!-- 6. Render Trigger -->
+        <div v-if="canRenderMaster && !output.hasVideo" class="mb-12 bg-gradient-to-br from-emerald-500/10 to-transparent border border-emerald-500/30 p-8 rounded-3xl relative overflow-hidden group">
              <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
               <div>
                 <h3 class="text-xl font-bold text-emerald-200 flex items-center gap-2 mb-2">
@@ -514,7 +1395,7 @@
                     Todos os assets foram aprovados. O sistema está pronto para compilar o vídeo final (FFmpeg).
                 </p>
               </div>
-               <button 
+                <button 
                   @click="renderMaster"
                   :disabled="rendering || output.status === 'GENERATING'"
                   class="px-8 py-4 bg-emerald-500 text-white font-black uppercase tracking-widest rounded-xl hover:bg-emerald-400 hover:scale-105 transition-all shadow-glow-emerald flex items-center gap-3 disabled:opacity-50 disabled:pointer-events-none"
@@ -526,40 +1407,63 @@
              </div>
         </div>
 
-        <!-- Script Viewer -->
-        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-32">
-          
-          <!-- Metadata Sidebar -->
-          <aside class="space-y-6">
-             <section class="glass-card p-6 rounded-2xl border-white/5">
-                <h3 class="mono-label mb-4 text-zinc-500">Summary</h3>
-                <p class="text-sm leading-relaxed text-zinc-300 italic">
-                  {{ output.script?.summary || output.dossier?.theme }}
+        <!-- 7. Render Approval (quando renderizado, antes de COMPLETED) -->
+        <div v-if="output.status === 'RENDERED' && output.hasVideo && !output.renderApproved" class="mb-12 bg-gradient-to-br from-amber-500/10 to-transparent border border-amber-500/30 p-8 rounded-3xl relative overflow-hidden group">
+             <div class="relative z-10 flex flex-col gap-6">
+              <div>
+                <h3 class="text-xl font-bold text-amber-200 flex items-center gap-2 mb-2">
+                  <CheckCircle2 :size="20" class="text-amber-500" />
+                  Estágio 7: Aprovação Final
+                </h3>
+                <p class="text-amber-200/60 text-sm max-w-xl">
+                    O vídeo foi renderizado com sucesso. Assista acima e aprove para finalizar ou refaça a renderização.
                 </p>
-             </section>
+              </div>
 
-             <section class="glass-card p-6 rounded-2xl border-white/5 space-y-4">
-               <div>
-                 <h3 class="mono-label mb-1 text-zinc-500">Duration</h3>
-                 <p class="text-xl font-mono">{{ output.script?.estimatedDuration || output.duration }}s</p>
-               </div>
-               <div>
-                  <h3 class="mono-label mb-1 text-zinc-500">Word Count</h3>
-                  <p class="text-xl font-mono">{{ output.script?.wordCount }} words</p>
-               </div>
-               <div>
-                 <h3 class="mono-label mb-1 text-zinc-500">Scene Count</h3>
-                 <p class="text-xl font-mono">{{ output.scenes?.length || 0 }} scenes</p>
-               </div>
-               <div class="pt-4 border-t border-white/5">
-                 <h3 class="mono-label mb-2 text-zinc-500">Styles</h3>
-                 <div class="flex flex-wrap gap-2">
-                   <span class="px-2 py-1 bg-white/5 rounded text-[9px]">{{ output.scriptStyle?.name }}</span>
-                   <span class="px-2 py-1 bg-white/5 rounded text-[9px]">{{ output.visualStyle?.name }}</span>
-                 </div>
-               </div>
-             </section>
+              <div class="flex gap-3">
+                <button
+                    @click="approveRender"
+                    :disabled="approving"
+                    class="px-8 py-4 bg-emerald-500 text-white font-black uppercase tracking-widest rounded-xl hover:bg-emerald-400 hover:scale-105 transition-all shadow-glow-emerald flex items-center gap-3 disabled:opacity-50"
+                >
+                    <span v-if="approving" class="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full"></span>
+                    <CheckCircle2 v-else :size="20" />
+                    {{ approving ? 'Processando...' : 'APROVAR E CONCLUIR' }}
+                </button>
 
+                <button 
+                    @click="renderAgain"
+                    :disabled="rendering"
+                    class="px-6 py-4 bg-white/5 border border-white/10 text-zinc-400 hover:text-white hover:border-amber-500/50 font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-3 disabled:opacity-50 disabled:pointer-events-none text-sm"
+                  >
+                     <span v-if="rendering" class="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full"></span>
+                     <RotateCw v-else :size="16" />
+                     {{ rendering ? 'RENDERIZANDO...' : 'REFAZER RENDER' }}
+                </button>
+              </div>
+             </div>
+        </div>
+
+        <!-- ⚠️ Aviso: Vídeo armazenado em disco (não no banco) -->
+        <div v-if="output.isStoredOnDisk" class="mb-12 bg-gradient-to-r from-yellow-500/10 via-orange-500/5 to-transparent border border-yellow-500/40 p-6 rounded-2xl flex items-start gap-4">
+          <div class="mt-0.5 shrink-0 w-10 h-10 rounded-xl bg-yellow-500/20 flex items-center justify-center">
+            <AlertTriangle :size="20" class="text-yellow-400" />
+          </div>
+          <div>
+            <h4 class="text-yellow-300 font-bold text-sm uppercase tracking-wider mb-1">Armazenamento Local</h4>
+            <p class="text-yellow-200/60 text-sm leading-relaxed">
+              Este vídeo é grande demais para ser salvo no banco de dados e está armazenado <strong class="text-yellow-300">apenas em disco local</strong> no servidor.
+              Ele será <strong class="text-yellow-300">perdido</strong> em caso de mudança de servidor, novo deploy ou migração para outra nuvem.
+              Faça o download do vídeo antes de qualquer operação de infraestrutura.
+            </p>
+          </div>
+        </div>
+
+        <!-- Script Viewer: só exibir quando existir roteiro (etapa Roteiro ou posterior). Evita mostrar área vazia na etapa Plano. -->
+        <main v-if="output.script" class="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-32">
+          
+          <!-- Sidebar: Background Music (Summary/métricas/constantes estão na barra fixa no topo) -->
+          <aside class="space-y-6">
              <!-- Background Music (Video Todo ou Tracks) -->
              <section v-if="output.script?.backgroundMusicPrompt || output.script?.backgroundMusicTracks?.length" class="glass-card p-6 rounded-2xl border-emerald-500/10 bg-emerald-500/5">
                <h3 class="flex items-center gap-2 mono-label mb-4 text-emerald-400">
@@ -582,7 +1486,7 @@
                  <div v-for="(track, idx) in output.script.backgroundMusicTracks" :key="idx" class="bg-black/20 p-3 rounded-xl border border-emerald-500/10">
                    <div class="flex items-center gap-2 mb-2">
                      <span class="text-[9px] px-2 py-1 bg-emerald-500/20 rounded text-emerald-300 font-mono">
-                       {{ track.startTime }}s → {{ track.endTime ? track.endTime + 's' : 'Fim' }}
+                       Cenas {{ track.startScene }} → {{ track.endScene !== null && track.endScene !== undefined ? track.endScene : 'Fim' }}
                      </span>
                      <span class="text-[9px] px-2 py-1 bg-emerald-500/10 rounded text-emerald-400/60 font-mono">{{ track.volume }}dB</span>
                    </div>
@@ -651,11 +1555,11 @@
                    
                    <!-- Visual -->
                    <div class="space-y-4">
-                      <div class="bg-blue-500/5 p-4 rounded-xl border border-blue-500/10">
+                      <div class="bg-primary/5 p-4 rounded-xl border border-primary/10">
                         <h4 class="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-blue-400/70 mb-2">
                           <Eye :size="10" /> Visual Prompt
                         </h4>
-                        <p class="text-sm text-blue-100/80 leading-relaxed font-light">
+                        <p class="text-sm text-white/80 leading-relaxed font-light">
                           {{ scene.visualDescription }}
                         </p>
                       </div>
@@ -677,17 +1581,16 @@
                         <Clapperboard :size="10" /> Motion Preview
                     </h4>
                     
-                    <div v-if="scene.videos?.length > 0" class="aspect-video bg-black rounded-lg overflow-hidden border border-white/10 relative group/video">
-                        <!-- Só mostramos o primeiro vídeo por enquanto -->
+                    <div v-if="getSelectedVideo(scene)" class="aspect-video bg-black rounded-lg overflow-hidden border border-white/10 relative group/video">
                         <video 
                         controls
                         loop
                         class="w-full h-full object-cover"
-                        :src="`/api/scene-videos/${scene.videos[0].id}/stream`"
+                        :src="`/api/scene-videos/${getSelectedVideo(scene).id}/stream`"
                         ></video>
                         
                         <div class="absolute bottom-2 right-2 px-2 py-1 bg-black/60 backdrop-blur rounded text-[8px] text-white/80 font-mono pointer-events-none">
-                        {{ scene.videos[0].provider }} • {{ scene.videos[0].duration }}s
+                        {{ getSelectedVideo(scene).provider }} • {{ getSelectedVideo(scene).duration }}s
                         </div>
                     </div>
                     <div v-else class="h-24 bg-pink-500/5 rounded-lg flex flex-col items-center justify-center gap-2 border border-dashed border-pink-500/20 text-pink-500/50">
@@ -715,6 +1618,17 @@
                            <Eye :size="16" class="text-white drop-shadow-lg" />
                         </div>
                       </div>
+                   </div>
+                   <!-- Cena restrita pelo filtro de conteúdo -->
+                   <div v-else-if="scene.imageStatus === 'restricted'" class="h-16 bg-red-500/5 rounded-lg flex items-center justify-center gap-3 text-xs border border-dashed border-red-500/20">
+                     <ShieldAlert :size="16" class="text-red-400/60" />
+                     <span class="text-red-300/70">Imagem bloqueada pelo filtro de conteúdo</span>
+                     <span class="px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider rounded-full bg-red-500/20 text-red-400">Restrita</span>
+                   </div>
+                   <!-- Cena com erro genérico -->
+                   <div v-else-if="scene.imageStatus === 'error'" class="h-16 bg-orange-500/5 rounded-lg flex items-center justify-center gap-3 text-xs border border-dashed border-orange-500/20">
+                     <AlertTriangle :size="16" class="text-orange-400/60" />
+                     <span class="text-orange-300/70">Erro ao gerar imagem</span>
                    </div>
                    <div v-else class="h-12 bg-white/5 rounded-lg flex items-center justify-center text-[10px] text-zinc-500 uppercase tracking-widest border border-dashed border-white/5">
                       {{ output.scriptApproved ? 'Aguardando Geração Image...' : 'Imagens Pendentes' }}
@@ -874,110 +1788,159 @@
     </div>
   </div>
 
-  <!-- Caption Style Selection Modal -->
+  <!-- Modal: Opções de renderização (logo + legendas) -->
   <div 
-    v-if="showCaptionStyleModal"
+    v-if="showRenderOptionsModal"
     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
-    @click.self="showCaptionStyleModal = false"
+    @click.self="showRenderOptionsModal = false"
   >
-    <div class="glass-card max-w-4xl w-full p-8 rounded-3xl border-secondary/20 shadow-2xl">
-      <!-- Header -->
+    <div class="glass-card max-w-4xl w-full max-h-[90vh] overflow-y-auto p-8 rounded-3xl border-emerald-500/20 shadow-2xl">
       <div class="flex items-center justify-between mb-6">
         <div>
           <h2 class="text-2xl font-black text-white flex items-center gap-3">
-            <Subtitles :size="28" class="text-secondary" />
-            Escolha o Estilo de Legenda
+            <Film :size="28" class="text-emerald-500" />
+            Opções de renderização
           </h2>
           <p class="text-zinc-400 text-sm mt-2">
-            Selecione o estilo ideal para sua plataforma
+            Inclua logo e/ou legendas no vídeo final
           </p>
         </div>
-        <button 
-          @click="showCaptionStyleModal = false"
-          class="p-2 hover:bg-white/10 rounded-lg transition-colors"
-        >
+        <button @click="showRenderOptionsModal = false" class="p-2 hover:bg-white/10 rounded-lg transition-colors">
           <X :size="24" />
         </button>
       </div>
 
-      <!-- Styles Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div
-          v-for="style in captionStyles"
-          :key="style.id"
-          @click="selectedStyleId = style.id"
-          class="relative p-6 rounded-2xl border-2 cursor-pointer transition-all hover:scale-105"
-          :class="[
-            selectedStyleId === style.id 
-              ? 'border-secondary bg-secondary/10' 
-              : 'border-white/10 bg-white/5 hover:border-white/20'
-          ]"
-        >
-          <!-- Recommended Badge -->
-          <div 
-            v-if="style.isRecommended"
-            class="absolute -top-2 -right-2 px-3 py-1 bg-secondary text-black text-[10px] font-black uppercase tracking-wider rounded-full shadow-glow-secondary"
+      <!-- Checkboxes -->
+      <div class="space-y-4 mb-6">
+        <label class="flex items-center gap-3 p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 cursor-pointer transition-colors">
+          <input type="checkbox" v-model="renderIncludeLogo" class="w-5 h-5 rounded border-white/30 text-primary bg-black/40" />
+          <span class="font-medium text-white">Incluir logo The Gap Files</span>
+          <span class="text-zinc-500 text-sm">(rodapé direito, transparente)</span>
+        </label>
+        <label class="flex items-center gap-3 p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 cursor-pointer transition-colors">
+          <input type="checkbox" v-model="renderIncludeCaptions" class="w-5 h-5 rounded border-white/30 text-secondary bg-black/40" />
+          <span class="font-medium text-white">Incluir legendas</span>
+          <span class="text-zinc-500 text-sm">(estilo escolhido abaixo)</span>
+        </label>
+        <label v-if="hasBgmData" class="flex items-center gap-3 p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 cursor-pointer transition-colors">
+          <input type="checkbox" v-model="renderAdjustVolume" class="w-5 h-5 rounded border-white/30 text-emerald-500 bg-black/40" />
+          <Volume2 :size="18" class="text-emerald-400" />
+          <span class="font-medium text-white">Ajustar volume do background</span>
+          <span class="text-zinc-500 text-sm">(dB por track)</span>
+        </label>
+      </div>
+
+      <!-- Opções de legenda (no mesmo modal, quando "Incluir legendas" marcado) -->
+      <div v-if="renderIncludeCaptions" class="mb-6">
+        <h3 class="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-3">Estilo de legenda</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div
+            v-for="style in captionStyles"
+            :key="style.id"
+            @click="renderCaptionStyleId = style.id"
+            class="relative p-6 rounded-2xl border-2 cursor-pointer transition-all hover:scale-[1.02]"
+            :class="[
+              renderCaptionStyleId === style.id ? 'border-secondary bg-secondary/10' : 'border-white/10 bg-white/5 hover:border-white/20'
+            ]"
           >
-            Recomendado
-          </div>
-
-          <!-- Style Info -->
-          <div class="flex items-start gap-3 mb-3">
-            <div 
-              class="p-2 rounded-lg"
-              :class="selectedStyleId === style.id ? 'bg-secondary/20' : 'bg-white/10'"
-            >
-              <Subtitles :size="20" :class="selectedStyleId === style.id ? 'text-secondary' : 'text-white'" />
+            <div v-if="style.isRecommended" class="absolute -top-2 -right-2 px-3 py-1 bg-secondary text-black text-[10px] font-black uppercase tracking-wider rounded-full">
+              Recomendado
             </div>
-            <div class="flex-1">
-              <h3 class="font-bold text-white">{{ style.name }}</h3>
-              <p class="text-xs text-zinc-500 uppercase tracking-wide">{{ style.platform }}</p>
+            <div class="flex items-start gap-3 mb-3">
+              <div class="p-2 rounded-lg" :class="renderCaptionStyleId === style.id ? 'bg-secondary/20' : 'bg-white/10'">
+                <Subtitles :size="20" :class="renderCaptionStyleId === style.id ? 'text-secondary' : 'text-white'" />
+              </div>
+              <div class="flex-1">
+                <h4 class="font-bold text-white">{{ style.name }}</h4>
+                <p class="text-xs text-zinc-500 uppercase">{{ style.platform }}</p>
+              </div>
             </div>
-          </div>
-
-          <p class="text-sm text-zinc-400 leading-relaxed">
-            {{ style.description }}
-          </p>
-
-          <!-- Effect Badge -->
-          <div v-if="style.effect && style.effect !== 'none'" class="mt-3">
-            <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full" :class="{
-              'bg-yellow-500/20 text-yellow-400': style.effect === 'word_highlight',
-              'bg-green-500/20 text-green-400': style.effect === 'karaoke_fill',
-              'bg-blue-500/20 text-blue-400': style.effect === 'fade',
-              'bg-purple-500/20 text-purple-400': style.effect === 'pop_in',
-              'bg-cyan-500/20 text-cyan-400': style.effect === 'glow_pulse',
-              'bg-pink-500/20 text-pink-400': style.effect === 'neon_flicker',
-            }">
-              {{ style.effect?.replace(/_/g, ' ') }}
-            </span>
-          </div>
-
-          <!-- Selected Indicator -->
-          <div 
-            v-if="selectedStyleId === style.id"
-            class="absolute bottom-4 right-4"
-          >
-            <CheckCircle2 :size="20" class="text-secondary" />
+            <p class="text-sm text-zinc-400 leading-relaxed">{{ style.description }}</p>
+            <div v-if="renderCaptionStyleId === style.id" class="absolute bottom-4 right-4">
+              <CheckCircle2 :size="20" class="text-secondary" />
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Actions -->
+      <!-- Ajuste de volume do background (quando checkbox ativado) -->
+      <div v-if="renderAdjustVolume && hasBgmData" class="mb-6">
+        <h3 class="text-sm font-bold text-emerald-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+          <Volume2 :size="16" />
+          Volume do Background
+        </h3>
+
+        <!-- Música única (backgroundMusicPrompt) -->
+        <div v-if="output.script?.backgroundMusicPrompt && !output.script?.backgroundMusicTracks?.length" class="space-y-3">
+          <div class="bg-black/20 p-4 rounded-xl border border-emerald-500/10">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs text-emerald-300 font-medium">Vídeo Todo</span>
+              <span class="text-sm font-mono font-bold text-emerald-400">{{ renderBgmVolumeGlobal }}dB</span>
+            </div>
+            <input
+              type="range"
+              v-model.number="renderBgmVolumeGlobal"
+              min="-40"
+              max="0"
+              step="1"
+              class="w-full accent-emerald-500 cursor-pointer"
+            />
+            <div class="flex items-center justify-between text-[10px] text-zinc-600 mt-1">
+              <span>-40dB (silencioso)</span>
+              <span class="text-emerald-500/60">Original: {{ output.script.backgroundMusicVolume || -18 }}dB</span>
+              <span>0dB (máximo)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Múltiplas tracks (backgroundMusicTracks) -->
+        <div v-else-if="output.script?.backgroundMusicTracks?.length" class="space-y-3">
+          <div 
+            v-for="(track, idx) in output.script.backgroundMusicTracks" 
+            :key="'vol-' + idx" 
+            class="bg-black/20 p-4 rounded-xl border border-emerald-500/10"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-[10px] font-mono font-bold text-emerald-300">
+                  {{ Number(idx) + 1 }}
+                </div>
+                <span class="text-xs text-emerald-300 font-medium">
+                  Cenas {{ track.startScene }} → {{ track.endScene !== null && track.endScene !== undefined ? track.endScene : 'Fim' }}
+                </span>
+              </div>
+              <span class="text-sm font-mono font-bold text-emerald-400">{{ getTrackVolumeOverride(Number(idx)) }}dB</span>
+            </div>
+            <input
+              type="range"
+              :value="getTrackVolumeOverride(Number(idx))"
+              @input="setTrackVolumeOverride(Number(idx), Number(($event.target as HTMLInputElement).value))"
+              min="-40"
+              max="0"
+              step="1"
+              class="w-full accent-emerald-500 cursor-pointer"
+            />
+            <div class="flex items-center justify-between text-[10px] text-zinc-600 mt-1">
+              <span>-40dB</span>
+              <span class="text-emerald-500/60">Original: {{ track.volume }}dB</span>
+              <span>0dB</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="flex items-center justify-between pt-6 border-t border-white/10">
-        <button
-          @click="showCaptionStyleModal = false"
-          class="px-6 py-3 text-zinc-400 hover:text-white transition-colors"
-        >
+        <button @click="showRenderOptionsModal = false" class="px-6 py-3 text-zinc-400 hover:text-white transition-colors">
           Cancelar
         </button>
         <button
-          @click="confirmAddCaptions"
-          :disabled="!selectedStyleId"
-          class="px-8 py-4 bg-secondary text-black font-black uppercase tracking-widest rounded-xl hover:bg-secondary/90 hover:scale-105 transition-all shadow-glow-secondary flex items-center gap-3 disabled:opacity-50 disabled:pointer-events-none"
+          @click="confirmRenderWithOptions"
+          :disabled="rendering || (renderIncludeCaptions && !renderCaptionStyleId)"
+          class="px-8 py-4 bg-emerald-500 text-white font-black uppercase tracking-widest rounded-xl hover:bg-emerald-400 hover:scale-105 transition-all shadow-glow-emerald flex items-center gap-3 disabled:opacity-50 disabled:pointer-events-none"
         >
-          <Zap :size="20" />
-          Processar Legendas
+          <span v-if="rendering" class="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full"></span>
+          <Zap v-else :size="20" />
+          {{ rendering ? 'RENDERIZANDO...' : 'RENDERIZAR' }}
         </button>
       </div>
     </div>
@@ -987,7 +1950,8 @@
 <script setup lang="ts">
 import { 
   ArrowLeft, Download, RotateCw, ScrollText, ImageIcon, Mic, Film, CheckCircle2, 
-  AlertTriangle, Edit, Eye, Music, X, Zap, Clapperboard, Subtitles, Radio, DollarSign, RefreshCw
+  AlertTriangle, Edit, Eye, Music, X, Zap, Clapperboard, Subtitles, Radio, DollarSign, RefreshCw, Wrench,
+  Map, ChevronUp, ChevronDown, Target, TrendingUp, Star, Heart, Volume2, BarChart3, ShieldAlert
 } from 'lucide-vue-next'
 import VoiceSelector from '~/components/dossier/VoiceSelector.vue'
 
@@ -999,12 +1963,308 @@ const output = ref<any>(null)
 const loading = ref(true)
 const approving = ref(false)
 const addingCaptions = ref(false)
-const isReprocessing = ref(false)
+
+// ═══════════════════════════════════════════════════════════
+// PIPELINE STAGE — separação total Plano vs Roteiro
+// ═══════════════════════════════════════════════════════════
+/** Etapa atual do pipeline: 'PLANO' | 'ROTEIRO' | 'VISUAL' | 'NARRACAO' | 'MUSICA' | 'MOTION' | 'RENDER' | 'FINAL' */
+const pipelineStage = computed(() => {
+  if (!output.value || output.value.status === 'FAILED') return null
+  if (!output.value.script) return 'PLANO'
+  if (!output.value.scriptApproved) return 'ROTEIRO'
+  if (!output.value.imagesApproved) return 'VISUAL'
+  if (!output.value.audioApproved) return 'NARRACAO'
+  if (!output.value.bgmApproved) return 'MUSICA'
+  if (output.value.enableMotion && !output.value.videosApproved) return 'MOTION'
+  if (!output.value.hasVideo) return 'RENDER'
+  return 'FINAL'
+})
+/** True = ainda na etapa Plano narrativo (sem roteiro criado). Conteúdo de plano só aqui. */
+const isPlanoStage = computed(() => pipelineStage.value === 'PLANO')
+/** True = etapa Roteiro (roteiro existe; aprovação ou conteúdo). Roteiro só aqui. */
+const isRoteiroStage = computed(() => pipelineStage.value === 'ROTEIRO')
 
 // Change Voice
 const showChangeVoiceModal = ref(false)
 const newVoiceId = ref<string | null>(null)
 const changingVoice = ref(false)
+
+// ═══════════════════════════════════════════════════════════
+// CORRECTION MODE STATE
+// Derivado do banco: se o output JÁ teve vídeo renderizado (hasVideo)
+// mas está com status PENDING e imagens desaprovadas, está em modo correção.
+// Isso persiste ao recarregar a página.
+// ═══════════════════════════════════════════════════════════
+const correctionMode = computed(() => {
+  if (!output.value) return false
+  // Já tinha vídeo renderizado + status voltou para PENDING/FAILED + imagens desaprovadas = modo correção
+  return output.value.hasVideo 
+    && output.value.status === 'PENDING' 
+    && output.value.scriptApproved 
+    && !output.value.imagesApproved
+})
+const enteringCorrections = ref(false)
+const regeneratingMotionSceneId = ref<string | null>(null)
+const correctedScenes = ref<Set<string>>(new Set())
+const motionRegeneratedScenes = ref<Set<string>>(new Set())
+const imageVersions = ref<Record<string, number>>({})
+const motionVersions = ref<Record<string, number>>({})
+
+// Edição de Visual Prompt
+const editingPromptSceneId = ref<string | null>(null)
+const editingPromptText = ref('')
+
+function startEditPrompt(scene: any) {
+  editingPromptSceneId.value = scene.id
+  editingPromptText.value = scene.visualDescription
+}
+
+function cancelEditPrompt(scene: any) {
+  editingPromptSceneId.value = null
+  editingPromptText.value = ''
+}
+
+async function saveEditPrompt(scene: any) {
+  if (!editingPromptText.value.trim()) return
+  try {
+    await $fetch(`/api/scenes/${scene.id}/update`, {
+      method: 'PATCH',
+      body: { visualDescription: editingPromptText.value.trim() }
+    })
+    scene.visualDescription = editingPromptText.value.trim()
+  } catch (error: any) {
+    console.error('Erro ao salvar prompt:', error)
+    alert('Erro ao salvar o prompt visual.')
+  }
+  editingPromptSceneId.value = null
+  editingPromptText.value = ''
+}
+
+const pendingMotionScenes = computed(() => {
+  if (!output.value?.enableMotion) return []
+  return [...correctedScenes.value].filter(id => !motionRegeneratedScenes.value.has(id))
+})
+
+async function enterCorrectionMode() {
+  if (enteringCorrections.value) return
+  enteringCorrections.value = true
+
+  try {
+    await $fetch(`/api/outputs/${outputId}/enter-corrections`, { method: 'PATCH' })
+    
+    // Atualizar estado local — correctionMode é computed e reagirá automaticamente
+    output.value.status = 'PENDING'
+    output.value.imagesApproved = false
+    output.value.videosApproved = false
+    correctedScenes.value = new Set()
+    motionRegeneratedScenes.value = new Set()
+    
+    // Recarregar dados completos
+    await loadOutput()
+  } catch (error: any) {
+    console.error('Erro ao entrar em modo correção:', error)
+    alert(error?.data?.message || 'Erro ao ativar modo correção.')
+  } finally {
+    enteringCorrections.value = false
+  }
+}
+
+async function exitCorrectionMode() {
+  // Mesmo fluxo de render: abre modal de opções (logo/legendas), ao confirmar aprova stages e dispara render
+  await openRenderOptionsModal('again', {
+    beforeRender: async () => {
+      await $fetch(`/api/outputs/${outputId}/approve-stage`, {
+        method: 'PATCH',
+        body: { stage: 'IMAGES', approved: true }
+      })
+      if (output.value?.enableMotion) {
+        await $fetch(`/api/outputs/${outputId}/approve-stage`, {
+          method: 'PATCH',
+          body: { stage: 'MOTION', approved: true }
+        })
+      }
+      correctedScenes.value = new Set()
+      motionRegeneratedScenes.value = new Set()
+    }
+  })
+}
+
+async function regenerateImageCorrection(scene: any) {
+  if (regeneratingSceneId.value) return
+  regeneratingSceneId.value = scene.id
+
+  try {
+    await $fetch(`/api/scenes/${scene.id}/regenerate-image`, {
+      method: 'POST',
+      body: { prompt: scene.visualDescription }
+    })
+
+    // Marcar cena como corrigida
+    correctedScenes.value = new Set([...correctedScenes.value, scene.id])
+    
+    // Recarregar output completo do banco para garantir dados frescos e reatividade
+    await loadOutput()
+    
+    // Forçar cache-bust nas imagens
+    imageVersions.value = { ...imageVersions.value, [scene.id]: Date.now() }
+    
+  } catch (error: any) {
+    console.error('Erro regenerando imagem:', error)
+    handleApiError(error, 'Erro ao regenerar imagem.')
+  } finally {
+    regeneratingSceneId.value = null
+  }
+}
+
+async function regenerateMotionCorrection(scene: any) {
+  if (regeneratingMotionSceneId.value) return
+  regeneratingMotionSceneId.value = scene.id
+
+  try {
+    const result = await $fetch(`/api/scenes/${scene.id}/regenerate-motion`, {
+      method: 'POST'
+    })
+
+    // Atualizar dados locais - reload a cena
+    const freshData = await $fetch(`/api/outputs/${outputId}`)
+    const freshScene = (freshData as any).scenes?.find((s: any) => s.id === scene.id)
+    if (freshScene) {
+      scene.videos = freshScene.videos
+    }
+    
+    // Marcar motion como reprocessado
+    motionRegeneratedScenes.value = new Set([...motionRegeneratedScenes.value, scene.id])
+    motionVersions.value = { ...motionVersions.value, [scene.id]: Date.now() }
+    
+    // Recarregar custos
+    loadCosts()
+  } catch (error: any) {
+    console.error('Erro regenerando motion:', error)
+    handleApiError(error, 'Erro ao regenerar motion.')
+  } finally {
+    regeneratingMotionSceneId.value = null
+  }
+}
+
+async function finishCorrectionsAndRender() {
+  if (rendering.value) return
+  // Mesmo fluxo de render: abre modal de opções (logo/legendas), ao confirmar aprova stages e dispara render
+  await openRenderOptionsModal('again', {
+    beforeRender: async () => {
+      await $fetch(`/api/outputs/${outputId}/approve-stage`, {
+        method: 'PATCH',
+        body: { stage: 'IMAGES', approved: true }
+      })
+      if (output.value?.enableMotion) {
+        await $fetch(`/api/outputs/${outputId}/approve-stage`, {
+          method: 'PATCH',
+          body: { stage: 'MOTION', approved: true }
+        })
+      }
+      correctedScenes.value = new Set()
+      motionRegeneratedScenes.value = new Set()
+    }
+  })
+}
+
+// Thumbnails (Opção A)
+const generatingThumbnails = ref(false)
+const selectingThumbnail = ref(false)
+const removingThumbnail = ref(false)
+const selectedThumbnailIdx = ref<number | null>(null)
+const showSelectedThumbnail = ref(false)
+const thumbnailHookText = ref('')
+const thumbnailVersion = ref(Date.now())
+
+// Social Media Kit
+const generatingSocialKit = ref(false)
+const activeSocialTab = ref('youtube')
+
+const socialKitTabs = [
+  { key: 'youtube', label: 'YouTube' },
+  { key: 'youtubeShorts', label: 'Shorts' },
+  { key: 'tiktok', label: 'TikTok' },
+  { key: 'instagram', label: 'Instagram' },
+]
+
+const activeSocialContent = computed(() => {
+  const kit = output.value?.socialKit as any
+  if (!kit) return null
+  return kit[activeSocialTab.value] || null
+})
+
+async function generateSocialKit() {
+  if (generatingSocialKit.value) return
+  generatingSocialKit.value = true
+  try {
+    await $fetch(`/api/outputs/${outputId}/generate-social-kit`, { method: 'POST' })
+    await loadOutput()
+    loadCosts()
+  } catch (e: any) {
+    handleApiError(e, 'Erro ao gerar Social Media Kit.')
+  } finally {
+    generatingSocialKit.value = false
+  }
+}
+
+function copySocialField(text: string) {
+  if (!text) return
+  navigator.clipboard.writeText(text)
+}
+
+function openThumbnailPreview(idx: number) {
+  selectedThumbnailIdx.value = idx
+}
+
+async function removeThumbnail() {
+  if (removingThumbnail.value) return
+  removingThumbnail.value = true
+  try {
+    await $fetch(`/api/outputs/${outputId}/remove-thumbnail`, { method: 'POST' })
+    await loadOutput()
+  } catch (e: any) {
+    handleApiError(e, 'Erro ao remover thumbnail.')
+  } finally {
+    removingThumbnail.value = false
+  }
+}
+
+async function generateThumbnails() {
+  if (generatingThumbnails.value) return
+  generatingThumbnails.value = true
+  try {
+    await $fetch(`/api/outputs/${outputId}/generate-thumbnails`, {
+      method: 'POST',
+      body: { hookText: thumbnailHookText.value || undefined }
+    })
+    await loadOutput()
+    loadCosts()
+    thumbnailHookText.value = ''
+  } catch (e: any) {
+    handleApiError(e, 'Erro ao gerar thumbnails.')
+  } finally {
+    generatingThumbnails.value = false
+  }
+}
+
+async function selectThumbnail(idx: number) {
+  if (selectingThumbnail.value) return
+  selectingThumbnail.value = true
+  selectedThumbnailIdx.value = idx
+  try {
+    await $fetch(`/api/outputs/${outputId}/select-thumbnail`, {
+      method: 'POST',
+      body: { index: idx }
+    })
+    await loadOutput()
+    thumbnailVersion.value = Date.now()
+  } catch (e: any) {
+    handleApiError(e, 'Erro ao selecionar thumbnail.')
+  } finally {
+    selectingThumbnail.value = false
+    selectedThumbnailIdx.value = null
+  }
+}
 
 // Pricing Error Modal
 const pricingError = ref<{ model: string; provider: string; configUrl: string } | null>(null)
@@ -1049,16 +2309,61 @@ function isEstimatedCost(resource: string): boolean {
   return costs.value.costAccuracy[resource] === 'estimated'
 }
 
-// Caption Styles Modal
-const showCaptionStyleModal = ref(false)
+/**
+ * Retorna custo real das opções extras filtrado dos logs do banco.
+ * Se nunca foi executada, retorna 0.
+ */
+function getExtraCost(key: 'thumbnail' | 'social_kit'): number {
+  if (!costs.value?.logs) return 0
+  if (key === 'thumbnail') {
+    return costs.value.logs
+      .filter((l: any) => l.resource === 'thumbnail')
+      .reduce((sum: number, l: any) => sum + l.cost, 0)
+  }
+  if (key === 'social_kit') {
+    return costs.value.logs
+      .filter((l: any) => l.resource === 'script' && (l.metadata as any)?.step === 'social_kit')
+      .reduce((sum: number, l: any) => sum + l.cost, 0)
+  }
+  return 0
+}
+
+// Caption styles (usado no modal de opções de renderização)
 const captionStyles = ref<any[]>([])
-const selectedStyleId = ref<string | null>(null)
-const recommendedStyleId = ref<string | null>(null)
+
+// Modal de opções de renderização (logo + legendas + volume na renderização principal)
+const showRenderOptionsModal = ref(false)
+const renderIncludeLogo = ref(true)
+const renderIncludeCaptions = ref(false)
+const renderCaptionStyleId = ref<string | null>(null)
+const renderAction = ref<'master' | 'again'>('master')
+const renderAdjustVolume = ref(false)
+const renderBgmVolumeGlobal = ref(-18)
+const renderBgmVolumePerTrack = ref<Record<number, number>>({})
+const pendingRenderOptions = ref<{ includeLogo: boolean; includeCaptions: boolean; captionStyleId: string | null; volumeOverride?: { global?: number; perTrack?: Record<number, number> } } | null>(null)
+
+// Computed: output tem dados de BGM para ajustar volume?
+const hasBgmData = computed(() => {
+  if (!output.value?.script) return false
+  return !!(output.value.script.backgroundMusicPrompt || output.value.script.backgroundMusicTracks?.length)
+})
+
+// Helpers para volume por track
+function getTrackVolumeOverride(idx: number): number {
+  return renderBgmVolumePerTrack.value[idx] ?? output.value?.script?.backgroundMusicTracks?.[idx]?.volume ?? -18
+}
+
+function setTrackVolumeOverride(idx: number, value: number) {
+  renderBgmVolumePerTrack.value = { ...renderBgmVolumePerTrack.value, [idx]: value }
+}
+/** Callback opcional a rodar antes de disparar o render (ex.: aprovar stages ao sair do modo correção) */
+const pendingBeforeRender = ref<(() => Promise<void>) | null>(null)
 
 async function loadOutput() {
   try {
     const data = await $fetch(`/api/outputs/${outputId}`)
     output.value = data
+    if ((data as any).script && generatingStage.value === 'SCRIPT') generatingStage.value = null
   } catch (error) {
     console.error('Erro ao carregar output:', error)
   } finally {
@@ -1067,6 +2372,71 @@ async function loadOutput() {
 }
 
 const regeneratingSceneId = ref<string | null>(null)
+const restrictedPromptEdits = ref<Record<string, string>>({})
+
+async function retryRestrictedImage(scene: any, mode: 'same' | 'edited') {
+  if (regeneratingSceneId.value) return
+  regeneratingSceneId.value = scene.id
+
+  const prompt = mode === 'edited' && restrictedPromptEdits.value[scene.id]
+    ? restrictedPromptEdits.value[scene.id]
+    : scene.visualDescription
+
+  try {
+    await $fetch(`/api/scenes/${scene.id}/regenerate-image`, {
+      method: 'POST',
+      body: { prompt }
+    })
+
+    // Sucesso! Limpar edição e recarregar
+    delete restrictedPromptEdits.value[scene.id]
+    correctedScenes.value = new Set([...correctedScenes.value, scene.id])
+    await loadOutput()
+    imageVersions.value = { ...imageVersions.value, [scene.id]: Date.now() }
+
+  } catch (error: any) {
+    console.error('Erro ao tentar regenerar imagem restrita:', error)
+
+    // Se ainda foi bloqueado, mostrar mensagem específica
+    if (error?.data?.data?.code === 'CONTENT_RESTRICTED') {
+      handleApiError(error, 'O prompt ainda foi rejeitado pelo filtro de conteúdo. Tente editar o prompt para usar termos mais abstratos.')
+    } else {
+      handleApiError(error, 'Erro ao regenerar imagem.')
+    }
+  } finally {
+    regeneratingSceneId.value = null
+  }
+}
+
+// Story Outline
+const outlineExpanded = ref(true)
+const showOutlineFeedbackModal = ref(false)
+const outlineFeedback = ref('')
+const outlineSuggestions = ref('') // sugestões na primeira geração do plano
+const regeneratingOutline = ref(false)
+
+async function confirmRegenerateOutline() {
+  regeneratingOutline.value = true
+  try {
+    const result = await $fetch(`/api/outputs/${outputId}/generate-outline`, {
+      method: 'POST',
+      body: { feedback: outlineFeedback.value.trim() || undefined }
+    })
+
+    output.value.storyOutline = (result as any).outline
+    output.value.storyOutlineApproved = false // novo plano = pendente de aprovação
+    showOutlineFeedbackModal.value = false
+    outlineFeedback.value = ''
+    outlineExpanded.value = true
+
+    await loadOutput()
+  } catch (error: any) {
+    console.error('Erro ao replanejar narrativa:', error)
+    alert(error?.data?.message || 'Erro ao gerar novo plano narrativo.')
+  } finally {
+    regeneratingOutline.value = false
+  }
+}
 
 // Regenerate Script Logic
 const showScriptFeedbackModal = ref(false)
@@ -1136,80 +2506,8 @@ async function downloadMaster() {
 
 async function renderAgain() {
   if (rendering.value) return
-  if (!confirm('Deseja iniciar uma nova renderização? O arquivo MP4 atual será substituído pelo novo.')) return
-
-  rendering.value = true
-  try {
-    const res = await $fetch(`/api/outputs/${outputId}/render`, {
-      method: 'POST'
-    })
-    
-    // Atualizar status local e iniciar polling
-    output.value.status = 'GENERATING'
-    startPolling()
-    
-    // Feedback opcional ou log
-    console.log('API Response:', res)
-  } catch (error) {
-    console.error('Erro ao disparar renderização:', error)
-    alert('Erro ao iniciar a renderização. Verifique o console.')
-  } finally {
-    rendering.value = false
-  }
+  await openRenderOptionsModal('again')
 }
-
-// Caption Functions
-async function addCaptions() {
-  try {
-    // 1. Buscar estilos disponíveis
-    const stylesData = await $fetch(`/api/outputs/${outputId}/caption-styles`)
-    captionStyles.value = stylesData.styles
-    recommendedStyleId.value = stylesData.recommendedStyleId
-    selectedStyleId.value = stylesData.recommendedStyleId // Pré-seleciona o recomendado
-    
-    // 2. Abrir modal
-    showCaptionStyleModal.value = true
-  } catch (error) {
-    console.error('Erro ao carregar estilos:', error)
-    alert('Erro ao carregar estilos de legendas')
-  }
-}
-
-async function confirmAddCaptions() {
-  if (!selectedStyleId.value) return
-  
-  showCaptionStyleModal.value = false
-  addingCaptions.value = true
-  
-  try {
-    const result = await $fetch(`/api/outputs/${outputId}/add-captions`, {
-      method: 'POST',
-      body: {
-        styleId: selectedStyleId.value,
-        force: isReprocessing.value
-      }
-    })
-
-    console.log('Legendas adicionadas:', result)
-    
-    // Recarregar output para mostrar vídeo legendado
-    await loadOutput()
-    
-    alert(`Legendas ${isReprocessing.value ? 'reprocessadas' : 'adicionadas'} com sucesso! Tamanho: ${result.sizeInMB} MB`)
-  } catch (error: any) {
-    console.error('Erro ao adicionar legendas:', error)
-    alert(`Erro ao adicionar legendas: ${error.data?.message || error.message || 'Erro desconhecido'}`)
-  } finally {
-    addingCaptions.value = false
-    isReprocessing.value = false
-  }
-}
-
-async function reprocessCaptions() {
-  isReprocessing.value = true
-  await addCaptions()
-}
-
 
 async function revertToScriptStep() {
   if (!confirm('Tem certeza? Isso permitirá editar o roteiro novamente. As imagens geradas serão mantidas, mas novas alterações no roteiro podem exigir novas imagens.')) return
@@ -1280,6 +2578,54 @@ async function approveScript() {
 }
 
 const generatingStage = ref<string | null>(null)
+const generatingOutline = ref(false)
+
+async function generateOutlineThenReload() {
+  generatingOutline.value = true
+  try {
+    await $fetch(`/api/outputs/${outputId}/generate-outline`, {
+      method: 'POST',
+      body: { feedback: outlineSuggestions.value.trim() || undefined }
+    })
+    outlineSuggestions.value = ''
+    await loadOutput()
+  } catch (e: any) {
+    console.error('Erro ao gerar plano:', e)
+    alert(e?.data?.message || 'Erro ao gerar plano narrativo.')
+  } finally {
+    generatingOutline.value = false
+  }
+}
+
+async function approveStoryOutline() {
+  if (approving.value) return
+  approving.value = true
+  try {
+    await $fetch(`/api/outputs/${outputId}/approve-stage`, {
+      method: 'PATCH',
+      body: { stage: 'STORY_OUTLINE', approved: true }
+    })
+    output.value.storyOutlineApproved = true
+    await loadOutput()
+  } catch (error) {
+    console.error('Erro ao aprovar plano:', error)
+    alert('Erro ao aprovar plano.')
+  } finally {
+    approving.value = false
+  }
+}
+
+async function startGenerateScript() {
+  if (generatingStage.value === 'SCRIPT') return
+  generatingStage.value = 'SCRIPT'
+  try {
+    await $fetch(`/api/outputs/${outputId}/generate-script`, { method: 'POST' })
+    startPolling()
+  } catch (e: any) {
+    generatingStage.value = null
+    alert(e?.data?.message || 'Erro ao iniciar geração do roteiro.')
+  }
+}
 
 async function generateImages() {
    generatingStage.value = 'IMAGES'
@@ -1315,7 +2661,11 @@ async function approveImages() {
 async function generateBgm() {
    generatingStage.value = 'BGM'
    try {
-     await $fetch(`/api/outputs/${outputId}/generate-background-music`, { method: 'POST' })
+     const hasExisting = bgmTracks.value.length > 0
+     await $fetch(`/api/outputs/${outputId}/generate-background-music`, { 
+       method: 'POST',
+       body: hasExisting ? { force: true } : undefined
+     })
      startPolling()
    } catch (e: any) {
      generatingStage.value = null
@@ -1432,17 +2782,106 @@ async function approveMotion() {
   }
 }
 
-async function renderMaster() {
-  if (rendering.value) return
-  rendering.value = true
+async function openRenderOptionsModal(action: 'master' | 'again', options?: { beforeRender?: () => Promise<void> }) {
+  renderAction.value = action
+  pendingBeforeRender.value = options?.beforeRender ?? null
   try {
-    await $fetch(`/api/outputs/${outputId}/render`, { method: 'POST' })
+    const stylesData = await $fetch(`/api/outputs/${outputId}/caption-styles`)
+    captionStyles.value = stylesData.styles
+    renderCaptionStyleId.value = stylesData.recommendedStyleId
+  } catch (e) {
+    captionStyles.value = []
+    renderCaptionStyleId.value = null
+  }
+  // Inicializar volume do background com valores do script
+  renderAdjustVolume.value = false
+  renderBgmVolumeGlobal.value = output.value?.script?.backgroundMusicVolume ?? -18
+  const perTrack: Record<number, number> = {}
+  if (output.value?.script?.backgroundMusicTracks?.length) {
+    for (const [idx, track] of output.value.script.backgroundMusicTracks.entries()) {
+      perTrack[idx] = track.volume ?? -18
+    }
+  }
+  renderBgmVolumePerTrack.value = perTrack
+  showRenderOptionsModal.value = true
+}
+
+async function confirmRenderWithOptions() {
+  if (rendering.value) return
+  if (renderIncludeCaptions.value && !renderCaptionStyleId.value) return
+
+  pendingRenderOptions.value = {
+    includeLogo: renderIncludeLogo.value,
+    includeCaptions: renderIncludeCaptions.value,
+    captionStyleId: renderIncludeCaptions.value ? renderCaptionStyleId.value : null,
+    ...(renderAdjustVolume.value && hasBgmData.value ? {
+      volumeOverride: output.value?.script?.backgroundMusicTracks?.length
+        ? { perTrack: { ...renderBgmVolumePerTrack.value } }
+        : { global: renderBgmVolumeGlobal.value }
+    } : {})
+  }
+  const beforeRender = pendingBeforeRender.value
+  pendingBeforeRender.value = null
+  showRenderOptionsModal.value = false
+
+  if (beforeRender) {
+    try {
+      await beforeRender()
+    } catch (e: any) {
+      console.error('Erro no passo anterior ao render:', e)
+      alert(e?.data?.message || e?.message || 'Erro ao preparar renderização.')
+      pendingRenderOptions.value = null
+      return
+    }
+  }
+  await doStartRender()
+}
+
+async function doStartRender() {
+  rendering.value = true
+  const opts = pendingRenderOptions.value
+  if (opts) pendingRenderOptions.value = null
+  try {
+    await $fetch(`/api/outputs/${outputId}/render`, {
+      method: 'POST',
+      body: opts ? {
+        includeLogo: opts.includeLogo,
+        includeCaptions: opts.includeCaptions,
+        captionStyleId: opts.captionStyleId ?? undefined,
+        volumeOverride: opts.volumeOverride ?? undefined
+      } : undefined
+    })
     output.value.status = 'GENERATING'
     startPolling()
   } catch (error) {
     alert('Erro ao iniciar renderização.')
   } finally {
     rendering.value = false
+  }
+}
+
+async function renderMaster() {
+  if (rendering.value) return
+  await openRenderOptionsModal('master')
+}
+
+async function approveRender() {
+  if (approving.value) return
+  approving.value = true
+
+  try {
+    await $fetch(`/api/outputs/${outputId}/approve-stage`, {
+      method: 'PATCH',
+      body: { stage: 'RENDER', approved: true }
+    })
+    
+    output.value.renderApproved = true
+    output.value.status = 'COMPLETED'
+    await loadOutput()
+  } catch (error) {
+    alert('Erro ao aprovar renderização.')
+  } finally {
+    approving.value = false
   }
 }
 
@@ -1461,6 +2900,32 @@ const allScenesHaveVideos = computed(() => {
     if (!output.value?.scenes?.length) return false
     return output.value.scenes.every((s: any) => s.videos?.length > 0)
 })
+
+// BGM Tracks filtradas dos audioTracks
+const bgmTracks = computed(() => {
+    if (!output.value?.audioTracks) return []
+    return output.value.audioTracks
+      .filter((a: any) => a.type === 'background_music')
+      .sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+})
+
+// Retorna os metadados da track de música do roteiro correspondente ao índice da BGM gerada
+function getBgmTrackMeta(idx: number): any {
+    const scriptTracks = output.value?.script?.backgroundMusicTracks
+    if (!scriptTracks?.length) return null
+    return scriptTracks[idx] || null
+}
+
+// Retorna o prompt da track: do roteiro (backgroundMusicTracks) ou do prompt único
+function getBgmTrackPrompt(idx: number): string | null {
+    const meta = getBgmTrackMeta(idx)
+    if (meta?.prompt) return meta.prompt
+    // Se é música única (video todo), usar o prompt do script
+    if (bgmTracks.value.length === 1 && output.value?.script?.backgroundMusicPrompt) {
+        return output.value.script.backgroundMusicPrompt
+    }
+    return null
+}
 
 // Helper para Render Button visibility
 const canRenderMaster = computed(() => {
@@ -1481,8 +2946,9 @@ function getStepClass(isCompleted: boolean, isPreviousCompleted: boolean) {
 function getStatusClass(status: string) {
   switch (status) {
     case 'COMPLETED': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+    case 'RENDERED': return 'bg-amber-500/10 text-amber-400 border-amber-500/30'
     case 'FAILED': return 'bg-red-500/10 text-red-400 border-red-500/30'
-    case 'PROCESSING': return 'bg-blue-500/10 text-blue-400 border-blue-500/30 animate-pulse'
+    case 'PROCESSING': return 'bg-primary/10 text-blue-400 border-blue-500/30 animate-pulse'
     case 'PENDING': return 'bg-zinc-500/10 text-zinc-400 border-zinc-500/30'
     case 'GENERATING': return 'bg-purple-500/10 text-purple-400 border-purple-500/30 animate-pulse'
     default: return 'bg-zinc-500/10 text-zinc-400 border-zinc-500/30'
@@ -1493,14 +2959,13 @@ let pollTimer: any = null
 function startPolling() {
   stopPolling()
   pollTimer = setInterval(async () => {
-    // Poll se estiver processando imagens, audio, motion ou renderização final
     if (output.value && (output.value.status === 'PROCESSING' || output.value.status === 'PENDING' || output.value.status === 'GENERATING')) {
-       // Silent reload
-       try {
-         const data = await $fetch(`/api/outputs/${outputId}`)
-         output.value = data
-         loadCosts()
-       } catch (e) {}
+      try {
+        const data = await $fetch(`/api/outputs/${outputId}`)
+        output.value = data
+        loadCosts()
+        // Opções de legendas/logo já vão no POST /render; pipeline aplica antes de salvar (uma gravação)
+      } catch (e) {}
     }
   }, 3000)
 }
@@ -1519,6 +2984,18 @@ onUnmounted(() => stopPolling())
 const selectedImage = ref<string | null>(null)
 function openImage(id: string) {
   selectedImage.value = id
+}
+
+/** Retorna a imagem selecionada (isSelected=true) da cena, ou a primeira como fallback */
+function getSelectedImage(scene: any) {
+  if (!scene.images?.length) return null
+  return scene.images.find((img: any) => img.isSelected) || scene.images[0]
+}
+
+/** Retorna o vídeo selecionado (isSelected=true) da cena, ou o primeiro como fallback */
+function getSelectedVideo(scene: any) {
+  if (!scene.videos?.length) return null
+  return scene.videos.find((v: any) => v.isSelected) || scene.videos[0]
 }
 </script>
 

@@ -1,7 +1,8 @@
 import { z } from 'zod'
 import { prisma } from '../../../../utils/prisma'
 import type { CreateOutputsDTO, CreateOutputsResponse } from '../../../../types/output.types'
-import { outputPipelineService } from '../../../../services/pipeline/output-pipeline.service'
+import { getClassificationById } from '../../../../constants/intelligence-classifications'
+import { getScriptStyleById } from '../../../../constants/script-styles'
 
 // Schema de validação
 const OutputTypeEnum = z.enum(['VIDEO_TEASER', 'VIDEO_FULL', 'TWITTER_THREAD', 'LINKEDIN_POST', 'INSTAGRAM_POST', 'PODCAST_EPISODE', 'BLOG_ARTICLE'])
@@ -21,6 +22,7 @@ const CreateOutputSchema = z.object({
   objective: z.string().max(2000).optional().transform(val => val === '' ? undefined : val),
   mustInclude: z.string().optional(),
   mustExclude: z.string().optional(),
+  classificationId: z.string().max(50).optional().transform(val => val === '' ? undefined : val),
   scriptStyleId: z.string().optional().transform(val => val === '' ? undefined : val),
   visualStyleId: z.string().optional().transform(val => val === '' ? undefined : val),
   seedId: z.union([z.string().uuid(), z.literal('')]).optional().transform(val => val === '' ? undefined : val)
@@ -56,11 +58,16 @@ export default defineEventHandler(async (event): Promise<CreateOutputsResponse> 
   const body = await readBody(event)
   const data = CreateOutputsSchema.parse(body) as CreateOutputsDTO
 
-  // Resolver seeds e estilos antes de criar (para garantir relacionamento fixo)
-  const outputsToCreate = []
+  // Resolver seeds, classificação e estilos (hierarquia: classification → script → visual)
+  const outputsToCreate: Array<typeof data.outputs[0] & { classificationId?: string; scriptStyleId?: string; visualStyleId?: string; seedId?: string }> = []
   for (const outputData of data.outputs) {
-    const visualStyleId = outputData.visualStyleId || dossier.preferredVisualStyleId
-    let seedId = outputData.seedId || dossier.preferredSeedId
+    const classificationId = outputData.classificationId ?? undefined
+    const classification = classificationId ? getClassificationById(classificationId) : undefined
+    // Pai → Filho → Neto: aplicar defaults quando não informados
+    const scriptStyleId = outputData.scriptStyleId ?? classification?.defaultScriptStyleId ?? undefined
+    const scriptStyle = scriptStyleId ? getScriptStyleById(scriptStyleId) : undefined
+    const visualStyleId = outputData.visualStyleId ?? dossier.preferredVisualStyleId ?? scriptStyle?.defaultVisualStyleId ?? undefined
+    let seedId: string | null | undefined = outputData.seedId || dossier.preferredSeedId
 
     // Se não houver seed mas houver estilo, criar/buscar uma seed aleatória
     if (!seedId && visualStyleId) {
@@ -82,8 +89,10 @@ export default defineEventHandler(async (event): Promise<CreateOutputsResponse> 
 
     outputsToCreate.push({
       ...outputData,
-      visualStyleId,
-      seedId
+      classificationId: classificationId ?? undefined,
+      scriptStyleId: scriptStyleId ?? undefined,
+      visualStyleId: visualStyleId ?? undefined,
+      seedId: seedId ?? undefined
     })
   }
 
@@ -107,8 +116,9 @@ export default defineEventHandler(async (event): Promise<CreateOutputsResponse> 
           objective: outputData.objective,
           mustInclude: outputData.mustInclude,
           mustExclude: outputData.mustExclude,
-          scriptStyleId: outputData.scriptStyleId,
-          visualStyleId: outputData.visualStyleId,
+          classificationId: outputData.classificationId ?? undefined,
+          scriptStyleId: outputData.scriptStyleId ?? undefined,
+          visualStyleId: outputData.visualStyleId ?? undefined,
           seedId: outputData.seedId,
           status: 'PENDING'
         }
@@ -116,22 +126,8 @@ export default defineEventHandler(async (event): Promise<CreateOutputsResponse> 
     )
   )
 
-  // Disparar pipeline de geração em background (Fire-and-Forget)
-  // Iniciamos apenas a geração de roteiro (primeira etapa)
-  outputs.forEach((output) => {
-    console.log(`[API] Triggering background SCRIPT GENERATION for output ${output.id}`)
-    outputPipelineService.generateScript(output.id).catch(async (err) => {
-      console.error(`[API] Script generation failed for output ${output.id}:`, err)
-      // Atualizar status para FAILED se der erro no script inicial
-      await prisma.output.update({
-        where: { id: output.id },
-        data: {
-          status: 'FAILED',
-          errorMessage: err instanceof Error ? err.message : 'Unknown error during script generation'
-        }
-      })
-    })
-  })
+  // Story Architect é etapa isolada: NÃO disparar generateScript aqui.
+  // Fluxo: usuário abre o output → Gera plano (generate-outline) → Aprova plano (STORY_OUTLINE) → Gera roteiro (generate-script).
 
   return {
     outputs: outputs.map((output: any) => ({
@@ -150,6 +146,7 @@ export default defineEventHandler(async (event): Promise<CreateOutputsResponse> 
       bgmApproved: output.bgmApproved,
       audioApproved: output.audioApproved,
       videosApproved: output.videosApproved,
+      renderApproved: output.renderApproved,
       hasBgm: false,
       errorMessage: output.errorMessage || undefined,
       createdAt: output.createdAt,

@@ -26,6 +26,7 @@ import { join } from 'path'
 import { tmpdir } from 'os'
 import { spawn } from 'child_process'
 import ffprobeInstaller from '@ffprobe-installer/ffprobe'
+import { createPipelineLogger } from '../utils/pipeline-logger'
 import {
   type CaptionStyleId,
   type CaptionStyle,
@@ -82,6 +83,21 @@ function getFFmpegPath(): string {
   return 'ffmpeg'
 }
 
+/** Logo no rodapé direito: tenta public/logo-footer.png, public/logo.png ou public/logo.jpeg (FFmpeg não suporta SVG). */
+function getFooterLogoPath(): string | null {
+  const cwd = process.cwd()
+  const candidates = [
+    join(cwd, 'public', 'logo-footer.png'),
+    join(cwd, 'public', 'logo.png'),
+    join(cwd, 'public', 'logo.jpeg'),
+    join(cwd, 'public', 'logo.jpg')
+  ]
+  for (const p of candidates) {
+    if (existsSync(p)) return p
+  }
+  return null
+}
+
 // ---------------------------------------------------------------------------
 //  CaptionService
 // ---------------------------------------------------------------------------
@@ -103,25 +119,26 @@ export class CaptionService {
     scenes: SceneCaptionData[],
     options: CaptionOptions = {}
   ): Promise<CaptionFromScenesResult> {
+    const log = createPipelineLogger({ stage: 'Captions' })
     const { styleId = 'tiktok_viral' } = options
     const style = CAPTION_STYLES[styleId]
 
-    console.log(`[CaptionService] Gerando legendas a partir de ${scenes.length} cenas`)
-    console.log(`[CaptionService] Estilo: ${style.name} (${style.effect})`)
+    log.info(`Gerando legendas a partir de ${scenes.length} cenas.`)
+    log.info(`Estilo: ${style.name} (${style.effect}).`)
 
     // 0. Extrair duração REAL dos áudios via ffprobe (corrige dessincronização)
     const scenesWithRealDuration = await this.resolveRealDurations(scenes)
 
     // 1. Calcular segmentos com offsets acumulados
     const segments = this.buildSegmentsFromScenes(scenesWithRealDuration, style)
-    console.log(`[CaptionService] ${segments.length} segmentos de legenda gerados`)
+    log.info(`${segments.length} segmentos de legenda gerados.`)
 
     // 2. Gerar conteúdo ASS com efeitos
     const assContent = this.generateASS(segments, style)
 
     // 3. Aplicar legendas com FFmpeg
     const captionedBuffer = await this.applyASSToVideo(videoBuffer, assContent)
-    console.log(`[CaptionService] Legendas aplicadas com sucesso`)
+    log.info('Legendas aplicadas com sucesso.')
 
     return {
       captionedBuffer,
@@ -166,7 +183,8 @@ export class CaptionService {
         segments.push(...sceneSegments)
       } else {
         // Fallback: distribuição proporcional por número de palavras
-        console.warn(`[CaptionService] Cena ${scene.order + 1}: sem word timings, usando distribuição proporcional`)
+        const captLog = createPipelineLogger({ stage: 'Captions' })
+        captLog.warn(`Cena ${scene.order + 1}: sem word timings; usando distribuição proporcional.`)
         const sceneSegments = this.buildSegmentsUniform(
           text,
           scene.audioDuration,
@@ -595,74 +613,121 @@ export class CaptionService {
   // =========================================================================
 
   /**
-   * Aplica arquivo ASS ao vídeo via FFmpeg
+   * Aplica apenas a logo no rodapé direito (sem legendas).
+   * Usado quando o usuário escolhe "incluir logo" mas não "incluir legendas".
    */
-  private async applyASSToVideo(videoBuffer: Buffer, assContent: string): Promise<Buffer> {
+  async applyLogoOnly(videoBuffer: Buffer): Promise<Buffer> {
+    const logoPath = getFooterLogoPath()
+    if (!logoPath) {
+      const log = createPipelineLogger({ stage: 'Captions' })
+      log.info('Nenhuma logo em public; retornando vídeo inalterado.')
+      return videoBuffer
+    }
+    return this.applyLogoOverlay(videoBuffer, null)
+  }
+
+  /**
+   * Overlay da logo no vídeo. Se assContent for fornecido, aplica legendas antes da logo.
+   */
+  private async applyLogoOverlay(videoBuffer: Buffer, assContent: string | null): Promise<Buffer> {
     const tempDir = tmpdir()
     const ts = Date.now()
     const inputPath = join(tempDir, `caption-input-${ts}.mp4`)
     const assPath = join(tempDir, `caption-subs-${ts}.ass`)
     const outputPath = join(tempDir, `caption-output-${ts}.mp4`)
+    const ffmpegPath = getFFmpegPath()
+    const logoPath = getFooterLogoPath()
 
     try {
       await fs.writeFile(inputPath, videoBuffer)
-      await fs.writeFile(assPath, assContent, 'utf-8')
+      if (assContent) await fs.writeFile(assPath, assContent, 'utf-8')
 
-      console.log('[CaptionService] Aplicando legendas com FFmpeg (ASS)...')
+      const forwardSlashAss = assPath.replace(/\\/g, '/')
+      const escapedAssPath = forwardSlashAss.replace(/:/g, '\\\\:')
 
-      // Escapar path para filtro FFmpeg (Windows: C: → C\\:)
-      const forwardSlashPath = assPath.replace(/\\/g, '/')
-      const escapedPath = forwardSlashPath.replace(/:/g, '\\\\:')
+      const captLog = createPipelineLogger({ stage: 'Captions' })
+      if (logoPath) {
+        if (assContent) {
+          captLog.info('Aplicando legendas + logo no rodapé direito (FFmpeg).')
+          const filterComplex =
+            `[0:v]ass=${escapedAssPath}[sub];[1:v]scale=-1:160,format=rgba,colorchannelmixer=aa=0.5[logo];[sub][logo]overlay=main_w-overlay_w-24:main_h-overlay_h-24[v]`
+          await new Promise<void>((resolve, reject) => {
+            const proc = spawn(ffmpegPath, [
+              '-i', inputPath, '-i', logoPath,
+              '-filter_complex', filterComplex, '-map', '[v]', '-map', '0:a',
+              '-c:a', 'copy', '-c:v', 'libx264', '-preset', 'fast', '-crf', '18', '-y', outputPath
+            ])
+            this.attachFFmpegHandlers(proc, resolve, reject)
+          })
+        } else {
+          captLog.info('Aplicando apenas logo no rodapé direito (FFmpeg).')
+          const filterComplex =
+            `[1:v]scale=-1:160,format=rgba,colorchannelmixer=aa=0.5[logo];[0:v][logo]overlay=main_w-overlay_w-24:main_h-overlay_h-24[v]`
+          await new Promise<void>((resolve, reject) => {
+            const proc = spawn(ffmpegPath, [
+              '-i', inputPath, '-i', logoPath,
+              '-filter_complex', filterComplex, '-map', '[v]', '-map', '0:a',
+              '-c:a', 'copy', '-c:v', 'libx264', '-preset', 'fast', '-crf', '18', '-y', outputPath
+            ])
+            this.attachFFmpegHandlers(proc, resolve, reject)
+          })
+        }
+      } else {
+        if (assContent) {
+          captLog.info('Aplicando legendas com FFmpeg (ASS).')
+          await new Promise<void>((resolve, reject) => {
+            const proc = spawn(ffmpegPath, [
+              '-i', inputPath, '-vf', `ass=${escapedAssPath}`,
+              '-c:a', 'copy', '-c:v', 'libx264', '-preset', 'fast', '-crf', '18', '-y', outputPath
+            ])
+            this.attachFFmpegHandlers(proc, resolve, reject)
+          })
+        } else {
+          await fs.unlink(inputPath).catch(() => {})
+          return videoBuffer
+        }
+      }
 
-      const ffmpegPath = getFFmpegPath()
-
-      await new Promise<void>((resolve, reject) => {
-        const proc = spawn(ffmpegPath, [
-          '-i', inputPath,
-          '-vf', `ass=${escapedPath}`,
-          '-c:a', 'copy',           // Não re-encoda áudio
-          '-c:v', 'libx264',
-          '-preset', 'fast',
-          '-crf', '18',             // Alta qualidade
-          '-y',
-          outputPath
-        ])
-
-        let stderrOutput = ''
-
-        proc.stderr.on('data', (data: Buffer) => {
-          const line = data.toString()
-          stderrOutput += line
-          if (line.includes('Error') || line.includes('error') || line.includes('Stream') || line.includes('Duration')) {
-            console.log('[FFmpeg]', line.trim())
-          }
-        })
-
-        proc.on('close', (code: number | null) => {
-          if (code === 0) resolve()
-          else reject(new Error(`FFmpeg saiu com código ${code}: ${stderrOutput.slice(-500)}`))
-        })
-
-        proc.on('error', (err: Error) => {
-          reject(new Error(`FFmpeg spawn error: ${err.message}`))
-        })
-      })
-
-      const captionedBuffer = await fs.readFile(outputPath)
-
-      // Limpar temporários
+      const outBuffer = await fs.readFile(outputPath)
       await fs.unlink(inputPath).catch(() => {})
       await fs.unlink(assPath).catch(() => {})
       await fs.unlink(outputPath).catch(() => {})
-
-      return captionedBuffer
+      return outBuffer
     } catch (error) {
       await fs.unlink(inputPath).catch(() => {})
       await fs.unlink(assPath).catch(() => {})
       await fs.unlink(outputPath).catch(() => {})
 
-      throw new Error(`Falha ao aplicar legendas: ${error}`)
+      throw new Error(`Falha ao aplicar legendas/logo: ${error}`)
     }
+  }
+
+  /** Aplica arquivo ASS ao vídeo via FFmpeg; usa applyLogoOverlay com ASS. */
+  private async applyASSToVideo(videoBuffer: Buffer, assContent: string): Promise<Buffer> {
+    return this.applyLogoOverlay(videoBuffer, assContent)
+  }
+
+  private attachFFmpegHandlers(
+    proc: ReturnType<typeof spawn>,
+    resolve: () => void,
+    reject: (err: Error) => void
+  ): void {
+    let stderrOutput = ''
+    proc.stderr?.on('data', (data: Buffer) => {
+      const line = data.toString()
+      stderrOutput += line
+      if (line.includes('Error') || line.includes('error') || line.includes('Stream') || line.includes('Duration')) {
+        const log = createPipelineLogger({ stage: 'Captions' })
+        log.step('FFmpeg', line.trim())
+      }
+    })
+    proc.on('close', (code: number | null) => {
+      if (code === 0) resolve()
+      else reject(new Error(`FFmpeg saiu com código ${code}: ${stderrOutput.slice(-500)}`))
+    })
+    proc.on('error', (err: Error) => {
+      reject(new Error(`FFmpeg spawn error: ${err.message}`))
+    })
   }
 
   // =========================================================================
@@ -688,9 +753,8 @@ export class CaptionService {
           const diff = Math.abs(realDuration - scene.audioDuration)
 
           if (diff > 0.5) {
-            console.log(
-              `[CaptionService] Cena ${scene.order + 1}: duração corrigida ${scene.audioDuration.toFixed(2)}s (estimada) → ${realDuration.toFixed(2)}s (real) [diff: ${diff.toFixed(2)}s]`
-            )
+            const log = createPipelineLogger({ stage: 'Captions' })
+            log.step(`Cena ${scene.order + 1}`, `duração ${scene.audioDuration.toFixed(2)}s → ${realDuration.toFixed(2)}s (diff ${diff.toFixed(2)}s)`)
           }
 
           resolved.push({
@@ -698,7 +762,8 @@ export class CaptionService {
             audioDuration: realDuration
           })
         } catch (err) {
-          console.warn(`[CaptionService] Cena ${scene.order + 1}: ffprobe falhou, usando estimativa (${scene.audioDuration.toFixed(2)}s)`)
+          const log = createPipelineLogger({ stage: 'Captions' })
+          log.warn(`Cena ${scene.order + 1}: ffprobe falhou; usando estimativa ${scene.audioDuration.toFixed(2)}s.`)
           resolved.push(scene)
         }
       } else {

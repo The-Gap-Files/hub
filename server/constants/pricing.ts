@@ -14,7 +14,7 @@
 
 export interface OutputBasedPricing {
   type: 'output'
-  unit: 'image' | 'video_second' | 'video'
+  unit: 'image' | 'video_second' | 'video' | 'music'
   costPerUnit: number
 }
 
@@ -48,11 +48,26 @@ export const REPLICATE_MODEL_PRICING: Record<string, ModelPricing> = {
     unit: 'image',
     costPerUnit: 0.04
   },
+  'luma/photon-flash': {
+    type: 'output',
+    unit: 'image',
+    costPerUnit: 0.01
+  },
+  // Flux Thumbnails v2 (LoRA fine-tuned para YouTube thumbnails com texto)
+  // ~$0.017/exec, H100, ~11s avg
+  'justmalhar/flux-thumbnails-v2': {
+    type: 'output',
+    unit: 'image',
+    costPerUnit: 0.017
+  },
 
   // === Vídeo / Motion (output-based) ===
-  // wan-video/wan-2.2-i2v-fast: preço por vídeo gerado
-  // 480p base=$0.05 | 480p interpolate=$0.065 | 720p base=$0.11 | 720p interpolate=$0.145
-  // Usamos 480p base (resolution: '480p', interpolate_output: false)
+  // wan-video/wan-2.2-5b-fast: 480p=$0.0125 | 720p=$0.025 (usamos 480p)
+  'wan-video/wan-2.2-5b-fast': {
+    type: 'output',
+    unit: 'video',
+    costPerUnit: 0.0125
+  },
   'wan-video/wan-2.2-i2v-fast': {
     type: 'output',
     unit: 'video',
@@ -70,12 +85,12 @@ export const REPLICATE_MODEL_PRICING: Record<string, ModelPricing> = {
     costPerUnit: 0.25
   },
 
-  // === Música (time-based) ===
-  // stability-ai/stable-audio-2.5 roda em GPU (estimativa L40S)
+  // === Música (output-based) ===
+  // stability-ai/stable-audio-2.5 cobra $0.20 por execução
   'stability-ai/stable-audio-2.5': {
-    type: 'time',
-    hardware: 'gpu-l40s',
-    costPerSecond: 0.000975
+    type: 'output',
+    unit: 'music',
+    costPerUnit: 0.20
   },
 
   // === TTS via Replicate (time-based) ===
@@ -177,6 +192,10 @@ export const LLM_PRICING: Record<string, LLMPricing> = {
   'claude-3-5-haiku-20241022': {
     costPerInputToken: 0.0000008,   // $0.80/1M input tokens
     costPerOutputToken: 0.000004    // $4.00/1M output tokens
+  },
+  'claude-haiku-4-5': {
+    costPerInputToken: 0.0000008,   // Haiku 4.5 - mesmo tier do 3.5 Haiku
+    costPerOutputToken: 0.000004
   }
 }
 

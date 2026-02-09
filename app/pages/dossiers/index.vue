@@ -90,6 +90,10 @@
                 <Film :size="14" class="text-primary group-hover/stat:text-primary-foreground transition-colors" />
                 <span class="mono-label !text-[10px] text-primary group-hover/stat:text-primary transition-colors">{{ dossier.outputsCount || 0 }} <span class="opacity-40 uppercase">renders</span></span>
               </div>
+              <div v-if="dossier.totalOutputsCost != null && dossier.totalOutputsCost > 0" class="flex items-center gap-2 group/stat border-l border-white/5 pl-6">
+                <span class="mono-label !text-[10px] text-emerald-400/90 group-hover/stat:text-emerald-400 transition-colors">{{ formatCost(dossier.totalOutputsCost) }}</span>
+                <span class="opacity-40 uppercase !text-[9px]">custo</span>
+              </div>
             </div>
           </div>
 
@@ -165,6 +169,12 @@ function changePage(newPage: number) {
   if (newPage < 1 || newPage > Math.ceil(total.value / pageSize.value)) return
   page.value = newPage
   loadDossiers()
+}
+
+function formatCost(totalCost: number): string {
+  if (totalCost >= 0.01) return `$${totalCost.toFixed(2)}`
+  if (totalCost > 0) return `$${totalCost.toFixed(4)}`
+  return '$0.00'
 }
 
 onMounted(() => {

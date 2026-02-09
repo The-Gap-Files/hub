@@ -24,14 +24,14 @@ const ScriptSceneSchema = z.object({
 
 const BackgroundMusicTrackSchema = z.object({
   prompt: z.string().describe('Prompt para geração de música no formato Stable Audio. Inclua gênero, instrumentos, BPM, mood e estilo. Exemplo: "Ambient, Drone, Dark Strings, Pulsing Heartbeat Rhythm, Tension Build-Up, Mysterious, Cinematic, Atmospheric, 80 BPM"'),
-  volume: z.number().describe('Volume em dB para mixagem com narração. Use valores entre -24 e -6. Exemplo: -18 para volume baixo, -12 para médio, -6 para alto'),
-  startTime: z.number().describe('Tempo de início em segundos (0 = início do vídeo)'),
-  endTime: z.number().nullable().describe('Tempo de fim em segundos (null = até o final do vídeo)')
+  volume: z.number().describe('Volume em dB para mixagem com narração (-24 a -6). Prefira -12 a -10 para fundo claramente audível; -18 fica baixo demais. Ex.: -12 médio, -10 mais presente, -6 alto.'),
+  startScene: z.number().describe('Número da cena onde esta track começa (0 = primeira cena)'),
+  endScene: z.number().nullable().describe('Número da última cena desta track (null = até a última cena do vídeo)')
 })
 
 const BackgroundMusicSchema = z.object({
   prompt: z.string().describe('Prompt para geração de música no formato Stable Audio. Inclua gênero, instrumentos, BPM, mood e estilo. Exemplo: "Ambient, Drone, Dark Strings, Subtle Pads, Mysterious, Cinematic, Atmospheric, well-arranged composition, 80 BPM"'),
-  volume: z.number().describe('Volume em dB para mixagem com narração. Use valores entre -24 e -6. Exemplo: -18 para volume baixo, -12 para médio, -6 para alto')
+  volume: z.number().describe('Volume em dB para mixagem com narração (-24 a -6). Prefira -12 a -10 para fundo claramente audível; -18 fica baixo demais. Ex.: -12 médio, -10 mais presente, -6 alto.')
 })
 
 const ScriptResponseSchema = z.object({
@@ -39,7 +39,7 @@ const ScriptResponseSchema = z.object({
   summary: z.string().describe('Sinopse intrigante de 2-3 parágrafos'),
   scenes: z.array(ScriptSceneSchema).describe('Lista de cenas que compõem o vídeo'),
   backgroundMusic: BackgroundMusicSchema.nullable().describe('Música de fundo única para TODO o vídeo (use apenas para vídeos curtos TikTok/Instagram). Use null para vídeos longos. Regra: "video todo"'),
-  backgroundMusicTracks: z.array(BackgroundMusicTrackSchema).nullable().describe('Lista de tracks de música de fundo com timestamps (use apenas para vídeos longos YouTube Cinematic). Use null para vídeos curtos. Cada track define uma música com prompt, volume e timestamps.')
+  backgroundMusicTracks: z.array(BackgroundMusicTrackSchema).nullable().describe('Lista de tracks de música de fundo por segmento de cenas (use apenas para vídeos longos YouTube Cinematic). Use null para vídeos curtos. Cada track define uma música com prompt, volume, startScene e endScene.')
 })
 
 type ScriptResponse = z.infer<typeof ScriptResponseSchema>
@@ -67,7 +67,7 @@ export class OpenAIScriptProvider implements IScriptGenerator {
   }
 
   async generate(request: ScriptGenerationRequest): Promise<ScriptGenerationResponse> {
-    console.log('[OpenAI Script] 🎬 Iniciando geração de roteiro via LangChain...')
+    console.log(`[OpenAI Script] 🎬 Iniciando geração de roteiro via LangChain (${this.modelName})...`)
 
     // Configurar o modelo para output estruturado (Zod) com includeRaw para capturar token usage
     const structuredLlm = this.model.withStructuredOutput(ScriptResponseSchema, { includeRaw: true })
@@ -240,33 +240,34 @@ export class OpenAIScriptProvider implements IScriptGenerator {
 - Use o campo "backgroundMusic" com "prompt" e "volume"
 - O "prompt" será usado diretamente no modelo Stable Audio 2.5 para gerar a música
 - FORMATO DO PROMPT: Inclua gênero, sub-gênero, instrumentos específicos, BPM, mood e estilo
-- O "volume" é em dB para mixagem com narração (-24 a -6). Use -18 para baixo, -12 para médio
+- O "volume" é em dB para mixagem com narração (-24 a -6). Prefira -12 a -10 para a música ser claramente audível; -18 costuma ficar baixo demais.
 - Exemplo de prompt: "Ambient, Dark Drone, Subtle Synthesizer Pads, Low Strings, Mysterious, Cinematic, Atmospheric, well-arranged composition, 80 BPM"
 - NÃO inclua volume no prompt - o volume é um campo separado
-- Exemplo completo: { prompt: "Ambient, Dark Drone, Subtle Pads, Mysterious, Cinematic, 80 BPM", volume: -18 }`
+- Exemplo completo: { prompt: "Ambient, Dark Drone, Subtle Pads, Mysterious, Cinematic, 80 BPM", volume: -12 }`
     } else if (isYouTubeCinematic) {
       musicInstructions = `
 ---
 🎵 ESTRATÉGIA DE MÚSICA DE FUNDO (YouTube Cinematic):
-- Use a lista "backgroundMusicTracks" para definir tracks com timestamps
-- Cada track tem: "prompt" (para Stable Audio 2.5), "volume" (dB), "startTime" e "endTime"
+- Use a lista "backgroundMusicTracks" para definir tracks por SEGMENTO DE CENAS
+- Cada track tem: "prompt" (para Stable Audio 2.5), "volume" (dB), "startScene" e "endScene"
+- "startScene" = número da cena onde a track começa (0 = primeira cena)
+- "endScene" = número da última cena desta track (null = até a última cena do vídeo)
 - O "prompt" será usado diretamente no modelo Stable Audio 2.5 para gerar cada track
 - FORMATO DO PROMPT: Inclua gênero, sub-gênero, instrumentos específicos, BPM, mood e estilo
-- O "volume" é em dB para mixagem com narração (-24 a -6). Use -18 para baixo, -12 para médio
-- NÃO mude música a cada 5 segundos (cada cena)
-- Agrupe cenas por SEGMENTOS NARRATIVOS maiores (15-60s):
-  • HOOK (0-15s): Música de abertura impactante
-  • CONTEXT (15-45s): Transição suave, estabelecimento
-  • RISING ACTION: Intensidade crescente progressiva
-  • CLIMAX: Pico emocional máximo
-  • RESOLUTION: Resolução e síntese
-  • CTA: Fechamento apropriado
-- Cada track deve ter duração máxima de 190 segundos (limite do modelo)
-- Use variações sutis da mesma música base por segmento
-- Exemplos de tracks:
-  • { prompt: "Cinematic, Impact Drums, Brass Stabs, Tension, Attention-Grabbing, Epic, 120 BPM", volume: -14, startTime: 0, endTime: 15 }
-  • { prompt: "Cinematic, Building Strings, Crescendo, Tension Build-Up, Suspenseful, 100 BPM", volume: -16, startTime: 15, endTime: 45 }
-  • { prompt: "Cinematic, Full Orchestra, Emotional Peak, Dramatic, Powerful, Climactic, 130 BPM", volume: -12, startTime: 45, endTime: null }`
+- O "volume" é em dB para mixagem com narração (-24 a -6). Prefira -12 a -10 para a música ser claramente audível; -18 costuma ficar baixo demais.
+- NÃO faça uma track por cena. Agrupe cenas por SEGMENTOS NARRATIVOS:
+  • HOOK: Cenas iniciais — música de abertura impactante
+  • CONTEXT: Cenas de contextualização — transição suave
+  • RISING ACTION: Corpo principal — intensidade crescente
+  • CLIMAX: Pico narrativo — máxima intensidade emocional
+  • RESOLUTION + CTA: Cenas finais — resolução e fechamento
+- Cada segmento pode cobrir múltiplas cenas (a duração real será calculada automaticamente)
+- Máximo de 38 cenas por track (190s / 5s por cena = limite do modelo Stable Audio)
+- Use variações sutis da mesma base musical por segmento
+- Exemplos de tracks (para um vídeo de 60 cenas):
+  • { prompt: "Cinematic, Impact Drums, Brass Stabs, Tension, Attention-Grabbing, Epic, 120 BPM", volume: -12, startScene: 0, endScene: 2 }
+  • { prompt: "Cinematic, Building Strings, Crescendo, Tension Build-Up, Suspenseful, 100 BPM", volume: -12, startScene: 3, endScene: 8 }
+  • { prompt: "Cinematic, Full Orchestra, Emotional Peak, Dramatic, Powerful, Climactic, 130 BPM", volume: -10, startScene: 9, endScene: null }`
     }
 
     return `Você é um roteirista mestre em storytelling cinematográfico e retenção viral.
@@ -285,8 +286,10 @@ DIRETRIZES TÉCNICAS (CRÍTICO):
 - SOUND DESIGN: Descreva a atmosfera sonora (SFX/Ambience) em inglês técnico para cada cena.
 - MÚSICA DE FUNDO: Use "backgroundMusic" para vídeos curtos (TikTok/Instagram) ou "backgroundMusicTracks" para vídeos longos (YouTube). O campo "prompt" deve ser compatível com Stable Audio 2.5 (gênero, instrumentos, BPM, mood). O campo "volume" (dB) será aplicado via FFmpeg na mixagem.
 - CAMADA SENSORIAL: Nas descrições visuais, inclua sentimentos, texturas e atmosfera.
-- DIRETRIZ VISUAL: As descrições visuais ('visualDescription') DEVEM SER SEMPRE EM INGLÊS, independentemente do idioma da narração.
+- DIRETRIZ VISUAL: As descrições visuais ('visualDescription') DEVEM SER SEMPRE EM INGLÊS e COMPLETAS: cada uma é o prompt final que será enviado diretamente ao modelo de imagem, sem etapa de merge. Incorpore estilo (base, iluminação, atmosfera, composição) em linguagem natural em cada cena. Seja VISUAL e CINEMATOGRÁFICO — descreva cenas com impacto máximo, texturas, atmosferas sombrias e composições dramáticas. Use linguagem artística intensa sem filtrar o tom.
+- PERSONAGENS: Quando houver personagens recorrentes na narrativa, use SEMPRE os nomes (ou um descritor consistente, ex.: "the detective", "Maria") no visualDescription em todas as cenas em que aparecem. Isso reduz variação entre cenas e ajuda a manter coerência visual (ex.: "John standing by the window" em vez de "a man by the window").
 - MULTIMODALIDADE: Se imagens forem fornecidas, analise-as para garantir consistência visual.
+- CENAS DE ENCERRAMENTO (CTA — OBRIGATÓRIO): As últimas cenas do vídeo (segmento CTA do plano narrativo) DEVEM incluir: (1) uma frase de gatilho para o espectador seguir o canal — por exemplo convite para se inscrever, ativar o sininho ou acompanhar o canal, no tom do vídeo; (2) menção ao canal "The Gap Files" como assinatura de encerramento. A história narrativa deve estar COMPLETAMENTE encerrada antes do CTA — nunca corte uma frase no meio na última cena de conteúdo. Reserve as últimas 1-2 cenas exclusivamente para conclusão da frase/ideia e CTA.
 ${musicInstructions}
 
 ---
@@ -299,6 +302,8 @@ ${visualInstructions}`
     const minWords = wordsPerScene - 1
     const maxWords = wordsPerScene + 2 // Hard limit para não ultrapassar 5s
     const idealSceneCount = Math.ceil(request.targetDuration / 5)
+    const maxExtraScenes = 4 // margem para concluir a história e CTA sem cortar frase
+    const maxSceneCount = idealSceneCount + maxExtraScenes
 
     // Determinar formato do vídeo
     const videoFormat = request.format || request.outputType || 'full-youtube'
@@ -314,13 +319,26 @@ ${visualInstructions}`
 - O "volume" deve ser em dB (-24 a -6) para mixagem com narração`
     } else if (isYouTubeCinematic) {
       formatContext = `\n\n🎬 FORMATO DO VÍDEO: YouTube Cinematic (vídeo longo, 600-3600s)
-- Use a lista "backgroundMusicTracks" com tracks { prompt, volume, startTime, endTime }
-- Cada track tem duração máxima de 190 segundos (limite do modelo Stable Audio)
-- Identifique segmentos narrativos (HOOK, CONTEXT, RISING ACTION, CLIMAX, RESOLUTION, CTA)
-- Música pode variar por segmento narrativo, mas NÃO a cada 5 segundos`
+- Use a lista "backgroundMusicTracks" com tracks { prompt, volume, startScene, endScene }
+- Cada track referencia CENAS (não timestamps). A duração real será calculada automaticamente.
+- Agrupe cenas por segmentos narrativos (HOOK, CONTEXT, RISING ACTION, CLIMAX, RESOLUTION, CTA)
+- Música pode variar por segmento narrativo, mas NÃO faça uma track por cena`
     }
 
     let baseInstruction = `Crie um roteiro em ${request.language} sobre o tema: "${request.theme}"${formatContext}`
+
+    if (request.dossierCategory) {
+      baseInstruction += `\n\n🏷️ CLASSIFICAÇÃO TEMÁTICA: ${request.dossierCategory.toUpperCase()}`
+      if (request.musicGuidance) {
+        baseInstruction += `\n🎵 ORIENTAÇÃO MUSICAL PARA ESTA CLASSIFICAÇÃO: O prompt de música DEVE seguir esta direção: "${request.musicGuidance}"`
+        baseInstruction += `\n💓 ATMOSFERA EMOCIONAL DA TRILHA: ${request.musicMood}`
+        baseInstruction += `\nUse esta orientação como BASE para os prompts de backgroundMusic/backgroundMusicTracks. Adapte conforme o tom do roteiro, mas mantenha a essência da classificação.`
+      }
+      if (request.visualGuidance) {
+        baseInstruction += `\n\n🖼️ ORIENTAÇÃO VISUAL (visualDescription): As descrições visuais de cada cena DEVEM seguir este tom e regras: ${request.visualGuidance}`
+        baseInstruction += `\nAplique esta orientação em TODAS as cenas. O visualDescription deve ser pronto para geração de imagem e alinhado ao tema do vídeo.`
+      }
+    }
 
     if (request.sourceDocument) {
       baseInstruction += `\n\n📄 DOCUMENTO PRINCIPAL (BASE NEURAL):\n${request.sourceDocument}`
@@ -345,6 +363,10 @@ ${visualInstructions}`
       baseInstruction += `\n\n📊 DADOS ESTATÍSTICOS/ESTRUTURADOS:\n${JSON.stringify(request.researchData, null, 2)}`
     }
 
+    if (request.storyOutline) {
+      baseInstruction += `\n\n${request.storyOutline}`
+    }
+
     if (request.additionalContext) {
       baseInstruction += `\n\n➕ CONTEXTO ADICIONAL:\n${request.additionalContext}`
     }
@@ -356,29 +378,30 @@ ${visualInstructions}`
     let musicWarning = ''
     if (isShortFormat) {
       musicWarning = `\n\n🚨 REGRA CRÍTICA DE MÚSICA DE FUNDO (TikTok/Instagram):
-Use "backgroundMusic": { "prompt": "...", "volume": -18 } para definir UMA música para TODO o vídeo.
+Use "backgroundMusic": { "prompt": "...", "volume": -12 } para definir UMA música para TODO o vídeo (prefira volume entre -12 e -10 para ficar audível).
 O prompt deve seguir o formato Stable Audio 2.5: gênero, instrumentos, BPM, mood.
 Defina "backgroundMusicTracks" como null.`
     } else if (isYouTubeCinematic) {
       musicWarning = `\n\n🚨 REGRA CRÍTICA DE MÚSICA DE FUNDO (YouTube Cinematic):
-Use "backgroundMusicTracks" com lista de tracks { prompt, volume, startTime, endTime }.
+Use "backgroundMusicTracks" com lista de tracks { prompt, volume, startScene, endScene }.
+"startScene" e "endScene" são NÚMEROS DE CENA (0-indexed), NÃO timestamps em segundos.
 O prompt de cada track deve seguir o formato Stable Audio 2.5: gênero, instrumentos, BPM, mood.
-Cada track tem duração máxima de 190s. Defina "backgroundMusic" como null.`
+Máximo de 38 cenas por track (limite do modelo). Defina "backgroundMusic" como null.`
     }
 
     return `${baseInstruction}
 
 ---
 ⚠️ REQUISITOS OBRIGATÓRIOS PARA APROVAÇÃO:
-1. DURAÇÃO TOTAL DO VÍDEO: O vídeo DEVE ter EXATAMENTE ${request.targetDuration} segundos de duração total.
-2. QUANTIDADE DE CENAS: Gere EXATAMENTE ${idealSceneCount} cenas (${request.targetDuration}s ÷ 5s por cena = ${idealSceneCount} cenas).
+1. DURAÇÃO MÍNIMA: O vídeo deve ter pelo menos ${request.targetDuration} segundos (${idealSceneCount} cenas). Você PODE gerar até ${maxSceneCount} cenas (no máximo ${maxExtraScenes} cenas extras) para concluir a história e o CTA sem cortar frases.
+2. QUANTIDADE DE CENAS: Gere entre ${idealSceneCount} e ${maxSceneCount} cenas. Use as cenas extras APENAS para: (a) terminar a última ideia/frase da história sem cortar no meio; (b) incluir o CTA completo (convite para seguir o canal + menção The Gap Files). Não extrapole além de ${maxSceneCount} cenas.
 3. DURAÇÃO DA CENA: Cada cena tem slots fixos de 5 segundos.
 4. CONTAGEM DE PALAVRAS: Cada narração DEVE ter entre ${minWords} e ${maxWords} palavras (${targetWPM} WPM ÷ 60 × 5s = ${wordsPerScene} palavras ideais). 🚨 NUNCA exceda ${maxWords} palavras - isso faz o áudio ultrapassar 5 segundos e quebra a sincronia. NUNCA faça cenas com menos de ${minWords} palavras - isso gera silêncio.
 5. MÚSICA DE FUNDO: ${isShortFormat ? 'Use "backgroundMusic" { prompt, volume } para UMA música para TODO o vídeo. O prompt deve ser compatível com Stable Audio 2.5.' : 'Use "backgroundMusicTracks" com tracks { prompt, volume, startTime, endTime }. O prompt de cada track deve ser compatível com Stable Audio 2.5.'}
 6. Se houver imagens anexas, use-as como referência visual primária.
 ${guidelines}${musicWarning}
 
-🚨 CRÍTICO: O vídeo final PRECISA ter ${request.targetDuration} segundos. Não gere menos cenas do que ${idealSceneCount}. Se necessário, divida o conteúdo em mais cenas para atingir a duração exata.`
+🚨 CRÍTICO: Mínimo ${idealSceneCount} cenas, máximo ${maxSceneCount} cenas. A última cena de conteúdo da história deve terminar com frase completa. As últimas 1-2 cenas devem ser conclusão + CTA (seguir canal + The Gap Files).`
   }
 
   private parseResponse(

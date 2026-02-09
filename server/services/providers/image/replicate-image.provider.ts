@@ -2,7 +2,8 @@
  * Implementação do gerador de imagens usando Replicate
  * 
  * Este provedor usa a biblioteca oficial do Replicate para acessar modelos como
- * Stable Diffusion, FLUX, etc. para geração de imagens cinematográficas.
+ * Luma Photon Flash (padrão), FLUX Schnell/Dev/Pro, Stable Diffusion, etc.
+ * Detecta automaticamente o modelo e ajusta os parâmetros de input.
  */
 
 import Replicate from 'replicate'
@@ -12,6 +13,18 @@ import type {
   ImageGenerationResponse,
   GeneratedImage
 } from '../../../types/ai-providers'
+
+/**
+ * Erro lançado quando o modelo de imagem rejeita o prompt por filtro de conteúdo sensível.
+ * Código E005 da Replicate/Luma.
+ */
+export class ContentRestrictedError extends Error {
+  public readonly code = 'CONTENT_RESTRICTED'
+  constructor(message: string, public readonly originalPrompt: string) {
+    super(message)
+    this.name = 'ContentRestrictedError'
+  }
+}
 
 export class ReplicateImageProvider implements IImageGenerator {
   private client: Replicate
@@ -25,12 +38,20 @@ export class ReplicateImageProvider implements IImageGenerator {
     this.client = new Replicate({
       auth: config.apiKey
     })
-    // FLUX Schnell é o estado da arte para velocidade/qualidade
-    this.model = config.model ?? 'black-forest-labs/flux-schnell'
+    // Luma Photon Flash: fotorrealístico de alta qualidade (mesmo modelo das thumbnails)
+    this.model = config.model ?? 'luma/photon-flash'
   }
 
   getName(): string {
     return 'REPLICATE'
+  }
+
+  /**
+   * Detecta se o modelo atual é Photon Flash (Luma).
+   * Photon Flash não suporta negative_prompt, num_outputs, go_fast, seed, resolution.
+   */
+  private isPhotonFlash(): boolean {
+    return this.model.includes('photon')
   }
 
   async generate(request: ImageGenerationRequest): Promise<ImageGenerationResponse> {
@@ -38,28 +59,9 @@ export class ReplicateImageProvider implements IImageGenerator {
     console.log(`[ReplicateImageProvider] Generating image with model ${this.model}. Prompt: ${enhancedPrompt.substring(0, 50)}...`)
 
     try {
-      // Preparar os inputs baseados no esquema do modelo (ex: FLUX)
-      const input: any = {
-        prompt: enhancedPrompt,
-        negative_prompt: request.negativePrompt ?? this.getDefaultNegativePrompt(),
-        num_outputs: request.numVariants ?? 1,
-        seed: request.seed,
-        output_format: "png",
-        go_fast: true,
-      }
-
-      // Se o aspect ratio for custom, usamos width/height
-      // Caso contrário, usamos o preset do modelo
-      if (request.aspectRatio === 'custom') {
-        input.aspect_ratio = 'custom'
-        input.width = request.width
-        input.height = request.height
-      } else {
-        input.aspect_ratio = request.aspectRatio || "1:1"
-        // Alguns modelos (como FLUX) ignoram width/height se aspect_ratio não for custom
-        // Mas podemos passar 'resolution' para garantir qualidade
-        input.resolution = "1 MP"
-      }
+      const input: any = this.isPhotonFlash()
+        ? this.buildPhotonFlashInput(enhancedPrompt, request)
+        : this.buildFluxInput(enhancedPrompt, request)
 
       let predictTime: number | undefined
       const output: any = await this.client.run(this.model as any, { input }, (prediction: any) => {
@@ -69,13 +71,13 @@ export class ReplicateImageProvider implements IImageGenerator {
       })
       console.log(`[ReplicateImageProvider] Replicate returned ${Array.isArray(output) ? output.length : 1} image(s)${predictTime ? ` (predict_time: ${predictTime.toFixed(2)}s)` : ''}`)
 
-      // Output pode ser string (URL única) ou array de URLs
-      const urls = Array.isArray(output) ? output : [output]
+      // Photon Flash retorna FileOutput (URL direta via .url()), FLUX retorna array de URLs
+      const urls = this.extractUrls(output)
 
       // Baixar imagens com retry
       const images: GeneratedImage[] = await Promise.all(
         urls.map(async (url, index) => {
-          return this.downloadImageWithRetry(url as string, index)
+          return this.downloadImageWithRetry(url, index)
         })
       )
 
@@ -86,13 +88,84 @@ export class ReplicateImageProvider implements IImageGenerator {
         predictTime
       }
     } catch (error: any) {
-      console.error('[ReplicateImageProvider] Error:', error)
+      const errorMsg = error?.message || String(error)
+      console.error('[ReplicateImageProvider] Error:', errorMsg)
+
+      // Detectar rejeição por filtro de conteúdo sensível (E005 da Replicate/Luma)
+      if (errorMsg.includes('flagged as sensitive') || errorMsg.includes('E005')) {
+        throw new ContentRestrictedError(
+          `Content safety filter rejected the prompt: ${errorMsg}`,
+          enhancedPrompt
+        )
+      }
 
       if (error.response) {
-        throw new Error(`Replicate API error: ${error.response.status} - ${error.message}`)
+        throw new Error(`Replicate API error: ${error.response.status} - ${errorMsg}`)
       }
-      throw new Error(`Replicate error: ${error.message}`)
+      throw new Error(`Replicate error: ${errorMsg}`)
     }
+  }
+
+  /**
+   * Inputs para Luma Photon Flash — aceita apenas prompt + aspect_ratio.
+   */
+  private buildPhotonFlashInput(prompt: string, request: ImageGenerationRequest): Record<string, any> {
+    const aspectRatio = request.aspectRatio === 'custom'
+      ? '1:1'
+      : this.mapToPhotonAspectRatio(request.aspectRatio || '1:1')
+
+    return { prompt, aspect_ratio: aspectRatio }
+  }
+
+  /**
+   * Inputs para FLUX Schnell/Dev/Pro — suporta payload completo.
+   */
+  private buildFluxInput(prompt: string, request: ImageGenerationRequest): Record<string, any> {
+    const input: any = {
+      prompt,
+      negative_prompt: request.negativePrompt ?? this.getDefaultNegativePrompt(),
+      num_outputs: request.numVariants ?? 1,
+      seed: request.seed,
+      output_format: "png",
+      go_fast: true,
+    }
+
+    if (request.aspectRatio === 'custom') {
+      input.aspect_ratio = 'custom'
+      input.width = request.width
+      input.height = request.height
+    } else {
+      input.aspect_ratio = request.aspectRatio || "1:1"
+      input.resolution = "1 MP"
+    }
+
+    return input
+  }
+
+  /**
+   * Extrai URLs do output do Replicate.
+   * Photon Flash retorna FileOutput (com .url()), FLUX retorna array de strings.
+   */
+  private extractUrls(output: any): string[] {
+    if (Array.isArray(output)) {
+      return output.map(item => typeof item === 'string' ? item : (item?.url?.() || String(item)))
+    }
+    const url = typeof output === 'string'
+      ? output
+      : (output?.url?.() || String(output))
+    return [url]
+  }
+
+  /**
+   * Mapeia aspect ratio para formatos aceitos pelo Photon Flash.
+   * Suportados: 1:1, 3:4, 4:3, 9:16, 16:9, 9:21, 21:9
+   */
+  private mapToPhotonAspectRatio(aspectRatio: string): string {
+    const mapping: Record<string, string> = {
+      '16:9': '16:9', '9:16': '9:16', '1:1': '1:1',
+      '4:3': '4:3', '3:4': '3:4', '21:9': '21:9', '9:21': '9:21'
+    }
+    return mapping[aspectRatio] || '16:9'
   }
 
   /**
@@ -127,7 +200,9 @@ export class ReplicateImageProvider implements IImageGenerator {
   }
 
   /**
-   * Enriquece o prompt com palavras-chave para melhor qualidade
+   * Garante âncora de estilo no prompt enviado ao modelo de imagem.
+   * - Se style for o baseStyle completo (ex.: Ghibli Sombrio), é preposto para fixar o look.
+   * - Se for uma chave conhecida (cinematic, photorealistic...), usa o enhancer curto.
    */
   private enhancePrompt(basePrompt: string, style?: ImageGenerationRequest['style']): string {
     const styleEnhancers: Record<string, string> = {
@@ -137,8 +212,12 @@ export class ReplicateImageProvider implements IImageGenerator {
       documentary: 'documentary style, natural lighting, authentic, journalistic, candid'
     }
 
+    // baseStyle completo (ex.: de visual-styles.ts) — usar como âncora no início do prompt
+    if (style && style.length > 50 && !styleEnhancers[style]) {
+      return `${style}, ${basePrompt}`
+    }
     const enhancer = style ? styleEnhancers[style] ?? '' : styleEnhancers.cinematic
-    return `${basePrompt}, ${enhancer}`
+    return enhancer ? `${basePrompt}, ${enhancer}` : basePrompt
   }
 
   /**

@@ -3,6 +3,8 @@ import { providerManager } from '../../../services/providers'
 import { costLogService } from '../../../services/cost-log.service'
 import { getVisualStyleById } from '../../../constants/visual-styles'
 import { getScriptStyleById } from '../../../constants/script-styles'
+import { getClassificationById } from '../../../constants/intelligence-classifications'
+import { formatOutlineForPrompt, type StoryOutline } from '../../../services/story-architect.service'
 import type { ScriptGenerationRequest } from '../../../types/ai-providers'
 
 export default defineEventHandler(async (event) => {
@@ -67,6 +69,12 @@ export default defineEventHandler(async (event) => {
 
     researchData: dossier.researchData ? JSON.parse(JSON.stringify(dossier.researchData)) : undefined,
 
+    // Classificação temática (no output) + orientação musical e visual
+    dossierCategory: output.classificationId || undefined,
+    musicGuidance: output.classificationId ? getClassificationById(output.classificationId)?.musicGuidance : undefined,
+    musicMood: output.classificationId ? getClassificationById(output.classificationId)?.musicMood : undefined,
+    visualGuidance: output.classificationId ? getClassificationById(output.classificationId)?.visualGuidance : undefined,
+
     targetDuration: output.duration || 300,
     targetWPM: output.targetWPM || 150,
 
@@ -89,7 +97,12 @@ export default defineEventHandler(async (event) => {
     mustInclude: output.mustInclude ?? undefined,
     mustExclude: output.mustExclude ?? undefined,
 
-    // 3. INJETAR O ALINHAMENTO/FEEDBACK DO USUÁRIO
+    // 3. INJETAR O PLANO NARRATIVO (Story Architect) se disponível
+    storyOutline: output.storyOutline
+      ? formatOutlineForPrompt(output.storyOutline as unknown as StoryOutline)
+      : undefined,
+
+    // 4. INJETAR O ALINHAMENTO/FEEDBACK DO USUÁRIO
     // Adicionamos como um contexto adicional prioritário ou nota
     additionalContext: `⚠️ SOLICITAÇÃO DE REVISÃO DO USUÁRIO (ALTA PRIORIDADE):\nO usuário solicitou alterações específicas no roteiro anterior. Ignore as versões anteriores e gere um novo roteiro seguindo estritamente estas instruções:\n"${body.feedback}"`
   }
@@ -181,8 +194,8 @@ export default defineEventHandler(async (event) => {
             scriptId,
             prompt: track.prompt,
             volume: track.volume,
-            startTime: track.startTime,
-            endTime: track.endTime
+            startScene: track.startScene,
+            endScene: track.endScene
           }))
         })
       }

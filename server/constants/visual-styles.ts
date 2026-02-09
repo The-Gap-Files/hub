@@ -5,7 +5,7 @@
  * Estilos visuais raramente mudam e não precisam de CRUD dinâmico.
  */
 
-export type VisualStyleId = 'epictok' | 'gta6' | 'cyberpunk' | 'oil-painting' | 'photorealistic'
+export type VisualStyleId = 'epictok' | 'ghibli-dark' | 'gta6' | 'cyberpunk' | 'oil-painting' | 'photorealistic'
 
 export interface VisualStyle {
   id: VisualStyleId
@@ -33,6 +33,20 @@ export const EPICTOK_STYLE: VisualStyle = {
   isActive: true
 }
 
+/** Estilo Ghibli em tom sombrio: ilustração 2D à la Studio Ghibli mas com atmosfera de suspense, leve horror e noir. Genérico para true crime, mistério, investigação. */
+export const GHIBLI_DARK_STYLE: VisualStyle = {
+  id: 'ghibli-dark',
+  name: 'Ghibli Sombrio',
+  description: 'Estilo Studio Ghibli em versão dark: ilustração 2D rica, mas com atmosfera de suspense, leve horror e noir. Ideal para true crime, mistério e investigação.',
+  baseStyle: 'Cinematic 2D illustration, Studio Ghibli art style dark variant, painterly anime aesthetic, moody and atmospheric',
+  lightingTags: 'dramatic chiaroscuro, soft shadows creeping, single light source or candlelight, muted cold tones, no golden hour',
+  atmosphereTags: 'suspenseful, subtle horror, noir mood, tense, mysterious, foreboding, solemn',
+  compositionTags: 'wide establishing shot when revealing tension, low angle for unease, textured paper effect, shallow depth',
+  tags: 'flat cell shading, inked outlines, Ghibli-style backgrounds but dark palette, desaturated greens and grays, no dreamlike or nostalgic, high contrast lighting, earthy muted tones, subtle grain',
+  order: 2,
+  isActive: true
+}
+
 export const GTA6_STYLE: VisualStyle = {
   id: 'gta6',
   name: 'GTA 6 Vibes',
@@ -42,7 +56,7 @@ export const GTA6_STYLE: VisualStyle = {
   atmosphereTags: 'energetic, luxurious, urban tropical paradise, high-octane',
   compositionTags: 'dynamic camera movement, establishing wide shots of cityscape, low angle hero shots',
   tags: 'saturated colors, photorealistic, neon lights, urban, tropical, palm trees swaying, ocean view, luxury cars gleaming, modern architecture',
-  order: 2,
+  order: 3,
   isActive: true
 }
 
@@ -55,7 +69,7 @@ export const CYBERPUNK_STYLE: VisualStyle = {
   atmosphereTags: 'dystopian, mysterious, tech-noir, rain-soaked melancholy',
   compositionTags: 'low angle looking up at megastructures, rain droplets on camera lens, holographic displays floating',
   tags: 'futuristic, advanced technology, dark atmosphere, sci-fi, holographic displays, flying cars passing by, megacity',
-  order: 3,
+  order: 4,
   isActive: true
 }
 
@@ -68,7 +82,7 @@ export const OIL_PAINTING_STYLE: VisualStyle = {
   atmosphereTags: 'timeless, contemplative, classical elegance, artistic reverence',
   compositionTags: 'traditional portrait framing, close-up with shallow depth, painterly brush strokes visible',
   tags: 'visible brush strokes, canvas texture, impressionist touches, artistic, painterly, traditional art',
-  order: 4,
+  order: 5,
   isActive: true
 }
 
@@ -81,7 +95,7 @@ export const PHOTOREALISTIC_STYLE: VisualStyle = {
   atmosphereTags: 'authentic, immersive, documentary realism, cinematic presence',
   compositionTags: 'shallow depth of field, cinematic aspect ratio, professional framing',
   tags: 'ultra detailed, realistic lighting, 4K, 8K, DSLR quality, professional camera work',
-  order: 5,
+  order: 6,
   isActive: true
 }
 
@@ -89,6 +103,7 @@ export const PHOTOREALISTIC_STYLE: VisualStyle = {
 
 export const VISUAL_STYLES: Record<VisualStyleId, VisualStyle> = {
   epictok: EPICTOK_STYLE,
+  'ghibli-dark': GHIBLI_DARK_STYLE,
   gta6: GTA6_STYLE,
   cyberpunk: CYBERPUNK_STYLE,
   'oil-painting': OIL_PAINTING_STYLE,

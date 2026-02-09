@@ -19,6 +19,7 @@ export interface CreateOutputDTO {
   objective?: string
   mustInclude?: string
   mustExclude?: string
+  classificationId?: string
   scriptStyleId?: string
   visualStyleId?: string
   seedId?: string
@@ -48,22 +49,26 @@ export interface OutputResponse {
   aspectRatio?: string
   platform?: string
   status: OutputStatus
+  storyOutlineApproved?: boolean
   scriptApproved: boolean
   imagesApproved: boolean
   bgmApproved: boolean
   audioApproved: boolean
   videosApproved: boolean
+  renderApproved: boolean
   hasBgm: boolean
   errorMessage?: string
   createdAt: Date
   updatedAt: Date
   completedAt?: Date
   hasVideo?: boolean
+  isStoredOnDisk?: boolean
   outputMimeType?: string
   outputSize?: number
   hasCaptionedVideo?: boolean
   captionedVideoSize?: number
   enableMotion: boolean
+  storyOutline?: any // Story Architect: plano narrativo estruturado
 }
 
 export interface OutputWithRelationsResponse extends OutputResponse {
@@ -80,6 +85,10 @@ export interface OutputWithRelationsResponse extends OutputResponse {
     id: string
     name: string
   }
+  classification?: {
+    id: string
+    label: string
+  }
   script?: any
   audioTracks?: any[]
   scenes?: any[]
@@ -88,10 +97,18 @@ export interface OutputWithRelationsResponse extends OutputResponse {
     outputType: OutputType
     relationType: string
   }[]
+  thumbnailCandidates?: Array<{ base64: string; prompt: string }> | null
+  hasThumbnail?: boolean
+  socialKit?: any
 }
 
 export interface CreateOutputsResponse {
   outputs: OutputResponse[]
   total: number
+}
+
+/** Resposta do clone de roteiro (novo output criado no mesmo dossier com script + cenas copiados) */
+export interface CloneOutputResponse {
+  output: OutputResponse
 }
 

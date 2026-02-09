@@ -34,6 +34,15 @@ export interface ScriptGenerationRequest {
   visualReferences?: string[] // Descrições de imagens de referência
   researchData?: any // Dados estruturados (fatos, datas, pessoas)
 
+  // Classificação temática do dossiê (intelligence classification)
+  dossierCategory?: string // classificationId do output (ex: 'true-crime', 'conspiração', 'mistério')
+  musicGuidance?: string // Prompt base de música para esta classificação (Stable Audio 2.5)
+  musicMood?: string // Atmosfera emocional da trilha
+  visualGuidance?: string // Instruções de tom para visualDescription (alinhado ao tema)
+
+  // Story Architect: plano narrativo pré-gerado por Sonnet
+  storyOutline?: string // JSON stringified do outline narrativo (hook, beats, climax, arco emocional)
+
   // Output-specific
   outputType?: string // VIDEO_TEASER, VIDEO_FULL, etc.
   format?: string // "teaser", "full"
@@ -68,8 +77,8 @@ export interface BackgroundMusic {
 export interface BackgroundMusicTrack {
   prompt: string // Prompt para Stable Audio 2.5 (gênero, instrumentos, BPM, mood)
   volume: number // Volume em dB para mixagem (-24 a -6)
-  startTime: number // Tempo de início em segundos
-  endTime: number | null // Tempo de fim em segundos (null = até o final)
+  startScene: number // Cena onde esta track começa (0 = primeira cena)
+  endScene: number | null // Última cena desta track (null = até a última cena)
 }
 
 export interface ScriptGenerationResponse {
@@ -170,7 +179,8 @@ export interface ImageGenerationRequest {
   negativePrompt?: string
   width: number
   height: number
-  style?: 'cinematic' | 'photorealistic' | 'artistic' | 'documentary'
+  /** Chave curta (cinematic, photorealistic...) ou baseStyle completo de visual-styles (âncora de estilo no prompt) */
+  style?: string
   seed?: number
   numVariants?: number // Quantas variantes gerar
   aspectRatio?: string // Formato das imagens (ex: "16:9", "9:16")

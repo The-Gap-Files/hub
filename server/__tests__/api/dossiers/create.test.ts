@@ -18,8 +18,7 @@ describe('Dossier API - POST /api/dossiers', () => {
       title: 'Caso Teste',
       theme: 'Tema de Teste',
       sourceText: 'Conteúdo do dossier de teste',
-      tags: ['teste', 'api'],
-      category: 'história'
+      tags: ['teste', 'api']
     }
 
     // Nota: Como estamos testando o handler diretamente, usamos o readBody mockado

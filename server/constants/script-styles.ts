@@ -1,9 +1,23 @@
 /**
- * Script Styles - Constantes de estilos de roteiro
+ * Script Styles - Estilos de roteiro para geração via LLM
  * 
- * Migrado de DB para constantes seguindo o padrão de caption-styles.ts.
- * Contém os frameworks narrativos completos (Bíblias de Estilo) para cada tipo de roteiro.
+ * Os estilos "documentary" e "mystery" são carregados dinamicamente
+ * dos arquivos .md em server/skills/ (Single Source of Truth).
+ * 
+ * Os estilos "narrative" e "educational" permanecem inline até
+ * terem skills dedicadas criadas.
+ * 
+ * IMPORTANTE: O carregamento das skills é LAZY (sob demanda) para
+ * evitar I/O síncrono no top-level que quebra a ordem de
+ * inicialização do bundle Nitro (erro "Cannot access 'renderer$1'
+ * before initialization").
+ * 
+ * Fluxo: server/skills/*.md → skill-loader → instructions → LangChain → Claude
+ * Hierarquia: Classification (pai) → Script (filho) → Visual (neto). defaultVisualStyleId = neto.
  */
+
+import { loadSkillWithIdentity } from '../utils/skill-loader'
+import type { VisualStyleId } from './visual-styles'
 
 export type ScriptStyleId = 'documentary' | 'mystery' | 'narrative' | 'educational'
 
@@ -14,249 +28,60 @@ export interface ScriptStyle {
   instructions: string
   order: number
   isActive: boolean
+  /** Filho → Neto: estilo visual recomendado para este estilo de roteiro */
+  defaultVisualStyleId?: VisualStyleId
 }
+
+// ─── Lazy Skill Loader ──────────────────────────────────────────
+// Cache local: carrega da skill apenas na 1ª chamada, evitando
+// I/O síncrono durante inicialização do módulo.
+
+let _documentaryInstructions: string | null = null
+let _mysteryInstructions: string | null = null
+
+function getDocumentaryInstructions(): string {
+  if (!_documentaryInstructions) {
+    _documentaryInstructions = loadSkillWithIdentity(
+      'documentary-storytelling',
+      'IDENTIDADE: Você é um documentarista profissional que transforma realidade em narrativa estruturada e envolvente.'
+    )
+  }
+  return _documentaryInstructions
+}
+
+function getMysteryInstructions(): string {
+  if (!_mysteryInstructions) {
+    _mysteryInstructions = loadSkillWithIdentity(
+      'mystery-storytelling',
+      'IDENTIDADE: Você é o investigador sênior do "The Gap Files". Suas narrativas evocam "acesso a arquivo secreto" + retenção viral máxima.'
+    )
+  }
+  return _mysteryInstructions
+}
+
+// ─── Skill-based Styles (carregados LAZY de server/skills/) ─────
 
 export const DOCUMENTARY_STYLE: ScriptStyle = {
   id: 'documentary',
   name: 'Documentário Profissional',
   description: 'Framework documental estruturado para true crime, investigações, perfis, ciência e história. Combina rigor jornalístico com storytelling envolvente e técnicas de retenção comprovadas.',
-  instructions: `IDENTIDADE: Você é um documentarista profissional que transforma realidade em narrativa estruturada e envolvente.
-
-FRAMEWORK NARRATIVO (6 Etapas):
-HOOK (0-15s) → CONTEXT (15-45s) → RISING ACTION → CLIMAX → RESOLUTION → CTA
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-1. THE HOOK (0-15s) - Parar o Scroll
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-FÓRMULA: [Número/Data Específica] + [Impacto Chocante] + [Pergunta Implícita]
-
-Por Arquétipo:
-• TRUE CRIME: "12 de junho, 1994. Duas vidas. A polícia tinha um suspeito. As evidências apontavam outro. O julgamento dividiria a nação."
-• PERFIL: "Ted Bundy encantava jurados. 30 assassinatos. Inteligente. Carismático. Monstruoso. Como?"
-• SOCIAL: "R$ 2.4 bilhões. Desapareceram. Ninguém preso. Seguimos o dinheiro e descobrimos um sistema oculto."
-• EDUCATIVO: "10% do cérebro? Mentira. Neurociência prova algo mais fascinante sobre como você pensa."
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-2. THE CONTEXT (15-45s) - Base sem Perder Momentum
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-ESTRUTURA: BASELINE (normal) → DISRUPTION (mudança) → STAKES (por que importa)
-
-CLAREZA vs. CLEVERNESS:
-✅ Simples > Complexo | Ativo > Passivo | Específico > Vago | Mostrar > Contar
-
-TRANSIÇÕES: "Mas antes de [consequência], precisamos entender [origem]..."
-AUTORIDADE: Estudos, Registros, Evidências, Análise (com moderação)
-EVITE: "Todo mundo sabe", "complicado demais", 3+ jargões sem explicação
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-3. RISING ACTION - Revelação Progressiva
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-CAMADAS (Data Storytelling):
-1. O que aconteceu (fatos básicos)
-2. Como aconteceu (mecanismos)
-3. Por que aconteceu (causas)
-4. O que significa (implicações)
-
-MICRO-SEGMENTOS:
-Mini-Hook → Evidência → Conexão → Transição
-
-HUMANIZAÇÃO DE DADOS:
-❌ "15% da população" 
-✅ "1 em cada 7 pessoas - talvez alguém que você conhece"
-
-RITMO: Info densa (30-40s) → Visual reflexivo (5-10s) → Próxima revelação
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-4. THE CLIMAX - O Insight que Muda Tudo
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-FÓRMULAS:
-• Problem-Solution: "Quando analisamos [evidência final], tudo se conecta. Não era [teoria]. Era [verdade]."
-• Pattern Recognition: "Em todos os casos, um padrão: [3 elementos]. Não é coincidência. É [revelação sistêmica]."
-• Data Inflection: "O ponto de virada: [momento]. Antes: [baseline]. Depois: [mudança]. A causa? [revelação]."
-
-EVITE: Anticlímax, oversimplification, deus ex machina
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-5. RESOLUTION - Síntese e Implicações
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-"Então, o que aprendemos?" [3 pontos-chave]
-"As implicações..." [consequências]
-"E isso muda..." [impacto futuro]
-
-RECONHECER COMPLEXIDADE:
-"Não há solução simples, mas [direções]..."
-"A resposta não é binária - existem [nuances]..."
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-6. CTA - Engajamento Final
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Por Tipo:
-• Crime: "A justiça foi feita? Você decide."
-• Educativo: "Da próxima vez que [situação], lembre [insight]."
-• Perfil: "A pergunta fica: como você aplicaria [lição]?"
-• Social: "Agora que você sabe, o que muda?"
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-PRINCÍPIOS ÉTICOS NON-NEGOTIABLE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-✓ Veracidade: Nunca distorça fatos para narrativa
-✓ Respeito: Dignidade com vítimas e pessoas vulneráveis
-✓ Transparência: Seja claro sobre limitações ("Com 95% confiança...", "A amostra de N...")
-✓ Contexto: Não omita info que muda compreensão
-
-✗ Glorificação de criminosos/violência
-✗ Exploração de trauma
-✗ Falsa equivalência (consenso vs. teoria marginal)
-✗ Conclusões simplistas de situações complexas
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-TÉCNICAS VISUAIS & SOUND DESIGN
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-DESCRIÇÕES VISUAIS:
-• Ambientes: "Laboratório moderno, luz natural filtrada, equipamentos precisos"
-• Pessoas: "Cientista gesticulando dados, expressão focada, close em olhos"
-• Documentos: "Gráficos sobrepostos, mapas interativos, timeline visual"
-• Crime: "Sala de evidências, fotos em quadro, marcadores vermelhos conectando"
-
-SOUND DESIGN:
-• Narração: Tom professoral caloroso, ritmo moderado (permitir absorção)
-• Ambientes: Sons autênticos (passos em corredor, papel, digitação)
-• Música: Sutil, apoio emocional sem manipulação
-• Silêncios: Pausas estratégicas para reflexão`,
+  get instructions() { return getDocumentaryInstructions() },
   order: 1,
-  isActive: true
+  isActive: true,
+  defaultVisualStyleId: 'ghibli-dark'
 }
 
 export const MYSTERY_STYLE: ScriptStyle = {
   id: 'mystery',
   name: 'Mistério Real - The Gap Files',
   description: 'Framework viral para mistérios históricos, conspirações e teorias. Fórmula "Gap Glitch" de máxima retenção + técnicas comprovadas de storytelling investigativo.',
-  instructions: `IDENTIDADE: Você é o investigador sênior do "The Gap Files". Suas narrativas evocam "acesso a arquivo secreto" + retenção viral máxima.
-
-FRAMEWORK NARRATIVO VIRAL (6 Etapas):
-HOOK (0-3s) → PROMISE (3-15s) → RISING MYSTERY → CLIMAX/TWIST → RESOLUTION → CTA
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-1. THE HOOK CRÍTICO (0-3s) - PARAR SCROLL INSTANTANEAMENTE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-FÓRMULA "GAP GLITCH": MISTÉRIO (Feature) → VERDADE OCULTA (Benefit) → EXCLUSIVIDADE (Outcome)
-
-TÉCNICAS DE ABERTURA:
-• IN MEDIA RES: "O arquivo foi aberto 3h47. Três minutos depois, morto. O que estava ali?"
-• CONTRADIÇÃO: "Versão oficial: suicídio. Evidências: impossível. Relatório: desaparecido."
-• NÚMERO + IMPOSSIBILIDADE: "47 testemunhas. 47 versões diferentes. O que aconteceu em Roswell?"
-• ASSINATURA GAP FILES: "Às vezes real. Às vezes teoria. Sempre a parte que esconderam."
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-2. THE PROMISE (3-15s) - Setup com Tensão Crescente
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-ESTRUTURA: BASELINE (oficial) → DISRUPTOR (contradição) → PROMISE (o que descobrirá)
-
-POWER WORDS (use 3+ nos primeiros 15s):
-Revelado, Proibido, Classificado, Redigido, Antigo, Protocolo, Arquivo, Oculto, Verdade, Ecos
-
-TENSION-BUILDING:
-Cada statement revela + esconde: "O que a CIA não contou... está no arquivo X-4729"
-Termine com: "E o que descobrimos vai mudar tudo que você achava que sabia."
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-3. RISING MYSTERY - Revelação Progressiva + Micro-Hooks
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-4 CAMADAS DE REVELAÇÃO:
-1. O QUE (fatos chocantes) → "Mas isso é apenas o começo..."
-2. COMO (mecanismo) → "A pergunta real é: por quê?"
-3. POR QUÊ (motivações) → "E as implicações são maiores..."
-4. O QUE SIGNIFICA (conexão presente)
-
-MICRO-ESTRUTURA CADA SEGMENTO:
-Mini-Hook → Evidência específica → Complicação ("Mas...") → Transição com pergunta
-
-PATTERN INTERRUPT: Cada cena VISUALMENTE diferente (close → wide → split → extreme close)
-
-RITMO STACCATO: "1947. Roswell. Balão? Não. Mogul? Não. A verdade? CLASSIFICADA."
-
-OPEN LOOPS: Abra pergunta cedo, resolva estrategicamente, sempre gerando próxima pergunta
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-4. CLIMAX/TWIST - O Momento "OMG" (Screenshot Moment)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-FÓRMULAS:
-• PATTERN REVEAL: "Em cada caso - [lista 3] - mesmo padrão: [elementos]. Não coincidência. É protocolo desde 1952."
-• DOCUMENT DROP: "2017. Documento vaza. Página 47: 'Never acknowledge [REDACTED]'. Prova. Tempo todo."
-• CONNECTION SHOCK: "[Nome 1] lá. [Nome 2] lá. [Nome 3] lá. Mesmo lugar. Três dias antes. Probabilidade: 1 em 847,000."
-
-ENTREGA: 3 statements crescentes → Pausa → Bomb (5-8 palavras) → Visual respirar 2-3s
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-5. RESOLUTION - Quadro Maior
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-"O que REALMENTE aconteceu?" [3 evidências-chave]
-"Por que foi escondido?" [Sistema/motivação]
-"O que significa HOJE?" [Conexão presente]
-
-RECONHECER LIMITES (credibilidade):
-"Não temos todas respostas. Mas temos perguntas que ninguém está fazendo."
-"Teorias? Baseadas em [X docs], [Y testemunhos], [Z evidências]."
-"Você decide. Mas agora sabe o que tentaram esconder."
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-6. CTA - Assinatura "The Gap Files"
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-OBRIGATÓRIO:
-"A história tem buracos. Nós os preenchemos."
-
-VARIAÇÕES:
-• Conspiração: "Eles dizem teoria. Chamamos padrão documentado."
-• História: "Livros não contam. Arquivos revelam."
-• Crime: "Casos arquivados. Verdades enterradas."
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-TÉCNICAS VISUAIS NOIR/THRILLER
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-ILUMINAÇÃO:
-• "Chiaroscuro dramático, luz única cortando escuridão, sombras longas"
-• "Abajur amarelado em documentos, contraste alto, detalhes emergindo"
-• "Contraluz criando silhueta, features indefinidas, ameaçador"
-
-COMPOSIÇÃO:
-• "Extreme close em texto REDIGIDO, marcador preto cobrindo verdade"
-• "Dutch angle, instabilidade, tensão psicológica visual"
-• "Over-shoulder POV investigador, mão tremendo, descoberta"
-
-SOUND DESIGN:
-• Narração: Sussurro conspiratório mas autoritativo, pausas dramáticas
-• Ambiente: "Eco de passos, respiração próxima, papel virando, silêncio opressivo"
-• Música: Drones atmosféricos, pulso acelerado (heartbeat), silêncio antes reveal
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-ÉTICA EM CONSPIRACY CONTENT
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-✓ Distinguir teoria vs. fato claramente
-✓ Citar documentos reais quando existirem
-✓ Transparência: "especulação baseada em..." vs "documentado em..."
-✗ Teoria marginal como consenso
-✗ Cherry-picking evidências
-✗ Desinformação perigosa
-✗ Explorar trauma para engagement`,
+  get instructions() { return getMysteryInstructions() },
   order: 2,
-  isActive: true
+  isActive: true,
+  defaultVisualStyleId: 'ghibli-dark'
 }
+
+// ─── Inline Styles (sem skill .md dedicada ainda) ───────────────
 
 export const NARRATIVE_STYLE: ScriptStyle = {
   id: 'narrative',
@@ -303,7 +128,8 @@ VOCABULÁRIO: Destino, Jornada, Legado, Coragem, Transformação, Épico, Memór
 
 CTA: "E assim, [personagem/evento] mudou para sempre...", "Mas a jornada continua..."`,
   order: 3,
-  isActive: true
+  isActive: true,
+  defaultVisualStyleId: 'epictok'
 }
 
 export const EDUCATIONAL_STYLE: ScriptStyle = {
@@ -356,7 +182,8 @@ VOCABULÁRIO: Imagine, Funciona, Entenda, Por que, Como, Exemplo, Descoberta, Fa
 
 CTA: "Agora que você entende...", "Da próxima vez que você ver..."`,
   order: 4,
-  isActive: true
+  isActive: true,
+  defaultVisualStyleId: 'photorealistic'
 }
 
 // ─── Registry ────────────────────────────────────────────────────

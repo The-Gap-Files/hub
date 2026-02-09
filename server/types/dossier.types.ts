@@ -9,7 +9,6 @@ export interface CreateDossierDTO {
   sourceText: string
   theme: string
   tags?: string[]
-  category?: string
   visualIdentityContext?: string
   preferredVisualStyleId?: string
   preferredSeedId?: string
@@ -48,7 +47,6 @@ export interface UpdateDossierDTO {
   sourceText?: string
   theme?: string
   tags?: string[]
-  category?: string
   researchData?: any
   isProcessed?: boolean
   visualIdentityContext?: string
@@ -67,7 +65,6 @@ export interface DossierResponse {
   theme: string
   researchData?: any
   tags: string[]
-  category?: string
   visualIdentityContext?: string | null
   preferredVisualStyleId?: string | null
   preferredSeedId?: string | null
@@ -80,6 +77,8 @@ export interface DossierResponse {
   imagesCount?: number
   notesCount?: number
   outputsCount?: number
+  /** Soma dos custos de todos os outputs do dossier (USD) */
+  totalOutputsCost?: number
 }
 
 export interface DossierWithRelationsResponse extends DossierResponse {
