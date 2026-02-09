@@ -49,7 +49,6 @@ export default defineEventHandler(async (event): Promise<DossierWithRelationsRes
   return {
     id: dossier.id,
     title: dossier.title,
-    sourceText: dossier.sourceText,
     theme: dossier.theme,
     researchData: dossier.researchData,
     tags: dossier.tags,

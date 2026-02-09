@@ -17,8 +17,8 @@ http://localhost:3000
 Clica "Novo Document"
 → Title: "Seu primeiro dossiê"
 → Theme: "Tema do conteúdo"
-→ SourceText: [Cola texto]
 → Salvar
+→ Adicionar fontes depois
 
 # Gerar Outputs
 Clica "Gerar Outputs"
@@ -51,7 +51,7 @@ DEPOIS (Document-First):
 
 ### Models
 - `Document` - Dossiê completo (centro do sistema)
-- `DocumentSource` - Textos secundários
+- `DocumentSource` - Fontes do dossiê (todas iguais)
 - `DocumentImage` - Imagens de referência
 - `DocumentNote` - Insights do usuário
 - `Output` - Vídeos/threads/posts gerados
@@ -118,7 +118,6 @@ hub/
 POST /api/documents
 {
   "title": "O Caso Simão de Trento",
-  "sourceText": "[5 páginas]",
   "theme": "Injustiça histórica",
   "tags": ["história", "religião"],
   "category": "true-crime"
@@ -127,7 +126,7 @@ POST /api/documents
 
 ### 2. Enriquecer (Opcional)
 ```typescript
-// Adicionar fontes secundárias
+// Adicionar fontes ao dossiê
 POST /api/documents/:id/sources
 { "title": "Artigo X", "content": "...", "sourceType": "article" }
 
@@ -193,8 +192,7 @@ vs.
 ### Contexto Rico para IA
 ```
 Prompt recebe:
-✅ sourceText (principal)
-✅ sources[] (artigos, papers)
+✅ sources[] (documentos, artigos, PDFs — todas iguais)
 ✅ notes[] (seus insights)
 ✅ images[] (referências visuais)
 ✅ researchData (fatos estruturados)

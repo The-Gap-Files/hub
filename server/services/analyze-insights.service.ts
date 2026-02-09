@@ -40,9 +40,8 @@ type AnalysisResponse = z.infer<typeof AnalysisResponseSchema>
 // =============================================================================
 
 export interface AnalyzeInsightsRequest {
-  sourceText: string
   theme: string
-  sources?: Array<{ title: string; content: string; sourceType: string }>
+  sources?: Array<{ title: string; content: string; sourceType: string; weight?: number }>
   existingNotes?: Array<{ content: string; noteType: string }>
   images?: Array<{ description: string }>
   existingPersons?: Array<{ name: string }>
@@ -150,7 +149,7 @@ export async function analyzeInsights(
 function buildSystemPrompt(): string {
   return `Você é um analista de inteligência editorial especializado em extrair insights profundos, curiosidades surpreendentes, dados de pesquisa estruturados e PESSOAS-CHAVE de material bruto.
 
-Sua função é analisar o dossiê fornecido (documento principal + fontes secundárias + notas existentes) e retornar:
+Sua função é analisar o dossiê fornecido (fontes do dossiê + notas existentes) e retornar:
 1. Uma lista de descobertas divididas em três categorias (items)
 2. Uma lista de pessoas-chave identificadas no material (persons)
 
@@ -216,26 +215,25 @@ function truncateText(text: string, maxTokens: number): string {
 }
 
 function buildUserPrompt(request: AnalyzeInsightsRequest): string {
-  // Budget allocation: documento principal (60%), fontes (25%), notas+imagens (15%)
-  const docBudget = Math.floor(MAX_PROMPT_TOKENS * 0.60)
-  const sourcesBudget = Math.floor(MAX_PROMPT_TOKENS * 0.25)
+  // Budget unificado: fontes (85%), notas+imagens (15%)
+  const sourcesBudget = Math.floor(MAX_PROMPT_TOKENS * 0.85)
   const metaBudget = Math.floor(MAX_PROMPT_TOKENS * 0.15)
 
   let prompt = `Analise o seguinte dossiê e extraia insights neurais, curiosidades e dados de pesquisa:\n\n`
 
   prompt += `📋 TEMA: ${request.theme}\n\n`
 
-  // Documento principal (com truncamento se necessário)
-  const truncatedDoc = truncateText(request.sourceText, docBudget)
-  prompt += `📄 DOCUMENTO PRINCIPAL:\n${truncatedDoc}\n\n`
-
-  // Fontes secundárias (distribui budget entre elas)
+  // Fontes (todas tratadas igualmente — arquitetura flat/democratizada)
   if (request.sources && request.sources.length > 0) {
-    const perSourceBudget = Math.floor(sourcesBudget / request.sources.length)
-    prompt += `📚 FONTES SECUNDÁRIAS:\n`
+    // Calcular budget proporcional ao peso de cada fonte
+    const totalWeight = request.sources.reduce((sum, s) => sum + (s.weight ?? 1.0), 0)
+    prompt += `📚 FONTES DO DOSSIÊ:\n`
     request.sources.forEach((source, i) => {
+      const weight = source.weight ?? 1.0
+      const perSourceBudget = Math.floor(sourcesBudget * (weight / totalWeight))
       const truncatedContent = truncateText(source.content, perSourceBudget)
-      prompt += `[${i + 1}] (${source.sourceType}) ${source.title}\n${truncatedContent}\n---\n`
+      const weightLabel = weight !== 1.0 ? ` [peso: ${weight}]` : ''
+      prompt += `[${i + 1}] (${source.sourceType}) ${source.title}${weightLabel}\n${truncatedContent}\n---\n`
     })
     prompt += '\n'
   }
@@ -268,8 +266,7 @@ function buildUserPrompt(request: AnalyzeInsightsRequest): string {
 
   // Log de diagnóstico
   const totalTokens = estimateTokens(prompt)
-  const wasTruncated = truncatedDoc.includes('[... CONTEÚDO TRUNCADO')
-  console.log(`[AnalyzeInsights] 📏 Prompt: ~${totalTokens.toLocaleString()} tokens estimados${wasTruncated ? ' (TRUNCADO)' : ''}`)
+  console.log(`[AnalyzeInsights] 📏 Prompt: ~${totalTokens.toLocaleString()} tokens estimados`)
 
   return prompt
 }

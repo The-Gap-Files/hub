@@ -78,7 +78,6 @@ export default defineEventHandler(async (event) => {
   try {
     const result = await generateMonetizationPlan(
       {
-        sourceText: dossier.sourceText,
         theme: dossier.theme,
         title: dossier.title,
         sources: dossier.sources.map(s => ({

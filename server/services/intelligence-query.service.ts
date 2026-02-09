@@ -25,7 +25,6 @@ const QueryResponseSchema = z.object({
 export interface IntelligenceQueryRequest {
   query: string
   source: 'docs' | 'web'
-  sourceText: string
   theme: string
   sources?: Array<{ title: string; content: string; sourceType: string }>
   existingNotes?: Array<{ content: string; noteType: string }>
@@ -110,14 +109,14 @@ export async function intelligenceQuery(
 
 function buildQuerySystemPrompt(source: 'docs' | 'web'): string {
   if (source === 'docs') {
-    return `Você é um analista de inteligência editorial. O usuário fará uma pergunta sobre o material de um dossiê (documento principal + fontes secundárias + notas existentes).
+    return `Você é um analista de inteligência editorial. O usuário fará uma pergunta sobre o material de um dossiê (fontes documentais + notas existentes).
 
 Sua função é responder a pergunta com base EXCLUSIVAMENTE no material fornecido adiante. Seja detalhado, preciso e cite trechos ou dados específicos sempre que possível.
 
 ## REGRAS:
 - Responda SOMENTE com base no material do dossiê fornecido
 - Se a informação não estiver no material, diga claramente: "Esta informação não consta no material do dossiê"
-- Cite fontes específicas quando aplicável (ex: "Conforme mencionado no documento principal...", "A fonte secundária X indica...")
+- Cite fontes específicas quando aplicável (ex: "Conforme mencionado na fonte X...", "A fonte Y indica...")
 - Seja conciso mas completo
 - Escreva em português brasileiro
 - Classifique sua resposta como insight (análise/conexão), curiosity (fato surpreendente) ou research (dado factual)`
@@ -141,17 +140,11 @@ function buildQueryUserPrompt(request: IntelligenceQueryRequest): string {
   let prompt = `TEMA DO DOSSIÊ: ${request.theme}\n\n`
 
   if (request.source === 'docs') {
-    // Incluir material do dossiê para consulta local
-    const maxDocChars = 12000
-    const truncatedDoc = request.sourceText.length > maxDocChars
-      ? request.sourceText.substring(0, maxDocChars) + '\n[...truncado...]'
-      : request.sourceText
-
-    prompt += `📄 DOCUMENTO PRINCIPAL:\n${truncatedDoc}\n\n`
-
+    // Incluir todas as fontes do dossiê (arquitetura flat/democratizada)
     if (request.sources && request.sources.length > 0) {
-      const perSourceChars = Math.floor(4000 / request.sources.length)
-      prompt += `📚 FONTES SECUNDÁRIAS:\n`
+      const totalBudget = 16000
+      const perSourceChars = Math.floor(totalBudget / request.sources.length)
+      prompt += `📚 FONTES DO DOSSIÊ:\n`
       request.sources.forEach((source, i) => {
         const truncated = source.content.length > perSourceChars
           ? source.content.substring(0, perSourceChars) + '...'

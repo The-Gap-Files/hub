@@ -10,15 +10,14 @@ describe('Dossier Attachments API', () => {
     const dossier = await prisma.dossier.create({
       data: {
         title: 'Dossier para Anexos',
-        theme: 'Testando anexos',
-        sourceText: 'Um texto longo o suficiente para passar na validação do zod.'
+        theme: 'Testando anexos'
       }
     })
     dossierId = dossier.id
   })
 
   describe('POST /api/dossiers/:id/sources', () => {
-    it('deve adicionar uma fonte secundária com sucesso', async () => {
+    it('deve adicionar uma fonte com sucesso', async () => {
       const payload = {
         title: 'Artigo Científico',
         content: 'Conteúdo detalhado da fonte...',

@@ -127,11 +127,8 @@ export class OutputPipelineService {
       language: output.language || 'pt-BR',
       narrationLanguage: output.narrationLanguage || 'pt-BR',
 
-      // DOSSIER SOURCES (RICO)
-      sourceDocument: dossier.sourceText,
-
-      // Fontes secundárias
-      additionalSources: dossier.sources?.map((s: any) => ({
+      // FONTES UNIFICADAS (arquitetura flat/democratizada)
+      sources: dossier.sources?.map((s: any) => ({
         title: s.title,
         content: s.content,
         type: s.sourceType

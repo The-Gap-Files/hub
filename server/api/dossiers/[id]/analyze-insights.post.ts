@@ -52,12 +52,12 @@ export default defineEventHandler(async (event) => {
     // Chamar o service de análise
     const result = await analyzeInsights(
       {
-        sourceText: dossier.sourceText,
         theme: dossier.theme,
         sources: dossier.sources.map(s => ({
           title: s.title,
           content: s.content,
-          sourceType: s.sourceType
+          sourceType: s.sourceType,
+          weight: s.weight
         })),
         existingNotes: dossier.notes.map(n => ({
           content: n.content,

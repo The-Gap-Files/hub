@@ -27,9 +27,10 @@ export interface ScriptGenerationRequest {
   visualCompositionTags?: string
   visualGeneralTags?: string
 
-  // Document-First: Múltiplas fontes de conteúdo
-  sourceDocument?: string // Documento principal (backward compatibility)
-  additionalSources?: Array<{ title: string; content: string; type: string }> // Fontes secundárias
+  // Fontes unificadas (arquitetura flat/democratizada — todas as fontes são tratadas igualmente)
+  sources?: Array<{ title: string; content: string; type: string; weight?: number }>
+  /** @deprecated — usar 'sources'. Campo mantido apenas para backward-compat temporária */
+  additionalSources?: Array<{ title: string; content: string; type: string }>
   userNotes?: string[] // Notas e insights do usuário
   visualReferences?: string[] // Descrições de imagens de referência
   researchData?: any // Dados estruturados (fatos, datas, pessoas)

@@ -66,7 +66,6 @@ type MonetizationPlan = z.infer<typeof MonetizationPlanSchema>
 // =============================================================================
 
 export interface MonetizationPlannerRequest {
-  sourceText: string
   theme: string
   title: string
   sources?: Array<{ title: string; content: string; sourceType: string }>
@@ -195,7 +194,7 @@ ${request.teaserDuration === 180 ? '- Hook (5s) → Setup (30s) → Desenvolvime
 **Full Video ${fullLabel}:**
 ${request.fullVideoDuration === 300 ? '- Vídeo compacto. Hook forte → Contexto mínimo → 3 beats principais → Clímax → CTA rápido.\n- Sem filler. Cada segundo conta.' : ''}
 ${request.fullVideoDuration === 600 ? '- Formato clássico. Hook → Contexto sólido → 4-5 beats com escalada → Clímax com twist → Resolução → CTA.\n- Equilíbrio entre profundidade e ritmo.' : ''}
-${request.fullVideoDuration === 900 ? '- Documentário completo. Hook épico → Contexto profundo → 5-7 beats detalhados → Clímax elaborado → Resolução com múltiplas camadas → CTA reflexivo.\n- Permite nuances, fontes secundárias e conexões históricas.' : ''}
+${request.fullVideoDuration === 900 ? '- Documentário completo. Hook épico → Contexto profundo → 5-7 beats detalhados → Clímax elaborado → Resolução com múltiplas camadas → CTA reflexivo.\n- Permite nuances, fontes adicionais e conexões históricas.' : ''}
 
 Retorne SEMPRE em JSON estruturado.`
 }
@@ -205,10 +204,9 @@ function buildUserPrompt(request: MonetizationPlannerRequest): string {
 
   prompt += `📋 TÍTULO: ${request.title}\n`
   prompt += `📋 TEMA: ${request.theme}\n\n`
-  prompt += `📄 DOCUMENTO PRINCIPAL:\n${request.sourceText}\n\n`
 
   if (request.sources && request.sources.length > 0) {
-    prompt += `📚 FONTES SECUNDÁRIAS:\n`
+    prompt += `📚 FONTES DO DOSSIÊ:\n`
     request.sources.forEach((source, i) => {
       prompt += `[${i + 1}] (${source.sourceType}) ${source.title}\n${source.content}\n---\n`
     })

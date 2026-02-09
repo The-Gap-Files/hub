@@ -62,7 +62,6 @@ export default defineEventHandler(async (event): Promise<DossierListResponse> =>
     dossiers: dossiers.map((doc: any) => ({
       id: doc.id,
       title: doc.title,
-      sourceText: doc.sourceText,
       theme: doc.theme,
       researchData: doc.researchData,
       tags: doc.tags,

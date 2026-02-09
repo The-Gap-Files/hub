@@ -340,14 +340,12 @@ ${visualInstructions}`
       }
     }
 
-    if (request.sourceDocument) {
-      baseInstruction += `\n\n📄 DOCUMENTO PRINCIPAL (BASE NEURAL):\n${request.sourceDocument}`
-    }
-
-    if (request.additionalSources && request.additionalSources.length > 0) {
-      baseInstruction += `\n\n📚 FONTES SECUNDÁRIAS (VETORES DE INTELIGÊNCIA):`
-      request.additionalSources.forEach((source, index) => {
-        baseInstruction += `\n[FONTE ${index + 1}] (${source.type}): ${source.title}\n${source.content}\n---`
+    // Fontes do dossiê (arquitetura flat/democratizada)
+    const allSources = request.sources || request.additionalSources || []
+    if (allSources.length > 0) {
+      baseInstruction += `\n\n📚 FONTES DO DOSSIÊ (BASE NEURAL):`
+      allSources.forEach((source, index) => {
+        baseInstruction += `\n[📄 FONTE ${index + 1}] (${source.type}): ${source.title}\n${source.content}\n---`
       })
     }
 

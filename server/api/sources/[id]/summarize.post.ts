@@ -1,7 +1,7 @@
 /**
  * POST /api/sources/[id]/summarize
  * 
- * Resume o conteúdo de uma fonte secundária usando LangChain.
+ * Resume o conteúdo de uma fonte do dossiê usando LangChain.
  * Para textos que excedem o contexto do modelo, usa estratégia Map-Reduce:
  *   1. Divide o texto em chunks que cabem no contexto
  *   2. Resume cada chunk individualmente (MAP)

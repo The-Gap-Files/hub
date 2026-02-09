@@ -85,16 +85,9 @@
 
         <!-- Progress Indicator -->
         <div class="flex items-center gap-4 mb-5">
-          <div class="flex items-center gap-1.5" :title="dossier.sourceText ? 'Documento adicionado' : 'Adicione um documento'">
-            <div class="w-5 h-5 rounded-md flex items-center justify-center" :class="dossier.sourceText ? 'bg-emerald-500/15 text-emerald-400' : 'bg-white/5 text-zinc-600'">
-              <FileText :size="11" />
-            </div>
-            <span class="text-[10px] font-medium" :class="dossier.sourceText ? 'text-emerald-400/80' : 'text-zinc-600'">Documento</span>
-          </div>
-          <div class="w-4 h-px bg-white/8"></div>
           <div class="flex items-center gap-1.5" :title="(dossier.sources?.length || 0) > 0 ? `${dossier.sources.length} fontes` : 'Adicione fontes'">
             <div class="w-5 h-5 rounded-md flex items-center justify-center" :class="(dossier.sources?.length || 0) > 0 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-white/5 text-zinc-600'">
-              <LinkIcon :size="11" />
+              <FileText :size="11" />
             </div>
             <span class="text-[10px] font-medium" :class="(dossier.sources?.length || 0) > 0 ? 'text-emerald-400/80' : 'text-zinc-600'">Fontes</span>
           </div>
@@ -191,44 +184,7 @@
           <div v-if="activeTab === 'content'" key="content" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <!-- Main Column -->
             <div class="lg:col-span-8 space-y-6">
-              <!-- Documento Primário -->
-              <section class="glass-card p-1 rounded-2xl">
-                <div class="p-6 pb-3 flex justify-between items-center border-b border-white/5">
-                  <div class="flex items-center gap-2.5">
-                    <div class="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400">
-                      <FileText :size="16" />
-                    </div>
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-white">Documento Primário</h3>
-                  </div>
-                  <button v-if="!showFullDocument" @click="showFullDocument = true" class="text-[10px] font-medium text-zinc-400 hover:text-white transition-colors flex items-center gap-1">
-                    <Maximize2 :size="12" />
-                    Expandir
-                  </button>
-                  <button v-else @click="showFullDocument = false" class="text-[10px] font-medium text-zinc-400 hover:text-white transition-colors flex items-center gap-1">
-                    <Minimize2 :size="12" />
-                    Compactar
-                  </button>
-                </div>
-                <div class="p-6">
-                  <div 
-                    class="relative prose prose-invert max-w-none text-zinc-400 font-sans leading-relaxed overflow-hidden custom-scrollbar"
-                    :class="showFullDocument ? 'max-h-none overflow-y-auto' : 'max-h-[320px]'"
-                  >
-                    <pre class="whitespace-pre-wrap font-sans text-sm tracking-tight leading-relaxed">{{ dossier.sourceText }}</pre>
-                    <!-- Fade gradient when collapsed -->
-                    <div v-if="!showFullDocument && dossier.sourceText?.length > 1500" class="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[hsl(240,10%,4.9%)] to-transparent pointer-events-none"></div>
-                  </div>
-                  <button 
-                    v-if="!showFullDocument && dossier.sourceText?.length > 1500" 
-                    @click="showFullDocument = true"
-                    class="mt-3 text-xs text-primary hover:text-primary/80 font-medium transition-colors"
-                  >
-                    Ler documento completo
-                  </button>
-                </div>
-              </section>
-              
-              <!-- Fontes Secundárias -->
+              <!-- Fontes do Dossiê (unificado) -->
               <DossierSources 
                 :dossier-id="dossierId" 
                 :initial-sources="dossier.sources || []" 
@@ -549,7 +505,6 @@ function estimateTokens(text: string): number {
 const dossierTokens = computed(() => {
   if (!dossier.value) return 0
   let total = 0
-  total += estimateTokens(dossier.value.sourceText || '')
   if (dossier.value.sources?.length) {
     for (const source of dossier.value.sources) {
       total += estimateTokens(source.content || '')

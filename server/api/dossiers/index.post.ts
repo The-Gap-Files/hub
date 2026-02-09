@@ -2,10 +2,9 @@ import { z } from 'zod'
 import { prisma } from '../../utils/prisma'
 import type { CreateDossierDTO, DossierResponse } from '../../types/dossier.types'
 
-// Schema de validação
+// Schema de validação — sourceText não é mais necessário na criação
 const CreateDossierSchema = z.object({
   title: z.string().min(3).max(255),
-  sourceText: z.string().min(10),
   theme: z.string().min(3),
   tags: z.array(z.string()).optional().default([]),
   visualIdentityContext: z.string().max(500).optional(),
@@ -38,11 +37,10 @@ export default defineEventHandler(async (event): Promise<DossierResponse> => {
     preferredSeedId = seedRecord.id
   }
 
-  // Criar dossier
+  // Criar dossier (sem sourceText — fontes são adicionadas via DossierSource)
   const dossier = await prisma.dossier.create({
     data: {
       title: data.title,
-      sourceText: data.sourceText,
       theme: data.theme,
       tags: data.tags || [],
       visualIdentityContext: data.visualIdentityContext,
@@ -57,7 +55,6 @@ export default defineEventHandler(async (event): Promise<DossierResponse> => {
   return {
     id: dossier.id,
     title: dossier.title,
-    sourceText: dossier.sourceText,
     theme: dossier.theme,
     researchData: dossier.researchData,
     tags: dossier.tags,

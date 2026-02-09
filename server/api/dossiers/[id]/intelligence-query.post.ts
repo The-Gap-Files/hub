@@ -56,7 +56,6 @@ export default defineEventHandler(async (event) => {
       {
         query,
         source,
-        sourceText: dossier.sourceText,
         theme: dossier.theme,
         sources: dossier.sources.map(s => ({
           title: s.title,

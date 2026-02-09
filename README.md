@@ -12,7 +12,7 @@ O Hub orquestra todo o pipeline de produção de vídeos — da pesquisa ao víd
 Dossier → Script → Audio → Imagens → Motion → Renderização → Legendas → Aprovação
 ```
 
-1. **Dossier** — Dossiê com texto-fonte, fontes secundárias, imagens e notas
+1. **Dossier** — Dossiê com fontes (documentos, artigos, PDFs), imagens e notas
 2. **Script** — Roteiro segmentado em cenas (narração + descrição visual)
 3. **Audio** — Narração com vozes de alta qualidade (ElevenLabs)
 4. **Imagens** — Geração cinematográfica com estilos visuais e seeds

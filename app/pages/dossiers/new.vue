@@ -168,24 +168,6 @@
           </select>
         </div>
 
-        <!-- Texto Principal -->
-        <div class="space-y-2">
-          <div class="flex justify-between items-end">
-            <label class="mono-label !text-[9px] text-zinc-500 flex items-center gap-2">
-              <AlignCenter :size="12" />
-              Fonte Primária (Base Neural)
-            </label>
-            <span class="mono-label !text-[9px] opacity-30">{{ formData.sourceText.length }} caracteres detectados</span>
-          </div>
-          <textarea
-            v-model="formData.sourceText"
-            required
-            rows="10"
-            class="w-full bg-white/5 border border-white/10 rounded-3xl p-6 text-sm text-zinc-300 font-mono leading-relaxed focus:border-primary outline-none transition-all shadow-inner resize-none custom-scrollbar"
-            placeholder="Cole aqui o corpo da investigação (artigo, transcrição, documento histórico)..."
-          ></textarea>
-        </div>
-
         <!-- UNIVERSO VISUAL (NOVO) -->
         <div class="pt-10 border-t border-white/5 space-y-8">
           <header class="flex items-center gap-3">
@@ -306,7 +288,6 @@ const formData = ref({
   theme: '',
   category: '',
   tags: [] as string[],
-  sourceText: '',
   visualIdentityContext: '',
   preferredVisualStyleId: '',
   preferredSeedId: '',
@@ -422,7 +403,6 @@ async function handleSubmit() {
       body: {
         title: formData.value.title,
         theme: formData.value.theme,
-        sourceText: formData.value.sourceText,
         tags: formData.value.tags,
         category: formData.value.category || undefined,
         visualIdentityContext: formData.value.visualIdentityContext || undefined,

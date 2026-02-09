@@ -9,8 +9,7 @@ describe('Dossier Outputs API', () => {
     const dossier = await prisma.dossier.create({
       data: {
         title: 'Dossier para Outputs',
-        theme: 'Testando outputs',
-        sourceText: 'Conteúdo base para geração de múltiplos formatos de vídeo.'
+        theme: 'Testando outputs'
       }
     })
     dossierId = dossier.id

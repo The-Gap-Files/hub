@@ -79,8 +79,7 @@ export type StoryOutline = z.infer<typeof StoryOutlineSchema>
 
 export interface StoryArchitectRequest {
   theme: string
-  sourceDocument: string
-  additionalSources?: Array<{ title: string; content: string; type: string }>
+  sources?: Array<{ title: string; content: string; type: string }>
   userNotes?: string[]
   editorialObjective?: string // Texto do editorial objective
   scriptStyleId?: string // 'documentary' | 'mystery' | etc.
@@ -190,11 +189,10 @@ function buildUserPrompt(request: StoryArchitectRequest): string {
   let prompt = `Analise o seguinte dossiê e crie o plano narrativo estruturado:\n\n`
 
   prompt += `📋 TEMA: ${request.theme}\n\n`
-  prompt += `📄 DOCUMENTO PRINCIPAL:\n${request.sourceDocument}\n\n`
 
-  if (request.additionalSources && request.additionalSources.length > 0) {
-    prompt += `📚 FONTES SECUNDÁRIAS:\n`
-    request.additionalSources.forEach((source, i) => {
+  if (request.sources && request.sources.length > 0) {
+    prompt += `📚 FONTES DO DOSSIÊ:\n`
+    request.sources.forEach((source, i) => {
       prompt += `[${i + 1}] (${source.type}) ${source.title}\n${source.content}\n---\n`
     })
     prompt += '\n'

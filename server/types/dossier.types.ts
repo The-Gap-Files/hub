@@ -6,7 +6,6 @@ import type { Dossier, DossierSource, DossierImage, DossierNote, DossierPerson }
 
 export interface CreateDossierDTO {
   title: string
-  sourceText: string
   theme: string
   tags?: string[]
   visualIdentityContext?: string
@@ -18,9 +17,10 @@ export interface CreateDossierDTO {
 export interface CreateDossierSourceDTO {
   title: string
   content: string
-  sourceType: 'url' | 'text'
+  sourceType: 'url' | 'text' | 'document' | 'pdf'
   url?: string
   author?: string
+  weight?: number
   order?: number
 }
 
@@ -45,7 +45,6 @@ export interface CreateDossierNoteDTO {
 
 export interface UpdateDossierDTO {
   title?: string
-  sourceText?: string
   theme?: string
   tags?: string[]
   researchData?: any
@@ -63,7 +62,6 @@ export interface UpdateDossierDTO {
 export interface DossierResponse {
   id: string
   title: string
-  sourceText: string
   theme: string
   researchData?: any
   tags: string[]

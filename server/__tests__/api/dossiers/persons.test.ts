@@ -9,8 +9,7 @@ describe('Dossier Persons API', () => {
     const dossier = await prisma.dossier.create({
       data: {
         title: 'Caso Kennedy',
-        theme: 'Assassinato e conspiração',
-        sourceText: 'Documento extenso sobre o assassinato de John F. Kennedy em 22 de novembro de 1963 em Dallas, Texas.'
+        theme: 'Assassinato e conspiração'
       }
     })
     dossierId = dossier.id

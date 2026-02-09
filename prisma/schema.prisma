@@ -28,10 +28,10 @@ model Channel {
 }
 
 /// Dossiê - centro do sistema, contém todos materiais de research e pode gerar múltiplos outputs
+/// Fontes são gerenciadas exclusivamente via DossierSource (arquitetura flat/democratizada)
 model Dossier {
   id                     String             @id @default(uuid())
   title                  String             @db.VarChar(255)
-  sourceText             String
   theme                  String
   researchData           Json?
   tags                   String[]
@@ -58,7 +58,9 @@ model Dossier {
   @@map("dossiers")
 }
 
-/// Fonte secundária do dossiê (artigo, paper, citação)
+/// Fonte do dossiê (todas as fontes são tratadas igualmente — arquitetura flat/democratizada)
+/// sourceType indica a natureza: 'document' (documento primário migrado), 'url', 'text', 'pdf'
+/// weight permite priorização opcional (padrão 1.0 = todas iguais)
 model DossierSource {
   id         String   @id @default(uuid())
   dossierId  String
@@ -67,6 +69,7 @@ model DossierSource {
   sourceType String   @db.VarChar(50)
   url        String?  @db.VarChar(500)
   author     String?  @db.VarChar(255)
+  weight     Float    @default(1.0) /// Peso para priorização (1.0 = padrão equilibrado)
   order      Int      @default(0)
   createdAt  DateTime @default(now())
   dossier    Dossier  @relation(fields: [dossierId], references: [id], onDelete: Cascade)

@@ -5,7 +5,8 @@
         <div class="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
           <LinkIcon :size="16" />
         </div>
-        <h3 class="text-xs font-bold uppercase tracking-wider text-white">Fontes Secundárias</h3>
+        <h3 class="text-xs font-bold uppercase tracking-wider text-white">Fontes do Dossiê</h3>
+        <span v-if="sources.length > 0" class="ml-2 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[9px] font-black tabular-nums">{{ sources.length }}</span>
       </div>
       <button 
         v-if="!showForm" 
@@ -188,7 +189,8 @@
     </div>
 
     <!-- Lista de Fontes -->
-    <div class="p-6">
+    <div class="relative">
+      <div class="p-6 max-h-[520px] overflow-y-auto custom-scrollbar">
       <div v-if="sources.length > 0" class="space-y-4">
         <div 
           v-for="source in sources" 
@@ -325,6 +327,9 @@
         </div>
         <p class="text-xs text-zinc-600">Nenhuma fonte adicionada</p>
       </div>
+      </div>
+      <!-- Fade gradient quando há scroll -->
+      <div v-if="sources.length > 3" class="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[hsl(240,10%,4.9%)] to-transparent pointer-events-none rounded-b-2xl"></div>
     </div>
   </div>
 </template>

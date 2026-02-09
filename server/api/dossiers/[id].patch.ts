@@ -5,7 +5,6 @@ import type { UpdateDossierDTO, DossierResponse } from '../../types/dossier.type
 // Schema de validação
 const UpdateDossierSchema = z.object({
   title: z.string().min(3).max(255).optional(),
-  sourceText: z.string().min(10).optional(),
   theme: z.string().min(3).optional(),
   tags: z.array(z.string()).optional(),
   researchData: z.any().optional(),
@@ -69,7 +68,6 @@ export default defineEventHandler(async (event): Promise<DossierResponse> => {
   return {
     id: dossier.id,
     title: dossier.title,
-    sourceText: dossier.sourceText,
     theme: dossier.theme,
     researchData: dossier.researchData,
     tags: dossier.tags,

@@ -112,7 +112,6 @@ describe('Channel API - CRUD', () => {
       await prisma.dossier.create({
         data: {
           title: 'Dossier do Canal',
-          sourceText: 'Texto de teste suficientemente longo',
           theme: 'Teste',
           channelId: channel.id
         }
@@ -270,7 +269,6 @@ describe('Channel API - CRUD', () => {
       const dossier = await prisma.dossier.create({
         data: {
           title: 'Dossier Protegido',
-          sourceText: 'Texto longo o suficiente para o teste',
           theme: 'Proteção',
           channelId: channel.id
         }
@@ -302,7 +300,6 @@ describe('Channel API - CRUD', () => {
       const dossier = await prisma.dossier.create({
         data: {
           title: 'O Caso do Triângulo das Bermudas',
-          sourceText: 'Pesquisa detalhada sobre o Triângulo das Bermudas',
           theme: 'Mistério Marítimo',
           channelId: channel.id
         }
@@ -324,7 +321,6 @@ describe('Channel API - CRUD', () => {
       const dossier = await prisma.dossier.create({
         data: {
           title: 'Dossier Avulso',
-          sourceText: 'Sem canal vinculado ainda',
           theme: 'Geral'
         }
       })
@@ -340,7 +336,6 @@ describe('Channel API - CRUD', () => {
       const dossier = await prisma.dossier.create({
         data: {
           title: 'Vai perder o canal',
-          sourceText: 'Texto do dossier que vai perder o canal',
           theme: 'SetNull',
           channelId: channel.id
         }
@@ -365,7 +360,6 @@ describe('Channel API - CRUD', () => {
       const dossier = await prisma.dossier.create({
         data: {
           title: 'Dossier TTS',
-          sourceText: 'Conteúdo para teste de TTS Provider',
           theme: 'TTS'
         }
       })
@@ -392,7 +386,6 @@ describe('Channel API - CRUD', () => {
       const dossier = await prisma.dossier.create({
         data: {
           title: 'Dossier Legacy',
-          sourceText: 'Output sem provider registrado',
           theme: 'Legacy'
         }
       })
@@ -417,7 +410,6 @@ describe('Channel API - CRUD', () => {
       const dossier = await prisma.dossier.create({
         data: {
           title: 'Dossier Narrador',
-          sourceText: 'Conteúdo para testar narrador mais usado',
           theme: 'Narrador',
           channelId: channel.id
         }

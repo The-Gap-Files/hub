@@ -56,8 +56,7 @@ export default defineEventHandler(async (event) => {
   try {
     const result = await generateStoryOutline({
       theme: dossier.theme,
-      sourceDocument: dossier.sourceText,
-      additionalSources: dossier.sources?.map((s: any) => ({
+      sources: dossier.sources?.map((s: any) => ({
         title: s.title,
         content: s.content,
         type: s.sourceType
@@ -76,16 +75,17 @@ export default defineEventHandler(async (event) => {
     })
 
     // 5. Registrar custo do plano (fire-and-forget) — resource 'outline', não 'script'
+    const totalSourceChars = dossier.sources?.reduce((sum: number, s: any) => sum + (s.content?.length || 0), 0) || 0
     costLogService.logOutlineGeneration({
       outputId,
       provider: result.provider,
       model: result.model,
-      inputCharacters: dossier.sourceText.length,
+      inputCharacters: totalSourceChars,
       outputCharacters: JSON.stringify(result.outline).length,
       usage: result.usage,
       action: feedback ? 'recreate' : 'create',
       detail: `Story Architect - ${result.outline.risingBeats.length} beats narrativos`
-    }).catch(() => {})
+    }).catch(() => { })
 
     return {
       success: true,

@@ -48,9 +48,7 @@ export default defineEventHandler(async (event) => {
     language: output.language || 'pt-BR',
     narrationLanguage: output.narrationLanguage || 'pt-BR',
 
-    sourceDocument: dossier.sourceText,
-
-    additionalSources: dossier.sources?.map((s: any) => ({
+    sources: dossier.sources?.map((s: any) => ({
       title: s.title,
       content: s.content,
       type: s.sourceType
@@ -121,7 +119,7 @@ export default defineEventHandler(async (event) => {
       usage: scriptResponse.usage,
       action: 'recreate',
       detail: `Script regeneration - ${scriptResponse.wordCount} words, user feedback`
-    }).catch(() => {})
+    }).catch(() => { })
 
     // 5. Atualizar no Banco (Transação)
     await prisma.$transaction(async (tx: any) => {
@@ -129,7 +127,7 @@ export default defineEventHandler(async (event) => {
       const existingScript = await tx.script.findUnique({ where: { outputId } })
 
       let scriptId = ''
-      
+
       if (existingScript) {
         await tx.script.update({
           where: { id: existingScript.id },
