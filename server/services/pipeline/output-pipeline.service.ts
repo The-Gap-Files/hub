@@ -680,6 +680,14 @@ export class OutputPipelineService {
         }
       }))
     }
+
+    // Registrar ttsProvider no output (se ainda não estiver salvo)
+    if (!output.ttsProvider) {
+      await prisma.output.update({
+        where: { id: outputId },
+        data: { ttsProvider: ttsProvider.getName().toUpperCase() }
+      })
+    }
   }
 
   /**
@@ -695,10 +703,13 @@ export class OutputPipelineService {
     console.log(`[OutputPipeline] 🔄 Regenerando narração com nova voz: ${newVoiceId}`)
 
     // 1. Atualizar voiceId no output
+    const currentTtsProvider = providerManager.getTTSProvider().getName().toUpperCase()
+
     await prisma.output.update({
       where: { id: outputId },
       data: {
         voiceId: newVoiceId,
+        ttsProvider: currentTtsProvider,
         audioApproved: false,
         // Se já tiver renderizado, resetar status pois o vídeo ficará desatualizado
         ...(await prisma.output.findUnique({ where: { id: outputId }, select: { status: true } })

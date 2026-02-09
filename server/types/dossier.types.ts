@@ -1,4 +1,4 @@
-import type { Dossier, DossierSource, DossierImage, DossierNote } from '@prisma/client'
+import type { Dossier, DossierSource, DossierImage, DossierNote, DossierPerson } from '@prisma/client'
 
 // =============================================================================
 // DTOs - CREATE
@@ -12,6 +12,7 @@ export interface CreateDossierDTO {
   visualIdentityContext?: string
   preferredVisualStyleId?: string
   preferredSeedId?: string
+  channelId?: string
 }
 
 export interface CreateDossierSourceDTO {
@@ -52,6 +53,7 @@ export interface UpdateDossierDTO {
   visualIdentityContext?: string
   preferredVisualStyleId?: string
   preferredSeedId?: string
+  channelId?: string | null
 }
 
 // =============================================================================
@@ -69,6 +71,9 @@ export interface DossierResponse {
   preferredVisualStyleId?: string | null
   preferredSeedId?: string | null
   isProcessed: boolean
+  channelId?: string | null
+  channelName?: string | null
+  channelHandle?: string | null
   createdAt: Date
   updatedAt: Date
 
@@ -85,6 +90,7 @@ export interface DossierWithRelationsResponse extends DossierResponse {
   sources: DossierSource[]
   images: DossierImage[]
   notes: DossierNote[]
+  persons: DossierPerson[]
 }
 
 export interface DossierListResponse {

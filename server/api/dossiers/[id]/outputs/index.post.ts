@@ -42,9 +42,10 @@ export default defineEventHandler(async (event): Promise<CreateOutputsResponse> 
     })
   }
 
-  // Verificar se dossier existe
+  // Verificar se dossier existe (incluir canal para herança de defaults)
   const dossier = await prisma.dossier.findUnique({
-    where: { id: dossierId }
+    where: { id: dossierId },
+    include: { channel: true }
   })
 
   if (!dossier) {
@@ -59,15 +60,16 @@ export default defineEventHandler(async (event): Promise<CreateOutputsResponse> 
   const data = CreateOutputsSchema.parse(body) as CreateOutputsDTO
 
   // Resolver seeds, classificação e estilos (hierarquia: classification → script → visual)
+  // Fallback 3 níveis: Output → Dossier → Channel → ScriptStyle
   const outputsToCreate: Array<typeof data.outputs[0] & { classificationId?: string; scriptStyleId?: string; visualStyleId?: string; seedId?: string }> = []
   for (const outputData of data.outputs) {
     const classificationId = outputData.classificationId ?? undefined
     const classification = classificationId ? getClassificationById(classificationId) : undefined
-    // Pai → Filho → Neto: aplicar defaults quando não informados
-    const scriptStyleId = outputData.scriptStyleId ?? classification?.defaultScriptStyleId ?? undefined
+    // Pai → Filho → Neto: aplicar defaults quando não informados (com fallback do Channel)
+    const scriptStyleId = outputData.scriptStyleId ?? classification?.defaultScriptStyleId ?? dossier.channel?.defaultScriptStyleId ?? undefined
     const scriptStyle = scriptStyleId ? getScriptStyleById(scriptStyleId) : undefined
-    const visualStyleId = outputData.visualStyleId ?? dossier.preferredVisualStyleId ?? scriptStyle?.defaultVisualStyleId ?? undefined
-    let seedId: string | null | undefined = outputData.seedId || dossier.preferredSeedId
+    const visualStyleId = outputData.visualStyleId ?? dossier.preferredVisualStyleId ?? dossier.channel?.defaultVisualStyleId ?? scriptStyle?.defaultVisualStyleId ?? undefined
+    let seedId: string | null | undefined = outputData.seedId || dossier.preferredSeedId || dossier.channel?.defaultSeedId
 
     // Se não houver seed mas houver estilo, criar/buscar uma seed aleatória
     if (!seedId && visualStyleId) {

@@ -19,8 +19,18 @@ const InsightItemSchema = z.object({
   noteType: z.enum(['insight', 'curiosity', 'research']).describe('insight = conexão analítica, padrão narrativo ou ângulo editorial. curiosity = fato surpreendente, contradição ou ponto pouco explorado. research = dado de pesquisa estruturado: fato verificável, estatística, data, nome ou referência documental')
 })
 
+const PersonItemSchema = z.object({
+  name: z.string().describe('Nome completo da pessoa'),
+  role: z.string().optional().describe('Papel narrativo: investigador, vítima, suspeito, testemunha, cientista, líder, autor, etc.'),
+  description: z.string().describe('Descrição breve da pessoa e sua relevância no contexto do dossiê (1-2 frases)'),
+  visualDescription: z.string().optional().describe('Descrição visual da pessoa para consistência em geração de imagens/vídeos: aparência física, vestimenta típica, expressão, edad aparente. Ex: "Homem caucasiano, 50 anos, cabelo grisalho curto, terno escuro, expressão severa"'),
+  aliases: z.array(z.string()).optional().describe('Apelidos, codinomes ou outros nomes pelos quais a pessoa é conhecida'),
+  relevance: z.enum(['primary', 'secondary', 'mentioned']).describe('primary = protagonista ou figura central. secondary = papel importante mas não central. mentioned = citado brevemente')
+})
+
 const AnalysisResponseSchema = z.object({
-  items: z.array(InsightItemSchema).min(1).max(15).describe('Lista de insights, curiosidades e dados de pesquisa extraídos do material')
+  items: z.array(InsightItemSchema).min(1).max(15).describe('Lista de insights, curiosidades e dados de pesquisa extraídos do material'),
+  persons: z.array(PersonItemSchema).max(10).describe('Lista de pessoas-chave identificadas no material. Apenas pessoas reais ou personagens relevantes, não figuras genéricas.')
 })
 
 type AnalysisResponse = z.infer<typeof AnalysisResponseSchema>
@@ -35,10 +45,12 @@ export interface AnalyzeInsightsRequest {
   sources?: Array<{ title: string; content: string; sourceType: string }>
   existingNotes?: Array<{ content: string; noteType: string }>
   images?: Array<{ description: string }>
+  existingPersons?: Array<{ name: string }>
 }
 
 export interface AnalyzeInsightsResult {
   items: Array<{ content: string; noteType: 'insight' | 'curiosity' | 'research' }>
+  persons: Array<{ name: string; role?: string; description: string; visualDescription?: string; aliases?: string[]; relevance: 'primary' | 'secondary' | 'mentioned' }>
   usage?: { inputTokens: number; outputTokens: number; totalTokens: number }
   provider: string
   model: string
@@ -109,16 +121,18 @@ export async function analyzeInsights(
     const outputTokens = usage?.output_tokens ?? 0
     const totalTokens = usage?.total_tokens ?? (inputTokens + outputTokens)
 
-    console.log(`[AnalyzeInsights] ✅ Análise concluída em ${elapsed}s — ${content.items.length} itens gerados`)
+    const personsCount = content.persons?.length || 0
+    console.log(`[AnalyzeInsights] ✅ Análise concluída em ${elapsed}s — ${content.items.length} itens + ${personsCount} pessoas`)
     console.log(`[AnalyzeInsights] 📊 Tokens: ${inputTokens} input + ${outputTokens} output = ${totalTokens} total`)
 
     const insights = content.items.filter(i => i.noteType === 'insight').length
     const curiosities = content.items.filter(i => i.noteType === 'curiosity').length
     const research = content.items.filter(i => i.noteType === 'research').length
-    console.log(`[AnalyzeInsights] 💡 ${insights} insights + 🔍 ${curiosities} curiosidades + 📊 ${research} dados de pesquisa`)
+    console.log(`[AnalyzeInsights] 💡 ${insights} insights + 🔍 ${curiosities} curiosidades + 📊 ${research} dados de pesquisa + 👤 ${personsCount} pessoas`)
 
     return {
       items: content.items,
+      persons: content.persons || [],
       usage: { inputTokens, outputTokens, totalTokens },
       provider: providerName.toUpperCase(),
       model: providerConfig.model ?? (providerName === 'anthropic' ? 'claude-sonnet-4-20250514' : 'gpt-4o-mini')
@@ -134,9 +148,11 @@ export async function analyzeInsights(
 // =============================================================================
 
 function buildSystemPrompt(): string {
-  return `Você é um analista de inteligência editorial especializado em extrair insights profundos, curiosidades surpreendentes e dados de pesquisa estruturados de material bruto.
+  return `Você é um analista de inteligência editorial especializado em extrair insights profundos, curiosidades surpreendentes, dados de pesquisa estruturados e PESSOAS-CHAVE de material bruto.
 
-Sua função é analisar o dossiê fornecido (documento principal + fontes secundárias + notas existentes) e retornar uma lista de descobertas divididas em três categorias:
+Sua função é analisar o dossiê fornecido (documento principal + fontes secundárias + notas existentes) e retornar:
+1. Uma lista de descobertas divididas em três categorias (items)
+2. Uma lista de pessoas-chave identificadas no material (persons)
 
 ## INSIGHT NEURAL (noteType: "insight")
 - Conexões não-óbvias entre informações do material
@@ -157,8 +173,16 @@ Sua função é analisar o dossiê fornecido (documento principal + fontes secun
 - Estatísticas e números concretos mencionados no material
 - Referências documentais ou bibliográficas
 - Linhas do tempo e sequências cronológicas
-- Atores-chave e suas relações (quem, o quê, quando, onde)
 - Dados que servem como base factual para roteiros e scripts
+
+## PESSOAS-CHAVE (persons)
+Identifique todas as pessoas relevantes mencionadas no material:
+- **name**: Nome completo como aparece no material
+- **role**: Papel narrativo (investigador, vítima, suspeito, testemunha, cientista, líder, político, jornalista, etc.)
+- **description**: Quem é esta pessoa e por que é relevante no contexto (1-2 frases)
+- **visualDescription**: Descrição visual da pessoa para geração de imagens/vídeos consistentes. Inclua: aparência física, idade aparente, vestimenta típica, expressão. Ex: "Homem caucasiano, ~50 anos, cabelo grisalho curto, terno escuro, expressão severa"
+- **aliases**: Lista de apelidos, codinomes ou outros nomes conhecidos
+- **relevance**: "primary" (protagonista/figura central), "secondary" (papel importante mas não central), "mentioned" (citado brevemente)
 
 ## REGRAS:
 - Gere entre 6 e 15 itens no total
@@ -168,7 +192,9 @@ Sua função é analisar o dossiê fornecido (documento principal + fontes secun
 - Escreva em português brasileiro
 - Seja específico — evite generalidades vagas
 - NÃO repita informações que já existam nas notas existentes do dossiê
-- Priorize descobertas que agreguem valor à produção de conteúdo`
+- NÃO repita pessoas que já foram extraídas anteriormente
+- Priorize descobertas que agreguem valor à produção de conteúdo
+- Para visualDescription, seja específico o suficiente para que um modelo de IA consiga gerar a pessoa consistentemente entre cenas`
 }
 
 // =============================================================================
@@ -233,7 +259,12 @@ function buildUserPrompt(request: AnalyzeInsightsRequest): string {
     prompt += `🧠 NOTAS JÁ EXISTENTES (NÃO repetir estes):\n${truncatedNotes}\n\n`
   }
 
-  prompt += `\nRetorne os insights, curiosidades e dados de pesquisa no formato JSON estruturado.`
+  if (request.existingPersons && request.existingPersons.length > 0) {
+    const personsText = request.existingPersons.map((p, i) => `[${i + 1}] ${p.name}`).join('\n')
+    prompt += `👤 PESSOAS JÁ EXTRAÍDAS (NÃO repetir):\n${personsText}\n\n`
+  }
+
+  prompt += `\nRetorne os insights, curiosidades, dados de pesquisa E pessoas-chave no formato JSON estruturado.`
 
   // Log de diagnóstico
   const totalTokens = estimateTokens(prompt)

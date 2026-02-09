@@ -6,14 +6,20 @@ export default defineEventHandler(async (event): Promise<DossierListResponse> =>
   const query = getQuery(event)
   const page = Number(query.page) || 1
   const pageSize = Number(query.pageSize) || 20
+  const channelId = query.channelId as string | undefined
 
-  // Get dossiers with counts (filtro por category removido: classificação está no output)
+  // Filtro por canal (opcional)
+  const where = channelId ? { channelId } : {}
+
+  // Get dossiers with counts
   const [dossiers, total] = await Promise.all([
     prisma.dossier.findMany({
+      where,
       orderBy: { createdAt: 'desc' },
       skip: (page - 1) * pageSize,
       take: pageSize,
       include: {
+        channel: { select: { id: true, name: true, handle: true } },
         _count: {
           select: {
             sources: true,
@@ -24,7 +30,7 @@ export default defineEventHandler(async (event): Promise<DossierListResponse> =>
         }
       }
     }),
-    prisma.dossier.count()
+    prisma.dossier.count({ where })
   ])
 
   const dossierIds = dossiers.map((d: any) => d.id)
@@ -61,6 +67,9 @@ export default defineEventHandler(async (event): Promise<DossierListResponse> =>
       researchData: doc.researchData,
       tags: doc.tags,
       isProcessed: doc.isProcessed,
+      channelId: doc.channelId,
+      channelName: doc.channel?.name ?? null,
+      channelHandle: doc.channel?.handle ?? null,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
       sourcesCount: doc._count.sources,
@@ -74,4 +83,5 @@ export default defineEventHandler(async (event): Promise<DossierListResponse> =>
     pageSize
   }
 })
+
 

@@ -12,7 +12,8 @@ const UpdateDossierSchema = z.object({
   isProcessed: z.boolean().optional(),
   visualIdentityContext: z.string().max(500).optional(),
   preferredVisualStyleId: z.string().optional().transform(val => val === '' ? undefined : val),
-  preferredSeedId: z.union([z.string().uuid(), z.literal('')]).optional().transform(val => val === '' ? undefined : val)
+  preferredSeedId: z.union([z.string().uuid(), z.literal('')]).optional().transform(val => val === '' ? undefined : val),
+  channelId: z.union([z.string().uuid(), z.literal(''), z.null()]).optional().transform(val => val === '' ? null : val)
 })
 
 export default defineEventHandler(async (event): Promise<DossierResponse> => {

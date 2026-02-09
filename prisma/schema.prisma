@@ -6,6 +6,27 @@ datasource db {
   provider = "postgresql"
 }
 
+/// Canal de conteúdo (ex: The Gap Files, Canal X) — entidade raiz multi-canal
+model Channel {
+  id                   String    @id @default(uuid())
+  name                 String    @db.VarChar(100)
+  handle               String    @unique @db.VarChar(50)
+  description          String?
+  platform             String?   @db.VarChar(50)
+  logoBase64           String? /// Logo do canal em base64
+  logoMimeType         String?   @db.VarChar(50)
+  defaultVisualStyleId String?   @db.VarChar(50) /// slug → constant (visual-styles.ts)
+  defaultScriptStyleId String?   @db.VarChar(50) /// slug → constant (script-styles.ts)
+  defaultSeedId        String?
+  isActive             Boolean   @default(true)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  dossiers             Dossier[]
+  defaultSeed          Seed?     @relation("ChannelDefaultSeed", fields: [defaultSeedId], references: [id], onDelete: SetNull)
+
+  @@map("channels")
+}
+
 /// Dossiê - centro do sistema, contém todos materiais de research e pode gerar múltiplos outputs
 model Dossier {
   id                     String             @id @default(uuid())
@@ -18,18 +39,22 @@ model Dossier {
   visualIdentityContext  String?            @db.VarChar(500) // Contexto visual do dossier
   preferredVisualStyleId String?
   preferredSeedId        String?
+  channelId              String? /// FK → Channel (nullable para migração gradual)
   createdAt              DateTime           @default(now())
   updatedAt              DateTime           @updatedAt
   images                 DossierImage[]
   notes                  DossierNote[]
+  persons                DossierPerson[]
   sources                DossierSource[]
   outputs                Output[]
   costLogs               CostLog[]
   monetizationPlans      MonetizationPlan[]
   preferredSeed          Seed?              @relation("DossierPreferredSeed", fields: [preferredSeedId], references: [id], onDelete: SetNull)
+  channel                Channel?           @relation(fields: [channelId], references: [id], onDelete: SetNull)
 
   @@index([createdAt])
   @@index([isProcessed])
+  @@index([channelId])
   @@map("dossiers")
 }
 
@@ -84,6 +109,25 @@ model DossierNote {
   @@map("dossier_notes")
 }
 
+/// Pessoa-chave extraída do dossiê (para consistência visual e narrativa)
+model DossierPerson {
+  id                String   @id @default(uuid())
+  dossierId         String
+  name              String   @db.VarChar(255)
+  role              String?  @db.VarChar(100) /// papel narrativo: investigador, vítima, suspeito, testemunha, etc.
+  description       String? /// descrição breve da pessoa e sua relevância
+  visualDescription String? /// descrição visual para consistência entre cenas de vídeo
+  aliases           String[] /// apelidos, outros nomes conhecidos
+  relevance         String   @default("secondary") @db.VarChar(20) /// primary | secondary | mentioned
+  order             Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  dossier           Dossier  @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+
+  @@index([dossierId])
+  @@map("dossier_persons")
+}
+
 /// Output gerado a partir de um dossiê (vídeo, thread, post, etc.)
 model Output {
   id                   String              @id @default(uuid())
@@ -97,6 +141,7 @@ model Output {
   language             String              @default("pt-BR") @db.VarChar(10)
   narrationLanguage    String              @default("pt-BR") @db.VarChar(10)
   voiceId              String?             @db.VarChar(100)
+  ttsProvider          String?             @db.VarChar(50) /// Provider TTS usado (ex: ELEVENLABS, REPLICATE)
   enableMotion         Boolean             @default(false)
   objective            String? // Objetivo editorial: diretriz narrativa que governa a geração do roteiro
   mustInclude          String?
@@ -333,6 +378,7 @@ model Seed {
   updatedAt           DateTime  @updatedAt
   outputs             Output[]  @relation("OutputSeed")
   preferredByDossiers Dossier[] @relation("DossierPreferredSeed")
+  preferredByChannels Channel[] @relation("ChannelDefaultSeed")
 
   @@map("seeds")
 }

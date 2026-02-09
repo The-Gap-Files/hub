@@ -36,6 +36,13 @@
           <div class="hover-glow"></div>
         </NuxtLink>
 
+        <NuxtLink to="/channels" class="nav-item group" active-class="active">
+          <Tv :size="18" class="nav-icon" />
+          <span class="nav-text">Rede de Canais</span>
+          <div class="active-indicator"></div>
+          <div class="hover-glow"></div>
+        </NuxtLink>
+
         <div class="pt-10 mb-4 px-4">
           <div class="mono-label !text-[9px] text-zinc-600 flex items-center justify-between">
             <span>Vetores de Engrenagem</span>
@@ -103,7 +110,7 @@
 
 <script setup lang="ts">
 import { 
-  LayoutDashboard, Library,
+  LayoutDashboard, Library, Tv,
   Database, Zap, User, Settings,
   ChevronRight
 } from 'lucide-vue-next'

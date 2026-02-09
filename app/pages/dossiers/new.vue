@@ -146,6 +146,28 @@
           </div>
         </div>
 
+        <!-- Canal (opcional) -->
+        <div class="space-y-2">
+          <label class="mono-label !text-[9px] text-zinc-500 flex items-center gap-2">
+            <Tv :size="12" />
+            Canal de Distribuição
+          </label>
+          <select
+            v-model="formData.channelId"
+            class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white focus:border-primary outline-none transition-all shadow-inner appearance-none cursor-pointer"
+          >
+            <option value="" class="bg-[#0A0A0F]">Nenhum canal (avulso)</option>
+            <option
+              v-for="ch in channelOptions"
+              :key="ch.id"
+              :value="ch.id"
+              class="bg-[#0A0A0F]"
+            >
+              {{ ch.name }} ({{ ch.handle }})
+            </option>
+          </select>
+        </div>
+
         <!-- Texto Principal -->
         <div class="space-y-2">
           <div class="flex justify-between items-end">
@@ -267,9 +289,17 @@
 <script setup lang="ts">
 import { 
   ArrowLeft, Zap, FileText, Target, Database, 
-  ChevronDown, Tag, AlignCenter, Plus, Palette, Dna, AlertTriangle, Layout,
+  ChevronDown, Tag, AlignCenter, Plus, Palette, Dna, AlertTriangle, Layout, Tv,
   Skull, History, Beaker, User, Search, Moon, Eye, X
 } from 'lucide-vue-next'
+
+interface ChannelOption {
+  id: string
+  name: string
+  handle: string
+}
+
+const channelOptions = ref<ChannelOption[]>([])
 
 const formData = ref({
   title: '',
@@ -279,7 +309,8 @@ const formData = ref({
   sourceText: '',
   visualIdentityContext: '',
   preferredVisualStyleId: '',
-  preferredSeedId: ''
+  preferredSeedId: '',
+  channelId: ''
 })
 
 const tagsInput = ref('')
@@ -350,7 +381,15 @@ onMounted(() => {
   window.addEventListener('click', handleClickOutside)
   loadVisualResources()
   loadClassifications()
+  loadChannelOptions()
 })
+
+async function loadChannelOptions() {
+  try {
+    const res = await $fetch<any>('/api/channels')
+    channelOptions.value = (res.channels || []).map((ch: any) => ({ id: ch.id, name: ch.name, handle: ch.handle }))
+  } catch { /* silencioso */ }
+}
 
 async function loadClassifications() {
   try {
@@ -388,7 +427,8 @@ async function handleSubmit() {
         category: formData.value.category || undefined,
         visualIdentityContext: formData.value.visualIdentityContext || undefined,
         preferredVisualStyleId: formData.value.preferredVisualStyleId || undefined,
-        preferredSeedId: formData.value.preferredSeedId || undefined
+        preferredSeedId: formData.value.preferredSeedId || undefined,
+        channelId: formData.value.channelId || undefined
       }
     })
 

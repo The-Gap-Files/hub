@@ -69,6 +69,16 @@
   .mono-label {
     @apply font-mono text-[11px] uppercase tracking-widest text-muted-foreground;
   }
+
+  /* Reduced noise version for field labels — use instead of mono-label in forms/fields */
+  .field-label {
+    @apply text-[10px] text-zinc-500 font-medium;
+  }
+
+  /* Compact badge with less visual noise than mono-label */
+  .badge-compact {
+    @apply font-mono text-[10px] uppercase tracking-wide text-muted-foreground;
+  }
 }
 
 /* Custom Scrollbar for the Investigation Hub */

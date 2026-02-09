@@ -179,6 +179,20 @@
           <p class="text-sm text-yellow-500/90">Selecione uma voz para continuar.</p>
         </div>
 
+        <!-- Sugestão de narrador do canal -->
+        <div v-if="channelVoiceSuggestion && !selectedVoiceId" class="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center gap-4">
+          <Mic :size="20" class="text-blue-400 shrink-0" />
+          <div class="flex-1">
+            <p class="text-xs text-blue-300">
+              🎙️ Narrador mais usado neste canal: <strong class="text-blue-200">{{ channelVoiceSuggestion.voiceId }}</strong> 
+              <span class="text-blue-400/60">({{ channelVoiceSuggestion.ttsProvider }}, {{ channelVoiceSuggestion.usageCount }}x)</span>
+            </p>
+          </div>
+          <button @click="applyChannelVoice" class="px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 text-[10px] font-bold uppercase rounded-lg transition-all shrink-0">
+            Usar
+          </button>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div class="space-y-6">
             <label class="flex items-center justify-between p-5 bg-white/5 border border-white/10 rounded-2xl cursor-pointer hover:bg-white/10 transition-all">
@@ -304,7 +318,7 @@
 
 <script setup lang="ts">
 import {
-  ArrowLeft, Zap, ChevronRight, Smartphone, Monitor, Instagram, Palette, AlertTriangle
+  ArrowLeft, Zap, ChevronRight, Smartphone, Monitor, Instagram, Palette, AlertTriangle, Mic
 } from 'lucide-vue-next'
 import VoiceSelector from '~/components/dossier/VoiceSelector.vue'
 
@@ -344,6 +358,7 @@ const scriptStyles = ref<any[]>([])
 const visualStyles = ref<any[]>([])
 const allSeeds = ref<any[]>([])
 const videoFormatsRaw = ref<any[]>([])
+const channelVoiceSuggestion = ref<{ ttsProvider: string; voiceId: string; usageCount: number } | null>(null)
 
 const formats = computed(() => {
   return videoFormatsRaw.value.map(f => {
@@ -471,8 +486,24 @@ async function loadStyles() {
     if (dossier.value?.preferredVisualStyleId) selectedVisualStyle.value = dossier.value.preferredVisualStyleId
     else if (visualStyles.value.length) selectedVisualStyle.value = visualStyles.value[0].id
     if (dossier.value?.preferredSeedId) selectedSeed.value = dossier.value.preferredSeedId
+
+    // Carregar sugestão de narrador do canal
+    if (dossier.value?.channelId) {
+      try {
+        const voiceRes = await $fetch<any>(`/api/channels/${dossier.value.channelId}/most-used-voice`)
+        if (voiceRes.voices?.length) {
+          channelVoiceSuggestion.value = voiceRes.voices[0]
+        }
+      } catch { /* silencioso */ }
+    }
   } catch (e) {
     console.error(e)
+  }
+}
+
+function applyChannelVoice() {
+  if (channelVoiceSuggestion.value) {
+    selectedVoiceId.value = channelVoiceSuggestion.value.voiceId
   }
 }
 

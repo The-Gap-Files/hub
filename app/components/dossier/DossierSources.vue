@@ -1,34 +1,34 @@
 <template>
   <div class="glass-card overflow-hidden">
-    <div class="p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
-      <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-          <LinkIcon :size="20" />
+    <div class="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+      <div class="flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+          <LinkIcon :size="16" />
         </div>
-        <h3 class="text-sm font-black uppercase tracking-[0.2em] text-white">Fontes Secundárias</h3>
+        <h3 class="text-xs font-bold uppercase tracking-wider text-white">Fontes Secundárias</h3>
       </div>
       <button 
         v-if="!showForm" 
         @click="showForm = true" 
-        class="btn-secondary !py-1.5 !px-4 text-[10px] uppercase tracking-widest border-primary/20 text-primary hover:bg-primary/10"
+        class="btn-secondary !py-1.5 !px-3 text-[10px] font-medium border-primary/20 text-primary hover:bg-primary/10"
       >
-        + Expandir Pesquisa
+        + Adicionar fonte
       </button>
     </div>
 
     <!-- Form para Adicionar (Cyberpunk Style) -->
-    <div v-if="showForm" class="p-8 border-b border-white/5 bg-primary/[0.02] animate-in slide-in-from-top-4 duration-500">
-      <div class="flex justify-between items-center mb-8">
-        <p class="mono-label text-primary">Injetar Novo Vetor de Inteligência</p>
+    <div v-if="showForm" class="p-6 border-b border-white/5 bg-primary/[0.02] animate-in slide-in-from-top-4 duration-500">
+      <div class="flex justify-between items-center mb-6">
+        <p class="text-xs font-medium text-primary">Adicionar nova fonte</p>
         <button @click="resetForm" class="text-white/30 hover:text-white transition-colors">
-          <X :size="20" />
+          <X :size="18" />
         </button>
       </div>
 
-      <form @submit.prevent="addSource" class="space-y-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="space-y-2">
-            <label class="mono-label !text-[9px]">{{ titleLabel }}</label>
+      <form @submit.prevent="addSource" class="space-y-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="space-y-1.5">
+            <label class="field-label">{{ titleLabel }}</label>
             <input 
               v-model="form.title" 
               type="text" 
@@ -37,8 +37,8 @@
               required
             />
           </div>
-          <div class="space-y-2">
-            <label class="mono-label !text-[9px]">Protocolo de Origem</label>
+          <div class="space-y-1.5">
+            <label class="field-label">Tipo de Fonte</label>
             <div class="relative" ref="vDropdownRef">
               <button 
                 type="button"
@@ -71,10 +71,57 @@
           </div>
         </div>
 
-        <div class="space-y-2">
+        <!-- Upload PDF (apenas para Textos Diversos) -->
+        <div v-if="form.sourceType === 'text'" class="space-y-1.5">
+          <label class="field-label">Importar de PDF</label>
+          <div 
+            class="relative flex items-center gap-3 p-4 rounded-xl border-2 border-dashed transition-all duration-300"
+            :class="pdfFile 
+              ? 'border-primary/40 bg-primary/[0.04]' 
+              : 'border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'"
+          >
+            <input 
+              ref="pdfInputRef"
+              type="file" 
+              accept=".pdf,application/pdf" 
+              class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+              @change="onPdfSelected"
+            />
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors" :class="pdfFile ? 'bg-primary/10 text-primary' : 'bg-white/5 text-white/30'">
+              <FileUp :size="20" />
+            </div>
+            <div class="flex-1 min-w-0">
+              <p v-if="pdfFile" class="text-sm text-white truncate">{{ pdfFile.name }}</p>
+              <p v-else class="text-xs text-zinc-500">Arraste um PDF ou clique para selecionar</p>
+              <p v-if="pdfFile" class="text-[9px] text-zinc-500 mt-0.5">{{ (pdfFile.size / 1024).toFixed(0) }}KB</p>
+            </div>
+            <button 
+              v-if="pdfFile"
+              type="button"
+              @click.stop="extractPdf"
+              :disabled="isExtractingPdf"
+              class="relative z-20 flex items-center gap-2 px-4 py-2 bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-xl text-primary text-[9px] font-black uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Loader2 v-if="isExtractingPdf" :size="14" class="animate-spin" />
+              <Upload v-else :size="14" />
+              <span>{{ isExtractingPdf ? 'Convertendo...' : 'Converter' }}</span>
+            </button>
+            <button 
+              v-if="pdfFile && !isExtractingPdf"
+              type="button"
+              @click.stop="clearPdf"
+              class="relative z-20 text-white/30 hover:text-red-400 p-1 transition-colors"
+              title="Remover PDF"
+            >
+              <X :size="16" />
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-1.5">
           <div class="flex justify-between items-end">
-             <label class="mono-label !text-[9px]">{{ contentLabel }}</label>
-             <span class="text-[8px] text-zinc-500 uppercase tracking-tighter opacity-60">*Necessário para processamento Neural</span>
+             <label class="field-label">{{ contentLabel }}</label>
+             <span class="text-[9px] text-zinc-600">* Necessário</span>
           </div>
           <textarea 
             v-model="form.content" 
@@ -85,11 +132,11 @@
           ></textarea>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="space-y-2">
-            <label class="mono-label !text-[9px] flex items-center gap-2">
-              Endereço Digital (URL)
-              <span v-if="form.sourceType === 'url'" class="text-primary text-[8px] ml-auto font-bold uppercase tracking-wider">Obrigatório</span>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="space-y-1.5">
+            <label class="field-label flex items-center gap-2">
+              URL
+              <span v-if="form.sourceType === 'url'" class="text-primary text-[9px] ml-auto font-medium">Obrigatório</span>
             </label>
             <div class="flex gap-2">
               <input 
@@ -112,8 +159,8 @@
               </button>
             </div>
           </div>
-          <div class="space-y-2">
-            <label class="mono-label !text-[9px]">Agente/Autor</label>
+          <div class="space-y-1.5">
+            <label class="field-label">Autor / Fonte</label>
             <input 
               v-model="form.author" 
               type="text" 
@@ -141,7 +188,7 @@
     </div>
 
     <!-- Lista de Fontes -->
-    <div class="p-8">
+    <div class="p-6">
       <div v-if="sources.length > 0" class="space-y-4">
         <div 
           v-for="source in sources" 
@@ -161,10 +208,10 @@
                   {{ source.title }}
                 </h4>
                 <div class="flex items-center gap-2">
-                  <span class="mono-label !text-[8px] text-zinc-600">
+                  <span class="text-[10px] font-mono text-zinc-600">
                     {{ estimateWordCount(source.content) }} palavras
                   </span>
-                  <span class="mono-label !text-[8px] opacity-40 group-hover:opacity-100">{{ source.sourceType }}</span>
+                  <span class="text-[10px] font-mono text-zinc-600/40 group-hover:text-zinc-500">{{ source.sourceType }}</span>
                 </div>
               </div>
               
@@ -175,7 +222,7 @@
               <div class="flex items-center gap-4 pt-1">
                 <div v-if="source.author" class="flex items-center gap-1.5">
                   <div class="w-1 h-1 rounded-full bg-primary/40"></div>
-                  <span class="mono-label !text-[8px] !lowercase text-muted-foreground">{{ source.author }}</span>
+                  <span class="text-[10px] text-zinc-500">{{ source.author }}</span>
                 </div>
                 <a v-if="source.url" :href="source.url" target="_blank" @click.stop class="flex items-center gap-1 text-[9px] font-black uppercase text-blue-400/50 hover:text-blue-400 transition-colors tracking-tighter">
                   <ExternalLink :size="10" />
@@ -205,7 +252,7 @@
             <div class="pt-4 space-y-4">
               <!-- Título editável -->
               <div class="space-y-1">
-                <label class="mono-label !text-[8px] text-zinc-600">Título</label>
+                <label class="field-label">Título</label>
                 <input 
                   v-model="editForm.title" 
                   type="text" 
@@ -216,7 +263,7 @@
               <!-- Conteúdo editável -->
               <div class="space-y-1">
                 <div class="flex justify-between items-center">
-                  <label class="mono-label !text-[8px] text-zinc-600">Conteúdo</label>
+                  <label class="field-label">Conteúdo</label>
                   <div class="flex items-center gap-3">
                     <span class="text-[8px] font-mono" :class="contentTokenClass(editForm.content)">
                       ~{{ estimateTokens(editForm.content).toLocaleString() }} tokens · {{ estimateWordCount(editForm.content).toLocaleString() }} palavras
@@ -272,11 +319,11 @@
         </div>
       </div>
       
-      <div v-else class="text-center py-20 border-2 border-dashed border-white/5 rounded-3xl">
-        <div class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 text-white/10">
-          <Database :size="32" />
+      <div v-else class="text-center py-12 border-2 border-dashed border-white/5 rounded-2xl">
+        <div class="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-3 text-white/8">
+          <Database :size="24" />
         </div>
-        <p class="mono-label opacity-30 italic">Aguardando injeção de fontes secundárias...</p>
+        <p class="text-xs text-zinc-600">Nenhuma fonte adicionada</p>
       </div>
     </div>
   </div>
@@ -286,7 +333,8 @@
 import { 
   Link as LinkIcon, X, Database, Globe, 
   FileText, ExternalLink, Trash2, Pencil, Save,
-  ChevronDown, ChevronUp, Sparkles, Loader2
+  ChevronDown, ChevronUp, Sparkles, Loader2,
+  FileUp, Upload
 } from 'lucide-vue-next'
 
 const props = defineProps<{
@@ -301,6 +349,11 @@ const showForm = ref(false)
 const submitting = ref(false)
 const isExtracting = ref(false)
 const isVDropdownOpen = ref(false)
+
+// ───── PDF Extract State ─────
+const pdfInputRef = ref<HTMLInputElement | null>(null)
+const pdfFile = ref<File | null>(null)
+const isExtractingPdf = ref(false)
 const vDropdownRef = ref<HTMLElement | null>(null)
 
 // ───── Edit State ─────
@@ -445,6 +498,54 @@ async function extractContent() {
   }
 }
 
+// ───── PDF Extraction ─────
+function onPdfSelected(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (file && file.type === 'application/pdf') {
+    pdfFile.value = file
+  }
+}
+
+function clearPdf() {
+  pdfFile.value = null
+  if (pdfInputRef.value) {
+    pdfInputRef.value.value = ''
+  }
+}
+
+async function extractPdf() {
+  if (!pdfFile.value) return
+  
+  isExtractingPdf.value = true
+  try {
+    const formData = new FormData()
+    formData.append('file', pdfFile.value)
+
+    const response = await $fetch<{ success: boolean, data: { title: string, content: string, pageCount: number, wordCount: number } }>('/api/tools/extract-pdf', {
+      method: 'POST',
+      body: formData
+    })
+
+    if (response.success && response.data) {
+      // Preencher título se estiver vazio
+      if (!form.value.title || form.value.title.length < 3) {
+        form.value.title = response.data.title
+      }
+
+      // Preencher conteúdo
+      form.value.content = response.data.content
+
+      console.log(`[DossierSources] ✅ PDF convertido: ${response.data.pageCount} páginas, ${response.data.wordCount.toLocaleString()} palavras`)
+    }
+  } catch (error: any) {
+    console.error('Erro ao converter PDF:', error)
+    alert(error.data?.message || 'Não foi possível converter o PDF. Verifique se o arquivo contém texto selecionável.')
+  } finally {
+    isExtractingPdf.value = false
+  }
+}
+
 const sourceTypes = [
   { id: 'url', label: 'HTTP (Web)', icon: Globe },
   { id: 'text', label: 'Textos Diversos', icon: FileText },
@@ -487,6 +588,7 @@ function resetForm() {
   }
   showForm.value = false
   isVDropdownOpen.value = false
+  clearPdf()
 }
 
 const titleLabel = computed(() => {

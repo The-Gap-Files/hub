@@ -10,7 +10,8 @@ const CreateDossierSchema = z.object({
   tags: z.array(z.string()).optional().default([]),
   visualIdentityContext: z.string().max(500).optional(),
   preferredVisualStyleId: z.string().optional().transform(val => val === '' ? undefined : val),
-  preferredSeedId: z.union([z.string().uuid(), z.literal('')]).optional().transform(val => val === '' ? undefined : val)
+  preferredSeedId: z.union([z.string().uuid(), z.literal('')]).optional().transform(val => val === '' ? undefined : val),
+  channelId: z.string().uuid().optional().transform(val => val === '' ? undefined : val)
 })
 
 export default defineEventHandler(async (event): Promise<DossierResponse> => {
@@ -47,6 +48,7 @@ export default defineEventHandler(async (event): Promise<DossierResponse> => {
       visualIdentityContext: data.visualIdentityContext,
       preferredVisualStyleId: data.preferredVisualStyleId,
       preferredSeedId: preferredSeedId,
+      channelId: data.channelId,
       isProcessed: false
     }
   })

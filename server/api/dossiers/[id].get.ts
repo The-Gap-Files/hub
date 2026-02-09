@@ -16,6 +16,7 @@ export default defineEventHandler(async (event): Promise<DossierWithRelationsRes
   const dossier = await prisma.dossier.findUnique({
     where: { id },
     include: {
+      channel: { select: { id: true, name: true, handle: true } },
       sources: {
         orderBy: { order: 'asc' }
       },
@@ -24,6 +25,9 @@ export default defineEventHandler(async (event): Promise<DossierWithRelationsRes
       },
       notes: {
         orderBy: { order: 'asc' }
+      },
+      persons: {
+        orderBy: [{ relevance: 'asc' }, { order: 'asc' }]
       },
       _count: {
         select: {
@@ -53,12 +57,16 @@ export default defineEventHandler(async (event): Promise<DossierWithRelationsRes
     preferredVisualStyleId: dossier.preferredVisualStyleId,
     preferredSeedId: dossier.preferredSeedId,
     isProcessed: dossier.isProcessed,
+    channelId: dossier.channelId,
+    channelName: dossier.channel?.name ?? null,
+    channelHandle: dossier.channel?.handle ?? null,
     createdAt: dossier.createdAt,
     updatedAt: dossier.updatedAt,
     outputsCount: dossier._count.outputs,
     totalOutputsCost: costs.grandTotal,
     sources: dossier.sources,
     images: dossier.images,
-    notes: dossier.notes
+    notes: dossier.notes,
+    persons: dossier.persons
   }
 })

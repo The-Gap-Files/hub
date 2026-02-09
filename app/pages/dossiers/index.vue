@@ -16,12 +16,20 @@
         <p class="text-zinc-500 font-medium max-w-md">Nexus central de inteligência e vetores de produção documental.</p>
       </div>
 
-      <NuxtLink to="/dossiers/new" class="btn-primary !px-10 !py-4 shadow-glow group/btn">
-        <span class="flex items-center gap-3">
-          <FilePlus :size="20" class="group-hover/btn:rotate-90 transition-transform duration-500" />
-          INICIAR NOVA INVESTIGAÇÃO
-        </span>
-      </NuxtLink>
+      <div class="relative flex items-center gap-4">
+        <!-- Channel Filter -->
+        <select v-model="selectedChannelId" @change="onChannelFilterChange" class="channel-filter">
+          <option value="">Todos os canais</option>
+          <option v-for="ch in channelOptions" :key="ch.id" :value="ch.id">{{ ch.name }}</option>
+        </select>
+
+        <NuxtLink to="/dossiers/new" class="btn-primary !px-10 !py-4 shadow-glow group/btn">
+          <span class="flex items-center gap-3">
+            <FilePlus :size="20" class="group-hover/btn:rotate-90 transition-transform duration-500" />
+            INICIAR NOVA INVESTIGAÇÃO
+          </span>
+        </NuxtLink>
+      </div>
     </header>
 
     <div v-if="loading" class="flex flex-col items-center justify-center py-40 space-y-6">
@@ -60,6 +68,7 @@
             <div class="flex items-center gap-3">
               <span class="mono-label px-2 py-0.5 bg-primary/10 border border-primary/20 rounded-md text-primary group-hover:bg-primary group-hover:text-white transition-all">ID: {{ dossier.id.slice(0, 8) }}</span>
               <span v-if="dossier.category" class="mono-label text-zinc-600 group-hover:text-zinc-400 transition-colors">{{ dossier.category }}</span>
+              <span v-if="dossier.channelName" class="mono-label px-1.5 py-0.5 bg-blue-400/10 border border-blue-400/20 rounded text-blue-400/70 !text-[9px]">{{ dossier.channelName }}</span>
               <span class="text-zinc-800">•</span>
               <span class="mono-label text-zinc-600">{{ new Date(dossier.createdAt).toLocaleDateString('pt-BR') }}</span>
             </div>
@@ -144,18 +153,35 @@ import {
   ChevronLeft
 } from 'lucide-vue-next'
 
+interface ChannelOption {
+  id: string
+  name: string
+}
+
 const dossiers = ref<any[]>([])
 const loading = ref(true)
 const page = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
+const selectedChannelId = ref('')
+const channelOptions = ref<ChannelOption[]>([])
+
+async function loadChannels() {
+  try {
+    const response = await $fetch<any>('/api/channels')
+    channelOptions.value = response.channels.map((ch: any) => ({ id: ch.id, name: ch.name }))
+  } catch {
+    // silencioso
+  }
+}
 
 async function loadDossiers() {
   loading.value = true
   try {
-    const response = await $fetch('/api/dossiers', {
-      query: { page: page.value, pageSize: pageSize.value }
-    })
+    const query: Record<string, any> = { page: page.value, pageSize: pageSize.value }
+    if (selectedChannelId.value) query.channelId = selectedChannelId.value
+
+    const response = await $fetch('/api/dossiers', { query })
     dossiers.value = (response as any).dossiers
     total.value = (response as any).total
   } catch (error) {
@@ -163,6 +189,11 @@ async function loadDossiers() {
   } finally {
     loading.value = false
   }
+}
+
+function onChannelFilterChange() {
+  page.value = 1
+  loadDossiers()
 }
 
 function changePage(newPage: number) {
@@ -178,7 +209,21 @@ function formatCost(totalCost: number): string {
 }
 
 onMounted(() => {
+  loadChannels()
   loadDossiers()
 })
 </script>
 
+<style scoped>
+.channel-filter {
+  @apply bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 text-xs text-white outline-none transition-all duration-300 cursor-pointer appearance-none;
+  @apply hover:border-primary/30 focus:border-primary/50;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.25em 1.25em;
+  padding-right: 2rem;
+}.channel-filter option {
+  @apply bg-[#0C0C12] text-white;
+}
+</style>

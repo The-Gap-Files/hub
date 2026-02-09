@@ -8,6 +8,7 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./server/__tests__/setup.ts'],
     include: ['server/__tests__/**/*.test.ts'],
+    fileParallelism: false
   },
   resolve: {
     alias: {

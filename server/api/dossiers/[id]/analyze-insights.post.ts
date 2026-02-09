@@ -25,7 +25,8 @@ export default defineEventHandler(async (event) => {
     include: {
       sources: { orderBy: { order: 'asc' } },
       images: { orderBy: { order: 'asc' } },
-      notes: { orderBy: { order: 'asc' } }
+      notes: { orderBy: { order: 'asc' } },
+      persons: { orderBy: { order: 'asc' } }
     }
   })
 
@@ -64,6 +65,9 @@ export default defineEventHandler(async (event) => {
         })),
         images: dossier.images.map(i => ({
           description: i.description
+        })),
+        existingPersons: dossier.persons.map(p => ({
+          name: p.name
         }))
       },
       {
@@ -73,8 +77,8 @@ export default defineEventHandler(async (event) => {
       }
     )
 
-    // Obter a próxima ordem disponível
-    const maxOrder = dossier.notes.reduce((max, n) => Math.max(max, n.order), -1)
+    // Obter a próxima ordem disponível para notas
+    const maxNoteOrder = dossier.notes.reduce((max, n) => Math.max(max, n.order), -1)
 
     // Salvar cada item como nota no dossiê
     const createdNotes = await prisma.$transaction(
@@ -84,11 +88,35 @@ export default defineEventHandler(async (event) => {
             dossierId,
             content: item.content,
             noteType: item.noteType,
-            order: maxOrder + 1 + index
+            order: maxNoteOrder + 1 + index
           }
         })
       )
     )
+
+    // Salvar pessoas extraídas como DossierPerson
+    let createdPersons: any[] = []
+    if (result.persons.length > 0) {
+      const maxPersonOrder = dossier.persons.reduce((max, p) => Math.max(max, p.order), -1)
+
+      createdPersons = await prisma.$transaction(
+        result.persons.map((person, index) =>
+          prisma.dossierPerson.create({
+            data: {
+              dossierId,
+              name: person.name,
+              role: person.role || null,
+              description: person.description || null,
+              visualDescription: person.visualDescription || null,
+              aliases: person.aliases || [],
+              relevance: person.relevance || 'secondary',
+              order: maxPersonOrder + 1 + index
+            }
+          })
+        )
+      )
+      console.log(`[AnalyzeInsights] 👤 ${createdPersons.length} pessoas salvas no dossiê ${dossierId}`)
+    }
 
     console.log(`[AnalyzeInsights] 💾 ${createdNotes.length} notas salvas no dossiê ${dossierId}`)
 
@@ -98,13 +126,15 @@ export default defineEventHandler(async (event) => {
       provider: result.provider,
       model: result.model,
       usage: result.usage,
-      detail: 'Análise neural – insights e curiosidades'
+      detail: 'Análise neural – insights, curiosidades e pessoas-chave'
     }).catch(err => console.error('[AnalyzeInsights] CostLog:', err))
 
     return {
       success: true,
       notes: createdNotes,
+      persons: createdPersons,
       count: createdNotes.length,
+      personsCount: createdPersons.length,
       usage: result.usage,
       provider: result.provider,
       model: result.model

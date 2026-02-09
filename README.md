@@ -1,81 +1,95 @@
-# The Gap Files - Video Automation Engine
+# The Gap Files — Hub
 
-Sistema de automação para criação de vídeos de YouTube focado em **História do Mundo** e **Teorias da Conspiração**.
+> *"O que aconteceu nos intervalos que ninguém viu?"*
+
+Hub de produção automatizada de vídeos para o canal **The Gap Files**. Mistérios, conspirações e eventos inexplicáveis da história.
 
 ## 🎬 Visão Geral
 
-Este projeto automatiza todo o pipeline de produção de vídeos:
+O Hub orquestra todo o pipeline de produção de vídeos — da pesquisa ao vídeo final — usando uma **arquitetura Dossier-First**:
 
-1. **Roteirização** - Geração de scripts segmentados em cenas (narração + descrição visual)
-2. **Áudio** - Conversão do roteiro em narração com vozes de alta qualidade
-3. **Imagens** - Geração de imagens cinematográficas para cada cena
-4. **Edição** - Montagem do vídeo final com áudio, imagens e legendas
+```
+Dossier → Script → Audio → Imagens → Motion → Renderização → Legendas → Aprovação
+```
+
+1. **Dossier** — Dossiê com texto-fonte, fontes secundárias, imagens e notas
+2. **Script** — Roteiro segmentado em cenas (narração + descrição visual)
+3. **Audio** — Narração com vozes de alta qualidade (ElevenLabs)
+4. **Imagens** — Geração cinematográfica com estilos visuais e seeds
+5. **Motion** — Animação de cenas via modelos de vídeo IA
+6. **Renderização** — Montagem final com FFmpeg
+7. **Legendas** — Auto-captioning via ElevenLabs Scribe
+8. **Aprovação** — Revisão e aprovação do vídeo final
 
 ## 🛠️ Stack Tecnológica
 
 | Componente | Tecnologia |
 |------------|------------|
-| Frontend/Orquestrador | Nuxt 4 (Vue 3) |
-| Backend/API | Nitro (Server Engine do Nuxt) |
-| Banco de Dados | PostgreSQL + Prisma ORM |
-| Scripts LLM | OpenAI GPT-4 / Anthropic / Gemini |
+| Frontend | Nuxt 4 (Vue 3) + TailwindCSS |
+| Backend/API | Nitro (Server Engine) |
+| Banco de Dados | PostgreSQL + Prisma 7 |
+| State Management | Pinia |
+| Scripts LLM | Anthropic Claude |
 | Text-to-Speech | ElevenLabs (Multilingual v2) |
-| Image Generation | Replicate (FLUX) / Stable Diffusion |
-| Video Editing | FFmpeg (em desenvolvimento) |
+| Image Generation | Replicate (Luma Photon Flash) |
+| Motion Generation | Replicate / RunPod |
+| Video Editing | FFmpeg |
+| Auto-Captioning | ElevenLabs Dubbing API (Scribe v2) |
 
 ## 📁 Estrutura do Projeto
 
 ```
 hub/
-├── app/                          # Frontend Nuxt
-│   ├── app.vue                   # Dashboard principal
-│   └── stores/                   # Pinia stores
-│       └── video.store.ts        # Estado dos vídeos
+├── app/                              # Frontend Nuxt
+│   ├── layouts/default.vue           # Sidebar + navigation
+│   ├── pages/
+│   │   ├── index.vue                 # Terminal Central (dashboard)
+│   │   ├── channels/index.vue        # Gestão de canais (CRUD)
+│   │   ├── dossiers/
+│   │   │   ├── index.vue             # Lista de dossiers
+│   │   │   ├── new.vue               # Criar novo dossier
+│   │   │   └── [id]/
+│   │   │       ├── index.vue         # Detalhe do dossier
+│   │   │       └── produce.vue       # Modal de produção (5 steps)
+│   │   ├── outputs/[id].vue          # Detalhe do output (pipeline)
+│   │   └── settings/seeds.vue        # Banco genético (seeds)
+│   └── components/                   # Componentes reutilizáveis
 │
-├── server/                       # Backend Nitro
-│   ├── api/                      # Endpoints REST
-│   │   └── videos/
-│   │       ├── index.get.ts      # GET /api/videos
-│   │       ├── index.post.ts     # POST /api/videos
-│   │       └── [id].get.ts       # GET /api/videos/:id
-│   │
-│   ├── services/                 # Lógica de negócio
-│   │   ├── providers/            # Provedores de IA (modular)
-│   │   │   ├── script/           # Geradores de roteiro
-│   │   │   ├── tts/              # Text-to-Speech
-│   │   │   ├── image/            # Geradores de imagem
-│   │   │   └── index.ts          # Factory & Manager
-│   │   │
-│   │   └── pipeline/             # Orquestração do pipeline
-│   │       └── video-pipeline.service.ts
-│   │
-│   ├── plugins/                  # Plugins Nitro
-│   │   └── providers.ts          # Inicialização dos providers
-│   │
-│   ├── types/                    # TypeScript interfaces
-│   │   └── ai-providers.ts       # Contratos dos provedores
-│   │
-│   └── utils/                    # Utilitários
-│       └── prisma.ts             # Singleton do Prisma
+├── server/                           # Backend Nitro
+│   ├── api/                          # Endpoints REST
+│   │   ├── channels/                 # CRUD de canais
+│   │   ├── dossiers/                 # CRUD de dossiers + outputs
+│   │   ├── styles/                   # Visual + Script styles
+│   │   └── tools/                    # Ferramentas (extração, resumo)
+│   ├── services/                     # Lógica de negócio
+│   │   ├── providers/                # Provedores de IA (modular)
+│   │   │   ├── script/               # Anthropic, OpenAI
+│   │   │   ├── tts/                  # ElevenLabs, Replicate
+│   │   │   ├── image/                # Replicate
+│   │   │   └── motion/               # Replicate, RunPod
+│   │   └── pipeline/                 # Orquestração do pipeline
+│   ├── constants/                    # Estilos, formatos, classificações
+│   ├── types/                        # TypeScript interfaces
+│   └── __tests__/                    # Testes de integração
 │
-├── prisma/                       # Banco de dados
-│   └── schema.prisma             # Definição dos modelos
+├── prisma/
+│   ├── schema.prisma                 # Modelos (Dossier, Output, Channel, etc.)
+│   └── seed-thegapfiles-channel.ts   # Seed do canal principal
 │
-└── .env.example                  # Variáveis de ambiente
+└── scripts/                          # Utilitários
 ```
 
 ## 🚀 Começando
 
-### 1. Pré-requisitos
+### Pré-requisitos
 
-- Node.js 20+
-- PostgreSQL 15+
-- Contas nas APIs de IA (OpenAI, ElevenLabs, Replicate)
+- Node.js 22+
+- PostgreSQL 17+
+- Contas nas APIs: Anthropic, ElevenLabs, Replicate
 
-### 2. Instalação
+### Instalação
 
 ```bash
-# Clonar e instalar
 cd hub
 npm install
 
@@ -84,82 +98,75 @@ cp .env.example .env
 # Editar .env com suas credenciais
 ```
 
-### 3. Configurar Banco de Dados
+### Banco de Dados
 
 ```bash
-# Gerar cliente Prisma
-npx prisma generate
+# Sincronizar schema com o banco
+npx prisma db push
 
-# Aplicar migrations
-npx prisma migrate dev --name init
+# Criar canal inicial
+npx tsx prisma/seed-thegapfiles-channel.ts
+
+# (Opcional) Criar banco de teste
+node scripts/create-test-db.cjs
+npx prisma db push --url "postgresql://...thegapfile_db_test?schema=public"
 ```
 
-### 4. Executar
+### Executar
 
 ```bash
 # Desenvolvimento
 npm run dev
 
-# Produção
-npm run build
-npm run preview
+# Testes (usa banco separado _test)
+npm test
+
+# Docker
+npm run docker:build
+npm run docker:run
 ```
 
-## 🔌 Modularidade dos Provedores
+## 🔌 Provedores de IA (Modular)
 
-O sistema foi projetado para **trocar APIs de IA facilmente**. Cada tipo de provedor implementa uma interface:
+O sistema suporta troca de provedores via `.env`:
 
-```typescript
-// Para trocar o gerador de scripts:
-// 1. Implemente IScriptGenerator
-// 2. Registre no factory (server/services/providers/index.ts)
-// 3. Altere SCRIPT_PROVIDER no .env
-
-interface IScriptGenerator {
-  generate(request: ScriptGenerationRequest): Promise<ScriptGenerationResponse>
-  getName(): string
-}
+```env
+SCRIPT_PROVIDER="anthropic"    # ou "openai"
+TTS_PROVIDER="elevenlabs"      # narração
+IMAGE_PROVIDER="replicate"     # imagens
+MOTION_PROVIDER="replicate"    # motion/vídeo
 ```
 
-### Provedores Suportados
-
-| Tipo | Provedores Disponíveis |
-|------|------------------------|
-| Script | OpenAI ✅, Anthropic 🔜, Gemini 🔜 |
-| TTS | ElevenLabs ✅, OpenAI TTS 🔜 |
-| Image | Replicate ✅, DALL-E 🔜, Midjourney 🔜 |
+Cada provedor implementa uma interface (`IScriptGenerator`, `ITTSProvider`, etc.) — basta trocar no `.env`.
 
 ## 📊 Modelo de Dados
 
-O schema do banco suporta todo o ciclo de vida do vídeo:
+### Entidades principais
 
-- **Video** - Entidade principal com status do pipeline
-- **Script** - Roteiro completo gerado
-- **Scene** - Segmentos com narração + descrição visual
-- **SceneImage** - Imagens geradas para cada cena
-- **AudioTrack** - Trilhas de áudio (narração, música)
-- **PipelineExecution** - Logs de execução
+- **Channel** — Canal de distribuição (YouTube, TikTok, etc.)
+- **Dossier** — Dossiê com pesquisa e fontes
+- **Output** — Vídeo produzido (com script, scenes, audio, images)
+- **Seed** — Código genético visual (determina estilo das imagens)
 
-### Status do Vídeo
+### Pipeline do Output
 
 ```
-PENDING → SCRIPT_GENERATING → SCRIPT_READY 
-        → AUDIO_GENERATING → AUDIO_READY 
-        → IMAGES_GENERATING → IMAGES_READY 
-        → RENDERING → COMPLETED
-                   ↓
-                FAILED
+PENDING → SCRIPT → AUDIO → IMAGES → MOTION → RENDERED → COMPLETED
+                                                  ↓
+                                               FAILED
 ```
 
-## 📝 Roadmap
+## 🧪 Testes
 
-- [ ] Integração FFmpeg para renderização
-- [ ] Suporte a Anthropic Claude
-- [ ] Geração de thumbnails automática
-- [ ] Legendas dinâmicas (captions)
-- [ ] Fila de jobs (BullMQ)
-- [ ] Upload automático para YouTube
+Os testes usam um banco PostgreSQL separado (`thegapfile_db_test`) com:
+- **Auto-sync** do schema via `prisma db push` no `beforeAll`
+- **Isolamento** via `TRUNCATE` no `beforeEach`
+- **Guard de segurança** que impede rodar contra o banco de produção
+
+```bash
+npm test
+```
 
 ## 📄 Licença
 
-Projeto privado - The Gap Files © 2026
+Projeto privado — The Gap Files © 2026
