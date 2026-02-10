@@ -68,7 +68,7 @@
             <div class="flex items-center gap-3">
               <span class="mono-label px-2 py-0.5 bg-primary/10 border border-primary/20 rounded-md text-primary group-hover:bg-primary group-hover:text-white transition-all">ID: {{ dossier.id.slice(0, 8) }}</span>
               <span v-if="dossier.category" class="mono-label text-zinc-600 group-hover:text-zinc-400 transition-colors">{{ dossier.category }}</span>
-              <span v-if="dossier.channelName" class="mono-label px-1.5 py-0.5 bg-blue-400/10 border border-blue-400/20 rounded text-blue-400/70 !text-[9px]">{{ dossier.channelName }}</span>
+              <span v-if="dossier.channelName" class="mono-label px-1.5 py-0.5 bg-blue-400/10 border border-blue-400/20 rounded text-blue-400/70 ">{{ dossier.channelName }}</span>
               <span class="text-zinc-800">•</span>
               <span class="mono-label text-zinc-600">{{ new Date(dossier.createdAt).toLocaleDateString('pt-BR') }}</span>
             </div>
@@ -85,23 +85,23 @@
             <div class="flex flex-wrap gap-6 pt-2">
               <div class="flex items-center gap-2 group/stat">
                 <Database :size="14" class="text-zinc-700 group-hover/stat:text-white transition-colors" />
-                <span class="mono-label !text-[10px] text-zinc-500 group-hover/stat:text-white transition-colors">{{ dossier.sourcesCount || 0 }} <span class="opacity-30">fontes</span></span>
+                <span class="mono-label  text-zinc-500 group-hover/stat:text-white transition-colors">{{ dossier.sourcesCount || 0 }} <span class="opacity-30">fontes</span></span>
               </div>
               <div class="flex items-center gap-2 group/stat">
                 <ImageIcon :size="14" class="text-zinc-700 group-hover/stat:text-white transition-colors" />
-                <span class="mono-label !text-[10px] text-zinc-500 group-hover/stat:text-white transition-colors">{{ dossier.imagesCount || 0 }} <span class="opacity-30">assets</span></span>
+                <span class="mono-label  text-zinc-500 group-hover/stat:text-white transition-colors">{{ dossier.imagesCount || 0 }} <span class="opacity-30">assets</span></span>
               </div>
               <div class="flex items-center gap-2 group/stat">
                 <Brain :size="14" class="text-zinc-700 group-hover/stat:text-white transition-colors" />
-                <span class="mono-label !text-[10px] text-zinc-500 group-hover/stat:text-white transition-colors">{{ dossier.notesCount || 0 }} <span class="opacity-30">insights</span></span>
+                <span class="mono-label  text-zinc-500 group-hover/stat:text-white transition-colors">{{ dossier.notesCount || 0 }} <span class="opacity-30">insights</span></span>
               </div>
               <div class="flex items-center gap-2 group/stat border-l border-white/5 pl-6">
                 <Film :size="14" class="text-primary group-hover/stat:text-primary-foreground transition-colors" />
-                <span class="mono-label !text-[10px] text-primary group-hover/stat:text-primary transition-colors">{{ dossier.outputsCount || 0 }} <span class="opacity-40 uppercase">renders</span></span>
+                <span class="mono-label  text-primary group-hover/stat:text-primary transition-colors">{{ dossier.outputsCount || 0 }} <span class="opacity-40 uppercase">renders</span></span>
               </div>
               <div v-if="dossier.totalOutputsCost != null && dossier.totalOutputsCost > 0" class="flex items-center gap-2 group/stat border-l border-white/5 pl-6">
-                <span class="mono-label !text-[10px] text-emerald-400/90 group-hover/stat:text-emerald-400 transition-colors">{{ formatCost(dossier.totalOutputsCost) }}</span>
-                <span class="opacity-40 uppercase !text-[9px]">custo</span>
+                <span class="mono-label  text-emerald-400/90 group-hover/stat:text-emerald-400 transition-colors">{{ formatCost(dossier.totalOutputsCost) }}</span>
+                <span class="opacity-40 uppercase ">custo</span>
               </div>
             </div>
           </div>
@@ -129,7 +129,7 @@
       </button>
       
       <div class="flex flex-col items-center">
-        <span class="mono-label !text-[10px] text-primary tracking-[0.2em]">Matrix Sector</span>
+        <span class="mono-label  text-primary tracking-[0.2em]">Matrix Sector</span>
         <span class="text-lg font-black text-white italic">
            {{ page }} / {{ Math.ceil(total / pageSize) }}
         </span>

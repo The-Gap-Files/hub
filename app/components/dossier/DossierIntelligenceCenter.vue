@@ -8,7 +8,7 @@
         </div>
         <div>
           <h2 class="text-sm font-bold text-white">Centro de Inteligência</h2>
-          <p class="text-[11px] text-zinc-500 mt-0.5">Pessoas, insights e dados extraídos do dossiê</p>
+          <p class="text-xs text-zinc-500 mt-0.5">Pessoas, insights e dados extraídos do dossiê</p>
         </div>
       </div>
       <div class="flex items-center gap-4">
@@ -16,31 +16,67 @@
         <div class="hidden md:flex items-center gap-3">
           <div class="flex items-center gap-1.5">
             <span class="text-sm font-bold font-mono text-white">{{ personsCount }}</span>
-            <span class="text-[10px] text-zinc-500">pessoas</span>
+            <span class="text-xs text-zinc-500">pessoas</span>
           </div>
           <div class="w-px h-3 bg-white/8"></div>
           <div class="flex items-center gap-1.5">
             <span class="text-sm font-bold font-mono text-white">{{ totalNotesCount }}</span>
-            <span class="text-[10px] text-zinc-500">notas</span>
+            <span class="text-xs text-zinc-500">notas</span>
           </div>
         </div>
-        <!-- Análise Neural Button -->
-        <button 
-          @click="runAnalysis"
-          :disabled="isAnalyzing"
-          class="nic-analyze-btn"
-          :class="isAnalyzing ? 'nic-analyze-btn--active' : ''"
-        >
-          <Loader2 v-if="isAnalyzing" :size="13" class="animate-spin" />
-          <Sparkles v-else :size="13" />
-          <span>{{ isAnalyzing ? 'Analisando...' : 'Análise Neural' }}</span>
-        </button>
+        <!-- Análise Neural Button + Popover -->
+        <div class="relative">
+          <button 
+            @click="handleAnalysisClick"
+            :disabled="isAnalyzing"
+            class="nic-analyze-btn"
+            :class="isAnalyzing ? 'nic-analyze-btn--active' : ''"
+          >
+            <Loader2 v-if="isAnalyzing" :size="13" class="animate-spin" />
+            <Sparkles v-else :size="13" />
+            <span>{{ isAnalyzing ? 'Analisando...' : 'Análise Neural' }}</span>
+          </button>
+
+          <!-- Popover de escolha -->
+          <Transition name="popover">
+            <div v-if="showAnalysisMenu" class="nic-analysis-popover">
+              <div class="nic-popover-header">
+                <Brain :size="13" class="text-amber-500" />
+                <span>Como deseja analisar?</span>
+                <button @click="showAnalysisMenu = false" class="nic-popover-close">
+                  <X :size="12" />
+                </button>
+              </div>
+              <div class="nic-popover-options">
+                <button @click="runAnalysis(true)" class="nic-popover-option nic-popover-option--reset">
+                  <div class="nic-popover-option-icon reset-icon">
+                    <RotateCcw :size="14" />
+                  </div>
+                  <div class="nic-popover-option-text">
+                    <strong>Refazer tudo</strong>
+                    <span>Apaga todas as notas e pessoas existentes e refaz do zero</span>
+                  </div>
+                </button>
+                <button @click="runAnalysis(false)" class="nic-popover-option nic-popover-option--add">
+                  <div class="nic-popover-option-icon add-icon">
+                    <Plus :size="14" />
+                  </div>
+                  <div class="nic-popover-option-text">
+                    <strong>Adicionar novas</strong>
+                    <span>Mantém dados existentes e adiciona novas informações</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </Transition>
+        </div>
       </div>
     </header>
 
     <!-- Banner de resultado -->
     <div v-if="analysisResult" class="nic-analysis-banner">
-      <span class="text-[10px] font-mono font-bold text-amber-400/80">
+      <span class="text-xs font-mono font-bold text-amber-400/80">
+        <template v-if="analysisResult.cleared">🗑️ Limpo e recriado: </template>
         +{{ analysisResult.notesCount }} notas +{{ analysisResult.personsCount }} pessoas via {{ analysisResult.provider }}
       </span>
       <button @click="analysisResult = null" class="text-zinc-600 hover:text-zinc-400 transition-colors">
@@ -89,7 +125,7 @@
                   </div>
                 </div>
 
-                <p v-if="person.description" class="text-[11px] text-zinc-500 leading-relaxed mt-1">{{ person.description }}</p>
+                <p v-if="person.description" class="text-xs text-zinc-500 leading-relaxed mt-1">{{ person.description }}</p>
 
                 <div v-if="person.aliases?.length" class="flex flex-wrap gap-1 mt-2">
                   <span v-for="alias in person.aliases" :key="alias" class="nic-tag person-tag">{{ alias }}</span>
@@ -97,11 +133,11 @@
 
                 <Transition name="expand">
                   <div v-if="expandedPerson === person.id && person.visualDescription" class="mt-2 pt-2 border-t border-white/5" @click.stop>
-                    <span class="text-[9px] text-zinc-500 font-medium flex items-center gap-1 mb-1">
+                    <span class="text-xs text-zinc-500 font-medium flex items-center gap-1 mb-1">
                       <Eye :size="10" />
                       Descrição Visual (IA)
                     </span>
-                    <p class="text-[11px] text-zinc-400 italic leading-relaxed">{{ person.visualDescription }}</p>
+                    <p class="text-xs text-zinc-400 italic leading-relaxed">{{ person.visualDescription }}</p>
                   </div>
                 </Transition>
               </div>
@@ -135,7 +171,7 @@
                   </button>
                 </div>
               </div>
-              <button v-if="insightNotes.length > maxDisplayed" @click="maxDisplayed += 20" class="text-[10px] text-primary hover:text-primary/80 font-medium mt-2 transition-colors">
+              <button v-if="insightNotes.length > maxDisplayed" @click="maxDisplayed += 20" class="text-xs text-primary hover:text-primary/80 font-medium mt-2 transition-colors">
                 Mostrar mais ({{ insightNotes.length - maxDisplayed }} restantes)
               </button>
             </div>
@@ -212,7 +248,7 @@
         <div class="nic-query-terminal">
           <div class="px-4 py-3 border-b border-white/5 flex items-center gap-2">
             <Terminal :size="13" class="text-emerald-500" />
-            <span class="text-[10px] font-bold text-zinc-400">Consulta de Inteligência</span>
+            <span class="text-xs font-bold text-zinc-400">Consulta de Inteligência</span>
           </div>
           <div class="nic-query-input-row">
             <div class="nic-query-prompt">›</div>
@@ -221,7 +257,7 @@
               type="text"
               placeholder="Pergunte sobre o dossiê..."
               class="nic-query-input"
-              @keydown.enter="submitQuery('docs')"
+              @keydown.enter="submitQuery('both')"
               :disabled="isQuerying"
             />
           </div>
@@ -242,19 +278,27 @@
               <Globe :size="11" />
               <span>Web</span>
             </button>
+            <button 
+              @click="submitQuery('both')" 
+              :disabled="!queryText.trim() || isQuerying"
+              class="nic-query-btn nic-query-btn--both"
+            >
+              <Layers :size="11" />
+              <span>Docs + Web</span>
+            </button>
           </div>
 
           <!-- Query Result -->
           <div v-if="isQuerying" class="nic-query-result nic-query-loading">
             <Loader2 :size="14" class="animate-spin text-amber-500/60" />
-            <span class="text-[10px] font-mono text-amber-500/60">Processando...</span>
+            <span class="text-xs font-mono text-amber-500/60">Processando...</span>
           </div>
 
           <div v-else-if="queryResult" class="nic-query-result">
             <div class="mb-2">
-              <span class="inline-flex items-center gap-1 text-[9px] font-mono font-bold text-zinc-500 px-1.5 py-0.5 rounded bg-white/5">
-                <component :is="queryResult.source === 'docs' ? FileText : Globe" :size="9" />
-                {{ queryResult.source === 'docs' ? 'Documento' : 'Web' }}
+              <span class="inline-flex items-center gap-1 text-xs font-mono font-bold text-zinc-500 px-1.5 py-0.5 rounded bg-white/5">
+              <component :is="queryResult.source === 'docs' ? FileText : queryResult.source === 'web' ? Globe : Layers" :size="9" />
+                {{ queryResult.source === 'docs' ? 'Documento' : queryResult.source === 'web' ? 'Web' : 'Docs + Web' }}
               </span>
             </div>
             <p class="text-xs text-zinc-300 leading-relaxed whitespace-pre-wrap">{{ queryResult.content }}</p>
@@ -279,7 +323,7 @@
 import { 
   Brain, Users, User, Lightbulb, Search, Database, Terminal,
   ChevronUp, ChevronDown, Sparkles, Loader2, X, Trash2,
-  Eye, FileText, Globe, BookmarkPlus
+  Eye, FileText, Globe, BookmarkPlus, RotateCcw, Plus, Layers
 } from 'lucide-vue-next'
 
 const props = defineProps<{
@@ -294,7 +338,7 @@ const emit = defineEmits(['updated'])
 const notes = ref([...props.initialNotes])
 const persons = ref([...props.initialPersons])
 const isAnalyzing = ref(false)
-const analysisResult = ref<{ notesCount: number; personsCount: number; provider: string } | null>(null)
+const analysisResult = ref<{ notesCount: number; personsCount: number; provider: string; cleared: boolean } | null>(null)
 const expandedPerson = ref<string | null>(null)
 const maxDisplayed = ref(20)
 
@@ -305,7 +349,7 @@ const activeSection = ref<'persons' | 'insights' | 'curiosities' | 'research' | 
 const queryText = ref('')
 const isQuerying = ref(false)
 const savingQuery = ref(false)
-const queryResult = ref<{ content: string; source: 'docs' | 'web'; noteType: string } | null>(null)
+const queryResult = ref<{ content: string; source: 'docs' | 'web' | 'both'; noteType: string } | null>(null)
 
 // Computed
 const insightNotes = computed(() => notes.value.filter(n => n.noteType === 'insight'))
@@ -325,8 +369,23 @@ function togglePerson(id: string) {
   expandedPerson.value = expandedPerson.value === id ? null : id
 }
 
+// Popover de análise
+const showAnalysisMenu = ref(false)
+
+function handleAnalysisClick() {
+  // Se já existem dados, mostrar menu de escolha
+  const hasExistingData = notes.value.length > 0 || persons.value.length > 0
+  if (hasExistingData) {
+    showAnalysisMenu.value = !showAnalysisMenu.value
+  } else {
+    // Sem dados existentes, executa direto (modo adicionar)
+    runAnalysis(false)
+  }
+}
+
 // Analysis
-async function runAnalysis() {
+async function runAnalysis(clearExisting: boolean) {
+  showAnalysisMenu.value = false
   isAnalyzing.value = true
   analysisResult.value = null
   try {
@@ -336,18 +395,28 @@ async function runAnalysis() {
       persons: any[]
       count: number
       personsCount: number
+      cleared: boolean
       provider: string
       model: string
     }>(`/api/dossiers/${props.dossierId}/analyze-insights`, {
-      method: 'POST'
+      method: 'POST',
+      body: { clearExisting }
     })
     if (data.success) {
-      if (data.notes.length > 0) notes.value.unshift(...data.notes)
-      if (data.persons.length > 0) persons.value.unshift(...data.persons)
+      if (data.cleared) {
+        // Se limpou, substituir tudo
+        notes.value = [...data.notes]
+        persons.value = [...data.persons]
+      } else {
+        // Se adicionou, inserir no início
+        if (data.notes.length > 0) notes.value.unshift(...data.notes)
+        if (data.persons.length > 0) persons.value.unshift(...data.persons)
+      }
       analysisResult.value = {
         notesCount: data.count,
         personsCount: data.personsCount,
-        provider: `${data.provider} (${data.model})`
+        provider: `${data.provider} (${data.model})`,
+        cleared: data.cleared
       }
       emit('updated')
     }
@@ -383,7 +452,7 @@ async function deletePerson(id: string) {
 }
 
 // Intelligence Query
-async function submitQuery(source: 'docs' | 'web') {
+async function submitQuery(source: 'docs' | 'web' | 'both') {
   if (!queryText.value.trim()) return
   isQuerying.value = true
   queryResult.value = null
@@ -466,7 +535,7 @@ watch(() => props.initialPersons, (newVal) => { persons.value = [...newVal] })
   gap: 5px;
   padding: 6px 14px;
   border-radius: 8px;
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -566,14 +635,14 @@ watch(() => props.initialPersons, (newVal) => { persons.value = [...newVal] })
 .research-icon { background: rgba(6, 182, 212, 0.12); color: #06b6d4; }
 
 .nic-section-title {
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: hsl(var(--foreground));
 }
 
 .nic-badge {
   font-family: 'Fira Code', monospace;
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   padding: 1px 6px;
   border-radius: 4px;
   background: hsl(var(--muted));
@@ -590,7 +659,7 @@ watch(() => props.initialPersons, (newVal) => { persons.value = [...newVal] })
 }
 
 .nic-empty p {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: hsl(var(--muted-foreground));
   opacity: 0.5;
 }
@@ -656,7 +725,7 @@ watch(() => props.initialPersons, (newVal) => { persons.value = [...newVal] })
 
 .nic-person-role {
   font-family: 'Fira Code', monospace;
-  font-size: 0.55rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   padding: 1px 6px;
@@ -669,7 +738,7 @@ watch(() => props.initialPersons, (newVal) => { persons.value = [...newVal] })
 
 .nic-relevance-badge {
   font-family: 'Fira Code', monospace;
-  font-size: 0.5rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   padding: 1px 5px;
@@ -683,7 +752,7 @@ watch(() => props.initialPersons, (newVal) => { persons.value = [...newVal] })
 
 .nic-tag {
   font-family: 'Fira Code', monospace;
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   padding: 0 5px;
   border-radius: 3px;
   background: hsl(var(--muted));
@@ -749,7 +818,7 @@ watch(() => props.initialPersons, (newVal) => { persons.value = [...newVal] })
 
 .nic-note-date {
   font-family: 'Fira Code', monospace;
-  font-size: 0.55rem;
+  font-size: 0.75rem;
   color: hsl(var(--muted-foreground) / 0.4);
 }
 
@@ -784,7 +853,7 @@ watch(() => props.initialPersons, (newVal) => { persons.value = [...newVal] })
   outline: none;
   padding: 0.75rem 0;
   font-family: 'Fira Code', monospace;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: hsl(var(--foreground));
 }
 
@@ -803,7 +872,7 @@ watch(() => props.initialPersons, (newVal) => { persons.value = [...newVal] })
   padding: 5px 10px;
   border-radius: 6px;
   font-family: 'Fira Code', monospace;
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   font-weight: 700;
   transition: all 200ms ease;
   cursor: pointer;
@@ -835,6 +904,18 @@ watch(() => props.initialPersons, (newVal) => { persons.value = [...newVal] })
   color: #10b981;
 }
 
+.nic-query-btn--both {
+  background: rgba(245, 158, 11, 0.06);
+  border: 1px solid rgba(245, 158, 11, 0.12);
+  color: rgba(245, 158, 11, 0.6);
+}
+
+.nic-query-btn--both:hover:not(:disabled) {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.25);
+  color: #f59e0b;
+}
+
 /* Query Result */
 .nic-query-result {
   margin: 0 0.75rem 0.75rem;
@@ -858,7 +939,7 @@ watch(() => props.initialPersons, (newVal) => { persons.value = [...newVal] })
   gap: 4px;
   padding: 4px 10px;
   border-radius: 6px;
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   font-weight: 600;
   background: rgba(16, 185, 129, 0.08);
   border: 1px solid rgba(16, 185, 129, 0.15);
@@ -876,7 +957,7 @@ watch(() => props.initialPersons, (newVal) => { persons.value = [...newVal] })
   gap: 4px;
   padding: 4px 10px;
   border-radius: 6px;
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   font-weight: 600;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid hsl(var(--border));
@@ -895,4 +976,119 @@ watch(() => props.initialPersons, (newVal) => { persons.value = [...newVal] })
 .expand-enter-active, .expand-leave-active { transition: all 200ms ease; overflow: hidden; }
 .expand-enter-from, .expand-leave-to { opacity: 0; max-height: 0; }
 .expand-enter-to, .expand-leave-from { opacity: 1; max-height: 200px; }
+
+/* Analysis Popover */
+.nic-analysis-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 320px;
+  background: hsl(240 10% 7%);
+  border: 1px solid hsl(var(--border));
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.03);
+  z-index: 50;
+}
+
+.nic-popover-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+
+.nic-popover-close {
+  margin-left: auto;
+  color: hsl(var(--muted-foreground) / 0.4);
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+
+.nic-popover-close:hover { color: hsl(var(--foreground)); }
+
+.nic-popover-options {
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  gap: 4px;
+}
+
+.nic-popover-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: all 200ms ease;
+}
+
+.nic-popover-option:hover {
+  background: hsl(var(--muted) / 0.4);
+}
+
+.nic-popover-option--reset:hover {
+  border-color: rgba(239, 68, 68, 0.15);
+  background: rgba(239, 68, 68, 0.04);
+}
+
+.nic-popover-option--add:hover {
+  border-color: rgba(16, 185, 129, 0.15);
+  background: rgba(16, 185, 129, 0.04);
+}
+
+.nic-popover-option-icon {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.reset-icon {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.add-icon {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.nic-popover-option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nic-popover-option-text strong {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+
+.nic-popover-option-text span {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.4;
+}
+
+/* Popover transition */
+.popover-enter-active { transition: all 200ms ease; }
+.popover-leave-active { transition: all 150ms ease; }
+.popover-enter-from { opacity: 0; transform: translateY(-6px) scale(0.96); }
+.popover-enter-to { opacity: 1; transform: translateY(0) scale(1); }
+.popover-leave-from { opacity: 1; transform: translateY(0) scale(1); }
+.popover-leave-to { opacity: 0; transform: translateY(-4px) scale(0.98); }
 </style>

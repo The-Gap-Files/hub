@@ -39,6 +39,41 @@ Para cada teaser, produza:
 - **format**: "teaser-tiktok" ou "teaser-reels"
 - **estimatedViews**: Estimativa de views na plataforma
 
+### ESTILO VISUAL (nível do plano — ÚNICO)
+
+Antes de gerar os itens individuais, escolha UM estilo visual que melhor represente o dossiê:
+
+- **visualStyleId** + **visualStyleName**: Escolha entre os IDs disponíveis no catálogo.
+
+Este estilo será compartilhado por TODOS os itens (Full Video e Teasers). Isso garante coerência visual e identidade do dossiê.
+
+### DIREÇÃO CRIATIVA POR ITEM
+
+Para CADA item (Full Video e cada Teaser), você DEVE atribuir:
+
+- **scriptStyleId** + **scriptStyleName**: Qual estilo de roteiro usar. Pode variar por item.
+- **editorialObjectiveId** + **editorialObjectiveName**: Qual objetivo editorial seguir. Pode variar por item.
+
+Regras para atribuição:
+1. Teasers mais curtos favorecem estilos mais agressivos e virais
+2. O Full Video favorece estilos com mais profundidade e imersão
+3. Considere o ângulo narrativo de cada teaser ao atribuir estilos
+4. Se uma Direção Criativa pré-aprovada foi fornecida, use-a como GUIA preferencial
+
+### VISUAL PROMPT (Prévia do Mundo)
+
+Para CADA item (Full Video e cada Teaser), você DEVE gerar um **visualPrompt** — um prompt de imagem pronto para ser usado com modelos como FLUX ou Photon Flash.
+
+Regras para o visualPrompt:
+1. **Idioma:** SEMPRE em inglês
+2. **Formato:** 1 parágrafo descritivo (50-120 palavras)
+3. **Conteúdo:** Descreva uma CENA REPRESENTATIVA do dossiê, como se fosse um frame do vídeo
+4. **Estilo visual:** TODOS os prompts devem usar o estilo visual ÚNICO escolhido para o plano
+5. **Atmosfera:** Inclua iluminação, atmosfera, composição e paleta de cores
+6. **Ângulo narrativo:** O prompt do Full Video deve refletir o tema geral. Cada teaser deve refletir SEU ângulo específico
+7. **Não inclua texto/lettering** no prompt — apenas elementos visuais
+8. **Evite rostos humanos detalhados** — prefira silhuetas, planos abertos, elementos simbólicos
+
 ## 🧠 REGRAS PARA ÂNGULOS DOS TEASERS
 
 Esta é a regra mais importante: **cada teaser DEVE abordar o tema por um ângulo narrativo DIFERENTE**.

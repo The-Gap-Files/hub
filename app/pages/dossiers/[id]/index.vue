@@ -78,7 +78,7 @@
         <!-- Linha 4: Tags -->
         <div class="flex flex-wrap gap-1.5 mb-6">
           <span v-for="tag in dossier.tags" :key="tag" 
-                class="px-2.5 py-0.5 bg-white/5 border border-white/8 text-white/60 text-[10px] font-semibold tracking-wide rounded-lg cursor-default">
+                class="px-2.5 py-0.5 bg-white/5 border border-white/8 text-white/60 text-xs font-semibold tracking-wide rounded-lg cursor-default">
             #{{ tag }}
           </span>
         </div>
@@ -89,21 +89,21 @@
             <div class="w-5 h-5 rounded-md flex items-center justify-center" :class="(dossier.sources?.length || 0) > 0 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-white/5 text-zinc-600'">
               <FileText :size="11" />
             </div>
-            <span class="text-[10px] font-medium" :class="(dossier.sources?.length || 0) > 0 ? 'text-emerald-400/80' : 'text-zinc-600'">Fontes</span>
+            <span class="text-xs font-medium" :class="(dossier.sources?.length || 0) > 0 ? 'text-emerald-400/80' : 'text-zinc-600'">Fontes</span>
           </div>
           <div class="w-4 h-px bg-white/8"></div>
           <div class="flex items-center gap-1.5" :title="(dossier.notes?.length || 0) > 0 ? `${dossier.notes.length} notas` : 'Execute a Análise Neural'">
             <div class="w-5 h-5 rounded-md flex items-center justify-center" :class="(dossier.notes?.length || 0) > 0 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-white/5 text-zinc-600'">
               <Brain :size="11" />
             </div>
-            <span class="text-[10px] font-medium" :class="(dossier.notes?.length || 0) > 0 ? 'text-emerald-400/80' : 'text-zinc-600'">Análise</span>
+            <span class="text-xs font-medium" :class="(dossier.notes?.length || 0) > 0 ? 'text-emerald-400/80' : 'text-zinc-600'">Análise</span>
           </div>
           <div class="w-4 h-px bg-white/8"></div>
           <div class="flex items-center gap-1.5" :title="(dossier.outputsCount || 0) > 0 ? `${dossier.outputsCount} outputs` : 'Gere vídeos'">
             <div class="w-5 h-5 rounded-md flex items-center justify-center" :class="(dossier.outputsCount || 0) > 0 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-white/5 text-zinc-600'">
               <PlayCircle :size="11" />
             </div>
-            <span class="text-[10px] font-medium" :class="(dossier.outputsCount || 0) > 0 ? 'text-emerald-400/80' : 'text-zinc-600'">Produção</span>
+            <span class="text-xs font-medium" :class="(dossier.outputsCount || 0) > 0 ? 'text-emerald-400/80' : 'text-zinc-600'">Produção</span>
           </div>
         </div>
 
@@ -114,7 +114,7 @@
             <Tv :size="13" class="text-zinc-500" />
             <template v-if="dossier.channelName">
               <span class="text-xs text-zinc-300">{{ dossier.channelName }}</span>
-              <span v-if="dossier.channelHandle" class="text-[10px] text-zinc-500">{{ dossier.channelHandle }}</span>
+              <span v-if="dossier.channelHandle" class="text-xs text-zinc-500">{{ dossier.channelHandle }}</span>
             </template>
             <button v-else @click="showChannelPicker = !showChannelPicker" class="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">
               Vincular canal
@@ -153,8 +153,8 @@
             <option value="" class="bg-[#0A0A0F]">Sem canal</option>
             <option v-for="ch in channelOptions" :key="ch.id" :value="ch.id" class="bg-[#0A0A0F]">{{ ch.name }}</option>
           </select>
-          <button @click="updateDossierChannel" class="px-3 py-1.5 bg-primary/20 hover:bg-primary/30 text-primary text-[10px] font-bold rounded-lg transition-all">Salvar</button>
-          <button @click="showChannelPicker = false" class="text-zinc-500 text-[10px] hover:text-white transition-colors">Cancelar</button>
+          <button @click="updateDossierChannel" class="px-3 py-1.5 bg-primary/20 hover:bg-primary/30 text-primary text-xs font-bold rounded-lg transition-all">Salvar</button>
+          <button @click="showChannelPicker = false" class="text-zinc-500 text-xs hover:text-white transition-colors">Cancelar</button>
         </div>
       </header>
 
@@ -171,7 +171,7 @@
         >
           <component :is="tab.icon" :size="14" />
           {{ tab.name }}
-          <span v-if="tab.count && tab.count > 0" class="ml-1 text-[9px] bg-primary/15 text-primary px-1.5 py-0.5 rounded-md font-mono">
+          <span v-if="tab.count && tab.count > 0" class="ml-1 text-xs bg-primary/15 text-primary px-1.5 py-0.5 rounded-md font-mono">
             {{ tab.count }}
           </span>
         </button>
@@ -206,7 +206,7 @@
                   <button 
                     v-if="!editingVisualSettings"
                     @click="startEditingVisualSettings"
-                    class="text-[10px] font-medium text-zinc-400 hover:text-white transition-colors">
+                    class="text-xs font-medium text-zinc-400 hover:text-white transition-colors">
                     Editar
                   </button>
                 </div>
@@ -215,16 +215,16 @@
                   <!-- Modo Visualização Compacto -->
                   <div v-if="!editingVisualSettings" class="space-y-3">
                     <div class="flex items-center justify-between">
-                      <span class="text-[10px] text-zinc-500 font-medium">Estilo</span>
+                      <span class="text-xs text-zinc-500 font-medium">Estilo</span>
                       <span class="text-xs text-white">{{ getVisualStyleName(dossier.preferredVisualStyleId) || 'Sistema' }}</span>
                     </div>
                     <div class="flex items-center justify-between">
-                      <span class="text-[10px] text-zinc-500 font-medium">DNA Seed</span>
+                      <span class="text-xs text-zinc-500 font-medium">DNA Seed</span>
                       <span class="text-xs text-white font-mono">{{ getSeedValue(dossier.preferredSeedId) || 'Auto' }}</span>
                     </div>
                     <div v-if="dossier.visualIdentityContext" class="pt-2 border-t border-white/5">
-                      <span class="text-[10px] text-zinc-500 font-medium block mb-1">Diretrizes</span>
-                      <p class="text-[11px] text-zinc-400 italic leading-relaxed line-clamp-3">
+                      <span class="text-xs text-zinc-500 font-medium block mb-1">Diretrizes</span>
+                      <p class="text-xs text-zinc-400 italic leading-relaxed line-clamp-3">
                         "{{ dossier.visualIdentityContext }}"
                       </p>
                     </div>
@@ -233,7 +233,7 @@
                   <!-- Modo Edição -->
                   <div v-else class="space-y-4">
                     <div class="space-y-1.5">
-                      <label class="text-[10px] text-zinc-500 font-medium flex items-center gap-1.5">
+                      <label class="text-xs text-zinc-500 font-medium flex items-center gap-1.5">
                         <Palette :size="10" />
                         Estilo Visual
                       </label>
@@ -246,7 +246,7 @@
                     </div>
                     
                     <div class="space-y-1.5">
-                      <label class="text-[10px] text-zinc-500 font-medium flex items-center gap-1.5">
+                      <label class="text-xs text-zinc-500 font-medium flex items-center gap-1.5">
                         <Dna :size="10" />
                         Seed DNA
                       </label>
@@ -259,7 +259,7 @@
                     </div>
                     
                     <div class="space-y-1.5">
-                      <label class="text-[10px] text-zinc-500 font-medium">Diretrizes de Identidade</label>
+                      <label class="text-xs text-zinc-500 font-medium">Diretrizes de Identidade</label>
                       <textarea
                         v-model="visualSettingsForm.visualIdentityContext"
                         rows="2"
@@ -272,7 +272,7 @@
                       <button 
                         @click="saveVisualSettings"
                         :disabled="savingVisualSettings"
-                        class="flex-1 px-3 py-2 bg-primary hover:bg-primary/90 text-white text-[10px] font-bold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5">
+                        class="flex-1 px-3 py-2 bg-primary hover:bg-primary/90 text-white text-xs font-bold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5">
                         <span v-if="!savingVisualSettings">Salvar</span>
                         <span v-else class="flex items-center gap-1.5">
                           <div class="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
@@ -282,14 +282,14 @@
                       <button 
                         @click="cancelEditingVisualSettings"
                         :disabled="savingVisualSettings"
-                        class="px-3 py-2 bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white text-[10px] font-bold rounded-lg transition-all disabled:opacity-50">
+                        class="px-3 py-2 bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white text-xs font-bold rounded-lg transition-all disabled:opacity-50">
                         Cancelar
                       </button>
                     </div>
                     
                     <div v-if="visualSettingsSaved" class="px-3 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg flex items-center gap-2 animate-in slide-in-from-top-2">
                       <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                      <span class="text-[10px] font-medium text-emerald-400">Atualizado!</span>
+                      <span class="text-xs font-medium text-emerald-400">Atualizado!</span>
                     </div>
                   </div>
                 </div>

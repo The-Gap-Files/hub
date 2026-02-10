@@ -93,7 +93,8 @@ export default defineEventHandler(async (event) => {
           description: i.description
         })),
         teaserDuration: teaserDuration as 60 | 120 | 180,
-        fullVideoDuration: fullVideoDuration as 300 | 600 | 900
+        fullVideoDuration: fullVideoDuration as 300 | 600 | 900,
+        creativeDirection: rawBody?.creativeDirection
       },
       {
         name: scriptConfig.name,

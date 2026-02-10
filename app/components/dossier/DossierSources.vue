@@ -6,12 +6,12 @@
           <LinkIcon :size="16" />
         </div>
         <h3 class="text-xs font-bold uppercase tracking-wider text-white">Fontes do Dossiê</h3>
-        <span v-if="sources.length > 0" class="ml-2 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[9px] font-black tabular-nums">{{ sources.length }}</span>
+        <span v-if="sources.length > 0" class="ml-2 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-black tabular-nums">{{ sources.length }}</span>
       </div>
       <button 
         v-if="!showForm" 
         @click="showForm = true" 
-        class="btn-secondary !py-1.5 !px-3 text-[10px] font-medium border-primary/20 text-primary hover:bg-primary/10"
+        class="btn-secondary !py-1.5 !px-3 text-xs font-medium border-primary/20 text-primary hover:bg-primary/10"
       >
         + Adicionar fonte
       </button>
@@ -49,7 +49,7 @@
               >
                 <div class="flex items-center gap-2">
                   <component :is="selectedTypeIcon" :size="14" class="text-primary/70" />
-                  <span class="uppercase text-[10px] font-black tracking-widest">{{ selectedTypeLabel }}</span>
+                  <span class="uppercase text-xs font-black tracking-widest">{{ selectedTypeLabel }}</span>
                 </div>
                 <ChevronDown :size="16" class="text-zinc-600 transition-transform" :class="{ 'rotate-180 text-primary': isVDropdownOpen }" />
               </button>
@@ -65,7 +65,7 @@
                   :class="{ 'bg-primary/10 text-primary': form.sourceType === type.id }"
                 >
                   <component :is="type.icon" :size="14" class="text-zinc-500 group-hover/opt:text-primary transition-colors" :class="{ 'text-primary': form.sourceType === type.id }" />
-                  <span class="text-[9px] font-black uppercase tracking-widest">{{ type.label }}</span>
+                  <span class="text-xs font-black uppercase tracking-widest">{{ type.label }}</span>
                 </button>
               </div>
             </div>
@@ -94,14 +94,14 @@
             <div class="flex-1 min-w-0">
               <p v-if="pdfFile" class="text-sm text-white truncate">{{ pdfFile.name }}</p>
               <p v-else class="text-xs text-zinc-500">Arraste um PDF ou clique para selecionar</p>
-              <p v-if="pdfFile" class="text-[9px] text-zinc-500 mt-0.5">{{ (pdfFile.size / 1024).toFixed(0) }}KB</p>
+              <p v-if="pdfFile" class="text-xs text-zinc-500 mt-0.5">{{ (pdfFile.size / 1024).toFixed(0) }}KB</p>
             </div>
             <button 
               v-if="pdfFile"
               type="button"
               @click.stop="extractPdf"
               :disabled="isExtractingPdf"
-              class="relative z-20 flex items-center gap-2 px-4 py-2 bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-xl text-primary text-[9px] font-black uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              class="relative z-20 flex items-center gap-2 px-4 py-2 bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-xl text-primary text-xs font-black uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Loader2 v-if="isExtractingPdf" :size="14" class="animate-spin" />
               <Upload v-else :size="14" />
@@ -122,7 +122,7 @@
         <div class="space-y-1.5">
           <div class="flex justify-between items-end">
              <label class="field-label">{{ contentLabel }}</label>
-             <span class="text-[9px] text-zinc-600">* Necessário</span>
+             <span class="text-xs text-zinc-600">* Necessário</span>
           </div>
           <textarea 
             v-model="form.content" 
@@ -137,7 +137,7 @@
           <div class="space-y-1.5">
             <label class="field-label flex items-center gap-2">
               URL
-              <span v-if="form.sourceType === 'url'" class="text-primary text-[9px] ml-auto font-medium">Obrigatório</span>
+              <span v-if="form.sourceType === 'url'" class="text-primary text-xs ml-auto font-medium">Obrigatório</span>
             </label>
             <div class="flex gap-2">
               <input 
@@ -210,10 +210,10 @@
                   {{ source.title }}
                 </h4>
                 <div class="flex items-center gap-2">
-                  <span class="text-[10px] font-mono text-zinc-600">
+                  <span class="text-xs font-mono text-zinc-600">
                     {{ estimateWordCount(source.content) }} palavras
                   </span>
-                  <span class="text-[10px] font-mono text-zinc-600/40 group-hover:text-zinc-500">{{ source.sourceType }}</span>
+                  <span class="text-xs font-mono text-zinc-600/40 group-hover:text-zinc-500">{{ source.sourceType }}</span>
                 </div>
               </div>
               
@@ -224,9 +224,9 @@
               <div class="flex items-center gap-4 pt-1">
                 <div v-if="source.author" class="flex items-center gap-1.5">
                   <div class="w-1 h-1 rounded-full bg-primary/40"></div>
-                  <span class="text-[10px] text-zinc-500">{{ source.author }}</span>
+                  <span class="text-xs text-zinc-500">{{ source.author }}</span>
                 </div>
-                <a v-if="source.url" :href="source.url" target="_blank" @click.stop class="flex items-center gap-1 text-[9px] font-black uppercase text-blue-400/50 hover:text-blue-400 transition-colors tracking-tighter">
+                <a v-if="source.url" :href="source.url" target="_blank" @click.stop class="flex items-center gap-1 text-xs font-black uppercase text-blue-400/50 hover:text-blue-400 transition-colors tracking-tighter">
                   <ExternalLink :size="10" />
                   Datalink Original
                 </a>
@@ -267,7 +267,7 @@
                 <div class="flex justify-between items-center">
                   <label class="field-label">Conteúdo</label>
                   <div class="flex items-center gap-3">
-                    <span class="text-[8px] font-mono" :class="contentTokenClass(editForm.content)">
+                    <span class="text-xs font-mono" :class="contentTokenClass(editForm.content)">
                       ~{{ estimateTokens(editForm.content).toLocaleString() }} tokens · {{ estimateWordCount(editForm.content).toLocaleString() }} palavras
                     </span>
                     <!-- Botão Resumir -->
@@ -275,7 +275,7 @@
                       v-if="estimateWordCount(editForm.content) > 500"
                       @click="summarizeSource(source.id)"
                       :disabled="isSummarizing"
-                      class="flex items-center gap-1.5 px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all border"
+                      class="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest transition-all border"
                       :class="isSummarizing 
                         ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 cursor-wait' 
                         : 'bg-amber-500/5 border-amber-500/20 text-amber-400/70 hover:text-amber-400 hover:bg-amber-500/10 hover:border-amber-500/30'"
@@ -297,18 +297,18 @@
               <div class="flex justify-between items-center pt-2">
                 <button 
                   @click="editingSourceId = null" 
-                  class="text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors"
+                  class="text-xs font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors"
                 >
                   Cancelar
                 </button>
                 <div class="flex items-center gap-3">
-                  <span v-if="editSaved" class="text-[8px] font-black uppercase tracking-widest text-emerald-400 animate-in fade-in duration-300">
+                  <span v-if="editSaved" class="text-xs font-black uppercase tracking-widest text-emerald-400 animate-in fade-in duration-300">
                     ✓ Salvo
                   </span>
                   <button 
                     @click="saveEdit(source.id)"
                     :disabled="isSavingEdit"
-                    class="flex items-center gap-2 px-4 py-2 bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-lg text-primary text-[9px] font-black uppercase tracking-widest transition-all disabled:opacity-50"
+                    class="flex items-center gap-2 px-4 py-2 bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-lg text-primary text-xs font-black uppercase tracking-widest transition-all disabled:opacity-50"
                   >
                     <Loader2 v-if="isSavingEdit" :size="12" class="animate-spin" />
                     <Save v-else :size="12" />

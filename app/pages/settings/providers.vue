@@ -27,8 +27,8 @@ import {
 
         <div class="flex items-center gap-4 bg-white/[0.02] border border-white/5 p-4 rounded-2xl">
            <div class="flex flex-col text-right">
-              <span class="mono-label !text-[8px] text-zinc-500 uppercase">System Integrity</span>
-              <span class="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Stable Connection</span>
+              <span class="mono-label text-zinc-500 uppercase">System Integrity</span>
+              <span class="text-xs font-black text-emerald-500 uppercase tracking-widest">Stable Connection</span>
            </div>
            <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981] animate-pulse"></div>
         </div>
@@ -59,11 +59,11 @@ import {
               <div class="h-1 w-12 bg-white/5 rounded-full overflow-hidden">
                  <div class="h-full bg-amber-500/20 w-1/2"></div>
               </div>
-              <span class="mono-label !text-[8px] text-zinc-600">Encrypted_Node_{{i}}</span>
+              <span class="mono-label text-zinc-600">Encrypted_Node_{{i}}</span>
            </div>
         </div>
 
-        <button class="mt-16 px-12 py-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] hover:text-white hover:border-amber-500/50 transition-all cursor-not-allowed">
+        <button class="mt-16 px-12 py-4 bg-white/5 border border-white/10 rounded-2xl text-xs font-black text-zinc-500 uppercase tracking-[0.3em] hover:text-white hover:border-amber-500/50 transition-all cursor-not-allowed">
            Awaiting authorization...
         </button>
       </div>
@@ -75,7 +75,7 @@ import {
                <Globe :size="24" />
             </div>
             <div>
-               <p class="mono-label !text-[8px] text-zinc-500 px-0">API Gateway</p>
+               <p class="mono-label text-zinc-500 px-0">API Gateway</p>
                <h4 class="text-lg font-black text-white uppercase italic">Multi-Region</h4>
             </div>
          </div>
@@ -84,7 +84,7 @@ import {
                <ShieldCheck :size="24" />
             </div>
             <div>
-               <p class="mono-label !text-[8px] text-zinc-500">Security layer</p>
+               <p class="mono-label text-zinc-500">Security layer</p>
                <h4 class="text-lg font-black text-white uppercase italic">AES-256-GCM</h4>
             </div>
          </div>
@@ -93,7 +93,7 @@ import {
                <Activity :size="24" />
             </div>
             <div>
-               <p class="mono-label !text-[8px] text-zinc-500">Global traffic</p>
+               <p class="mono-label text-zinc-500">Global traffic</p>
                <h4 class="text-lg font-black text-white uppercase italic">0.0ms Latency</h4>
             </div>
          </div>

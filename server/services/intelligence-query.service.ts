@@ -14,7 +14,7 @@ import { ChatAnthropic } from '@langchain/anthropic'
 // =============================================================================
 
 const QueryResponseSchema = z.object({
-  content: z.string().describe('Resposta completa e detalhada à pergunta do usuário, baseada no material fornecido'),
+  content: z.string().describe('Resposta direta e concisa à pergunta do usuário, em no máximo 3-5 frases. Vá direto ao ponto, sem preâmbulos.'),
   noteType: z.enum(['insight', 'curiosity', 'research']).describe('Tipo de informação da resposta: insight = análise/conexão, curiosity = fato surpreendente, research = dado factual')
 })
 
@@ -24,7 +24,7 @@ const QueryResponseSchema = z.object({
 
 export interface IntelligenceQueryRequest {
   query: string
-  source: 'docs' | 'web'
+  source: 'docs' | 'web' | 'both'
   theme: string
   sources?: Array<{ title: string; content: string; sourceType: string }>
   existingNotes?: Array<{ content: string; noteType: string }>
@@ -57,7 +57,7 @@ export async function intelligenceQuery(
       anthropicApiKey: providerConfig.apiKey,
       modelName: queryModel,
       temperature: 0.6,
-      maxTokens: 2048
+      maxTokens: 1024
     })
     structuredLlm = model.withStructuredOutput(QueryResponseSchema, { includeRaw: true })
   } else {
@@ -107,39 +107,48 @@ export async function intelligenceQuery(
 // PROMPTS
 // =============================================================================
 
-function buildQuerySystemPrompt(source: 'docs' | 'web'): string {
+function buildQuerySystemPrompt(source: 'docs' | 'web' | 'both'): string {
   if (source === 'docs') {
-    return `Você é um analista de inteligência editorial. O usuário fará uma pergunta sobre o material de um dossiê (fontes documentais + notas existentes).
+    return `Você é um analista de inteligência editorial. Responda perguntas sobre o dossiê de forma CURTA e DIRETA.
 
-Sua função é responder a pergunta com base EXCLUSIVAMENTE no material fornecido adiante. Seja detalhado, preciso e cite trechos ou dados específicos sempre que possível.
-
-## REGRAS:
-- Responda SOMENTE com base no material do dossiê fornecido
-- Se a informação não estiver no material, diga claramente: "Esta informação não consta no material do dossiê"
-- Cite fontes específicas quando aplicável (ex: "Conforme mencionado na fonte X...", "A fonte Y indica...")
-- Seja conciso mas completo
+## REGRAS OBRIGATÓRIAS:
+- Máximo 3-5 frases. Vá direto ao ponto.
+- NUNCA reformule a pergunta. NUNCA faça introdução. Comece pela resposta.
+- Responda SOMENTE com base no material fornecido
+- Se não consta no material, diga apenas: "Não consta no material do dossiê."
+- Cite a fonte brevemente quando relevante (ex: "Segundo a fonte X, ...")
 - Escreva em português brasileiro
-- Classifique sua resposta como insight (análise/conexão), curiosity (fato surpreendente) ou research (dado factual)`
+- Classifique como insight, curiosity ou research`
   }
 
-  return `Você é um pesquisador editorial especializado. O usuário fará uma pergunta sobre um tema e você deve responder com seu conhecimento geral, trazendo informações verificáveis, dados relevantes e contexto.
+  if (source === 'both') {
+    return `Você é um analista de inteligência editorial com acesso ao material do dossiê E conhecimento externo. Responda de forma CURTA e DIRETA.
 
-O tema do dossiê é fornecido para contexto, mas sua resposta deve ir além do material — trazendo conhecimento externo.
-
-## REGRAS:
-- Traga dados complementares ao material do dossiê
-- Priorize informações verificáveis: datas, nomes, locais, fontes históricas
-- Inclua detalhes que enriqueçam a narrativa (perfeitos para curiosidades e fatos pouco conhecidos)
-- Se não tiver certeza de um dado, indique com "segundo registros..." ou "há relatos de que..."
-- Seja conciso mas detalhado
+## REGRAS OBRIGATÓRIAS:
+- Máximo 3-5 frases. Vá direto ao ponto.
+- NUNCA reformule a pergunta. NUNCA faça introdução. Comece pela resposta.
+- Use o material do dossiê como base principal
+- Complemente com seu conhecimento externo quando o material for insuficiente
+- Distinga claramente: "No dossiê: ..." vs "Além do dossiê: ..."
 - Escreva em português brasileiro
-- Classifique sua resposta como insight (análise/conexão), curiosity (fato surpreendente) ou research (dado factual)`
+- Classifique como insight, curiosity ou research`
+  }
+
+  return `Você é um pesquisador editorial. Responda perguntas trazendo conhecimento externo de forma CURTA e PRECISA.
+
+## REGRAS OBRIGATÓRIAS:
+- Máximo 3-5 frases. Vá direto ao ponto.
+- NUNCA reformule a pergunta. NUNCA faça introdução. Comece pela resposta.
+- Priorize dados verificáveis: datas, nomes, locais, fontes
+- Se não tiver certeza, use "segundo registros..." ou "há relatos..."
+- Escreva em português brasileiro
+- Classifique como insight, curiosity ou research`
 }
 
 function buildQueryUserPrompt(request: IntelligenceQueryRequest): string {
   let prompt = `TEMA DO DOSSIÊ: ${request.theme}\n\n`
 
-  if (request.source === 'docs') {
+  if (request.source === 'docs' || request.source === 'both') {
     // Incluir todas as fontes do dossiê (arquitetura flat/democratizada)
     if (request.sources && request.sources.length > 0) {
       const totalBudget = 16000
@@ -160,7 +169,7 @@ function buildQueryUserPrompt(request: IntelligenceQueryRequest): string {
     }
   }
 
-  prompt += `\n❓ PERGUNTA DO USUÁRIO:\n${request.query}\n\nResponda de forma detalhada e estruturada.`
+  prompt += `\n❓ PERGUNTA:\n${request.query}\n\nResponda em no máximo 3-5 frases, direto ao ponto.`
 
   return prompt
 }

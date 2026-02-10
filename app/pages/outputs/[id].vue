@@ -13,7 +13,7 @@
       <NuxtLink 
         v-if="output?.dossierId"
         :to="`/dossiers/${output.dossierId}`" 
-        class="inline-flex items-center gap-2 text-zinc-500 hover:text-white transition-colors mb-8 mono-label !text-[10px]"
+        class="inline-flex items-center gap-2 text-zinc-500 hover:text-white transition-colors mb-8 mono-label"
       >
         <ArrowLeft :size="14" />
         VOLTAR AO DOSSIÊ
@@ -29,10 +29,10 @@
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
           <div>
             <div class="flex items-center gap-3 mb-2">
-              <span class="px-2 py-1 bg-white/10 rounded text-[9px] font-black tracking-widest uppercase text-white/70">
+              <span class="px-2 py-1 bg-white/10 rounded text-xs font-black tracking-widest uppercase text-white/70">
                 {{ output.outputType }}
               </span>
-              <span v-if="output.status" :class="getStatusClass(output.status)" class="px-2 py-1 rounded text-[9px] font-black tracking-widest uppercase border">
+              <span v-if="output.status" :class="getStatusClass(output.status)" class="px-2 py-1 rounded text-xs font-black tracking-widest uppercase border">
                 {{ output.status }}
               </span>
             </div>
@@ -47,7 +47,7 @@
             <div v-if="costs?.total > 0" class="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-lg">
               <DollarSign :size="14" class="text-amber-400" />
               <span class="text-amber-300 text-sm font-mono font-bold">{{ formatCost(costs.total) }}</span>
-              <span class="text-amber-400/50 text-[9px] uppercase tracking-widest">gasto neste output</span>
+              <span class="text-amber-400/50 text-xs uppercase tracking-widest">gasto neste output</span>
             </div>
           </div>
 
@@ -95,7 +95,7 @@
           <div class="flex flex-col gap-4 sm:gap-0 sm:flex-row sm:items-center sm:justify-between sm:flex-wrap">
             <!-- Summary (uma linha) -->
             <div class="min-w-0 flex-1 sm:max-w-xl">
-              <p class="mono-label text-[9px] text-zinc-500 uppercase tracking-widest mb-1">Summary</p>
+              <p class="mono-label text-xs text-zinc-500 uppercase tracking-widest mb-1">Summary</p>
               <p class="text-sm text-zinc-300 italic leading-relaxed truncate" :title="output.script?.summary || output.dossier?.theme">
                 {{ output.script?.summary || output.dossier?.theme || '—' }}
               </p>
@@ -103,21 +103,21 @@
             <!-- Métricas: Duration, Word count, Scene count -->
             <div class="flex items-center gap-6 sm:gap-8 flex-shrink-0">
               <div>
-                <p class="mono-label text-[9px] text-zinc-500 uppercase tracking-widest mb-0.5">Duration</p>
+                <p class="mono-label text-xs text-zinc-500 uppercase tracking-widest mb-0.5">Duration</p>
                 <p class="text-lg font-mono font-bold text-white">{{ output.script?.estimatedDuration || output.duration }}s</p>
               </div>
               <div>
-                <p class="mono-label text-[9px] text-zinc-500 uppercase tracking-widest mb-0.5">Word count</p>
+                <p class="mono-label text-xs text-zinc-500 uppercase tracking-widest mb-0.5">Word count</p>
                 <p class="text-lg font-mono font-bold text-white">{{ output.script?.wordCount ?? '—' }} <span class="text-zinc-500 text-sm font-normal">words</span></p>
               </div>
               <div>
-                <p class="mono-label text-[9px] text-zinc-500 uppercase tracking-widest mb-0.5">Scene count</p>
+                <p class="mono-label text-xs text-zinc-500 uppercase tracking-widest mb-0.5">Scene count</p>
                 <p class="text-lg font-mono font-bold text-white">{{ output.scenes?.length ?? 0 }} <span class="text-zinc-500 text-sm font-normal">scenes</span></p>
               </div>
             </div>
             <!-- Constantes escolhidas -->
             <div class="flex flex-wrap items-center gap-2 sm:gap-3 pt-2 sm:pt-0 border-t border-white/5 sm:border-t-0 sm:border-l sm:border-white/10 sm:pl-6">
-              <span class="mono-label text-[9px] text-zinc-500 uppercase tracking-widest w-full sm:w-auto mb-0.5 sm:mb-0">Constantes escolhidas</span>
+              <span class="mono-label text-xs text-zinc-500 uppercase tracking-widest w-full sm:w-auto mb-0.5 sm:mb-0">Constantes escolhidas</span>
               <div class="flex flex-wrap items-center gap-2">
                 <span v-if="output.classification" class="inline-flex items-center px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-200 text-xs font-medium transition-colors duration-200 hover:bg-amber-500/15 cursor-default">{{ output.classification.label }}</span>
                 <span v-if="output.scriptStyle" class="inline-flex items-center px-3 py-1.5 rounded-xl bg-primary/10 border border-primary/20 text-primary text-xs font-medium transition-colors duration-200 hover:bg-primary/15 cursor-default">{{ output.scriptStyle.name }}</span>
@@ -137,7 +137,7 @@
                     :class="output.aspectRatio === '9:16' ? 'max-h-[70vh] object-contain' : ''"
                     :src="`/api/outputs/${outputId}/video`"
                 ></video>
-                <div class="p-4 bg-white/5 flex items-center justify-between text-[10px] mono-label text-zinc-500">
+                <div class="p-4 bg-white/5 flex items-center justify-between text-xs mono-label text-zinc-500">
                     <span class="flex items-center gap-2">
                         <Film :size="12" /> MASTER RENDERIZADO (POSTGRESQL STORAGE)
                     </span>
@@ -152,7 +152,7 @@
             <Star :size="16" class="text-amber-400" />
             Opções extras
             <!-- Custos reais já gastos nessas opções -->
-            <span v-if="getExtraCost('thumbnail') > 0 || getExtraCost('social_kit') > 0" class="text-[9px] text-zinc-600 font-normal ml-auto flex items-center gap-1.5 font-mono">
+            <span v-if="getExtraCost('thumbnail') > 0 || getExtraCost('social_kit') > 0" class="text-xs text-zinc-600 font-normal ml-auto flex items-center gap-1.5 font-mono">
               <DollarSign :size="10" />
               <span v-if="getExtraCost('thumbnail') > 0" class="text-amber-400/60">
                 Thumbnails: {{ formatCost(getExtraCost('thumbnail')) }}
@@ -185,7 +185,7 @@
                     {{ generatingThumbnails ? 'Gerando...' : 'Criar thumbnails' }}
                   </button>
                 </div>
-                <p class="text-[10px] text-zinc-500">Gera 4 opções via Photon Flash + Claude Haiku. O hook text é opcional.</p>
+                <p class="text-xs text-zinc-500">Gera 4 opções via Photon Flash + Claude Haiku. O hook text é opcional.</p>
               </div>
               <!-- Grid de thumbnails candidatas -->
               <div v-else-if="output.thumbnailCandidates?.length" class="space-y-3">
@@ -198,7 +198,7 @@
                     class="relative aspect-video rounded-xl overflow-hidden border-2 border-white/10 transition-all hover:border-primary hover:scale-[1.02] cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary group"
                   >
                     <img :src="`data:image/png;base64,${cand.base64}`" :alt="`Thumbnail ${Number(idx) + 1}`" class="w-full h-full object-cover" />
-                    <span v-if="cand.hookText" class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent px-2 py-1.5 text-[9px] font-black text-white uppercase tracking-wider text-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span v-if="cand.hookText" class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent px-2 py-1.5 text-xs font-black text-white uppercase tracking-wider text-center opacity-0 group-hover:opacity-100 transition-opacity">
                       {{ cand.hookText }}
                     </span>
                   </button>
@@ -250,7 +250,7 @@
                 <Share2 :size="16" :class="generatingSocialKit ? 'animate-spin' : ''" />
                 {{ generatingSocialKit ? 'Gerando kit de publicação...' : 'Gerar Social Media Kit' }}
               </button>
-              <p v-if="!output.socialKit" class="text-[10px] text-zinc-500 mt-1">Títulos, descrições e hashtags otimizados para YouTube, TikTok, Shorts e Instagram via Claude Haiku.</p>
+              <p v-if="!output.socialKit" class="text-xs text-zinc-500 mt-1">Títulos, descrições e hashtags otimizados para YouTube, TikTok, Shorts e Instagram via Claude Haiku.</p>
 
               <!-- Kit gerado -->
               <div v-if="output.socialKit" class="space-y-3">
@@ -263,7 +263,7 @@
                     <button
                       @click="generateSocialKit"
                       :disabled="generatingSocialKit"
-                      class="text-[10px] text-zinc-500 hover:text-violet-400 transition-colors cursor-pointer"
+                      class="text-xs text-zinc-500 hover:text-violet-400 transition-colors cursor-pointer"
                     >
                       {{ generatingSocialKit ? 'Gerando...' : 'Regerar' }}
                     </button>
@@ -277,7 +277,7 @@
                     :key="tab.key"
                     @click="activeSocialTab = tab.key"
                     :class="[
-                      'px-3 py-1.5 text-[11px] font-bold rounded-md transition-all cursor-pointer',
+                      'px-3 py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer',
                       activeSocialTab === tab.key
                         ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30'
                         : 'text-zinc-500 hover:text-zinc-300'
@@ -292,8 +292,8 @@
                   <!-- Título -->
                   <div class="bg-black/20 rounded-xl p-3 border border-white/5">
                     <div class="flex items-center justify-between mb-1.5">
-                      <span class="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Título</span>
-                      <button @click="copySocialField(activeSocialContent.title)" class="text-[10px] text-zinc-600 hover:text-violet-400 transition-colors cursor-pointer">
+                      <span class="text-xs text-zinc-500 uppercase tracking-wider font-bold">Título</span>
+                      <button @click="copySocialField(activeSocialContent.title)" class="text-xs text-zinc-600 hover:text-violet-400 transition-colors cursor-pointer">
                         Copiar
                       </button>
                     </div>
@@ -303,8 +303,8 @@
                   <!-- Descrição -->
                   <div class="bg-black/20 rounded-xl p-3 border border-white/5">
                     <div class="flex items-center justify-between mb-1.5">
-                      <span class="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Descrição</span>
-                      <button @click="copySocialField(activeSocialContent.description)" class="text-[10px] text-zinc-600 hover:text-violet-400 transition-colors cursor-pointer">
+                      <span class="text-xs text-zinc-500 uppercase tracking-wider font-bold">Descrição</span>
+                      <button @click="copySocialField(activeSocialContent.description)" class="text-xs text-zinc-600 hover:text-violet-400 transition-colors cursor-pointer">
                         Copiar
                       </button>
                     </div>
@@ -314,8 +314,8 @@
                   <!-- Hashtags -->
                   <div class="bg-black/20 rounded-xl p-3 border border-white/5">
                     <div class="flex items-center justify-between mb-1.5">
-                      <span class="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Hashtags</span>
-                      <button @click="copySocialField(activeSocialContent.hashtags?.join(' '))" class="text-[10px] text-zinc-600 hover:text-violet-400 transition-colors cursor-pointer">
+                      <span class="text-xs text-zinc-500 uppercase tracking-wider font-bold">Hashtags</span>
+                      <button @click="copySocialField(activeSocialContent.hashtags?.join(' '))" class="text-xs text-zinc-600 hover:text-violet-400 transition-colors cursor-pointer">
                         Copiar todas
                       </button>
                     </div>
@@ -323,7 +323,7 @@
                       <span
                         v-for="tag in activeSocialContent.hashtags"
                         :key="tag"
-                        class="px-2 py-0.5 bg-violet-500/10 border border-violet-500/20 rounded text-[10px] text-violet-300 font-medium"
+                        class="px-2 py-0.5 bg-violet-500/10 border border-violet-500/20 rounded text-xs text-violet-300 font-medium"
                       >
                         {{ tag }}
                       </span>
@@ -334,8 +334,8 @@
                 <!-- SEO Tags -->
                 <div v-if="output.socialKit?.seoTags?.length" class="bg-black/20 rounded-xl p-3 border border-white/5">
                   <div class="flex items-center justify-between mb-1.5">
-                    <span class="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">SEO Tags</span>
-                    <button @click="copySocialField(output.socialKit.seoTags.join(', '))" class="text-[10px] text-zinc-600 hover:text-violet-400 transition-colors cursor-pointer">
+                    <span class="text-xs text-zinc-500 uppercase tracking-wider font-bold">SEO Tags</span>
+                    <button @click="copySocialField(output.socialKit.seoTags.join(', '))" class="text-xs text-zinc-600 hover:text-violet-400 transition-colors cursor-pointer">
                       Copiar
                     </button>
                   </div>
@@ -343,7 +343,7 @@
                     <span
                       v-for="tag in output.socialKit.seoTags"
                       :key="tag"
-                      class="px-2 py-0.5 bg-zinc-800 border border-white/5 rounded text-[10px] text-zinc-400"
+                      class="px-2 py-0.5 bg-zinc-800 border border-white/5 rounded text-xs text-zinc-400"
                     >
                       {{ tag }}
                     </span>
@@ -403,14 +403,14 @@
                 <button
                   @click="removeThumbnail(); showSelectedThumbnail = false"
                   :disabled="removingThumbnail"
-                  class="px-3 py-1.5 text-[11px] font-bold text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/10 transition-colors cursor-pointer"
+                  class="px-3 py-1.5 text-xs font-bold text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/10 transition-colors cursor-pointer"
                 >
                   {{ removingThumbnail ? 'Removendo...' : 'Remover' }}
                 </button>
                 <button
                   @click="generateThumbnails(); showSelectedThumbnail = false"
                   :disabled="generatingThumbnails"
-                  class="px-3 py-1.5 text-[11px] font-bold text-amber-400 border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-colors flex items-center gap-1.5 cursor-pointer"
+                  class="px-3 py-1.5 text-xs font-bold text-amber-400 border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
                   <ImageIcon :size="12" :class="generatingThumbnails ? 'animate-spin' : ''" />
                   {{ generatingThumbnails ? 'Gerando...' : 'Gerar novamente' }}
@@ -419,7 +419,7 @@
               <a
                 :href="`/api/outputs/${outputId}/thumbnail?t=${thumbnailVersion}`"
                 download="thumbnail.png"
-                class="btn-primary px-3 py-1.5 text-[11px] font-bold flex items-center gap-1.5 cursor-pointer"
+                class="btn-primary px-3 py-1.5 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
               >
                 <Download :size="12" />
                 DOWNLOAD
@@ -490,19 +490,19 @@
                   
                   <!-- Status badges -->
                   <span v-if="scene.imageStatus === 'restricted'" 
-                    class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-red-500/20 text-red-400 animate-pulse">
+                    class="px-2 py-0.5 text-xs font-bold uppercase tracking-wider rounded-full bg-red-500/20 text-red-400 animate-pulse">
                     🔴 Restrita
                   </span>
                   <span v-else-if="scene.imageStatus === 'error'" 
-                    class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-orange-500/20 text-orange-400">
+                    class="px-2 py-0.5 text-xs font-bold uppercase tracking-wider rounded-full bg-orange-500/20 text-orange-400">
                     ⚠️ Erro
                   </span>
                   <span v-else-if="correctedScenes.has(scene.id) && !motionRegeneratedScenes.has(scene.id)" 
-                    class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-amber-500/20 text-amber-400 animate-pulse">
+                    class="px-2 py-0.5 text-xs font-bold uppercase tracking-wider rounded-full bg-amber-500/20 text-amber-400 animate-pulse">
                     Motion pendente
                   </span>
                   <span v-else-if="correctedScenes.has(scene.id) && motionRegeneratedScenes.has(scene.id)" 
-                    class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-emerald-500/20 text-emerald-400">
+                    class="px-2 py-0.5 text-xs font-bold uppercase tracking-wider rounded-full bg-emerald-500/20 text-emerald-400">
                     Corrigida
                   </span>
                 </div>
@@ -516,7 +516,7 @@
               <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- COLUNA 1: Imagem -->
                 <div class="space-y-3">
-                  <h4 class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-purple-400/80">
+                  <h4 class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-purple-400/80">
                     <ImageIcon :size="12" /> Imagem da Cena
                   </h4>
                   
@@ -555,7 +555,7 @@
                     <div class="aspect-video bg-red-500/5 rounded-xl flex flex-col items-center justify-center border border-dashed border-red-500/30 text-center p-6 gap-3">
                       <ShieldAlert :size="32" class="text-red-400/60" />
                       <p class="text-sm font-bold text-red-300">Imagem bloqueada pelo filtro de conteúdo</p>
-                      <p class="text-[10px] text-red-300/50 max-w-sm">
+                      <p class="text-xs text-red-300/50 max-w-sm">
                         O modelo rejeitou o prompt visual por conter termos sensíveis. 
                         Você pode tentar novamente com o mesmo prompt ou editá-lo abaixo.
                       </p>
@@ -564,7 +564,7 @@
                     <!-- Prompt original que foi bloqueado -->
                     <div class="bg-red-500/5 p-3 rounded-lg border border-red-500/10">
                       <div class="flex items-center justify-between mb-1.5">
-                        <h4 class="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-red-400/60">
+                        <h4 class="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-red-400/60">
                           <AlertTriangle :size="10" /> Prompt Bloqueado
                         </h4>
                       </div>
@@ -605,7 +605,7 @@
 
                   <!-- Image History (thumbnails das versões anteriores) -->
                   <div v-if="scene.images?.length > 1" class="mt-2">
-                    <span class="text-[9px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5 block">Histórico</span>
+                    <span class="text-xs font-bold uppercase tracking-widest text-zinc-600 mb-1.5 block">Histórico</span>
                     <div class="flex gap-2 overflow-x-auto pb-1">
                       <div 
                         v-for="img in scene.images.filter((i: any) => !i.isSelected)" 
@@ -625,21 +625,21 @@
                   <!-- Visual Description (editável no modo correção) -->
                   <div class="bg-primary/5 p-3 rounded-lg border border-primary/10">
                     <div class="flex items-center justify-between mb-1.5">
-                      <h4 class="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-primary/60">
+                      <h4 class="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-primary/60">
                         <Eye :size="10" /> Visual Prompt
                       </h4>
                       <button 
                         v-if="!editingPromptSceneId || editingPromptSceneId !== scene.id"
                         @click="startEditPrompt(scene)"
-                        class="text-[9px] text-primary/40 hover:text-primary/70 transition-colors flex items-center gap-1 uppercase tracking-wider"
+                        class="text-xs text-primary/40 hover:text-primary/70 transition-colors flex items-center gap-1 uppercase tracking-wider"
                       >
                         <Edit :size="10" /> Editar
                       </button>
                       <div v-else class="flex items-center gap-2">
-                        <button @click="cancelEditPrompt(scene)" class="text-[9px] text-zinc-500 hover:text-white transition-colors uppercase tracking-wider">
+                        <button @click="cancelEditPrompt(scene)" class="text-xs text-zinc-500 hover:text-white transition-colors uppercase tracking-wider">
                           Cancelar
                         </button>
-                        <button @click="saveEditPrompt(scene)" class="text-[9px] text-primary hover:text-primary/80 transition-colors uppercase tracking-wider font-bold">
+                        <button @click="saveEditPrompt(scene)" class="text-xs text-primary hover:text-primary/80 transition-colors uppercase tracking-wider font-bold">
                           Salvar
                         </button>
                       </div>
@@ -656,7 +656,7 @@
 
                 <!-- COLUNA 2: Motion -->
                 <div class="space-y-3">
-                  <h4 class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-pink-400/80">
+                  <h4 class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-pink-400/80">
                     <Clapperboard :size="12" /> Motion da Cena
                   </h4>
                   
@@ -669,7 +669,7 @@
                         :src="`/api/scene-videos/${getSelectedVideo(scene).id}/stream?t=${motionVersions[scene.id] || 0}`"
                         :key="'motion-' + scene.id + '-' + (motionVersions[scene.id] || 0)"
                       ></video>
-                      <div class="absolute bottom-2 right-2 px-2 py-1 bg-black/60 backdrop-blur rounded text-[8px] text-white/80 font-mono pointer-events-none">
+                      <div class="absolute bottom-2 right-2 px-2 py-1 bg-black/60 backdrop-blur rounded text-xs text-white/80 font-mono pointer-events-none">
                         {{ getSelectedVideo(scene).provider }} • {{ getSelectedVideo(scene).duration?.toFixed(1) }}s
                       </div>
                     </div>
@@ -749,8 +749,8 @@
         <div class="mb-12 grid grid-cols-8 gap-3 p-1 bg-white/5 rounded-2xl border border-white/5">
            <div class="pipeline-step" :class="getStepClass(output.storyOutlineApproved, true)">
              <Map :size="16" />
-             <span class="text-[9px] font-black tracking-widest">Plano</span>
-             <span v-if="getStepCost('outline') > 0" class="text-[8px] font-mono text-amber-400/70">
+             <span class="text-xs font-black tracking-widest">Plano</span>
+             <span v-if="getStepCost('outline') > 0" class="text-xs font-mono text-amber-400/70">
                {{ formatCost(getStepCost('outline')) }}
                <span v-if="isEstimatedCost('outline')" class="text-amber-500/50" title="Custo estimado (tokens reais indisponíveis)">~</span>
              </span>
@@ -759,8 +759,8 @@
 
            <div class="pipeline-step" :class="getStepClass(output.scriptApproved, output.storyOutlineApproved)">
              <ScrollText :size="16" />
-             <span class="text-[9px] font-black tracking-widest">Roteiro</span>
-             <span v-if="getStepCost('script') > 0" class="text-[8px] font-mono text-amber-400/70">
+             <span class="text-xs font-black tracking-widest">Roteiro</span>
+             <span v-if="getStepCost('script') > 0" class="text-xs font-mono text-amber-400/70">
                {{ formatCost(getStepCost('script')) }}
                <span v-if="isEstimatedCost('script')" class="text-amber-500/50" title="Custo estimado (tokens reais indisponíveis)">~</span>
              </span>
@@ -769,41 +769,41 @@
            
            <div class="pipeline-step" :class="getStepClass(output.imagesApproved, output.scriptApproved)">
              <ImageIcon :size="16" />
-             <span class="text-[9px] font-black tracking-widest">Visual</span>
-             <span v-if="getStepCost('image') > 0" class="text-[8px] font-mono text-amber-400/70">{{ formatCost(getStepCost('image')) }}</span>
+             <span class="text-xs font-black tracking-widest">Visual</span>
+             <span v-if="getStepCost('image') > 0" class="text-xs font-mono text-amber-400/70">{{ formatCost(getStepCost('image')) }}</span>
              <div v-if="output.imagesApproved" class="absolute top-2 right-2 text-emerald-400"><CheckCircle2 :size="12"/></div>
            </div>
 
            <div class="pipeline-step" :class="getStepClass(output.audioApproved, output.imagesApproved)">
              <Mic :size="16" />
-             <span class="text-[9px] font-black tracking-widest">Narração</span>
-             <span v-if="getStepCost('narration') > 0" class="text-[8px] font-mono text-amber-400/70">{{ formatCost(getStepCost('narration')) }}</span>
+             <span class="text-xs font-black tracking-widest">Narração</span>
+             <span v-if="getStepCost('narration') > 0" class="text-xs font-mono text-amber-400/70">{{ formatCost(getStepCost('narration')) }}</span>
              <div v-if="output.audioApproved" class="absolute top-2 right-2 text-emerald-400"><CheckCircle2 :size="12"/></div>
            </div>
 
            <div class="pipeline-step" :class="getStepClass(output.bgmApproved, output.audioApproved)">
              <Radio :size="16" />
-             <span class="text-[9px] font-black tracking-widest">Música</span>
-             <span v-if="getStepCost('bgm') > 0" class="text-[8px] font-mono text-amber-400/70">{{ formatCost(getStepCost('bgm')) }}</span>
+             <span class="text-xs font-black tracking-widest">Música</span>
+             <span v-if="getStepCost('bgm') > 0" class="text-xs font-mono text-amber-400/70">{{ formatCost(getStepCost('bgm')) }}</span>
              <div v-if="output.bgmApproved" class="absolute top-2 right-2 text-emerald-400"><CheckCircle2 :size="12"/></div>
            </div>
 
            <div class="pipeline-step" :class="getStepClass(output.videosApproved, output.bgmApproved)">
              <Clapperboard :size="16" />
-             <span class="text-[9px] font-black tracking-widest">Motion</span>
-             <span v-if="getStepCost('motion') > 0" class="text-[8px] font-mono text-amber-400/70">{{ formatCost(getStepCost('motion')) }}</span>
+             <span class="text-xs font-black tracking-widest">Motion</span>
+             <span v-if="getStepCost('motion') > 0" class="text-xs font-mono text-amber-400/70">{{ formatCost(getStepCost('motion')) }}</span>
              <div v-if="output.videosApproved" class="absolute top-2 right-2 text-emerald-400"><CheckCircle2 :size="12"/></div>
            </div>
 
            <div class="pipeline-step" :class="getStepClass(output.hasVideo, canRenderMaster || output.hasVideo)">
              <Film :size="16" />
-             <span class="text-[9px] font-black tracking-widest">Render</span>
+             <span class="text-xs font-black tracking-widest">Render</span>
              <div v-if="output.hasVideo" class="absolute top-2 right-2 text-emerald-400"><CheckCircle2 :size="12"/></div>
            </div>
 
            <div class="pipeline-step" :class="getStepClass(output.status === 'COMPLETED', output.hasVideo)">
              <CheckCircle2 :size="16" />
-             <span class="text-[9px] font-black tracking-widest">Final</span>
+             <span class="text-xs font-black tracking-widest">Final</span>
              <div v-if="output.status === 'COMPLETED'" class="absolute top-2 right-2 text-emerald-400"><CheckCircle2 :size="12"/></div>
            </div>
         </div>
@@ -902,7 +902,7 @@
               <!-- Hook -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-red-500/5 p-5 rounded-2xl border border-red-500/10">
-                  <h4 class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-red-400/80 mb-3">
+                  <h4 class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-red-400/80 mb-3">
                     <Zap :size="12" /> Hook Strategy
                   </h4>
                   <p class="text-sm text-red-200/70 leading-relaxed mb-3">{{ output.storyOutline.hookStrategy }}</p>
@@ -912,7 +912,7 @@
                 </div>
 
                 <div class="bg-primary/5 p-5 rounded-2xl border border-primary/10">
-                  <h4 class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/80 mb-3">
+                  <h4 class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-primary/80 mb-3">
                     <Target :size="12" /> Setup / Promise
                   </h4>
                   <p class="text-sm text-zinc-300/90 leading-relaxed">{{ output.storyOutline.promiseSetup }}</p>
@@ -921,7 +921,7 @@
 
               <!-- Rising Beats -->
               <div class="bg-amber-500/5 p-5 rounded-2xl border border-amber-500/10">
-                <h4 class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-amber-400/80 mb-4">
+                <h4 class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-amber-400/80 mb-4">
                   <TrendingUp :size="12" /> Beats de Revelação ({{ output.storyOutline.risingBeats?.length }})
                 </h4>
                 <div class="space-y-3">
@@ -940,17 +940,17 @@
               <!-- Climax + Resolution -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-purple-500/5 p-5 rounded-2xl border border-purple-500/10">
-                  <h4 class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-purple-400/80 mb-3">
+                  <h4 class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-purple-400/80 mb-3">
                     <Star :size="12" /> Clímax
                   </h4>
                   <div class="flex items-center gap-2 mb-3">
-                    <span class="px-2 py-1 bg-purple-500/20 rounded text-[9px] font-bold text-purple-300 uppercase">{{ output.storyOutline.climaxFormula }}</span>
+                    <span class="px-2 py-1 bg-purple-500/20 rounded text-xs font-bold text-purple-300 uppercase">{{ output.storyOutline.climaxFormula }}</span>
                   </div>
                   <p class="text-sm text-purple-200/70 leading-relaxed">{{ output.storyOutline.climaxMoment }}</p>
                 </div>
 
                 <div class="bg-emerald-500/5 p-5 rounded-2xl border border-emerald-500/10">
-                  <h4 class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-400/80 mb-3">
+                  <h4 class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-emerald-400/80 mb-3">
                     <CheckCircle2 :size="12" /> Resolução
                   </h4>
                   <ul class="space-y-1 mb-3">
@@ -965,13 +965,13 @@
               <!-- Emotional Arc + Tone -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-pink-500/5 p-4 rounded-2xl border border-pink-500/10">
-                  <h4 class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-pink-400/80 mb-2">
+                  <h4 class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-pink-400/80 mb-2">
                     <Heart :size="12" /> Arco Emocional
                   </h4>
                   <p class="text-sm text-pink-200/70">{{ output.storyOutline.emotionalArc }}</p>
                 </div>
                 <div class="bg-zinc-500/5 p-4 rounded-2xl border border-zinc-500/10">
-                  <h4 class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-400/80 mb-2">
+                  <h4 class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-400/80 mb-2">
                     <Volume2 :size="12" /> Progressão de Tom
                   </h4>
                   <p class="text-sm text-zinc-200/70">{{ output.storyOutline.toneProgression }}</p>
@@ -980,14 +980,14 @@
 
               <!-- Scene Distribution -->
               <div class="bg-cyan-500/5 p-4 rounded-2xl border border-cyan-500/10">
-                <h4 class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-cyan-400/80 mb-3">
+                <h4 class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-cyan-400/80 mb-3">
                   <BarChart3 :size="12" /> Distribuição de Cenas
                 </h4>
                 <div class="flex flex-wrap gap-3">
                   <div v-for="(count, segment) in output.storyOutline.segmentDistribution" :key="segment" class="flex items-center gap-2 px-3 py-1.5 bg-black/30 rounded-lg">
-                    <span class="text-[9px] font-bold uppercase tracking-widest text-cyan-300/60">{{ segment }}</span>
+                    <span class="text-xs font-bold uppercase tracking-widest text-cyan-300/60">{{ segment }}</span>
                     <span class="text-sm font-mono font-bold text-white">{{ count }}</span>
-                    <span class="text-[9px] text-cyan-400/40">cenas</span>
+                    <span class="text-xs text-cyan-400/40">cenas</span>
                   </div>
                 </div>
               </div>
@@ -1090,7 +1090,7 @@
                   Revise o roteiro abaixo cuidadosamente. Ao aprovar, o sistema iniciará automaticamente a geração de imagens (custo de tokens/GPU).
                 </p>
                 <!-- Cost info badge -->
-                <div v-if="getStepCost('script') > 0" class="mt-3 inline-flex items-center gap-2 px-2.5 py-1 rounded-lg text-[10px] font-mono"
+                <div v-if="getStepCost('script') > 0" class="mt-3 inline-flex items-center gap-2 px-2.5 py-1 rounded-lg text-xs font-mono"
                   :class="isEstimatedCost('script') ? 'bg-amber-500/10 border border-amber-500/20 text-amber-400/80' : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400/80'"
                 >
                   <DollarSign :size="10" />
@@ -1306,12 +1306,12 @@
                       {{ Number(idx) + 1 }}
                     </div>
                     <div class="flex items-center gap-2 flex-wrap">
-                      <span v-if="getBgmTrackMeta(Number(idx))" class="text-[9px] px-2 py-1 bg-emerald-500/20 rounded text-emerald-300 font-mono">
+                      <span v-if="getBgmTrackMeta(Number(idx))" class="text-xs px-2 py-1 bg-emerald-500/20 rounded text-emerald-300 font-mono">
                         Cenas {{ getBgmTrackMeta(Number(idx)).startScene }} → {{ getBgmTrackMeta(Number(idx)).endScene !== null && getBgmTrackMeta(Number(idx)).endScene !== undefined ? getBgmTrackMeta(Number(idx)).endScene : 'Fim' }}
                       </span>
-                      <span v-else-if="bgmTracks.length === 1" class="text-[9px] px-2 py-1 bg-emerald-500/20 rounded text-emerald-300 font-mono uppercase tracking-widest">Video Todo</span>
-                      <span class="text-[9px] px-2 py-1 bg-emerald-500/10 rounded text-emerald-400/60 font-mono">{{ track.duration ? `${track.duration.toFixed(1)}s` : '—' }}</span>
-                      <span class="text-[9px] px-2 py-1 bg-emerald-500/10 rounded text-emerald-400/60 font-mono">{{ getBgmTrackMeta(Number(idx))?.volume || output.script?.backgroundMusicVolume || -18 }}dB</span>
+                      <span v-else-if="bgmTracks.length === 1" class="text-xs px-2 py-1 bg-emerald-500/20 rounded text-emerald-300 font-mono uppercase tracking-widest">Video Todo</span>
+                      <span class="text-xs px-2 py-1 bg-emerald-500/10 rounded text-emerald-400/60 font-mono">{{ track.duration ? `${track.duration.toFixed(1)}s` : '—' }}</span>
+                      <span class="text-xs px-2 py-1 bg-emerald-500/10 rounded text-emerald-400/60 font-mono">{{ getBgmTrackMeta(Number(idx))?.volume || output.script?.backgroundMusicVolume || -18 }}dB</span>
                     </div>
                   </div>
 
@@ -1473,8 +1473,8 @@
                <!-- Música única (TikTok/Instagram - "video todo") -->
                <div v-if="output.script?.backgroundMusicPrompt" class="space-y-3">
                  <div class="flex items-center gap-2">
-                   <span class="text-[9px] px-2 py-1 bg-emerald-500/20 rounded text-emerald-300 font-mono uppercase tracking-widest">Video Todo</span>
-                   <span class="text-[9px] px-2 py-1 bg-emerald-500/10 rounded text-emerald-400/60 font-mono">{{ output.script.backgroundMusicVolume || -18 }}dB</span>
+                   <span class="text-xs px-2 py-1 bg-emerald-500/20 rounded text-emerald-300 font-mono uppercase tracking-widest">Video Todo</span>
+                   <span class="text-xs px-2 py-1 bg-emerald-500/10 rounded text-emerald-400/60 font-mono">{{ output.script.backgroundMusicVolume || -18 }}dB</span>
                  </div>
                  <p class="text-sm text-emerald-200/80 leading-relaxed italic">
                    {{ output.script.backgroundMusicPrompt }}
@@ -1485,10 +1485,10 @@
                <div v-else-if="output.script?.backgroundMusicTracks?.length" class="space-y-3">
                  <div v-for="(track, idx) in output.script.backgroundMusicTracks" :key="idx" class="bg-black/20 p-3 rounded-xl border border-emerald-500/10">
                    <div class="flex items-center gap-2 mb-2">
-                     <span class="text-[9px] px-2 py-1 bg-emerald-500/20 rounded text-emerald-300 font-mono">
+                     <span class="text-xs px-2 py-1 bg-emerald-500/20 rounded text-emerald-300 font-mono">
                        Cenas {{ track.startScene }} → {{ track.endScene !== null && track.endScene !== undefined ? track.endScene : 'Fim' }}
                      </span>
-                     <span class="text-[9px] px-2 py-1 bg-emerald-500/10 rounded text-emerald-400/60 font-mono">{{ track.volume }}dB</span>
+                     <span class="text-xs px-2 py-1 bg-emerald-500/10 rounded text-emerald-400/60 font-mono">{{ track.volume }}dB</span>
                    </div>
                    <p class="text-xs text-emerald-200/60 leading-relaxed">
                      {{ track.prompt }}
@@ -1530,11 +1530,11 @@
                    <!-- Narration -->
                    <div class="bg-black/20 p-4 rounded-xl border border-white/5">
                       <div class="flex justify-between items-center mb-2">
-                        <h4 class="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-zinc-500">
+                        <h4 class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-500">
                           <Mic :size="10" /> Narration ({{ output.narrationLanguage || 'PT-BR' }})
                         </h4>
                         <!-- Audio Status Badge -->
-                        <span v-if="output.status === 'PROCESSING' && !output.audioTracks?.some((a: any) => a.type === 'narration')" class="text-[8px] text-orange-400 animate-pulse">Gerando Áudio...</span>
+                        <span v-if="output.status === 'PROCESSING' && !output.audioTracks?.some((a: any) => a.type === 'narration')" class="text-xs text-orange-400 animate-pulse">Gerando Áudio...</span>
                       </div>
                       
                       <p class="text-lg font-serif text-white/90 leading-relaxed mb-4">
@@ -1556,7 +1556,7 @@
                    <!-- Visual -->
                    <div class="space-y-4">
                       <div class="bg-primary/5 p-4 rounded-xl border border-primary/10">
-                        <h4 class="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-blue-400/70 mb-2">
+                        <h4 class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-blue-400/70 mb-2">
                           <Eye :size="10" /> Visual Prompt
                         </h4>
                         <p class="text-sm text-white/80 leading-relaxed font-light">
@@ -1565,7 +1565,7 @@
                       </div>
 
                       <div v-if="scene.audioDescription" class="bg-purple-500/5 p-3 rounded-xl border border-purple-500/10">
-                        <h4 class="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-purple-400/70 mb-2">
+                        <h4 class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-purple-400/70 mb-2">
                           <Music :size="10" /> Audio SFX
                         </h4>
                         <p class="text-xs text-purple-200/60 leading-relaxed">
@@ -1577,7 +1577,7 @@
 
                 <!-- 🎥 Video/Motion Preview -->
                 <div v-if="output.enableMotion && (output.videosApproved || output.scenes?.some((s:any) => s.videos?.length))" class="mt-4 pt-4 border-t border-white/5">
-                    <h4 class="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-pink-500/70 mb-2">
+                    <h4 class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-pink-500/70 mb-2">
                         <Clapperboard :size="10" /> Motion Preview
                     </h4>
                     
@@ -1589,13 +1589,13 @@
                         :src="`/api/scene-videos/${getSelectedVideo(scene).id}/stream`"
                         ></video>
                         
-                        <div class="absolute bottom-2 right-2 px-2 py-1 bg-black/60 backdrop-blur rounded text-[8px] text-white/80 font-mono pointer-events-none">
+                        <div class="absolute bottom-2 right-2 px-2 py-1 bg-black/60 backdrop-blur rounded text-xs text-white/80 font-mono pointer-events-none">
                         {{ getSelectedVideo(scene).provider }} • {{ getSelectedVideo(scene).duration }}s
                         </div>
                     </div>
                     <div v-else class="h-24 bg-pink-500/5 rounded-lg flex flex-col items-center justify-center gap-2 border border-dashed border-pink-500/20 text-pink-500/50">
                         <Clapperboard :size="16" class="animate-pulse" />
-                        <span class="text-[9px] uppercase tracking-wider">{{ output.audioApproved ? 'Aguardando Motion...' : 'Pendente de Áudio' }}</span>
+                        <span class="text-xs uppercase tracking-wider">{{ output.audioApproved ? 'Aguardando Motion...' : 'Pendente de Áudio' }}</span>
                     </div>
                 </div>
                 
@@ -1623,14 +1623,14 @@
                    <div v-else-if="scene.imageStatus === 'restricted'" class="h-16 bg-red-500/5 rounded-lg flex items-center justify-center gap-3 text-xs border border-dashed border-red-500/20">
                      <ShieldAlert :size="16" class="text-red-400/60" />
                      <span class="text-red-300/70">Imagem bloqueada pelo filtro de conteúdo</span>
-                     <span class="px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider rounded-full bg-red-500/20 text-red-400">Restrita</span>
+                     <span class="px-2 py-0.5 text-xs font-bold uppercase tracking-wider rounded-full bg-red-500/20 text-red-400">Restrita</span>
                    </div>
                    <!-- Cena com erro genérico -->
                    <div v-else-if="scene.imageStatus === 'error'" class="h-16 bg-orange-500/5 rounded-lg flex items-center justify-center gap-3 text-xs border border-dashed border-orange-500/20">
                      <AlertTriangle :size="16" class="text-orange-400/60" />
                      <span class="text-orange-300/70">Erro ao gerar imagem</span>
                    </div>
-                   <div v-else class="h-12 bg-white/5 rounded-lg flex items-center justify-center text-[10px] text-zinc-500 uppercase tracking-widest border border-dashed border-white/5">
+                   <div v-else class="h-12 bg-white/5 rounded-lg flex items-center justify-center text-xs text-zinc-500 uppercase tracking-widest border border-dashed border-white/5">
                       {{ output.scriptApproved ? 'Aguardando Geração Image...' : 'Imagens Pendentes' }}
                    </div>
                 </div>
@@ -1681,11 +1681,11 @@
 
       <div class="bg-black/40 border border-white/10 rounded-xl p-5 space-y-3">
         <div>
-          <span class="text-[9px] font-black tracking-widest text-zinc-500 uppercase">Modelo</span>
+          <span class="text-xs font-black tracking-widest text-zinc-500 uppercase">Modelo</span>
           <p class="text-white font-mono text-sm mt-1">{{ pricingError.model }}</p>
         </div>
         <div>
-          <span class="text-[9px] font-black tracking-widest text-zinc-500 uppercase">Provider</span>
+          <span class="text-xs font-black tracking-widest text-zinc-500 uppercase">Provider</span>
           <p class="text-white font-mono text-sm mt-1">{{ pricingError.provider }}</p>
         </div>
       </div>
@@ -1843,7 +1843,7 @@
               renderCaptionStyleId === style.id ? 'border-secondary bg-secondary/10' : 'border-white/10 bg-white/5 hover:border-white/20'
             ]"
           >
-            <div v-if="style.isRecommended" class="absolute -top-2 -right-2 px-3 py-1 bg-secondary text-black text-[10px] font-black uppercase tracking-wider rounded-full">
+            <div v-if="style.isRecommended" class="absolute -top-2 -right-2 px-3 py-1 bg-secondary text-black text-xs font-black uppercase tracking-wider rounded-full">
               Recomendado
             </div>
             <div class="flex items-start gap-3 mb-3">
@@ -1885,7 +1885,7 @@
               step="1"
               class="w-full accent-emerald-500 cursor-pointer"
             />
-            <div class="flex items-center justify-between text-[10px] text-zinc-600 mt-1">
+            <div class="flex items-center justify-between text-xs text-zinc-600 mt-1">
               <span>-40dB (silencioso)</span>
               <span class="text-emerald-500/60">Original: {{ output.script.backgroundMusicVolume || -18 }}dB</span>
               <span>0dB (máximo)</span>
@@ -1902,7 +1902,7 @@
           >
             <div class="flex items-center justify-between mb-3">
               <div class="flex items-center gap-2">
-                <div class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-[10px] font-mono font-bold text-emerald-300">
+                <div class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-xs font-mono font-bold text-emerald-300">
                   {{ Number(idx) + 1 }}
                 </div>
                 <span class="text-xs text-emerald-300 font-medium">
@@ -1920,7 +1920,7 @@
               step="1"
               class="w-full accent-emerald-500 cursor-pointer"
             />
-            <div class="flex items-center justify-between text-[10px] text-zinc-600 mt-1">
+            <div class="flex items-center justify-between text-xs text-zinc-600 mt-1">
               <span>-40dB</span>
               <span class="text-emerald-500/60">Original: {{ track.volume }}dB</span>
               <span>0dB</span>

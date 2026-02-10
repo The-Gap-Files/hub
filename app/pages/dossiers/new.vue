@@ -5,7 +5,7 @@
       
       <NuxtLink to="/dossiers" class="group/back flex items-center gap-2 text-zinc-600 hover:text-primary transition-colors mb-6">
         <ArrowLeft :size="16" class="group-hover/back:-translate-x-1 transition-transform" />
-        <span class="mono-label !text-[10px]">Retornar ao Hub</span>
+        <span class="mono-label text-xs">Retornar ao Hub</span>
       </NuxtLink>
 
       <div class="relative space-y-2">
@@ -30,7 +30,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           <!-- Título -->
           <div class="space-y-2">
-            <label class="mono-label !text-[9px] text-zinc-500 flex items-center gap-2">
+            <label class="mono-label text-xs text-zinc-500 flex items-center gap-2">
               <FileText :size="12" />
               Título do Arquivo
             </label>
@@ -45,7 +45,7 @@
 
           <!-- Tema -->
           <div class="space-y-2">
-            <label class="mono-label !text-[9px] text-zinc-500 flex items-center gap-2">
+            <label class="mono-label text-xs text-zinc-500 flex items-center gap-2">
               <Target :size="12" />
               Vetor de Retenção (Tema)
             </label>
@@ -60,7 +60,7 @@
 
           <!-- Categoria (Custom Select) -->
           <div class="space-y-2">
-            <label class="mono-label !text-[9px] text-zinc-500 flex items-center gap-2">
+            <label class="mono-label text-xs text-zinc-500 flex items-center gap-2">
               <Database :size="12" />
               Classificação de Inteligência
             </label>
@@ -111,7 +111,7 @@
                     </div>
                     <div>
                       <span class="block text-xs font-black uppercase tracking-widest">{{ cat.label }}</span>
-                      <span class="block text-[8px] text-zinc-600 group-hover/opt:text-zinc-400 uppercase tracking-tighter">{{ cat.desc }}</span>
+                      <span class="block text-xs text-zinc-600 group-hover/opt:text-zinc-400 uppercase tracking-tighter">{{ cat.desc }}</span>
                     </div>
                     <div v-if="formData.category === cat.id" class="ml-auto">
                       <div class="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_10px_rgba(59,130,246,1)]"></div>
@@ -124,7 +124,7 @@
 
           <!-- Tags -->
           <div class="space-y-2">
-            <label class="mono-label !text-[9px] text-zinc-500 flex items-center gap-2">
+            <label class="mono-label text-xs text-zinc-500 flex items-center gap-2">
               <Tag :size="12" />
               Marcadores de Metadados
             </label>
@@ -138,7 +138,7 @@
               <span
                 v-for="tag in formData.tags"
                 :key="tag"
-                class="px-3 py-1 bg-primary/10 border border-primary/20 text-primary text-[9px] font-black uppercase rounded-lg"
+                class="px-3 py-1 bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase rounded-lg"
               >
                 #{{ tag }}
               </span>
@@ -148,7 +148,7 @@
 
         <!-- Canal (opcional) -->
         <div class="space-y-2">
-          <label class="mono-label !text-[9px] text-zinc-500 flex items-center gap-2">
+          <label class="mono-label text-xs text-zinc-500 flex items-center gap-2">
             <Tv :size="12" />
             Canal de Distribuição
           </label>
@@ -176,14 +176,14 @@
             </div>
             <div>
               <h2 class="text-xs font-black uppercase tracking-[0.3em] text-white">Universo Visual</h2>
-              <p class="text-[9px] text-zinc-500 uppercase font-bold tracking-widest mt-0.5">Defina a identidade estética padrão desta investigação</p>
+              <p class="text-xs text-zinc-500 uppercase font-bold tracking-widest mt-0.5">Defina a identidade estética padrão desta investigação</p>
             </div>
           </header>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <!-- Estilo Visual Preferencial -->
             <div class="space-y-3">
-              <label class="mono-label !text-[9px] text-zinc-500 flex items-center gap-2">
+              <label class="mono-label text-xs text-zinc-500 flex items-center gap-2">
                 <Layout :size="12" />
                 Estilo Visual Direcionador
               </label>
@@ -205,7 +205,7 @@
 
             <!-- Passo 4: DNA Visual (Seed) -->
             <div class="space-y-3">
-              <label class="mono-label !text-[9px] text-zinc-500 flex items-center gap-2">
+              <label class="mono-label text-xs text-zinc-500 flex items-center gap-2">
                 <Dna :size="12" />
                 Assinatura Genética (Seed)
               </label>
@@ -228,7 +228,7 @@
 
           <!-- Contexto Visual (Seu aviso customizado) -->
           <div class="space-y-3">
-            <label class="mono-label !text-[9px] text-zinc-500 flex items-center gap-2">
+            <label class="mono-label text-xs text-zinc-500 flex items-center gap-2">
               <AlertTriangle :size="12" />
               Diretrizes de Identidade do Universo (Warning Protocol)
             </label>
@@ -246,7 +246,7 @@
           <button
             type="submit"
             :disabled="submitting"
-            class="btn-primary flex-1 py-5 !text-[12px] tracking-[0.2em] font-black relative group/btn overflow-hidden"
+            class="btn-primary flex-1 py-5 !text-xs tracking-[0.2em] font-black relative group/btn overflow-hidden"
           >
             <span v-if="!submitting" class="flex items-center justify-center gap-3 relative z-10">
               <Plus :size="20" class="group-hover/btn:rotate-90 transition-transform duration-500" />
@@ -259,7 +259,7 @@
             <div class="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500"></div>
           </button>
           
-          <NuxtLink to="/dossiers" class="btn-secondary !px-12 flex items-center justify-center py-5 mono-label !text-[10px] !text-zinc-500 hover:!text-white border-white/5 hover:bg-white/5">
+          <NuxtLink to="/dossiers" class="btn-secondary !px-12 flex items-center justify-center py-5 mono-label text-xs !text-zinc-500 hover:!text-white border-white/5 hover:bg-white/5">
             Abortar
           </NuxtLink>
         </div>

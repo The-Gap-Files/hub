@@ -17,7 +17,7 @@
         />
         <button 
           @click="fileInput?.click()" 
-          class="btn-secondary !py-1.5 !px-4 text-[10px] uppercase tracking-widest border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/10"
+          class="btn-secondary !py-1.5 !px-4 text-xs uppercase tracking-widest border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/10"
           :disabled="uploading"
         >
           <span v-if="!uploading" class="flex items-center gap-2">
@@ -51,10 +51,10 @@
           <div class="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/90 via-black/40 to-transparent translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
             <div class="flex justify-between items-end gap-4">
               <div class="flex-1 min-w-0">
-                <p class="text-[10px] font-mono text-indigo-400 uppercase tracking-widest mb-1">Asset ID: {{ image.id.slice(0, 8) }}</p>
+                <p class="text-xs font-mono text-indigo-400 uppercase tracking-widest mb-1">Asset ID: {{ image.id.slice(0, 8) }}</p>
                 <h4 class="text-white font-bold text-sm truncate uppercase tracking-tighter">{{ image.description }}</h4>
                 <div v-if="image.tags" class="flex gap-2 mt-2">
-                   <span v-for="tag in image.tags.split(',')" :key="tag" class="text-[8px] font-black uppercase bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded border border-indigo-500/30">
+                   <span v-for="tag in image.tags.split(',')" :key="tag" class="text-xs font-black uppercase bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded border border-indigo-500/30">
                      {{ tag.trim() }}
                    </span>
                 </div>
@@ -105,7 +105,7 @@
 
            <div class="space-y-5">
              <div class="space-y-1.5">
-               <label class="mono-label !text-[9px] text-indigo-200/70">Identificador do Asset</label>
+               <label class="mono-label text-xs text-indigo-200/70">Identificador do Asset</label>
                <input 
                 v-model="uploadForm.description" 
                 type="text" 
@@ -114,7 +114,7 @@
                />
              </div>
              <div class="space-y-1.5">
-               <label class="mono-label !text-[9px] text-indigo-200/70">Classificação (Tags)</label>
+               <label class="mono-label text-xs text-indigo-200/70">Classificação (Tags)</label>
                <input 
                 v-model="uploadForm.tags" 
                 type="text" 
@@ -127,13 +127,13 @@
 
          <div class="flex gap-3 p-6 pt-4 border-t border-white/5 bg-white/[0.02]">
            <button @click="confirmUpload" :disabled="uploading" class="btn-primary flex-1 py-3 !bg-indigo-600 hover:!bg-indigo-500 shadow-none border-none">
-             <span v-if="!uploading" class="flex items-center justify-center gap-2 tracking-widest text-[10px] font-black">REGISTRAR ASSET</span>
+             <span v-if="!uploading" class="flex items-center justify-center gap-2 tracking-widest text-xs font-black">REGISTRAR ASSET</span>
              <span v-else class="flex items-center justify-center gap-2">
                 <div class="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
                 GRAVANDO...
              </span>
            </button>
-           <button @click="cancelUpload" class="btn-secondary !px-6 text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">
+           <button @click="cancelUpload" class="btn-secondary !px-6 text-xs font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">
              Abortar
            </button>
          </div>

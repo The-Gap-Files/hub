@@ -10,7 +10,7 @@ import { intelligenceQuery } from '../../../services/intelligence-query.service'
 
 const QuerySchema = z.object({
   query: z.string().min(3, 'A consulta deve ter pelo menos 3 caracteres'),
-  source: z.enum(['docs', 'web'])
+  source: z.enum(['docs', 'web', 'both'])
 })
 
 export default defineEventHandler(async (event) => {

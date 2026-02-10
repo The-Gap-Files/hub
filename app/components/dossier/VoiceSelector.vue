@@ -5,7 +5,7 @@
         <Mic :size="14" />
         {{ label || 'Voz do Narrador (IA)' }}
       </div>
-      <div v-if="manualMode" class="text-[9px] text-primary font-bold uppercase tracking-widest animate-pulse">
+      <div v-if="manualMode" class="text-xs text-primary font-bold uppercase tracking-widest animate-pulse">
         MODO MANUAL
       </div>
     </label>

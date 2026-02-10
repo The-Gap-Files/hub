@@ -36,6 +36,13 @@
     --ring: 240 4.9% 83.9%;
 
     --radius: 0.75rem;
+
+    /* Typography scale (base 16px, ratio 1.25 — typography-system.md) */
+    --font-size-xs: 0.75rem;   /* 12px — labels, captions, metadata (mínimo legível) */
+    --font-size-sm: 0.875rem;  /* 14px — body compacto, cards */
+    --font-size-base: 1rem;    /* 16px — corpo principal */
+    --font-size-lg: 1.125rem; /* 18px — subheadings */
+    --font-size-xl: 1.25rem;  /* 20px */
   }
 }
 
@@ -67,17 +74,17 @@
   }
 
   .mono-label {
-    @apply font-mono text-[11px] uppercase tracking-widest text-muted-foreground;
+    @apply font-mono text-xs uppercase tracking-widest text-muted-foreground;
   }
 
   /* Reduced noise version for field labels — use instead of mono-label in forms/fields */
   .field-label {
-    @apply text-[10px] text-zinc-500 font-medium;
+    @apply text-xs text-zinc-500 font-medium;
   }
 
   /* Compact badge with less visual noise than mono-label */
   .badge-compact {
-    @apply font-mono text-[10px] uppercase tracking-wide text-muted-foreground;
+    @apply font-mono text-xs uppercase tracking-wide text-muted-foreground;
   }
 }
 

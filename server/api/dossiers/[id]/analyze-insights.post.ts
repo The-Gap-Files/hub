@@ -11,6 +11,8 @@ import { costLogService } from '../../../services/cost-log.service'
 
 export default defineEventHandler(async (event) => {
   const dossierId = getRouterParam(event, 'id')
+  const body = await readBody(event).catch(() => ({}))
+  const clearExisting = body?.clearExisting === true
 
   if (!dossierId) {
     throw createError({
@@ -50,6 +52,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     // Chamar o service de análise
+    // Se clearExisting, não enviar existingNotes/existingPersons (serão apagados, IA pode gerar tudo do zero)
     const result = await analyzeInsights(
       {
         theme: dossier.theme,
@@ -59,14 +62,14 @@ export default defineEventHandler(async (event) => {
           sourceType: s.sourceType,
           weight: s.weight
         })),
-        existingNotes: dossier.notes.map(n => ({
+        existingNotes: clearExisting ? [] : dossier.notes.map(n => ({
           content: n.content,
           noteType: n.noteType || 'insight'
         })),
         images: dossier.images.map(i => ({
           description: i.description
         })),
-        existingPersons: dossier.persons.map(p => ({
+        existingPersons: clearExisting ? [] : dossier.persons.map(p => ({
           name: p.name
         }))
       },
@@ -77,8 +80,17 @@ export default defineEventHandler(async (event) => {
       }
     )
 
-    // Obter a próxima ordem disponível para notas
-    const maxNoteOrder = dossier.notes.reduce((max, n) => Math.max(max, n.order), -1)
+    // Se clearExisting, apagar todas as notas e pessoas antes de criar as novas
+    if (clearExisting) {
+      const [deletedNotes, deletedPersons] = await prisma.$transaction([
+        prisma.dossierNote.deleteMany({ where: { dossierId } }),
+        prisma.dossierPerson.deleteMany({ where: { dossierId } })
+      ])
+      console.log(`[AnalyzeInsights] 🗑️ Limpeza: ${deletedNotes.count} notas + ${deletedPersons.count} pessoas removidas`)
+    }
+
+    // Obter a próxima ordem disponível para notas (se clearExisting, começa do 0)
+    const maxNoteOrder = clearExisting ? -1 : dossier.notes.reduce((max, n) => Math.max(max, n.order), -1)
 
     // Salvar cada item como nota no dossiê
     const createdNotes = await prisma.$transaction(
@@ -97,7 +109,7 @@ export default defineEventHandler(async (event) => {
     // Salvar pessoas extraídas como DossierPerson
     let createdPersons: any[] = []
     if (result.persons.length > 0) {
-      const maxPersonOrder = dossier.persons.reduce((max, p) => Math.max(max, p.order), -1)
+      const maxPersonOrder = clearExisting ? -1 : dossier.persons.reduce((max, p) => Math.max(max, p.order), -1)
 
       createdPersons = await prisma.$transaction(
         result.persons.map((person, index) =>
@@ -135,6 +147,7 @@ export default defineEventHandler(async (event) => {
       persons: createdPersons,
       count: createdNotes.length,
       personsCount: createdPersons.length,
+      cleared: clearExisting,
       usage: result.usage,
       provider: result.provider,
       model: result.model

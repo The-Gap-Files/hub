@@ -49,6 +49,7 @@ model Dossier {
   outputs                Output[]
   costLogs               CostLog[]
   monetizationPlans      MonetizationPlan[]
+  seedSamples            SeedSample[]       @relation("DossierSeedSamples")
   preferredSeed          Seed?              @relation("DossierPreferredSeed", fields: [preferredSeedId], references: [id], onDelete: SetNull)
   channel                Channel?           @relation(fields: [channelId], references: [id], onDelete: SetNull)
 
@@ -374,16 +375,43 @@ model PipelineExecution {
 
 /// Seeds para geração de imagens/vídeos (receitas visuais)
 model Seed {
-  id                  String    @id @default(uuid())
-  value               Int       @unique
-  usageCount          Int       @default(0)
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
-  outputs             Output[]  @relation("OutputSeed")
-  preferredByDossiers Dossier[] @relation("DossierPreferredSeed")
-  preferredByChannels Channel[] @relation("ChannelDefaultSeed")
+  id                  String       @id @default(uuid())
+  value               Int          @unique
+  usageCount          Int          @default(0)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  outputs             Output[]     @relation("OutputSeed")
+  samples             SeedSample[] @relation("SeedSamples")
+  preferredByDossiers Dossier[]    @relation("DossierPreferredSeed")
+  preferredByChannels Channel[]    @relation("ChannelDefaultSeed")
 
   @@map("seeds")
+}
+
+/// Amostra visual gerada com uma seed — registro universal de qualquer imagem
+/// produzida pelo sistema (style preview, pipeline de cenas, thumbnail, etc.)
+/// Permite consultar todas as imagens de uma seed na gestão de seeds.
+model SeedSample {
+  id          String   @id @default(uuid())
+  seedId      String
+  dossierId   String? /// Contexto opcional: dossiê de onde veio a geração
+  source      String   @db.VarChar(50) /// "style-preview" | "scene-image" | "thumbnail" | "test"
+  prompt      String /// Prompt usado na geração
+  base64      String /// Imagem em base64 (sem prefixo data:...)
+  mimeType    String   @default("image/png") @db.VarChar(30)
+  provider    String   @db.VarChar(30) /// "REPLICATE"
+  model       String?  @db.VarChar(100) /// ex: "luma/photon-flash"
+  aspectRatio String?  @db.VarChar(10) /// "16:9", "9:16", "1:1"
+  metadata    Json? /// Dados extras: visualStyleId, itemKey, predictTime, etc.
+  createdAt   DateTime @default(now())
+  seed        Seed     @relation("SeedSamples", fields: [seedId], references: [id], onDelete: Cascade)
+  dossier     Dossier? @relation("DossierSeedSamples", fields: [dossierId], references: [id], onDelete: SetNull)
+
+  @@index([seedId])
+  @@index([dossierId])
+  @@index([source])
+  @@index([createdAt])
+  @@map("seed_samples")
 }
 
 /// Log de custos de API - append-only ledger desacoplado dos artefatos

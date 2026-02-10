@@ -72,7 +72,7 @@
               <h3 class="text-lg font-black text-white uppercase tracking-tight leading-tight group-hover:text-primary transition-colors truncate">
                 {{ channel.name }}
               </h3>
-              <span class="mono-label !text-[10px] text-primary/50">{{ channel.handle }}</span>
+              <span class="mono-label  text-primary/50">{{ channel.handle }}</span>
             </div>
 
             <div class="flex items-center gap-2">
@@ -92,20 +92,20 @@
           <div class="flex items-center gap-4 pt-2 border-t border-white/5">
             <div class="flex items-center gap-1.5">
               <Library :size="12" class="text-zinc-600" />
-              <span class="mono-label !text-[10px] text-zinc-500">{{ channel.dossiersCount || 0 }} <span class="opacity-40">dossiers</span></span>
+              <span class="mono-label  text-zinc-500">{{ channel.dossiersCount || 0 }} <span class="opacity-40">dossiers</span></span>
             </div>
 
             <div v-if="channel.platform" class="flex items-center gap-1.5 ml-auto">
-              <span class="mono-label !text-[9px] px-2 py-0.5 bg-white/5 border border-white/10 rounded-md text-zinc-400 uppercase">{{ channel.platform }}</span>
+              <span class="mono-label  px-2 py-0.5 bg-white/5 border border-white/10 rounded-md text-zinc-400 uppercase">{{ channel.platform }}</span>
             </div>
           </div>
 
           <!-- Visual Style + Script Style Tags -->
           <div v-if="channel.defaultVisualStyleId || channel.defaultScriptStyleId" class="flex flex-wrap gap-2">
-            <span v-if="channel.defaultVisualStyleId" class="mono-label !text-[9px] px-2 py-0.5 bg-primary/10 border border-primary/20 rounded-md text-primary/60">
+            <span v-if="channel.defaultVisualStyleId" class="mono-label  px-2 py-0.5 bg-primary/10 border border-primary/20 rounded-md text-primary/60">
               🎨 {{ channel.defaultVisualStyleId }}
             </span>
-            <span v-if="channel.defaultScriptStyleId" class="mono-label !text-[9px] px-2 py-0.5 bg-blue-400/10 border border-blue-400/20 rounded-md text-blue-400/60">
+            <span v-if="channel.defaultScriptStyleId" class="mono-label  px-2 py-0.5 bg-blue-400/10 border border-blue-400/20 rounded-md text-blue-400/60">
               📝 {{ channel.defaultScriptStyleId }}
             </span>
           </div>
@@ -135,7 +135,7 @@
                   <h2 class="text-lg font-black text-white uppercase tracking-tight">
                     {{ isEditing ? 'Editar Canal' : 'Novo Canal' }}
                   </h2>
-                  <span class="mono-label !text-[9px] text-zinc-500">{{ isEditing ? 'Protocolo de Modificação' : 'Protocolo de Criação' }}</span>
+                  <span class="mono-label  text-zinc-500">{{ isEditing ? 'Protocolo de Modificação' : 'Protocolo de Criação' }}</span>
                 </div>
               </div>
               <button @click="closeModal" class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition-all">
@@ -147,28 +147,28 @@
             <div class="flex-1 overflow-y-auto p-6 space-y-5">
               <!-- Name -->
               <div class="space-y-1.5">
-                <label class="mono-label !text-[10px] text-zinc-500 uppercase">Nome do Canal *</label>
+                <label class="mono-label  text-zinc-500 uppercase">Nome do Canal *</label>
                 <input v-model="form.name" type="text" placeholder="The Gap Files" maxlength="100"
                   class="input-field w-full" />
               </div>
 
               <!-- Handle -->
               <div class="space-y-1.5">
-                <label class="mono-label !text-[10px] text-zinc-500 uppercase">Handle *</label>
+                <label class="mono-label  text-zinc-500 uppercase">Handle *</label>
                 <input v-model="form.handle" type="text" placeholder="@thegapfiles" maxlength="50"
                   class="input-field w-full" />
               </div>
 
               <!-- Description -->
               <div class="space-y-1.5">
-                <label class="mono-label !text-[10px] text-zinc-500 uppercase">Descrição</label>
+                <label class="mono-label  text-zinc-500 uppercase">Descrição</label>
                 <textarea v-model="form.description" placeholder="Mistérios e lacunas da história oficial..." rows="3"
                   class="input-field w-full resize-none"></textarea>
               </div>
 
               <!-- Platform -->
               <div class="space-y-1.5">
-                <label class="mono-label !text-[10px] text-zinc-500 uppercase">Plataforma</label>
+                <label class="mono-label  text-zinc-500 uppercase">Plataforma</label>
                 <select v-model="form.platform" class="input-field w-full">
                   <option value="">Selecionar...</option>
                   <option value="YOUTUBE">YouTube</option>
@@ -181,7 +181,7 @@
 
               <!-- Visual Style -->
               <div class="space-y-1.5">
-                <label class="mono-label !text-[10px] text-zinc-500 uppercase">Estilo Visual Padrão</label>
+                <label class="mono-label  text-zinc-500 uppercase">Estilo Visual Padrão</label>
                 <select v-model="form.defaultVisualStyleId" class="input-field w-full">
                   <option value="">Nenhum (herdar do dossier)</option>
                   <option v-for="style in visualStyles" :key="style.id" :value="style.id">
@@ -192,7 +192,7 @@
 
               <!-- Script Style -->
               <div class="space-y-1.5">
-                <label class="mono-label !text-[10px] text-zinc-500 uppercase">Estilo de Roteiro Padrão</label>
+                <label class="mono-label  text-zinc-500 uppercase">Estilo de Roteiro Padrão</label>
                 <select v-model="form.defaultScriptStyleId" class="input-field w-full">
                   <option value="">Nenhum (herdar da classificação)</option>
                   <option v-for="style in scriptStyles" :key="style.id" :value="style.id">
@@ -203,7 +203,7 @@
 
               <!-- Logo Upload -->
               <div class="space-y-1.5">
-                <label class="mono-label !text-[10px] text-zinc-500 uppercase">Logo do Canal</label>
+                <label class="mono-label  text-zinc-500 uppercase">Logo do Canal</label>
                 <div class="flex items-center gap-4">
                   <div class="w-16 h-16 rounded-2xl border border-white/10 flex items-center justify-center bg-white/[0.02] overflow-hidden shrink-0">
                     <img v-if="form.logoBase64" :src="form.logoBase64" class="w-full h-full object-cover" />
@@ -223,7 +223,7 @@
               <div v-if="isEditing" class="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] border border-white/5">
                 <div>
                   <p class="text-xs font-bold text-white uppercase">Status do Canal</p>
-                  <p class="mono-label !text-[9px] text-zinc-500">{{ form.isActive ? 'Canal receberá novos dossiers' : 'Canal desativado — não receberá novos dossiers' }}</p>
+                  <p class="mono-label  text-zinc-500">{{ form.isActive ? 'Canal receberá novos dossiers' : 'Canal desativado — não receberá novos dossiers' }}</p>
                 </div>
                 <button @click="form.isActive = !form.isActive"
                   class="w-12 h-6 rounded-full transition-all duration-300 relative"

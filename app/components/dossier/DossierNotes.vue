@@ -12,7 +12,7 @@
           v-if="!showForm"
           @click="runAnalysis"
           :disabled="isAnalyzing"
-          class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all border"
           :class="isAnalyzing 
             ? 'bg-purple-500/10 border-purple-500/30 text-purple-400 cursor-wait' 
             : 'bg-purple-500/5 border-purple-500/20 text-purple-400/70 hover:text-purple-400 hover:bg-purple-500/10 hover:border-purple-500/30'"
@@ -24,7 +24,7 @@
         <button 
           v-if="!showForm" 
           @click="showForm = true" 
-          class="text-amber-500/50 hover:text-amber-500 text-[10px] font-black uppercase tracking-widest transition-all"
+          class="text-amber-500/50 hover:text-amber-500 text-xs font-black uppercase tracking-widest transition-all"
         >
           + Add Log
         </button>
@@ -33,7 +33,7 @@
 
     <!-- Banner de resultado da análise -->
     <div v-if="analysisResult" class="px-6 py-3 bg-purple-500/5 border-b border-purple-500/10 flex justify-between items-center animate-in fade-in duration-500">
-      <span class="text-[9px] font-black uppercase tracking-widest text-purple-400/80">
+      <span class="text-xs font-black uppercase tracking-widest text-purple-400/80">
         {{ analysisResult.count }} insights gerados via {{ analysisResult.provider }}
       </span>
       <button @click="analysisResult = null" class="text-purple-400/30 hover:text-purple-400 transition-colors">
@@ -52,7 +52,7 @@
            <span 
             v-if="note.noteType" 
             :class="getNoteTypeClass(note.noteType)"
-            class="px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-tighter"
+            class="px-2 py-0.5 rounded-md text-xs font-black uppercase tracking-tighter"
           >
             {{ note.noteType }}
           </span>
@@ -63,7 +63,7 @@
         </p>
         
         <div class="mt-4 pt-4 border-t border-white/5 flex justify-between items-center">
-          <span class="text-[9px] font-mono text-zinc-600 uppercase">{{ formatDate(note.createdAt) }}</span>
+          <span class="text-xs font-mono text-zinc-600 uppercase">{{ formatDate(note.createdAt) }}</span>
           <button @click="deleteNote(note.id)" class="opacity-0 group-hover:opacity-100 text-red-500/50 hover:text-red-500 transition-all">
             <Trash2 :size="14" />
           </button>
@@ -76,7 +76,7 @@
         <Edit3 :size="24" />
       </div>
       <p class="mono-label opacity-30 italic leading-relaxed text-xs">Nenhum insight neural registrado.</p>
-      <button @click="showForm = true" class="mt-4 btn-secondary !text-[10px] py-1.5 px-6">
+      <button @click="showForm = true" class="mt-4 btn-secondary text-xs py-1.5 px-6">
         Iniciar Registro
       </button>
     </div>
@@ -104,7 +104,7 @@
           <button 
             type="button"
             @click="isTypeDropdownOpen = !isTypeDropdownOpen"
-            class="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-[9px] font-black text-amber-500 uppercase tracking-widest outline-none transition-all flex items-center gap-3 hover:border-amber-500/30"
+            class="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-xs font-black text-amber-500 uppercase tracking-widest outline-none transition-all flex items-center gap-3 hover:border-amber-500/30"
             :class="{ 'border-amber-500': isTypeDropdownOpen }"
           >
             <div class="w-1.5 h-1.5 rounded-full" :class="getNoteTypeBulletClass(newNote.noteType)"></div>
@@ -123,7 +123,7 @@
                 :class="{ 'bg-amber-500/10 text-amber-500': newNote.noteType === type.id }"
              >
                 <div class="w-1.5 h-1.5 rounded-full" :class="type.bullet"></div>
-                <span class="text-[9px] font-black uppercase tracking-widest">{{ type.label }}</span>
+                <span class="text-xs font-black uppercase tracking-widest">{{ type.label }}</span>
              </button>
           </div>
         </div>
@@ -131,7 +131,7 @@
         <button 
           @click="addNote" 
           :disabled="!newNote.content || submitting" 
-          class="btn-primary !px-6 !py-2 !text-[10px] !bg-amber-600 hover:!bg-amber-500 shadow-none border-none disabled:opacity-30"
+          class="btn-primary !px-6 !py-2 !bg-amber-600 hover:!bg-amber-500 shadow-none border-none disabled:opacity-30"
         >
           {{ submitting ? '...' : 'REGISTRAR' }}
         </button>

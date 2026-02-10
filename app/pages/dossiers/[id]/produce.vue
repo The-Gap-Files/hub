@@ -29,11 +29,11 @@
               : stepDone(s.id) 
                 ? 'bg-white/5 border-white/10 text-zinc-400 hover:border-white/20 hover:text-white' 
                 : 'bg-white/[0.02] border-white/5 text-zinc-600'">
-            <span class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black border"
+            <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black border"
                   :class="currentStep === s.id ? 'border-primary bg-primary/30' : 'border-current'">
               {{ s.num }}
             </span>
-            <span class="text-[10px] font-bold uppercase tracking-wider hidden sm:inline">{{ s.label }}</span>
+            <span class="text-xs font-bold uppercase tracking-wider hidden sm:inline">{{ s.label }}</span>
           </button>
         </nav>
       </div>
@@ -46,7 +46,7 @@
           <Palette :size="20" />
         </div>
         <div class="space-y-1">
-          <p class="text-[10px] font-black uppercase tracking-widest text-purple-400">Diretriz do Universo</p>
+          <p class="text-xs font-black uppercase tracking-widest text-purple-400">Diretriz do Universo</p>
           <p class="text-sm text-purple-200/80 italic">"{{ dossier.visualIdentityContext }}"</p>
         </div>
       </div>
@@ -102,7 +102,7 @@
               </div>
               <div v-if="selectedFormats.includes(fmt.id)" class="pt-4 border-t border-white/10">
                 <div class="flex items-center justify-between mb-2">
-                  <span class="text-[10px] font-bold text-zinc-500 uppercase">Duração</span>
+                  <span class="text-xs font-bold text-zinc-500 uppercase">Duração</span>
                   <span class="text-sm font-mono text-white">{{ Math.floor((formatDurations[fmt.id] || 0) / 60) }}:{{ String((formatDurations[fmt.id] || 0) % 60).padStart(2, '0') }}</span>
                 </div>
                 <input
@@ -117,7 +117,7 @@
                   v-if="formatDurations[fmt.id] !== fmt.defaultDuration"
                   type="button"
                   @click.stop="formatDurations[fmt.id] = fmt.defaultDuration"
-                  class="mt-2 text-[10px] text-primary/80 hover:text-primary font-bold uppercase">
+                  class="mt-2 text-xs text-primary/80 hover:text-primary font-bold uppercase">
                   Padrão ({{ fmt.defaultDuration }}s)
                 </button>
               </div>
@@ -140,7 +140,7 @@
             class="px-6 py-5 rounded-2xl text-left transition-all border relative"
             :class="[selectedScriptStyle === style.id ? 'bg-blue-600 border-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.2)]' : 'bg-white/5 border-white/10 text-zinc-500 hover:border-white/20 hover:text-white']">
             <span class="font-bold uppercase tracking-widest text-sm">{{ style.name }}</span>
-            <span v-if="selectedClassificationId && style.id === recommendedScriptStyleId" class="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] bg-amber-500/20 text-amber-400 px-2 py-1 rounded-md border border-amber-500/30">Recomendado</span>
+            <span v-if="selectedClassificationId && style.id === recommendedScriptStyleId" class="absolute right-4 top-1/2 -translate-y-1/2 text-xs bg-amber-500/20 text-amber-400 px-2 py-1 rounded-md border border-amber-500/30">Recomendado</span>
           </button>
         </div>
       </section>
@@ -161,8 +161,8 @@
             class="px-6 py-5 rounded-2xl text-left transition-all border relative"
             :class="[selectedVisualStyle === style.id ? 'bg-purple-600 border-purple-500 text-white shadow-[0_0_20px_rgba(139,92,246,0.2)]' : 'bg-white/5 border-white/10 text-zinc-500 hover:border-white/20 hover:text-white']">
             <span class="font-bold uppercase tracking-widest text-sm">{{ style.name }}</span>
-            <span v-if="style.id === dossier?.preferredVisualStyleId" class="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] bg-white/10 px-2 py-1 rounded-md">DNA</span>
-            <span v-else-if="selectedClassificationId && style.id === recommendedVisualStyleId" class="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] bg-amber-500/20 text-amber-400 px-2 py-1 rounded-md border border-amber-500/30">Recomendado</span>
+            <span v-if="style.id === dossier?.preferredVisualStyleId" class="absolute right-4 top-1/2 -translate-y-1/2 text-xs bg-white/10 px-2 py-1 rounded-md">DNA</span>
+            <span v-else-if="selectedClassificationId && style.id === recommendedVisualStyleId" class="absolute right-4 top-1/2 -translate-y-1/2 text-xs bg-amber-500/20 text-amber-400 px-2 py-1 rounded-md border border-amber-500/30">Recomendado</span>
           </button>
         </div>
       </section>
@@ -188,7 +188,7 @@
               <span class="text-blue-400/60">({{ channelVoiceSuggestion.ttsProvider }}, {{ channelVoiceSuggestion.usageCount }}x)</span>
             </p>
           </div>
-          <button @click="applyChannelVoice" class="px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 text-[10px] font-bold uppercase rounded-lg transition-all shrink-0">
+          <button @click="applyChannelVoice" class="px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 text-xs font-bold uppercase rounded-lg transition-all shrink-0">
             Usar
           </button>
         </div>
@@ -200,7 +200,7 @@
               <input type="checkbox" v-model="enableMotion" class="rounded border-white/20 bg-white/5 text-primary focus:ring-primary" />
             </label>
             <div>
-              <label class="block text-[10px] font-bold text-zinc-500 uppercase mb-2">Velocidade da narração (WPM)</label>
+              <label class="block text-xs font-bold text-zinc-500 uppercase mb-2">Velocidade da narração (WPM)</label>
               <div class="flex gap-2">
                 <button v-for="wpm in [120, 150, 180]" :key="wpm"
                   @click="selectedWPM = wpm"
@@ -218,7 +218,7 @@
           </div>
           <div class="space-y-6">
             <div>
-              <label class="block text-[10px] font-bold text-zinc-500 uppercase mb-2">Objetivo editorial</label>
+              <label class="block text-xs font-bold text-zinc-500 uppercase mb-2">Objetivo editorial</label>
               <div class="space-y-2 max-h-[200px] overflow-y-auto custom-scrollbar">
                 <button @click="selectedObjectiveId = ''; customObjective = ''"
                   class="w-full px-4 py-3 rounded-xl text-left text-sm border transition-all"
@@ -242,7 +242,7 @@
                 placeholder="Descreva o objetivo editorial..." />
             </div>
             <div>
-              <label class="block text-[10px] font-bold text-zinc-500 uppercase mb-2">Assinatura genética (DNA)</label>
+              <label class="block text-xs font-bold text-zinc-500 uppercase mb-2">Assinatura genética (DNA)</label>
               <select v-model="selectedSeed"
                 class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-purple-500">
                 <option value="" class="bg-[#0A0A0F]">Aleatória</option>

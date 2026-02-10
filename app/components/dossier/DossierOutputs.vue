@@ -7,11 +7,11 @@
         </div>
         <div>
           <h3 class="text-xl font-black text-white tracking-tighter uppercase italic">Master Renders</h3>
-          <p class="mono-label !text-[9px] opacity-40">{{ outputs.length }} arquivos gerados no pipeline</p>
-          <p v-if="totalCost > 0" class="mono-label !text-[10px] text-emerald-400/90 mt-1">Custo total: {{ formatCost(totalCost) }}</p>
+          <p class="mono-label opacity-40">{{ outputs.length }} arquivos gerados no pipeline</p>
+          <p v-if="totalCost > 0" class="mono-label text-emerald-400/90 mt-1">Custo total: {{ formatCost(totalCost) }}</p>
         </div>
       </div>
-      <a :href="`/dossiers/${dossierId}/produce`" class="btn-primary !px-8 !py-3 !text-[10px] tracking-widest font-black uppercase inline-flex items-center gap-2">
+      <a :href="`/dossiers/${dossierId}/produce`" class="btn-primary !px-8 !py-3 !text-xs tracking-widest font-black uppercase inline-flex items-center gap-2">
         <Zap :size="16" />
         Novo Vetor
       </a>
@@ -19,7 +19,7 @@
 
     <div v-if="loading" class="flex flex-col items-center justify-center py-32 space-y-4">
       <div class="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin shadow-glow"></div>
-      <p class="mono-label !text-[10px] animate-pulse">Sincronizando Metadados...</p>
+      <p class="mono-label animate-pulse">Sincronizando Metadados...</p>
     </div>
 
     <div v-else-if="outputs.length > 0" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
@@ -39,17 +39,17 @@
                 <div class="w-1 h-1 bg-primary rounded-full animate-ping"></div>
               </div>
             </div>
-            <span class="mono-label !text-[10px] animate-pulse text-primary tracking-[0.3em]">CLICK_TO_MONITOR</span>
+            <span class="mono-label animate-pulse text-primary tracking-[0.3em]">CLICK_TO_MONITOR</span>
           </NuxtLink>
           
           <div v-else-if="output.status === 'FAILED'" class="absolute inset-0 bg-red-500/10 flex flex-col items-center justify-center space-y-2">
             <AlertTriangle :size="32" class="text-red-500" />
-            <span class="mono-label !text-[10px] text-red-500">CRITICAL_RENDER_ERROR</span>
+            <span class="mono-label text-red-500">CRITICAL_RENDER_ERROR</span>
           </div>
 
           <div v-else-if="output.status === 'CANCELLED'" class="absolute inset-0 bg-orange-500/10 flex flex-col items-center justify-center space-y-2">
             <XCircle :size="32" class="text-orange-500" />
-            <span class="mono-label !text-[10px] text-orange-500">PIPELINE_CANCELLED</span>
+            <span class="mono-label text-orange-500">PIPELINE_CANCELLED</span>
           </div>
 
 
@@ -64,13 +64,13 @@
           
           <!-- Badge de Status (OLED style) -->
           <div class="absolute top-4 right-4">
-             <div :class="getStatusClass(output.status)" class="px-3 py-1 rounded-lg text-[9px] font-black tracking-widest border transition-all">
+             <div :class="getStatusClass(output.status)" class="px-3 py-1 rounded-lg text-xs font-black tracking-widest border transition-all">
                {{ output.status }}
              </div>
           </div>
 
           <!-- Timecode Overlay -->
-          <div v-if="output.status === 'COMPLETED'" class="absolute bottom-4 left-4 mono-label !text-[9px] bg-black/60 px-2 py-1 rounded border border-white/10">
+          <div v-if="output.status === 'COMPLETED'" class="absolute bottom-4 left-4 mono-label bg-black/60 px-2 py-1 rounded border border-white/10">
             TC: 00:00:{{ output.duration < 10 ? '0' + output.duration : output.duration }}:00
           </div>
         </div>
@@ -83,31 +83,31 @@
                 {{ formatOutputType(output.outputType) }}
               </h4>
               <div class="flex items-center gap-2">
-                <span class="mono-label !text-[8px] text-zinc-500">{{ output.platform }}</span>
+                <span class="mono-label text-zinc-500">{{ output.platform }}</span>
                 <span class="text-zinc-700">•</span>
-                <span class="mono-label !text-[8px] text-zinc-500">{{ output.aspectRatio }}</span>
+                <span class="mono-label text-zinc-500">{{ output.aspectRatio }}</span>
               </div>
             </div>
             <div class="text-right flex flex-col items-end gap-1">
-              <p class="mono-label !text-[10px] text-primary">{{ output.duration }}s</p>
-              <p class="text-[8px] font-mono text-zinc-600 uppercase">DURATION</p>
-              <p v-if="output.totalCost != null && output.totalCost > 0" class="mono-label !text-[10px] text-emerald-400/90 mt-1">{{ formatCost(output.totalCost) }}</p>
-              <p v-if="output.totalCost != null && output.totalCost > 0" class="text-[8px] font-mono text-zinc-600 uppercase">CUSTO</p>
+              <p class="mono-label text-primary">{{ output.duration }}s</p>
+              <p class="text-xs font-mono text-zinc-600 uppercase">DURATION</p>
+              <p v-if="output.totalCost != null && output.totalCost > 0" class="mono-label text-emerald-400/90 mt-1">{{ formatCost(output.totalCost) }}</p>
+              <p v-if="output.totalCost != null && output.totalCost > 0" class="text-xs font-mono text-zinc-600 uppercase">CUSTO</p>
             </div>
           </div>
 
           <!-- Constantes: Classificação + Roteiro + Visual (rastreabilidade) -->
           <div class="flex flex-wrap gap-2 mb-8">
             <div v-if="output.classification" class="flex items-center gap-1.5 px-2 py-1 rounded-md bg-amber-500/10 border border-amber-500/20">
-              <span class="mono-label !text-[8px] text-amber-300">{{ output.classification.label }}</span>
+              <span class="mono-label text-amber-300">{{ output.classification.label }}</span>
             </div>
             <div v-if="output.scriptStyle" class="flex items-center gap-1.5 px-2 py-1 rounded-md bg-blue-500/10 border border-blue-500/20">
               <ScrollText :size="10" class="text-blue-400" />
-              <span class="mono-label !text-[8px] text-blue-300">{{ output.scriptStyle.name }}</span>
+              <span class="mono-label text-blue-300">{{ output.scriptStyle.name }}</span>
             </div>
             <div v-if="output.visualStyle" class="flex items-center gap-1.5 px-2 py-1 rounded-md bg-purple-500/10 border border-purple-500/20">
               <Zap :size="10" class="text-purple-400" />
-              <span class="mono-label !text-[8px] text-purple-300">{{ output.visualStyle.name }}</span>
+              <span class="mono-label text-purple-300">{{ output.visualStyle.name }}</span>
             </div>
           </div>
 
@@ -115,7 +115,7 @@
           <div class="mt-auto grid grid-cols-2 gap-3">
             <template v-if="output.status === 'COMPLETED'">
               <button 
-                class="btn-secondary !py-2.5 !text-[10px] font-black flex items-center justify-center gap-2 border-white/10 hover:border-primary/30"
+                class="btn-secondary !py-2.5 !text-xs font-black flex items-center justify-center gap-2 border-white/10 hover:border-primary/30"
                 @click="downloadOutput(output)"
               >
                 <Download :size="14" />
@@ -123,7 +123,7 @@
               </button>
               <NuxtLink 
                 :to="`/outputs/${output.id}`" 
-                class="btn-primary !py-2.5 !text-[10px] font-black flex items-center justify-center gap-2 shadow-none"
+                class="btn-primary !py-2.5 !text-xs font-black flex items-center justify-center gap-2 shadow-none"
               >
                 <ExternalLink :size="14" />
                 MASTER_VIEW
@@ -131,7 +131,7 @@
             </template>
             <template v-else-if="output.status === 'FAILED'">
               <button 
-                class="col-span-2 py-3 rounded-xl bg-red-600/10 border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest hover:bg-red-600/20 transition-all"
+                class="col-span-2 py-3 rounded-xl bg-red-600/10 border border-red-500/20 text-red-500 text-xs font-black uppercase tracking-widest hover:bg-red-600/20 transition-all"
                 @click="retryOutput(output)"
               >
                 REINJECT_PIPELINE
@@ -140,13 +140,13 @@
             <!-- Estado para Script Próximo Estágio (Aguardando Aprovação) -->
             <template v-else-if="!output.scriptApproved && output.status !== 'FAILED'">
               <div class="col-span-2">
-                 <div class="py-3 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[9px] font-black uppercase tracking-widest text-center flex items-center justify-center mb-3">
+                 <div class="py-3 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-black uppercase tracking-widest text-center flex items-center justify-center mb-3">
                     <ScrollText :size="12" class="mr-2" />
                     Roteiro Aguardando Aprovação
                  </div>
                  <NuxtLink 
                     :to="`/outputs/${output.id}`" 
-                    class="btn-primary w-full !py-3 !text-[10px] font-black flex items-center justify-center gap-2"
+                    class="btn-primary w-full !py-3 !text-xs font-black flex items-center justify-center gap-2"
                  >
                     <ExternalLink :size="14" />
                     REVISAR & APROVAR
@@ -159,7 +159,7 @@
                <div class="col-span-2 grid grid-cols-2 gap-3">
                   <NuxtLink 
                     :to="`/outputs/${output.id}`"
-                    class="py-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[9px] font-black uppercase tracking-widest text-center flex items-center justify-center hover:bg-blue-500/20 transition-all cursor-pointer group/monitor"
+                    class="py-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-black uppercase tracking-widest text-center flex items-center justify-center hover:bg-blue-500/20 transition-all cursor-pointer group/monitor"
                   >
                     <div class="w-1.5 h-1.5 bg-blue-400 rounded-full animate-ping mr-2"></div>
                     <span class="group-hover/monitor:hidden">PROCESSING</span>
@@ -167,7 +167,7 @@
                   </NuxtLink>
                   <button 
                     @click="abortOutput(output)"
-                    class="py-3 rounded-xl bg-red-900/10 border border-red-500/20 text-red-500/50 hover:text-red-500 text-[9px] font-black uppercase tracking-widest hover:bg-red-900/20 transition-all flex items-center justify-center gap-2"
+                    class="py-3 rounded-xl bg-red-900/10 border border-red-500/20 text-red-500/50 hover:text-red-500 text-xs font-black uppercase tracking-widest hover:bg-red-900/20 transition-all flex items-center justify-center gap-2"
                   >
                     <XCircle :size="12" />
                     Abort
@@ -179,7 +179,7 @@
             <div v-if="output.hasScript || output.scriptApproved" class="col-span-2 pt-2 border-t border-white/5">
               <button 
                 type="button"
-                class="w-full py-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:border-primary/30 hover:text-primary text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                class="w-full py-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:border-primary/30 hover:text-primary text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all disabled:opacity-50"
                 :disabled="cloningId === output.id"
                 @click="cloneOutput(output)"
               >

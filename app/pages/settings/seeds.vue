@@ -239,14 +239,14 @@ onMounted(() => {
           <div class="mt-auto flex items-center justify-between pt-4 border-t border-white/5">
              <div class="flex items-center gap-2">
                 <Activity :size="10" class="text-zinc-700" />
-                <span class="mono-label !text-[8px] text-zinc-500">{{ seed._count.outputs }} <span class="opacity-40">USOS</span></span>
+                <span class="mono-label text-zinc-500">{{ seed._count.outputs }} <span class="opacity-40">USOS</span></span>
              </div>
              <button 
                @click="openSamplesModal(seed)"
                class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 text-emerald-500 transition-all group/view opacity-0 group-hover:opacity-100"
              >
                <Eye :size="12" class="group-hover/view:scale-110 transition-transform" />
-               <span class="mono-label !text-[7px] font-black">VER</span>
+               <span class="mono-label font-black">VER</span>
              </button>
           </div>
 
@@ -269,14 +269,14 @@ onMounted(() => {
             <header class="mb-8 text-left">
                <div class="flex items-center gap-2 text-emerald-500 mb-1">
                  <Zap :size="14" />
-                 <span class="mono-label text-emerald-500 font-black !text-[8px]">New DNA Entry</span>
+                 <span class="mono-label text-emerald-500 font-black">New DNA Entry</span>
                </div>
                <h2 class="text-2xl font-black text-white uppercase italic tracking-tighter">Registrar DNA</h2>
             </header>
 
             <form @submit.prevent="handleSubmit" class="space-y-6 text-left">
               <div class="space-y-2">
-                <label class="mono-label !text-zinc-500 !text-[9px]">Valor Matemático (Seed)</label>
+                <label class="mono-label !text-zinc-500">Valor Matemático (Seed)</label>
                 <div class="flex gap-2">
                    <div class="relative flex-1">
                       <Hash :size="16" class="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" />
@@ -311,7 +311,7 @@ onMounted(() => {
             <header class="mb-8 text-left">
                <div class="flex items-center gap-2 text-emerald-500 mb-1">
                  <Image :size="14" />
-                 <span class="mono-label text-emerald-500 font-black !text-[8px]">Visual Samples</span>
+                 <span class="mono-label text-emerald-500 font-black">Visual Samples</span>
                </div>
                <h2 class="text-3xl font-black text-white uppercase italic tracking-tighter">
                  DNA #{{ selectedSeed?.value }}
@@ -351,7 +351,7 @@ onMounted(() => {
                 <!-- Overlay -->
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <div class="absolute bottom-0 left-0 right-0 p-3">
-                    <p class="text-[8px] text-white/60 font-mono line-clamp-2">{{ sample.promptUsed }}</p>
+                    <p class="text-xs text-white/60 font-mono line-clamp-2">{{ sample.promptUsed }}</p>
                   </div>
                 </div>
 
@@ -408,10 +408,10 @@ onMounted(() => {
             <!-- Image Info -->
             <div class="mt-6 max-w-3xl w-full glass-card p-6 border-emerald-500/20">
               <div class="flex items-center justify-between mb-3">
-                <span class="mono-label text-emerald-500 !text-[9px]">
+                <span class="mono-label text-emerald-500">
                   {{ (selectedSampleIndex ?? 0) + 1 }} / {{ samplesData.length }}
                 </span>
-                <span class="text-[8px] text-zinc-600 font-mono">
+                <span class="text-xs text-zinc-600 font-mono">
                   {{ new Date(currentSample.createdAt).toLocaleString() }}
                 </span>
               </div>
@@ -421,8 +421,8 @@ onMounted(() => {
               </p>
               
               <div v-if="currentSample.outputTitle" class="flex items-center gap-2 pt-3 border-t border-white/5">
-                <span class="mono-label !text-[8px] text-zinc-600">OUTPUT:</span>
-                <span class="text-[10px] text-emerald-500 font-medium">{{ currentSample.outputTitle }}</span>
+                <span class="mono-label text-zinc-600">OUTPUT:</span>
+                <span class="text-xs text-emerald-500 font-medium">{{ currentSample.outputTitle }}</span>
               </div>
             </div>
           </div>

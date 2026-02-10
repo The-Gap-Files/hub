@@ -17,7 +17,7 @@
 
       <!-- Navigation -->
       <nav class="flex-1 px-4 space-y-1">
-        <div class="mono-label !text-[9px] px-4 mb-4 text-zinc-600 flex items-center justify-between">
+        <div class="mono-label  px-4 mb-4 text-zinc-600 flex items-center justify-between">
           <span>Protocolos Centrais</span>
           <ChevronRight :size="10" class="opacity-20" />
         </div>
@@ -44,7 +44,7 @@
         </NuxtLink>
 
         <div class="pt-10 mb-4 px-4">
-          <div class="mono-label !text-[9px] text-zinc-600 flex items-center justify-between">
+          <div class="mono-label  text-zinc-600 flex items-center justify-between">
             <span>Vetores de Engrenagem</span>
             <ChevronRight :size="10" class="opacity-20" />
           </div>
@@ -64,7 +64,7 @@
 
       <!-- System Metadata -->
       <div class="px-8 mb-6">
-        <div class="flex flex-col gap-1 p-3 rounded-xl bg-white/[0.02] border border-white/5 font-mono text-[7px] text-zinc-600">
+        <div class="flex flex-col gap-1 p-3 rounded-xl bg-white/[0.02] border border-white/5 font-mono text-xs text-zinc-600">
            <div class="flex justify-between uppercase">
              <span>Build Hash</span>
              <span class="text-zinc-400">#AG-40X-2026</span>
@@ -84,7 +84,7 @@
           </div>
           <div class="flex-1 min-w-0 z-10">
             <p class="text-xs font-black text-white uppercase tracking-wider truncate">Administrator</p>
-            <p class="mono-label !text-[8px] text-primary">Nível de Acesso: S</p>
+            <p class="mono-label  text-primary">Nível de Acesso: S</p>
           </div>
           <Settings :size="14" class="text-zinc-600 group-hover:text-primary transition-colors z-10" />
           
@@ -129,7 +129,7 @@ const goHome = () => router.push('/')
 }
 
 .nav-text {
-  @apply text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-500;
+  @apply text-xs font-black uppercase tracking-[0.2em] transition-all duration-500;
 }
 
 .nav-item.active {

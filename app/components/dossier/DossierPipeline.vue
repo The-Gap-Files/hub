@@ -56,11 +56,11 @@ function getStepStatus(stepId: string, index: number) {
 
           <!-- Label -->
           <div class="text-center">
-            <p class="text-[10px] md:text-xs font-black uppercase tracking-tighter"
+            <p class="text-xs md:text-xs font-black uppercase tracking-tighter"
                :class="getStepStatus(step.id, index) === 'active' ? 'text-primary' : 'text-white'">
               {{ step.name }}
             </p>
-            <p class="hidden md:block text-[8px] font-mono text-muted-foreground mt-0.5 whitespace-nowrap">
+            <p class="hidden md:block text-xs font-mono text-muted-foreground mt-0.5 whitespace-nowrap">
               {{ step.desc }}
             </p>
           </div>
