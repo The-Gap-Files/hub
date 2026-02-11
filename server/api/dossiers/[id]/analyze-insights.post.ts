@@ -8,6 +8,7 @@
 import { prisma } from '../../../utils/prisma'
 import { analyzeInsights } from '../../../services/analyze-insights.service'
 import { costLogService } from '../../../services/cost-log.service'
+import { calculateLLMCost } from '../../../constants/pricing'
 
 export default defineEventHandler(async (event) => {
   const dossierId = getRouterParam(event, 'id')
@@ -39,19 +40,8 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Obter config do provider de script
-  const config = useRuntimeConfig()
-  const scriptConfig = config.providers?.script
-
-  if (!scriptConfig?.apiKey) {
-    throw createError({
-      statusCode: 500,
-      message: 'Script AI provider not configured. Check your .env file.'
-    })
-  }
-
   try {
-    // Chamar o service de análise
+    // Chamar o service de análise (provider/modelo gerenciados pela LLM Factory)
     // Se clearExisting, não enviar existingNotes/existingPersons (serão apagados, IA pode gerar tudo do zero)
     const result = await analyzeInsights(
       {
@@ -72,11 +62,6 @@ export default defineEventHandler(async (event) => {
         existingPersons: clearExisting ? [] : dossier.persons.map(p => ({
           name: p.name
         }))
-      },
-      {
-        name: scriptConfig.name,
-        apiKey: scriptConfig.apiKey,
-        model: scriptConfig.model
       }
     )
 
@@ -133,11 +118,18 @@ export default defineEventHandler(async (event) => {
     console.log(`[AnalyzeInsights] 💾 ${createdNotes.length} notas salvas no dossiê ${dossierId}`)
 
     // Registrar custo da análise neural (fire-and-forget)
-    costLogService.logInsightsGeneration({
+    const inputTokens = result.usage?.inputTokens ?? 0
+    const outputTokens = result.usage?.outputTokens ?? 0
+    const cost = calculateLLMCost(result.model, inputTokens, outputTokens)
+
+    costLogService.log({
       dossierId,
+      resource: 'insights',
+      action: 'create',
       provider: result.provider,
       model: result.model,
-      usage: result.usage,
+      cost,
+      metadata: { input_tokens: inputTokens, output_tokens: outputTokens, total_tokens: inputTokens + outputTokens },
       detail: 'Análise neural – insights, curiosidades e pessoas-chave'
     }).catch(err => console.error('[AnalyzeInsights] CostLog:', err))
 

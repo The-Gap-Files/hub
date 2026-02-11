@@ -1,4 +1,3 @@
-
 import Replicate from 'replicate'
 import type {
   ITTSProvider,
@@ -6,6 +5,7 @@ import type {
   TTSResponse,
   VoiceOption
 } from '../../../types/ai-providers'
+import { calculateReplicateTimeCost } from '../../../constants/pricing'
 
 export class ReplicateElevenLabsProvider implements ITTSProvider {
   private replicate: Replicate
@@ -59,14 +59,21 @@ export class ReplicateElevenLabsProvider implements ITTSProvider {
       console.log('[ReplicateElevenLabs] 📡 Input:', JSON.stringify(input, null, 2))
 
       // Modelo elevenlabs/v2-multilingual
+      const model = 'elevenlabs/v2-multilingual'
+      let predictTime: number | undefined
       const output = await this.replicate.run(
-        "elevenlabs/v2-multilingual",
-        { input }
+        model as `${string}/${string}`,
+        { input },
+        (prediction: any) => {
+          if (prediction.metrics?.predict_time) {
+            predictTime = prediction.metrics.predict_time
+          }
+        }
       ) as any
 
       console.log(`[ReplicateElevenLabs] 📥 Output received (Stream/URL):`, output)
 
-      // Replicate retorna um ReadableStream ou URL. 
+      // Replicate retorna um ReadableStream ou URL.
       // Se for stream, precisamos converter p/ Buffer.
       let audioBuffer: Buffer
 
@@ -89,11 +96,20 @@ export class ReplicateElevenLabsProvider implements ITTSProvider {
       const wordCount = request.text.split(/\s+/).length
       const estimatedDuration = (wordCount / (150 * (request.speed || 1.0))) * 60
 
+      // predictTime da API ou estimativa baseada na duração do áudio (proxy para GPU time)
+      const predictTimeForCost = predictTime ?? estimatedDuration
+
       return {
         audioBuffer,
         duration: estimatedDuration,
         provider: this.getName(),
-        format: 'mp3'
+        format: 'mp3',
+        costInfo: {
+          cost: calculateReplicateTimeCost(model, predictTimeForCost),
+          provider: 'REPLICATE',
+          model,
+          metadata: { characters: request.text.length, predict_time: predictTimeForCost }
+        }
       }
 
     } catch (e) {

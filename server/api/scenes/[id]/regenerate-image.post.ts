@@ -1,10 +1,12 @@
 import { prisma } from '../../../utils/prisma'
 import { providerManager } from '../../../services/providers'
+import { createImageProvider } from '../../../services/providers'
 import { costLogService } from '../../../services/cost-log.service'
-import { validateReplicatePricing, PricingNotConfiguredError } from '../../../constants/pricing'
+import { validateReplicatePricing, PricingNotConfiguredError, calculateReplicateOutputCost } from '../../../constants/pricing'
 import { getVisualStyleById } from '../../../constants/visual-styles'
 import type { ImageGenerationRequest } from '../../../types/ai-providers'
 import { ContentRestrictedError } from '../../../services/providers/image/replicate-image.provider'
+import { getMediaProviderForTask } from '../../../services/media/media-factory'
 
 export default defineEventHandler(async (event) => {
   const sceneId = getRouterParam(event, 'id')
@@ -30,17 +32,17 @@ export default defineEventHandler(async (event) => {
 
   console.log(`[API] Regenerating image for Scene ${sceneId}`)
 
-  // 2. Configurar Provider
+  // 2. Configurar Provider (via Media Factory → DB → env fallback)
   let imageProvider
   try {
     imageProvider = providerManager.getImageProvider()
-  } catch (e) {
-    const key = process.env.REPLICATE_API_KEY?.replace(/"/g, '')
-    if (key) {
-      const { createImageProvider } = await import('../../../services/providers')
-      imageProvider = createImageProvider('replicate', key)
+  } catch {
+    // Fallback: resolver via Media Factory (que lê do banco com fallback para env)
+    const config = await getMediaProviderForTask('image-generation')
+    if (config?.apiKey) {
+      imageProvider = createImageProvider(config.providerId, config.apiKey, config.model, config.inputSchema)
     } else {
-      throw new Error('Image Provider not configured')
+      throw new Error('Image Provider not configured. Configure via Settings → Providers.')
     }
   }
 
@@ -66,14 +68,20 @@ export default defineEventHandler(async (event) => {
 
   const vs = output.visualStyleId ? getVisualStyleById(output.visualStyleId) : undefined
 
-  const promptToUse = body.prompt ?? scene.visualDescription
+  let promptToUse = body.prompt ?? scene.visualDescription
+
+  // FAIL-SAFE: garantir que a âncora de estilo está presente no prompt
+  const baseStyle = vs?.baseStyle
+  if (baseStyle && !promptToUse.toLowerCase().includes(baseStyle.toLowerCase().slice(0, 30))) {
+    console.log(`[API] ⚠️ Âncora de estilo ausente na cena — prepending baseStyle`)
+    promptToUse = `${baseStyle}, ${promptToUse}`
+  }
 
   const request: ImageGenerationRequest = {
     prompt: promptToUse,
     width,
     height,
     aspectRatio: output.aspectRatio || '16:9',
-    style: (vs?.baseStyle as any) || 'cinematic',
     seed: body.seed || undefined,
     numVariants: 1
   }
@@ -143,11 +151,17 @@ export default defineEventHandler(async (event) => {
   })
 
   // Registrar custo da regeneração de imagem (fire-and-forget)
-  costLogService.logReplicateImage({
+  const imgModel = response.model || 'luma/photon-flash'
+  const imgCost = calculateReplicateOutputCost(imgModel, 1) ?? 0
+
+  costLogService.log({
     outputId: output.id,
-    model: response.model || 'luma/photon-flash',
-    numImages: 1,
+    resource: 'image',
     action: 'recreate',
+    provider: 'REPLICATE',
+    model: imgModel,
+    cost: imgCost,
+    metadata: { num_images: 1, cost_per_image: imgCost },
     detail: `Scene image regeneration (single)`
   }).catch(() => { })
 

@@ -355,25 +355,42 @@
               </div>
 
               <!-- Botões de ação para preview pendente -->
-              <div v-if="!plan.fullVideo.stylePreview.confirmed" class="flex items-center gap-2">
-                <button
-                  @click="confirmStylePreview('fullVideo')"
-                  :disabled="confirmingPreviewFor !== null"
-                  class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/25 hover:border-emerald-500/40 text-emerald-300 text-xs font-bold uppercase tracking-wider rounded-xl transition-all disabled:opacity-50"
-                >
-                  <Loader2 v-if="confirmingPreviewFor === 'fullVideo'" :size="14" class="animate-spin" />
-                  <Check v-else :size="14" />
-                  {{ confirmingPreviewFor === 'fullVideo' ? 'Confirmando...' : '✓ Confirmar Mundo' }}
-                </button>
-                <button
-                  @click="generateStylePreview('fullVideo')"
-                  :disabled="generatingPreviewFor !== null"
-                  class="flex items-center gap-2 px-4 py-2.5 bg-zinc-500/10 hover:bg-zinc-500/20 border border-white/10 hover:border-white/20 text-zinc-400 text-xs font-bold uppercase tracking-wider rounded-xl transition-all disabled:opacity-50 disabled:cursor-wait"
-                >
-                  <Loader2 v-if="generatingPreviewFor === 'fullVideo'" :size="14" class="animate-spin" />
-                  <RefreshCw v-else :size="14" />
-                  {{ generatingPreviewFor === 'fullVideo' ? 'Gerando...' : 'Regenerar' }}
-                </button>
+              <div v-if="!plan.fullVideo.stylePreview.confirmed" class="space-y-2">
+                <!-- Seed Selector inline -->
+                <div class="flex items-center gap-2">
+                  <select
+                    v-model="selectedSeedMode"
+                    class="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-zinc-300 focus:border-blue-500/40 outline-none flex-1"
+                  >
+                    <option value="random">🎲 Seed Aleatória</option>
+                    <option :value="'current-' + plan.fullVideo.stylePreview.seedValue">
+                      🔒 Manter Seed {{ plan.fullVideo.stylePreview.seedValue }}
+                    </option>
+                    <option v-for="s in availableSeeds" :key="s.id" :value="s.id">
+                      🧬 {{ s.value }}
+                    </option>
+                  </select>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button
+                    @click="confirmStylePreview('fullVideo')"
+                    :disabled="confirmingPreviewFor !== null"
+                    class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/25 hover:border-emerald-500/40 text-emerald-300 text-xs font-bold uppercase tracking-wider rounded-xl transition-all disabled:opacity-50"
+                  >
+                    <Loader2 v-if="confirmingPreviewFor === 'fullVideo'" :size="14" class="animate-spin" />
+                    <Check v-else :size="14" />
+                    {{ confirmingPreviewFor === 'fullVideo' ? 'Confirmando...' : '✓ Confirmar Mundo' }}
+                  </button>
+                  <button
+                    @click="generateStylePreview('fullVideo')"
+                    :disabled="generatingPreviewFor !== null"
+                    class="flex items-center gap-2 px-4 py-2.5 bg-zinc-500/10 hover:bg-zinc-500/20 border border-white/10 hover:border-white/20 text-zinc-400 text-xs font-bold uppercase tracking-wider rounded-xl transition-all disabled:opacity-50 disabled:cursor-wait"
+                  >
+                    <Loader2 v-if="generatingPreviewFor === 'fullVideo'" :size="14" class="animate-spin" />
+                    <RefreshCw v-else :size="14" />
+                    {{ generatingPreviewFor === 'fullVideo' ? 'Gerando...' : 'Regenerar' }}
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -515,25 +532,40 @@
                   </div>
 
                   <!-- Botões para preview pendente (teaser) -->
-                  <div v-if="!teaser.stylePreview.confirmed" class="flex items-center gap-1.5">
-                    <button
-                      @click="confirmStylePreview('teaser', Number(index))"
-                      :disabled="confirmingPreviewFor !== null"
-                      class="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/25 text-emerald-300 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all disabled:opacity-50"
+                  <div v-if="!teaser.stylePreview.confirmed" class="space-y-1.5">
+                    <!-- Seed Selector mini -->
+                    <select
+                      v-model="selectedSeedMode"
+                      class="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[10px] text-zinc-300 focus:border-violet-500/40 outline-none"
                     >
-                      <Loader2 v-if="confirmingPreviewFor === `teaser-${index}`" :size="10" class="animate-spin" />
-                      <Check v-else :size="10" />
-                      {{ confirmingPreviewFor === `teaser-${index}` ? '...' : '✓ Confirmar' }}
-                    </button>
-                    <button
-                      @click="generateStylePreview('teaser', Number(index))"
-                      :disabled="generatingPreviewFor !== null"
-                      class="flex items-center gap-1 px-2 py-1.5 bg-zinc-500/10 hover:bg-zinc-500/20 border border-white/10 text-zinc-400 text-[10px] font-bold uppercase rounded-lg transition-all disabled:opacity-40 disabled:cursor-wait"
-                    >
-                      <Loader2 v-if="generatingPreviewFor === `teaser-${index}`" :size="10" class="animate-spin" />
-                      <RefreshCw v-else :size="10" />
-                      {{ generatingPreviewFor === `teaser-${index}` ? '...' : 'Regenerar' }}
-                    </button>
+                      <option value="random">🎲 Seed Aleatória</option>
+                      <option :value="'current-' + teaser.stylePreview.seedValue">
+                        🔒 Manter {{ teaser.stylePreview.seedValue }}
+                      </option>
+                      <option v-for="s in availableSeeds" :key="s.id" :value="s.id">
+                        🧬 {{ s.value }}
+                      </option>
+                    </select>
+                    <div class="flex items-center gap-1.5">
+                      <button
+                        @click="confirmStylePreview('teaser', Number(index))"
+                        :disabled="confirmingPreviewFor !== null"
+                        class="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/25 text-emerald-300 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all disabled:opacity-50"
+                      >
+                        <Loader2 v-if="confirmingPreviewFor === `teaser-${index}`" :size="10" class="animate-spin" />
+                        <Check v-else :size="10" />
+                        {{ confirmingPreviewFor === `teaser-${index}` ? '...' : '✓ Confirmar' }}
+                      </button>
+                      <button
+                        @click="generateStylePreview('teaser', Number(index))"
+                        :disabled="generatingPreviewFor !== null"
+                        class="flex items-center gap-1 px-2 py-1.5 bg-zinc-500/10 hover:bg-zinc-500/20 border border-white/10 text-zinc-400 text-[10px] font-bold uppercase rounded-lg transition-all disabled:opacity-40 disabled:cursor-wait"
+                      >
+                        <Loader2 v-if="generatingPreviewFor === `teaser-${index}`" :size="10" class="animate-spin" />
+                        <RefreshCw v-else :size="10" />
+                        {{ generatingPreviewFor === `teaser-${index}` ? '...' : 'Regenerar' }}
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <!-- Generate button (primeira geração ou após confirmação) -->
@@ -838,6 +870,9 @@ async function generateStylePreview(itemType: 'fullVideo' | 'teaser', teaserInde
     if (selectedSeedMode.value === 'random') {
       // Gerar seed aleatória no padrão do sistema (0 - 2^31)
       seedValue = Math.floor(Math.random() * 2147483647)
+    } else if (selectedSeedMode.value.startsWith('current-')) {
+      // Manter a seed atual do preview
+      seedValue = parseInt(selectedSeedMode.value.replace('current-', ''), 10)
     } else {
       // Seed existente selecionada
       const existingSeed = availableSeeds.value.find(s => s.id === selectedSeedMode.value)

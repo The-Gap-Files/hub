@@ -3,6 +3,9 @@
  * 
  * Este módulo centraliza a criação e gestão de provedores,
  * permitindo trocar implementações através de configuração.
+ *
+ * O Script Provider é resolvido dinamicamente via LLM Factory (banco de dados),
+ * garantindo que a configuração da UI seja sempre respeitada.
  */
 
 import type {
@@ -16,12 +19,17 @@ import type {
 
 import { OpenAIScriptProvider } from './script/openai-script.provider'
 import { AnthropicScriptProvider } from './script/anthropic-script.provider'
+import { GeminiScriptProvider } from './script/gemini-script.provider'
 import { ElevenLabsTTSProvider } from './tts/elevenlabs-tts.provider'
 import { ReplicateElevenLabsProvider } from './tts/replicate-elevenlabs.provider'
 import { ReplicateImageProvider } from './image/replicate-image.provider'
+import { GeminiImageProvider } from './image/gemini-image.provider'
 import { ReplicateMotionProvider } from './motion/replicate-motion.provider'
 import { RunPodMotionProvider } from './motion/runpod-motion.provider'
 import { ReplicateMusicProvider } from './music/replicate-music.provider'
+import { getMediaProviderForTaskSync, getMediaProviderForTask } from '../media/media-factory'
+import { getAssignment } from '../llm/llm-factory'
+import { prisma } from '../../utils/prisma'
 
 // =============================================================================
 // PROVIDER REGISTRY
@@ -29,7 +37,8 @@ import { ReplicateMusicProvider } from './music/replicate-music.provider'
 
 const scriptProviders: Record<string, new (config: { apiKey: string; model?: string }) => IScriptGenerator> = {
   openai: OpenAIScriptProvider,
-  anthropic: AnthropicScriptProvider
+  anthropic: AnthropicScriptProvider,
+  gemini: GeminiScriptProvider
 }
 
 const ttsProviders: Record<string, new (config: { apiKey: string }) => ITTSProvider> = {
@@ -38,7 +47,8 @@ const ttsProviders: Record<string, new (config: { apiKey: string }) => ITTSProvi
 }
 
 const imageProviders: Record<string, new (config: { apiKey: string }) => IImageGenerator> = {
-  replicate: ReplicateImageProvider
+  replicate: ReplicateImageProvider,
+  gemini: GeminiImageProvider
 }
 
 const motionProviders: Record<string, new (config: { apiKey: string }) => IMotionProvider> = {
@@ -70,28 +80,28 @@ export function createTTSProvider(name: string, apiKey: string): ITTSProvider {
   return new ProviderClass({ apiKey })
 }
 
-export function createImageProvider(name: string, apiKey: string, model?: string): IImageGenerator {
+export function createImageProvider(name: string, apiKey: string, model?: string, inputSchema?: any): IImageGenerator {
   const ProviderClass = imageProviders[name.toLowerCase()]
   if (!ProviderClass) {
     throw new Error(`Image provider "${name}" not found. Available: ${Object.keys(imageProviders).join(', ')}`)
   }
-  return new ProviderClass({ apiKey, model } as any)
+  return new ProviderClass({ apiKey, model, inputSchema } as any)
 }
 
-export function createMotionProvider(name: string, apiKey: string, model?: string): IMotionProvider {
+export function createMotionProvider(name: string, apiKey: string, model?: string, inputSchema?: any): IMotionProvider {
   const ProviderClass = motionProviders[name.toLowerCase()]
   if (!ProviderClass) {
     throw new Error(`Motion provider "${name}" not found. Available: ${Object.keys(motionProviders).join(', ')}`)
   }
-  return new ProviderClass({ apiKey, model } as any)
+  return new ProviderClass({ apiKey, model, inputSchema } as any)
 }
 
-export function createMusicProvider(name: string, apiKey: string, model?: string): IMusicProvider {
+export function createMusicProvider(name: string, apiKey: string, model?: string, inputSchema?: any): IMusicProvider {
   const ProviderClass = musicProviders[name.toLowerCase()]
   if (!ProviderClass) {
     throw new Error(`Music provider "${name}" not found. Available: ${Object.keys(musicProviders).join(', ')}`)
   }
-  return new ProviderClass({ apiKey, model } as any)
+  return new ProviderClass({ apiKey, model, inputSchema } as any)
 }
 
 // =============================================================================
@@ -99,7 +109,6 @@ export function createMusicProvider(name: string, apiKey: string, model?: string
 // =============================================================================
 
 class ProviderManager {
-  private scriptProvider: IScriptGenerator | null = null
   private ttsProvider: ITTSProvider | null = null
   private imageProvider: IImageGenerator | null = null
   private motionProvider: IMotionProvider | null = null
@@ -108,9 +117,6 @@ class ProviderManager {
   configure(configs: ProviderConfig[]): void {
     for (const config of configs) {
       switch (config.type) {
-        case 'script':
-          this.scriptProvider = createScriptProvider(config.name, config.apiKey!, config.model)
-          break
         case 'tts':
           this.ttsProvider = createTTSProvider(config.name, config.apiKey!)
           break
@@ -127,69 +133,120 @@ class ProviderManager {
     }
   }
 
-  getScriptProvider(): IScriptGenerator {
-    if (!this.scriptProvider) {
-      throw new Error('Script provider not configured. Call configure() first.')
+  /**
+   * Invalida todas as instâncias de provider em cache.
+   * Na próxima chamada a getXxxProvider(), o provider será recriado
+   * com a configuração mais recente do banco (via media-factory).
+   */
+  invalidateProviders(): void {
+    this.imageProvider = null
+    this.ttsProvider = null
+    this.motionProvider = null
+    this.musicProvider = null
+    console.log('[ProviderManager] All provider instances invalidated')
+  }
+
+  /**
+   * Resolve o Script Provider dinamicamente via LLM Factory (banco de dados).
+   * Sempre consulta o assignment 'script' no banco para respeitar a configuração da UI.
+   */
+  async getScriptProvider(): Promise<IScriptGenerator> {
+    const assignment = await getAssignment('script')
+
+    // Buscar API key do provider no banco
+    const dbProvider = await prisma.llmProvider.findUnique({
+      where: { id: assignment.provider },
+      select: { apiKey: true }
+    })
+
+    let apiKey = dbProvider?.apiKey || ''
+
+    // Fallback: env vars
+    if (!apiKey) {
+      const envMap: Record<string, string> = {
+        openai: 'OPENAI_API_KEY',
+        anthropic: 'ANTHROPIC_API_KEY',
+        groq: 'GROQ_API_KEY',
+        gemini: 'GOOGLE_API_KEY'
+      }
+      apiKey = process.env[envMap[assignment.provider] || '']?.replace(/"/g, '') || ''
     }
-    return this.scriptProvider
+
+    if (!apiKey) {
+      throw new Error(
+        `[ProviderManager] API Key não configurada para script provider "${assignment.provider}". ` +
+        `Configure via UI (Settings → Providers).`
+      )
+    }
+
+    console.log(`[ProviderManager] Script → ${assignment.provider}/${assignment.model} (LLM Factory)`)
+    return createScriptProvider(assignment.provider, apiKey, assignment.model)
   }
 
   getTTSProvider(): ITTSProvider {
     if (!this.ttsProvider) {
-      throw new Error('TTS provider not configured. Call configure() first.')
+      const config = getMediaProviderForTaskSync('tts-narration')
+      if (config?.apiKey) {
+        console.log(`[ProviderManager] TTS → ${config.providerId}/${config.model} (Media Factory)`)
+        this.ttsProvider = createTTSProvider(config.providerId, config.apiKey)
+        return this.ttsProvider
+      }
+
+      throw new Error(
+        'TTS provider not configured. Configure via UI (Settings → Providers) ou defina ELEVENLABS_API_KEY no .env.'
+      )
     }
     return this.ttsProvider
   }
 
   getImageProvider(): IImageGenerator {
     if (!this.imageProvider) {
-      // Auto-configure fallback
-      const replicateKey = process.env.REPLICATE_API_KEY?.replace(/"/g, '')
-      if (replicateKey) {
-        console.log('[ProviderManager] Auto-configuring Image Provider with Replicate (ENV)')
-        this.imageProvider = createImageProvider('replicate', replicateKey)
+      const config = getMediaProviderForTaskSync('image-generation')
+      if (config?.apiKey) {
+        console.log(`[ProviderManager] Image → ${config.providerId}/${config.model} (Media Factory)`)
+        this.imageProvider = createImageProvider(config.providerId, config.apiKey, config.model, config.inputSchema)
         return this.imageProvider
       }
 
-      throw new Error('Image provider not configured. Call configure() first.')
+      throw new Error(
+        'Image provider not configured. Configure via UI (Settings → Providers) ou defina REPLICATE_API_KEY no .env.'
+      )
     }
     return this.imageProvider
   }
 
   getMotionProvider(): IMotionProvider {
     if (!this.motionProvider) {
-      // Auto-configure fallback if API Key exists in env
-      // Valida se a chave existe e não é uma string vazia (ou literal "")
-      const runpodKey = process.env.RUNPOD_API_KEY?.replace(/"/g, '')
-      const runpodEndpoint = process.env.RUNPOD_ENDPOINT_ID?.replace(/"/g, '')
-
-      if (runpodKey && runpodEndpoint) {
-        this.motionProvider = createMotionProvider('runpod', runpodKey)
+      const config = getMediaProviderForTaskSync('motion-video')
+      if (config?.apiKey) {
+        // RunPod precisa do endpointId via extraConfig
+        if (config.providerId === 'runpod' && config.extraConfig?.endpointId) {
+          process.env.RUNPOD_ENDPOINT_ID = config.extraConfig.endpointId as string
+        }
+        console.log(`[ProviderManager] Motion → ${config.providerId}/${config.model} (Media Factory)`)
+        this.motionProvider = createMotionProvider(config.providerId, config.apiKey, config.model, config.inputSchema)
         return this.motionProvider
       }
 
-      const replicateKey = process.env.REPLICATE_API_KEY?.replace(/"/g, '')
-      if (replicateKey) {
-        this.motionProvider = createMotionProvider('replicate', replicateKey)
-        return this.motionProvider
-      }
-
-      throw new Error('Motion provider not configured. Call configure() first.')
+      throw new Error(
+        'Motion provider not configured. Configure via UI (Settings → Providers) ou defina RUNPOD_API_KEY ou REPLICATE_API_KEY no .env.'
+      )
     }
     return this.motionProvider
   }
 
   getMusicProvider(): IMusicProvider {
     if (!this.musicProvider) {
-      // Auto-configure fallback com Replicate (mesmo provider de image/motion)
-      const replicateKey = process.env.REPLICATE_API_KEY?.replace(/"/g, '')
-      if (replicateKey) {
-        console.log('[ProviderManager] Auto-configuring Music Provider with Replicate (Stable Audio 2.5)')
-        this.musicProvider = createMusicProvider('replicate', replicateKey)
+      const config = getMediaProviderForTaskSync('background-music')
+      if (config?.apiKey) {
+        console.log(`[ProviderManager] Music → ${config.providerId}/${config.model} (Media Factory)`)
+        this.musicProvider = createMusicProvider(config.providerId, config.apiKey, config.model, config.inputSchema)
         return this.musicProvider
       }
 
-      throw new Error('Music provider not configured. Call configure() first or set REPLICATE_API_KEY.')
+      throw new Error(
+        'Music provider not configured. Configure via UI (Settings → Providers) ou defina REPLICATE_API_KEY no .env.'
+      )
     }
     return this.musicProvider
   }

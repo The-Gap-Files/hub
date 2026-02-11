@@ -1,9 +1,11 @@
 /**
  * Output Pipeline Service
- * 
- * Orquestra todo o fluxo de criação de output (vídeo, thread, post, etc.)
- * a partir de um dossier.
- * 
+ *
+ * Serviço principal que ORQUESTRA todo o processo de geração de conteúdo,
+ * delegando cada etapa ao "provider" ativo (abstração de provedor IA).
+ *
+ * Integra Persons & Neural Insights do Intelligence Center ao pipeline.
+ *
  * Suporta:
  * - VIDEO_TEASER (15-60s, vertical, cliffhanger)
  * - VIDEO_FULL (5-20min, horizontal, narrativa completa)
@@ -26,6 +28,7 @@ import { formatOutlineForPrompt } from '../story-architect.service'
 import type { StoryOutline } from '../story-architect.service'
 import { getClassificationById } from '../../constants/intelligence-classifications'
 import { validateReplicatePricing } from '../../constants/pricing'
+import { mapPersonsFromPrisma, mapNeuralInsightsFromNotes } from '../../utils/format-intelligence-context'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import ffmpeg from 'fluent-ffmpeg'
@@ -96,7 +99,8 @@ export class OutputPipelineService {
           include: {
             sources: { orderBy: { order: 'asc' } },
             images: { orderBy: { order: 'asc' } },
-            notes: { orderBy: { order: 'asc' } }
+            notes: { orderBy: { order: 'asc' } },
+            persons: { orderBy: { order: 'asc' } }
           }
         },
         seed: true
@@ -118,7 +122,7 @@ export class OutputPipelineService {
    */
   public async generateScript(outputId: string) {
     const output = await this.loadOutputContext(outputId)
-    const scriptProvider = providerManager.getScriptProvider()
+    const scriptProvider = await providerManager.getScriptProvider()
     const dossier = output.dossier
 
     // Construir prompt com TODAS as fontes
@@ -185,7 +189,11 @@ export class OutputPipelineService {
 
       // Diretrizes
       mustInclude: output.mustInclude || undefined,
-      mustExclude: output.mustExclude || undefined
+      mustExclude: output.mustExclude || undefined,
+
+      // Persons & Neural Insights (Intelligence Center)
+      persons: mapPersonsFromPrisma(dossier.persons),
+      neuralInsights: mapNeuralInsightsFromNotes(dossier.notes)
     }
 
     // ─── Story Architect: plano narrativo é etapa isolada e deve estar aprovado ───
@@ -208,15 +216,15 @@ export class OutputPipelineService {
     // Gerar roteiro
     const scriptResponse = await scriptProvider.generate(promptContext)
 
-    // Registrar custo do script (fire-and-forget) -- usa tokens reais quando disponíveis
-    costLogService.logScriptGeneration({
+    // Registrar custo do script (fire-and-forget) — usa costInfo do provider
+    costLogService.log({
       outputId,
-      provider: scriptResponse.provider || 'ANTHROPIC',
-      model: scriptResponse.model || 'claude-opus-4-6',
-      inputCharacters: JSON.stringify(promptContext).length,
-      outputCharacters: scriptResponse.fullText.length,
-      usage: scriptResponse.usage,
+      resource: 'script',
       action: 'create',
+      provider: scriptResponse.costInfo.provider,
+      model: scriptResponse.costInfo.model,
+      cost: scriptResponse.costInfo.cost,
+      metadata: scriptResponse.costInfo.metadata,
       detail: `Script generation - ${scriptResponse.wordCount} words, ${scriptResponse.scenes?.length || 0} scenes`
     }).catch(() => { })
 
@@ -294,7 +302,7 @@ export class OutputPipelineService {
 
       log.info(`${scenes.length} cenas para gerar imagens.`)
 
-      const CONCURRENCY_LIMIT = 50 // Envio em lotes de 50 ao Replicate
+      const CONCURRENCY_LIMIT = 5 // Lotes de 5 para evitar rate-limit/erros da API
       const sceneChunks = []
       for (let i = 0; i < scenes.length; i += CONCURRENCY_LIMIT) {
         sceneChunks.push(scenes.slice(i, i + CONCURRENCY_LIMIT))
@@ -314,11 +322,17 @@ export class OutputPipelineService {
           const height = isPortrait ? 1344 : 768
 
           // Descrição visual vem completa do roteiro (já incorpora estilo + tema); sem merge.
-          // NÃO enviar baseStyle como style — o visualDescription já contém a âncora de estilo
-          // embutida pela LLM (instrução de buildVisualInstructionsForScript). Caso contrário,
-          // enhancePrompt() preporá o baseStyle novamente, causando duplicação.
+          // FAIL-SAFE: Se o LLM não incluiu a âncora de estilo no visualDescription,
+          // o pipeline prepende automaticamente para garantir consistência visual.
+          let visualPrompt = scene.visualDescription
+          const baseStyle = output.visualStyle?.baseStyle
+          if (baseStyle && !visualPrompt.toLowerCase().includes(baseStyle.toLowerCase().slice(0, 30))) {
+            log.warn(`Cena ${absoluteIndex + 1}: âncora de estilo ausente — prepending baseStyle`)
+            visualPrompt = `${baseStyle}, ${visualPrompt}`
+          }
+
           const request: ImageGenerationRequest = {
-            prompt: scene.visualDescription,
+            prompt: visualPrompt,
             width,
             height,
             aspectRatio: output.aspectRatio || '16:9',
@@ -347,12 +361,15 @@ export class OutputPipelineService {
             }
           })
 
-          // Registrar custo da imagem (fire-and-forget)
-          costLogService.logReplicateImage({
+          // Registrar custo da imagem (fire-and-forget) — usa costInfo do provider
+          costLogService.log({
             outputId,
-            model: imageResponse.model || 'luma/photon-flash',
-            numImages: imageResponse.images.length,
+            resource: 'image',
             action: 'create',
+            provider: imageResponse.costInfo.provider,
+            model: imageResponse.costInfo.model,
+            cost: imageResponse.costInfo.cost,
+            metadata: imageResponse.costInfo.metadata,
             detail: `Scene ${absoluteIndex + 1}/${scenes.length} - image generation${imageResponse.predictTime ? ` (${imageResponse.predictTime.toFixed(1)}s GPU)` : ''}`
           }).catch(() => { })
         }))
@@ -506,13 +523,15 @@ export class OutputPipelineService {
         }
       })
 
-      // Registrar custo da música (fire-and-forget)
-      costLogService.logReplicateMusic({
+      // Registrar custo da música (fire-and-forget) — usa costInfo do provider
+      costLogService.log({
         outputId,
-        model: musicResponse.model || 'stability-ai/stable-audio-2.5',
-        predictTime: musicResponse.predictTime,
-        audioDuration: duration,
+        resource: 'bgm',
         action: 'create',
+        provider: musicResponse.costInfo.provider,
+        model: musicResponse.costInfo.model,
+        cost: musicResponse.costInfo.cost,
+        metadata: musicResponse.costInfo.metadata,
         detail: `Background music (full video) - ${duration}s audio`
       }).catch(() => { })
 
@@ -560,13 +579,15 @@ export class OutputPipelineService {
           }
         })
 
-        // Registrar custo da track (fire-and-forget)
-        costLogService.logReplicateMusic({
+        // Registrar custo da track (fire-and-forget) — usa costInfo do provider
+        costLogService.log({
           outputId,
-          model: musicResponse.model || 'stability-ai/stable-audio-2.5',
-          predictTime: musicResponse.predictTime,
-          audioDuration: trackDuration,
+          resource: 'bgm',
           action: 'create',
+          provider: musicResponse.costInfo.provider,
+          model: musicResponse.costInfo.model,
+          cost: musicResponse.costInfo.cost,
+          metadata: musicResponse.costInfo.metadata,
           detail: `BGM track scenes ${start}→${end} - ${trackDuration}s audio`
         }).catch(() => { })
 
@@ -656,25 +677,17 @@ export class OutputPipelineService {
           }
         })
 
-        // Registrar custo da narração (fire-and-forget)
-        const ttsProviderName = ttsProvider.getName().toUpperCase()
-        if (ttsProviderName === 'ELEVENLABS') {
-          costLogService.logElevenLabsTTS({
-            outputId,
-            characterCount: scene.narration.length,
-            action: 'create',
-            detail: `Scene ${scene.order + 1} narration - ${scene.narration.length} chars`
-          }).catch(() => { })
-        } else {
-          costLogService.logReplicateTTS({
-            outputId,
-            model: 'elevenlabs/v2-multilingual',
-            elapsedSeconds: audioResponse.duration || 0,
-            characterCount: scene.narration.length,
-            action: 'create',
-            detail: `Scene ${scene.order + 1} narration via Replicate - ${scene.narration.length} chars`
-          }).catch(() => { })
-        }
+        // Registrar custo da narração (fire-and-forget) — usa costInfo do provider
+        costLogService.log({
+          outputId,
+          resource: 'narration',
+          action: 'create',
+          provider: audioResponse.costInfo.provider,
+          model: audioResponse.costInfo.model,
+          cost: audioResponse.costInfo.cost,
+          metadata: audioResponse.costInfo.metadata,
+          detail: `Scene ${scene.order + 1} narration - ${scene.narration.length} chars`
+        }).catch(() => { })
       }))
     }
 
@@ -787,13 +800,15 @@ export class OutputPipelineService {
           }
         })
 
-        // Registrar custo do motion (fire-and-forget)
-        costLogService.logReplicateMotion({
+        // Registrar custo do motion (fire-and-forget) — usa costInfo do provider
+        costLogService.log({
           outputId,
-          model: videoResponse.model || 'wan-video/wan-2.2-i2v-fast',
-          predictTime: videoResponse.predictTime,
-          numVideos: 1,
+          resource: 'motion',
           action: 'create',
+          provider: videoResponse.costInfo.provider,
+          model: videoResponse.costInfo.model,
+          cost: videoResponse.costInfo.cost,
+          metadata: videoResponse.costInfo.metadata,
           detail: `Scene ${scene.order + 1}/${scenes.length} - motion generation`
         }).catch(() => { })
       }))
@@ -869,13 +884,15 @@ export class OutputPipelineService {
       }
     })
 
-    // 6. Registrar custo (fire-and-forget)
-    costLogService.logReplicateMotion({
+    // 6. Registrar custo (fire-and-forget) — usa costInfo do provider
+    costLogService.log({
       outputId: output.id,
-      model: videoResponse.model || 'wan-video/wan-2.2-i2v-fast',
-      predictTime: videoResponse.predictTime,
-      numVideos: 1,
+      resource: 'motion',
       action: 'recreate',
+      provider: videoResponse.costInfo.provider,
+      model: videoResponse.costInfo.model,
+      cost: videoResponse.costInfo.cost,
+      metadata: videoResponse.costInfo.metadata,
       detail: `Scene ${scene.order + 1} - motion regeneration (correction)`
     }).catch(() => { })
 

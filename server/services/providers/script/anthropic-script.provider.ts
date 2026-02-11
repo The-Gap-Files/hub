@@ -7,11 +7,14 @@ import {
 } from '@langchain/core/messages'
 import type {
   IScriptGenerator,
+  ProviderCostInfo,
   ScriptGenerationRequest,
   ScriptGenerationResponse,
   ScriptScene
 } from '../../../types/ai-providers'
+import { calculateLLMCost } from '../../../constants/pricing'
 import { buildVisualInstructionsForScript } from '../../../utils/wan-prompt-builder'
+import { formatPersonsForPrompt, formatNeuralInsightsForPrompt } from '../../../utils/format-intelligence-context'
 
 // Schema para validação estruturada do output (Garante JSON válido e tipos corretos)
 const ScriptSceneSchema = z.object({
@@ -281,6 +284,7 @@ DIRETRIZES TÉCNICAS (CRÍTICO):
 - CAMADA SENSORIAL: Nas descrições visuais, inclua sentimentos, texturas e atmosfera.
 - DIRETRIZ VISUAL: As descrições visuais ('visualDescription') DEVEM SER SEMPRE EM INGLÊS e COMPLETAS: cada uma é o prompt final que será enviado diretamente ao modelo de imagem, sem etapa de merge. Incorpore estilo (base, iluminação, atmosfera, composição) em linguagem natural em cada cena. Seja VISUAL e CINEMATOGRÁFICO — descreva cenas com impacto máximo, texturas, atmosferas sombrias e composições dramáticas. Use linguagem artística intensa sem filtrar o tom.
 - PERSONAGENS: Quando houver personagens recorrentes na narrativa, use SEMPRE os nomes (ou um descritor consistente, ex.: "the detective", "Maria") no visualDescription em todas as cenas em que aparecem. Isso reduz variação entre cenas e ajuda a manter coerência visual (ex.: "John standing by the window" em vez de "a man by the window").
+- CONSISTÊNCIA VISUAL DE PERSONAGENS: Quando o dossiê fornecer visualDescription para personagens-chave, incorpore EXATAMENTE esses descritores visuais no visualDescription de cada cena onde o personagem aparece. Isso garante que o modelo de imagem mantenha a mesma aparência entre cenas.
 - MULTIMODALIDADE: Se imagens forem fornecidas, analise-as para garantir consistência visual.
 - CENAS DE ENCERRAMENTO (CTA — OBRIGATÓRIO): As últimas cenas do vídeo (segmento CTA do plano narrativo) DEVEM incluir: (1) uma frase de gatilho para o espectador seguir o canal — por exemplo convite para se inscrever, ativar o sininho ou acompanhar o canal, no tom do vídeo; (2) menção ao canal "The Gap Files" como assinatura de encerramento. A história narrativa deve estar COMPLETAMENTE encerrada antes do CTA — nunca corte uma frase no meio na última cena de conteúdo. Reserve as últimas 1-2 cenas exclusivamente para conclusão da frase/ideia e CTA.
 ${musicInstructions}
@@ -344,6 +348,16 @@ ${visualInstructions}`
 
     if (request.userNotes && request.userNotes.length > 0) {
       baseInstruction += `\n\n🧠 INSIGHTS E NOTAS DO AGENTE:\n${request.userNotes.join('\n- ')}`
+    }
+
+    // Persons & Neural Insights (Intelligence Center)
+    const personsBlock = formatPersonsForPrompt(request.persons || [])
+    if (personsBlock) {
+      baseInstruction += `\n\n${personsBlock}`
+    }
+    const insightsBlock = formatNeuralInsightsForPrompt(request.neuralInsights || [])
+    if (insightsBlock) {
+      baseInstruction += `\n\n${insightsBlock}`
     }
 
     if (request.visualReferences && request.visualReferences.length > 0) {
@@ -412,6 +426,7 @@ ${guidelines}${musicWarning}
     const wordCount = fullText.split(/\s+/).length
     const estimatedDuration = scenes.reduce((acc, s) => acc + s.estimatedDuration, 0)
 
+    const usage = tokenUsage ?? { inputTokens: 0, outputTokens: 0, totalTokens: 0 }
     return {
       title: content.title,
       summary: content.summary,
@@ -423,7 +438,17 @@ ${guidelines}${musicWarning}
       estimatedDuration,
       provider: this.getName(),
       model: this.modelName,
-      usage: tokenUsage
+      usage: tokenUsage,
+      costInfo: {
+        cost: calculateLLMCost(this.modelName, usage.inputTokens, usage.outputTokens),
+        provider: this.getName(),
+        model: this.modelName,
+        metadata: {
+          input_tokens: usage.inputTokens,
+          output_tokens: usage.outputTokens,
+          total_tokens: usage.totalTokens
+        }
+      }
     }
   }
 }

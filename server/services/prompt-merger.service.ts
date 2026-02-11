@@ -1,21 +1,21 @@
 /**
  * Intelligent Prompt Merger Service
  * 
- * Usa Claude (Anthropic) para fazer merge inteligente de prompts visuais,
+ * Usa a LLM Factory (Núcleo de IA) para fazer merge inteligente de prompts visuais,
  * removendo redundâncias e criando prompts mais naturais.
  * 
- * Fallback: Se Claude falhar, usa concatenação manual.
+ * O provider/modelo são controlados pela task "merge" na UI (Settings → Núcleo de IA).
+ * 
+ * Fallback: Se a LLM falhar, usa concatenação manual.
  */
 
-import Anthropic from '@anthropic-ai/sdk'
+import { SystemMessage, HumanMessage } from '@langchain/core/messages'
+import { createLlmForTask, getAssignment } from './llm/llm-factory'
+import type { LlmTaskId } from '../constants/llm-registry'
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY
-})
+const TASK_ID: LlmTaskId = 'merge'
 
-const MERGE_MODEL = process.env.ANTHROPIC_MODEL_MERGE || process.env.ANTHROPIC_MERGE_MODEL || 'claude-haiku-4-5'
-
-// Semáforo para limitar chamadas concorrentes ao Haiku (evita 429 rate limit)
+// Semáforo para limitar chamadas concorrentes (evita 429 rate limit)
 const MAX_CONCURRENT = 5
 let activeCalls = 0
 const waitQueue: Array<() => void> = []
@@ -57,14 +57,14 @@ export interface PromptMergeResult {
 export class PromptMergerService {
   /**
    * Faz merge inteligente do prompt da cena com as tags do estilo visual.
-   * Retorna mergedPrompt + usage/model quando Claude é usado (para CostLog).
+   * Retorna mergedPrompt + usage/model quando a LLM é usada (para CostLog).
    */
   async mergePrompt(request: PromptMergeRequest): Promise<PromptMergeResult> {
     await acquireSlot()
     try {
-      return await this.claudeMerge(request)
+      return await this.llmMerge(request)
     } catch (error) {
-      console.warn('[PromptMerger] Claude merge failed, using manual fallback:', error)
+      console.warn('[PromptMerger] LLM merge failed, using manual fallback:', error)
       return { mergedPrompt: this.manualMerge(request) }
     } finally {
       releaseSlot()
@@ -72,10 +72,11 @@ export class PromptMergerService {
   }
 
   /**
-   * Merge usando Claude Haiku (inteligente, remove redundâncias)
+   * Merge usando LLM via Factory (inteligente, remove redundâncias)
    */
-  private async claudeMerge(request: PromptMergeRequest): Promise<PromptMergeResult> {
+  private async llmMerge(request: PromptMergeRequest): Promise<PromptMergeResult> {
     const { sceneDescription, visualStyle } = request
+
 
     // Coletar elementos do estilo
     const styleElements = [
@@ -105,33 +106,36 @@ STYLE ELEMENTS: ${styleElements}
 
 Merge these into a single optimized prompt:`
 
-    const response = await anthropic.messages.create({
-      model: MERGE_MODEL,
-      system: systemPrompt,
-      messages: [
-        { role: 'user', content: userPrompt }
-      ],
-      temperature: 0.3, // Baixa variação para consistência
-      max_tokens: 200
-    })
+    const llm = await createLlmForTask(TASK_ID, { temperature: 0.3, maxTokens: 200 })
 
-    const textBlock = response.content.find(block => block.type === 'text')
-    const mergedPrompt = textBlock?.text?.trim()
+    const response = await llm.invoke([
+      new SystemMessage(systemPrompt),
+      new HumanMessage(userPrompt)
+    ])
+
+    const mergedPrompt = typeof response.content === 'string'
+      ? response.content.trim()
+      : String(response.content ?? '').trim()
 
     if (!mergedPrompt) {
-      throw new Error('Claude returned empty response')
+      throw new Error('LLM returned empty response')
     }
 
-    const usage = response.usage
+    // Extrair usage (compatível com qualquer provider LangChain)
+    const usageMeta = response.usage_metadata
+    const usage = usageMeta
       ? {
-          inputTokens: response.usage.input_tokens,
-          outputTokens: response.usage.output_tokens,
-          totalTokens: response.usage.input_tokens + response.usage.output_tokens
-        }
+        inputTokens: usageMeta.input_tokens ?? 0,
+        outputTokens: usageMeta.output_tokens ?? 0,
+        totalTokens: (usageMeta.input_tokens ?? 0) + (usageMeta.output_tokens ?? 0)
+      }
       : undefined
 
-    console.log(`[PromptMerger] ✅ Merge successful (${MERGE_MODEL})`)
-    return { mergedPrompt, usage, model: MERGE_MODEL }
+    const assignment = await getAssignment(TASK_ID)
+    const modelUsed = `${assignment.provider}/${assignment.model}`
+
+    console.log(`[PromptMerger] ✅ Merge successful (${modelUsed})`)
+    return { mergedPrompt, usage, model: assignment.model }
   }
 
   /**

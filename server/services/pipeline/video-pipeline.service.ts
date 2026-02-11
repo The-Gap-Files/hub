@@ -312,19 +312,110 @@ export class VideoPipelineService {
         }
       } else {
         const sizeMB = (stats.size / 1024 / 1024).toFixed(1)
-        log.info(`Vídeo grande (${sizeMB} MB); armazenando em disco (sem pós-processo). ${opts ? 'Opções de legendas/logo ignoradas para este tamanho.' : ''}`)
-        await prisma.output.update({
-          where: { id: outputId },
-          data: {
-            outputData: null,
-            outputMimeType: 'video/mp4',
-            outputSize: stats.size,
-            outputPath: finalPath,
-            status: 'RENDERED',
-            completedAt: null,
-            renderOptions: Prisma.DbNull
+        log.info(`Vídeo grande (${sizeMB} MB); processando legendas/logo em disco (sem carregar em memória).`)
+
+        // Processar legendas/logo on-disk (FFmpeg path → path, sem Buffer)
+        let processedPath = finalPath
+
+        if (opts && (opts.includeCaptions || opts.includeLogo)) {
+          const captionService = new CaptionService()
+          const postProcessedPath = finalPath.replace('.mp4', '_pp.mp4')
+
+          if (opts.includeCaptions && opts.captionStyleId) {
+            log.info('[OnDisk] Aplicando legendas + logo no vídeo grande.')
+            const outputForCaptions = await prisma.output.findUnique({
+              where: { id: outputId },
+              select: {
+                scenes: {
+                  orderBy: { order: 'asc' },
+                  select: {
+                    order: true,
+                    narration: true,
+                    audioTracks: {
+                      where: { type: 'scene_narration' },
+                      select: { duration: true, fileData: true, alignment: true },
+                      take: 1
+                    }
+                  }
+                }
+              }
+            })
+            type SceneWithTracks = { order: number; narration: string; audioTracks: Array<{ duration: number; fileData: Buffer | null; alignment: unknown }> }
+            const scenesWithTracks = (outputForCaptions?.scenes ?? []) as unknown as SceneWithTracks[]
+            const sceneCaptionData: SceneCaptionData[] = scenesWithTracks
+              .filter(scene => scene.narration && scene.audioTracks[0])
+              .map(scene => {
+                const track = scene.audioTracks[0]!
+                const wordTimings = Array.isArray(track.alignment)
+                  ? (track.alignment as { word: string; startTime: number; endTime: number }[])
+                  : undefined
+                return {
+                  narration: scene.narration,
+                  audioDuration: track.duration || 5,
+                  audioFileData: track.fileData ? Buffer.from(track.fileData) : undefined,
+                  wordTimings,
+                  order: scene.order
+                }
+              })
+            if (sceneCaptionData.length > 0) {
+              await captionService.addCaptionsFromScenesOnDisk(
+                finalPath, postProcessedPath, sceneCaptionData,
+                { styleId: opts.captionStyleId as CaptionStyleId }
+              )
+              processedPath = postProcessedPath
+            }
+          } else if (opts.includeLogo) {
+            log.info('[OnDisk] Aplicando apenas logo no vídeo grande.')
+            await captionService.applyLogoOnlyOnDisk(finalPath, postProcessedPath)
+            processedPath = postProcessedPath
           }
-        })
+        }
+
+        // Verificar tamanho final após pós-processamento
+        const finalStats = await fs.stat(processedPath)
+        const finalSizeMB = (finalStats.size / 1024 / 1024).toFixed(1)
+
+        // Tentar salvar no DB; se falhar (muito grande), manter em disco
+        if (finalStats.size <= MAX_DB_SIZE) {
+          log.info(`[OnDisk] Pós-processado (${finalSizeMB} MB) cabe no banco; salvando.`)
+          const videoBuffer = await fs.readFile(processedPath)
+          await prisma.output.update({
+            where: { id: outputId },
+            data: {
+              outputData: videoBuffer,
+              outputMimeType: 'video/mp4',
+              outputSize: finalStats.size,
+              outputPath: null,
+              status: 'RENDERED',
+              completedAt: null,
+              renderOptions: Prisma.DbNull
+            }
+          })
+          // Limpar arquivos de disco
+          await fs.unlink(finalPath).catch(() => { })
+          if (processedPath !== finalPath) await fs.unlink(processedPath).catch(() => { })
+        } else {
+          // Se ainda é grande demais para o banco, mover o pós-processado para o path final
+          if (processedPath !== finalPath) {
+            await fs.rename(processedPath, finalPath).catch(async () => {
+              await fs.copyFile(processedPath, finalPath)
+              await fs.unlink(processedPath).catch(() => { })
+            })
+          }
+          log.info(`[OnDisk] Vídeo grande (${finalSizeMB} MB) salvo em disco com legendas/logo: ${finalPath}`)
+          await prisma.output.update({
+            where: { id: outputId },
+            data: {
+              outputData: null,
+              outputMimeType: 'video/mp4',
+              outputSize: finalStats.size,
+              outputPath: finalPath,
+              status: 'RENDERED',
+              completedAt: null,
+              renderOptions: Prisma.DbNull
+            }
+          })
+        }
       }
 
       return { success: true }

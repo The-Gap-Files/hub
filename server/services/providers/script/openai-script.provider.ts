@@ -7,11 +7,14 @@ import {
 } from '@langchain/core/messages'
 import type {
   IScriptGenerator,
+  ProviderCostInfo,
   ScriptGenerationRequest,
   ScriptGenerationResponse,
   ScriptScene
 } from '../../../types/ai-providers'
+import { calculateLLMCost } from '../../../constants/pricing'
 import { buildVisualInstructionsForScript } from '../../../utils/wan-prompt-builder'
+import { formatPersonsForPrompt, formatNeuralInsightsForPrompt } from '../../../utils/format-intelligence-context'
 
 // Schema para validação estruturada do output (Garante JSON válido e tipos corretos)
 const ScriptSceneSchema = z.object({
@@ -277,6 +280,27 @@ ESTILO NARRATIVO E PERSONA:
 ${styleInstructions}
 
 ---
+📐 ARQUITETURA NARRATIVA PROPORCIONAL (OBRIGATÓRIO):
+O roteiro DEVE seguir proporções rígidas entre seus atos. Isso é CRÍTICO para manter a retenção do início ao fim.
+
+| FASE | PROPORÇÃO DO TOTAL | FUNÇÃO |
+|------|-------|--------|
+| 🎯 HOOK (Gancho) | ≤5% das cenas | Captura atenção. Mistério + Promessa. In media res. |
+| 📜 CORPO FACTUAL (Investigação) | 55-65% das cenas | Fatos, cronologia, revelações, evidências. O CORAÇÃO do vídeo. |
+| 🔗 PONTE TEMPORAL (se aplicável) | 10-15% das cenas | Conexão passado-presente, relevância contemporânea. |
+| 💡 REFLEXÃO/LIÇÃO | ≤15% das cenas | Significado, implicação, questionamento. CONCISO e IMPACTANTE. |
+| 📢 CTA (Encerramento) | ≤5% das cenas (máx 2-3 cenas) | Seguir canal + assinatura "The Gap Files". |
+
+🚨 REGRA DE PROPORÇÃO MÁXIMA: A seção de REFLEXÃO/LIÇÃO (tudo depois do corpo factual e ponte temporal) NUNCA deve ultrapassar 20% do total de cenas. Se o vídeo tem 150 cenas, a reflexão deve ter NO MÁXIMO 30 cenas. Prefira 15-20%. Roteiros com reflexão longa demais causam QUEDA DE RETENÇÃO.
+
+🚨 REGRA ANTI-REPETIÇÃO (CRÍTICO):
+- PROIBIDO repetir a mesma ideia com variações. Se já disse "uma mentira de 500 anos", NÃO repita como "uma fake news medieval", "a mesma narrativa secular", etc.
+- Cada cena deve avançar o argumento ou adicionar informação NOVA. Se não tem conteúdo novo, a cena não deveria existir.
+- TÉCNICA: Use a regra "1 ideia = 1 cena". Se a ideia já foi expressa, avance para a próxima.
+- A reflexão final deve ser CIRÚRGICA: poucos golpes precisos > muitas repetições diluídas.
+- PREFERÍVEL: Uma reflexão de 5 cenas devastadoras a uma reflexão de 25 cenas repetitivas.
+
+---
 DIRETRIZES TÉCNICAS (CRÍTICO):
 - SINCRONIA: Cada cena DEVE durar EXATAMENTE 5 segundos de narração.
 - DENSIDADE OBRIGATÓRIA: Com base na velocidade de fala (${targetWPM} WPM), cada cena DEVE conter entre ${wordsPerScene - 1} e ${maxWordsHard} palavras. A conta é: ${targetWPM} WPM ÷ 60 × 5s = ${wordsPerScene} palavras ideais.
@@ -288,6 +312,7 @@ DIRETRIZES TÉCNICAS (CRÍTICO):
 - CAMADA SENSORIAL: Nas descrições visuais, inclua sentimentos, texturas e atmosfera.
 - DIRETRIZ VISUAL: As descrições visuais ('visualDescription') DEVEM SER SEMPRE EM INGLÊS e COMPLETAS: cada uma é o prompt final que será enviado diretamente ao modelo de imagem, sem etapa de merge. Incorpore estilo (base, iluminação, atmosfera, composição) em linguagem natural em cada cena. Seja VISUAL e CINEMATOGRÁFICO — descreva cenas com impacto máximo, texturas, atmosferas sombrias e composições dramáticas. Use linguagem artística intensa sem filtrar o tom.
 - PERSONAGENS: Quando houver personagens recorrentes na narrativa, use SEMPRE os nomes (ou um descritor consistente, ex.: "the detective", "Maria") no visualDescription em todas as cenas em que aparecem. Isso reduz variação entre cenas e ajuda a manter coerência visual (ex.: "John standing by the window" em vez de "a man by the window").
+- CONSISTÊNCIA VISUAL DE PERSONAGENS: Quando o dossiê fornecer visualDescription para personagens-chave, incorpore EXATAMENTE esses descritores visuais no visualDescription de cada cena onde o personagem aparece. Isso garante que o modelo de imagem mantenha a mesma aparência entre cenas.
 - MULTIMODALIDADE: Se imagens forem fornecidas, analise-as para garantir consistência visual.
 - CENAS DE ENCERRAMENTO (CTA — OBRIGATÓRIO): As últimas cenas do vídeo (segmento CTA do plano narrativo) DEVEM incluir: (1) uma frase de gatilho para o espectador seguir o canal — por exemplo convite para se inscrever, ativar o sininho ou acompanhar o canal, no tom do vídeo; (2) menção ao canal "The Gap Files" como assinatura de encerramento. A história narrativa deve estar COMPLETAMENTE encerrada antes do CTA — nunca corte uma frase no meio na última cena de conteúdo. Reserve as últimas 1-2 cenas exclusivamente para conclusão da frase/ideia e CTA.
 ${musicInstructions}
@@ -353,6 +378,16 @@ ${visualInstructions}`
       baseInstruction += `\n\n🧠 INSIGHTS E NOTAS DO AGENTE:\n${request.userNotes.join('\n- ')}`
     }
 
+    // Persons & Neural Insights (Intelligence Center)
+    const personsBlock = formatPersonsForPrompt(request.persons || [])
+    if (personsBlock) {
+      baseInstruction += `\n\n${personsBlock}`
+    }
+    const insightsBlock = formatNeuralInsightsForPrompt(request.neuralInsights || [])
+    if (insightsBlock) {
+      baseInstruction += `\n\n${insightsBlock}`
+    }
+
     if (request.visualReferences && request.visualReferences.length > 0) {
       baseInstruction += `\n\n🖼️ REFERÊNCIAS VISUAIS EXISTENTES (DESCRITORES):\n${request.visualReferences.join('\n- ')}`
     }
@@ -387,6 +422,9 @@ O prompt de cada track deve seguir o formato Stable Audio 2.5: gênero, instrume
 Máximo de 38 cenas por track (limite do modelo). Defina "backgroundMusic" como null.`
     }
 
+    const maxReflectionScenes = Math.max(3, Math.round(idealSceneCount * 0.15))
+    const maxReflectionCeiling = Math.round(idealSceneCount * 0.20)
+
     return `${baseInstruction}
 
 ---
@@ -397,9 +435,17 @@ Máximo de 38 cenas por track (limite do modelo). Defina "backgroundMusic" como 
 4. CONTAGEM DE PALAVRAS: Cada narração DEVE ter entre ${minWords} e ${maxWords} palavras (${targetWPM} WPM ÷ 60 × 5s = ${wordsPerScene} palavras ideais). 🚨 NUNCA exceda ${maxWords} palavras - isso faz o áudio ultrapassar 5 segundos e quebra a sincronia. NUNCA faça cenas com menos de ${minWords} palavras - isso gera silêncio.
 5. MÚSICA DE FUNDO: ${isShortFormat ? 'Use "backgroundMusic" { prompt, volume } para UMA música para TODO o vídeo. O prompt deve ser compatível com Stable Audio 2.5.' : 'Use "backgroundMusicTracks" com tracks { prompt, volume, startTime, endTime }. O prompt de cada track deve ser compatível com Stable Audio 2.5.'}
 6. Se houver imagens anexas, use-as como referência visual primária.
+7. 📐 PROPORÇÃO NARRATIVA: A seção de REFLEXÃO/LIÇÃO (após o corpo factual + ponte temporal) deve ter no MÁXIMO ${maxReflectionScenes} cenas (15% ideal, ${maxReflectionCeiling} cenas = teto absoluto de 20%). Invista as cenas no CORPO FACTUAL, não na reflexão.
+8. 🚫 ANTI-REPETIÇÃO: Antes de finalizar, releia TODAS as cenas de reflexão. Se duas cenas expressam a mesma ideia com palavras diferentes, ELIMINE uma e redistribua o conteúdo para o corpo factual. Cada cena de reflexão deve trazer um ARGUMENTO ÚNICO e INÉDITO.
 ${guidelines}${musicWarning}
 
-🚨 CRÍTICO: Mínimo ${idealSceneCount} cenas, máximo ${maxSceneCount} cenas. A última cena de conteúdo da história deve terminar com frase completa. As últimas 1-2 cenas devem ser conclusão + CTA (seguir canal + The Gap Files).`
+� VALIDAÇÃO FINAL OBRIGATÓRIA:
+Antes de retornar o JSON, faça esta auditoria interna:
+1. CONTE as cenas totais — deve estar entre ${idealSceneCount} e ${maxSceneCount}.
+2. CONTE as cenas de reflexão/lição (após o corpo factual) — deve ser ≤${maxReflectionCeiling} cenas.
+3. PROCURE repetições temáticas — se encontrar, ELIMINE e COMPACTE.
+4. A última cena de conteúdo deve terminar com frase completa.
+5. As últimas 1-2 cenas devem ser conclusão + CTA (seguir canal + The Gap Files).`
   }
 
   private parseResponse(
@@ -419,6 +465,7 @@ ${guidelines}${musicWarning}
     const wordCount = fullText.split(/\s+/).length
     const estimatedDuration = scenes.reduce((acc, s) => acc + s.estimatedDuration, 0)
 
+    const usage = tokenUsage ?? { inputTokens: 0, outputTokens: 0, totalTokens: 0 }
     return {
       title: content.title,
       summary: content.summary,
@@ -430,7 +477,17 @@ ${guidelines}${musicWarning}
       estimatedDuration,
       provider: this.getName(),
       model: this.modelName,
-      usage: tokenUsage
+      usage: tokenUsage,
+      costInfo: {
+        cost: calculateLLMCost(this.modelName, usage.inputTokens, usage.outputTokens),
+        provider: this.getName(),
+        model: this.modelName,
+        metadata: {
+          input_tokens: usage.inputTokens,
+          output_tokens: usage.outputTokens,
+          total_tokens: usage.totalTokens
+        }
+      }
     }
   }
 }

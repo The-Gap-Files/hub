@@ -41,16 +41,6 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const config = useRuntimeConfig()
-  const scriptConfig = config.providers?.script
-
-  if (!scriptConfig?.apiKey) {
-    throw createError({
-      statusCode: 500,
-      message: 'Script AI provider not configured. Check your .env file.'
-    })
-  }
-
   try {
     const result = await intelligenceQuery(
       {
@@ -66,11 +56,6 @@ export default defineEventHandler(async (event) => {
           content: n.content,
           noteType: n.noteType || 'research'
         }))
-      },
-      {
-        name: scriptConfig.name,
-        apiKey: scriptConfig.apiKey,
-        model: scriptConfig.model
       }
     )
 

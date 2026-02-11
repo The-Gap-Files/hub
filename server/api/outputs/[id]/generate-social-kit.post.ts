@@ -10,10 +10,9 @@
 
 import { prisma } from '../../../utils/prisma'
 import { costLogService } from '../../../services/cost-log.service'
-import { ChatAnthropic } from '@langchain/anthropic'
 import { SystemMessage, HumanMessage } from '@langchain/core/messages'
-
-const SOCIAL_KIT_MODEL = process.env.ANTHROPIC_MODEL_THUMBNAIL || 'claude-3-5-haiku-20241022'
+import { createLlmForTask, getAssignment } from '../../../services/llm/llm-factory'
+import type { LlmTaskId } from '../../../constants/llm-registry'
 
 interface PlatformContent {
   title: string
@@ -48,8 +47,8 @@ export default defineEventHandler(async (event) => {
 
   if (!output) throw createError({ statusCode: 404, message: 'Output não encontrado' })
 
-  const apiKey = process.env.ANTHROPIC_API_KEY
-  if (!apiKey) throw createError({ statusCode: 500, message: 'ANTHROPIC_API_KEY não configurada' })
+  const TASK_ID: LlmTaskId = 'social-kit'
+
 
   // Contexto do vídeo
   const title = output.title || (output.dossier as any)?.theme || 'Vídeo'
@@ -134,14 +133,10 @@ Retorne APENAS um JSON válido com esta estrutura (sem markdown, sem \`\`\`):
   "seoTags": ["keyword1", "keyword2"]
 }`
 
-  const model = new ChatAnthropic({
-    anthropicApiKey: apiKey,
-    modelName: SOCIAL_KIT_MODEL,
-    temperature: 0.8,
-    maxTokens: 3000
-  })
+  const model = await createLlmForTask(TASK_ID, { temperature: 0.8, maxTokens: 3000 })
+  const socialKitAssignment = await getAssignment(TASK_ID)
 
-  console.log(`[SocialKit] 📱 Gerando kit de publicação via ${SOCIAL_KIT_MODEL}...`)
+  console.log(`[SocialKit] 📱 Gerando kit de publicação via ${socialKitAssignment.provider}/${socialKitAssignment.model}...`)
 
   const llmResponse = await model.invoke([
     new SystemMessage(systemPrompt),
@@ -179,20 +174,20 @@ Retorne APENAS um JSON válido com esta estrutura (sem markdown, sem \`\`\`):
   const llmUsage = llmResponse.usage_metadata
   if (llmUsage) {
     const { calculateLLMCost } = await import('../../../constants/pricing')
-    const cost = calculateLLMCost(SOCIAL_KIT_MODEL, llmUsage.input_tokens, llmUsage.output_tokens)
+    const cost = calculateLLMCost(socialKitAssignment.model, llmUsage.input_tokens, llmUsage.output_tokens)
     costLogService.log({
       outputId: id,
       resource: 'script',
       action: 'create',
-      provider: 'ANTHROPIC',
-      model: SOCIAL_KIT_MODEL,
+      provider: socialKitAssignment.provider.toUpperCase(),
+      model: socialKitAssignment.model,
       cost,
       metadata: {
         input_tokens: llmUsage.input_tokens,
         output_tokens: llmUsage.output_tokens,
         step: 'social_kit'
       },
-      detail: 'Social Media Kit generation'
+      detail: `Social Media Kit via ${socialKitAssignment.provider}/${socialKitAssignment.model}`
     }).catch(() => { })
   }
 

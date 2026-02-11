@@ -1,6 +1,7 @@
 import { prisma } from '../../../utils/prisma'
 import { providerManager } from '../../../services/providers'
 import { costLogService } from '../../../services/cost-log.service'
+import { calculateLLMCost } from '../../../constants/pricing'
 import { getVisualStyleById } from '../../../constants/visual-styles'
 import { getScriptStyleById } from '../../../constants/script-styles'
 import { getClassificationById } from '../../../constants/intelligence-classifications'
@@ -36,7 +37,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const dossier = output.dossier
-  const scriptProvider = providerManager.getScriptProvider()
+  const scriptProvider = await providerManager.getScriptProvider()
 
   // Resolver estilos a partir das constantes
   const scriptStyle = output.scriptStyleId ? getScriptStyleById(output.scriptStyleId) : undefined
@@ -110,14 +111,18 @@ export default defineEventHandler(async (event) => {
     const scriptResponse = await scriptProvider.generate(promptContext)
 
     // 4.1 Registrar custo da regeneração (fire-and-forget) -- usa tokens reais quando disponíveis
-    costLogService.logScriptGeneration({
+    const inputTokens = scriptResponse.usage?.inputTokens ?? 0
+    const outputTokens = scriptResponse.usage?.outputTokens ?? 0
+    const cost = calculateLLMCost(scriptResponse.model || 'claude-opus-4-6', inputTokens, outputTokens)
+
+    costLogService.log({
       outputId,
+      resource: 'script',
+      action: 'recreate',
       provider: scriptResponse.provider || 'ANTHROPIC',
       model: scriptResponse.model || 'claude-opus-4-6',
-      inputCharacters: JSON.stringify(promptContext).length,
-      outputCharacters: scriptResponse.fullText.length,
-      usage: scriptResponse.usage,
-      action: 'recreate',
+      cost,
+      metadata: { input_tokens: inputTokens, output_tokens: outputTokens, total_tokens: inputTokens + outputTokens },
       detail: `Script regeneration - ${scriptResponse.wordCount} words, user feedback`
     }).catch(() => { })
 

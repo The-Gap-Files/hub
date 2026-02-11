@@ -7,11 +7,10 @@
  */
 
 import { z } from 'zod'
-import { ChatOpenAI } from '@langchain/openai'
-import { ChatAnthropic } from '@langchain/anthropic'
 import { SystemMessage, HumanMessage } from '@langchain/core/messages'
 import { loadSkill } from '../utils/skill-loader'
 import { serializeConstantsCatalog } from '../utils/constants-catalog'
+import { createLlmForTask, getAssignment } from './llm/llm-factory'
 import type { CreativeDirection } from './creative-direction-advisor.service'
 
 // =============================================================================
@@ -26,8 +25,8 @@ const FullVideoSuggestionSchema = z.object({
   keyPoints: z.array(z.string()).min(3).max(5).describe('Pontos-chave que devem aparecer no roteiro'),
   emotionalArc: z.string().describe('Progressão emocional do início ao fim'),
   estimatedViews: z.number().describe('Estimativa conservadora de views'),
-  platform: z.literal('YouTube'),
-  format: z.literal('full-youtube'),
+  platform: z.enum(['YouTube']).describe('Plataforma obrigatória: YouTube'),
+  format: z.enum(['full-youtube']).describe('Formato obrigatório: full-youtube'),
   // ── Creative Direction ─────────────────────────────────────────
   scriptStyleId: z.string().describe('ID do estilo de roteiro atribuído (ex: "mystery", "documentary")'),
   scriptStyleName: z.string().describe('Nome legível do estilo de roteiro'),
@@ -142,39 +141,15 @@ export interface MonetizationPlannerResult {
 // =============================================================================
 
 export async function generateMonetizationPlan(
-  request: MonetizationPlannerRequest,
-  providerConfig: { name: string; apiKey: string; model?: string; baseUrl?: string }
+  request: MonetizationPlannerRequest
 ): Promise<MonetizationPlannerResult> {
   console.log('[MonetizationPlanner] 💰 Iniciando geração de plano de monetização...')
   console.log(`[MonetizationPlanner] ⏱️ Teasers: ${request.teaserDuration}s | Full: ${request.fullVideoDuration / 60}min`)
 
-  // Criar modelo baseado no provider configurado
-  const providerName = providerConfig.name.toLowerCase()
-  let structuredLlm: any
-
-  if (providerName === 'anthropic') {
-    const insightsModel = process.env.ANTHROPIC_MODEL_INSIGHTS || providerConfig.model || 'claude-sonnet-4-20250514'
-    const model = new ChatAnthropic({
-      anthropicApiKey: providerConfig.apiKey,
-      modelName: insightsModel,
-      temperature: 0.85,
-      maxTokens: 8192
-    })
-    structuredLlm = model.withStructuredOutput(MonetizationPlanSchema, { includeRaw: true })
-  } else {
-    // OpenAI (default)
-    const model = new ChatOpenAI({
-      openAIApiKey: providerConfig.apiKey,
-      modelName: providerConfig.model ?? 'gpt-4o-mini',
-      configuration: {
-        baseURL: providerConfig.baseUrl ?? 'https://api.openai.com/v1'
-      },
-      temperature: 0.85,
-      timeout: 120000,
-      maxRetries: 2
-    })
-    structuredLlm = model.withStructuredOutput(MonetizationPlanSchema, { includeRaw: true })
-  }
+  // Criar modelo via LLM Factory
+  const assignment = await getAssignment('monetization')
+  const model = await createLlmForTask('monetization')
+  const structuredLlm = (model as any).withStructuredOutput(MonetizationPlanSchema, { includeRaw: true })
 
   // Carregar skill de monetização
   const skillContent = loadSkill('monetization-planner')
@@ -183,10 +158,7 @@ export async function generateMonetizationPlan(
   const systemPrompt = buildSystemPrompt(skillContent, request)
   const userPrompt = buildUserPrompt(request)
 
-  const resolvedModel = providerName === 'anthropic'
-    ? (process.env.ANTHROPIC_MODEL_INSIGHTS || providerConfig.model || 'claude-sonnet-4-20250514')
-    : (providerConfig.model || 'gpt-4o-mini')
-  console.log(`[MonetizationPlanner] 📤 Enviando para ${providerName} (${resolvedModel})...`)
+  console.log(`[MonetizationPlanner] 📤 Enviando para ${assignment.provider} (${assignment.model})...`)
 
   const messages = [
     new SystemMessage(systemPrompt),
@@ -214,8 +186,8 @@ export async function generateMonetizationPlan(
     return {
       plan: content,
       usage: { inputTokens, outputTokens, totalTokens },
-      provider: providerName.toUpperCase(),
-      model: resolvedModel
+      provider: assignment.provider.toUpperCase(),
+      model: assignment.model
     }
   } catch (error) {
     console.error('[MonetizationPlanner] ❌ Erro na geração:', error)
@@ -295,8 +267,7 @@ Retorne SEMPRE em JSON estruturado.`
 // =============================================================================
 
 export async function regenerateMonetizationItem(
-  request: RegenerateItemRequest,
-  providerConfig: { name: string; apiKey: string; model?: string; baseUrl?: string }
+  request: RegenerateItemRequest
 ): Promise<RegenerateItemResult> {
   const isTeaser = request.type === 'teaser'
   const schema = isTeaser ? SingleTeaserSchema : SingleFullVideoSchema
@@ -304,29 +275,9 @@ export async function regenerateMonetizationItem(
 
   console.log(`[MonetizationPlanner] 🔄 Regenerando ${label}...`)
 
-  const providerName = providerConfig.name.toLowerCase()
-  let structuredLlm: any
-
-  if (providerName === 'anthropic') {
-    const insightsModel = process.env.ANTHROPIC_MODEL_INSIGHTS || providerConfig.model || 'claude-sonnet-4-20250514'
-    const model = new ChatAnthropic({
-      anthropicApiKey: providerConfig.apiKey,
-      modelName: insightsModel,
-      temperature: 0.95,
-      maxTokens: 4096
-    })
-    structuredLlm = model.withStructuredOutput(schema, { includeRaw: true })
-  } else {
-    const model = new ChatOpenAI({
-      openAIApiKey: providerConfig.apiKey,
-      modelName: providerConfig.model ?? 'gpt-4o-mini',
-      configuration: { baseURL: providerConfig.baseUrl ?? 'https://api.openai.com/v1' },
-      temperature: 0.95,
-      timeout: 60000,
-      maxRetries: 2
-    })
-    structuredLlm = model.withStructuredOutput(schema, { includeRaw: true })
-  }
+  const assignment = await getAssignment('monetization')
+  const regenModel = await createLlmForTask('monetization')
+  const structuredLlm = (regenModel as any).withStructuredOutput(schema, { includeRaw: true })
 
   // Montar prompt de regeneração
   const existingAngles = request.currentPlan.teasers.map(t => t.angleCategory)
@@ -397,9 +348,7 @@ Gere um ${isTeaser ? `teaser de ${request.teaserDuration}s` : `Full Video de ${r
   const outputTokens = usage?.output_tokens ?? 0
   const totalTokens = usage?.total_tokens ?? (inputTokens + outputTokens)
 
-  const resolvedModel = providerName === 'anthropic'
-    ? (process.env.ANTHROPIC_MODEL_INSIGHTS || providerConfig.model || 'claude-sonnet-4-20250514')
-    : (providerConfig.model || 'gpt-4o-mini')
+  const resolvedModel = assignment.model
 
   console.log(`[MonetizationPlanner] ✅ ${label} regenerado em ${elapsed}s (${totalTokens} tokens)`)
 
@@ -419,26 +368,8 @@ Gere um ${isTeaser ? `teaser de ${request.teaserDuration}s` : `Full Video de ${r
     console.log(`[MonetizationPlanner] 📅 Regenerando cronograma...`)
 
     let scheduleLlm: any
-    if (providerName === 'anthropic') {
-      const insightsModel2 = process.env.ANTHROPIC_MODEL_INSIGHTS || providerConfig.model || 'claude-sonnet-4-20250514'
-      const model2 = new ChatAnthropic({
-        anthropicApiKey: providerConfig.apiKey,
-        modelName: insightsModel2,
-        temperature: 0.7,
-        maxTokens: 2048
-      })
-      scheduleLlm = model2.withStructuredOutput(RegeneratedScheduleSchema, { includeRaw: true })
-    } else {
-      const model2 = new ChatOpenAI({
-        openAIApiKey: providerConfig.apiKey,
-        modelName: providerConfig.model ?? 'gpt-4o-mini',
-        configuration: { baseURL: providerConfig.baseUrl ?? 'https://api.openai.com/v1' },
-        temperature: 0.7,
-        timeout: 30000,
-        maxRetries: 1
-      })
-      scheduleLlm = model2.withStructuredOutput(RegeneratedScheduleSchema, { includeRaw: true })
-    }
+    const scheduleModel = await createLlmForTask('monetization')
+    scheduleLlm = (scheduleModel as any).withStructuredOutput(RegeneratedScheduleSchema, { includeRaw: true })
 
     const fullVideoTitle = updatedPlan.fullVideo.title
     const teaserList = updatedPlan.teasers
@@ -479,7 +410,7 @@ Distribua ao longo da semana (Segunda a Domingo). O Full Video geralmente vai no
       outputTokens: outputTokens + scheduleTokens.output,
       totalTokens: totalTokens + scheduleTokens.input + scheduleTokens.output
     },
-    provider: providerName.toUpperCase(),
+    provider: assignment.provider.toUpperCase(),
     model: resolvedModel
   }
 }

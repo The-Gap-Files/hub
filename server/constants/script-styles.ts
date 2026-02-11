@@ -68,7 +68,7 @@ export const DOCUMENTARY_STYLE: ScriptStyle = {
   get instructions() { return getDocumentaryInstructions() },
   order: 1,
   isActive: true,
-  defaultVisualStyleId: 'ghibli-dark'
+  defaultVisualStyleId: 'noir-cinematic'
 }
 
 export const MYSTERY_STYLE: ScriptStyle = {
@@ -78,7 +78,7 @@ export const MYSTERY_STYLE: ScriptStyle = {
   get instructions() { return getMysteryInstructions() },
   order: 2,
   isActive: true,
-  defaultVisualStyleId: 'ghibli-dark'
+  defaultVisualStyleId: 'noir-cinematic'
 }
 
 // ─── Inline Styles (sem skill .md dedicada ainda) ───────────────

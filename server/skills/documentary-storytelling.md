@@ -77,7 +77,7 @@ Estudos, Registros, Evidências, Documentado, Análise, Especialistas, Dados
 ### 3. RISING ACTION (Corpo Principal) - Construir Tensão
 **Objetivo:** Revelar camadas progressivamente, mantendo retenção.
 
-**TÉCNICA DE REVELAÇÃO PROGRESSIVA (baseada em data-storytelling):**
+**TÉCNICA DE REVELAÇÃO PROGRESSIVA (3 Camadas de Passado):**
 
 ```
 Camada 1: O que aconteceu (fatos básicos)
@@ -85,9 +85,8 @@ Camada 1: O que aconteceu (fatos básicos)
 Camada 2: Como aconteceu (mecanismos, processo)
     ↓
 Camada 3: Por que aconteceu (causas, motivações)
-    ↓
-Camada 4: O que isso significa (implicações maiores)
 ```
+(Nota: Implicações maiores devem ir para a Resolução para evitar quebra de cronologia).
 
 **MICRO-ESTRUTURA DE CADA SEGMENTO:**
 1. **Mini-Hook:** Introduza nova informação intrigante
@@ -286,6 +285,7 @@ Outcome: "Muda como entendemos [fenômeno]"
 6. [ ] Há conexão clara entre informação e impacto humano real?
 7. [ ] O ritmo permite absorção mas mantém interesse?
 8. [ ] Momentos emotivos são autênticos, não manipulativos?
+9. [ ] A narrativa mantém a cronologia sem pular para o presente antes da hora?
 
 ### Ética e Respeito
 9. [ ] Vítimas e pessoas vulneráveis são tratadas com dignidade?

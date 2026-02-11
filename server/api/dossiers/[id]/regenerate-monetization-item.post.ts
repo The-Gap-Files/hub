@@ -62,14 +62,6 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'Dossier not found' })
   }
 
-  // Config do provider
-  const config = useRuntimeConfig()
-  const scriptConfig = config.providers?.script
-
-  if (!scriptConfig?.apiKey) {
-    throw createError({ statusCode: 500, message: 'Script AI provider not configured' })
-  }
-
   try {
     const result = await regenerateMonetizationItem(
       {
@@ -94,11 +86,6 @@ export default defineEventHandler(async (event) => {
           ? newDuration
           : (activePlan.fullVideoDuration ?? 600)) as 300 | 600 | 900,
         userSuggestion: userSuggestion?.trim() || undefined
-      },
-      {
-        name: scriptConfig.name,
-        apiKey: scriptConfig.apiKey,
-        model: scriptConfig.model
       }
     )
 
@@ -138,11 +125,14 @@ export default defineEventHandler(async (event) => {
     })
 
     // Registrar custo
-    costLogService.logInsightsGeneration({
+    costLogService.log({
       dossierId,
+      resource: 'insights',
+      action: 'create',
       provider: result.provider,
       model: result.model,
-      usage: result.usage,
+      cost,
+      metadata: { input_tokens: inputTokens, output_tokens: outputTokens, total_tokens: inputTokens + outputTokens },
       detail: `Regeneração de ${type}${type === 'teaser' ? ` #${index! + 1}` : ''}`
     }).catch(err => console.error('[RegenerateItem] CostLog:', err))
 

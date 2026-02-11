@@ -4,8 +4,11 @@ import type {
   IMotionProvider,
   MotionGenerationRequest,
   MotionGenerationResponse,
-  GeneratedMotion
+  GeneratedMotion,
+  ProviderCostInfo
 } from '../../../types/ai-providers'
+import { calculateReplicateOutputCost, calculateReplicateTimeCost } from '../../../constants/pricing'
+import { buildMotionInput, type MotionInputContext } from '../../../utils/input-schema-builder'
 
 /** Wan 2.2 5B: num_frames entre 81-121 (5s-7.5s @ 16fps) */
 const FPS = 16
@@ -26,13 +29,15 @@ function durationToNumFrames(durationSeconds: number): number {
 export class ReplicateMotionProvider implements IMotionProvider {
   private client: Replicate
   private model: string
+  private inputSchema: any = null
 
-  constructor(config: { apiKey: string; model?: string }) {
+  constructor(config: { apiKey: string; model?: string; inputSchema?: any }) {
     if (!config.apiKey) {
       throw new Error('Replicate API key is required')
     }
     this.client = new Replicate({ auth: config.apiKey })
     this.model = config.model || 'wan-video/wan-2.2-i2v-fast'
+    this.inputSchema = config.inputSchema ?? null
   }
 
   getName(): string {
@@ -43,23 +48,40 @@ export class ReplicateMotionProvider implements IMotionProvider {
     try {
       console.log(`[ReplicateMotion] Generating video from image`)
 
-      const imageBuffer = request.imageBuffer || await fs.readFile(request.imagePath!)
-      const durationSeconds = request.duration ?? 5
-      const numFrames = durationToNumFrames(durationSeconds)
+      let input: any
+      let calculatedDuration: number
 
-      // Input conforme schema wan-video/wan-2.2-i2v-fast (sem negative_prompt, aspect_ratio, optimize_prompt)
-      const input = {
-        image: imageBuffer,
-        prompt: request.prompt || 'Natural, smooth camera movement. Cinematic lighting.',
-        num_frames: numFrames,
-        resolution: '480p' as const,
-        frames_per_second: 16,
-        go_fast: true,
-        sample_shift: 12,
-        disable_safety_checker: false
+      if (this.inputSchema) {
+        // Dynamic: build from schema
+        const result = buildMotionInput(this.inputSchema, {
+          imageBuffer: request.imageBuffer || await fs.readFile(request.imagePath!),
+          prompt: request.prompt,
+          duration: request.duration,
+          aspectRatio: request.aspectRatio,
+          guidanceScale: request.guidanceScale,
+          numInferenceSteps: request.numInferenceSteps
+        })
+        input = result.input
+        calculatedDuration = result.calculatedDuration
+      } else {
+        // Fallback: existing hardcoded logic
+        const imageBuffer = request.imageBuffer || await fs.readFile(request.imagePath!)
+        const durationSeconds = request.duration ?? 5
+        const numFrames = durationToNumFrames(durationSeconds)
+        calculatedDuration = numFrames / FPS
+        input = {
+          image: imageBuffer,
+          prompt: request.prompt || 'Natural, smooth camera movement. Cinematic lighting.',
+          num_frames: numFrames,
+          resolution: '480p' as const,
+          frames_per_second: 16,
+          go_fast: true,
+          sample_shift: 12,
+          disable_safety_checker: false
+        }
       }
 
-      console.log(`[ReplicateMotion] Using model: ${this.model}, num_frames: ${numFrames} (~${(numFrames / FPS).toFixed(1)}s)`)
+      console.log(`[ReplicateMotion] Using model: ${this.model}, duration: ~${calculatedDuration.toFixed(1)}s`)
 
       let predictTime: number | undefined
       const output = await this.client.run(this.model as any, { input }, (prediction: any) => {
@@ -77,17 +99,26 @@ export class ReplicateMotionProvider implements IMotionProvider {
 
       const motion: GeneratedMotion = {
         videoBuffer,
-        duration: numFrames / FPS,
+        duration: calculatedDuration,
         format: 'mp4'
       }
 
       console.log(`[ReplicateMotion] predict_time: ${predictTime?.toFixed(2) ?? 'N/A'}s`)
 
+      const outputCost = calculateReplicateOutputCost(this.model, 1)
+      const cost = outputCost != null ? outputCost : (predictTime != null ? calculateReplicateTimeCost(this.model, predictTime) : 0)
+
       return {
         video: motion,
         provider: 'REPLICATE',
         model: this.model,
-        predictTime
+        predictTime,
+        costInfo: {
+          cost,
+          provider: 'REPLICATE',
+          model: this.model,
+          metadata: { predict_time: predictTime }
+        }
       }
 
     } catch (error: any) {

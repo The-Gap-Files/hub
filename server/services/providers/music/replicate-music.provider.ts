@@ -2,8 +2,14 @@ import Replicate from 'replicate'
 import type {
   IMusicProvider,
   MusicGenerationRequest,
-  MusicGenerationResponse
+  MusicGenerationResponse,
+  ProviderCostInfo
 } from '../../../types/ai-providers'
+import {
+  calculateReplicateOutputCost,
+  calculateReplicateTimeCost
+} from '../../../constants/pricing'
+import { buildMusicInput, type MusicInputContext } from '../../../utils/input-schema-builder'
 
 /**
  * Replicate Music Provider
@@ -16,13 +22,15 @@ import type {
 export class ReplicateMusicProvider implements IMusicProvider {
   private client: Replicate
   private model: string
+  private inputSchema: any = null
 
-  constructor(config: { apiKey: string; model?: string }) {
+  constructor(config: { apiKey: string; model?: string; inputSchema?: any }) {
     if (!config.apiKey) {
       throw new Error('Replicate API key is required for Music Provider')
     }
     this.client = new Replicate({ auth: config.apiKey })
     this.model = config.model || 'stability-ai/stable-audio-2.5'
+    this.inputSchema = config.inputSchema ?? null
   }
 
   getName(): string {
@@ -38,20 +46,23 @@ export class ReplicateMusicProvider implements IMusicProvider {
       console.log(`[ReplicateMusic] Prompt: "${request.prompt}"`)
       console.log(`[ReplicateMusic] Duração: ${duration}s`)
 
-      const input: Record<string, unknown> = {
-        prompt: request.prompt,
-        duration
-      }
+      let input: Record<string, unknown>
 
-      // Parâmetros opcionais
-      if (request.seed !== undefined) {
-        input.seed = request.seed
-      }
-      if (request.steps !== undefined) {
-        input.steps = Math.min(8, Math.max(4, request.steps))
-      }
-      if (request.cfgScale !== undefined) {
-        input.cfg_scale = Math.min(25, Math.max(1, request.cfgScale))
+      if (this.inputSchema) {
+        // Dynamic: build from schema
+        input = buildMusicInput(this.inputSchema, {
+          prompt: request.prompt,
+          duration,
+          seed: request.seed,
+          steps: request.steps,
+          cfgScale: request.cfgScale
+        })
+      } else {
+        // Fallback: existing hardcoded logic
+        input = { prompt: request.prompt, duration }
+        if (request.seed !== undefined) input.seed = request.seed
+        if (request.steps !== undefined) input.steps = Math.min(8, Math.max(4, request.steps))
+        if (request.cfgScale !== undefined) input.cfg_scale = Math.min(25, Math.max(1, request.cfgScale))
       }
 
       const startTime = Date.now()
@@ -97,13 +108,22 @@ export class ReplicateMusicProvider implements IMusicProvider {
 
       console.log(`[ReplicateMusic] ✅ Música gerada com sucesso! Tamanho: ${(audioBuffer.length / 1024).toFixed(0)}KB`)
 
+      const outputCost = calculateReplicateOutputCost(this.model, 1)
+      const cost = outputCost != null ? outputCost : (predictTime != null ? calculateReplicateTimeCost(this.model, predictTime) : 0)
+
       return {
         audioBuffer,
         duration,
         format: 'mp3',
         provider: this.getName(),
         model: this.model,
-        predictTime
+        predictTime,
+        costInfo: {
+          cost,
+          provider: 'REPLICATE',
+          model: this.model,
+          metadata: { audio_duration: duration, predict_time: predictTime }
+        }
       }
     } catch (error) {
       console.error('[ReplicateMusic] ❌ Erro na geração de música:', error)

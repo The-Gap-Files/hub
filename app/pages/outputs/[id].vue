@@ -351,6 +351,34 @@
                 </div>
               </div>
             </div>
+
+            <!-- Exportar Legendas (SRT/VTT) -->
+            <div class="border-t border-white/5 pt-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h4 class="text-xs font-bold text-cyan-300 flex items-center gap-2">
+                    <Subtitles :size="14" /> Exportar Legendas
+                  </h4>
+                  <p class="text-xs text-zinc-500 mt-1">Arquivo de legenda com timestamps do ElevenLabs para upload no YouTube, Vimeo, etc.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <a
+                    :href="`/api/outputs/${outputId}/export-subtitles?format=srt`"
+                    download
+                    class="btn-secondary flex items-center gap-1.5 text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/10 text-xs cursor-pointer px-3 py-1.5"
+                  >
+                    <Download :size="12" /> .SRT
+                  </a>
+                  <a
+                    :href="`/api/outputs/${outputId}/export-subtitles?format=vtt`"
+                    download
+                    class="btn-secondary flex items-center gap-1.5 text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/10 text-xs cursor-pointer px-3 py-1.5"
+                  >
+                    <Download :size="12" /> .VTT
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -550,54 +578,105 @@
                       {{ regeneratingSceneId === scene.id ? 'GERANDO NOVA IMAGEM...' : 'REGENERAR IMAGEM' }}
                     </button>
                   </div>
-                  <!-- Cena RESTRITA pelo filtro de conteúdo -->
-                  <div v-else-if="scene.imageStatus === 'restricted'" class="space-y-3">
-                    <div class="aspect-video bg-red-500/5 rounded-xl flex flex-col items-center justify-center border border-dashed border-red-500/30 text-center p-6 gap-3">
-                      <ShieldAlert :size="32" class="text-red-400/60" />
-                      <p class="text-sm font-bold text-red-300">Imagem bloqueada pelo filtro de conteúdo</p>
-                      <p class="text-xs text-red-300/50 max-w-sm">
-                        O modelo rejeitou o prompt visual por conter termos sensíveis. 
-                        Você pode tentar novamente com o mesmo prompt ou editá-lo abaixo.
-                      </p>
-                    </div>
+                   <!-- Cena RESTRITA pelo filtro de conteúdo -->
+                   <div v-else-if="scene.imageStatus === 'restricted'" class="space-y-3">
+                     <div class="aspect-video bg-red-500/5 rounded-xl flex flex-col items-center justify-center border border-dashed border-red-500/30 text-center p-6 gap-3">
+                       <ShieldAlert :size="32" class="text-red-400/60" />
+                       <p class="text-sm font-bold text-red-300">Imagem bloqueada pelo filtro de conteúdo</p>
+                       <p class="text-xs text-red-300/50 max-w-sm">
+                         O modelo rejeitou o prompt visual por conter termos sensíveis.
+                         Use a IA para reescrever o prompt em um nível mais seguro.
+                       </p>
+                     </div>
 
-                    <!-- Prompt original que foi bloqueado -->
-                    <div class="bg-red-500/5 p-3 rounded-lg border border-red-500/10">
-                      <div class="flex items-center justify-between mb-1.5">
-                        <h4 class="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-red-400/60">
-                          <AlertTriangle :size="10" /> Prompt Bloqueado
-                        </h4>
-                      </div>
-                      <textarea
-                        v-model="restrictedPromptEdits[scene.id]"
-                        class="w-full bg-black/40 border border-red-500/20 rounded-lg p-2.5 text-xs text-white/80 leading-relaxed focus:border-red-500/50 focus:outline-none resize-y min-h-[60px]"
-                        rows="3"
-                        :placeholder="scene.visualDescription"
-                      ></textarea>
-                    </div>
+                     <!-- Seletor de Nível de Segurança (IA) -->
+                     <div class="bg-white/[0.02] p-3 rounded-lg border border-white/5">
+                       <h4 class="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-white/40 mb-2.5">
+                         <Sparkles :size="10" /> Reescrever com IA
+                       </h4>
+                       <div class="grid grid-cols-3 gap-2">
+                         <button
+                           @click.stop="sanitizeRestrictedPrompt(scene, 'intense')"
+                           :disabled="sanitizingSceneId === scene.id"
+                           class="group px-3 py-2.5 bg-red-500/8 border border-red-500/20 text-red-300/80 hover:bg-red-500/15 hover:text-red-200 hover:border-red-500/40 rounded-lg transition-all flex flex-col items-center gap-1 text-center disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                         >
+                           <span class="text-base">🔴</span>
+                           <span class="text-[10px] font-bold uppercase tracking-wider">Intenso</span>
+                           <span class="text-[9px] text-white/25 leading-tight">Original</span>
+                         </button>
+                         <button
+                           @click.stop="sanitizeRestrictedPrompt(scene, 'moderate')"
+                           :disabled="sanitizingSceneId === scene.id"
+                           class="group px-3 py-2.5 bg-amber-500/8 border border-amber-500/20 text-amber-300/80 hover:bg-amber-500/15 hover:text-amber-200 hover:border-amber-500/40 rounded-lg transition-all flex flex-col items-center gap-1 text-center disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                         >
+                           <span v-if="sanitizingSceneId === scene.id && sanitizingLevel === 'moderate'" class="animate-spin w-4 h-4 border-2 border-amber-300/30 border-t-amber-300 rounded-full"></span>
+                           <span v-else class="text-base">🟡</span>
+                           <span class="text-[10px] font-bold uppercase tracking-wider">Moderado</span>
+                           <span class="text-[9px] text-white/25 leading-tight">Sem gore/violência</span>
+                         </button>
+                         <button
+                           @click.stop="sanitizeRestrictedPrompt(scene, 'safe')"
+                           :disabled="sanitizingSceneId === scene.id"
+                           class="group px-3 py-2.5 bg-emerald-500/8 border border-emerald-500/20 text-emerald-300/80 hover:bg-emerald-500/15 hover:text-emerald-200 hover:border-emerald-500/40 rounded-lg transition-all flex flex-col items-center gap-1 text-center disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                         >
+                           <span v-if="sanitizingSceneId === scene.id && sanitizingLevel === 'safe'" class="animate-spin w-4 h-4 border-2 border-emerald-300/30 border-t-emerald-300 rounded-full"></span>
+                           <span v-else class="text-base">🟢</span>
+                           <span class="text-[10px] font-bold uppercase tracking-wider">Seguro</span>
+                           <span class="text-[9px] text-white/25 leading-tight">Abstrato/atmosférico</span>
+                         </button>
+                       </div>
+                     </div>
 
-                    <!-- Botões de retry -->
-                    <div class="flex gap-2">
-                      <button
-                        @click.stop="retryRestrictedImage(scene, 'same')"
-                        :disabled="!!regeneratingSceneId"
-                        class="flex-1 px-4 py-3 bg-red-500/10 border border-red-500/30 text-red-300 hover:bg-red-500/20 hover:text-red-200 rounded-xl transition-all flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
-                      >
-                        <span v-if="regeneratingSceneId === scene.id" class="animate-spin w-4 h-4 border-2 border-red-300/30 border-t-red-300 rounded-full"></span>
-                        <RotateCw v-else :size="14" />
-                        {{ regeneratingSceneId === scene.id ? 'TENTANDO...' : 'TENTAR NOVAMENTE' }}
-                      </button>
-                      <button
-                        v-if="restrictedPromptEdits[scene.id] && restrictedPromptEdits[scene.id] !== scene.visualDescription"
-                        @click.stop="retryRestrictedImage(scene, 'edited')"
-                        :disabled="!!regeneratingSceneId"
-                        class="flex-1 px-4 py-3 bg-purple-500/10 border border-purple-500/30 text-purple-300 hover:bg-purple-500/20 hover:text-purple-200 rounded-xl transition-all flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
-                      >
-                        <Edit :size="14" />
-                        ENVIAR EDITADO
-                      </button>
-                    </div>
-                  </div>
+                     <!-- Prompt editável (original ou reescrito pela IA) -->
+                     <div class="bg-red-500/5 p-3 rounded-lg border border-red-500/10">
+                       <div class="flex items-center justify-between mb-1.5">
+                         <h4 class="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-red-400/60">
+                           <AlertTriangle :size="10" /> 
+                           {{ restrictedPromptEdits[scene.id] && restrictedPromptEdits[scene.id] !== scene.visualDescription ? 'Prompt Reescrito' : 'Prompt Bloqueado' }}
+                         </h4>
+                         <span 
+                           v-if="restrictedPromptEdits[scene.id] && restrictedPromptEdits[scene.id] !== scene.visualDescription"
+                           class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
+                           :class="{
+                             'bg-amber-500/15 text-amber-300/70': lastSanitizeLevel[scene.id] === 'moderate',
+                             'bg-emerald-500/15 text-emerald-300/70': lastSanitizeLevel[scene.id] === 'safe',
+                             'bg-purple-500/15 text-purple-300/70': !lastSanitizeLevel[scene.id]
+                           }"
+                         >
+                           {{ lastSanitizeLevel[scene.id] === 'moderate' ? '🟡 Moderado' : lastSanitizeLevel[scene.id] === 'safe' ? '🟢 Seguro' : '✏️ Editado' }}
+                         </span>
+                       </div>
+                       <textarea
+                         v-model="restrictedPromptEdits[scene.id]"
+                         class="w-full bg-black/40 border border-red-500/20 rounded-lg p-2.5 text-xs text-white/80 leading-relaxed focus:border-red-500/50 focus:outline-none resize-y min-h-[60px]"
+                         rows="3"
+                         :placeholder="scene.visualDescription"
+                       ></textarea>
+                     </div>
+
+                     <!-- Botões de retry -->
+                     <div class="flex gap-2">
+                       <button
+                         @click.stop="retryRestrictedImage(scene, 'same')"
+                         :disabled="!!regeneratingSceneId"
+                         class="flex-1 px-4 py-3 bg-red-500/10 border border-red-500/30 text-red-300 hover:bg-red-500/20 hover:text-red-200 rounded-xl transition-all flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                       >
+                         <span v-if="regeneratingSceneId === scene.id && !restrictedPromptEdits[scene.id]" class="animate-spin w-4 h-4 border-2 border-red-300/30 border-t-red-300 rounded-full"></span>
+                         <RotateCw v-else :size="14" />
+                         TENTAR ORIGINAL
+                       </button>
+                       <button
+                         v-if="restrictedPromptEdits[scene.id] && restrictedPromptEdits[scene.id] !== scene.visualDescription"
+                         @click.stop="retryRestrictedImage(scene, 'edited')"
+                         :disabled="!!regeneratingSceneId"
+                         class="flex-1 px-4 py-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20 hover:text-emerald-200 rounded-xl transition-all flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                       >
+                         <span v-if="regeneratingSceneId === scene.id && restrictedPromptEdits[scene.id]" class="animate-spin w-4 h-4 border-2 border-emerald-300/30 border-t-emerald-300 rounded-full"></span>
+                         <Sparkles v-else :size="14" />
+                         {{ regeneratingSceneId === scene.id ? 'GERANDO...' : 'GERAR COM PROMPT EDITADO' }}
+                       </button>
+                     </div>
+                   </div>
                   <!-- Sem imagem (genérico) -->
                   <div v-else class="aspect-video bg-white/5 rounded-xl flex items-center justify-center border border-dashed border-white/10 text-zinc-600 text-sm">
                     Sem imagem
@@ -746,9 +825,15 @@
         </div>
 
         <!-- Pipeline Progress (8 Stages): Plano narrativo → Roteiro → Visual → ... -->
+        <!-- Steps aprovados são clicáveis: ao clicar, volta para aquela etapa (desaprova ela e as seguintes) -->
         <div class="mb-12 grid grid-cols-8 gap-3 p-1 bg-white/5 rounded-2xl border border-white/5">
-           <div class="pipeline-step" :class="getStepClass(output.storyOutlineApproved, true)">
-             <Map :size="16" />
+           <div class="pipeline-step" 
+             :class="getStepClass(output.storyOutlineApproved, true)"
+             @click="output.storyOutlineApproved ? revertToStage('STORY_OUTLINE') : null"
+             :title="output.storyOutlineApproved ? 'Clique para voltar a esta etapa' : ''"
+           >
+             <Map :size="16" class="step-icon" />
+             <Undo2 v-if="output.storyOutlineApproved" :size="16" class="step-undo-icon" />
              <span class="text-xs font-black tracking-widest">Plano</span>
              <span v-if="getStepCost('outline') > 0" class="text-xs font-mono text-amber-400/70">
                {{ formatCost(getStepCost('outline')) }}
@@ -757,8 +842,13 @@
              <div v-if="output.storyOutlineApproved" class="absolute top-2 right-2 text-emerald-400"><CheckCircle2 :size="12"/></div>
            </div>
 
-           <div class="pipeline-step" :class="getStepClass(output.scriptApproved, output.storyOutlineApproved)">
-             <ScrollText :size="16" />
+           <div class="pipeline-step" 
+             :class="getStepClass(output.scriptApproved, output.storyOutlineApproved)"
+             @click="output.scriptApproved ? revertToStage('SCRIPT') : null"
+             :title="output.scriptApproved ? 'Clique para voltar a esta etapa' : ''"
+           >
+             <ScrollText :size="16" class="step-icon" />
+             <Undo2 v-if="output.scriptApproved" :size="16" class="step-undo-icon" />
              <span class="text-xs font-black tracking-widest">Roteiro</span>
              <span v-if="getStepCost('script') > 0" class="text-xs font-mono text-amber-400/70">
                {{ formatCost(getStepCost('script')) }}
@@ -767,29 +857,49 @@
              <div v-if="output.scriptApproved" class="absolute top-2 right-2 text-emerald-400"><CheckCircle2 :size="12"/></div>
            </div>
            
-           <div class="pipeline-step" :class="getStepClass(output.imagesApproved, output.scriptApproved)">
-             <ImageIcon :size="16" />
+           <div class="pipeline-step" 
+             :class="getStepClass(output.imagesApproved, output.scriptApproved)"
+             @click="output.imagesApproved ? revertToStage('IMAGES') : null"
+             :title="output.imagesApproved ? 'Clique para voltar a esta etapa' : ''"
+           >
+             <ImageIcon :size="16" class="step-icon" />
+             <Undo2 v-if="output.imagesApproved" :size="16" class="step-undo-icon" />
              <span class="text-xs font-black tracking-widest">Visual</span>
              <span v-if="getStepCost('image') > 0" class="text-xs font-mono text-amber-400/70">{{ formatCost(getStepCost('image')) }}</span>
              <div v-if="output.imagesApproved" class="absolute top-2 right-2 text-emerald-400"><CheckCircle2 :size="12"/></div>
            </div>
 
-           <div class="pipeline-step" :class="getStepClass(output.audioApproved, output.imagesApproved)">
-             <Mic :size="16" />
+           <div class="pipeline-step" 
+             :class="getStepClass(output.audioApproved, output.imagesApproved)"
+             @click="output.audioApproved ? revertToStage('AUDIO') : null"
+             :title="output.audioApproved ? 'Clique para voltar a esta etapa' : ''"
+           >
+             <Mic :size="16" class="step-icon" />
+             <Undo2 v-if="output.audioApproved" :size="16" class="step-undo-icon" />
              <span class="text-xs font-black tracking-widest">Narração</span>
              <span v-if="getStepCost('narration') > 0" class="text-xs font-mono text-amber-400/70">{{ formatCost(getStepCost('narration')) }}</span>
              <div v-if="output.audioApproved" class="absolute top-2 right-2 text-emerald-400"><CheckCircle2 :size="12"/></div>
            </div>
 
-           <div class="pipeline-step" :class="getStepClass(output.bgmApproved, output.audioApproved)">
-             <Radio :size="16" />
+           <div class="pipeline-step" 
+             :class="getStepClass(output.bgmApproved, output.audioApproved)"
+             @click="output.bgmApproved ? revertToStage('BGM') : null"
+             :title="output.bgmApproved ? 'Clique para voltar a esta etapa' : ''"
+           >
+             <Radio :size="16" class="step-icon" />
+             <Undo2 v-if="output.bgmApproved" :size="16" class="step-undo-icon" />
              <span class="text-xs font-black tracking-widest">Música</span>
              <span v-if="getStepCost('bgm') > 0" class="text-xs font-mono text-amber-400/70">{{ formatCost(getStepCost('bgm')) }}</span>
              <div v-if="output.bgmApproved" class="absolute top-2 right-2 text-emerald-400"><CheckCircle2 :size="12"/></div>
            </div>
 
-           <div class="pipeline-step" :class="getStepClass(output.videosApproved, output.bgmApproved)">
-             <Clapperboard :size="16" />
+           <div class="pipeline-step" 
+             :class="getStepClass(output.videosApproved, output.bgmApproved)"
+             @click="output.videosApproved ? revertToStage('MOTION') : null"
+             :title="output.videosApproved ? 'Clique para voltar a esta etapa' : ''"
+           >
+             <Clapperboard :size="16" class="step-icon" />
+             <Undo2 v-if="output.videosApproved" :size="16" class="step-undo-icon" />
              <span class="text-xs font-black tracking-widest">Motion</span>
              <span v-if="getStepCost('motion') > 0" class="text-xs font-mono text-amber-400/70">{{ formatCost(getStepCost('motion')) }}</span>
              <div v-if="output.videosApproved" class="absolute top-2 right-2 text-emerald-400"><CheckCircle2 :size="12"/></div>
@@ -1520,9 +1630,15 @@
                        </span>
                        <RotateCw v-else :size="14" />
                      </button>
-                     <button class="text-zinc-600 hover:text-white transition-colors p-1 rounded hover:bg-white/10">
-                       <Edit :size="14" />
-                     </button>
+                      <button 
+                        @click="editingPromptSceneId === scene.id ? cancelEditPrompt(scene) : startEditPrompt(scene)"
+                        class="text-zinc-600 hover:text-white transition-colors p-1 rounded hover:bg-white/10"
+                        :class="{ 'text-primary bg-primary/10': editingPromptSceneId === scene.id }"
+                        title="Editar Visual Prompt"
+                      >
+                        <X v-if="editingPromptSceneId === scene.id" :size="14" />
+                        <Edit v-else :size="14" />
+                      </button>
                    </div>
                  </div>
 
@@ -1555,14 +1671,82 @@
                    
                    <!-- Visual -->
                    <div class="space-y-4">
-                      <div class="bg-primary/5 p-4 rounded-xl border border-primary/10">
-                        <h4 class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-blue-400/70 mb-2">
-                          <Eye :size="10" /> Visual Prompt
-                        </h4>
-                        <p class="text-sm text-white/80 leading-relaxed font-light">
-                          {{ scene.visualDescription }}
-                        </p>
-                      </div>
+                       <div class="bg-primary/5 p-4 rounded-xl border border-primary/10" :class="{ 'border-primary/30': editingPromptSceneId === scene.id }">
+                         <h4 class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-blue-400/70 mb-2">
+                           <Eye :size="10" /> Visual Prompt
+                           <span v-if="scene.imageStatus === 'restricted'" class="px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-red-500/20 text-red-400">Restrita</span>
+                         </h4>
+
+                         <!-- Modo visualização -->
+                         <p v-if="editingPromptSceneId !== scene.id" class="text-sm text-white/80 leading-relaxed font-light">
+                           {{ scene.visualDescription }}
+                         </p>
+
+                         <!-- Modo edição -->
+                         <div v-else class="space-y-3">
+                           <!-- Seletor IA de nível (para cenas restritas) -->
+                           <div v-if="scene.imageStatus === 'restricted'" class="bg-white/[0.02] p-3 rounded-lg border border-white/5">
+                             <h5 class="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-white/40 mb-2">
+                               <Sparkles :size="9" /> Reescrever com IA
+                             </h5>
+                             <div class="grid grid-cols-3 gap-1.5">
+                               <button
+                                 @click.stop="sanitizeAndFillEdit(scene, 'intense')"
+                                 :disabled="sanitizingSceneId === scene.id"
+                                 class="px-2 py-2 bg-red-500/8 border border-red-500/20 text-red-300/80 hover:bg-red-500/15 hover:border-red-500/40 rounded-lg transition-all flex flex-col items-center gap-0.5 text-center disabled:opacity-50 cursor-pointer"
+                               >
+                                 <span class="text-sm">🔴</span>
+                                 <span class="text-[9px] font-bold uppercase tracking-wider">Intenso</span>
+                               </button>
+                               <button
+                                 @click.stop="sanitizeAndFillEdit(scene, 'moderate')"
+                                 :disabled="sanitizingSceneId === scene.id"
+                                 class="px-2 py-2 bg-amber-500/8 border border-amber-500/20 text-amber-300/80 hover:bg-amber-500/15 hover:border-amber-500/40 rounded-lg transition-all flex flex-col items-center gap-0.5 text-center disabled:opacity-50 cursor-pointer"
+                               >
+                                 <span v-if="sanitizingSceneId === scene.id && sanitizingLevel === 'moderate'" class="animate-spin w-3.5 h-3.5 border-2 border-amber-300/30 border-t-amber-300 rounded-full"></span>
+                                 <span v-else class="text-sm">🟡</span>
+                                 <span class="text-[9px] font-bold uppercase tracking-wider">Moderado</span>
+                               </button>
+                               <button
+                                 @click.stop="sanitizeAndFillEdit(scene, 'safe')"
+                                 :disabled="sanitizingSceneId === scene.id"
+                                 class="px-2 py-2 bg-emerald-500/8 border border-emerald-500/20 text-emerald-300/80 hover:bg-emerald-500/15 hover:border-emerald-500/40 rounded-lg transition-all flex flex-col items-center gap-0.5 text-center disabled:opacity-50 cursor-pointer"
+                               >
+                                 <span v-if="sanitizingSceneId === scene.id && sanitizingLevel === 'safe'" class="animate-spin w-3.5 h-3.5 border-2 border-emerald-300/30 border-t-emerald-300 rounded-full"></span>
+                                 <span v-else class="text-sm">🟢</span>
+                                 <span class="text-[9px] font-bold uppercase tracking-wider">Seguro</span>
+                               </button>
+                             </div>
+                           </div>
+
+                           <!-- Textarea de edição -->
+                           <textarea
+                             v-model="editingPromptText"
+                             class="w-full bg-black/40 border border-primary/20 rounded-lg p-3 text-sm text-white/90 leading-relaxed focus:border-primary/50 focus:outline-none resize-y min-h-[80px]"
+                             rows="4"
+                           ></textarea>
+
+                           <!-- Botões Salvar / Cancelar / Regenerar -->
+                           <div class="flex gap-2">
+                             <button
+                               @click="saveEditPrompt(scene)"
+                               class="flex-1 px-3 py-2 bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 rounded-lg transition-all flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider cursor-pointer"
+                             >
+                               <Check :size="12" /> Salvar
+                             </button>
+                             <button
+                               v-if="editingPromptText !== scene.visualDescription"
+                               @click="saveAndRegenerateImage(scene)"
+                               :disabled="!!regeneratingSceneId"
+                               class="flex-1 px-3 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20 rounded-lg transition-all flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider disabled:opacity-50 cursor-pointer"
+                             >
+                               <span v-if="regeneratingSceneId === scene.id" class="animate-spin w-3 h-3 border-2 border-emerald-300/30 border-t-emerald-300 rounded-full"></span>
+                               <Sparkles v-else :size="12" />
+                               Salvar & Gerar
+                             </button>
+                           </div>
+                         </div>
+                       </div>
 
                       <div v-if="scene.audioDescription" class="bg-purple-500/5 p-3 rounded-xl border border-purple-500/10">
                         <h4 class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-purple-400/70 mb-2">
@@ -1951,7 +2135,8 @@
 import { 
   ArrowLeft, Download, RotateCw, ScrollText, ImageIcon, Mic, Film, CheckCircle2, 
   AlertTriangle, Edit, Eye, Music, X, Zap, Clapperboard, Subtitles, Radio, DollarSign, RefreshCw, Wrench,
-  Map, ChevronUp, ChevronDown, Target, TrendingUp, Star, Heart, Volume2, BarChart3, ShieldAlert
+  Map, ChevronUp, ChevronDown, Target, TrendingUp, Star, Heart, Volume2, BarChart3, ShieldAlert,
+  Undo2
 } from 'lucide-vue-next'
 import VoiceSelector from '~/components/dossier/VoiceSelector.vue'
 
@@ -2038,6 +2223,74 @@ async function saveEditPrompt(scene: any) {
   }
   editingPromptSceneId.value = null
   editingPromptText.value = ''
+}
+
+async function sanitizeAndFillEdit(scene: any, level: 'intense' | 'moderate' | 'safe') {
+  if (sanitizingSceneId.value) return
+
+  // Se 'intense', restaura o prompt original
+  if (level === 'intense') {
+    editingPromptText.value = scene.visualDescription
+    return
+  }
+
+  sanitizingSceneId.value = scene.id
+  sanitizingLevel.value = level
+
+  try {
+    const result = await $fetch(`/api/scenes/${scene.id}/sanitize-prompt`, {
+      method: 'POST',
+      body: { level }
+    }) as any
+
+    editingPromptText.value = result.sanitizedPrompt
+  } catch (error: any) {
+    console.error('Erro ao sanitizar prompt:', error)
+    alert('Erro ao reescrever o prompt. Tente novamente.')
+  } finally {
+    sanitizingSceneId.value = null
+    sanitizingLevel.value = null
+  }
+}
+
+async function saveAndRegenerateImage(scene: any) {
+  if (regeneratingSceneId.value) return
+  if (!editingPromptText.value.trim()) return
+
+  regeneratingSceneId.value = scene.id
+
+  try {
+    // 1. Salvar o prompt editado
+    const newPrompt = editingPromptText.value.trim()
+    await $fetch(`/api/scenes/${scene.id}/update`, {
+      method: 'PATCH',
+      body: { visualDescription: newPrompt }
+    })
+    scene.visualDescription = newPrompt
+
+    // 2. Regenerar a imagem com o novo prompt
+    await $fetch(`/api/scenes/${scene.id}/regenerate-image`, {
+      method: 'POST',
+      body: { prompt: newPrompt }
+    })
+
+    // Sucesso — fechar editor e recarregar
+    editingPromptSceneId.value = null
+    editingPromptText.value = ''
+    correctedScenes.value = new Set([...correctedScenes.value, scene.id])
+    await loadOutput()
+    imageVersions.value = { ...imageVersions.value, [scene.id]: Date.now() }
+
+  } catch (error: any) {
+    console.error('Erro ao salvar e regenerar:', error)
+    if (error?.data?.data?.code === 'CONTENT_RESTRICTED') {
+      alert('O prompt ainda foi rejeitado pelo filtro de conteúdo. Tente um nível mais seguro (🟡 Moderado ou 🟢 Seguro).')
+    } else {
+      handleApiError(error, 'Erro ao salvar e regenerar imagem.')
+    }
+  } finally {
+    regeneratingSceneId.value = null
+  }
 }
 
 const pendingMotionScenes = computed(() => {
@@ -2373,6 +2626,40 @@ async function loadOutput() {
 
 const regeneratingSceneId = ref<string | null>(null)
 const restrictedPromptEdits = ref<Record<string, string>>({})
+const sanitizingSceneId = ref<string | null>(null)
+const sanitizingLevel = ref<string | null>(null)
+const lastSanitizeLevel = ref<Record<string, string>>({})
+
+async function sanitizeRestrictedPrompt(scene: any, level: 'intense' | 'moderate' | 'safe') {
+  if (sanitizingSceneId.value) return
+
+  // Se 'intense', coloca o prompt original de volta na textarea
+  if (level === 'intense') {
+    restrictedPromptEdits.value = { ...restrictedPromptEdits.value, [scene.id]: scene.visualDescription }
+    delete lastSanitizeLevel.value[scene.id]
+    return
+  }
+
+  sanitizingSceneId.value = scene.id
+  sanitizingLevel.value = level
+
+  try {
+    const result = await $fetch(`/api/scenes/${scene.id}/sanitize-prompt`, {
+      method: 'POST',
+      body: { level }
+    }) as any
+
+    // Preencher a textarea com o prompt sanitizado
+    restrictedPromptEdits.value = { ...restrictedPromptEdits.value, [scene.id]: result.sanitizedPrompt }
+    lastSanitizeLevel.value = { ...lastSanitizeLevel.value, [scene.id]: level }
+  } catch (error: any) {
+    console.error('Erro ao sanitizar prompt:', error)
+    alert('Erro ao reescrever o prompt. Tente novamente.')
+  } finally {
+    sanitizingSceneId.value = null
+    sanitizingLevel.value = null
+  }
+}
 
 async function retryRestrictedImage(scene: any, mode: 'same' | 'edited') {
   if (regeneratingSceneId.value) return
@@ -2509,48 +2796,65 @@ async function renderAgain() {
   await openRenderOptionsModal('again')
 }
 
-async function revertToScriptStep() {
-  if (!confirm('Tem certeza? Isso permitirá editar o roteiro novamente. As imagens geradas serão mantidas, mas novas alterações no roteiro podem exigir novas imagens.')) return
+// ═══════════════════════════════════════════════════════════
+// REVERT TO STAGE — volta para uma etapa anterior
+// Desaprova a etapa selecionada e todas as subsequentes.
+// Os assets já gerados são mantidos; apenas as flags de aprovação são resetadas.
+// ═══════════════════════════════════════════════════════════
+const reverting = ref(false)
+
+/** Mapeamento ordenado: stage → campo de aprovação no output */
+const STAGE_ORDER: Array<{ stage: string; field: string; label: string }> = [
+  { stage: 'STORY_OUTLINE', field: 'storyOutlineApproved', label: 'Plano' },
+  { stage: 'SCRIPT', field: 'scriptApproved', label: 'Roteiro' },
+  { stage: 'IMAGES', field: 'imagesApproved', label: 'Visual' },
+  { stage: 'AUDIO', field: 'audioApproved', label: 'Narração' },
+  { stage: 'BGM', field: 'bgmApproved', label: 'Música' },
+  { stage: 'MOTION', field: 'videosApproved', label: 'Motion' },
+]
+
+async function revertToStage(targetStage: string) {
+  if (reverting.value || approving.value) return
+
+  const targetIdx = STAGE_ORDER.findIndex(s => s.stage === targetStage)
+  if (targetIdx < 0) return
+
+  const stageInfo = STAGE_ORDER[targetIdx]
+  if (!stageInfo) return
+  const targetLabel = stageInfo.label
+  
+  // Identificar quais etapas serão desaprovadas (a etapa clicada + todas as posteriores que estão aprovadas)
+  const stagesToRevert = STAGE_ORDER.slice(targetIdx).filter(s => {
+    return output.value?.[s.field] === true
+  })
+
+  if (stagesToRevert.length === 0) return
+
+  const stageNames = stagesToRevert.map(s => s.label).join(', ')
+  if (!confirm(`Voltar para a etapa "${targetLabel}"?\n\nAs seguintes aprovações serão removidas: ${stageNames}.\nOs assets já gerados serão mantidos.`)) return
+
+  reverting.value = true
 
   try {
-    await $fetch(`/api/outputs/${outputId}`, {
-      method: 'PATCH',
-      body: {
-        scriptApproved: false,
-        imagesApproved: false, // Resetar aprovação de imagens também
-        status: 'PENDING_REVIEW' // Novo status customizado ou mapeado no back
-      }
-    })
-    
-    // Atualizar estado local
-    output.value.scriptApproved = false
-    output.value.imagesApproved = false
-    // loadOutput() // Reload full
-    window.location.reload() // Full refresh mais seguro para resetar estado
-  } catch (e) {
-    alert('Erro ao reverter etapa')
-  }
-}
+    // Desaprovar cada stage sequencialmente (da última para a primeira para consistência)
+    for (const stageInfo of [...stagesToRevert].reverse()) {
+      await $fetch(`/api/outputs/${outputId}/approve-stage`, {
+        method: 'PATCH',
+        body: { stage: stageInfo.stage, approved: false }
+      })
+      // Atualizar estado local imediatamente
+      output.value[stageInfo.field] = false
+    }
 
-async function revertToImagesStep() {
-  if (!confirm('Voltar para revisão de imagens? Isso cancelará a aprovação atual das imagens.')) return
-
-  try {
-    await $fetch(`/api/outputs/${outputId}`, {
-      method: 'PATCH',
-      body: {
-        imagesApproved: false,
-        videosApproved: false,
-        status: 'PROCESSING'
-      }
-    })
-    
-    // Atualizar estado local
-    output.value.imagesApproved = false
-    output.value.videosApproved = false
-    window.location.reload()
-  } catch (e) {
-    alert('Erro ao reverter etapa')
+    // Recarregar dados completos do banco
+    await loadOutput()
+  } catch (error: any) {
+    console.error('Erro ao reverter etapa:', error)
+    alert(error?.data?.message || 'Erro ao voltar para a etapa selecionada.')
+    // Recarregar para garantir consistência mesmo em caso de erro parcial
+    await loadOutput()
+  } finally {
+    reverting.value = false
   }
 }
 
@@ -3016,8 +3320,28 @@ function getSelectedVideo(scene: any) {
   @apply bg-emerald-500/5 border-emerald-500/20 text-emerald-400;
 }
 
+.pipeline-step.completed:hover {
+  @apply bg-amber-500/10 border-amber-500/30 text-amber-400;
+}
+
 .pipeline-step.pending {
   @apply opacity-50;
+}
+
+/* Ícone swap: mostra o ícone do step normalmente, troca por undo no hover */
+.step-icon {
+  display: block;
+  transition: opacity 0.2s;
+}
+.step-undo-icon {
+  display: none;
+  transition: opacity 0.2s;
+}
+.pipeline-step.completed:hover .step-icon {
+  display: none;
+}
+.pipeline-step.completed:hover .step-undo-icon {
+  display: block;
 }
 
 .shadow-glow-orange {

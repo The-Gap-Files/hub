@@ -91,7 +91,7 @@ Mas documentos DESCLASSIFICADOS em 1994 revelam...
 ### 3. RISING MYSTERY (Corpo) - Revelação Progressiva com Micro-Hooks
 **Objetivo:** Cada segmento = novo layer de complexidade + deixa nova pergunta.
 
-**REVELAÇÃO PROGRESSIVA EM 4 CAMADAS (baseado em data-storytelling):**
+**REVELAÇÃO PROGRESSIVA EM 3 CAMADAS (Foco na Linha do Tempo):**
 
 ```
 CAMADA 1: O QUE aconteceu (fatos chocantes)
@@ -99,9 +99,9 @@ CAMADA 1: O QUE aconteceu (fatos chocantes)
 CAMADA 2: COMO aconteceu (mecanismo do mistério)
     ↓ [Mini-Hook: "A pergunta real é: por quê?"]
 CAMADA 3: POR QUÊ aconteceu (motivações ocultas)
-    ↓ [Mini-Hook: "E as implicações são maiores que imaginamos..."]
-CAMADA 4: O QUE SIGNIFICA (conexões com presente)
+    ↓ [Mini-Hook: "Prepare o terreno para o Clímax..."]
 ```
+🚨 **REGRA DE OURO:** Mantenha-se na linha do tempo do evento. NÃO pule para os dias atuais ou implicações futuras aqui. Guarde isso para a Resolução.
 
 **MICRO-ESTRUTURA DE CADA SEGMENTO:**
 1. **Mini-Hook:** Introduza contradição ou fato intrigante
@@ -390,6 +390,7 @@ Mas o terceiro mencionou um nome. Um nome que aparece em TODOS os casos. [Loop 2
 6. [ ] Open loops estrategicamente colocados?
 7. [ ] Pattern interrupt a cada 10-15s?
 8. [ ] Build-up progressivo até clímax?
+9. [ ] A linha do tempo é respeitada sem pular para o presente prematuramente?
 
 ### Credibilidade (crítico para mistério)
 9. [ ] Números/datas específicos (não "muitos"/"antigo")?

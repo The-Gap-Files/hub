@@ -12,11 +12,10 @@
  */
 
 import { z } from 'zod'
-import { ChatOpenAI } from '@langchain/openai'
-import { ChatAnthropic } from '@langchain/anthropic'
 import { SystemMessage, HumanMessage } from '@langchain/core/messages'
 import { loadSkill } from '../utils/skill-loader'
 import { serializeConstantsCatalog } from '../utils/constants-catalog'
+import { createLlmForTask, getAssignment } from './llm/llm-factory'
 
 // =============================================================================
 // SCHEMAS — Formato estruturado que a IA deve retornar
@@ -97,38 +96,14 @@ export interface CreativeDirectionResult {
 // =============================================================================
 
 export async function generateCreativeDirection(
-  request: CreativeDirectionRequest,
-  providerConfig: { name: string; apiKey: string; model?: string; baseUrl?: string }
+  request: CreativeDirectionRequest
 ): Promise<CreativeDirectionResult> {
   console.log('[CreativeDirection] 🎨 Iniciando análise de direção criativa...')
 
-  // Criar modelo baseado no provider configurado
-  const providerName = providerConfig.name.toLowerCase()
-  let structuredLlm: any
-
-  if (providerName === 'anthropic') {
-    const insightsModel = process.env.ANTHROPIC_MODEL_INSIGHTS || providerConfig.model || 'claude-sonnet-4-20250514'
-    const model = new ChatAnthropic({
-      anthropicApiKey: providerConfig.apiKey,
-      modelName: insightsModel,
-      temperature: 0.7,
-      maxTokens: 6144
-    })
-    structuredLlm = model.withStructuredOutput(CreativeDirectionSchema, { includeRaw: true })
-  } else {
-    // OpenAI (default)
-    const model = new ChatOpenAI({
-      openAIApiKey: providerConfig.apiKey,
-      modelName: providerConfig.model ?? 'gpt-4o-mini',
-      configuration: {
-        baseURL: providerConfig.baseUrl ?? 'https://api.openai.com/v1'
-      },
-      temperature: 0.7,
-      timeout: 120000,
-      maxRetries: 2
-    })
-    structuredLlm = model.withStructuredOutput(CreativeDirectionSchema, { includeRaw: true })
-  }
+  // Criar modelo via LLM Factory
+  const assignment = await getAssignment('creative-direction')
+  const model = await createLlmForTask('creative-direction')
+  const structuredLlm = (model as any).withStructuredOutput(CreativeDirectionSchema, { includeRaw: true })
 
   // Carregar skill + catálogo de constants
   const skillContent = loadSkill('creative-direction-advisor')
@@ -138,10 +113,7 @@ export async function generateCreativeDirection(
   const systemPrompt = buildSystemPrompt(skillContent, catalog)
   const userPrompt = buildUserPrompt(request)
 
-  const resolvedModel = providerName === 'anthropic'
-    ? (process.env.ANTHROPIC_MODEL_INSIGHTS || providerConfig.model || 'claude-sonnet-4-20250514')
-    : (providerConfig.model || 'gpt-4o-mini')
-  console.log(`[CreativeDirection] 📤 Enviando para ${providerName} (${resolvedModel})...`)
+  console.log(`[CreativeDirection] 📤 Enviando para ${assignment.provider} (${assignment.model})...`)
 
   const messages = [
     new SystemMessage(systemPrompt),
@@ -176,8 +148,8 @@ export async function generateCreativeDirection(
   return {
     direction: content,
     usage: { inputTokens, outputTokens, totalTokens },
-    provider: providerName.toUpperCase(),
-    model: resolvedModel
+    provider: assignment.provider.toUpperCase(),
+    model: assignment.model
   }
 }
 

@@ -16,6 +16,7 @@ import type {
   VoiceListOptions,
   VoiceListResponse
 } from '../../../types/ai-providers'
+import { calculateElevenLabsCost } from '../../../constants/pricing'
 
 export class ElevenLabsTTSProvider implements ITTSProvider {
   private apiKey: string
@@ -103,13 +104,20 @@ export class ElevenLabsTTSProvider implements ITTSProvider {
         console.warn(`[ElevenLabs] ⚠️ No alignment data, using estimated duration: ${duration.toFixed(2)}s`)
       }
 
+      const model = 'eleven_multilingual_v2'
       return {
         audioBuffer,
         duration,
         provider: this.getName(),
         format: 'mp3',
         alignment,
-        wordTimings
+        wordTimings,
+        costInfo: {
+          cost: calculateElevenLabsCost(model, request.text.length),
+          provider: 'ELEVENLABS',
+          model,
+          metadata: { characters: request.text.length }
+        }
       }
     } catch (e) {
       console.error('[ElevenLabs] 💥 Exception calling API:', e)

@@ -626,6 +626,120 @@ export class CaptionService {
     return this.applyLogoOverlay(videoBuffer, null)
   }
 
+  // =========================================================================
+  //  Path-based variants (para vídeos grandes — sem carregar em memória)
+  // =========================================================================
+
+  /**
+   * Aplica legendas + logo direto em disco (input path → output path).
+   * Não carrega o vídeo em memória — ideal para vídeos > 200MB.
+   */
+  async addCaptionsFromScenesOnDisk(
+    inputVideoPath: string,
+    outputVideoPath: string,
+    scenes: SceneCaptionData[],
+    options: CaptionOptions = {}
+  ): Promise<{ styleUsed: CaptionStyleId; scenesProcessed: number }> {
+    const log = createPipelineLogger({ stage: 'Captions' })
+    const { styleId = 'tiktok_viral' } = options
+    const style = CAPTION_STYLES[styleId]
+
+    log.info(`[OnDisk] Gerando legendas a partir de ${scenes.length} cenas.`)
+    log.info(`[OnDisk] Estilo: ${style.name} (${style.effect}).`)
+
+    const scenesWithRealDuration = await this.resolveRealDurations(scenes)
+    const segments = this.buildSegmentsFromScenes(scenesWithRealDuration, style)
+    log.info(`[OnDisk] ${segments.length} segmentos de legenda gerados.`)
+
+    const assContent = this.generateASS(segments, style)
+    await this.applyLogoOverlayOnDisk(inputVideoPath, outputVideoPath, assContent)
+    log.info('[OnDisk] Legendas aplicadas com sucesso.')
+
+    return { styleUsed: styleId, scenesProcessed: scenes.length }
+  }
+
+  /**
+   * Aplica apenas logo direto em disco (input path → output path).
+   * Não carrega o vídeo em memória.
+   */
+  async applyLogoOnlyOnDisk(inputVideoPath: string, outputVideoPath: string): Promise<boolean> {
+    const logoPath = getFooterLogoPath()
+    if (!logoPath) {
+      const log = createPipelineLogger({ stage: 'Captions' })
+      log.info('[OnDisk] Nenhuma logo em public; copiando vídeo inalterado.')
+      await fs.copyFile(inputVideoPath, outputVideoPath)
+      return false
+    }
+    await this.applyLogoOverlayOnDisk(inputVideoPath, outputVideoPath, null)
+    return true
+  }
+
+  /**
+   * Versão on-disk do applyLogoOverlay — trabalha apenas com paths, sem buffers.
+   */
+  private async applyLogoOverlayOnDisk(
+    inputVideoPath: string,
+    outputVideoPath: string,
+    assContent: string | null
+  ): Promise<void> {
+    const tempDir = tmpdir()
+    const ts = Date.now()
+    const assPath = join(tempDir, `caption-subs-${ts}.ass`)
+    const ffmpegPath = getFFmpegPath()
+    const logoPath = getFooterLogoPath()
+
+    try {
+      if (assContent) await fs.writeFile(assPath, assContent, 'utf-8')
+
+      const forwardSlashAss = assPath.replace(/\\/g, '/')
+      const escapedAssPath = forwardSlashAss.replace(/:/g, '\\\\:')
+
+      const captLog = createPipelineLogger({ stage: 'Captions' })
+      if (logoPath) {
+        if (assContent) {
+          captLog.info('[OnDisk] Aplicando legendas + logo no rodapé direito (FFmpeg).')
+          const filterComplex =
+            `[0:v]ass=${escapedAssPath}[sub];[1:v]scale=-1:160,format=rgba,colorchannelmixer=aa=0.5[logo];[sub][logo]overlay=main_w-overlay_w-24:main_h-overlay_h-24[v]`
+          await new Promise<void>((resolve, reject) => {
+            const proc = spawn(ffmpegPath, [
+              '-i', inputVideoPath, '-i', logoPath,
+              '-filter_complex', filterComplex, '-map', '[v]', '-map', '0:a',
+              '-c:a', 'copy', '-c:v', 'libx264', '-preset', 'fast', '-crf', '18', '-y', outputVideoPath
+            ])
+            this.attachFFmpegHandlers(proc, resolve, reject)
+          })
+        } else {
+          captLog.info('[OnDisk] Aplicando apenas logo no rodapé direito (FFmpeg).')
+          const filterComplex =
+            `[1:v]scale=-1:160,format=rgba,colorchannelmixer=aa=0.5[logo];[0:v][logo]overlay=main_w-overlay_w-24:main_h-overlay_h-24[v]`
+          await new Promise<void>((resolve, reject) => {
+            const proc = spawn(ffmpegPath, [
+              '-i', inputVideoPath, '-i', logoPath,
+              '-filter_complex', filterComplex, '-map', '[v]', '-map', '0:a',
+              '-c:a', 'copy', '-c:v', 'libx264', '-preset', 'fast', '-crf', '18', '-y', outputVideoPath
+            ])
+            this.attachFFmpegHandlers(proc, resolve, reject)
+          })
+        }
+      } else {
+        if (assContent) {
+          captLog.info('[OnDisk] Aplicando legendas com FFmpeg (ASS).')
+          await new Promise<void>((resolve, reject) => {
+            const proc = spawn(ffmpegPath, [
+              '-i', inputVideoPath, '-vf', `ass=${escapedAssPath}`,
+              '-c:a', 'copy', '-c:v', 'libx264', '-preset', 'fast', '-crf', '18', '-y', outputVideoPath
+            ])
+            this.attachFFmpegHandlers(proc, resolve, reject)
+          })
+        } else {
+          await fs.copyFile(inputVideoPath, outputVideoPath)
+        }
+      }
+    } finally {
+      await fs.unlink(assPath).catch(() => { })
+    }
+  }
+
   /**
    * Overlay da logo no vídeo. Se assContent for fornecido, aplica legendas antes da logo.
    */
@@ -683,20 +797,20 @@ export class CaptionService {
             this.attachFFmpegHandlers(proc, resolve, reject)
           })
         } else {
-          await fs.unlink(inputPath).catch(() => {})
+          await fs.unlink(inputPath).catch(() => { })
           return videoBuffer
         }
       }
 
       const outBuffer = await fs.readFile(outputPath)
-      await fs.unlink(inputPath).catch(() => {})
-      await fs.unlink(assPath).catch(() => {})
-      await fs.unlink(outputPath).catch(() => {})
+      await fs.unlink(inputPath).catch(() => { })
+      await fs.unlink(assPath).catch(() => { })
+      await fs.unlink(outputPath).catch(() => { })
       return outBuffer
     } catch (error) {
-      await fs.unlink(inputPath).catch(() => {})
-      await fs.unlink(assPath).catch(() => {})
-      await fs.unlink(outputPath).catch(() => {})
+      await fs.unlink(inputPath).catch(() => { })
+      await fs.unlink(assPath).catch(() => { })
+      await fs.unlink(outputPath).catch(() => { })
 
       throw new Error(`Falha ao aplicar legendas/logo: ${error}`)
     }
@@ -823,7 +937,7 @@ export class CaptionService {
 
       return duration
     } finally {
-      await fs.unlink(tempPath).catch(() => {})
+      await fs.unlink(tempPath).catch(() => { })
     }
   }
 
@@ -844,6 +958,88 @@ export class CaptionService {
     const cs = Math.floor((seconds % 1) * 100)
 
     return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}.${cs.toString().padStart(2, '0')}`
+  }
+
+  /** Formata tempo em segundos para formato SRT (HH:MM:SS,mmm) */
+  private formatSRTTime(seconds: number): string {
+    const h = Math.floor(seconds / 3600)
+    const m = Math.floor((seconds % 3600) / 60)
+    const s = Math.floor(seconds % 60)
+    const ms = Math.floor((seconds % 1) * 1000)
+
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')},${ms.toString().padStart(3, '0')}`
+  }
+
+  /** Formata tempo em segundos para formato VTT (HH:MM:SS.mmm) */
+  private formatVTTTime(seconds: number): string {
+    return this.formatSRTTime(seconds).replace(',', '.')
+  }
+
+  // =========================================================================
+  //  Subtitle Export (SRT / VTT)
+  // =========================================================================
+
+  /**
+   * Exporta legendas no formato SRT com timestamps precisos.
+   * Usa a mesma lógica de segmentação do ASS (word timings do ElevenLabs).
+   * 
+   * Formato SRT (aceito pelo YouTube, Vimeo, etc):
+   *   1
+   *   00:00:01,200 --> 00:00:03,800
+   *   Texto da legenda
+   */
+  async exportSRT(
+    scenes: SceneCaptionData[],
+    options: CaptionOptions = {}
+  ): Promise<string> {
+    const { styleId = 'tiktok_viral' } = options
+    const style = CAPTION_STYLES[styleId]
+
+    const scenesWithRealDuration = await this.resolveRealDurations(scenes)
+    const segments = this.buildSegmentsFromScenes(scenesWithRealDuration, style)
+
+    const lines: string[] = []
+    for (let i = 0; i < segments.length; i++) {
+      const seg = segments[i]!
+      lines.push(`${i + 1}`)
+      lines.push(`${this.formatSRTTime(seg.startTime)} --> ${this.formatSRTTime(seg.endTime)}`)
+      lines.push(seg.text)
+      lines.push('')
+    }
+
+    return lines.join('\n')
+  }
+
+  /**
+   * Exporta legendas no formato WebVTT com timestamps precisos.
+   * YouTube e navegadores modernos suportam nativamente.
+   * 
+   * Formato VTT:
+   *   WEBVTT
+   *   
+   *   00:00:01.200 --> 00:00:03.800
+   *   Texto da legenda
+   */
+  async exportVTT(
+    scenes: SceneCaptionData[],
+    options: CaptionOptions = {}
+  ): Promise<string> {
+    const { styleId = 'tiktok_viral' } = options
+    const style = CAPTION_STYLES[styleId]
+
+    const scenesWithRealDuration = await this.resolveRealDurations(scenes)
+    const segments = this.buildSegmentsFromScenes(scenesWithRealDuration, style)
+
+    const lines: string[] = ['WEBVTT', '']
+    for (let i = 0; i < segments.length; i++) {
+      const seg = segments[i]!
+      lines.push(`${i + 1}`)
+      lines.push(`${this.formatVTTTime(seg.startTime)} --> ${this.formatVTTTime(seg.endTime)}`)
+      lines.push(seg.text)
+      lines.push('')
+    }
+
+    return lines.join('\n')
   }
 }
 

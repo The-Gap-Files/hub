@@ -3,7 +3,8 @@ import type {
   IMotionProvider,
   MotionGenerationRequest,
   MotionGenerationResponse,
-  GeneratedMotion
+  GeneratedMotion,
+  ProviderCostInfo
 } from '../../../types/ai-providers'
 
 /**
@@ -131,10 +132,18 @@ export class RunPodMotionProvider implements IMotionProvider {
       format: 'mp4'
     }
 
+    const predictTime = data?.output?.predict_time
+
     return {
       video: motion,
       provider: 'RUNPOD',
-      model: 'wan-2.2-comfy-worker'
+      model: 'wan-2.2-comfy-worker',
+      costInfo: {
+        cost: 0, // TODO: Add RunPod pricing calculator
+        provider: 'RUNPOD',
+        model: 'wan-2.2-comfy-worker',
+        metadata: { predict_time: predictTime }
+      }
     }
   }
 

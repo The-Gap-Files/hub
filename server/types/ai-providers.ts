@@ -5,6 +5,22 @@
  */
 
 // =============================================================================
+// COST TRACKING — Campo obrigatório em TODA response de provider externo
+// =============================================================================
+
+/** Informações de custo que TODA response de provider externo DEVE incluir */
+export interface ProviderCostInfo {
+  /** Custo em USD da operação */
+  cost: number
+  /** Nome do provider (ex: "REPLICATE", "ELEVENLABS", "OPENAI") */
+  provider: string
+  /** Modelo usado */
+  model: string
+  /** Metadados de cálculo (tokens, predict_time, characters, etc.) */
+  metadata?: Record<string, unknown>
+}
+
+// =============================================================================
 // SCRIPT GENERATION (OpenAI, Anthropic, Gemini)
 // =============================================================================
 
@@ -60,6 +76,20 @@ export interface ScriptGenerationRequest {
   mustExclude?: string // O que NÃO deve ter no roteiro
   targetWPM?: number // Velocidade de fala alvo (Words Per Minute): 120 (lenta), 150 (média), 180 ( rápida)
   wordsPerScene?: number // Número alvo de palavras por cena (calculado a partir de targetWPM)
+
+  // Persons & Neural Insights (Intelligence Center do dossiê)
+  persons?: Array<{
+    name: string
+    role?: string | null
+    description?: string | null
+    visualDescription?: string | null
+    aliases?: string[]
+    relevance: string
+  }>
+  neuralInsights?: Array<{
+    content: string
+    noteType: 'insight' | 'curiosity' | 'research'
+  }>
 }
 
 export interface ScriptScene {
@@ -100,6 +130,8 @@ export interface ScriptGenerationResponse {
     outputTokens: number
     totalTokens: number
   }
+
+  costInfo: ProviderCostInfo
 }
 
 export interface IScriptGenerator {
@@ -145,6 +177,8 @@ export interface TTSResponse {
 
   /** Word-level timestamps derivados do alignment de caracteres */
   wordTimings?: TTSWordTiming[] | null
+
+  costInfo: ProviderCostInfo
 }
 
 export interface VoiceListOptions {
@@ -200,6 +234,7 @@ export interface ImageGenerationResponse {
   provider: string
   model: string
   predictTime?: number // Tempo real de GPU em segundos (retornado pela API)
+  costInfo: ProviderCostInfo
 }
 
 export interface IImageGenerator {
@@ -237,6 +272,7 @@ export interface MotionGenerationResponse {
   provider: string
   model: string
   predictTime?: number // Tempo real de GPU em segundos (retornado pela API)
+  costInfo: ProviderCostInfo
 }
 
 export interface IMotionProvider {
@@ -319,6 +355,7 @@ export interface MusicGenerationResponse {
   provider: string
   model: string
   predictTime?: number     // Tempo real de GPU em segundos (retornado pela API)
+  costInfo: ProviderCostInfo
 }
 
 export interface IMusicProvider {

@@ -38,17 +38,8 @@ export default defineNuxtConfig({
       url: process.env.DATABASE_URL
     },
 
-    // Provedores de IA
+    // Provedores de IA (legados — apenas para compatibilidade com providers de mídia)
     providers: {
-      script: {
-        name: process.env.SCRIPT_PROVIDER ?? 'anthropic',
-        apiKey: process.env.SCRIPT_PROVIDER === 'openai'
-          ? (process.env.OPENAI_API_KEY ?? '')
-          : (process.env.ANTHROPIC_API_KEY ?? ''),
-        model: process.env.SCRIPT_PROVIDER === 'openai'
-          ? (process.env.OPENAI_MODEL ?? 'gpt-4o')
-          : (process.env.ANTHROPIC_MODEL_SCRIPT ?? process.env.ANTHROPIC_MODEL ?? 'claude-sonnet-4-20250514')
-      },
       tts: {
         name: process.env.TTS_PROVIDER ?? 'elevenlabs',
         apiKey: process.env.ELEVENLABS_API_KEY ?? '',

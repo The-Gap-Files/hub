@@ -41,17 +41,6 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Obter config do provider de script
-  const config = useRuntimeConfig()
-  const scriptConfig = config.providers?.script
-
-  if (!scriptConfig?.apiKey) {
-    throw createError({
-      statusCode: 500,
-      message: 'Script AI provider not configured. Check your .env file.'
-    })
-  }
-
   const result = await generateCreativeDirection(
     {
       theme: dossier.theme,
@@ -65,11 +54,6 @@ export default defineEventHandler(async (event) => {
         content: n.content,
         noteType: n.noteType || 'insight'
       }))
-    },
-    {
-      name: scriptConfig.name,
-      apiKey: scriptConfig.apiKey,
-      model: scriptConfig.model
     }
   )
 
@@ -83,11 +67,14 @@ export default defineEventHandler(async (event) => {
   console.log(`[SuggestCreativeDirection] 💵 Custo: $${cost.toFixed(6)}`)
 
   // Registrar custo (fire-and-forget)
-  costLogService.logInsightsGeneration({
+  costLogService.log({
     dossierId,
+    resource: 'insights',
+    action: 'create',
     provider: result.provider,
     model: result.model,
-    usage: result.usage,
+    cost,
+    metadata: { input_tokens: inputTokens, output_tokens: outputTokens, total_tokens: inputTokens + outputTokens },
     detail: 'Creative Direction Advisor — Análise de direção criativa'
   }).catch(err => console.error('[SuggestCreativeDirection] CostLog:', err))
 

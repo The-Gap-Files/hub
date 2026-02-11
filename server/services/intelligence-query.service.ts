@@ -6,8 +6,7 @@
  */
 
 import { z } from 'zod'
-import { ChatOpenAI } from '@langchain/openai'
-import { ChatAnthropic } from '@langchain/anthropic'
+import { createLlmForTask, getAssignment } from './llm/llm-factory'
 
 // =============================================================================
 // SCHEMA
@@ -43,36 +42,13 @@ export interface IntelligenceQueryResult {
 // =============================================================================
 
 export async function intelligenceQuery(
-  request: IntelligenceQueryRequest,
-  providerConfig: { name: string; apiKey: string; model?: string; baseUrl?: string }
+  request: IntelligenceQueryRequest
 ): Promise<IntelligenceQueryResult> {
   console.log(`[IntelligenceQuery] 🔎 Consulta: "${request.query}" (source: ${request.source})`)
 
-  const providerName = providerConfig.name.toLowerCase()
-  let structuredLlm: any
-
-  if (providerName === 'anthropic') {
-    const queryModel = process.env.ANTHROPIC_MODEL_INSIGHTS || providerConfig.model || 'claude-sonnet-4-20250514'
-    const model = new ChatAnthropic({
-      anthropicApiKey: providerConfig.apiKey,
-      modelName: queryModel,
-      temperature: 0.6,
-      maxTokens: 1024
-    })
-    structuredLlm = model.withStructuredOutput(QueryResponseSchema, { includeRaw: true })
-  } else {
-    const model = new ChatOpenAI({
-      openAIApiKey: providerConfig.apiKey,
-      modelName: providerConfig.model ?? 'gpt-4o-mini',
-      configuration: {
-        baseURL: providerConfig.baseUrl ?? 'https://api.openai.com/v1'
-      },
-      temperature: 0.6,
-      timeout: 60000,
-      maxRetries: 2
-    })
-    structuredLlm = model.withStructuredOutput(QueryResponseSchema, { includeRaw: true })
-  }
+  const assignment = await getAssignment('intelligence-query')
+  const model = await createLlmForTask('intelligence-query')
+  const structuredLlm = (model as any).withStructuredOutput(QueryResponseSchema, { includeRaw: true })
 
   const systemPrompt = buildQuerySystemPrompt(request.source)
   const userPrompt = buildQueryUserPrompt(request)
@@ -98,8 +74,8 @@ export async function intelligenceQuery(
     content: content.content,
     noteType: content.noteType,
     usage: { inputTokens, outputTokens, totalTokens },
-    provider: providerName.toUpperCase(),
-    model: providerConfig.model ?? (providerName === 'anthropic' ? 'claude-sonnet-4-20250514' : 'gpt-4o-mini')
+    provider: assignment.provider.toUpperCase(),
+    model: assignment.model
   }
 }
 

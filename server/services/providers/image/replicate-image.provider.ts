@@ -11,8 +11,11 @@ import type {
   IImageGenerator,
   ImageGenerationRequest,
   ImageGenerationResponse,
-  GeneratedImage
+  GeneratedImage,
+  ProviderCostInfo
 } from '../../../types/ai-providers'
+import { calculateReplicateOutputCost } from '../../../constants/pricing'
+import { buildImageInput, type ImageInputContext } from '../../../utils/input-schema-builder'
 
 /**
  * Erro lançado quando o modelo de imagem rejeita o prompt por filtro de conteúdo sensível.
@@ -29,17 +32,20 @@ export class ContentRestrictedError extends Error {
 export class ReplicateImageProvider implements IImageGenerator {
   private client: Replicate
   private model: string
+  private inputSchema: any = null
 
   constructor(config: {
     apiKey: string
     model?: string
     baseUrl?: string
+    inputSchema?: any
   }) {
     this.client = new Replicate({
       auth: config.apiKey
     })
     // Luma Photon Flash: fotorrealístico de alta qualidade (mesmo modelo das thumbnails)
     this.model = config.model ?? 'luma/photon-flash'
+    this.inputSchema = config.inputSchema ?? null
   }
 
   getName(): string {
@@ -59,9 +65,25 @@ export class ReplicateImageProvider implements IImageGenerator {
     console.log(`[ReplicateImageProvider] Generating image with model ${this.model}. Prompt: ${enhancedPrompt.substring(0, 50)}...`)
 
     try {
-      const input: any = this.isPhotonFlash()
-        ? this.buildPhotonFlashInput(enhancedPrompt, request)
-        : this.buildFluxInput(enhancedPrompt, request)
+      let input: any
+
+      if (this.inputSchema) {
+        // Dynamic: build from schema
+        input = buildImageInput(this.inputSchema, {
+          prompt: enhancedPrompt,
+          negativePrompt: request.negativePrompt,
+          width: request.width,
+          height: request.height,
+          aspectRatio: request.aspectRatio,
+          seed: request.seed,
+          numVariants: request.numVariants
+        })
+      } else {
+        // Fallback: existing hardcoded logic
+        input = this.isPhotonFlash()
+          ? this.buildPhotonFlashInput(enhancedPrompt, request)
+          : this.buildFluxInput(enhancedPrompt, request)
+      }
 
       let predictTime: number | undefined
       const output: any = await this.client.run(this.model as any, { input }, (prediction: any) => {
@@ -85,7 +107,16 @@ export class ReplicateImageProvider implements IImageGenerator {
         images,
         provider: 'replicate',
         model: this.model,
-        predictTime
+        predictTime,
+        costInfo: {
+          cost: calculateReplicateOutputCost(this.model, images.length) ?? 0,
+          provider: 'REPLICATE',
+          model: this.model,
+          metadata: {
+            num_images: images.length,
+            ...(predictTime != null && { predict_time: predictTime })
+          }
+        }
       }
     } catch (error: any) {
       const errorMsg = error?.message || String(error)
@@ -203,6 +234,8 @@ export class ReplicateImageProvider implements IImageGenerator {
    * Garante âncora de estilo no prompt enviado ao modelo de imagem.
    * - Se style for o baseStyle completo (ex.: Ghibli Sombrio), é preposto para fixar o look.
    * - Se for uma chave conhecida (cinematic, photorealistic...), usa o enhancer curto.
+   * - Se nenhum style for passado MAS o prompt já contém âncora de estilo
+   *   (cenário normal: a LLM embutiu o estilo no visualDescription), NÃO adiciona fallback.
    */
   private enhancePrompt(basePrompt: string, style?: ImageGenerationRequest['style']): string {
     const styleEnhancers: Record<string, string> = {
@@ -216,8 +249,26 @@ export class ReplicateImageProvider implements IImageGenerator {
     if (style && style.length > 50 && !styleEnhancers[style]) {
       return `${style}, ${basePrompt}`
     }
-    const enhancer = style ? styleEnhancers[style] ?? '' : styleEnhancers.cinematic
-    return enhancer ? `${basePrompt}, ${enhancer}` : basePrompt
+
+    // Chave curta explícita (cinematic, photorealistic, etc.)
+    if (style && styleEnhancers[style]) {
+      return `${basePrompt}, ${styleEnhancers[style]}`
+    }
+
+    // Sem style passado — verificar se o prompt já contém âncora de estilo embutida pela LLM.
+    // Indicadores: termos de estilo visual que mostram que o roteirista já incluiu a âncora.
+    const styleAnchors = ['cinematic', 'photorealistic', 'ghibli', 'illustration', 'oil painting', 'cyberpunk', 'anime', 'painterly', 'documentary film']
+    const promptLower = basePrompt.toLowerCase()
+    const hasStyleAnchor = styleAnchors.some(anchor => promptLower.includes(anchor))
+
+    if (hasStyleAnchor) {
+      // O prompt já é auto-suficiente — retornar sem modificar
+      return basePrompt
+    }
+
+    // Fallback: prompt genérico sem âncora — adicionar enhancer cinematic
+    const enhancer = styleEnhancers.cinematic
+    return `${basePrompt}, ${enhancer}`
   }
 
   /**

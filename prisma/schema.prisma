@@ -462,6 +462,75 @@ model MonetizationPlan {
   @@map("monetization_plans")
 }
 
+/// Provider de IA configurável (LLM ou Mídia)
+/// Gerenciado pela UI em /settings/providers — API keys ficam aqui, não no .env
+model LlmProvider {
+  id          String     @id @db.VarChar(30) /// Ex: "openai", "anthropic", "replicate", "elevenlabs"
+  name        String     @db.VarChar(50)     /// Ex: "OpenAI", "Replicate"
+  description String?    @db.Text
+  apiKey      String?    @db.Text            /// API Key (criptografar em prod)
+  baseUrl     String?    @db.VarChar(200)    /// Base URL customizada
+  iconKey     String     @default("brain") @db.VarChar(30)
+  category    String     @default("llm") @db.VarChar(20) /// "llm" | "media" — separa LLMs de providers de mídia
+  isActive    Boolean    @default(true)
+  extraConfig Json?      /// Config extra (ex: endpointId para RunPod, voiceId para ElevenLabs)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  models      LlmModel[]
+  @@map("llm_providers")
+}
+
+/// Modelo de LLM disponível dentro de um provider
+model LlmModel {
+  id                       String      @id @default(uuid())
+  modelId                  String      @db.VarChar(100)  /// ID na API (ex: "gpt-4o", "claude-sonnet-4-20250514")
+  name                     String      @db.VarChar(100)  /// Nome legível (ex: "GPT-4o")
+  providerId               String      @db.VarChar(30)
+  contextWindow            Int         @default(128000)
+  costTier                 Int         @default(2)       /// 1-5 (1=barato, 5=caro)
+  supportsStructuredOutput Boolean     @default(true)
+  supportsVision           Boolean     @default(false)
+  isActive                 Boolean     @default(true)
+  inputSchema              Json?       /// Schema de input do modelo — define como montar o payload para a API
+  createdAt                DateTime    @default(now())
+  updatedAt                DateTime    @updatedAt
+
+  provider    LlmProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, modelId])
+  @@map("llm_models")
+}
+
+/// Assignment de provider/modelo de IA por task — persistido no banco.
+/// Cada task (script, analysis, story-architect, etc.) tem UMA linha nesta tabela.
+/// Quando não existe registro, o sistema usa os defaults do LLM Registry.
+model LlmAssignment {
+  id          String   @id @default(uuid())
+  taskId      String   @unique @db.VarChar(50) /// Ex: "script", "analysis", "monetization"
+  provider    String   @db.VarChar(30) /// Ex: "openai", "anthropic", "groq"
+  model       String   @db.VarChar(100) /// Ex: "gpt-4o", "claude-sonnet-4-20250514"
+  temperature Float    @default(0.7) /// 0.0 a 2.0
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("llm_assignments")
+}
+
+/// Assignment de provider/modelo de MÍDIA por task (imagem, TTS, motion, música).
+/// Mesma lógica do LlmAssignment mas para providers de mídia (Replicate, ElevenLabs, RunPod).
+model MediaAssignment {
+  id          String   @id @default(uuid())
+  taskId      String   @unique @db.VarChar(50) /// Ex: "image-generation", "tts-narration", "motion-video", "background-music", "thumbnail"
+  provider    String   @db.VarChar(30) /// Ex: "replicate", "elevenlabs", "runpod"
+  model       String   @db.VarChar(150) /// Ex: "luma/photon-flash", "eleven_multilingual_v2"
+  extraConfig Json?    /// Config extra por task (ex: voiceId, endpointId, seed, steps)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("media_assignments")
+}
+
 /// Tipo de provedor de IA usado
 enum AIProvider {
   OPENAI

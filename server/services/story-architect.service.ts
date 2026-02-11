@@ -11,9 +11,11 @@
  */
 
 import { z } from 'zod'
-import { ChatAnthropic } from '@langchain/anthropic'
 import { SystemMessage, HumanMessage } from '@langchain/core/messages'
 import { loadSkill } from '../utils/skill-loader'
+import { createLlmForTask, getAssignment } from './llm/llm-factory'
+import type { PersonContext, NeuralInsightContext } from '../utils/format-intelligence-context'
+import { formatPersonsForPrompt, formatNeuralInsightsForPrompt } from '../utils/format-intelligence-context'
 
 // =============================================================================
 // SCHEMA - Formato estruturado que a IA deve retornar
@@ -86,6 +88,10 @@ export interface StoryArchitectRequest {
   dossierCategory?: string // Classificação temática: 'true-crime', 'conspiração', etc.
   targetDuration: number // Em segundos
   language?: string
+
+  // Persons & Neural Insights (Intelligence Center)
+  persons?: PersonContext[]
+  neuralInsights?: NeuralInsightContext[]
 }
 
 export interface StoryArchitectResult {
@@ -99,30 +105,24 @@ export interface StoryArchitectResult {
 // SERVICE
 // =============================================================================
 
-const ARCHITECT_MODEL = process.env.ANTHROPIC_MODEL_ARCHITECT || process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-20250514'
-
 export async function generateStoryOutline(
-  request: StoryArchitectRequest,
-  apiKey: string
+  request: StoryArchitectRequest
 ): Promise<StoryArchitectResult> {
   console.log('[StoryArchitect] 🏗️ Iniciando planejamento narrativo...')
 
-  const model = new ChatAnthropic({
-    anthropicApiKey: apiKey,
-    modelName: ARCHITECT_MODEL,
-    temperature: 0.7,
-    maxTokens: 4096
-  })
-
-  const structuredLlm = model.withStructuredOutput(StoryOutlineSchema, { includeRaw: true })
+  const assignment = await getAssignment('story-architect')
+  const model = await createLlmForTask('story-architect')
+  const structuredLlm = (model as any).withStructuredOutput(StoryOutlineSchema, { includeRaw: true })
 
   const systemPrompt = buildSystemPrompt(request)
   const userPrompt = buildUserPrompt(request)
 
-  console.log(`[StoryArchitect] 📤 Enviando para ${ARCHITECT_MODEL}...`)
+  console.log(`[StoryArchitect] 📤 Enviando para ${assignment.provider} (${assignment.model})...`)
   console.log('[StoryArchitect] 🎯 Editorial Objective:', request.editorialObjective ? 'Sim' : 'Não definido')
   console.log('[StoryArchitect] 🎬 Script Style:', request.scriptStyleId || 'default')
   console.log('[StoryArchitect] ⏱️ Target Duration:', request.targetDuration, 'seconds')
+  console.log('[StoryArchitect] 👤 Persons:', request.persons?.length || 0)
+  console.log('[StoryArchitect] 🧠 Neural Insights:', request.neuralInsights?.length || 0)
 
   const messages = [
     new SystemMessage(systemPrompt),
@@ -157,8 +157,8 @@ export async function generateStoryOutline(
     return {
       outline: content,
       usage: { inputTokens, outputTokens, totalTokens },
-      provider: 'ANTHROPIC',
-      model: ARCHITECT_MODEL
+      provider: assignment.provider.toUpperCase(),
+      model: assignment.model
     }
   } catch (error) {
     console.error('[StoryArchitect] ❌ Erro no planejamento narrativo:', error)
@@ -204,6 +204,20 @@ function buildUserPrompt(request: StoryArchitectRequest): string {
       prompt += `- ${note}\n`
     })
     prompt += '\n'
+  }
+
+  // Persons (Intelligence Center)
+  const personsBlock = formatPersonsForPrompt(request.persons || [])
+  if (personsBlock) {
+    prompt += personsBlock
+    prompt += `⚠️ INSTRUÇÃO SOBRE PERSONAGENS: Distribua as pessoas-chave pelos beats narrativos. Personagens "primary" devem aparecer em múltiplos beats. Use os nomes exatos para garantir consistência.\n\n`
+  }
+
+  // Neural Insights (Intelligence Center)
+  const insightsBlock = formatNeuralInsightsForPrompt(request.neuralInsights || [])
+  if (insightsBlock) {
+    prompt += insightsBlock
+    prompt += `⚠️ INSTRUÇÃO SOBRE INTELIGÊNCIA NEURAL: Use os insights como combustível narrativo. Curiosidades são ideais para hooks e pattern interrupts. Dados de pesquisa servem como âncoras factuais nos beats.\n\n`
   }
 
   if (request.editorialObjective) {

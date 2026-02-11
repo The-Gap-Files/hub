@@ -196,6 +196,24 @@ export const LLM_PRICING: Record<string, LLMPricing> = {
   'claude-haiku-4-5': {
     costPerInputToken: 0.0000008,   // Haiku 4.5 - mesmo tier do 3.5 Haiku
     costPerOutputToken: 0.000004
+  },
+
+  // === Google (Gemini) ===
+  'gemini-1.5-pro': {
+    costPerInputToken: 0.0000035,   // $3.50/1M input tokens (<= 128k context)
+    costPerOutputToken: 0.0000105   // $10.50/1M output tokens (<= 128k context)
+  },
+  'gemini-1.5-flash': {
+    costPerInputToken: 0.000000075, // $0.075/1M input tokens (<= 128k context)
+    costPerOutputToken: 0.0000003   // $0.30/1M output tokens (<= 128k context)
+  },
+  'gemini-2.0-flash-exp': {
+    costPerInputToken: 0.000000075, // Estimativa baseada no Flash 1.5 (Free tier available)
+    costPerOutputToken: 0.0000003
+  },
+  'gemini-2.0-flash': {
+    costPerInputToken: 0.0000001,   // ~$0.10/1M input (Estimativa conservadora)
+    costPerOutputToken: 0.0000004
   }
 }
 

@@ -64,17 +64,6 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Obter config do provider de script
-  const config = useRuntimeConfig()
-  const scriptConfig = config.providers?.script
-
-  if (!scriptConfig?.apiKey) {
-    throw createError({
-      statusCode: 500,
-      message: 'Script AI provider not configured. Check your .env file.'
-    })
-  }
-
   try {
     const result = await generateMonetizationPlan(
       {
@@ -95,11 +84,6 @@ export default defineEventHandler(async (event) => {
         teaserDuration: teaserDuration as 60 | 120 | 180,
         fullVideoDuration: fullVideoDuration as 300 | 600 | 900,
         creativeDirection: rawBody?.creativeDirection
-      },
-      {
-        name: scriptConfig.name,
-        apiKey: scriptConfig.apiKey,
-        model: scriptConfig.model
       }
     )
 
@@ -138,11 +122,14 @@ export default defineEventHandler(async (event) => {
     console.log(`[SuggestMonetization] 💾 Plano salvo: ${savedPlan.id}`)
 
     // Registrar custo (fire-and-forget)
-    costLogService.logInsightsGeneration({
+    costLogService.log({
       dossierId,
+      resource: 'insights',
+      action: 'create',
       provider: result.provider,
       model: result.model,
-      usage: result.usage,
+      cost,
+      metadata: { input_tokens: inputTokens, output_tokens: outputTokens, total_tokens: inputTokens + outputTokens },
       detail: 'Plano de monetização Document-First'
     }).catch(err => console.error('[SuggestMonetization] CostLog:', err))
 

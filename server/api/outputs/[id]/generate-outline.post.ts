@@ -11,7 +11,9 @@
 import { prisma } from '../../../utils/prisma'
 import { generateStoryOutline } from '../../../services/story-architect.service'
 import { costLogService } from '../../../services/cost-log.service'
+import { calculateLLMCost } from '../../../constants/pricing'
 import { getScriptStyleById } from '../../../constants/script-styles'
+import { mapPersonsFromPrisma, mapNeuralInsightsFromNotes } from '../../../utils/format-intelligence-context'
 
 export default defineEventHandler(async (event) => {
   const outputId = getRouterParam(event, 'id')
@@ -29,7 +31,8 @@ export default defineEventHandler(async (event) => {
       dossier: {
         include: {
           sources: true,
-          notes: true
+          notes: true,
+          persons: { orderBy: { order: 'asc' } }
         }
       }
     }
@@ -40,12 +43,6 @@ export default defineEventHandler(async (event) => {
   }
 
   const dossier = output.dossier
-
-  // 2. Verificar API key
-  const anthropicApiKey = process.env.ANTHROPIC_API_KEY
-  if (!anthropicApiKey) {
-    throw createError({ statusCode: 500, message: 'ANTHROPIC_API_KEY not configured' })
-  }
 
   // 3. Montar request
   const userNotes = dossier.notes?.map((n: any) => n.content) || []
@@ -62,11 +59,13 @@ export default defineEventHandler(async (event) => {
         type: s.sourceType
       })) || [],
       userNotes,
+      persons: mapPersonsFromPrisma(dossier.persons),
+      neuralInsights: mapNeuralInsightsFromNotes(dossier.notes),
       editorialObjective: output.objective || undefined,
       scriptStyleId: output.scriptStyleId || undefined,
       targetDuration: output.duration || 300,
       language: output.language || 'pt-BR'
-    }, anthropicApiKey)
+    })
 
     // 4. Salvar outline no banco (novo plano = pendente de aprovação)
     await prisma.output.update({
@@ -75,15 +74,18 @@ export default defineEventHandler(async (event) => {
     })
 
     // 5. Registrar custo do plano (fire-and-forget) — resource 'outline', não 'script'
-    const totalSourceChars = dossier.sources?.reduce((sum: number, s: any) => sum + (s.content?.length || 0), 0) || 0
-    costLogService.logOutlineGeneration({
+    const inputTokens = result.usage?.inputTokens ?? 0
+    const outputTokens = result.usage?.outputTokens ?? 0
+    const cost = calculateLLMCost(result.model, inputTokens, outputTokens)
+
+    costLogService.log({
       outputId,
+      resource: 'outline',
+      action: feedback ? 'recreate' : 'create',
       provider: result.provider,
       model: result.model,
-      inputCharacters: totalSourceChars,
-      outputCharacters: JSON.stringify(result.outline).length,
-      usage: result.usage,
-      action: feedback ? 'recreate' : 'create',
+      cost,
+      metadata: { input_tokens: inputTokens, output_tokens: outputTokens, total_tokens: inputTokens + outputTokens },
       detail: `Story Architect - ${result.outline.risingBeats.length} beats narrativos`
     }).catch(() => { })
 

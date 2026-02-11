@@ -6,9 +6,8 @@
  */
 
 import { z } from 'zod'
-import { ChatOpenAI } from '@langchain/openai'
-import { ChatAnthropic } from '@langchain/anthropic'
 import { SystemMessage, HumanMessage } from '@langchain/core/messages'
+import { createLlmForTask, getAssignment } from './llm/llm-factory'
 
 // =============================================================================
 // SCHEMA - Formato estruturado que a IA deve retornar
@@ -60,47 +59,20 @@ export interface AnalyzeInsightsResult {
 // =============================================================================
 
 export async function analyzeInsights(
-  request: AnalyzeInsightsRequest,
-  providerConfig: { name: string; apiKey: string; model?: string; baseUrl?: string }
+  request: AnalyzeInsightsRequest
 ): Promise<AnalyzeInsightsResult> {
   console.log('[AnalyzeInsights] 🧠 Iniciando análise neural do dossiê...')
 
-  // Criar modelo baseado no provider configurado
-  const providerName = providerConfig.name.toLowerCase()
-  let structuredLlm: any
-
-  if (providerName === 'anthropic') {
-    const insightsModel = process.env.ANTHROPIC_MODEL_INSIGHTS || providerConfig.model || 'claude-sonnet-4-20250514'
-    const model = new ChatAnthropic({
-      anthropicApiKey: providerConfig.apiKey,
-      modelName: insightsModel,
-      temperature: 0.8,
-      maxTokens: 4096
-    })
-    structuredLlm = model.withStructuredOutput(AnalysisResponseSchema, { includeRaw: true })
-  } else {
-    // OpenAI (default)
-    const model = new ChatOpenAI({
-      openAIApiKey: providerConfig.apiKey,
-      modelName: providerConfig.model ?? 'gpt-4o-mini',
-      configuration: {
-        baseURL: providerConfig.baseUrl ?? 'https://api.openai.com/v1'
-      },
-      temperature: 0.8,
-      timeout: 60000,
-      maxRetries: 2
-    })
-    structuredLlm = model.withStructuredOutput(AnalysisResponseSchema, { includeRaw: true })
-  }
+  // Criar modelo via LLM Factory (provider/modelo configurável via UI)
+  const assignment = await getAssignment('analysis')
+  const model = await createLlmForTask('analysis')
+  const structuredLlm = (model as any).withStructuredOutput(AnalysisResponseSchema, { includeRaw: true })
 
   // Montar o prompt
   const systemPrompt = buildSystemPrompt()
   const userPrompt = buildUserPrompt(request)
 
-  const resolvedModel = providerName === 'anthropic'
-    ? (process.env.ANTHROPIC_MODEL_INSIGHTS || providerConfig.model || 'claude-sonnet-4-20250514')
-    : (providerConfig.model || 'gpt-4o-mini')
-  console.log(`[AnalyzeInsights] 📤 Enviando para ${providerName} (${resolvedModel})...`)
+  console.log(`[AnalyzeInsights] 📤 Enviando para ${assignment.provider} (${assignment.model})...`)
 
   const messages = [
     new SystemMessage(systemPrompt),
@@ -133,8 +105,8 @@ export async function analyzeInsights(
       items: content.items,
       persons: content.persons || [],
       usage: { inputTokens, outputTokens, totalTokens },
-      provider: providerName.toUpperCase(),
-      model: providerConfig.model ?? (providerName === 'anthropic' ? 'claude-sonnet-4-20250514' : 'gpt-4o-mini')
+      provider: assignment.provider.toUpperCase(),
+      model: assignment.model
     }
   } catch (error) {
     console.error('[AnalyzeInsights] ❌ Erro na análise:', error)

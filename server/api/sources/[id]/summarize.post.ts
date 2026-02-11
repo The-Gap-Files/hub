@@ -10,10 +10,11 @@
 
 import { z } from 'zod'
 import { prisma } from '../../../utils/prisma'
-import { ChatAnthropic } from '@langchain/anthropic'
-import { ChatOpenAI } from '@langchain/openai'
 import { SystemMessage, HumanMessage } from '@langchain/core/messages'
 import { costLogService } from '../../../services/cost-log.service'
+import { calculateLLMCost } from '../../../constants/pricing'
+import { createLlmForTask, getAssignment } from '../../../services/llm/llm-factory'
+import type { LlmTaskId } from '../../../constants/llm-registry'
 
 const BodySchema = z.object({
   save: z.boolean().default(false)
@@ -54,20 +55,12 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event).catch(() => ({}))
   const { save } = BodySchema.parse(body)
 
-  const config = useRuntimeConfig()
-  const scriptConfig = config.providers?.script
+  const TASK_ID: LlmTaskId = 'summarize'
 
-  if (!scriptConfig?.apiKey) {
-    throw createError({
-      statusCode: 500,
-      message: 'AI provider not configured'
-    })
-  }
-
-  const providerName = (scriptConfig.name || 'anthropic').toLowerCase()
 
   try {
-    const llm = createLLM(providerName, scriptConfig)
+    const llm = await createLlmForTask(TASK_ID, { temperature: 0.3, maxTokens: 8192 })
+    const assignment = await getAssignment(TASK_ID)
     const startTime = Date.now()
     let totalInputTokens = 0
     let totalOutputTokens = 0
@@ -136,11 +129,17 @@ export default defineEventHandler(async (event) => {
     }
 
     // Registrar custo
-    costLogService.logInsightsGeneration({
+    const modelUsed = assignment.model
+    const summaryCost = calculateLLMCost(modelUsed, totalInputTokens, totalOutputTokens)
+
+    costLogService.log({
       dossierId: source.dossierId,
-      provider: providerName.toUpperCase(),
-      model: scriptConfig.model || (providerName === 'anthropic' ? 'claude-sonnet-4-20250514' : 'gpt-4o-mini'),
-      usage: { inputTokens: totalInputTokens, outputTokens: totalOutputTokens, totalTokens: totalInputTokens + totalOutputTokens },
+      resource: 'insights',
+      action: 'create',
+      provider: assignment.provider.toUpperCase(),
+      model: modelUsed,
+      cost: summaryCost,
+      metadata: { input_tokens: totalInputTokens, output_tokens: totalOutputTokens, total_tokens: totalInputTokens + totalOutputTokens },
       detail: `Resumo de fonte: ${source.title}${needsChunking ? ' (map-reduce)' : ''}`
     }).catch((err: any) => console.error('[SummarizeSource] CostLog:', err))
 
@@ -165,24 +164,6 @@ export default defineEventHandler(async (event) => {
 // =============================================================================
 // HELPERS
 // =============================================================================
-
-function createLLM(providerName: string, scriptConfig: any): any {
-  if (providerName === 'anthropic') {
-    const model = process.env.ANTHROPIC_MODEL_INSIGHTS || scriptConfig.model || 'claude-sonnet-4-20250514'
-    return new ChatAnthropic({
-      anthropicApiKey: scriptConfig.apiKey,
-      modelName: model,
-      temperature: 0.3,
-      maxTokens: 8192
-    })
-  }
-  return new ChatOpenAI({
-    openAIApiKey: scriptConfig.apiKey,
-    modelName: scriptConfig.model ?? 'gpt-4o-mini',
-    temperature: 0.3,
-    timeout: 120000
-  })
-}
 
 /** Divide texto em chunks respeitando quebras de parágrafos */
 function splitIntoChunks(text: string, maxChars: number): string[] {

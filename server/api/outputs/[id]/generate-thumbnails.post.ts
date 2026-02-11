@@ -14,14 +14,13 @@
 import { prisma } from '../../../utils/prisma'
 import { getThumbnailDimensions } from '../../../utils/thumbnail-prompt-builder'
 import { loadSkill } from '../../../utils/skill-loader'
-import { validateReplicatePricing, PricingNotConfiguredError } from '../../../constants/pricing'
+import { validateReplicatePricing, PricingNotConfiguredError, calculateReplicateOutputCost, calculateLLMCost } from '../../../constants/pricing'
 import { costLogService } from '../../../services/cost-log.service'
-import { ChatAnthropic } from '@langchain/anthropic'
 import { SystemMessage, HumanMessage } from '@langchain/core/messages'
 import Replicate from 'replicate'
-
-// Modelo leve/barato só para gerar prompts de imagem
-const THUMBNAIL_PROMPT_MODEL = process.env.ANTHROPIC_MODEL_THUMBNAIL || 'claude-3-5-haiku-20241022'
+import { createLlmForTask, getAssignment } from '../../../services/llm/llm-factory'
+import type { LlmTaskId } from '../../../constants/llm-registry'
+import { getMediaProviderForTask } from '../../../services/media/media-factory'
 
 // Modelo de imagem para thumbnails
 const THUMBNAIL_IMAGE_MODEL = 'luma/photon-flash'
@@ -145,17 +144,12 @@ Retorne APENAS um JSON array com 4 objetos:
   ...
 ]`
 
-  const apiKey = process.env.ANTHROPIC_API_KEY
-  if (!apiKey) throw createError({ statusCode: 500, message: 'ANTHROPIC_API_KEY não configurada' })
+  const TASK_ID: LlmTaskId = 'thumbnail-prompt'
+  const model = await createLlmForTask(TASK_ID, { temperature: 0.9, maxTokens: 2000 })
+  const thumbnailAssignment = await getAssignment(TASK_ID)
+  const thumbnailPromptModel = thumbnailAssignment.model
 
-  const model = new ChatAnthropic({
-    anthropicApiKey: apiKey,
-    modelName: THUMBNAIL_PROMPT_MODEL,
-    temperature: 0.9,
-    maxTokens: 2000
-  })
-
-  console.log(`[Thumbnails] 🎨 Gerando prompts + hooks via ${THUMBNAIL_PROMPT_MODEL}...`)
+  console.log(`[Thumbnails] 🎨 Gerando prompts + hooks via ${thumbnailAssignment.provider}/${thumbnailPromptModel}...`)
 
   const llmResponse = await model.invoke([
     new SystemMessage(systemPrompt),
@@ -192,11 +186,11 @@ Retorne APENAS um JSON array com 4 objetos:
   // ═══════════════════════════════════════════════════
   // PASSO 2: Gerar thumbnails via Photon Flash (com texto no prompt)
   // ═══════════════════════════════════════════════════
-  const replicateApiKey = process.env.REPLICATE_API_KEY?.replace(/"/g, '')
-  if (!replicateApiKey) {
-    throw createError({ statusCode: 500, message: 'REPLICATE_API_KEY não configurada' })
+  const thumbnailMedia = await getMediaProviderForTask('thumbnail')
+  if (!thumbnailMedia.apiKey) {
+    throw createError({ statusCode: 500, message: 'API Key do provider de thumbnails não configurada. Configure via Settings → Providers.' })
   }
-  const replicate = new Replicate({ auth: replicateApiKey })
+  const replicate = new Replicate({ auth: thumbnailMedia.apiKey })
 
   const aspectRatio = mapAspectRatio(dims.aspectRatio)
 
@@ -260,18 +254,40 @@ Retorne APENAS um JSON array com 4 objetos:
   // ═══════════════════════════════════════════════════
   // PASSO 4: Registrar custos (fire-and-forget)
   // ═══════════════════════════════════════════════════
+
+  // 4a. Custo das imagens geradas (Replicate)
+  const imageCost = calculateReplicateOutputCost(THUMBNAIL_IMAGE_MODEL, candidates.length)
+  if (imageCost !== null) {
+    costLogService.log({
+      outputId: id,
+      resource: 'thumbnail',
+      action: 'create',
+      provider: 'REPLICATE',
+      model: THUMBNAIL_IMAGE_MODEL,
+      cost: imageCost,
+      metadata: { num_images: candidates.length, cost_per_image: imageCost / candidates.length, step: 'image_generation' },
+      detail: `${candidates.length} thumbnails via ${THUMBNAIL_IMAGE_MODEL}`
+    }).catch(() => { })
+  }
+
+  // 4b. Custo da LLM que gerou os prompts
   const llmUsage = llmResponse.usage_metadata
-  costLogService.logThumbnailGeneration({
-    outputId: id,
-    imageModel: THUMBNAIL_IMAGE_MODEL,
-    numImages: candidates.length,
-    llmModel: THUMBNAIL_PROMPT_MODEL,
-    llmProvider: 'ANTHROPIC',
-    llmUsage: llmUsage ? {
-      inputTokens: llmUsage.input_tokens,
-      outputTokens: llmUsage.output_tokens
-    } : undefined
-  })
+  if (llmUsage) {
+    const llmInputTokens = llmUsage.input_tokens
+    const llmOutputTokens = llmUsage.output_tokens
+    const llmCost = calculateLLMCost(thumbnailPromptModel, llmInputTokens, llmOutputTokens)
+
+    costLogService.log({
+      outputId: id,
+      resource: 'thumbnail',
+      action: 'create',
+      provider: thumbnailAssignment.provider.toUpperCase(),
+      model: thumbnailPromptModel,
+      cost: llmCost,
+      metadata: { input_tokens: llmInputTokens, output_tokens: llmOutputTokens, total_tokens: llmInputTokens + llmOutputTokens, step: 'prompt_generation' },
+      detail: `Prompt generation via ${thumbnailAssignment.provider}/${thumbnailPromptModel}`
+    }).catch(() => { })
+  }
 
   return {
     success: true,
