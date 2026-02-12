@@ -33,6 +33,22 @@ function createStructuredOutput(model: any, schema: any, provider: string) {
 
 // Fallback parser: extrai JSON da resposta raw quando parsed é null (Zod v4 compat)
 function fallbackParseFromRaw(rawMessage: any, logPrefix: string): any | null {
+  // Tentativa 1: Extrair de tool_calls (Anthropic function calling)
+  const toolCalls = rawMessage?.tool_calls || rawMessage?.lc_kwargs?.tool_calls
+  if (toolCalls && Array.isArray(toolCalls) && toolCalls.length > 0) {
+    const firstTool = toolCalls[0]
+    if (firstTool?.args) {
+      console.log(`${logPrefix} ✅ Fallback parse bem sucedido (tool_calls[0].args)`)
+      return firstTool.args
+    }
+    // Anthropic usa 'input' em vez de 'args'
+    if (firstTool?.input) {
+      console.log(`${logPrefix} ✅ Fallback parse bem sucedido (tool_calls[0].input)`)
+      return firstTool.input
+    }
+  }
+
+  // Tentativa 2: Extrair de content (text response)
   const candidates = rawMessage?.lc_kwargs?.content || rawMessage?.content
   try {
     // Tentar extrair do content text
@@ -40,7 +56,7 @@ function fallbackParseFromRaw(rawMessage: any, logPrefix: string): any | null {
       // Limpar markdown code blocks se houver
       const cleaned = candidates.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
       const parsed = JSON.parse(cleaned)
-      console.log(`${logPrefix} ✅ Fallback parse bem sucedido`)
+      console.log(`${logPrefix} ✅ Fallback parse bem sucedido (content string)`)
       return parsed
     }
     // Array content (AIMessageChunk com parts)
@@ -356,12 +372,25 @@ async function invokeWithFallback(
     }
 
     // parsed é null — tentativa de fallback do raw
+    console.log(`${LOG} ⚠️ Structured output retornou parsed=null. Tentando fallback...`)
+    console.log(`${LOG} 🔍 Raw message type:`, typeof result.raw)
+    console.log(`${LOG} 🔍 Raw message keys:`, Object.keys(result.raw || {}))
+
     const fallback = fallbackParseFromRaw(result.raw, LOG)
     if (fallback) {
       // Para Gemini, normalizar aliases mesmo no fallback parse
       const normalized = isGemini ? normalizeMonetizationResponse(fallback) : fallback
       return { parsed: normalized, raw: result.raw }
     }
+
+    // Fallback falhou — logar conteúdo raw para debug
+    const rawContent = result.raw?.lc_kwargs?.content || result.raw?.content || result.raw
+    const contentPreview = typeof rawContent === 'string'
+      ? rawContent.substring(0, 2000)
+      : JSON.stringify(rawContent, null, 2).substring(0, 2000)
+
+    console.error(`${LOG} ❌ Fallback parse falhou. Raw content (primeiros 2000 chars):`)
+    console.error(contentPreview)
 
     throw new Error('Structured output retornou parsed=null e fallback falhou')
   } catch (error: any) {
@@ -642,9 +671,9 @@ export async function generateMonetizationPlan(
   console.log(`${LOG} 💰 Iniciando geração de plano de monetização...`)
   console.log(`${LOG} ⏱️ Teasers: ${teaserCount}x ${request.teaserDuration}s | Full: ${request.fullVideoDuration / 60}min`)
 
-  // Criar modelo via LLM Factory
+  // Criar modelo via LLM Factory (com maxTokens aumentado para 15 teasers + fullVideo)
   const assignment = await getAssignment('monetization')
-  const model = await createLlmForTask('monetization')
+  const model = await createLlmForTask('monetization', { maxTokens: 32768 })
   const MonetizationPlanSchema = createMonetizationPlanSchema(teaserCount)
 
   // Carregar skill de monetização
@@ -738,12 +767,6 @@ function buildSystemPrompt(skillContent: string, request: MonetizationPlannerReq
   const teaserLabel = request.teaserDuration === 60 ? 'curtos (60s)' : request.teaserDuration === 120 ? 'médios (120s)' : 'longos (180s)'
   const fullLabel = `${request.fullVideoDuration / 60} minutos`
 
-  // Catálogo de constants para a IA conhecer as opções disponíveis
-  const catalog = serializeConstantsCatalog()
-
-  // Distribuição automática de papéis narrativos
-  const roleDistribution = serializeRoleDistribution(teaserCount)
-
   // Bloco de creative direction pré-gerada (se houver)
   let creativeDirectionBlock = ''
   if (request.creativeDirection) {
@@ -766,18 +789,6 @@ Se a direção criativa recomendou "custom", use seu melhor julgamento com base 
   }
 
   return `${skillContent}
-
-## 📚 CATÁLOGO DE CONSTANTS DISPONÍVEIS
-
-Para cada item (Full Video e cada Teaser), você DEVE atribuir:
-- **scriptStyleId** + **scriptStyleName**: Estilo de roteiro
-- **editorialObjectiveId** + **editorialObjectiveName**: Objetivo editorial
-- **angleCategory**: Ângulo narrativo (do catálogo)
-- **narrativeRole**: Papel narrativo (gateway, deep-dive ou hook-only)
-
-Use APENAS os IDs listados abaixo. Cada teaser pode ter combinação DIFERENTE do Full Video.
-
-${catalog}
 ${creativeDirectionBlock}
 
 ## ⚙️ CONFIGURAÇÃO DESTA SESSÃO
@@ -785,30 +796,6 @@ ${creativeDirectionBlock}
 - **Duração dos Teasers:** ${teaserLabel} (${request.teaserDuration} segundos cada)
 - **Duração do Full Video:** ${fullLabel} (${request.fullVideoDuration} segundos)
 - **Quantidade de Teasers:** Gere EXATAMENTE ${teaserCount} teasers
-
-### 🎭 DISTRIBUIÇÃO DE PAPÉIS NARRATIVOS (OBRIGATÓRIO)
-
-${roleDistribution}
-
-**REGRAS CRÍTICAS dos papéis:**
-- O(s) teaser(s) **gateway** DEVE(M) vir PRIMEIRO(S) no array — são a apresentação do tema
-- Os **deep-dive** assumem familiaridade básica — NO MÁXIMO 1 frase de contexto
-- Os **hook-only** começam DIRETO pela revelação/contradição — ZERO contextualização
-- NUNCA repita a mesma contextualização introdutória em múltiplos teasers
-- Cada teaser DEVE ter um angleCategory DIFERENTE dos demais
-
-### ⛔ ANTI-PADRÕES (avoidPatterns — OBRIGATÓRIO POR TEASER)
-
-Cada teaser DEVE conter 1-4 instruções de **"O QUE NÃO FAZER"** no campo \`avoidPatterns\`.
-Essas instruções são ESPECÍFICAS para o conteúdo do dossiê, NUNCA genéricas.
-
-**Regras para avoidPatterns:**
-- Cada anti-padrão começa com "NÃO" e inclui um EXEMPLO CONCRETO do que evitar
-- Para **gateway**: evite contar TUDO de uma vez (ex: "NÃO revele [fato X] que será explorado no deep-dive")
-- Para **deep-dive**: elimine contextualização (ex: "NÃO comece com '[Cidade, Ano. Um personagem...]' — isso é introdução")
-- Para **hook-only**: elimine qualquer setup (ex: "NÃO explique quem foi [Personagem] — vá direto para [revelação]")
-- Use dados REAIS do dossiê nos exemplos (nomes, locais, datas)
-- Esses anti-padrões serão usados pelo Story Architect e Script Generator para evitar erros
 
 ### Calibração de profundidade por duração:
 

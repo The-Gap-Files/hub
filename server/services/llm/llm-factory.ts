@@ -331,10 +331,10 @@ export async function createChatModel(options: CreateLlmOptions): Promise<BaseCh
         anthropicApiKey: apiKey,
         modelName: model,
         temperature,
-        maxRetries: 2,
+        maxRetries: 3,
         ...(maxTokens ? { maxTokens } : {}),
         clientOptions: {
-          timeout: 60_000,
+          timeout: 600_000, // 10 minutos para tarefas complexas (monetization com 15 teasers)
           ...(baseUrl ? { baseURL: baseUrl } : {})
         }
       })

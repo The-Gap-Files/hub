@@ -110,9 +110,26 @@ export function buildCacheableMessages(config: CacheablePromptConfig): Cacheable
         const base64 = Buffer.isBuffer(img.data)
           ? img.data.toString('base64')
           : Buffer.from(img.data).toString('base64')
+
+        // Normalizar media_type para Anthropic (image/jpg → image/jpeg)
+        let mediaType = img.mimeType || 'image/jpeg'
+        if (mediaType === 'image/jpg') mediaType = 'image/jpeg'
+
+        // Validar media_type aceito pelo Anthropic
+        const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+        if (!validTypes.includes(mediaType)) {
+          console.warn(`[PromptCache] ⚠️ Pulando imagem com media_type não suportado: ${mediaType} (Anthropic aceita: jpeg, png, gif, webp)`)
+          continue // Pular esta imagem
+        }
+
+        // Formato nativo do Anthropic (não image_url)
         contentParts.push({
-          type: 'image_url' as const,
-          image_url: { url: `data:${img.mimeType};base64,${base64}` }
+          type: 'image' as const,
+          source: {
+            type: 'base64' as const,
+            media_type: mediaType,
+            data: base64
+          }
         } as any)
       }
     }
