@@ -14,6 +14,25 @@ HOOK → CONTEXT → RISING ACTION → CLIMAX → RESOLUTION → CTA
 (0-15s)  (15-45s)    (corpo)      (virada)   (síntese)   (ação)
 ```
 
+## 🧬 ADAPTAÇÃO POR PAPEL NARRATIVO (NARRATIVE ROLES)
+
+Embora a estrutura acima seja o padrão, você deve adaptá-la RIGOROSAMENTE ao `narrativeRole` do roteiro:
+
+### GATEWAY (Porta de Entrada)
+- **Estrutura:** Segue o padrão completo (Hook -> Context -> Rising...).
+- **Context:** Essencial (15-45s). Explique tudo como se o público não soubesse nada.
+- **Tom:** Acolhedor, assume ignorância do tema.
+
+### DEEP-DIVE (Mergulho Direto)
+- **Estrutura:** HOOK -> RISING ACTION... (Contexto Minimalista).
+- **Context:** ZERO ou MÁXIMO 1 frase. O público já conhece o tema. Não explique o básico.
+- **Tom:** Insider, técnico, rápido. Vá direto aos detalhes suculentos.
+
+### HOOK-ONLY (Gancho Puro)
+- **Estrutura:** HOOK (Extendido) -> CTA. (Sem Contexto, Sem Resolução longa).
+- **Context:** PROIBIDO. Comece *in medias res*.
+- **Tom:** Urgente, chocante. O objetivo é apenas gerar curiosidade para o vídeo longo.
+
 ---
 
 ## 🎬 ESTRUTURA DETALHADA

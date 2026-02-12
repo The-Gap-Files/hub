@@ -68,13 +68,53 @@ export default defineEventHandler(async (event) => {
 
   const vs = output.visualStyleId ? getVisualStyleById(output.visualStyleId) : undefined
 
+  // ─── VISUAL CONTINUITY ENGINE (MESMA LÓGICA DO PIPELINE) ───
+  // Monta Style Anchor a partir dos campos de estilo visual
+  let styleAnchorParts: string[] = []
+  if (vs) {
+    if (vs.baseStyle) styleAnchorParts.push(vs.baseStyle)
+    if (vs.lightingTags) styleAnchorParts.push(vs.lightingTags)
+    if (vs.atmosphereTags) styleAnchorParts.push(vs.atmosphereTags)
+    if (vs.compositionTags) styleAnchorParts.push(vs.compositionTags)
+    if (vs.tags) styleAnchorParts.push(vs.tags)
+  }
+  const styleAnchor = styleAnchorParts.length > 0
+    ? `[VISUAL STYLE ANCHOR — ${styleAnchorParts.join(', ')}]`
+    : ''
+
+  // Buscar cena anterior para contexto de continuidade
+  const prevScene = await prisma.scene.findFirst({
+    where: {
+      outputId: output.id,
+      order: { lt: scene.order }
+    },
+    orderBy: { order: 'desc' },
+    select: {
+      sceneEnvironment: true,
+      visualDescription: true
+    }
+  })
+
+  // Determinar se é mesmo ambiente da cena anterior
+  const isSameEnvironment = prevScene
+    && scene.sceneEnvironment
+    && prevScene.sceneEnvironment
+    && scene.sceneEnvironment === prevScene.sceneEnvironment
+
+  // Construir prompt visual com Anchor + Continuity
   let promptToUse = body.prompt ?? scene.visualDescription
 
-  // FAIL-SAFE: garantir que a âncora de estilo está presente no prompt
-  const baseStyle = vs?.baseStyle
-  if (baseStyle && !promptToUse.toLowerCase().includes(baseStyle.toLowerCase().slice(0, 30))) {
-    console.log(`[API] ⚠️ Âncora de estilo ausente na cena — prepending baseStyle`)
-    promptToUse = `${baseStyle}, ${promptToUse}`
+  if (styleAnchor) {
+    if (isSameEnvironment && prevScene) {
+      // Mesmo ambiente → Anchor + Continuity
+      const continuityContext = prevScene.visualDescription.slice(0, 300)
+      promptToUse = `${styleAnchor}\n[VISUAL CONTINUITY — same environment "${scene.sceneEnvironment}": ${continuityContext}]\n\n${promptToUse}`
+      console.log(`[API] 🔗 Regeneração com Continuity + Anchor (env: ${scene.sceneEnvironment})`)
+    } else {
+      // Novo ambiente → Só Anchor (transição limpa)
+      promptToUse = `${styleAnchor}\n\n${promptToUse}`
+      console.log(`[API] 🎨 Regeneração com Anchor only${scene.sceneEnvironment ? ` (env: ${scene.sceneEnvironment})` : ''}`)
+    }
   }
 
   const request: ImageGenerationRequest = {
@@ -86,7 +126,7 @@ export default defineEventHandler(async (event) => {
     numVariants: 1
   }
 
-  console.log(`[API] 🖼️ [DEBUG] Regenerar imagem — Scene ${sceneId} — prompt completo:\n${request.prompt}`)
+  console.log(`[API] 🖼️ [DEBUG] Regenerar imagem — Scene ${sceneId} — prompt com anchor/continuity:\n${request.prompt}`)
 
   // 4. Gerar (com detecção de safety filter)
   let response

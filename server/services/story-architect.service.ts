@@ -11,11 +11,13 @@
  */
 
 import { z } from 'zod'
-import { SystemMessage, HumanMessage } from '@langchain/core/messages'
+import { SystemMessage, HumanMessage, AIMessage } from '@langchain/core/messages'
 import { loadSkill } from '../utils/skill-loader'
 import { createLlmForTask, getAssignment } from './llm/llm-factory'
 import type { PersonContext, NeuralInsightContext } from '../utils/format-intelligence-context'
 import { formatPersonsForPrompt, formatNeuralInsightsForPrompt } from '../utils/format-intelligence-context'
+import { buildDossierBlock } from '../utils/dossier-prompt-block'
+import { buildCacheableMessages, logCacheMetrics, shouldApplyCache } from './llm/anthropic-cache-helper'
 
 // =============================================================================
 // SCHEMA - Formato estruturado que a IA deve retornar
@@ -104,6 +106,7 @@ export interface StoryArchitectRequest {
     scriptOutline?: string
     cta?: string
     strategicNotes?: string
+    avoidPatterns?: string[]
   }
 }
 
@@ -136,6 +139,23 @@ export async function generateStoryOutline(
   const systemPrompt = buildSystemPrompt(request)
   const userPrompt = buildUserPrompt(request)
 
+  // ── Prompt Caching: montar dossiê canônico ──────────────────────
+  const dossierBlock = buildDossierBlock({
+    theme: request.theme,
+    sources: request.sources,
+    userNotes: request.userNotes,
+    persons: request.persons,
+    neuralInsights: request.neuralInsights
+  })
+
+  const isAnthropicProvider = assignment.provider.toLowerCase().includes('anthropic') || assignment.provider.toLowerCase().includes('claude')
+  const cacheResult = buildCacheableMessages({
+    dossierBlock,
+    systemPrompt,
+    taskPrompt: userPrompt,
+    providerName: isAnthropicProvider ? 'ANTHROPIC' : assignment.provider
+  })
+
   console.log(`[StoryArchitect] 📤 Enviando para ${assignment.provider} (${assignment.model})...`)
   console.log('[StoryArchitect] 🎯 Editorial Objective:', request.editorialObjective ? 'Sim' : 'Não definido')
   console.log('[StoryArchitect] 🎬 Script Style:', request.scriptStyleId || 'default')
@@ -145,11 +165,11 @@ export async function generateStoryOutline(
   if (request.monetizationContext) {
     console.log(`[StoryArchitect] 💰 Monetization: ${request.monetizationContext.itemType} (${request.monetizationContext.angleCategory})`)
   }
+  if (cacheResult.cacheEnabled) {
+    console.log(`[StoryArchitect] 🗄️ Cache ativado — dossiê: ~${cacheResult.estimatedCacheTokens} tokens`)
+  }
 
-  const messages = [
-    new SystemMessage(systemPrompt),
-    new HumanMessage(userPrompt)
-  ]
+  const messages = [...cacheResult.messages]
 
   try {
     const startTime = Date.now()
@@ -185,6 +205,73 @@ export async function generateStoryOutline(
       }
     }
 
+    // -- VALIDAÇÃO NARRATIVA (AUTO-CORREÇÃO) --
+    if (content && request.monetizationContext && request.monetizationContext.narrativeRole) {
+      const { narrativeRole, angleCategory, avoidPatterns, itemType, angle } = request.monetizationContext
+      const maxRetries = 2
+      let attempts = 0
+      let isValid = false
+
+      // Import dinâmico para evitar dependência circular se houver
+      const { validateStoryOutline } = await import('./story-validator.service')
+
+      while (!isValid && attempts < maxRetries) {
+        console.log(`[StoryArchitect] 🔍 Validando narrativa (Tentativa ${attempts + 1}/${maxRetries + 1})...`)
+
+        const validation = await validateStoryOutline(content, {
+          itemType,
+          narrativeRole,
+          angleCategory,
+          angleDescription: angle,
+          avoidPatterns
+        })
+
+        if (validation.approved) {
+          isValid = true
+          console.log(`[StoryArchitect] ✅ Outline APROVADO pelo validador.`)
+        } else {
+          attempts++
+          console.warn(`[StoryArchitect] ❌ Outline REPROVADO. Violações: ${validation.violations?.join(' | ')}`)
+
+          if (attempts <= maxRetries) {
+            const correctionInstruction = `
+🚨 FEEDBACK CRÍTICO DE CORREÇÃO (O ANTERIOR FOI REPROVADO):
+O outline gerado VIOLOU as regras narrativas do ângulo/role.
+MOTIVOS:
+${validation.violations?.map(v => `- ${v}`).join('\n')}
+
+INSTRUÇÃO DE CORREÇÃO:
+${validation.corrections}
+
+⚠️ GERE O OUTLINE NOVAMENTE CORRIGINDO ESSES PONTOS.
+MANTENHA O QUE ESTAVA BOM, MAS REMOVA/ALTERE O QUE VIOLOU AS REGRAS.
+`
+            // Adiciona feedback e tenta de novo
+            // Nota: Estamos re-usando o messages array, adicionando o output anterior e o feedback
+            // Isso mantém o contexto do que foi gerado errado para ele saber o que NÃO fazer
+            messages.push(new AIMessage(JSON.stringify(content)))
+            messages.push(new HumanMessage(correctionInstruction))
+
+            console.log(`[StoryArchitect] 🔄 Regenerando outline com feedback de correção...`)
+
+            const retryResult = await structuredLlm.invoke(messages)
+            const retryContent = retryResult.parsed as StoryOutline | null
+            // Se o retry falhar no parse, mantemos o anterior (fail safe)
+            if (retryContent) {
+              content = retryContent
+            } else {
+              console.warn(`[StoryArchitect] ⚠️ Retry falhou no parsing. Mantendo versão anterior com erros.`)
+              break // Sai do loop para não insistir em erro técnico
+            }
+          }
+        }
+      }
+
+      if (!isValid) {
+        console.warn(`[StoryArchitect] ⚠️ Outline salvo com avisos após ${attempts} tentativas de correção.`)
+      }
+    }
+
     // Extrair token usage
     const usage = rawMessage?.usage_metadata || rawMessage?.response_metadata?.usage
     const inputTokens = usage?.input_tokens ?? 0
@@ -193,6 +280,12 @@ export async function generateStoryOutline(
 
     console.log(`[StoryArchitect] ✅ Plano narrativo gerado em ${elapsed}s`)
     console.log(`[StoryArchitect] 📊 Tokens: ${inputTokens} input + ${outputTokens} output = ${totalTokens} total`)
+
+    // ── Log de métricas de cache ──────────────────────────────────
+    if (cacheResult.cacheEnabled) {
+      logCacheMetrics('StoryArchitect', rawMessage)
+    }
+
     console.log(`[StoryArchitect] 🎬 Hook: "${content.hookCandidate.substring(0, 60)}..."`)
     console.log(`[StoryArchitect] 📈 Beats: ${content.risingBeats.length} revelações progressivas`)
     console.log(`[StoryArchitect] 🎯 Clímax: ${content.climaxFormula}`)
@@ -267,7 +360,36 @@ function buildUserPrompt(request: StoryArchitectRequest): string {
       prompt += `\n💡 **NOTAS ESTRATÉGICAS DO PLANO DE MONETIZAÇÃO:**\n${mc.strategicNotes}\n`
       prompt += `Use essas notas para guiar o tom, a intensidade e os pontos de ênfase do plano narrativo.\n`
     }
-    prompt += `\n⚠️ INSTRUÇÃO CRÍTICA: Use o hook, ângulo e papel narrativo acima como GUIA. O plano narrativo deve ser coerente com essas diretrizes. Não invente um ângulo diferente.\n\n`
+    if (mc.avoidPatterns && mc.avoidPatterns.length > 0) {
+      prompt += `\n⛔ **O QUE NÃO FAZER (ANTI-PADRÕES OBRIGATÓRIOS):**\n`
+      mc.avoidPatterns.forEach((pattern, i) => {
+        prompt += `${i + 1}. ${pattern}\n`
+      })
+      prompt += `\n🚨 Os anti-padrões acima são INVIOLÁVEIS. Eles devem influenciar sua distribuição de cenas, especialmente a seção CONTEXT/SETUP.\n`
+    }
+
+    // Instrução sobre segmentDistribution.context baseada no narrativeRole
+    if (mc.narrativeRole === 'deep-dive') {
+      prompt += `\n📊 **REGRA DE DISTRIBUIÇÃO – DEEP-DIVE:** A seção "context" na segmentDistribution DEVE ser 0 ou no máximo 1. Redistribua as cenas para "rising" ou "climax". O espectador JÁ CONHECE o básico.\n`
+    } else if (mc.narrativeRole === 'hook-only') {
+      prompt += `\n📊 **REGRA DE DISTRIBUIÇÃO – HOOK-ONLY:** A seção "context" na segmentDistribution DEVE ser 0. ZERO cenas de contexto. Todas as cenas vão para "hook", "rising" e "climax".\n`
+    }
+
+    prompt += `\n⚠️ INSTRUÇÃO CRÍTICA: Use o hook, ângulo e papel narrativo acima como GUIA. O plano narrativo deve ser coerente com essas diretrizes. Não invente um ângulo diferente.\n`
+
+    // Regra de foco no ângulo — evitar contaminação narrativa
+    if (mc.narrativeRole === 'deep-dive' || mc.narrativeRole === 'hook-only') {
+      prompt += `\n🎯 **REGRA DE FOCO NARRATIVO (CRÍTICA):**\n`
+      prompt += `Este teaser tem ângulo "${mc.angle}" (${mc.angleCategory}). `
+      prompt += `TODOS os beats, o clímax e a resolução devem estar 100% DENTRO deste ângulo.\n`
+      prompt += `- NÃO faça "saltos temporais" para eventos de outros ângulos/teasers do dossiê.\n`
+      prompt += `- NÃO traga personagens ou eventos que não pertencem a este ângulo específico.\n`
+      prompt += `- O dossiê pode ter múltiplos arcos (ex: 1475 E 2019), mas este teaser cobre APENAS o ângulo "${mc.angleCategory}".\n`
+      prompt += `- Se o ângulo é sobre tortura medieval, NÃO mencione crimes modernos. Se é sobre psicologia de um atirador, NÃO reconte a história de 1475.\n`
+      prompt += `- Pense assim: se o espectador vê APENAS este teaser, ele deve sair entendendo profundamente UM aspecto, não uma colagem superficial de vários.\n`
+    }
+
+    prompt += `\n`
   }
 
   if (request.sources && request.sources.length > 0) {
@@ -415,3 +537,4 @@ IGNORAR: ${outline.whatToIgnore.length > 0 ? outline.whatToIgnore.join('; ') : '
 
 🚨 SIGA ESTE PLANO. A estrutura, ordem dos beats e distribuição de cenas já foram pensadas. Seu trabalho agora é ESCREVER cada cena seguindo este blueprint.`
 }
+

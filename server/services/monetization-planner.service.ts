@@ -12,6 +12,8 @@ import { loadSkill } from '../utils/skill-loader'
 import { serializeConstantsCatalog, serializeRoleDistribution } from '../utils/constants-catalog'
 import { createLlmForTask, getAssignment } from './llm/llm-factory'
 import type { CreativeDirection } from './creative-direction-advisor.service'
+import { buildDossierBlock } from '../utils/dossier-prompt-block'
+import { buildCacheableMessages, logCacheMetrics } from './llm/anthropic-cache-helper'
 
 const LOG = '[MonetizationPlanner]'
 
@@ -417,23 +419,30 @@ async function invokeWithFallback(
         } catch (secondParseErr: any) {
           console.warn(`${LOG} ⚠️ Sanitização básica falhou: ${secondParseErr.message}`)
 
-          // Última tentativa: extrair o primeiro bloco {} completo
-          const jsonMatch = sanitized.match(/\{[\s\S]*\}/)
-          if (jsonMatch) {
-            try {
-              parsed = JSON.parse(jsonMatch[0])
-              console.log(`${LOG} ✅ Bloco JSON extraído e parseado com sucesso`)
-            } catch (thirdParseErr: any) {
-              console.error(`${LOG} ❌ Todas as tentativas de parse falharam`)
+          // Tentativa avançada: escapar aspas internas (ex: "texto "interno" texto")
+          try {
+            const escaped = sanitized.replace(/(\w)"(\w)/g, '$1\\"$2')
+            parsed = JSON.parse(escaped)
+            console.log(`${LOG} ✅ JSON com aspas escapadas parseado com sucesso`)
+          } catch (escapeErr) {
+            // Última tentativa: extrair o primeiro bloco {} completo
+            const jsonMatch = sanitized.match(/\{[\s\S]*\}/)
+            if (jsonMatch) {
+              try {
+                parsed = JSON.parse(jsonMatch[0])
+                console.log(`${LOG} ✅ Bloco JSON extraído e parseado com sucesso`)
+              } catch (thirdParseErr: any) {
+                console.error(`${LOG} ❌ Todas as tentativas de parse falharam`)
+                console.error(`${LOG} 🔍 Texto recebido completo (${jsonText.length} chars):`)
+                console.error(jsonText)
+                throw firstParseErr // Lançar o erro original (mais preciso)
+              }
+            } else {
+              console.error(`${LOG} ❌ Nenhum bloco JSON encontrado no texto`)
               console.error(`${LOG} 🔍 Texto recebido completo (${jsonText.length} chars):`)
               console.error(jsonText)
-              throw firstParseErr // Lançar o erro original (mais preciso)
+              throw firstParseErr
             }
-          } else {
-            console.error(`${LOG} ❌ Nenhum bloco JSON encontrado no texto`)
-            console.error(`${LOG} 🔍 Texto recebido completo (${jsonText.length} chars):`)
-            console.error(jsonText)
-            throw firstParseErr
           }
         }
       }
@@ -472,11 +481,18 @@ const FullVideoSuggestionSchema = z.object({
   estimatedViews: z.number().describe('Estimativa conservadora de views'),
   platform: z.enum(['YouTube']).describe('Plataforma obrigatória: YouTube'),
   format: z.enum(['full-youtube']).describe('Formato obrigatório: full-youtube'),
-  // ── Creative Direction ─────────────────────────────────────────
-  scriptStyleId: z.string().describe('ID do estilo de roteiro atribuído (ex: "mystery", "documentary")'),
-  scriptStyleName: z.string().describe('Nome legível do estilo de roteiro'),
-  editorialObjectiveId: z.string().describe('ID do objetivo editorial (ex: "hidden-truth", "viral-hook")'),
-  editorialObjectiveName: z.string().describe('Nome legível do objetivo editorial'),
+  // ── Creative Direction (ATENÇÃO: roteiro ≠ visual) ─────────────
+  scriptStyleId: z.string().describe(
+    'ID do ESTILO DE ROTEIRO (como o narrador conta a história). ' +
+    'IDs válidos: "documentary", "mystery", "narrative", "educational". ' +
+    'NÃO confundir com estilo visual (noir-cinematic, photorealistic, etc).'
+  ),
+  scriptStyleName: z.string().describe('Nome legível do estilo de roteiro (ex: "Documentário Profissional", "Mistério Real")'),
+  editorialObjectiveId: z.string().describe(
+    'ID do objetivo editorial. IDs válidos: "full-reveal", "hidden-truth", "cliffhanger", ' +
+    '"mystery-layers", "deep-analysis", "explainer", "emotional-impact", "viral-hook", "controversy".'
+  ),
+  editorialObjectiveName: z.string().describe('Nome legível do objetivo editorial (ex: "Verdade Oculta", "Gancho Viral")'),
   // ── Visual Preview ──────────────────────────────────────────────
   visualPrompt: z.string().describe('Prompt de imagem (inglês, 1 parágrafo) descrevendo uma cena representativa no estilo visual ÚNICO do plano. Deve incluir atmosfera, iluminação, composição e estilo artístico.'),
 })
@@ -500,11 +516,29 @@ const TeaserSuggestionSchema = z.object({
   platform: z.enum(['TikTok', 'YouTube Shorts', 'Instagram Reels']).describe('Plataforma alvo'),
   format: z.enum(['teaser-tiktok', 'teaser-reels']).describe('ID do formato de vídeo'),
   estimatedViews: z.number().describe('Estimativa de views na plataforma'),
-  // ── Creative Direction ─────────────────────────────────────────
-  scriptStyleId: z.string().describe('ID do estilo de roteiro atribuído a este teaser'),
-  scriptStyleName: z.string().describe('Nome legível do roteiro'),
-  editorialObjectiveId: z.string().describe('ID do objetivo editorial deste teaser'),
+  // ── Creative Direction (ATENÇÃO: roteiro ≠ visual) ─────────────
+  scriptStyleId: z.string().describe(
+    'ID do ESTILO DE ROTEIRO (como o narrador conta). ' +
+    'IDs válidos: "documentary", "mystery", "narrative", "educational". ' +
+    'NÃO é estilo visual — noir-cinematic, photorealistic são visuais, NÃO roteiro.'
+  ),
+  scriptStyleName: z.string().describe('Nome legível do estilo de roteiro (ex: "Documentário Profissional", "Mistério Real")'),
+  editorialObjectiveId: z.string().describe(
+    'ID do objetivo editorial. IDs válidos: "full-reveal", "hidden-truth", "cliffhanger", ' +
+    '"mystery-layers", "deep-analysis", "explainer", "emotional-impact", "viral-hook", "controversy".'
+  ),
   editorialObjectiveName: z.string().describe('Nome legível do objetivo editorial'),
+  // ── Anti-Padrões (O QUE NÃO FAZER) ────────────────────────────
+  avoidPatterns: z.array(z.string()).min(1).max(4).describe(
+    'Lista de 1-4 instruções de "O QUE NÃO FAZER" específicas para este teaser. ' +
+    'Cada item deve ser uma instrução CONCRETA baseada no conteúdo do dossiê, não genérica. ' +
+    'Ex: "NÃO comece com \'Trento, 1475. Um menino...\' — isso é contextualização introdutória", ' +
+    '"NÃO explique quem foi Simão de Trento — assuma que o espectador já sabe", ' +
+    '"NÃO use tom de documentário neutro — este teaser exige urgência". ' +
+    'Para gateway, os avoidPatterns focam em evitar excesso (não contar TUDO). ' +
+    'Para deep-dive, focam em eliminar contextualização. ' +
+    'Para hook-only, focam em eliminar qualquer setup.'
+  ),
   // ── Visual Preview ──────────────────────────────────────────────
   visualPrompt: z.string().describe('Prompt de imagem (inglês, 1 parágrafo) para este teaser, usando o estilo visual ÚNICO do plano. Deve refletir o ângulo narrativo específico do teaser.'),
 })
@@ -620,12 +654,37 @@ export async function generateMonetizationPlan(
   const systemPrompt = buildSystemPrompt(skillContent, request)
   const userPrompt = buildUserPrompt(request)
 
-  console.log(`${LOG} 📤 Enviando para ${assignment.provider} (${assignment.model})...`)
+  // ── Prompt Caching: montar dossiê canônico ──────────────────────
+  const dossierBlock = buildDossierBlock({
+    theme: request.theme,
+    title: request.title,
+    sources: request.sources?.map(s => ({
+      title: s.title, content: s.content, type: s.sourceType,
+      weight: s.weight ?? 1.0
+    })),
+    userNotes: request.notes?.map(n => n.content),
+    persons: request.persons?.map(p => ({
+      name: p.name,
+      role: p.role,
+      description: p.description,
+      relevance: p.relevance
+    }))
+  })
 
-  const messages = [
-    new SystemMessage(systemPrompt),
-    new HumanMessage(userPrompt)
-  ]
+  const isAnthropicProvider = assignment.provider.toLowerCase().includes('anthropic') || assignment.provider.toLowerCase().includes('claude')
+  const cacheResult = buildCacheableMessages({
+    dossierBlock,
+    systemPrompt,
+    taskPrompt: userPrompt,
+    providerName: isAnthropicProvider ? 'ANTHROPIC' : assignment.provider
+  })
+
+  console.log(`${LOG} 📤 Enviando para ${assignment.provider} (${assignment.model})...`)
+  if (cacheResult.cacheEnabled) {
+    console.log(`${LOG} 🗄️ Cache ativado — dossiê: ~${cacheResult.estimatedCacheTokens} tokens`)
+  }
+
+  const messages = [...cacheResult.messages]
 
   try {
     const startTime = Date.now()
@@ -645,6 +704,11 @@ export async function generateMonetizationPlan(
     console.log(`${LOG} 📊 1 Full Video + ${content?.teasers?.length ?? '?'} Teasers`)
     console.log(`${LOG} 📊 Tokens: ${inputTokens} input + ${outputTokens} output = ${totalTokens} total`)
     console.log(`${LOG} 💵 Receita estimada: ${content?.estimatedTotalRevenue ?? 'N/A'}`)
+
+    // ── Log de métricas de cache ──────────────────────────────────
+    if (cacheResult.cacheEnabled) {
+      logCacheMetrics('Monetization', rawMessage)
+    }
 
     // Validar que o JSON tem a estrutura mínima esperada
     if (!content?.teasers || !content?.fullVideo) {
@@ -732,6 +796,19 @@ ${roleDistribution}
 - Os **hook-only** começam DIRETO pela revelação/contradição — ZERO contextualização
 - NUNCA repita a mesma contextualização introdutória em múltiplos teasers
 - Cada teaser DEVE ter um angleCategory DIFERENTE dos demais
+
+### ⛔ ANTI-PADRÕES (avoidPatterns — OBRIGATÓRIO POR TEASER)
+
+Cada teaser DEVE conter 1-4 instruções de **"O QUE NÃO FAZER"** no campo \`avoidPatterns\`.
+Essas instruções são ESPECÍFICAS para o conteúdo do dossiê, NUNCA genéricas.
+
+**Regras para avoidPatterns:**
+- Cada anti-padrão começa com "NÃO" e inclui um EXEMPLO CONCRETO do que evitar
+- Para **gateway**: evite contar TUDO de uma vez (ex: "NÃO revele [fato X] que será explorado no deep-dive")
+- Para **deep-dive**: elimine contextualização (ex: "NÃO comece com '[Cidade, Ano. Um personagem...]' — isso é introdução")
+- Para **hook-only**: elimine qualquer setup (ex: "NÃO explique quem foi [Personagem] — vá direto para [revelação]")
+- Use dados REAIS do dossiê nos exemplos (nomes, locais, datas)
+- Esses anti-padrões serão usados pelo Story Architect e Script Generator para evitar erros
 
 ### Calibração de profundidade por duração:
 
@@ -896,55 +973,43 @@ Gere um ${isTeaser ? `teaser de ${request.teaserDuration}s` : `Full Video de ${r
 // =============================================================================
 
 function buildUserPrompt(request: MonetizationPlannerRequest): string {
-  let prompt = `Analise o seguinte dossiê e crie um plano de monetização Document-First:\n\n`
+  // O dossiê (theme, sources, notes, persons) agora vem via buildDossierBlock (cacheado)
+  // Este prompt contém APENAS as instruções específicas de monetização
 
-  prompt += `📋 TÍTULO: ${request.title}\n`
-  prompt += `📋 TEMA: ${request.theme}\n\n`
+  let prompt = `Crie um plano de monetização Document-First para o dossiê acima:\n\n`
 
-  if (request.sources && request.sources.length > 0) {
-    prompt += `📚 FONTES DO DOSSIÊ (ordenadas por peso/relevância):\n`
-    const sorted = [...request.sources].sort((a, b) => (b.weight ?? 1.0) - (a.weight ?? 1.0))
-    sorted.forEach((source, i) => {
-      const weightLabel = (source.weight ?? 1.0) !== 1.0 ? ` [peso: ${source.weight}]` : ''
-      prompt += `[${i + 1}] (${source.sourceType}) ${source.title}${weightLabel}\n${source.content}\n---\n`
-    })
-    prompt += '\n'
+  // ── Parâmetros de duração ──────────────────────────────────────────
+  prompt += `⏱️ DURAÇÕES OBRIGATÓRIAS:\n`
+  prompt += `- Teasers: ${request.teaserDuration}s cada\n`
+  prompt += `- Full Video: ${request.fullVideoDuration / 60} minutos\n\n`
+
+  // ── Creative Direction (se fornecida) ──────────────────────────────
+  if (request.creativeDirection) {
+    const cd = request.creativeDirection
+    prompt += `🎨 DIREÇÃO CRIATIVA (OBRIGATÓRIA):\n`
+    prompt += `Visual Style: ${cd.fullVideo.visualStyle.name} (ID: ${cd.fullVideo.visualStyle.id})\n`
+    prompt += `Script Style: ${cd.fullVideo.scriptStyle.name} (ID: ${cd.fullVideo.scriptStyle.id})\n`
+    prompt += `Editorial Objective: ${cd.fullVideo.editorialObjective.name} (ID: ${cd.fullVideo.editorialObjective.id})\n`
+    prompt += `\n⚠️ TODOS os itens do plano (Full Video + Teasers) DEVEM usar esses IDs. Não invente IDs novos.\n\n`
   }
 
-  if (request.notes && request.notes.length > 0) {
-    prompt += `🧠 NOTAS E INSIGHTS DO DOSSIÊ:\n`
-    request.notes.forEach((note, i) => {
-      prompt += `[${i + 1}] (${note.noteType}) ${note.content}\n`
-    })
-    prompt += '\n'
-  }
+  // ── Catálogo de constantes ────────────────────────────────────────
+  prompt += serializeConstantsCatalog()
+  prompt += `\n\n`
 
-  if (request.images && request.images.length > 0) {
-    prompt += `🖼️ IMAGENS DE REFERÊNCIA:\n`
-    request.images.forEach((img, i) => {
-      prompt += `[${i + 1}] ${img.description}\n`
-    })
-    prompt += '\n'
-  }
+  // ── Role Distribution Strategy ─────────────────────────────────────
+  const teaserCount = Math.min(15, Math.max(4, request.teaserCount ?? 6))
+  prompt += serializeRoleDistribution(teaserCount)
+  prompt += `\n\n`
 
-  // Pessoas-chave do dossiê (permite hooks com nomes reais)
-  if (request.persons && request.persons.length > 0) {
-    prompt += `👤 PESSOAS-CHAVE DO DOSSIÊ:\n`
-    request.persons.forEach((p, i) => {
-      const roleLabel = p.role ? ` (${p.role})` : ''
-      const descLabel = p.description ? ` — ${p.description}` : ''
-      prompt += `[${i + 1}] ${p.name}${roleLabel}${descLabel} [${p.relevance}]\n`
-    })
-    prompt += `\n⚠️ USE OS NOMES REAIS DAS PESSOAS nos hooks e ângulos. Hooks com nomes próprios são mais impactantes que referências genéricas como "um homem" ou "a vítima".\n\n`
-  }
-
-  // Dados estruturados de pesquisa
-  if (request.researchData) {
-    prompt += `📊 DADOS ESTRUTURADOS DE PESQUISA:\n${JSON.stringify(request.researchData, null, 2)}\n\n`
-  }
-
-  prompt += `\nCrie o plano de monetização completo em JSON estruturado.`
-  prompt += `\nLembre-se: teasers de ${request.teaserDuration}s e full video de ${request.fullVideoDuration / 60} minutos.`
+  // ── Instruções finais ──────────────────────────────────────────────
+  prompt += `\n🎯 INSTRUÇÕES FINAIS:\n`
+  prompt += `1. Gere 1 Full Video + ${Math.min(15, Math.max(4, request.teaserCount ?? 6))} Teasers\n`
+  prompt += `2. Cada item deve ter hook ÚNICO e ângulo DIFERENTE\n`
+  prompt += `3. Use os IDs do catálogo de constantes (não invente novos)\n`
+  prompt += `4. Inclua avoidPatterns específicos para cada teaser (baseados no dossiê)\n`
+  prompt += `5. Gere visualPrompt em inglês para cada item (1 parágrafo, atmosfera + composição)\n`
+  prompt += `6. Retorne o plano completo em JSON estruturado\n`
 
   return prompt
 }

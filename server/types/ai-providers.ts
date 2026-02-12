@@ -94,6 +94,7 @@ export interface ScriptGenerationRequest {
   // Papel narrativo do item de monetização (governa profundidade de contextualização)
   narrativeRole?: 'gateway' | 'deep-dive' | 'hook-only'
   strategicNotes?: string // Notas estratégicas do plano de monetização
+  avoidPatterns?: string[] // Anti-padrões do monetizador ("O que NÃO fazer")
 }
 
 export interface ScriptScene {

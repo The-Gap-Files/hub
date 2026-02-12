@@ -359,6 +359,15 @@ EXEMPLO DO QUE NÃO FAZER: Se o hook é sobre uma confissão sob tortura, NÃO c
     baseInstruction += `\n\n💡 NOTAS ESTRATÉGICAS DO PLANO DE MONETIZAÇÃO:\n${request.strategicNotes}\nUse essas notas para guiar o tom, a intensidade e os pontos de ênfase do roteiro.`
   }
 
+  // Anti-padrões do monetizador (instruções de "O que NÃO fazer")
+  if (request.avoidPatterns && request.avoidPatterns.length > 0) {
+    baseInstruction += `\n\n⛔ O QUE NÃO FAZER (ANTI-PADRÕES INVIOLÁVEIS do plano de monetização):\n`
+    request.avoidPatterns.forEach((pattern, i) => {
+      baseInstruction += `${i + 1}. ${pattern}\n`
+    })
+    baseInstruction += `\n🚨 As instruções acima são INVIOLÁVEIS. Se qualquer cena do seu roteiro viola um desses anti-padrões, REESCREVA a cena antes de finalizar.`
+  }
+
   if (request.additionalContext) {
     baseInstruction += `\n\n➕ CONTEXTO ADICIONAL:\n${request.additionalContext}`
   }

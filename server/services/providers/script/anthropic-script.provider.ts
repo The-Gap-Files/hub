@@ -19,6 +19,8 @@ import {
   fallbackParseRawResponse,
   extractTokenUsage
 } from './shared-script-prompts'
+import { buildDossierBlock } from '../../../utils/dossier-prompt-block'
+import { buildCacheableMessages, logCacheMetrics } from '../../llm/anthropic-cache-helper'
 
 export class AnthropicScriptProvider implements IScriptGenerator {
   private model: ChatAnthropic
@@ -57,22 +59,34 @@ export class AnthropicScriptProvider implements IScriptGenerator {
     console.log('Target Duration:', request.targetDuration, 'seconds')
     console.log('Target WPM:', request.targetWPM)
     console.log('Ideal Scene Count:', Math.ceil(request.targetDuration / 5))
-    console.log('--- [DEBUG] LANGCHAIN SYSTEM PROMPT ---')
-    console.log(systemPrompt)
 
-    // Preparar mensagens (Suporte Multimodal)
-    const messages: BaseMessage[] = [new SystemMessage(systemPrompt)]
+    // ── Prompt Caching: montar dossiê canônico ──────────────────────
+    const dossierBlock = buildDossierBlock({
+      theme: request.theme,
+      sources: request.sources?.map(s => ({
+        title: s.title, content: s.content, type: s.type,
+        weight: (s as any).weight ?? 1.0
+      })),
+      userNotes: request.userNotes,
+      persons: request.persons,
+      neuralInsights: request.neuralInsights
+    })
 
-    const humanContent: any[] = [{ type: 'text', text: userPrompt }]
+    const { messages, cacheEnabled, estimatedCacheTokens } = buildCacheableMessages({
+      dossierBlock,
+      systemPrompt,
+      taskPrompt: userPrompt,
+      images: request.images,
+      providerName: this.getName()
+    })
 
-    // Injetar imagens se disponíveis (Claude Vision)
-    humanContent.push(...processImagesForLangChain(request.images, LOG))
-
-    messages.push(new HumanMessage({ content: humanContent }))
+    if (cacheEnabled) {
+      console.log(`${LOG} 🗄️ Cache ativado — dossiê: ~${estimatedCacheTokens} tokens`)
+    }
 
     try {
       const startTime = Date.now()
-      console.log(`${LOG} 📤 Enviando request multimodal para LangChain + Claude...`)
+      console.log(`${LOG} 📤 Enviando request para LangChain + Claude...`)
       console.log(`${LOG} 🔍 Schema esperado: title, summary, scenes, backgroundMusic, backgroundMusicTracks`)
 
       const result = await structuredLlm.invoke(messages)
@@ -84,6 +98,11 @@ export class AnthropicScriptProvider implements IScriptGenerator {
 
       const tokenUsage = extractTokenUsage(rawMessage)
       console.log(`${LOG} 📊 Token Usage REAL: ${tokenUsage.inputTokens} input + ${tokenUsage.outputTokens} output = ${tokenUsage.totalTokens} total`)
+
+      // ── Log de métricas de cache ──────────────────────────────────
+      if (cacheEnabled) {
+        logCacheMetrics('Script', rawMessage)
+      }
 
       // FALLBACK: Se withStructuredOutput não conseguiu parsear (Zod v4 compat ou output truncado)
       if (!content) {

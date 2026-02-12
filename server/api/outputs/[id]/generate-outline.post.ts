@@ -35,6 +35,7 @@ export default defineEventHandler(async (event) => {
     scriptStyleName?: string
     editorialObjectiveId?: string
     editorialObjectiveName?: string
+    avoidPatterns?: string[]
   } | undefined
 
   console.log(`[API] Generating story outline for Output ${outputId}${feedback ? ` with feedback: "${feedback}"` : ''}${monetizationContext ? ` from monetization (${monetizationContext.itemType}: ${monetizationContext.angleCategory})` : ''}`)
@@ -97,6 +98,7 @@ export default defineEventHandler(async (event) => {
         scriptStyleName: monetizationContext.scriptStyleName,
         editorialObjectiveId: monetizationContext.editorialObjectiveId,
         editorialObjectiveName: monetizationContext.editorialObjectiveName,
+        avoidPatterns: monetizationContext.avoidPatterns,
       }
     }
     await prisma.output.update({

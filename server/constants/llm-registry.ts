@@ -20,6 +20,7 @@ export type LlmTaskId =
   | 'script'              // Geração de roteiro completo
   | 'analysis'            // Análise de insights neurais
   | 'story-architect'     // Planejamento narrativo / outline
+  | 'story-validator'     // Validação de outline (checa aderência a regras narrativas)
   | 'monetization'        // Plano de monetização
   | 'intelligence-query'  // Consulta manual ao dossiê
   | 'creative-direction'  // Consultoria de direção criativa
@@ -156,6 +157,16 @@ export const LLM_TASKS: Record<LlmTaskId, LlmTask> = {
     requiresLargeContext: true,
     defaultProvider: 'anthropic',
     defaultModel: 'claude-sonnet-4-20250514'
+  },
+  'story-validator': {
+    id: 'story-validator',
+    label: 'Validador de Narrativa',
+    description: 'Valida outlines contra regras de role e ângulo narrativo. Tarefa analítica que exige precisão, não criatividade.',
+    iconKey: 'check-circle',
+    requiresStructuredOutput: true,
+    requiresLargeContext: false,
+    defaultProvider: 'groq',
+    defaultModel: 'llama-3.3-70b-versatile'
   },
   monetization: {
     id: 'monetization',

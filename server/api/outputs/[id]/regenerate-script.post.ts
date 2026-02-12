@@ -127,6 +127,10 @@ export default defineEventHandler(async (event) => {
       promptContext.additionalContext = `🎯 OBJETIVO EDITORIAL (CRÍTICO - GOVERNA TODA A NARRATIVA):\n${monetizationMeta.editorialObjectiveName}\n\n${promptContext.additionalContext}`
       console.log(`[RegenerateScript] 🎯 Editorial sobrescrito pelo monetizador: ${monetizationMeta.editorialObjectiveId}`)
     }
+    if (monetizationMeta.avoidPatterns && monetizationMeta.avoidPatterns.length > 0) {
+      promptContext.avoidPatterns = monetizationMeta.avoidPatterns
+      console.log(`[RegenerateScript] ⛔ ${monetizationMeta.avoidPatterns.length} anti-padrões injetados`)
+    }
   }
 
   try {

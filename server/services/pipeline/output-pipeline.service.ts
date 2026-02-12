@@ -236,7 +236,13 @@ export class OutputPipelineService {
         scriptLog.info(`🎯 Objetivo editorial sobrescrito pelo monetizador: ${meta.editorialObjectiveId} (${meta.editorialObjectiveName})`)
       }
 
-      scriptLog.info(`💰 Monetization meta: role=${meta.narrativeRole || 'none'}, style=${meta.scriptStyleId || 'default'}, editorial=${meta.editorialObjectiveId || 'default'}, notes=${meta.strategicNotes ? 'yes' : 'no'}`)
+      // Anti-padrões do monetizador (instruções de "O que NÃO fazer")
+      if (meta.avoidPatterns && meta.avoidPatterns.length > 0) {
+        promptContext.avoidPatterns = meta.avoidPatterns
+        scriptLog.info(`⛔ ${meta.avoidPatterns.length} anti-padrões do monetizador injetados`)
+      }
+
+      scriptLog.info(`💰 Monetization meta: role=${meta.narrativeRole || 'none'}, style=${meta.scriptStyleId || 'default'}, editorial=${meta.editorialObjectiveId || 'default'}, avoidPatterns=${meta.avoidPatterns?.length || 0}, notes=${meta.strategicNotes ? 'yes' : 'no'}`)
     }
 
     // Gerar roteiro

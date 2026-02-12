@@ -14,6 +14,25 @@ HOOK → PROMISE → RISING MYSTERY → CLIMAX/TWIST → RESOLUTION → CTA
 (0-3s)  (3-15s)     (corpo)          (virada)      (síntese)    (ação)
 ```
 
+## 🧬 ADAPTAÇÃO POR PAPEL NARRATIVO (NARRATIVE ROLES)
+
+Embora o mistério seja a chave, o nível de contexto muda drasticamente conforme o ROLE:
+
+### GATEWAY (Porta de Entrada)
+- **Estrutura:** Completa (Hook -> Promise com Contexto -> Rising...).
+- **Context/Promise:** Essencial. Explique O QUE é o mistério para quem nunca ouviu falar.
+- **Tom:** Conspiratório convidativo. "Você sabia que...?"
+
+### DEEP-DIVE (Mergulho Direto)
+- **Estrutura:** HOOK -> RISING MYSTERY (Sem re-explicar o básico).
+- **Context/Promise:** ZERO ou MÁXIMO 1 frase. O público já conhece a teoria. Vá para a evidência nova.
+- **Tom:** Insider, "apenas para quem sabe" (red pill).
+
+### HOOK-ONLY (Gancho Puro)
+- **Estrutura:** HOOK (Extendido) -> CTA.
+- **Context:** PROIBIDO. Jogue a evidência na cara do espectador.
+- **Tom:** Urgente, pânico, revelação súbita.
+
 ---
 
 ## 🎬 ESTRUTURA DETALHADA

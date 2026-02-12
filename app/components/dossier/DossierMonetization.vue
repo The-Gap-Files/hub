@@ -532,6 +532,23 @@
                 <p class="text-xs text-purple-300 italic">{{ teaser.cta }}</p>
               </div>
 
+              <!-- ── Anti-padrões (O que NÃO fazer) ── -->
+              <div v-if="teaser.avoidPatterns && teaser.avoidPatterns.length > 0">
+                <label class="mono-label text-xs text-red-500/80 mb-1.5 block flex items-center gap-1">
+                  <ShieldAlert :size="11" />
+                  O que NÃO fazer
+                </label>
+                <ul class="space-y-1">
+                  <li
+                    v-for="(pattern, pi) in teaser.avoidPatterns"
+                    :key="pi"
+                    class="text-[11px] text-red-400/70 leading-relaxed pl-3 relative before:content-['⛔'] before:absolute before:left-0 before:text-[9px]"
+                  >
+                    {{ pattern }}
+                  </li>
+                </ul>
+              </div>
+
               <!-- ── Creative Direction Badges (por teaser) ── -->
               <div v-if="teaser.scriptStyleId" class="flex flex-wrap gap-1.5">
                 <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-violet-500/8 border border-violet-500/10 text-[10px] font-medium text-violet-300/80" title="Roteiro">

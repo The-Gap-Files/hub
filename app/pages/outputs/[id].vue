@@ -3007,6 +3007,7 @@ const selectedMonetizationItem = ref<{
   scriptStyleName?: string
   editorialObjectiveId?: string
   editorialObjectiveName?: string
+  avoidPatterns?: string[]
 } | null>(null)
 
 async function loadMonetizationPlan() {
@@ -3046,7 +3047,8 @@ function selectMonetizationTeaser(teaser: any, index: number) {
     scriptStyleId: teaser.scriptStyleId,
     scriptStyleName: teaser.scriptStyleName,
     editorialObjectiveId: teaser.editorialObjectiveId,
-    editorialObjectiveName: teaser.editorialObjectiveName
+    editorialObjectiveName: teaser.editorialObjectiveName,
+    avoidPatterns: teaser.avoidPatterns
   }
 }
 
@@ -3067,7 +3069,8 @@ function selectMonetizationFullVideo(fullVideo: any) {
     scriptStyleId: fullVideo.scriptStyleId,
     scriptStyleName: fullVideo.scriptStyleName,
     editorialObjectiveId: fullVideo.editorialObjectiveId,
-    editorialObjectiveName: fullVideo.editorialObjectiveName
+    editorialObjectiveName: fullVideo.editorialObjectiveName,
+    avoidPatterns: fullVideo.avoidPatterns
   }
 }
 
