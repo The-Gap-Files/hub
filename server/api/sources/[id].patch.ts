@@ -5,7 +5,8 @@ const UpdateSourceSchema = z.object({
   title: z.string().min(1).max(255).optional(),
   content: z.string().min(1).optional(),
   url: z.union([z.string().url(), z.literal('')]).optional().transform(v => v || undefined),
-  author: z.string().max(255).optional()
+  author: z.string().max(255).optional(),
+  weight: z.number().min(0.1).max(5.0).optional()
 })
 
 export default defineEventHandler(async (event) => {

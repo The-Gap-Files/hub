@@ -50,7 +50,8 @@ export default defineEventHandler(async (event) => {
         sources: dossier.sources.map(s => ({
           title: s.title,
           content: s.content,
-          sourceType: s.sourceType
+          sourceType: s.sourceType,
+          weight: s.weight ?? 1.0
         })),
         existingNotes: dossier.notes.map(n => ({
           content: n.content,

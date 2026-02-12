@@ -90,12 +90,18 @@ export interface ScriptGenerationRequest {
     content: string
     noteType: 'insight' | 'curiosity' | 'research'
   }>
+
+  // Papel narrativo do item de monetização (governa profundidade de contextualização)
+  narrativeRole?: 'gateway' | 'deep-dive' | 'hook-only'
+  strategicNotes?: string // Notas estratégicas do plano de monetização
 }
 
 export interface ScriptScene {
   order: number
   narration: string
   visualDescription: string
+  sceneEnvironment?: string // Identificador do ambiente (ex: "bishop_study", "canal_dawn") para continuidade visual
+  motionDescription?: string // Instruções de movimento para i2v (câmera, sujeito, atmosfera dinâmica)
   audioDescription?: string // Descrição de SFX ou atmosfera sonora
   estimatedDuration: number // em segundos
 }

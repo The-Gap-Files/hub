@@ -52,7 +52,8 @@ export default defineEventHandler(async (event) => {
     sources: dossier.sources?.map((s: any) => ({
       title: s.title,
       content: s.content,
-      type: s.sourceType
+      type: s.sourceType,
+      weight: s.weight ?? 1.0
     })) || [],
 
     // Mantém notas originais
@@ -101,9 +102,31 @@ export default defineEventHandler(async (event) => {
       ? formatOutlineForPrompt(output.storyOutline as unknown as StoryOutline)
       : undefined,
 
+    // 3.1 Extrair metadados de monetização do outline
+    narrativeRole: (output.storyOutline as any)?._monetizationMeta?.narrativeRole || undefined,
+    strategicNotes: (output.storyOutline as any)?._monetizationMeta?.strategicNotes || undefined,
+
     // 4. INJETAR O ALINHAMENTO/FEEDBACK DO USUÁRIO
     // Adicionamos como um contexto adicional prioritário ou nota
     additionalContext: `⚠️ SOLICITAÇÃO DE REVISÃO DO USUÁRIO (ALTA PRIORIDADE):\nO usuário solicitou alterações específicas no roteiro anterior. Ignore as versões anteriores e gere um novo roteiro seguindo estritamente estas instruções:\n"${body.feedback}"`
+  }
+
+  // 4.1 Sobrescrever estilo de roteiro e editorial do monetizador (se disponível no outline)
+  const monetizationMeta = (output.storyOutline as any)?._monetizationMeta
+  if (monetizationMeta) {
+    if (monetizationMeta.scriptStyleId) {
+      const monetizationStyle = getScriptStyleById(monetizationMeta.scriptStyleId)
+      if (monetizationStyle) {
+        promptContext.scriptStyleDescription = monetizationStyle.description
+        promptContext.scriptStyleInstructions = monetizationStyle.instructions
+        console.log(`[RegenerateScript] 🎭 Estilo sobrescrito pelo monetizador: ${monetizationMeta.scriptStyleId}`)
+      }
+    }
+    if (monetizationMeta.editorialObjectiveId && monetizationMeta.editorialObjectiveName) {
+      // Combinar editorial do monetizador com feedback do usuário
+      promptContext.additionalContext = `🎯 OBJETIVO EDITORIAL (CRÍTICO - GOVERNA TODA A NARRATIVA):\n${monetizationMeta.editorialObjectiveName}\n\n${promptContext.additionalContext}`
+      console.log(`[RegenerateScript] 🎯 Editorial sobrescrito pelo monetizador: ${monetizationMeta.editorialObjectiveId}`)
+    }
   }
 
   try {
@@ -184,6 +207,8 @@ export default defineEventHandler(async (event) => {
             order: index,
             narration: scene.narration,
             visualDescription: scene.visualDescription,
+            sceneEnvironment: scene.sceneEnvironment || null,
+            motionDescription: scene.motionDescription || null,
             audioDescription: scene.audioDescription || null,
             estimatedDuration: scene.estimatedDuration || 5
           }))

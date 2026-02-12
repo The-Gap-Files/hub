@@ -28,6 +28,7 @@ export type LlmTaskId =
   | 'sanitize'            // Reescrita de prompts bloqueados por filtro
   | 'thumbnail-prompt'    // Geração de prompts para thumbnails
   | 'social-kit'          // Kit de publicação para redes sociais
+  | 'deep-research-prompt' // Gera prompt otimizado para Deep Research
 
 export interface LlmModel {
   id: string
@@ -235,6 +236,16 @@ export const LLM_TASKS: Record<LlmTaskId, LlmTask> = {
     requiresLargeContext: false,
     defaultProvider: 'anthropic',
     defaultModel: 'claude-haiku-3-5-20241022'
+  },
+  'deep-research-prompt': {
+    id: 'deep-research-prompt',
+    label: 'Prompt de Deep Research',
+    description: 'Gera prompt de pesquisa otimizado para o Gemini Deep Research, baseado nos metadados do dossiê.',
+    iconKey: 'search',
+    requiresStructuredOutput: false,
+    requiresLargeContext: false,
+    defaultProvider: 'groq',
+    defaultModel: 'llama-3.3-70b-versatile'
   }
 }
 

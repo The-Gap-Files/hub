@@ -80,7 +80,7 @@ export type CreativeDirection = z.infer<typeof CreativeDirectionSchema>
 export interface CreativeDirectionRequest {
   theme: string
   title: string
-  sources?: Array<{ title: string; content: string; sourceType: string }>
+  sources?: Array<{ title: string; content: string; sourceType: string; weight?: number }>
   notes?: Array<{ content: string; noteType: string }>
 }
 
@@ -183,9 +183,11 @@ function buildUserPrompt(request: CreativeDirectionRequest): string {
   prompt += `📋 TEMA: ${request.theme}\n\n`
 
   if (request.sources && request.sources.length > 0) {
-    prompt += `📚 FONTES DO DOSSIÊ:\n`
-    request.sources.forEach((source, i) => {
-      prompt += `[${i + 1}] (${source.sourceType}) ${source.title}\n${source.content}\n---\n`
+    prompt += `📚 FONTES DO DOSSIÊ (ordenadas por peso/relevância):\n`
+    const sorted = [...request.sources].sort((a, b) => (b.weight ?? 1.0) - (a.weight ?? 1.0))
+    sorted.forEach((source, i) => {
+      const weightLabel = (source.weight ?? 1.0) !== 1.0 ? ` [peso: ${source.weight}]` : ''
+      prompt += `[${i + 1}] (${source.sourceType}) ${source.title}${weightLabel}\n${source.content}\n---\n`
     })
     prompt += '\n'
   }

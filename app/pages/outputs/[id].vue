@@ -1140,28 +1140,134 @@
         </div>
 
         <!-- Etapa 0: Plano narrativo (Story Architect) — isolada antes do roteiro -->
-        <div v-if="isPlanoStage && output.status !== 'FAILED' && !output.storyOutline" class="mb-12 bg-cyan-500/5 border border-cyan-500/20 p-8 rounded-3xl flex flex-col items-center justify-center gap-6 text-center py-16">
-            <Map :size="48" class="text-cyan-500/70 mb-2" />
-            <h3 class="text-xl font-bold text-cyan-200">Etapa 1: Plano Narrativo</h3>
-            <p class="text-zinc-400 text-sm max-w-md">Gere o plano da história (Story Architect) e valide antes de criar o roteiro. O plano define hook, beats, clímax e distribuição de cenas.</p>
-            <div class="w-full max-w-xl text-left">
-              <label class="block text-cyan-300/80 text-xs font-bold uppercase tracking-wider mb-2">Sugestões para o plano (opcional)</label>
+        <div v-if="isPlanoStage && output.status !== 'FAILED' && !output.storyOutline" class="mb-12 bg-cyan-500/5 border border-cyan-500/20 p-8 rounded-3xl flex flex-col gap-6 py-10">
+            <div class="text-center">
+              <Map :size="48" class="text-cyan-500/70 mb-2 mx-auto" />
+              <h3 class="text-xl font-bold text-cyan-200">Etapa 1: Plano Narrativo</h3>
+              <p class="text-zinc-400 text-sm max-w-md mx-auto mt-2">Gere o plano da história (Story Architect) e valide antes de criar o roteiro. O plano define hook, beats, clímax e distribuição de cenas.</p>
+            </div>
+
+            <!-- Monetization Picker (quando existe plano ativo) -->
+            <div v-if="monetizationPlan?.planData" class="w-full max-w-4xl mx-auto">
+              <div class="flex items-center gap-2 mb-4">
+                <Sparkles :size="14" class="text-purple-400" />
+                <span class="text-xs font-bold uppercase tracking-widest text-purple-300">Baseado no Plano de Monetização</span>
+                <span class="text-xs text-zinc-600">(opcional — selecione um item ou escreva sugestão livre)</span>
+              </div>
+
+              <!-- Full Video Card -->
+              <div v-if="monetizationPlan.planData.fullVideo" class="mb-3">
+                <button
+                  @click="selectMonetizationFullVideo(monetizationPlan.planData.fullVideo)"
+                  :class="[
+                    'w-full text-left p-4 rounded-xl border transition-all duration-200',
+                    selectedMonetizationItem?.itemType === 'fullVideo'
+                      ? 'bg-cyan-500/10 border-cyan-500/40 ring-1 ring-cyan-500/30'
+                      : 'bg-black/30 border-white/5 hover:border-cyan-500/20 hover:bg-cyan-500/5'
+                  ]"
+                >
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 mb-1">
+                        <span class="px-2 py-0.5 text-[10px] font-black uppercase tracking-wider bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 rounded">Full Video</span>
+                        <span class="text-xs text-zinc-500">{{ Math.round(monetizationPlan.fullVideoDuration / 60) }}min</span>
+                      </div>
+                      <h4 class="text-sm font-bold text-white truncate">{{ monetizationPlan.planData.fullVideo.title }}</h4>
+                      <p class="text-xs text-zinc-500 mt-1 line-clamp-1">{{ monetizationPlan.planData.fullVideo.hook }}</p>
+                    </div>
+                    <div v-if="selectedMonetizationItem?.itemType === 'fullVideo'" class="flex-shrink-0">
+                      <CheckCircle2 :size="20" class="text-cyan-400" />
+                    </div>
+                  </div>
+                </button>
+              </div>
+
+              <!-- Teasers Grid -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                <button
+                  v-for="(teaser, idx) in monetizationPlan.planData.teasers"
+                  :key="idx"
+                  @click="selectMonetizationTeaser(teaser, Number(idx))"
+                  :class="[
+                    'text-left p-3 rounded-xl border transition-all duration-200',
+                    selectedMonetizationItem?.title === teaser.title
+                      ? 'bg-purple-500/10 border-purple-500/40 ring-1 ring-purple-500/30'
+                      : 'bg-black/30 border-white/5 hover:border-purple-500/20 hover:bg-purple-500/5'
+                  ]"
+                >
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-1.5 mb-1 flex-wrap">
+                        <span class="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-zinc-600/20 text-zinc-400 rounded">T{{ Number(idx) + 1 }}</span>
+                        <span class="px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 rounded">{{ teaser.angleCategory }}</span>
+                        <span v-if="teaser.narrativeRole" :class="['px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded border', narrativeRoleBadge(teaser.narrativeRole).color]">
+                          {{ narrativeRoleBadge(teaser.narrativeRole).icon }} {{ teaser.narrativeRole }}
+                        </span>
+                      </div>
+                      <h4 class="text-xs font-bold text-white truncate">{{ teaser.title }}</h4>
+                      <p class="text-[10px] text-zinc-600 mt-0.5 line-clamp-1">{{ teaser.hook }}</p>
+                    </div>
+                    <div v-if="selectedMonetizationItem?.title === teaser.title" class="flex-shrink-0 mt-1">
+                      <CheckCircle2 :size="16" class="text-purple-400" />
+                    </div>
+                  </div>
+                </button>
+              </div>
+
+              <!-- Selected Item Preview -->
+              <div v-if="selectedMonetizationItem" class="mt-4 p-4 bg-gradient-to-r from-purple-500/5 to-cyan-500/5 border border-purple-500/20 rounded-xl">
+                <div class="flex items-center gap-2 mb-2">
+                  <CheckCircle2 :size="14" class="text-purple-400" />
+                  <span class="text-xs font-bold text-purple-300 uppercase tracking-wider">Selecionado</span>
+                </div>
+                <p class="text-sm text-white font-bold">{{ selectedMonetizationItem.title }}</p>
+                <p class="text-xs text-zinc-400 mt-1">
+                  {{ selectedMonetizationItem.itemType === 'fullVideo' ? 'Full Video' : 'Teaser' }}
+                  · Ângulo: <span class="text-indigo-300">{{ selectedMonetizationItem.angleCategory }}</span>
+                  <template v-if="selectedMonetizationItem.narrativeRole">
+                    · Papel: <span class="text-emerald-300">{{ selectedMonetizationItem.narrativeRole }}</span>
+                  </template>
+                </p>
+                <p class="text-xs text-zinc-500 mt-1 italic">"{{ selectedMonetizationItem.hook }}"</p>
+              </div>
+            </div>
+
+            <!-- Loading monetization -->
+            <div v-else-if="loadingMonetization" class="text-center py-4">
+              <span class="text-xs text-zinc-600 animate-pulse">Verificando plano de monetização...</span>
+            </div>
+
+            <!-- Sugestões livres (sempre disponível) -->
+            <div class="w-full max-w-xl mx-auto text-left">
+              <label class="block text-cyan-300/80 text-xs font-bold uppercase tracking-wider mb-2">
+                {{ monetizationPlan?.planData ? 'Sugestões adicionais (opcional)' : 'Sugestões para o plano (opcional)' }}
+              </label>
               <textarea 
                 v-model="outlineSuggestions"
                 class="w-full h-28 bg-black/40 border border-cyan-500/20 rounded-xl p-4 text-sm text-zinc-200 placeholder-zinc-500 focus:border-cyan-500/50 focus:outline-none resize-y"
-                placeholder="Ex: Focar no mistério, tom mais sombrio, incluir reviravolta no meio, ênfase no personagem X..."
+                :placeholder="selectedMonetizationItem
+                  ? 'Complementos para o item selecionado. Ex: mais tensão, focar na contradição...'
+                  : 'Ex: Focar no mistério, tom mais sombrio, incluir reviravolta no meio, ênfase no personagem X...'"
               />
-              <p class="mt-1.5 text-zinc-500 text-xs">Suas sugestões serão enviadas ao Story Architect para orientar o plano e reduzir a necessidade de refazer.</p>
+              <p class="mt-1.5 text-zinc-500 text-xs">
+                {{ selectedMonetizationItem
+                  ? 'O Story Architect usará o item selecionado + suas sugestões para gerar o plano.'
+                  : 'Suas sugestões serão enviadas ao Story Architect para orientar o plano e reduzir a necessidade de refazer.' }}
+              </p>
             </div>
-            <button 
-              @click="generateOutlineThenReload"
-              :disabled="generatingOutline"
-              class="px-8 py-4 bg-cyan-500 text-black font-black uppercase tracking-widest rounded-xl hover:bg-cyan-400 transition-all flex items-center gap-3 disabled:opacity-50"
-            >
-              <span v-if="generatingOutline" class="animate-spin w-5 h-5 border-2 border-black/30 border-t-black rounded-full"></span>
-              <Zap v-else :size="20" />
-              {{ generatingOutline ? 'GERANDO PLANO...' : 'GERAR PLANO NARRATIVO' }}
-            </button>
+
+            <!-- Botão Gerar -->
+            <div class="text-center">
+              <button 
+                @click="generateOutlineThenReload"
+                :disabled="generatingOutline"
+                class="px-8 py-4 bg-cyan-500 text-black font-black uppercase tracking-widest rounded-xl hover:bg-cyan-400 transition-all flex items-center gap-3 disabled:opacity-50 mx-auto"
+              >
+                <span v-if="generatingOutline" class="animate-spin w-5 h-5 border-2 border-black/30 border-t-black rounded-full"></span>
+                <Zap v-else :size="20" />
+                {{ generatingOutline ? 'GERANDO PLANO...' : selectedMonetizationItem ? 'GERAR PLANO A PARTIR DA RECEITA' : 'GERAR PLANO NARRATIVO' }}
+              </button>
+            </div>
         </div>
 
         <!-- Plano aprovado, sem roteiro ainda: botão Gerar roteiro -->
@@ -2884,14 +2990,112 @@ async function approveScript() {
 const generatingStage = ref<string | null>(null)
 const generatingOutline = ref(false)
 
+// ── Monetization Context (para outline baseado em plano de monetização) ──
+const monetizationPlan = ref<any>(null)
+const loadingMonetization = ref(false)
+const selectedMonetizationItem = ref<{
+  itemType: 'teaser' | 'fullVideo'
+  title: string
+  hook: string
+  angle: string
+  angleCategory: string
+  narrativeRole?: string
+  scriptOutline?: string
+  cta?: string
+  strategicNotes?: string
+  scriptStyleId?: string
+  scriptStyleName?: string
+  editorialObjectiveId?: string
+  editorialObjectiveName?: string
+} | null>(null)
+
+async function loadMonetizationPlan() {
+  if (!output.value?.dossierId || monetizationPlan.value) return
+  loadingMonetization.value = true
+  try {
+    const response = await $fetch(`/api/dossiers/${output.value.dossierId}/monetization-plans`) as any
+    const plans = response?.data || []
+    if (plans.length > 0) {
+      // Pegar o plano ativo mais recente
+      monetizationPlan.value = plans.find((p: any) => p.isActive) || plans[0]
+    }
+  } catch (e) {
+    // Silencioso — monetização é opcional
+    console.debug('[Output] Sem plano de monetização:', e)
+  } finally {
+    loadingMonetization.value = false
+  }
+}
+
+function selectMonetizationTeaser(teaser: any, index: number) {
+  // Toggle: clicar de novo desmarca
+  if (selectedMonetizationItem.value?.title === teaser.title) {
+    selectedMonetizationItem.value = null
+    return
+  }
+  selectedMonetizationItem.value = {
+    itemType: 'teaser',
+    title: teaser.title,
+    hook: teaser.hook,
+    angle: teaser.angle,
+    angleCategory: teaser.angleCategory,
+    narrativeRole: teaser.narrativeRole,
+    scriptOutline: teaser.scriptOutline,
+    cta: teaser.cta,
+    strategicNotes: monetizationPlan.value?.planData?.strategicNotes || undefined,
+    scriptStyleId: teaser.scriptStyleId,
+    scriptStyleName: teaser.scriptStyleName,
+    editorialObjectiveId: teaser.editorialObjectiveId,
+    editorialObjectiveName: teaser.editorialObjectiveName
+  }
+}
+
+function selectMonetizationFullVideo(fullVideo: any) {
+  if (selectedMonetizationItem.value?.itemType === 'fullVideo') {
+    selectedMonetizationItem.value = null
+    return
+  }
+  selectedMonetizationItem.value = {
+    itemType: 'fullVideo',
+    title: fullVideo.title,
+    hook: fullVideo.hook,
+    angle: fullVideo.angle || fullVideo.scriptOutline?.split('→')[0]?.trim() || 'principal',
+    angleCategory: fullVideo.angleCategory || 'cronologico',
+    scriptOutline: fullVideo.scriptOutline,
+    cta: fullVideo.cta,
+    strategicNotes: monetizationPlan.value?.planData?.strategicNotes || undefined,
+    scriptStyleId: fullVideo.scriptStyleId,
+    scriptStyleName: fullVideo.scriptStyleName,
+    editorialObjectiveId: fullVideo.editorialObjectiveId,
+    editorialObjectiveName: fullVideo.editorialObjectiveName
+  }
+}
+
+function narrativeRoleBadge(role: string): { label: string; icon: string; color: string } {
+  const badges: Record<string, { label: string; icon: string; color: string }> = {
+    gateway: { label: 'Porta de Entrada', icon: '🚪', color: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' },
+    'deep-dive': { label: 'Mergulho Direto', icon: '🔍', color: 'bg-blue-500/10 text-blue-300 border-blue-500/20' },
+    'hook-only': { label: 'Gancho Puro', icon: '💥', color: 'bg-amber-500/10 text-amber-300 border-amber-500/20' }
+  }
+  return badges[role] || { label: role, icon: '📋', color: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20' }
+}
+
 async function generateOutlineThenReload() {
   generatingOutline.value = true
   try {
+    const body: any = {}
+    if (outlineSuggestions.value.trim()) {
+      body.feedback = outlineSuggestions.value.trim()
+    }
+    if (selectedMonetizationItem.value) {
+      body.monetizationContext = selectedMonetizationItem.value
+    }
     await $fetch(`/api/outputs/${outputId}/generate-outline`, {
       method: 'POST',
-      body: { feedback: outlineSuggestions.value.trim() || undefined }
+      body
     })
     outlineSuggestions.value = ''
+    selectedMonetizationItem.value = null
     await loadOutput()
   } catch (e: any) {
     console.error('Erro ao gerar plano:', e)
@@ -3278,9 +3482,10 @@ function stopPolling() {
   if (pollTimer) clearInterval(pollTimer)
 }
 
-onMounted(() => {
-  loadOutput()
+onMounted(async () => {
+  await loadOutput()
   loadCosts()
+  loadMonetizationPlan()
   startPolling()
 })
 onUnmounted(() => stopPolling())

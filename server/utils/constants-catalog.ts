@@ -1,8 +1,8 @@
 /**
  * Constants Catalog Serializer
  * 
- * Serializa as constants criativas (script styles, visual styles, editorial objectives)
- * em formato texto para injeção no prompt da LLM.
+ * Serializa as constants criativas (script styles, visual styles, editorial objectives,
+ * narrative angles, narrative roles) em formato texto para injeção no prompt da LLM.
  * 
  * Usado pelo Creative Direction Advisor e Monetization Planner para que a IA
  * conheça todas as opções disponíveis e possa escolher ou sugerir novas.
@@ -11,6 +11,8 @@
 import { getScriptStylesList } from '../constants/script-styles'
 import { getVisualStylesList } from '../constants/visual-styles'
 import { EDITORIAL_OBJECTIVES } from '../constants/editorial-objectives'
+import { NARRATIVE_ANGLES } from '../constants/narrative-angles'
+import { NARRATIVE_ROLES, calculateRoleDistribution } from '../constants/narrative-roles'
 
 /**
  * Serializa todas as constants criativas em formato legível para a LLM.
@@ -47,7 +49,36 @@ export function serializeConstantsCatalog(): string {
     catalog += `  _Instrução:_ ${truncated}\n\n`
   })
 
+  // ── Narrative Angles ───────────────────────────────────────────
+  catalog += '### 🧭 ÂNGULOS NARRATIVOS DISPONÍVEIS\n\n'
+  catalog += '_Escolha os ângulos mais relevantes para o dossiê. NÃO é obrigatório usar todos._\n\n'
+  NARRATIVE_ANGLES.forEach(a => {
+    catalog += `- **\`${a.id}\`**: "${a.name}"\n`
+    catalog += `  ${a.description}\n`
+    catalog += `  _Ex:_ ${a.example}\n\n`
+  })
+
+  // ── Narrative Roles ────────────────────────────────────────────
+  catalog += '### 🎭 PAPÉIS NARRATIVOS (OBRIGATÓRIO para cada teaser)\n\n'
+  catalog += '_Cada teaser DEVE receber um papel. Isso define quanto contexto ele inclui._\n\n'
+  NARRATIVE_ROLES.forEach(r => {
+    catalog += `- **\`${r.id}\`**: "${r.name}" [contexto: ${r.contextLevel}]\n`
+    catalog += `  ${r.description}\n\n`
+  })
+
   return catalog
+}
+
+/**
+ * Serializa a distribuição de papéis narrativos para N teasers.
+ * Usado no system prompt do monetization planner.
+ */
+export function serializeRoleDistribution(teaserCount: number): string {
+  const dist = calculateRoleDistribution(teaserCount)
+  return `Para ${teaserCount} teasers, distribua os papéis assim:
+- **gateway** (Porta de Entrada): ${dist.gateway} teaser(s) — contextualização COMPLETA
+- **deep-dive** (Mergulho Direto): ${dist.deepDive} teaser(s) — contexto MÍNIMO (1 frase máx.)
+- **hook-only** (Gancho Puro): ${dist.hookOnly} teaser(s) — ZERO contextualização`
 }
 
 /**
@@ -58,5 +89,7 @@ export function getValidConstantIds() {
     scriptStyleIds: getScriptStylesList().map(s => s.id),
     visualStyleIds: getVisualStylesList().map(s => s.id),
     editorialObjectiveIds: EDITORIAL_OBJECTIVES.map(o => o.id),
+    narrativeAngleIds: NARRATIVE_ANGLES.map(a => a.id),
+    narrativeRoleIds: NARRATIVE_ROLES.map(r => r.id),
   }
 }

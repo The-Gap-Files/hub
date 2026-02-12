@@ -21,8 +21,23 @@ export default defineEventHandler(async (event) => {
 
   const body = await readBody(event).catch(() => ({}))
   const feedback = body?.feedback as string | undefined
+  const monetizationContext = body?.monetizationContext as {
+    itemType: 'teaser' | 'fullVideo'
+    title: string
+    hook: string
+    angle: string
+    angleCategory: string
+    narrativeRole?: string
+    scriptOutline?: string
+    cta?: string
+    strategicNotes?: string
+    scriptStyleId?: string
+    scriptStyleName?: string
+    editorialObjectiveId?: string
+    editorialObjectiveName?: string
+  } | undefined
 
-  console.log(`[API] Generating story outline for Output ${outputId}${feedback ? ` with feedback: "${feedback}"` : ''}`)
+  console.log(`[API] Generating story outline for Output ${outputId}${feedback ? ` with feedback: "${feedback}"` : ''}${monetizationContext ? ` from monetization (${monetizationContext.itemType}: ${monetizationContext.angleCategory})` : ''}`)
 
   // 1. Buscar Output com Dossier
   const output = await prisma.output.findUnique({
@@ -56,21 +71,37 @@ export default defineEventHandler(async (event) => {
       sources: dossier.sources?.map((s: any) => ({
         title: s.title,
         content: s.content,
-        type: s.sourceType
+        type: s.sourceType,
+        weight: s.weight ?? 1.0
       })) || [],
       userNotes,
       persons: mapPersonsFromPrisma(dossier.persons),
       neuralInsights: mapNeuralInsightsFromNotes(dossier.notes),
       editorialObjective: output.objective || undefined,
       scriptStyleId: output.scriptStyleId || undefined,
+      dossierCategory: output.classificationId || undefined,
       targetDuration: output.duration || 300,
-      language: output.language || 'pt-BR'
+      language: output.language || 'pt-BR',
+      monetizationContext
     })
 
-    // 4. Salvar outline no banco (novo plano = pendente de aprovação)
+    // 4. Salvar outline no banco (enriquecido com metadados de monetização)
+    const outlineToSave: any = { ...result.outline }
+    if (monetizationContext) {
+      outlineToSave._monetizationMeta = {
+        narrativeRole: monetizationContext.narrativeRole,
+        strategicNotes: monetizationContext.strategicNotes,
+        angleCategory: monetizationContext.angleCategory,
+        itemType: monetizationContext.itemType,
+        scriptStyleId: monetizationContext.scriptStyleId,
+        scriptStyleName: monetizationContext.scriptStyleName,
+        editorialObjectiveId: monetizationContext.editorialObjectiveId,
+        editorialObjectiveName: monetizationContext.editorialObjectiveName,
+      }
+    }
     await prisma.output.update({
       where: { id: outputId },
-      data: { storyOutline: result.outline as any, storyOutlineApproved: false }
+      data: { storyOutline: outlineToSave as any, storyOutlineApproved: false }
     })
 
     // 5. Registrar custo do plano (fire-and-forget) — resource 'outline', não 'script'

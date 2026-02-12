@@ -25,7 +25,7 @@ export interface IntelligenceQueryRequest {
   query: string
   source: 'docs' | 'web' | 'both'
   theme: string
-  sources?: Array<{ title: string; content: string; sourceType: string }>
+  sources?: Array<{ title: string; content: string; sourceType: string; weight?: number }>
   existingNotes?: Array<{ content: string; noteType: string }>
 }
 
@@ -128,13 +128,19 @@ function buildQueryUserPrompt(request: IntelligenceQueryRequest): string {
     // Incluir todas as fontes do dossiê (arquitetura flat/democratizada)
     if (request.sources && request.sources.length > 0) {
       const totalBudget = 16000
-      const perSourceChars = Math.floor(totalBudget / request.sources.length)
+      // Distribuir budget de tokens proporcional ao peso
+      const totalWeight = request.sources.reduce((sum, s) => sum + (s.weight ?? 1.0), 0)
       prompt += `📚 FONTES DO DOSSIÊ:\n`
-      request.sources.forEach((source, i) => {
+      // Ordenar por peso descendente
+      const sorted = [...request.sources].sort((a, b) => (b.weight ?? 1.0) - (a.weight ?? 1.0))
+      sorted.forEach((source, i) => {
+        const weight = source.weight ?? 1.0
+        const perSourceChars = Math.floor(totalBudget * (weight / totalWeight))
         const truncated = source.content.length > perSourceChars
           ? source.content.substring(0, perSourceChars) + '...'
           : source.content
-        prompt += `[${i + 1}] (${source.sourceType}) ${source.title}\n${truncated}\n---\n`
+        const weightLabel = weight !== 1.0 ? ` [peso: ${weight}]` : ''
+        prompt += `[${i + 1}] (${source.sourceType}) ${source.title}${weightLabel}\n${truncated}\n---\n`
       })
       prompt += '\n'
     }

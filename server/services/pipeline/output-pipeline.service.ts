@@ -135,7 +135,8 @@ export class OutputPipelineService {
       sources: dossier.sources?.map((s: any) => ({
         title: s.title,
         content: s.content,
-        type: s.sourceType
+        type: s.sourceType,
+        weight: s.weight ?? 1.0
       })) || [],
 
       // Insights do usuário
@@ -208,10 +209,35 @@ export class OutputPipelineService {
       )
     }
 
-    const outlineData = output.storyOutline as StoryOutline
+    const outlineData = output.storyOutline as StoryOutline & { _monetizationMeta?: any }
     promptContext.storyOutline = formatOutlineForPrompt(outlineData)
     const scriptLog = createPipelineLogger({ stage: 'Outline', outputId })
     scriptLog.info(`Plano narrativo aprovado: ${outlineData.risingBeats?.length || 0} beats.`)
+
+    // Extrair metadados de monetização do outline (narrativeRole, strategicNotes, creative direction)
+    if (outlineData._monetizationMeta) {
+      const meta = outlineData._monetizationMeta
+      promptContext.narrativeRole = meta.narrativeRole || undefined
+      promptContext.strategicNotes = meta.strategicNotes || undefined
+
+      // Sobrescrever estilo de roteiro se o monetizador sugeriu um específico para este teaser
+      if (meta.scriptStyleId) {
+        const monetizationStyle = getScriptStyleById(meta.scriptStyleId)
+        if (monetizationStyle) {
+          promptContext.scriptStyleDescription = monetizationStyle.description
+          promptContext.scriptStyleInstructions = monetizationStyle.instructions
+          scriptLog.info(`🎭 Estilo de roteiro sobrescrito pelo monetizador: ${meta.scriptStyleId} (${meta.scriptStyleName || monetizationStyle.name})`)
+        }
+      }
+
+      // Sobrescrever objetivo editorial se o monetizador sugeriu um específico
+      if (meta.editorialObjectiveId && meta.editorialObjectiveName) {
+        promptContext.additionalContext = `🎯 OBJETIVO EDITORIAL (CRÍTICO - GOVERNA TODA A NARRATIVA):\n${meta.editorialObjectiveName}`
+        scriptLog.info(`🎯 Objetivo editorial sobrescrito pelo monetizador: ${meta.editorialObjectiveId} (${meta.editorialObjectiveName})`)
+      }
+
+      scriptLog.info(`💰 Monetization meta: role=${meta.narrativeRole || 'none'}, style=${meta.scriptStyleId || 'default'}, editorial=${meta.editorialObjectiveId || 'default'}, notes=${meta.strategicNotes ? 'yes' : 'no'}`)
+    }
 
     // Gerar roteiro
     const scriptResponse = await scriptProvider.generate(promptContext)
@@ -259,6 +285,8 @@ export class OutputPipelineService {
           order: index,
           narration: scene.narration,
           visualDescription: scene.visualDescription,
+          sceneEnvironment: scene.sceneEnvironment || null,
+          motionDescription: scene.motionDescription || null,
           audioDescription: scene.audioDescription || null,
           estimatedDuration: scene.estimatedDuration || 5
         }))
@@ -312,6 +340,35 @@ export class OutputPipelineService {
       let successCount = 0
       let errorCount = 0
 
+      // =====================================================================
+      // 🎨 VISUAL CONTINUITY ENGINE
+      // Injeta [VISUAL STYLE ANCHOR] e [VISUAL CONTINUITY] nos prompts
+      // baseado no sceneEnvironment de cada cena.
+      //
+      // Mesmo ambiente (sceneEnvironment igual ao anterior) →
+      //   Anchor + Continuity (objetos e atmosfera da cena anterior persistem)
+      // Novo ambiente (sceneEnvironment diferente ou primeira cena) →
+      //   Só Anchor (transição limpa, sem contaminação)
+      // =====================================================================
+
+      // Montar Style Anchor a partir dos campos de estilo visual
+      const vs = output.visualStyle
+      let styleAnchorParts: string[] = []
+      if (vs) {
+        if (vs.baseStyle) styleAnchorParts.push(vs.baseStyle)
+        if (vs.lightingTags) styleAnchorParts.push(vs.lightingTags)
+        if (vs.atmosphereTags) styleAnchorParts.push(vs.atmosphereTags)
+        if (vs.compositionTags) styleAnchorParts.push(vs.compositionTags)
+        if (vs.tags) styleAnchorParts.push(vs.tags)
+      }
+      const styleAnchor = styleAnchorParts.length > 0
+        ? `[VISUAL STYLE ANCHOR — ${styleAnchorParts.join(', ')}]`
+        : ''
+
+      if (styleAnchor) {
+        log.info(`🎨 Style Anchor: ${styleAnchor.slice(0, 100)}...`)
+      }
+
       for (const chunk of sceneChunks) {
         const results = await Promise.allSettled(chunk.map(async (scene, chunkIndex) => {
           const absoluteIndex = scenes.indexOf(scene)
@@ -321,14 +378,28 @@ export class OutputPipelineService {
           const width = isPortrait ? 768 : 1344
           const height = isPortrait ? 1344 : 768
 
-          // Descrição visual vem completa do roteiro (já incorpora estilo + tema); sem merge.
-          // FAIL-SAFE: Se o LLM não incluiu a âncora de estilo no visualDescription,
-          // o pipeline prepende automaticamente para garantir consistência visual.
+          // Montar prompt visual com Style Anchor + Visual Continuity
           let visualPrompt = scene.visualDescription
-          const baseStyle = output.visualStyle?.baseStyle
-          if (baseStyle && !visualPrompt.toLowerCase().includes(baseStyle.toLowerCase().slice(0, 30))) {
-            log.warn(`Cena ${absoluteIndex + 1}: âncora de estilo ausente — prepending baseStyle`)
-            visualPrompt = `${baseStyle}, ${visualPrompt}`
+
+          // Determinar se é mesmo ambiente da cena anterior
+          const prevScene = absoluteIndex > 0 ? scenes[absoluteIndex - 1] : null
+          const isSameEnvironment = prevScene
+            && scene.sceneEnvironment
+            && prevScene.sceneEnvironment
+            && scene.sceneEnvironment === prevScene.sceneEnvironment
+
+          if (styleAnchor) {
+            if (isSameEnvironment && prevScene) {
+              // Mesmo ambiente → Anchor + Continuity
+              // Extrai elementos chave da descrição anterior para manter coerência de objetos
+              const continuityContext = prevScene.visualDescription.slice(0, 300)
+              visualPrompt = `${styleAnchor}\n[VISUAL CONTINUITY — same environment "${scene.sceneEnvironment}": ${continuityContext}]\n\n${visualPrompt}`
+              log.step(`Cena ${absoluteIndex + 1}`, `🔗 Continuity + Anchor (env: ${scene.sceneEnvironment})`)
+            } else {
+              // Novo ambiente → Só Anchor (transição limpa)
+              visualPrompt = `${styleAnchor}\n\n${visualPrompt}`
+              log.step(`Cena ${absoluteIndex + 1}`, `🎨 Anchor only${scene.sceneEnvironment ? ` (new env: ${scene.sceneEnvironment})` : ''}`)
+            }
           }
 
           const request: ImageGenerationRequest = {
@@ -340,7 +411,7 @@ export class OutputPipelineService {
             numVariants: 1
           }
 
-          log.step(`Cena ${absoluteIndex + 1}/${scenes.length}`, `prompt: ${request.prompt.slice(0, 80)}...`)
+          log.step(`Cena ${absoluteIndex + 1}/${scenes.length}`, `prompt: ${request.prompt.slice(0, 120)}...`)
 
           const imageResponse = await imageProvider.generate(request)
           const firstImage = imageResponse.images[0]
@@ -774,22 +845,26 @@ export class OutputPipelineService {
         const selectedImage = scene.images[0]
         if (!selectedImage?.fileData) return
 
+        // Motion prompt: prefere motionDescription (focado em movimento)
+        // Fallback: visualDescription (backward-compatible com roteiros antigos)
+        const motionPrompt = scene.motionDescription || scene.visualDescription
+
         const durationSeconds = scene.audioTracks[0]?.duration ?? scene.estimatedDuration ?? 5
         const request: MotionGenerationRequest = {
           imageBuffer: Buffer.from(selectedImage.fileData!) as any,
-          prompt: scene.visualDescription,
+          prompt: motionPrompt,
           duration: durationSeconds,
           aspectRatio: output.aspectRatio || '16:9'
         }
 
-        console.log(`[OutputPipeline] 🎞️ Generating motion for scene ${scene.order + 1} (duration: ${durationSeconds.toFixed(1)}s)`)
+        console.log(`[OutputPipeline] 🎬 Motion scene ${scene.order + 1} (duration: ${durationSeconds.toFixed(1)}s) prompt: ${motionPrompt.slice(0, 80)}...`)
         const videoResponse = await motionProvider.generate(request)
 
         await prisma.sceneVideo.create({
           data: {
             sceneId: scene.id,
             provider: motionProvider.getName() as any,
-            promptUsed: scene.visualDescription,
+            promptUsed: motionPrompt,
             fileData: Buffer.from(videoResponse.video.videoBuffer) as any,
             mimeType: 'video/mp4',
             originalSize: videoResponse.video.videoBuffer.length,
@@ -857,15 +932,18 @@ export class OutputPipelineService {
       data: { isSelected: false }
     })
 
+    // Motion prompt: prefere motionDescription (focado em movimento)
+    const motionPrompt = scene.motionDescription || scene.visualDescription
+
     const durationSeconds = scene.audioTracks[0]?.duration ?? scene.estimatedDuration ?? 5
     const request: MotionGenerationRequest = {
       imageBuffer: Buffer.from(selectedImage.fileData!) as any,
-      prompt: scene.visualDescription,
+      prompt: motionPrompt,
       duration: durationSeconds,
       aspectRatio: output.aspectRatio || '16:9'
     }
 
-    console.log(`[OutputPipeline] 🎞️ Generating motion for scene ${scene.order + 1} (${sceneId}, duration: ${durationSeconds.toFixed(1)}s)`)
+    console.log(`[OutputPipeline] 🎬 Regenerating motion for scene ${scene.order + 1} (${sceneId}, duration: ${durationSeconds.toFixed(1)}s)`)
     const videoResponse = await motionProvider.generate(request)
 
     // 5. Salvar novo SceneVideo
@@ -873,7 +951,7 @@ export class OutputPipelineService {
       data: {
         sceneId,
         provider: motionProvider.getName() as any,
-        promptUsed: scene.visualDescription,
+        promptUsed: motionPrompt,
         fileData: Buffer.from(videoResponse.video.videoBuffer) as any,
         mimeType: 'video/mp4',
         originalSize: videoResponse.video.videoBuffer.length,

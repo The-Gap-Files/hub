@@ -37,8 +37,8 @@
             <p class="text-xs text-zinc-400 leading-relaxed">
               A IA analisará o dossiê e sugerirá um pacote completo:
               <strong class="text-white">1 vídeo completo</strong> (YouTube) +
-              <strong class="text-white">4-6 teasers</strong> (TikTok/Shorts/Reels),
-              cada um com ângulo narrativo diferente para maximizar alcance e conversão.
+              <strong class="text-white">N teasers</strong> (TikTok/Shorts/Reels),
+              cada um com ângulo narrativo e papel narrativo diferentes para maximizar alcance e conversão.
             </p>
           </div>
         </div>
@@ -97,6 +97,35 @@
                 </div>
               </button>
             </div>
+          </div>
+        </div>
+
+        <!-- Quantidade de Teasers -->
+        <div class="space-y-4">
+          <label class="mono-label text-xs text-zinc-500 flex items-center gap-2">
+            <Scissors :size="12" />
+            Quantidade de Teasers
+          </label>
+          <div class="flex items-center gap-4">
+            <input
+              type="range"
+              :min="4"
+              :max="15"
+              v-model.number="selectedTeaserCount"
+              class="flex-1 h-2 bg-white/10 rounded-full appearance-none cursor-pointer accent-purple-500
+                     [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
+                     [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-purple-500
+                     [&::-webkit-slider-thumb]:shadow-[0_0_10px_rgba(168,85,247,0.4)] [&::-webkit-slider-thumb]:cursor-pointer
+                     [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-purple-300"
+            />
+            <div class="w-14 h-12 rounded-xl border border-purple-500/30 bg-purple-500/10 flex items-center justify-center">
+              <span class="text-lg font-black text-purple-300">{{ selectedTeaserCount }}</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between text-[10px] text-zinc-600 font-mono uppercase tracking-wider px-1">
+            <span>4 min</span>
+            <span class="text-purple-400/60">{{ roleDistributionLabel }}</span>
+            <span>15 max</span>
           </div>
         </div>
 
@@ -458,6 +487,12 @@
                 ]">
                   {{ teaser.angleCategory }}
                 </span>
+                <span v-if="teaser.narrativeRole" :class="[
+                  'px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider',
+                  narrativeRoleColor(teaser.narrativeRole)
+                ]" :title="narrativeRoleTooltip(teaser.narrativeRole)">
+                  {{ narrativeRoleIcon(teaser.narrativeRole) }} {{ teaser.narrativeRole }}
+                </span>
                 <button
                   @click="regenerateTeaser(Number(index))"
                   :disabled="regeneratingTeaserIndex !== null"
@@ -683,6 +718,7 @@ const props = defineProps<{
 // ───── State ─────
 const selectedTeaserDuration = ref<60 | 120 | 180>(60)
 const selectedFullDuration = ref<300 | 600 | 900>(600)
+const selectedTeaserCount = ref(6)
 const generating = ref(false)
 const loadingExisting = ref(true)
 const errorMessage = ref('')
@@ -754,7 +790,8 @@ async function generatePlan() {
       method: 'POST',
       body: {
         teaserDuration: selectedTeaserDuration.value,
-        fullVideoDuration: selectedFullDuration.value
+        fullVideoDuration: selectedFullDuration.value,
+        teaserCount: selectedTeaserCount.value
       }
     }) as any
 
@@ -966,19 +1003,62 @@ async function confirmStylePreview(itemType: 'fullVideo' | 'teaser', teaserIndex
 // ───── Utils ─────
 function angleCategoryColor(category: string): string {
   const colors: Record<string, string> = {
-    cronológico: 'bg-blue-500/10 text-blue-400 border border-blue-500/20',
-    econômico: 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20',
-    religioso: 'bg-purple-500/10 text-purple-400 border border-purple-500/20',
-    político: 'bg-red-500/10 text-red-400 border border-red-500/20',
+    cronologico: 'bg-blue-500/10 text-blue-400 border border-blue-500/20',
+    economico: 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20',
+    ideologico: 'bg-purple-500/10 text-purple-400 border border-purple-500/20',
+    politico: 'bg-red-500/10 text-red-400 border border-red-500/20',
     humano: 'bg-pink-500/10 text-pink-400 border border-pink-500/20',
     conspirativo: 'bg-orange-500/10 text-orange-400 border border-orange-500/20',
-    científico: 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20',
-    geopolítico: 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20',
+    cientifico: 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20',
+    geopolitico: 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20',
     cultural: 'bg-teal-500/10 text-teal-400 border border-teal-500/20',
-    paradoxal: 'bg-fuchsia-500/10 text-fuchsia-400 border border-fuchsia-500/20'
+    paradoxal: 'bg-fuchsia-500/10 text-fuchsia-400 border border-fuchsia-500/20',
+    'conexao-temporal': 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
+    psicologico: 'bg-rose-500/10 text-rose-400 border border-rose-500/20',
+    evidencial: 'bg-sky-500/10 text-sky-400 border border-sky-500/20',
+    revisionista: 'bg-lime-500/10 text-lime-400 border border-lime-500/20',
+    propagandistico: 'bg-red-600/10 text-red-300 border border-red-600/20',
+    tecnologico: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+    etico: 'bg-violet-500/10 text-violet-400 border border-violet-500/20'
   }
   return colors[category] || 'bg-zinc-500/10 text-zinc-400 border border-zinc-500/20'
 }
+
+function narrativeRoleColor(role: string): string {
+  const colors: Record<string, string> = {
+    gateway: 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20',
+    'deep-dive': 'bg-blue-500/10 text-blue-300 border border-blue-500/20',
+    'hook-only': 'bg-amber-500/10 text-amber-300 border border-amber-500/20'
+  }
+  return colors[role] || 'bg-zinc-500/10 text-zinc-400 border border-zinc-500/20'
+}
+
+function narrativeRoleIcon(role: string): string {
+  const icons: Record<string, string> = {
+    gateway: '🚪',
+    'deep-dive': '🔍',
+    'hook-only': '💥'
+  }
+  return icons[role] || '📋'
+}
+
+function narrativeRoleTooltip(role: string): string {
+  const tooltips: Record<string, string> = {
+    gateway: 'Porta de Entrada — contextualização completa do tema',
+    'deep-dive': 'Mergulho Direto — contexto mínimo, foca no ângulo',
+    'hook-only': 'Gancho Puro — zero contextualização, máximo impacto'
+  }
+  return tooltips[role] || ''
+}
+
+const roleDistributionLabel = computed(() => {
+  const n = selectedTeaserCount.value
+  const gw = n >= 10 ? 2 : 1
+  const remaining = n - gw
+  const dd = Math.ceil(remaining * 0.55)
+  const ho = remaining - dd
+  return `${gw}🚪 ${dd}🔍 ${ho}💥`
+})
 
 function formatPlanDate(dateString: string): string {
   if (!dateString) return ''

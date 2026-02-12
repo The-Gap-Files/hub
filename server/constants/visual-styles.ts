@@ -5,7 +5,7 @@
  * Estilos visuais raramente mudam e não precisam de CRUD dinâmico.
  */
 
-export type VisualStyleId = 'epictok' | 'noir-cinematic' | 'ghibli-dark' | 'gta6' | 'cyberpunk' | 'oil-painting' | 'photorealistic'
+export type VisualStyleId = 'epictok' | 'noir-cinematic' | 'noir-classic' | 'ghibli-dark' | 'gta6' | 'cyberpunk' | 'oil-painting' | 'photorealistic'
 
 export interface VisualStyle {
   id: VisualStyleId
@@ -33,17 +33,31 @@ export const EPICTOK_STYLE: VisualStyle = {
   isActive: true
 }
 
-/** Noir Cinematográfico (Híbrido): estilo assinatura The Gap Files. Fotorrealismo sujo (gritty), grain pesado, chiaroscuro extremo. Evita "look IA" limpo. */
+/** Noir Cinematográfico (V3.5): estilo assinatura The Gap Files. Pintura digital cinematográfica dark — não é foto, não é HQ. É concept art de filme noir com chiaroscuro pesado. */
 export const NOIR_CINEMATIC_STYLE: VisualStyle = {
   id: 'noir-cinematic',
   name: 'Noir Cinematográfico',
-  description: 'Estilo híbrido: fotorrealismo dark com textura de filme granulado (gritty), chiaroscuro tipo Caravaggio e atmosfera de arquivo confidencial.',
-  baseStyle: 'Dark cinematic film still, heavy film grain, raw and gritty texture, Caravaggio-inspired chiaroscuro lighting, moody and atmospheric',
-  lightingTags: 'dramatic chiaroscuro, single directional light source, cold blue-teal ambient tones, warm accent from fire or candles, volumetric fog and haze, low-key lighting',
-  atmosphereTags: 'somber, ominous, foreboding, investigative noir, historically grounded, oppressive silence, tension',
-  compositionTags: 'cinematic wide establishing shots, low angle for unease, shallow depth of field, film grain texture, 16:9 cinematic framing',
-  tags: 'film grain, raw texture, desaturated vintage photography aesthetic, high contrast, cold teal and steel blue tones, warm fire accents, mist and fog, no fantasy elements, no anime, no cartoon, no 3d render look',
+  description: 'Pintura digital cinematográfica dark: concept art com chiaroscuro pesado, texturas pictóricas sutis e composição de cinema noir. Entre fotorrealismo e ilustração.',
+  baseStyle: 'Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric',
+  lightingTags: 'dramatic chiaroscuro, single directional light source, cold blue-teal ambient tones, warm accent from fire or candles, volumetric fog and haze, low-key lighting, light cutting through darkness',
+  atmosphereTags: 'somber, ominous, foreboding, investigative noir, oppressive silence, tension, morally ambiguous, fatalistic',
+  compositionTags: 'cinematic wide establishing shots, low angle for unease, dramatic camera angles, shallow depth of field, 16:9 cinematic framing, figures emerging from shadow',
+  tags: 'subtle painterly brushstrokes, matte painting quality, dark desaturated palette, high contrast, cold teal and steel blue tones, warm fire accents, mist and fog, gritty texture, no photograph, no DSLR, no clean AI render, no anime, no cartoon, no comic book, semi-realistic stylized art, concept art aesthetic',
   order: 2,
+  isActive: true
+}
+
+/** Noir Clássico: ilustração noir pura inspirada em Sin City, Batman Dark Deco e graphic novels sombrias. Preto absoluto, ink wash, acentos seletivos de cor. */
+export const NOIR_CLASSIC_STYLE: VisualStyle = {
+  id: 'noir-classic',
+  name: 'Noir Clássico',
+  description: 'Ilustração noir pura: ink wash painting, alto contraste preto e branco com acentos seletivos de cor. Inspirado em Sin City, Batman Dark Deco e graphic novels sombrias.',
+  baseStyle: 'Dark noir graphic novel illustration, ink wash painting style, heavy black shadows, stark high-contrast chiaroscuro, stylized and painterly, not photorealistic',
+  lightingTags: 'extreme chiaroscuro, single harsh directional light, venetian blind shadow patterns, cold moonlight blue accents, light cutting through absolute darkness, silhouette-heavy composition',
+  atmosphereTags: 'somber, ominous, foreboding, investigative noir, oppressive silence, tension, morally ambiguous, fatalistic',
+  compositionTags: 'dramatic angles, dutch tilt, low angle for unease, graphic novel panel composition, bold negative space, cinematic framing, figures emerging from shadow',
+  tags: 'ink wash texture, visible brushstrokes, Sin City aesthetic, Dark Deco style, stark black and white with selective color accent, desaturated palette, deep blacks, no photorealism, no photograph, no camera grain, no DSLR look, hand-drawn quality, graphic novel art, illustrated, painterly noir, cross-hatching details',
+  order: 3,
   isActive: true
 }
 
@@ -57,7 +71,7 @@ export const GHIBLI_DARK_STYLE: VisualStyle = {
   atmosphereTags: 'suspenseful, subtle horror, noir mood, tense, mysterious, foreboding, solemn',
   compositionTags: 'wide establishing shot when revealing tension, low angle for unease, textured paper effect, shallow depth',
   tags: 'flat cell shading, inked outlines, Ghibli-style backgrounds but dark palette, desaturated greens and grays, no dreamlike or nostalgic, high contrast lighting, earthy muted tones, subtle grain',
-  order: 3,
+  order: 4,
   isActive: true
 }
 
@@ -70,7 +84,7 @@ export const GTA6_STYLE: VisualStyle = {
   atmosphereTags: 'energetic, luxurious, urban tropical paradise, high-octane',
   compositionTags: 'dynamic camera movement, establishing wide shots of cityscape, low angle hero shots',
   tags: 'saturated colors, photorealistic, neon lights, urban, tropical, palm trees swaying, ocean view, luxury cars gleaming, modern architecture',
-  order: 4,
+  order: 5,
   isActive: true
 }
 
@@ -83,7 +97,7 @@ export const CYBERPUNK_STYLE: VisualStyle = {
   atmosphereTags: 'dystopian, mysterious, tech-noir, rain-soaked melancholy',
   compositionTags: 'low angle looking up at megastructures, rain droplets on camera lens, holographic displays floating',
   tags: 'futuristic, advanced technology, dark atmosphere, sci-fi, holographic displays, flying cars passing by, megacity',
-  order: 5,
+  order: 6,
   isActive: true
 }
 
@@ -96,7 +110,7 @@ export const OIL_PAINTING_STYLE: VisualStyle = {
   atmosphereTags: 'timeless, contemplative, classical elegance, artistic reverence',
   compositionTags: 'traditional portrait framing, close-up with shallow depth, painterly brush strokes visible',
   tags: 'visible brush strokes, canvas texture, impressionist touches, artistic, painterly, traditional art',
-  order: 6,
+  order: 7,
   isActive: true
 }
 
@@ -109,7 +123,7 @@ export const PHOTOREALISTIC_STYLE: VisualStyle = {
   atmosphereTags: 'authentic, immersive, documentary realism, cinematic presence',
   compositionTags: 'shallow depth of field, cinematic aspect ratio, professional framing',
   tags: 'ultra detailed, realistic lighting, 4K, 8K, DSLR quality, professional camera work',
-  order: 7,
+  order: 8,
   isActive: true
 }
 
@@ -118,6 +132,7 @@ export const PHOTOREALISTIC_STYLE: VisualStyle = {
 export const VISUAL_STYLES: Record<VisualStyleId, VisualStyle> = {
   epictok: EPICTOK_STYLE,
   'noir-cinematic': NOIR_CINEMATIC_STYLE,
+  'noir-classic': NOIR_CLASSIC_STYLE,
   'ghibli-dark': GHIBLI_DARK_STYLE,
   gta6: GTA6_STYLE,
   cyberpunk: CYBERPUNK_STYLE,

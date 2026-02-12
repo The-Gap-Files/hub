@@ -133,7 +133,7 @@ Retorne APENAS um JSON válido com esta estrutura (sem markdown, sem \`\`\`):
   "seoTags": ["keyword1", "keyword2"]
 }`
 
-  const model = await createLlmForTask(TASK_ID, { temperature: 0.8, maxTokens: 3000 })
+  const model = await createLlmForTask(TASK_ID, { temperature: 0.8, maxTokens: 8000 })
   const socialKitAssignment = await getAssignment(TASK_ID)
 
   console.log(`[SocialKit] 📱 Gerando kit de publicação via ${socialKitAssignment.provider}/${socialKitAssignment.model}...`)

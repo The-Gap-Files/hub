@@ -2,7 +2,7 @@
  * POST /api/dossiers/[id]/suggest-monetization
  * 
  * Analisa o dossiê via IA e gera um plano de monetização Document-First:
- * 1 Full Video (YouTube) + 4-6 Teasers (TikTok/Shorts/Reels)
+ * 1 Full Video (YouTube) + N Teasers (TikTok/Shorts/Reels)
  * 
  * O plano é retornado para aprovação manual — NÃO cria outputs automaticamente.
  */
@@ -32,6 +32,7 @@ export default defineEventHandler(async (event) => {
   const rawBody = await readBody(event)
   const teaserDuration = Number(rawBody?.teaserDuration)
   const fullVideoDuration = Number(rawBody?.fullVideoDuration)
+  const teaserCount = rawBody?.teaserCount ? Number(rawBody.teaserCount) : 6
 
   if (![60, 120, 180].includes(teaserDuration)) {
     throw createError({
@@ -47,13 +48,21 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  if (teaserCount < 4 || teaserCount > 15) {
+    throw createError({
+      statusCode: 400,
+      message: 'teaserCount deve ser entre 4 e 15'
+    })
+  }
+
   // Buscar dossiê com relações
   const dossier = await prisma.dossier.findUnique({
     where: { id: dossierId },
     include: {
       sources: { orderBy: { order: 'asc' } },
       images: { orderBy: { order: 'asc' } },
-      notes: { orderBy: { order: 'asc' } }
+      notes: { orderBy: { order: 'asc' } },
+      persons: { orderBy: { order: 'asc' } }
     }
   })
 
@@ -72,7 +81,8 @@ export default defineEventHandler(async (event) => {
         sources: dossier.sources.map(s => ({
           title: s.title,
           content: s.content,
-          sourceType: s.sourceType
+          sourceType: s.sourceType,
+          weight: s.weight ?? 1.0
         })),
         notes: dossier.notes.map(n => ({
           content: n.content,
@@ -81,8 +91,16 @@ export default defineEventHandler(async (event) => {
         images: dossier.images.map(i => ({
           description: i.description
         })),
+        persons: dossier.persons?.map(p => ({
+          name: p.name,
+          role: p.role,
+          description: p.description,
+          relevance: p.relevance
+        })) || [],
+        researchData: dossier.researchData || undefined,
         teaserDuration: teaserDuration as 60 | 120 | 180,
         fullVideoDuration: fullVideoDuration as 300 | 600 | 900,
+        teaserCount,
         creativeDirection: rawBody?.creativeDirection
       }
     )
@@ -143,7 +161,8 @@ export default defineEventHandler(async (event) => {
       model: result.model,
       config: {
         teaserDuration,
-        fullVideoDuration
+        fullVideoDuration,
+        teaserCount
       },
       createdAt: savedPlan.createdAt
     }
