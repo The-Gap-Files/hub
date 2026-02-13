@@ -10,12 +10,12 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Verificar se dossier existe
+  // Verificar se dossier existe e contar relações
   const existing = await prisma.dossier.findUnique({
     where: { id },
     include: {
       _count: {
-        select: { outputs: true }
+        select: { sources: true, outputs: true }
       }
     }
   })
@@ -27,13 +27,20 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Verificar se tem outputs (aviso)
-  if (existing._count.outputs > 0) {
-    // Ainda permite deletar (cascade), mas loga warning
-    console.warn(`Deleting dossier ${id} with ${existing._count.outputs} outputs`)
+  // Regra de negócio: só pode deletar se NÃO houver fontes
+  if (existing._count.sources > 0) {
+    throw createError({
+      statusCode: 422,
+      message: `Não é possível deletar este dossiê: ele possui ${existing._count.sources} fonte(s) vinculada(s). Remova todas as fontes antes de deletar.`
+    })
   }
 
-  // Deletar dossier (cascade deleta outputs, sources, images, notes)
+  // Loga warning se tem outputs (serão deletados em cascata)
+  if (existing._count.outputs > 0) {
+    console.warn(`[DELETE] Deleting dossier ${id} with ${existing._count.outputs} outputs (cascade)`)
+  }
+
+  // Deletar dossier (cascade deleta outputs, images, notes, etc.)
   await prisma.dossier.delete({
     where: { id }
   })

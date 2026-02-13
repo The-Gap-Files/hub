@@ -9,6 +9,7 @@ export interface CreateDossierDTO {
   theme: string
   tags?: string[]
   visualIdentityContext?: string
+  researchPrompt?: string
   preferredVisualStyleId?: string
   preferredSeedId?: string
   channelId?: string
@@ -50,6 +51,7 @@ export interface UpdateDossierDTO {
   researchData?: any
   isProcessed?: boolean
   visualIdentityContext?: string
+  researchPrompt?: string
   preferredVisualStyleId?: string
   preferredSeedId?: string
   channelId?: string | null
@@ -66,6 +68,7 @@ export interface DossierResponse {
   researchData?: any
   tags: string[]
   visualIdentityContext?: string | null
+  researchPrompt?: string | null
   preferredVisualStyleId?: string | null
   preferredSeedId?: string | null
   isProcessed: boolean

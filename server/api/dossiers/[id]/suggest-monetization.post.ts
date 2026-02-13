@@ -78,6 +78,7 @@ export default defineEventHandler(async (event) => {
       {
         theme: dossier.theme,
         title: dossier.title,
+        visualIdentityContext: dossier.visualIdentityContext || undefined,
         sources: dossier.sources.map(s => ({
           title: s.title,
           content: s.content,
@@ -95,6 +96,7 @@ export default defineEventHandler(async (event) => {
           name: p.name,
           role: p.role,
           description: p.description,
+          visualDescription: p.visualDescription,
           relevance: p.relevance
         })) || [],
         researchData: dossier.researchData || undefined,

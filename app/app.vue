@@ -5,6 +5,7 @@
       <NuxtPage />
     </NuxtLayout>
     <NotificationToast />
+    <AiLogViewer />
   </div>
 </template>
 

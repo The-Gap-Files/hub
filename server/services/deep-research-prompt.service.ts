@@ -26,6 +26,8 @@ export interface DeepResearchPromptRequest {
   tags?: string[]
   /** Fontes já existentes no dossiê (apenas títulos para contexto) */
   existingSourceTitles?: string[]
+  /** Assets visuais do dossiê (descrição + tags de cada imagem) */
+  imageDescriptions?: { description: string; tags: string }[]
   /** Idioma desejado para o relatório de pesquisa */
   language?: 'pt-br' | 'en'
   /** Profundidade da pesquisa */
@@ -162,6 +164,18 @@ function buildUserPrompt(request: DeepResearchPromptRequest): string {
     request.existingSourceTitles.forEach((title, i) => {
       prompt += `  ${i + 1}. ${title}\n`
     })
+  }
+
+  if (request.imageDescriptions && request.imageDescriptions.length > 0) {
+    prompt += `\n🖼️ ASSETS VISUAIS DO DOSSIÊ (contexto visual já coletado — use para direcionar a pesquisa):\n`
+    request.imageDescriptions.forEach((img, i) => {
+      prompt += `  ${i + 1}. ${img.description}`
+      if (img.tags) {
+        prompt += ` [tags: ${img.tags}]`
+      }
+      prompt += `\n`
+    })
+    prompt += `Considere estes assets visuais ao sugerir os ângulos de pesquisa — eles indicam o tipo de evidência visual já disponível e podem sugerir lacunas a investigar.\n`
   }
 
   prompt += `\nGere o prompt de pesquisa agora. Retorne SOMENTE o prompt, sem explicação.`

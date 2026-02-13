@@ -4,6 +4,10 @@
  * Exporta legendas com timestamps precisos para upload no YouTube/Vimeo.
  * Usa word timings do ElevenLabs quando disponíveis (precisão por palavra).
  * 
+ * Anti-Drift: proba a duração real do vídeo renderizado e escala todos os
+ * timestamps proporcionalmente, eliminando qualquer descompasso causado por
+ * frame grid, AAC padding, re-encoding, etc.
+ * 
  * Query params:
  *   format: 'srt' (padrão) ou 'vtt'
  */
@@ -22,11 +26,13 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: `Formato inválido: ${format}. Use 'srt' ou 'vtt'.` })
   }
 
-  // Buscar output com cenas e áudios
+  // Buscar output com cenas, áudios e dados do vídeo para probing
   const output = await prisma.output.findUnique({
     where: { id: outputId },
     select: {
       title: true,
+      outputPath: true,
+      outputData: true,
       scenes: {
         orderBy: { order: 'asc' },
         select: {
@@ -69,11 +75,30 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'No narration audio found for subtitle export' })
   }
 
-  // Gerar legendas
+  // Probar duração real do vídeo renderizado (anti-drift)
   const captionService = new CaptionService()
+  let actualVideoDuration: number | undefined
+
+  try {
+    if (output.outputPath) {
+      // Vídeo em disco — proba diretamente (eficiente)
+      actualVideoDuration = await captionService.probeVideoDuration({ path: output.outputPath })
+    } else if (output.outputData) {
+      // Vídeo no banco — proba via buffer temp
+      actualVideoDuration = await captionService.probeVideoDuration({
+        buffer: Buffer.from(output.outputData)
+      })
+    }
+  } catch (err) {
+    // Se falhar o probing, prossegue sem scaling (melhor que falhar tudo)
+    console.warn('[export-subtitles] Falha ao probar duração do vídeo; exportando sem scaling.', err)
+  }
+
+  // Gerar legendas (com scaling se duração disponível)
+  const exportOptions = { actualVideoDuration }
   const content = format === 'vtt'
-    ? await captionService.exportVTT(sceneCaptionData)
-    : await captionService.exportSRT(sceneCaptionData)
+    ? await captionService.exportVTT(sceneCaptionData, exportOptions)
+    : await captionService.exportSRT(sceneCaptionData, exportOptions)
 
   // Preparar filename seguro
   const safeName = (output.title || 'output')

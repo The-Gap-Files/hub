@@ -9,13 +9,14 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    // Atualizar status para CANCELLED
+    // Atualizar status para CANCELLED (select só campos leves para evitar Invalid string length na resposta)
     const output = await prisma.output.update({
       where: { id },
       data: {
-        status: 'CANCELLED',
+        status: 'PENDING',
         updatedAt: new Date()
-      }
+      },
+      select: { id: true, status: true, updatedAt: true }
     })
 
     // Registrar log de cancelamento

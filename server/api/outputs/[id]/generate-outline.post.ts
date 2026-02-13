@@ -48,6 +48,7 @@ export default defineEventHandler(async (event) => {
         include: {
           sources: true,
           notes: true,
+          images: true,
           persons: { orderBy: { order: 'asc' } }
         }
       }
@@ -69,6 +70,7 @@ export default defineEventHandler(async (event) => {
   try {
     const result = await generateStoryOutline({
       theme: dossier.theme,
+      visualIdentityContext: dossier.visualIdentityContext || undefined,
       sources: dossier.sources?.map((s: any) => ({
         title: s.title,
         content: s.content,
@@ -78,11 +80,15 @@ export default defineEventHandler(async (event) => {
       userNotes,
       persons: mapPersonsFromPrisma(dossier.persons),
       neuralInsights: mapNeuralInsightsFromNotes(dossier.notes),
+      imageDescriptions: dossier.images?.map((i: any) => i.description).filter(Boolean) || [],
+      researchData: dossier.researchData || undefined,
       editorialObjective: output.objective || undefined,
       scriptStyleId: output.scriptStyleId || undefined,
       dossierCategory: output.classificationId || undefined,
       targetDuration: output.duration || 300,
       language: output.language || 'pt-BR',
+      mustInclude: output.mustInclude || undefined,
+      mustExclude: output.mustExclude || undefined,
       monetizationContext
     })
 

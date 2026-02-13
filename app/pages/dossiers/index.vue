@@ -16,21 +16,122 @@
         <p class="text-zinc-500 font-medium max-w-md">Nexus central de inteligência e vetores de produção documental.</p>
       </div>
 
-      <div class="relative flex items-center gap-4">
-        <!-- Channel Filter -->
-        <select v-model="selectedChannelId" @change="onChannelFilterChange" class="channel-filter">
-          <option value="">Todos os canais</option>
-          <option v-for="ch in channelOptions" :key="ch.id" :value="ch.id">{{ ch.name }}</option>
-        </select>
-
-        <NuxtLink to="/dossiers/new" class="btn-primary !px-10 !py-4 shadow-glow group/btn">
-          <span class="flex items-center gap-3">
-            <FilePlus :size="20" class="group-hover/btn:rotate-90 transition-transform duration-500" />
-            INICIAR NOVA INVESTIGAÇÃO
-          </span>
-        </NuxtLink>
-      </div>
+        <div class="flex gap-2">
+            <button
+                @click="openNewsRadar"
+                class="btn-secondary !px-4 !py-4 shadow-glow group/btn border-primary/20 text-primary hover:bg-primary/10"
+                title="Interceptar Sinais Globais"
+            >
+                <Radio :size="20" class="group-hover/btn:scale-110 transition-transform duration-500" />
+            </button>
+            <NuxtLink to="/dossiers/new" class="btn-primary !px-10 !py-4 shadow-glow group/btn">
+            <span class="flex items-center gap-3">
+                <FilePlus :size="20" class="group-hover/btn:rotate-90 transition-transform duration-500" />
+                INICIAR NOVA INVESTIGAÇÃO
+            </span>
+            </NuxtLink>
+        </div>
     </header>
+
+    <!-- News Radar Modal -->
+    <div v-if="showNewsModal" class="fixed inset-0 z-50 flex items-center justify-center p-8 backdrop-blur-md bg-black/80" @click.self="showNewsModal = false">
+        <div class="w-full max-w-5xl h-[85vh] bg-[#09090b] border border-white/10 rounded-3xl flex flex-col shadow-2xl relative overflow-hidden">
+            <!-- Header -->
+            <div class="p-6 border-b border-white/10 bg-white/[0.02]">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400 animate-pulse">
+                            <Radio :size="20" />
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-white tracking-tight uppercase">Radar de Inteligência</h2>
+                            <p class="text-xs text-zinc-500 mono-label tracking-widest">
+                              {{ filteredNews.length }} sinais interceptados
+                              <span v-if="refreshingNews" class="text-emerald-500 animate-pulse ml-2">● scanning...</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button 
+                            @click="refreshNewsRadar" 
+                            :disabled="refreshingNews"
+                            class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-zinc-500 hover:text-emerald-400 hover:border-emerald-500/30 transition-all disabled:opacity-30"
+                            title="Atualizar feeds"
+                        >
+                            <Loader2 v-if="refreshingNews" :size="14" class="animate-spin" />
+                            <Radio v-else :size="14" />
+                        </button>
+                        <button @click="showNewsModal = false" class="text-zinc-500 hover:text-white transition-colors">
+                            <X :size="24" />
+                        </button>
+                    </div>
+                </div>
+                <!-- Category Filters -->
+                <div class="flex gap-2 flex-wrap">
+                    <button
+                        v-for="cat in newsCategories"
+                        :key="cat.id"
+                        @click="selectedNewsCategory = selectedNewsCategory === cat.id ? '' : cat.id"
+                        :class="[
+                            'px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider border transition-all',
+                            selectedNewsCategory === cat.id
+                                ? `${cat.activeClass} border-current`
+                                : 'bg-white/5 border-white/5 text-zinc-500 hover:bg-white/10 hover:text-zinc-300'
+                        ]"
+                    >
+                        {{ cat.icon }} {{ cat.label }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 content-start">
+                <div v-if="loadingNews" class="col-span-full flex flex-col items-center justify-center py-20 space-y-4">
+                     <Loader2 :size="40" class="animate-spin text-emerald-500" />
+                     <p class="text-emerald-500/50 mono-label animate-pulse">Scanning frequencies...</p>
+                </div>
+
+                <div v-else-if="filteredNews.length === 0" class="col-span-full flex flex-col items-center justify-center py-20 space-y-4">
+                     <Radio :size="40" class="text-zinc-700" />
+                     <p class="text-zinc-600 mono-label">Nenhum sinal nesta frequência.</p>
+                </div>
+                
+                <div 
+                    v-else 
+                    v-for="(item, idx) in filteredNews" 
+                    :key="idx" 
+                    class="bg-white/5 border border-white/5 hover:border-emerald-500/30 hover:bg-emerald-500/[0.02] p-5 rounded-xl flex flex-col gap-3 group transition-all duration-300"
+                >
+                    <div class="flex justify-between items-start gap-2">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span :class="getCategoryBadgeClass(item.category)" class="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded">{{ item.category }}</span>
+                            <span class="text-[10px] text-zinc-600">{{ item.source }}</span>
+                            <span v-if="item.publishedAt" class="text-[10px] text-zinc-600">· {{ formatNewsDate(item.publishedAt) }}</span>
+                        </div>
+                        <a :href="item.link" target="_blank" class="text-zinc-600 hover:text-emerald-400 transition-colors shrink-0"><ExternalLink :size="14" /></a>
+                    </div>
+                    
+                    <h3 class="text-white text-base leading-tight group-hover:text-emerald-400 transition-colors line-clamp-3 font-semibold">
+                        {{ item.title }}
+                    </h3>
+                    
+                    <p class="text-zinc-500 text-xs line-clamp-3 leading-relaxed">
+                        {{ item.summary }}
+                    </p>
+
+                    <div class="mt-auto pt-3">
+                        <button 
+                            @click="investigateSignal(item)"
+                            class="w-full py-2 bg-emerald-500/10 hover:bg-emerald-500 hover:text-black border border-emerald-500/20 rounded-lg text-emerald-400 text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2"
+                        >
+                            <Files :size="14" />
+                            Investigar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div v-if="loading" class="flex flex-col items-center justify-center py-40 space-y-6">
       <div class="relative">
@@ -107,6 +208,15 @@
           </div>
 
           <div class="flex gap-2 self-end md:self-center opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-500">
+            <!-- Delete Button (só aparece se não tem fontes) -->
+            <button
+              v-if="(dossier.sourcesCount || 0) === 0"
+              @click.stop="confirmDelete(dossier)"
+              class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-500 hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-400 transition-all duration-300"
+              title="Deletar dossiê (sem fontes)"
+            >
+              <Trash2 :size="18" />
+            </button>
             <div class="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-white shadow-glow">
               <ChevronRight :size="24" />
             </div>
@@ -150,7 +260,7 @@
 import { 
   Library, FilePlus, Database, Image as ImageIcon, 
   Brain, Film, ChevronRight, FolderOpen,
-  ChevronLeft
+  ChevronLeft, Trash2, Radio, X, Loader2, ExternalLink, Files
 } from 'lucide-vue-next'
 
 interface ChannelOption {
@@ -165,6 +275,75 @@ const pageSize = ref(20)
 const total = ref(0)
 const selectedChannelId = ref('')
 const channelOptions = ref<ChannelOption[]>([])
+const deleting = ref<string | null>(null)
+const showNewsModal = ref(false)
+const newsItems = ref<any[]>([])
+const loadingNews = ref(false)
+const router = useRouter()
+const selectedNewsCategory = ref('')
+
+const newsCategories = [
+  { id: 'paranormal', label: 'Paranormal', icon: '👁️', activeClass: 'bg-purple-500/20 text-purple-400' },
+  { id: 'science', label: 'Ciência', icon: '🔬', activeClass: 'bg-cyan-500/20 text-cyan-400' },
+  { id: 'true-crime', label: 'True Crime', icon: '🔪', activeClass: 'bg-red-500/20 text-red-400' },
+  { id: 'serial-killer', label: 'Serial Killers', icon: '💀', activeClass: 'bg-rose-500/20 text-rose-400' },
+  { id: 'journalism', label: 'Jornalismo', icon: '📰', activeClass: 'bg-amber-500/20 text-amber-400' },
+  { id: 'geopolitics', label: 'Geopolítica', icon: '🌐', activeClass: 'bg-blue-500/20 text-blue-400' },
+  { id: 'weird', label: 'Bizarro', icon: '🤡', activeClass: 'bg-pink-500/20 text-pink-400' },
+]
+
+const filteredNews = computed(() => {
+  if (!selectedNewsCategory.value) return newsItems.value
+  return newsItems.value.filter((item: any) => item.category === selectedNewsCategory.value)
+})
+
+function formatNewsDate(dateStr: string): string {
+  try {
+    const date = new Date(dateStr)
+    if (isNaN(date.getTime())) return ''
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+    if (diffHours < 1) return 'agora'
+    if (diffHours < 24) return `há ${diffHours}h`
+    if (diffDays < 7) return `há ${diffDays}d`
+    return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
+  } catch {
+    return ''
+  }
+}
+
+function getCategoryBadgeClass(category: string): string {
+  const map: Record<string, string> = {
+    'paranormal': 'bg-purple-500/20 text-purple-400',
+    'science': 'bg-cyan-500/20 text-cyan-400',
+    'true-crime': 'bg-red-500/20 text-red-400',
+    'serial-killer': 'bg-rose-500/20 text-rose-400',
+    'journalism': 'bg-amber-500/20 text-amber-400',
+    'geopolitics': 'bg-blue-500/20 text-blue-400',
+    'weird': 'bg-pink-500/20 text-pink-400',
+  }
+  return map[category] || 'bg-white/10 text-zinc-400'
+}
+
+async function confirmDelete(dossier: any) {
+  const confirmed = window.confirm(`Deletar o dossiê "${dossier.title}"?\n\nEsta ação é irreversível.`)
+  if (!confirmed) return
+
+  deleting.value = dossier.id
+  try {
+    await $fetch(`/api/dossiers/${dossier.id}`, { method: 'DELETE' })
+    // Remover da lista local imediatamente (otimistic)
+    dossiers.value = dossiers.value.filter(d => d.id !== dossier.id)
+    total.value = Math.max(0, total.value - 1)
+  } catch (error: any) {
+    const msg = error?.data?.message || 'Erro ao deletar dossiê'
+    alert(msg)
+  } finally {
+    deleting.value = null
+  }
+}
 
 async function loadChannels() {
   try {
@@ -206,6 +385,77 @@ function formatCost(totalCost: number): string {
   if (totalCost >= 0.01) return `$${totalCost.toFixed(2)}`
   if (totalCost > 0) return `$${totalCost.toFixed(4)}`
   return '$0.00'
+}
+
+const refreshingNews = ref(false)
+
+async function openNewsRadar() {
+    showNewsModal.value = true
+    if (newsItems.value.length === 0) {
+        // Primeira abertura: carregar do cache (banco) instantaneamente
+        loadingNews.value = true
+        try {
+            const cached = await $fetch<any>('/api/intelligence/news')
+            newsItems.value = cached.data
+        } catch (e) {
+            // Cache vazio, vai direto pro refresh
+        } finally {
+            loadingNews.value = false
+        }
+    }
+    // Sempre buscar novos sinais dos feeds em background
+    refreshNewsRadar()
+}
+
+async function refreshNewsRadar() {
+    refreshingNews.value = true
+    try {
+        const res = await $fetch<any>('/api/intelligence/news', { query: { refresh: 'true' } })
+        newsItems.value = res.data
+    } catch (e) {
+        if (newsItems.value.length === 0) {
+            alert('Falha ao conectar com satélites de notícias.')
+        }
+    } finally {
+        refreshingNews.value = false
+    }
+}
+
+async function investigateSignal(item: any) {
+    // Criar dossier automaticamente e redirecionar
+    if (!confirm(`Iniciar investigação sobre: "${item.title}"?`)) return
+    
+    try {
+        const payload = {
+            title: item.title,
+            theme: item.summary ? `${item.summary}\n\nSource: ${item.link}` : `Investigation based on: ${item.link}`,
+            tags: ['AUTO-INTEL', item.source],
+            visualIdentityContext: 'Documentary/Investigative',
+        }
+        
+        const res = await $fetch<any>('/api/dossiers', {
+            method: 'POST',
+            body: payload
+        })
+        
+        // Adicionar o link como fonte automaticamente
+        await $fetch(`/api/dossiers/${res.id}/sources`, {
+            method: 'POST',
+            body: {
+                title: 'Primary Signal Source',
+                content: item.link, // URL vai aqui, o backend pode extrair depois se tiver scraper
+                sourceType: 'ARTICLE',
+                url: item.link,
+                author: item.author || item.source
+            }
+        })
+
+        showNewsModal.value = false
+        router.push(`/dossiers/${res.id}`)
+    } catch (e) {
+        console.error(e)
+        alert('Erro ao iniciar investigação.')
+    }
 }
 
 onMounted(() => {

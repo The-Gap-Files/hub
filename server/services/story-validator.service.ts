@@ -1,6 +1,5 @@
-import fs from 'fs/promises'
-import path from 'path'
 import { z } from 'zod'
+import { loadSkill } from '../utils/skill-loader'
 import { createLlmForTask, getAssignment } from './llm/llm-factory'
 
 // Schema de Resposta da Validação
@@ -14,7 +13,7 @@ export type ValidationResult = z.infer<typeof ValidationResultSchema>
 
 interface ValidationContext {
   itemType: 'teaser' | 'fullVideo'
-  narrativeRole: string // gateway | deep-dive | hook-only
+  narrativeRole: string // gateway | deep-dive | hook-only | full-video
   angleCategory: string
   angleDescription: string
   avoidPatterns?: string[]
@@ -23,26 +22,41 @@ interface ValidationContext {
 const LOG = '[StoryValidator]'
 
 /**
+ * Resolve o nome do skill de validação baseado no contexto.
+ * - Teasers: story-validator-{narrativeRole} (ex: story-validator-gateway)
+ * - Full Video: full-video/story-validator
+ */
+function resolveValidationSkillName(context: ValidationContext): string {
+  if (context.itemType === 'fullVideo' || context.narrativeRole === 'full-video') {
+    return 'full-video/story-validator'
+  }
+  return `teaser/story-validator-${context.narrativeRole}`
+}
+
+/**
  * Valida um Outline narrativo contra as regras de sua Role e Ângulo.
- * Usa Skills específicas (story-validator-*.md) como critério de aceite.
+ * Usa Skills específicas como critério de aceite:
+ * - Teasers: server/skills/story-validator-{role}.md
+ * - Full Video: server/skills/full-video/story-validator.md
  */
 export async function validateStoryOutline(
   outline: any,
   context: ValidationContext
 ): Promise<ValidationResult> {
-  // 1. Identificar e carregar a Skill correta
-  const skillFileName = `story-validator-${context.narrativeRole}.md`
-  const skillPath = path.resolve(process.cwd(), 'server', 'skills', skillFileName)
+  const isFullVideo = context.itemType === 'fullVideo' || context.narrativeRole === 'full-video'
+  const skillName = resolveValidationSkillName(context)
 
+  // 1. Carregar a Skill de validação via skill-loader (suporta subpastas)
   let validationSkill = ''
   try {
-    validationSkill = await fs.readFile(skillPath, 'utf-8')
+    validationSkill = loadSkill(skillName)
   } catch (error) {
-    console.warn(`${LOG} Skill não encontrada para role "${context.narrativeRole}". Pulando validação.`)
+    console.warn(`${LOG} Skill não encontrada: "${skillName}". Pulando validação.`)
     return { approved: true } // Se não tem regra específica, aprova por padrão (safe fail)
   }
 
   // 2. Montar o Prompt de Validação
+  const roleLabel = isFullVideo ? 'Full Video' : context.narrativeRole
   const prompt = `
 PAINEL DE VALIDAÇÃO NARRATIVA
 -----------------------------
@@ -54,7 +68,7 @@ ${validationSkill}
 
 CONTEXTO DO PROJETO:
 - Tipo: ${context.itemType}
-- Role: ${context.narrativeRole}
+- Role: ${roleLabel}
 - Ângulo Obrigatório: ${context.angleCategory} ("${context.angleDescription}")
 - Avoid Patterns (O QUE NÃO FAZER):
 ${(context.avoidPatterns || []).map(p => `  - ${p}`).join('\n')}
@@ -63,16 +77,32 @@ OUTLINE PARA ANÁLISE:
 ${JSON.stringify(outline, null, 2)}
 
 INSTRUÇÃO FINAL:
-Analise cada beat do outline. Verifique:
+${isFullVideo ? `Analise o outline de FULL VIDEO. Execute os 14 checks definidos na skill:
+1. Cold Open presente (Fatal)
+2. Promise/Declaração nos primeiros 10%
+3. Setup ≤ 25% das cenas
+4. ≥5 rising beats
+5. Escalação progressiva entre beats (Fatal)
+6. Midpoint presente entre 40-60% (Fatal)
+7. Re-engagement hooks a cada ~36 cenas
+8. Dark Moment (70-75%)
+9. Clímax posicionado (80-92%)
+10. Resolução + CTA nos últimos 10% (Fatal)
+11. Ângulo respeitado em todos os beats
+12. Arco emocional com ≥5 estados
+13. Cenas totais = duração/5
+14. Avoid Patterns respeitados
+
+Regra: 1+ fatal = REPROVADO. 0 fatais + 2+ graves = REPROVADO.` : `Analise cada beat do outline. Verifique:
 1. Contaminação de Contexto (fala de coisas fora do ângulo?)
 2. Profundidade (respeita o nível de contexto da role?)
-3. Anti-Padrões (violou algo?)
+3. Anti-Padrões (violou algo?)`}
 
 Responda APENAS no formato JSON definido.
 `
 
   // 3. Chamar LLM via Factory (usa o modelo configurado para 'story-validator')
-  console.log(`${LOG} Validando outline (${context.narrativeRole})...`)
+  console.log(`${LOG} Validando outline (${roleLabel})...`)
 
   try {
     const assignment = await getAssignment('story-validator')

@@ -262,6 +262,11 @@ export function buildUserPrompt(request: ScriptGenerationRequest, providerHint?:
 
   let baseInstruction = `Crie um roteiro em ${request.language} sobre o tema: "${request.theme}"${formatContext}`
 
+  // Diretrizes de identidade visual do universo do dossiê (Warning Protocol)
+  if (request.visualIdentityContext) {
+    baseInstruction += `\n\n🎨 DIRETRIZES DE IDENTIDADE DO UNIVERSO (WARNING PROTOCOL):\n${request.visualIdentityContext}`
+  }
+
   if (request.dossierCategory) {
     baseInstruction += `\n\n🏷️ CLASSIFICAÇÃO TEMÁTICA: ${request.dossierCategory.toUpperCase()}`
     if (request.musicGuidance) {

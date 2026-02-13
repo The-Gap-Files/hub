@@ -23,6 +23,14 @@ import { buildCacheableMessages, logCacheMetrics, shouldApplyCache } from './llm
 // SCHEMA - Formato estruturado que a IA deve retornar
 // =============================================================================
 
+const HookVariantSchema = z.object({
+  level: z.enum(['green', 'moderate', 'aggressive', 'lawless']).describe(
+    'Nível tonal: green (seguro/informativo), moderate (provocativo mas contido), aggressive (no limite do YouTube), lawless (ultrapassa diretrizes — referência extrema)'
+  ),
+  hook: z.string().describe('Frase de hook (15-30 palavras) calibrada para o nível tonal'),
+  rationale: z.string().describe('Por que esse tom funciona para este tema (1 frase)')
+})
+
 const RisingBeatSchema = z.object({
   order: z.number().describe('Ordem do beat (1, 2, 3...)'),
   revelation: z.string().describe('O que é revelado neste beat'),
@@ -43,7 +51,9 @@ const SegmentDistributionSchema = z.object({
 const StoryOutlineSchema = z.object({
   // Estratégia de abertura
   hookStrategy: z.string().describe('Técnica de abertura e por que funciona para este tema'),
-  hookCandidate: z.string().describe('Frase de hook candidata (15-25 palavras) como referência de tom'),
+  hookVariants: z.array(HookVariantSchema).length(4).describe(
+    '4 variantes de hook com níveis tonais diferentes (green, moderate, aggressive, lawless). O usuário escolherá uma.'
+  ),
 
   // Setup
   promiseSetup: z.string().describe('Como o contexto será estabelecido após o hook + qual a promessa implícita'),
@@ -76,6 +86,7 @@ const StoryOutlineSchema = z.object({
 })
 
 export type StoryOutline = z.infer<typeof StoryOutlineSchema>
+export type HookVariant = z.infer<typeof HookVariantSchema>
 
 // =============================================================================
 // TIPOS
@@ -83,6 +94,7 @@ export type StoryOutline = z.infer<typeof StoryOutlineSchema>
 
 export interface StoryArchitectRequest {
   theme: string
+  visualIdentityContext?: string
   sources?: Array<{ title: string; content: string; type: string; weight?: number }>
   userNotes?: string[]
   editorialObjective?: string // Texto do editorial objective
@@ -94,6 +106,16 @@ export interface StoryArchitectRequest {
   // Persons & Neural Insights (Intelligence Center)
   persons?: PersonContext[]
   neuralInsights?: NeuralInsightContext[]
+
+  // Asset descriptions (descrições textuais dos assets visuais do dossiê)
+  imageDescriptions?: string[]
+
+  // Diretrizes do usuário (do Output)
+  mustInclude?: string
+  mustExclude?: string
+
+  // Dados estruturados do dossiê (fatos, datas, pessoas em JSON)
+  researchData?: any
 
   // Monetization Context (quando gerado a partir de um item do plano de monetização)
   monetizationContext?: {
@@ -142,8 +164,10 @@ export async function generateStoryOutline(
   // ── Prompt Caching: montar dossiê canônico ──────────────────────
   const dossierBlock = buildDossierBlock({
     theme: request.theme,
+    visualIdentityContext: request.visualIdentityContext,
     sources: request.sources,
     userNotes: request.userNotes,
+    imageDescriptions: request.imageDescriptions,
     persons: request.persons,
     neuralInsights: request.neuralInsights
   })
@@ -206,8 +230,12 @@ export async function generateStoryOutline(
     }
 
     // -- VALIDAÇÃO NARRATIVA (AUTO-CORREÇÃO) --
-    if (content && request.monetizationContext && request.monetizationContext.narrativeRole) {
-      const { narrativeRole, angleCategory, avoidPatterns, itemType, angle } = request.monetizationContext
+    // Trigger: teasers com narrativeRole OU fullVideo (que não tem narrativeRole)
+    const hasValidationContext = content && request.monetizationContext && (
+      request.monetizationContext.narrativeRole || request.monetizationContext.itemType === 'fullVideo'
+    )
+    if (hasValidationContext) {
+      const { narrativeRole, angleCategory, avoidPatterns, itemType, angle } = request.monetizationContext!
       const maxRetries = 2
       let attempts = 0
       let isValid = false
@@ -220,7 +248,7 @@ export async function generateStoryOutline(
 
         const validation = await validateStoryOutline(content, {
           itemType,
-          narrativeRole,
+          narrativeRole: narrativeRole || 'full-video',
           angleCategory,
           angleDescription: angle,
           avoidPatterns
@@ -286,7 +314,13 @@ MANTENHA O QUE ESTAVA BOM, MAS REMOVA/ALTERE O QUE VIOLOU AS REGRAS.
       logCacheMetrics('StoryArchitect', rawMessage)
     }
 
-    console.log(`[StoryArchitect] 🎬 Hook: "${content.hookCandidate.substring(0, 60)}..."`)
+    // Log das 3 variantes de hook
+    if (content.hookVariants?.length) {
+      content.hookVariants.forEach((v: any) => {
+        const emoji = v.level === 'green' ? '🟢' : v.level === 'moderate' ? '🟡' : v.level === 'aggressive' ? '🔴' : '☠️'
+        console.log(`[StoryArchitect] ${emoji} Hook (${v.level}): "${v.hook.substring(0, 60)}..."`)
+      })
+    }
     console.log(`[StoryArchitect] 📈 Beats: ${content.risingBeats.length} revelações progressivas`)
     console.log(`[StoryArchitect] 🎯 Clímax: ${content.climaxFormula}`)
     console.log(`[StoryArchitect] 💓 Arco emocional: ${content.emotionalArc}`)
@@ -313,8 +347,14 @@ MANTENHA O QUE ESTAVA BOM, MAS REMOVA/ALTERE O QUE VIOLOU AS REGRAS.
 // =============================================================================
 
 function buildSystemPrompt(request: StoryArchitectRequest): string {
-  // Carregar a skill do Story Architect
-  const architectSkill = loadSkill('story-architect')
+  // Carregar a skill do Story Architect — usa skill especializada para full video
+  const isFullVideo = request.monetizationContext?.itemType === 'fullVideo'
+  const skillName = isFullVideo ? 'full-video/story-architect' : 'teaser/story-architect'
+  const architectSkill = loadSkill(skillName)
+
+  if (isFullVideo) {
+    console.log('[StoryArchitect] 🎬 Usando skill FULL VIDEO para outline')
+  }
 
   return `${architectSkill}
 
@@ -324,7 +364,8 @@ PARÂMETROS TÉCNICOS:
 - Cada cena dura 5 segundos
 - Total de cenas esperado: ${Math.ceil(request.targetDuration / 5)}
 - A soma de todas as cenas na distribuição DEVE ser igual a ${Math.ceil(request.targetDuration / 5)}
-- Idioma do roteiro: ${request.language || 'pt-BR'}`
+- Idioma do roteiro: ${request.language || 'pt-BR'}
+- Tipo de conteúdo: ${isFullVideo ? 'FULL VIDEO (vídeo completo longo)' : 'TEASER (vídeo curto)'}`
 }
 
 function buildUserPrompt(request: StoryArchitectRequest): string {
@@ -389,6 +430,19 @@ function buildUserPrompt(request: StoryArchitectRequest): string {
       prompt += `- Pense assim: se o espectador vê APENAS este teaser, ele deve sair entendendo profundamente UM aspecto, não uma colagem superficial de vários.\n`
     }
 
+    // Instruções específicas para full video
+    if (mc.itemType === 'fullVideo') {
+      prompt += `\n🎬 **INSTRUÇÕES PARA FULL VIDEO (CRÍTICA):**\n`
+      prompt += `Este é um VÍDEO COMPLETO, não um teaser. A estrutura deve seguir o framework Three-Act:\n`
+      prompt += `- ATO 1 (0-20%): Cold Open + Setup + Catalyst\n`
+      prompt += `- ATO 2 (20-75%): Investigation + MIDPOINT obrigatório + Complications + Dark Moment\n`
+      prompt += `- ATO 3 (75-100%): Break Into Three + Revelation + Resolution + CTA\n`
+      prompt += `- O MIDPOINT (~50% do vídeo) é OBRIGATÓRIO — sem ele o vídeo perde retenção.\n`
+      prompt += `- Preveja RE-ENGAGEMENT HOOKS a cada ~3 minutos (36 cenas).\n`
+      prompt += `- A escalação de intensidade entre beats é LEI — nenhum beat pode ter menos intensidade que o anterior.\n`
+      prompt += `- O ângulo definido ("${mc.angle}") deve guiar TODOS os beats, mas o full video pode explorar mais facetas dentro desse mesmo ângulo.\n`
+    }
+
     prompt += `\n`
   }
 
@@ -437,6 +491,20 @@ function buildUserPrompt(request: StoryArchitectRequest): string {
     prompt += `🏷️ CLASSIFICAÇÃO TEMÁTICA: ${request.dossierCategory.toUpperCase()}\n\n`
   }
 
+  // Dados estruturados do dossiê
+  if (request.researchData) {
+    prompt += `📊 DADOS ESTRUTURADOS (FATOS, DATAS, CONEXÕES):\n${JSON.stringify(request.researchData, null, 2)}\n\n`
+  }
+
+  // Diretrizes do usuário — DEVEM ser respeitadas no planejamento dos beats
+  let guidelines = ''
+  if (request.mustInclude) guidelines += `\n✅ DEVE INCLUIR NO PLANO: ${request.mustInclude}`
+  if (request.mustExclude) guidelines += `\n🚫 NÃO PODE CONTER NO PLANO: ${request.mustExclude}`
+  if (guidelines) {
+    prompt += `⚠️ DIRETRIZES OBRIGATÓRIAS DO USUÁRIO:${guidelines}\n\n`
+    prompt += `🚨 Estas diretrizes são INVIOLÁVEIS. Os beats narrativos, o clímax e a resolução DEVEM respeitar estas regras. Não planeje beats que violem o "NÃO PODE CONTER" nem omita o que "DEVE INCLUIR".\n\n`
+  }
+
   prompt += `⏱️ DURAÇÃO TOTAL: ${request.targetDuration} segundos (${Math.ceil(request.targetDuration / 5)} cenas de 5s cada)\n\n`
 
   prompt += `Crie o plano narrativo completo no formato JSON estruturado. Lembre-se: pense no CLÍMAX primeiro, depois construa o caminho até ele.`
@@ -452,7 +520,7 @@ function buildUserPrompt(request: StoryArchitectRequest): string {
  * Converte o StoryOutline em texto legível para injeção no prompt do Opus.
  * Este texto é adicionado ao user prompt do generateScript.
  */
-export function formatOutlineForPrompt(outline: StoryOutline & { _monetizationMeta?: any }): string {
+export function formatOutlineForPrompt(outline: StoryOutline & { _monetizationMeta?: any, _selectedHookLevel?: string, _customHook?: string }): string {
   const beats = outline.risingBeats
     .map((b, i) => `  ${i + 1}. ${b.revelation} → Levanta: "${b.newQuestion}"`)
     .join('\n')
@@ -460,6 +528,24 @@ export function formatOutlineForPrompt(outline: StoryOutline & { _monetizationMe
   const dist = outline.segmentDistribution
   const meta = outline._monetizationMeta
   const role = meta?.narrativeRole as string | undefined
+
+  // Resolver o hook selecionado pelo usuário (custom → _customHook, fallback: moderate → primeiro disponível)
+  const selectedLevel = (outline as any)._selectedHookLevel || 'moderate'
+
+  let hookText: string
+  let hookLevel: string
+
+  if (selectedLevel === 'custom' && (outline as any)._customHook) {
+    hookText = (outline as any)._customHook
+    hookLevel = 'custom'
+  } else {
+    const selectedVariant = outline.hookVariants?.find(v => v.level === selectedLevel)
+      || outline.hookVariants?.find(v => v.level === 'moderate')
+      || outline.hookVariants?.[0]
+    // Fallback para outlines antigos que ainda têm hookCandidate
+    hookText = selectedVariant?.hook || (outline as any).hookCandidate || ''
+    hookLevel = selectedVariant?.level || 'moderate'
+  }
 
   // Bloco de papel narrativo — aparece DENTRO do blueprint, não como nota extra
   let narrativeRoleBlock = ''
@@ -503,11 +589,15 @@ ${outline.promiseSetup}
 Não usar. Pular direto para RISING ACTION.`
   }
 
+  // Emoji do nível tonal selecionado
+  const levelEmoji = hookLevel === 'green' ? '🟢' : hookLevel === 'aggressive' ? '🔴' : hookLevel === 'lawless' ? '☠️' : hookLevel === 'custom' ? '✍️' : '🟡'
+
   return `🏗️ PLANO NARRATIVO (SIGA ESTE BLUEPRINT OBRIGATORIAMENTE):
 ${narrativeRoleBlock}
 ━━ HOOK (${dist.hook} cenas) ━━
 Estratégia: ${outline.hookStrategy}
-Referência de tom: "${outline.hookCandidate}"
+${levelEmoji} Tom selecionado: ${hookLevel.toUpperCase()}
+Referência de tom: "${hookText}"
 
 ${contextLabel}
 

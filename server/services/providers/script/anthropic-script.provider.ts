@@ -63,6 +63,7 @@ export class AnthropicScriptProvider implements IScriptGenerator {
     // ── Prompt Caching: montar dossiê canônico ──────────────────────
     const dossierBlock = buildDossierBlock({
       theme: request.theme,
+      visualIdentityContext: request.visualIdentityContext,
       sources: request.sources?.map(s => ({
         title: s.title, content: s.content, type: s.type,
         weight: (s as any).weight ?? 1.0

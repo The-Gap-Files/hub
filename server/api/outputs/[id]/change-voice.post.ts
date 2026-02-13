@@ -32,12 +32,22 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  // Validar targetWPM (opcional) — 120 (lento), 150 (normal), 180 (rápido)
+  const targetWPM = body.targetWPM ? Number(body.targetWPM) : undefined
+  if (targetWPM !== undefined && (isNaN(targetWPM) || targetWPM < 100 || targetWPM > 200)) {
+    throw createError({
+      statusCode: 400,
+      message: 'targetWPM deve ser um número entre 100 e 200.'
+    })
+  }
+
   // Buscar output
   const output = await prisma.output.findUnique({
     where: { id },
     select: {
       id: true,
       voiceId: true,
+      targetWPM: true,
       scriptApproved: true,
       imagesApproved: true,
       status: true,
@@ -57,17 +67,27 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Verificar se é a mesma voz
-  if (output.voiceId === body.voiceId) {
+  // Verificar se algo mudou (voz OU velocidade)
+  const sameVoice = output.voiceId === body.voiceId
+  const sameWPM = !targetWPM || output.targetWPM === targetWPM
+  if (sameVoice && sameWPM) {
     throw createError({
       statusCode: 409,
-      message: 'A voz selecionada já é a mesma do output atual.'
+      message: 'Nenhuma alteração detectada. A voz e a velocidade são as mesmas do output atual.'
     })
   }
 
   const previousVoiceId = output.voiceId
 
-  console.log(`[ChangeVoice] Output ${id}: trocando voz de "${previousVoiceId}" para "${body.voiceId}"`)
+  console.log(`[ChangeVoice] Output ${id}: trocando voz de "${previousVoiceId}" para "${body.voiceId}"${targetWPM ? ` (WPM: ${targetWPM})` : ''}`)
+
+  // Atualizar targetWPM no banco ANTES de regenerar (se foi enviado)
+  if (targetWPM) {
+    await prisma.output.update({
+      where: { id },
+      data: { targetWPM }
+    })
+  }
 
   // Fire-and-forget: regenerar áudio em background
   outputPipelineService.regenerateAudioWithVoice(id, body.voiceId).catch(err => {
@@ -79,6 +99,7 @@ export default defineEventHandler(async (event) => {
     message: 'Troca de narrador iniciada. A narração está sendo regenerada.',
     previousVoiceId,
     newVoiceId: body.voiceId,
-    scenesCount: output._count.scenes
+    scenesCount: output._count.scenes,
+    ...(targetWPM ? { targetWPM } : {})
   }
 })

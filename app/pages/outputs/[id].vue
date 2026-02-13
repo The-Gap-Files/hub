@@ -756,12 +756,12 @@
                     <!-- Regenerate Motion Button -->
                     <button 
                       @click="regenerateMotionCorrection(scene)"
-                      :disabled="!!regeneratingMotionSceneId"
+                      :disabled="regeneratingMotionSceneIds.has(scene.id)"
                       class="mt-3 w-full px-4 py-3 bg-pink-500/10 border border-pink-500/30 text-pink-300 hover:bg-pink-500/20 hover:text-pink-200 rounded-xl transition-all flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider disabled:opacity-50 disabled:pointer-events-none"
                     >
-                      <span v-if="regeneratingMotionSceneId === scene.id" class="animate-spin w-4 h-4 border-2 border-pink-300/30 border-t-pink-300 rounded-full"></span>
+                      <span v-if="regeneratingMotionSceneIds.has(scene.id)" class="animate-spin w-4 h-4 border-2 border-pink-300/30 border-t-pink-300 rounded-full"></span>
                       <RotateCw v-else :size="14" />
-                      {{ regeneratingMotionSceneId === scene.id ? 'REPROCESSANDO MOTION...' : 'REGENERAR MOTION' }}
+                      {{ regeneratingMotionSceneIds.has(scene.id) ? 'REPROCESSANDO MOTION...' : 'REGENERAR MOTION' }}
                     </button>
                   </div>
                   <div v-else class="relative">
@@ -774,12 +774,12 @@
                     <button 
                       v-if="output.enableMotion && scene.images?.length > 0"
                       @click="regenerateMotionCorrection(scene)"
-                      :disabled="!!regeneratingMotionSceneId"
+                      :disabled="regeneratingMotionSceneIds.has(scene.id)"
                       class="mt-3 w-full px-4 py-3 bg-pink-500/10 border border-pink-500/30 text-pink-300 hover:bg-pink-500/20 hover:text-pink-200 rounded-xl transition-all flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider disabled:opacity-50 disabled:pointer-events-none"
                     >
-                      <span v-if="regeneratingMotionSceneId === scene.id" class="animate-spin w-4 h-4 border-2 border-pink-300/30 border-t-pink-300 rounded-full"></span>
+                      <span v-if="regeneratingMotionSceneIds.has(scene.id)" class="animate-spin w-4 h-4 border-2 border-pink-300/30 border-t-pink-300 rounded-full"></span>
                       <Zap v-else :size="14" />
-                      {{ regeneratingMotionSceneId === scene.id ? 'GERANDO MOTION...' : 'GERAR MOTION' }}
+                      {{ regeneratingMotionSceneIds.has(scene.id) ? 'GERANDO MOTION...' : 'GERAR MOTION' }}
                     </button>
                   </div>
 
@@ -1011,12 +1011,100 @@
             <div v-if="outlineExpanded" class="p-8 space-y-6">
               <!-- Hook -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-red-500/5 p-5 rounded-2xl border border-red-500/10">
+                <div class="bg-red-500/5 p-5 rounded-2xl border border-red-500/10" :class="{ 'md:col-span-2': output.storyOutline.hookVariants?.length }">
                   <h4 class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-red-400/80 mb-3">
                     <Zap :size="12" /> Hook Strategy
                   </h4>
-                  <p class="text-sm text-red-200/70 leading-relaxed mb-3">{{ output.storyOutline.hookStrategy }}</p>
-                  <div class="bg-black/30 p-3 rounded-lg border border-red-500/10">
+                  <p class="text-sm text-red-200/70 leading-relaxed mb-4">{{ output.storyOutline.hookStrategy }}</p>
+                  
+                  <!-- Hook Variants (4 níveis tonais + custom) -->
+                  <div v-if="output.storyOutline.hookVariants?.length" class="space-y-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+                      <button
+                        v-for="variant in output.storyOutline.hookVariants"
+                        :key="variant.level"
+                        @click="!output.storyOutlineApproved && (selectedHookLevel = variant.level)"
+                        :class="[
+                          'text-left p-4 rounded-xl border-2 transition-all duration-200 group/hook',
+                          selectedHookLevel === variant.level
+                            ? variant.level === 'green'
+                              ? 'bg-emerald-500/10 border-emerald-500/40 ring-1 ring-emerald-500/20'
+                              : variant.level === 'moderate'
+                                ? 'bg-amber-500/10 border-amber-500/40 ring-1 ring-amber-500/20'
+                                : variant.level === 'aggressive'
+                                  ? 'bg-red-500/10 border-red-500/40 ring-1 ring-red-500/20'
+                                  : 'bg-purple-900/20 border-purple-500/40 ring-1 ring-purple-500/20'
+                            : 'bg-black/20 border-white/5 hover:border-white/15',
+                          output.storyOutlineApproved ? 'cursor-default' : 'cursor-pointer'
+                        ]"
+                      >
+                        <div class="flex items-center justify-between mb-2">
+                          <span :class="[
+                            'text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded',
+                            variant.level === 'green' ? 'bg-emerald-500/20 text-emerald-300' :
+                            variant.level === 'moderate' ? 'bg-amber-500/20 text-amber-300' :
+                            variant.level === 'aggressive' ? 'bg-red-500/20 text-red-300' :
+                            'bg-purple-900/30 text-purple-300'
+                          ]">
+                            {{ variant.level === 'green' ? '🟢 Seguro' : variant.level === 'moderate' ? '🟡 Ameno' : variant.level === 'aggressive' ? '🔴 Agressivo' : '☠️ Terra sem Lei' }}
+                          </span>
+                          <CheckCircle2 v-if="selectedHookLevel === variant.level" :size="16" :class="[
+                            variant.level === 'green' ? 'text-emerald-400' :
+                            variant.level === 'moderate' ? 'text-amber-400' :
+                            variant.level === 'aggressive' ? 'text-red-400' :
+                            'text-purple-400'
+                          ]" />
+                        </div>
+                        <p class="text-sm text-white/80 italic font-serif leading-relaxed mb-2">"{{ variant.hook }}"</p>
+                        <p class="text-[11px] text-zinc-500 leading-relaxed">{{ variant.rationale }}</p>
+                      </button>
+                    </div>
+
+                    <!-- Card Personalizado (custom hook) -->
+                    <button
+                      v-if="!output.storyOutlineApproved"
+                      @click="selectedHookLevel = 'custom'"
+                      :class="[
+                        'w-full text-left p-4 rounded-xl border-2 transition-all duration-200',
+                        selectedHookLevel === 'custom'
+                          ? 'bg-cyan-500/10 border-cyan-500/40 ring-1 ring-cyan-500/20'
+                          : 'bg-black/20 border-white/5 hover:border-white/15 cursor-pointer'
+                      ]"
+                    >
+                      <div class="flex items-center justify-between mb-2">
+                        <span class="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300">
+                          ✍️ Personalizado
+                        </span>
+                        <CheckCircle2 v-if="selectedHookLevel === 'custom'" :size="16" class="text-cyan-400" />
+                      </div>
+                      <p class="text-[11px] text-zinc-500 mb-3">Escreva seu próprio hook mesclando as variantes acima.</p>
+                      <textarea
+                        v-if="selectedHookLevel === 'custom'"
+                        v-model="customHookText"
+                        rows="3"
+                        placeholder="Ex: Misture o tom do Aggressive com a sutileza do Moderate..."
+                        class="w-full bg-black/40 border border-cyan-500/20 rounded-lg px-3 py-2 text-sm text-white/90 italic font-serif placeholder-zinc-600 focus:border-cyan-500/50 outline-none transition-all resize-none"
+                        @click.stop
+                      ></textarea>
+                    </button>
+
+                    <!-- Preview do hook custom quando aprovado -->
+                    <div
+                      v-if="output.storyOutlineApproved && selectedHookLevel === 'custom' && customHookText"
+                      class="p-4 rounded-xl border-2 bg-cyan-500/10 border-cyan-500/40"
+                    >
+                      <div class="flex items-center gap-2 mb-2">
+                        <span class="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300">
+                          ✍️ Personalizado
+                        </span>
+                        <CheckCircle2 :size="16" class="text-cyan-400" />
+                      </div>
+                      <p class="text-sm text-white/80 italic font-serif leading-relaxed">"{{ customHookText }}"</p>
+                    </div>
+                  </div>
+
+                  <!-- Fallback: hookCandidate antigo (compatibilidade) -->
+                  <div v-else-if="output.storyOutline.hookCandidate" class="bg-black/30 p-3 rounded-lg border border-red-500/10">
                     <p class="text-sm text-white/80 italic font-serif">"{{ output.storyOutline.hookCandidate }}"</p>
                   </div>
                 </div>
@@ -1149,9 +1237,9 @@
 
             <!-- Monetization Picker (quando existe plano ativo) -->
             <div v-if="monetizationPlan?.planData" class="w-full max-w-4xl mx-auto">
-              <div class="flex items-center gap-2 mb-4">
+              <div class="flex items-center gap-2 mb-4 flex-wrap">
                 <Sparkles :size="14" class="text-purple-400" />
-                <span class="text-xs font-bold uppercase tracking-widest text-purple-300">Baseado no Plano de Monetização</span>
+                <span class="text-xs font-bold uppercase tracking-widest text-purple-300">{{ monetizationPlan.planData.planTitle || 'Plano de Monetização' }}</span>
                 <span class="text-xs text-zinc-600">(opcional — selecione um item ou escreva sugestão livre)</span>
               </div>
 
@@ -1431,7 +1519,7 @@
 
                 <!-- Trocar Narrador -->
                 <button
-                    @click="showChangeVoiceModal = true"
+                    @click="openChangeVoiceModal()"
                     :disabled="generatingStage === 'AUDIO' || changingVoice"
                     class="px-6 py-4 bg-white/5 border border-white/10 text-zinc-400 hover:text-white hover:border-amber-500/50 font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-3 disabled:opacity-50 disabled:pointer-events-none text-sm"
                 >
@@ -1611,15 +1699,30 @@
                     Todos os assets foram aprovados. O sistema está pronto para compilar o vídeo final (FFmpeg).
                 </p>
               </div>
+              <div class="flex flex-col items-end gap-3">
                 <button 
                   @click="renderMaster"
-                  :disabled="rendering || output.status === 'GENERATING'"
+                  :disabled="rendering || (output.status === 'GENERATING' && !renderStale)"
                   class="px-8 py-4 bg-emerald-500 text-white font-black uppercase tracking-widest rounded-xl hover:bg-emerald-400 hover:scale-105 transition-all shadow-glow-emerald flex items-center gap-3 disabled:opacity-50 disabled:pointer-events-none"
                 >
-                  <span v-if="rendering || output.status === 'GENERATING'" class="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full"></span>
+                  <span v-if="rendering || (output.status === 'GENERATING' && !renderStale)" class="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full"></span>
                   <Zap v-else :size="20" />
-                  {{ rendering || output.status === 'GENERATING' ? 'RENDERIZANDO...' : 'RENDERIZAR MASTER' }}
+                  {{ rendering || (output.status === 'GENERATING' && !renderStale) ? 'RENDERIZANDO...' : 'RENDERIZAR MASTER' }}
                 </button>
+                <!-- Aviso de render travado -->
+                <div v-if="renderStale" class="flex items-center gap-3 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 max-w-md">
+                  <div class="flex-1">
+                    <p class="text-xs font-bold text-red-300">Render parece travado</p>
+                    <p class="text-xs text-red-300/60">O status está em GENERATING mas nenhum render ativo foi detectado. O processo pode ter sido interrompido.</p>
+                  </div>
+                  <button 
+                    @click="cancelStaleRender"
+                    class="px-4 py-2 bg-red-500/20 border border-red-500/30 text-red-300 text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-red-500/30 transition-all shrink-0"
+                  >
+                    CANCELAR
+                  </button>
+                </div>
+              </div>
              </div>
         </div>
 
@@ -1871,21 +1974,49 @@
                         <Clapperboard :size="10" /> Motion Preview
                     </h4>
                     
-                    <div v-if="getSelectedVideo(scene)" class="aspect-video bg-black rounded-lg overflow-hidden border border-white/10 relative group/video">
+                    <div v-if="getSelectedVideo(scene)">
+                      <div class="aspect-video bg-black rounded-lg overflow-hidden border border-white/10 relative group/video">
                         <video 
                         controls
                         loop
                         class="w-full h-full object-cover"
-                        :src="`/api/scene-videos/${getSelectedVideo(scene).id}/stream`"
+                        :src="`/api/scene-videos/${getSelectedVideo(scene).id}/stream?t=${motionVersions[scene.id] || 0}`"
+                        :key="'motion-main-' + scene.id + '-' + (motionVersions[scene.id] || 0)"
                         ></video>
                         
                         <div class="absolute bottom-2 right-2 px-2 py-1 bg-black/60 backdrop-blur rounded text-xs text-white/80 font-mono pointer-events-none">
-                        {{ getSelectedVideo(scene).provider }} • {{ getSelectedVideo(scene).duration }}s
+                        {{ getSelectedVideo(scene).provider }} • {{ getSelectedVideo(scene).duration?.toFixed(1) }}s
                         </div>
+                      </div>
+
+                      <!-- Regenerar Motion Individual -->
+                      <button 
+                        v-if="pipelineStage === 'MOTION'"
+                        @click="regenerateMotionCorrection(scene)"
+                        :disabled="regeneratingMotionSceneIds.has(scene.id)"
+                        class="mt-2 w-full px-3 py-2 bg-pink-500/10 border border-pink-500/20 text-pink-300 hover:bg-pink-500/20 hover:text-pink-200 hover:border-pink-500/40 rounded-lg transition-all flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                      >
+                        <span v-if="regeneratingMotionSceneIds.has(scene.id)" class="animate-spin w-3.5 h-3.5 border-2 border-pink-300/30 border-t-pink-300 rounded-full"></span>
+                        <RotateCw v-else :size="12" />
+                        {{ regeneratingMotionSceneIds.has(scene.id) ? 'REGENERANDO...' : 'REGENERAR MOTION' }}
+                      </button>
                     </div>
-                    <div v-else class="h-24 bg-pink-500/5 rounded-lg flex flex-col items-center justify-center gap-2 border border-dashed border-pink-500/20 text-pink-500/50">
+                    <div v-else class="space-y-2">
+                      <div class="h-24 bg-pink-500/5 rounded-lg flex flex-col items-center justify-center gap-2 border border-dashed border-pink-500/20 text-pink-500/50">
                         <Clapperboard :size="16" class="animate-pulse" />
                         <span class="text-xs uppercase tracking-wider">{{ output.audioApproved ? 'Aguardando Motion...' : 'Pendente de Áudio' }}</span>
+                      </div>
+                      <!-- Gerar Motion Individual (cena sem vídeo) -->
+                      <button 
+                        v-if="pipelineStage === 'MOTION'"
+                        @click="regenerateMotionCorrection(scene)"
+                        :disabled="regeneratingMotionSceneIds.has(scene.id)"
+                        class="w-full px-3 py-2 bg-pink-500/10 border border-pink-500/20 text-pink-300 hover:bg-pink-500/20 hover:text-pink-200 hover:border-pink-500/40 rounded-lg transition-all flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                      >
+                        <span v-if="regeneratingMotionSceneIds.has(scene.id)" class="animate-spin w-3.5 h-3.5 border-2 border-pink-300/30 border-t-pink-300 rounded-full"></span>
+                        <Zap v-else :size="12" />
+                        {{ regeneratingMotionSceneIds.has(scene.id) ? 'GERANDO...' : 'GERAR MOTION' }}
+                      </button>
                     </div>
                 </div>
                 
@@ -2026,7 +2157,7 @@
             Trocar Narrador
           </h2>
           <p class="text-zinc-400 text-sm mt-2">
-            Escolha uma nova voz. Toda a narração será regenerada.
+            Escolha uma nova voz e/ou velocidade. Toda a narração será regenerada.
           </p>
           <p v-if="output.voiceId" class="text-zinc-500 text-xs mt-1 font-mono">
             Voz atual: {{ output.voiceId }}
@@ -2046,6 +2177,22 @@
           v-model="newVoiceId"
           label="Nova Voz do Narrador"
         />
+      </div>
+
+      <!-- Speed Selector (WPM) -->
+      <div class="mb-6">
+        <label class="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Velocidade da narração (WPM)</label>
+        <div class="flex gap-2">
+          <button v-for="wpm in [120, 150, 180]" :key="wpm"
+            @click="newTargetWPM = wpm"
+            class="flex-1 py-3 rounded-xl text-xs font-bold uppercase border transition-all"
+            :class="[newTargetWPM === wpm ? 'bg-amber-500 border-amber-500 text-black' : 'bg-white/5 border-white/10 hover:border-white/20 text-zinc-400 hover:text-white']">
+            {{ wpm === 120 ? 'Lento' : wpm === 150 ? 'Normal' : 'Rápido' }} ({{ wpm }})
+          </button>
+        </div>
+        <p v-if="output.targetWPM && newTargetWPM !== output.targetWPM" class="text-xs text-amber-400/60 mt-1.5">
+          Atual: {{ output.targetWPM }} WPM → Nova: {{ newTargetWPM }} WPM
+        </p>
       </div>
 
       <!-- Warning -->
@@ -2068,7 +2215,7 @@
         </button>
         <button
           @click="confirmChangeVoice"
-          :disabled="!newVoiceId || newVoiceId === output.voiceId"
+          :disabled="!newVoiceId || (newVoiceId === output.voiceId && newTargetWPM === (output.targetWPM || 150))"
           class="px-8 py-4 bg-amber-500 text-black font-black uppercase tracking-widest rounded-xl hover:bg-amber-400 hover:scale-105 transition-all shadow-[0_0_20px_rgba(245,158,11,0.3)] flex items-center gap-3 disabled:opacity-50 disabled:pointer-events-none"
         >
           <Mic :size="20" />
@@ -2278,6 +2425,7 @@ const isRoteiroStage = computed(() => pipelineStage.value === 'ROTEIRO')
 // Change Voice
 const showChangeVoiceModal = ref(false)
 const newVoiceId = ref<string | null>(null)
+const newTargetWPM = ref(150)
 const changingVoice = ref(false)
 
 // ═══════════════════════════════════════════════════════════
@@ -2295,7 +2443,7 @@ const correctionMode = computed(() => {
     && !output.value.imagesApproved
 })
 const enteringCorrections = ref(false)
-const regeneratingMotionSceneId = ref<string | null>(null)
+const regeneratingMotionSceneIds = ref<Set<string>>(new Set())
 const correctedScenes = ref<Set<string>>(new Set())
 const motionRegeneratedScenes = ref<Set<string>>(new Set())
 const imageVersions = ref<Record<string, number>>({})
@@ -2476,8 +2624,8 @@ async function regenerateImageCorrection(scene: any) {
 }
 
 async function regenerateMotionCorrection(scene: any) {
-  if (regeneratingMotionSceneId.value) return
-  regeneratingMotionSceneId.value = scene.id
+  if (regeneratingMotionSceneIds.value.has(scene.id)) return
+  regeneratingMotionSceneIds.value = new Set([...regeneratingMotionSceneIds.value, scene.id])
 
   try {
     const result = await $fetch(`/api/scenes/${scene.id}/regenerate-motion`, {
@@ -2501,7 +2649,9 @@ async function regenerateMotionCorrection(scene: any) {
     console.error('Erro regenerando motion:', error)
     handleApiError(error, 'Erro ao regenerar motion.')
   } finally {
-    regeneratingMotionSceneId.value = null
+    const next = new Set(regeneratingMotionSceneIds.value)
+    next.delete(scene.id)
+    regeneratingMotionSceneIds.value = next
   }
 }
 
@@ -2722,7 +2872,65 @@ async function loadOutput() {
   try {
     const data = await $fetch(`/api/outputs/${outputId}`)
     output.value = data
-    if ((data as any).script && generatingStage.value === 'SCRIPT') generatingStage.value = null
+
+    // ── DEBUG: Estado completo do pipeline ──
+    const d = data as any
+    console.log('═══════════════════════════════════════════')
+    console.log('📋 [loadOutput] Estado do Pipeline:')
+    console.log('  status:', d.status)
+    console.log('  hasVideo:', d.hasVideo)
+    console.log('  enableMotion:', d.enableMotion)
+    console.log('  ── Aprovações ──')
+    console.log('  storyOutlineApproved:', d.storyOutlineApproved)
+    console.log('  scriptApproved:', d.scriptApproved)
+    console.log('  imagesApproved:', d.imagesApproved)
+    console.log('  bgmApproved:', d.bgmApproved)
+    console.log('  audioApproved:', d.audioApproved)
+    console.log('  videosApproved:', d.videosApproved)
+    console.log('  renderApproved:', d.renderApproved)
+    console.log('  ── Assets ──')
+    console.log('  hasScript:', !!d.script)
+    console.log('  scenesCount:', d.scenes?.length ?? 0)
+    console.log('  scenesWithImages:', d.scenes?.filter((s: any) => s.images?.length > 0).length ?? 0)
+    console.log('  scenesWithAudio:', d.scenes?.filter((s: any) => s.audioTracks?.some((a: any) => a.type === 'scene_narration')).length ?? 0)
+    console.log('  scenesWithVideos:', d.scenes?.filter((s: any) => s.videos?.length > 0).length ?? 0)
+    console.log('  bgmTracks:', d.audioTracks?.filter((a: any) => a.type === 'background_music').length ?? 0)
+    console.log('  ── Frontend State ──')
+    console.log('  generatingStage:', generatingStage.value)
+    console.log('  generationStartedAt:', generationStartedAt.value)
+    console.log('  rendering:', rendering.value)
+    console.log('  approving:', approving.value)
+    console.log('  correctionMode:', correctionMode.value)
+    console.log('  canRenderMaster:', d.scriptApproved && d.imagesApproved && d.bgmApproved && d.audioApproved && (d.enableMotion ? d.videosApproved : true))
+    console.log('  showRenderTrigger:', (d.scriptApproved && d.imagesApproved && d.bgmApproved && d.audioApproved && (d.enableMotion ? d.videosApproved : true)) && !d.hasVideo)
+    console.log('═══════════════════════════════════════════')
+
+    // ── Auto-clear generatingStage quando a geração termina ──
+    // Detecta que os assets foram gerados e limpa o loading state
+    if (generatingStage.value) {
+      const d = data as any
+      // Se o output foi atualizado DEPOIS do início da geração, podemos verificar assets
+      const outputUpdated = new Date(d.updatedAt).getTime() > generationStartedAt.value
+      const shouldClear =
+        d.status === 'FAILED' || // Limpar loading em caso de falha
+        (generatingStage.value === 'SCRIPT' && d.script && outputUpdated) ||
+        (generatingStage.value === 'IMAGES' && d.scenes?.every((s: any) => s.images?.length > 0) && outputUpdated) ||
+        (generatingStage.value === 'AUDIO' && d.scenes?.every((s: any) => s.audioTracks?.some((a: any) => a.type === 'scene_narration')) && outputUpdated) ||
+        (generatingStage.value === 'BGM' && d.audioTracks?.some((a: any) => a.type === 'background_music') && outputUpdated) ||
+        (generatingStage.value === 'MOTION' && d.scenes?.every((s: any) => s.videos?.length > 0) && outputUpdated)
+      if (shouldClear) {
+        generatingStage.value = null
+        generationStartedAt.value = 0
+      }
+    }
+
+    // Restaurar o nível tonal do hook selecionado (se já foi aprovado)
+    if ((data as any).storyOutline?._selectedHookLevel) {
+      selectedHookLevel.value = (data as any).storyOutline._selectedHookLevel
+    }
+    if ((data as any).storyOutline?._customHook) {
+      customHookText.value = (data as any).storyOutline._customHook
+    }
   } catch (error) {
     console.error('Erro ao carregar output:', error)
   } finally {
@@ -2807,6 +3015,8 @@ const showOutlineFeedbackModal = ref(false)
 const outlineFeedback = ref('')
 const outlineSuggestions = ref('') // sugestões na primeira geração do plano
 const regeneratingOutline = ref(false)
+const selectedHookLevel = ref('moderate') // Nível tonal do hook selecionado pelo usuário
+const customHookText = ref('') // Texto do hook personalizado escrito pelo usuário
 
 async function confirmRegenerateOutline() {
   regeneratingOutline.value = true
@@ -2821,6 +3031,8 @@ async function confirmRegenerateOutline() {
     showOutlineFeedbackModal.value = false
     outlineFeedback.value = ''
     outlineExpanded.value = true
+    selectedHookLevel.value = 'moderate' // Reset ao regenerar
+    customHookText.value = '' // Reset hook custom
 
     await loadOutput()
   } catch (error: any) {
@@ -2883,6 +3095,32 @@ async function regenerateImage(scene: any) {
 }
 
 const rendering = ref(false)
+/** Detecta render órfão: status=GENERATING mas nenhum render ativo nesta sessão */
+const renderStale = ref(false)
+let staleCheckTimer: any = null
+
+function startStaleDetection() {
+  if (staleCheckTimer) clearTimeout(staleCheckTimer)
+  // Se ao carregar a página o status já é GENERATING, aguarda 60s antes de considerar travado
+  if (output.value?.status === 'GENERATING' && !rendering.value) {
+    staleCheckTimer = setTimeout(() => {
+      if (output.value?.status === 'GENERATING' && !rendering.value) {
+        console.warn('🔴 Render travado detectado! Status GENERATING há mais de 60s sem render ativo.')
+        renderStale.value = true
+      }
+    }, 60000) // 60 segundos
+  }
+}
+
+async function cancelStaleRender() {
+  try {
+    await $fetch(`/api/outputs/${outputId}/cancel`, { method: 'POST' })
+    renderStale.value = false
+    await loadOutput()
+  } catch (e: any) {
+    alert('Erro ao cancelar: ' + (e?.data?.message || e?.message))
+  }
+}
 async function downloadMaster() {
   // Agora baixamos diretamente do endpoint que lê do banco
   const downloadUrl = `/api/outputs/${outputId}/download`
@@ -2988,6 +3226,8 @@ async function approveScript() {
 }
 
 const generatingStage = ref<string | null>(null)
+/** Timestamp (ms) de quando a geração atual foi iniciada — usado para detectar que o backend terminou */
+const generationStartedAt = ref<number>(0)
 const generatingOutline = ref(false)
 
 // ── Monetization Context (para outline baseado em plano de monetização) ──
@@ -3114,7 +3354,12 @@ async function approveStoryOutline() {
   try {
     await $fetch(`/api/outputs/${outputId}/approve-stage`, {
       method: 'PATCH',
-      body: { stage: 'STORY_OUTLINE', approved: true }
+      body: {
+        stage: 'STORY_OUTLINE',
+        approved: true,
+        selectedHookLevel: selectedHookLevel.value,
+        ...(selectedHookLevel.value === 'custom' && customHookText.value ? { customHook: customHookText.value } : {})
+      }
     })
     output.value.storyOutlineApproved = true
     await loadOutput()
@@ -3129,22 +3374,26 @@ async function approveStoryOutline() {
 async function startGenerateScript() {
   if (generatingStage.value === 'SCRIPT') return
   generatingStage.value = 'SCRIPT'
+  generationStartedAt.value = Date.now()
   try {
     await $fetch(`/api/outputs/${outputId}/generate-script`, { method: 'POST' })
     startPolling()
   } catch (e: any) {
     generatingStage.value = null
+    generationStartedAt.value = 0
     alert(e?.data?.message || 'Erro ao iniciar geração do roteiro.')
   }
 }
 
 async function generateImages() {
    generatingStage.value = 'IMAGES'
+   generationStartedAt.value = Date.now()
    try {
      await $fetch(`/api/outputs/${outputId}/generate-images`, { method: 'POST' })
      startPolling()
    } catch (e: any) {
      generatingStage.value = null
+     generationStartedAt.value = 0
      handleApiError(e, 'Erro ao iniciar geração de imagens')
    }
 }
@@ -3171,6 +3420,7 @@ async function approveImages() {
 
 async function generateBgm() {
    generatingStage.value = 'BGM'
+   generationStartedAt.value = Date.now()
    try {
      const hasExisting = bgmTracks.value.length > 0
      await $fetch(`/api/outputs/${outputId}/generate-background-music`, { 
@@ -3180,6 +3430,7 @@ async function generateBgm() {
      startPolling()
    } catch (e: any) {
      generatingStage.value = null
+     generationStartedAt.value = 0
      handleApiError(e, 'Erro ao iniciar geração de música')
    }
 }
@@ -3205,11 +3456,13 @@ async function approveBgm() {
 
 async function generateAudio() {
    generatingStage.value = 'AUDIO'
+   generationStartedAt.value = Date.now()
    try {
      await $fetch(`/api/outputs/${outputId}/generate-audio`, { method: 'POST' })
      startPolling()
    } catch (e: any) {
      generatingStage.value = null
+     generationStartedAt.value = 0
      handleApiError(e, 'Erro ao iniciar geração de áudio')
    }
 }
@@ -3233,28 +3486,39 @@ async function approveAudio() {
   }
 }
 
+function openChangeVoiceModal() {
+  // Inicializar WPM com o valor atual do output
+  newTargetWPM.value = output.value.targetWPM || 150
+  showChangeVoiceModal.value = true
+}
+
 async function confirmChangeVoice() {
-  if (!newVoiceId.value || newVoiceId.value === output.value.voiceId) return
+  const sameVoice = newVoiceId.value === output.value.voiceId
+  const sameWPM = newTargetWPM.value === (output.value.targetWPM || 150)
+  if (!newVoiceId.value || (sameVoice && sameWPM)) return
 
   showChangeVoiceModal.value = false
   changingVoice.value = true
   generatingStage.value = 'AUDIO'
+  generationStartedAt.value = Date.now()
 
   try {
     const result = await $fetch(`/api/outputs/${outputId}/change-voice`, {
       method: 'POST',
-      body: { voiceId: newVoiceId.value }
+      body: { voiceId: newVoiceId.value, targetWPM: newTargetWPM.value }
     })
 
     console.log('Troca de voz iniciada:', result)
 
-    // Atualizar voiceId local
+    // Atualizar voiceId e targetWPM locais
     output.value.voiceId = newVoiceId.value
+    output.value.targetWPM = newTargetWPM.value
 
     // Iniciar polling para acompanhar geração
     startPolling()
   } catch (error: any) {
     generatingStage.value = null
+    generationStartedAt.value = 0
     const msg = error?.data?.message || error?.message || 'Erro desconhecido'
     alert(`Erro ao trocar narrador: ${msg}`)
   } finally {
@@ -3265,11 +3529,13 @@ async function confirmChangeVoice() {
 
 async function generateMotion() {
    generatingStage.value = 'MOTION'
+   generationStartedAt.value = Date.now()
    try {
      await $fetch(`/api/outputs/${outputId}/generate-motion`, { method: 'POST' })
      startPolling()
    } catch (e: any) {
      generatingStage.value = null
+     generationStartedAt.value = 0
      handleApiError(e, 'Erro ao iniciar geração de motion')
    }
 }
@@ -3470,12 +3736,15 @@ let pollTimer: any = null
 function startPolling() {
   stopPolling()
   pollTimer = setInterval(async () => {
-    if (output.value && (output.value.status === 'PROCESSING' || output.value.status === 'PENDING' || output.value.status === 'GENERATING')) {
+    if (!output.value) return
+    // Polling ativo quando: status indica processamento OU uma geração está em andamento
+    const statusNeedsPolling = output.value.status === 'PROCESSING' || output.value.status === 'PENDING' || output.value.status === 'GENERATING'
+    const generationInProgress = !!generatingStage.value
+    if (statusNeedsPolling || generationInProgress) {
       try {
         const data = await $fetch(`/api/outputs/${outputId}`)
         output.value = data
         loadCosts()
-        // Opções de legendas/logo já vão no POST /render; pipeline aplica antes de salvar (uma gravação)
       } catch (e) {}
     }
   }, 3000)
@@ -3490,8 +3759,12 @@ onMounted(async () => {
   loadCosts()
   loadMonetizationPlan()
   startPolling()
+  startStaleDetection()
 })
-onUnmounted(() => stopPolling())
+onUnmounted(() => {
+  stopPolling()
+  if (staleCheckTimer) clearTimeout(staleCheckTimer)
+})
 
 const selectedImage = ref<string | null>(null)
 function openImage(id: string) {

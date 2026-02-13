@@ -59,6 +59,12 @@ export interface CaptionOptions {
   styleId?: CaptionStyleId
 }
 
+export interface SubtitleExportOptions extends CaptionOptions {
+  /** Duração real do vídeo renderizado (via ffprobe). Quando fornecida,
+   *  todos os timestamps são escalados proporcionalmente para eliminar drift. */
+  actualVideoDuration?: number
+}
+
 export interface CaptionFromScenesResult {
   captionedBuffer: Buffer
   styleUsed: CaptionStyleId
@@ -158,6 +164,9 @@ export class CaptionService {
    *   1. wordTimings do ElevenLabs (precisão perfeita, por palavra)
    *   2. Duração real via ffprobe (resolveRealDurations, por cena)
    *   3. Duração estimada do banco (fallback)
+   * 
+   * NOTA: Para legendas SRT/VTT externas, o drift acumulativo é corrigido
+   * via scaling proporcional em scaleSegmentsToVideoDuration() — não aqui.
    */
   private buildSegmentsFromScenes(
     scenes: SceneCaptionData[],
@@ -950,6 +959,7 @@ export class CaptionService {
   //  Utilities
   // =========================================================================
 
+
   /** Formata tempo em segundos para formato ASS (H:MM:SS.cc) */
   private formatASSTime(seconds: number): string {
     const h = Math.floor(seconds / 3600)
@@ -983,6 +993,11 @@ export class CaptionService {
    * Exporta legendas no formato SRT com timestamps precisos.
    * Usa a mesma lógica de segmentação do ASS (word timings do ElevenLabs).
    * 
+   * Se actualVideoDuration for fornecida, escala TODOS os timestamps
+   * proporcionalmente para alinhar com a duração real do vídeo renderizado.
+   * Isso elimina qualquer drift causado por frame grid, AAC padding,
+   * re-encoding na concatenação, etc.
+   * 
    * Formato SRT (aceito pelo YouTube, Vimeo, etc):
    *   1
    *   00:00:01,200 --> 00:00:03,800
@@ -990,17 +1005,20 @@ export class CaptionService {
    */
   async exportSRT(
     scenes: SceneCaptionData[],
-    options: CaptionOptions = {}
+    options: SubtitleExportOptions = {}
   ): Promise<string> {
-    const { styleId = 'tiktok_viral' } = options
+    const { styleId = 'tiktok_viral', actualVideoDuration } = options
     const style = CAPTION_STYLES[styleId]
 
     const scenesWithRealDuration = await this.resolveRealDurations(scenes)
     const segments = this.buildSegmentsFromScenes(scenesWithRealDuration, style)
 
+    // Escalar timestamps para alinhar com a duração real do vídeo
+    const scaled = this.scaleSegmentsToVideoDuration(segments, scenesWithRealDuration, actualVideoDuration)
+
     const lines: string[] = []
-    for (let i = 0; i < segments.length; i++) {
-      const seg = segments[i]!
+    for (let i = 0; i < scaled.length; i++) {
+      const seg = scaled[i]!
       lines.push(`${i + 1}`)
       lines.push(`${this.formatSRTTime(seg.startTime)} --> ${this.formatSRTTime(seg.endTime)}`)
       lines.push(seg.text)
@@ -1022,17 +1040,20 @@ export class CaptionService {
    */
   async exportVTT(
     scenes: SceneCaptionData[],
-    options: CaptionOptions = {}
+    options: SubtitleExportOptions = {}
   ): Promise<string> {
-    const { styleId = 'tiktok_viral' } = options
+    const { styleId = 'tiktok_viral', actualVideoDuration } = options
     const style = CAPTION_STYLES[styleId]
 
     const scenesWithRealDuration = await this.resolveRealDurations(scenes)
     const segments = this.buildSegmentsFromScenes(scenesWithRealDuration, style)
 
+    // Escalar timestamps para alinhar com a duração real do vídeo
+    const scaled = this.scaleSegmentsToVideoDuration(segments, scenesWithRealDuration, actualVideoDuration)
+
     const lines: string[] = ['WEBVTT', '']
-    for (let i = 0; i < segments.length; i++) {
-      const seg = segments[i]!
+    for (let i = 0; i < scaled.length; i++) {
+      const seg = scaled[i]!
       lines.push(`${i + 1}`)
       lines.push(`${this.formatVTTTime(seg.startTime)} --> ${this.formatVTTTime(seg.endTime)}`)
       lines.push(seg.text)
@@ -1040,6 +1061,111 @@ export class CaptionService {
     }
 
     return lines.join('\n')
+  }
+
+  // =========================================================================
+  //  Timeline Scaling (Anti-Drift)
+  // =========================================================================
+
+  /**
+   * Escala segmentos de legenda para alinhar com a duração real do vídeo.
+   * 
+   * O vídeo renderizado pode ter duração ligeiramente diferente da soma
+   * dos áudios por causa de: frame grid quantization (16fps = 62.5ms por frame),
+   * AAC encoder padding (~46ms por cena), re-encoding na concatenação, etc.
+   * 
+   * Em vez de tentar prever cada fonte de erro, medimos a duração real
+   * e escalamos TUDO proporcionalmente. Simples, robusto, definitivo.
+   * 
+   * Exemplo: sum_audio=300.0s, video_real=299.2s → scale=0.99733
+   *          Todos timestamps *= 0.99733 → drift ZERO.
+   */
+  private scaleSegmentsToVideoDuration(
+    segments: CaptionSegment[],
+    scenes: SceneCaptionData[],
+    actualVideoDuration?: number
+  ): CaptionSegment[] {
+    if (!actualVideoDuration || actualVideoDuration <= 0) return segments
+    if (segments.length === 0) return segments
+
+    // Duração total esperada = soma das durações dos áudios
+    const expectedTotal = scenes.reduce((sum, s) => sum + s.audioDuration, 0)
+    if (expectedTotal <= 0) return segments
+
+    const scaleFactor = actualVideoDuration / expectedTotal
+    const diff = Math.abs(actualVideoDuration - expectedTotal)
+
+    const log = createPipelineLogger({ stage: 'Captions' })
+    log.info(`[Subtitle Scaling] Duração esperada: ${expectedTotal.toFixed(3)}s, Vídeo real: ${actualVideoDuration.toFixed(3)}s, Diff: ${diff.toFixed(3)}s, Scale: ${scaleFactor.toFixed(6)}`)
+
+    // Se a diferença é negligenciável (< 50ms), não escalar
+    if (diff < 0.05) {
+      log.info('[Subtitle Scaling] Diferença < 50ms; sem necessidade de escalar.')
+      return segments
+    }
+
+    return segments.map(seg => ({
+      ...seg,
+      startTime: seg.startTime * scaleFactor,
+      endTime: seg.endTime * scaleFactor,
+      words: seg.words.map(w => ({
+        ...w,
+        startMs: Math.round(w.startMs * scaleFactor),
+        durationMs: Math.round(w.durationMs * scaleFactor)
+      }))
+    }))
+  }
+
+  /**
+   * Proba a duração real de um vídeo a partir de Buffer ou path em disco.
+   * Usado pelo endpoint de export de legendas para obter o scaleFactor.
+   */
+  async probeVideoDuration(source: { buffer?: Buffer; path?: string }): Promise<number> {
+    let tempPath: string | null = null
+
+    try {
+      const filePath = source.path ?? (() => {
+        tempPath = join(tmpdir(), `subtitle-probe-${Date.now()}.mp4`)
+        return tempPath
+      })()
+
+      if (source.buffer && !source.path) {
+        await fs.writeFile(filePath, source.buffer)
+      }
+
+      const ffprobePath = this.getFFprobePath()
+
+      return await new Promise<number>((resolve, reject) => {
+        const proc = spawn(ffprobePath, [
+          '-v', 'quiet',
+          '-print_format', 'json',
+          '-show_format',
+          filePath
+        ])
+
+        let stdout = ''
+        let stderr = ''
+
+        proc.stdout.on('data', (data: Buffer) => { stdout += data.toString() })
+        proc.stderr.on('data', (data: Buffer) => { stderr += data.toString() })
+
+        proc.on('close', (code: number | null) => {
+          if (code !== 0) return reject(new Error(`ffprobe video exit code ${code}: ${stderr}`))
+          try {
+            const parsed = JSON.parse(stdout)
+            const dur = parseFloat(parsed?.format?.duration)
+            if (isNaN(dur) || dur <= 0) return reject(new Error('ffprobe retornou duração de vídeo inválida'))
+            resolve(dur)
+          } catch (e) {
+            reject(new Error(`Erro ao parsear duração do vídeo: ${e}`))
+          }
+        })
+
+        proc.on('error', (err: Error) => reject(new Error(`ffprobe video spawn error: ${err.message}`)))
+      })
+    } finally {
+      if (tempPath) await fs.unlink(tempPath).catch(() => { })
+    }
   }
 }
 

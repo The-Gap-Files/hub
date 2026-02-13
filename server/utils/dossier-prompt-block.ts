@@ -27,8 +27,10 @@ import { formatPersonsForPrompt, formatNeuralInsightsForPrompt } from './format-
 export interface DossierCacheInput {
   theme: string
   title?: string
+  visualIdentityContext?: string
   sources?: Array<{ title: string; content: string; type: string; weight?: number }>
   userNotes?: string[]
+  imageDescriptions?: string[]
   persons?: PersonContext[]
   neuralInsights?: NeuralInsightContext[]
 }
@@ -50,6 +52,11 @@ export function buildDossierBlock(dossier: DossierCacheInput): string {
   parts.push(`📋 TEMA: ${dossier.theme}`)
   if (dossier.title) {
     parts.push(`📋 TÍTULO: ${dossier.title}`)
+  }
+
+  // ── VISUAL IDENTITY CONTEXT (Warning Protocol) ─────────────────────
+  if (dossier.visualIdentityContext) {
+    parts.push(`🎨 DIRETRIZES DE IDENTIDADE DO UNIVERSO (WARNING PROTOCOL):\n${dossier.visualIdentityContext}`)
   }
 
   // ── SOURCES (ordenadas por peso descendente) ───────────────────────
@@ -76,6 +83,15 @@ export function buildDossierBlock(dossier: DossierCacheInput): string {
   const personsBlock = formatPersonsForPrompt(dossier.persons || [])
   if (personsBlock) {
     parts.push(personsBlock)
+  }
+
+  // ── IMAGE DESCRIPTIONS (Assets Visuais do Dossiê) ──────────────────
+  if (dossier.imageDescriptions && dossier.imageDescriptions.length > 0) {
+    let imagesBlock = `🖼️ ASSETS VISUAIS DO DOSSIÊ (${dossier.imageDescriptions.length} imagens de referência):\n`
+    dossier.imageDescriptions.forEach((desc, i) => {
+      imagesBlock += `[${i + 1}] ${desc}\n`
+    })
+    parts.push(imagesBlock)
   }
 
   // ── NEURAL INSIGHTS ────────────────────────────────────────────────

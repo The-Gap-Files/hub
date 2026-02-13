@@ -30,6 +30,7 @@ export type LlmTaskId =
   | 'thumbnail-prompt'    // Geração de prompts para thumbnails
   | 'social-kit'          // Kit de publicação para redes sociais
   | 'deep-research-prompt' // Gera prompt otimizado para Deep Research
+  | 'dossier-investigator'  // Investiga uma semente e preenche metadados do dossiê
 
 export interface LlmModel {
   id: string
@@ -257,6 +258,16 @@ export const LLM_TASKS: Record<LlmTaskId, LlmTask> = {
     requiresLargeContext: false,
     defaultProvider: 'groq',
     defaultModel: 'llama-3.3-70b-versatile'
+  },
+  'dossier-investigator': {
+    id: 'dossier-investigator',
+    label: 'Investigador de Dossiê',
+    description: 'Investiga uma semente (palavra, pessoa, tema) na web e gera todos os metadados para criação de dossiê.',
+    iconKey: 'search',
+    requiresStructuredOutput: true,
+    requiresLargeContext: false,
+    defaultProvider: 'gemini',
+    defaultModel: 'gemini-2.0-flash'
   }
 }
 

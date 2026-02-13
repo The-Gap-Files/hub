@@ -2,6 +2,9 @@
  * Logger padronizado para o pipeline de outputs.
  * Formato: [Stage] [outputId?] mensagem
  * Facilita rastrear todas as etapas por outputId e filtrar por stage em produção.
+ *
+ * Os logs emitidos aqui são automaticamente capturados pelo ConsoleInterceptor
+ * (ai-logger.ts) e transmitidos via SSE para o frontend.
  */
 
 export type PipelineStage =

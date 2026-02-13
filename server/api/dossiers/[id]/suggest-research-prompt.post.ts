@@ -36,6 +36,10 @@ export default defineEventHandler(async (event) => {
       sources: {
         select: { title: true },
         orderBy: { order: 'asc' }
+      },
+      images: {
+        select: { description: true, tags: true },
+        orderBy: { order: 'asc' }
       }
     }
   })
@@ -53,6 +57,12 @@ export default defineEventHandler(async (event) => {
     classificationId,
     tags: dossier.tags,
     existingSourceTitles: dossier.sources.map(s => s.title),
+    imageDescriptions: dossier.images
+      .filter(img => img.description?.trim())
+      .map(img => ({
+        description: img.description,
+        tags: img.tags || ''
+      })),
     language,
     depth
   })

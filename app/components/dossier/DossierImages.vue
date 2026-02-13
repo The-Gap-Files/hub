@@ -1,5 +1,13 @@
 <template>
-  <div class="glass-card overflow-hidden">
+  <div class="glass-card overflow-hidden" @dragover.prevent="isDragging = true" @dragleave="isDragging = false" @drop.prevent="handleDrop">
+    <!-- Paste/Drop Zone Overlay -->
+    <div v-if="isDragging" class="absolute inset-0 z-50 bg-indigo-600/20 backdrop-blur-sm border-2 border-dashed border-indigo-500 rounded-3xl flex items-center justify-center">
+      <div class="text-center">
+        <ClipboardPaste :size="48" class="text-indigo-400 mx-auto mb-3" />
+        <p class="text-indigo-300 text-sm font-bold uppercase tracking-wider">Soltar imagem aqui</p>
+      </div>
+    </div>
+
     <div class="p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
       <div class="flex items-center gap-3">
         <div class="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500">
@@ -75,11 +83,12 @@
         </div>
       </div>
       
-      <div v-else class="text-center py-20 border-2 border-dashed border-white/5 rounded-3xl">
-        <div class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6 text-white/5">
-          <Film :size="32" />
+      <div v-else class="text-center py-20 border-2 border-dashed border-white/5 rounded-3xl hover:border-indigo-500/20 transition-colors">
+        <div class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6 text-white/10">
+          <ClipboardPaste :size="32" />
         </div>
         <p class="mono-label opacity-30 italic">Nenhum asset visual injetado no setor.</p>
+        <p class="text-[11px] text-indigo-500/40 mt-3 uppercase tracking-wider font-bold">Ctrl+V para colar imagem do clipboard</p>
       </div>
     </div>
 
@@ -102,6 +111,22 @@
               <img :src="uploadPreview" class="w-full h-full object-contain opacity-80 group-hover:opacity-100 transition-opacity" />
               <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
            </div>
+
+            <!-- AI Suggestion Button -->
+            <button
+              @click="suggestAssetMetadata"
+              :disabled="suggestingMetadata"
+              class="w-full mb-5 py-2.5 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 hover:border-violet-500/40 rounded-xl text-violet-400 text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-wait"
+            >
+              <template v-if="!suggestingMetadata">
+                <Sparkles :size="14" />
+                Sugerir via IA
+              </template>
+              <template v-else>
+                <div class="w-3.5 h-3.5 border-2 border-violet-400/30 border-t-violet-400 rounded-full animate-spin"></div>
+                Analisando contexto...
+              </template>
+            </button>
 
            <div class="space-y-5">
              <div class="space-y-1.5">
@@ -145,7 +170,7 @@
 <script setup lang="ts">
 import { 
   Image as ImageIcon, Upload, Maximize2, 
-  Trash2, Film, Zap, X 
+  Trash2, Film, Zap, X, ClipboardPaste, Sparkles 
 } from 'lucide-vue-next'
 
 const props = defineProps<{
@@ -161,11 +186,68 @@ const uploading = ref(false)
 const showUploadModal = ref(false)
 const uploadPreview = ref('')
 const selectedFile = ref<File | null>(null)
+const isDragging = ref(false)
+const suggestingMetadata = ref(false)
 
 const uploadForm = ref({
   description: '',
   tags: ''
 })
+
+// ── Clipboard Paste Handler ──
+function handlePaste(event: ClipboardEvent) {
+  const items = event.clipboardData?.items
+  if (!items) return
+
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      event.preventDefault()
+      const file = item.getAsFile()
+      if (!file) continue
+
+      selectedFile.value = file
+      uploadPreview.value = URL.createObjectURL(file)
+      uploadForm.value.description = `Clipboard_${new Date().toISOString().slice(0,10)}_${Date.now().toString(36)}`
+      showUploadModal.value = true
+      break
+    }
+  }
+}
+
+// ── Drag & Drop Handler ──
+function handleDrop(event: DragEvent) {
+  isDragging.value = false
+  const file = event.dataTransfer?.files?.[0]
+  if (!file || !file.type.startsWith('image/')) return
+
+  selectedFile.value = file
+  uploadPreview.value = URL.createObjectURL(file)
+  uploadForm.value.description = file.name.split('.')[0] ?? file.name
+  showUploadModal.value = true
+}
+
+onMounted(() => {
+  document.addEventListener('paste', handlePaste)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('paste', handlePaste)
+})
+
+async function suggestAssetMetadata() {
+  suggestingMetadata.value = true
+  try {
+    const res = await $fetch<{ identifier: string; tags: string }>(`/api/dossiers/${props.dossierId}/suggest-asset-metadata`, {
+      method: 'POST'
+    })
+    uploadForm.value.description = res.identifier
+    uploadForm.value.tags = res.tags
+  } catch (err) {
+    console.error('[AI Suggest] Falha:', err)
+  } finally {
+    suggestingMetadata.value = false
+  }
+}
 
 async function handleFileSelect(event: any) {
   const file = event.target.files[0]
@@ -225,7 +307,7 @@ async function confirmUpload() {
 async function deleteImage(id: string) {
   if (!confirm('Eliminar este asset visual permanentemente?')) return
   try {
-    // await $fetch(`/api/dossiers/${props.dossierId}/images/${id}`, { method: 'DELETE' })
+    await $fetch(`/api/dossiers/${props.dossierId}/images/${id}`, { method: 'DELETE' })
     images.value = images.value.filter(img => img.id !== id)
     emit('updated')
   } catch (error) {

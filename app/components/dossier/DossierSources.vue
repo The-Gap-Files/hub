@@ -957,6 +957,7 @@ async function addSource() {
 async function deleteSource(id: string) {
   if (!confirm('Tem certeza que deseja remover esta fonte?')) return
   try {
+    await $fetch(`/api/sources/${id}`, { method: 'DELETE' })
     sources.value = sources.value.filter(s => s.id !== id)
     emit('updated')
   } catch (error) {

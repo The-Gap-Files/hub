@@ -259,7 +259,18 @@
                     </div>
                     
                     <div class="space-y-1.5">
-                      <label class="text-xs text-zinc-500 font-medium">Diretrizes de Identidade</label>
+                      <label class="text-xs text-zinc-500 font-medium flex items-center gap-1.5 group/info relative">
+                        Diretrizes de Identidade
+                        <HelpCircle :size="12" class="text-zinc-600 hover:text-primary cursor-help transition-colors" />
+                        
+                        <!-- Tooltip -->
+                        <div class="absolute left-0 bottom-full mb-2 w-64 p-3 bg-zinc-900 border border-white/10 rounded-xl shadow-2xl opacity-0 group-hover/info:opacity-100 pointer-events-none transition-all z-50 transform translate-y-2 group-hover/info:translate-y-0">
+                          <p class="text-[10px] leading-relaxed text-zinc-300 normal-case tracking-normal font-normal">
+                            <strong class="text-primary block mb-1">A âncora visual do seu universo.</strong>
+                            Este campo injeta diretrizes estéticas diretas em cada imagem gerada (concreto, ferrugem, iluminação). Garante que a identidade do dossiê seja preservada mesmo em cenas complexas.
+                          </p>
+                        </div>
+                      </label>
                       <textarea
                         v-model="visualSettingsForm.visualIdentityContext"
                         rows="2"
@@ -344,7 +355,8 @@ import {
   ArrowLeft, Zap, FileText, Database, Palette, AlertTriangle, Dna, Tv,
   LayoutDashboard, PlayCircle, TrendingUp, Brain, Clock, Maximize2, Minimize2,
   Link as LinkIcon,
-  Target, Eye, EyeOff, Layers, BookOpen, GraduationCap, Heart, Flame, Swords
+  Target, Eye, EyeOff, Layers, BookOpen, GraduationCap, Heart, Flame, Swords,
+  HelpCircle
 } from 'lucide-vue-next'
 import DossierSources from '~/components/dossier/DossierSources.vue'
 import DossierImages from '~/components/dossier/DossierImages.vue'

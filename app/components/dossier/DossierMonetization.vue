@@ -183,8 +183,8 @@
                 <TrendingUp :size="24" />
               </div>
               <div>
-                <h3 class="text-lg font-black uppercase tracking-widest text-white">Plano Gerado</h3>
-                <div class="flex items-center gap-2 mt-1">
+                <h3 class="text-lg font-black uppercase tracking-widest text-white">{{ plan.planTitle || 'Plano Gerado' }}</h3>
+                <div class="flex items-center gap-2 mt-1 flex-wrap">
                   <span class="text-xs text-zinc-500 font-mono uppercase tracking-wider">
                     1 Full Video + {{ plan.teasers.length }} Teasers · Receita estimada: {{ plan.estimatedTotalRevenue }}
                     <span v-if="planCreatedAt" class="ml-2 text-zinc-600">· {{ formatPlanDate(planCreatedAt) }}</span>

@@ -26,6 +26,7 @@ export interface ProviderCostInfo {
 
 export interface ScriptGenerationRequest {
   theme: string
+  visualIdentityContext?: string
   language: string
   narrationLanguage?: string // Idioma da narração (pode ser diferente do roteiro)
   targetDuration: number // em segundos

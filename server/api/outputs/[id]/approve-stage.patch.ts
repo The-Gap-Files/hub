@@ -17,6 +17,20 @@ export default defineEventHandler(async (event) => {
   switch (stage) {
     case 'STORY_OUTLINE':
       updateData.storyOutlineApproved = approved
+      // Salvar o nível tonal do hook selecionado pelo usuário no JSON do outline
+      if (approved && body.selectedHookLevel) {
+        const currentOutput = await prisma.output.findUnique({
+          where: { id },
+          select: { storyOutline: true }
+        })
+        if (currentOutput?.storyOutline && typeof currentOutput.storyOutline === 'object') {
+          updateData.storyOutline = {
+            ...(currentOutput.storyOutline as any),
+            _selectedHookLevel: body.selectedHookLevel,
+            ...(body.selectedHookLevel === 'custom' && body.customHook ? { _customHook: body.customHook } : {})
+          }
+        }
+      }
       break
     case 'SCRIPT':
       updateData.scriptApproved = approved

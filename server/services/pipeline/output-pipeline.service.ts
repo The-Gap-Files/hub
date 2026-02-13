@@ -128,6 +128,7 @@ export class OutputPipelineService {
     // Construir prompt com TODAS as fontes
     const promptContext: ScriptGenerationRequest = {
       theme: dossier.theme,
+      visualIdentityContext: dossier.visualIdentityContext || undefined,
       language: output.language || 'pt-BR',
       narrationLanguage: output.narrationLanguage || 'pt-BR',
 
@@ -375,6 +376,15 @@ export class OutputPipelineService {
         log.info(`🎨 Style Anchor: ${styleAnchor.slice(0, 100)}...`)
       }
 
+      // Montar Visual Identity do dossiê (diretrizes específicas do universo)
+      const visualIdentity = output.dossier?.visualIdentityContext
+        ? `[VISUAL IDENTITY — ${output.dossier.visualIdentityContext}]`
+        : ''
+
+      if (visualIdentity) {
+        log.info(`🆔 Visual Identity: ${visualIdentity.slice(0, 100)}...`)
+      }
+
       for (const chunk of sceneChunks) {
         const results = await Promise.allSettled(chunk.map(async (scene, chunkIndex) => {
           const absoluteIndex = scenes.indexOf(scene)
@@ -384,7 +394,7 @@ export class OutputPipelineService {
           const width = isPortrait ? 768 : 1344
           const height = isPortrait ? 1344 : 768
 
-          // Montar prompt visual com Style Anchor + Visual Continuity
+          // Montar prompt visual com Style Anchor + Visual Identity + Visual Continuity
           let visualPrompt = scene.visualDescription
 
           // Determinar se é mesmo ambiente da cena anterior
@@ -394,18 +404,22 @@ export class OutputPipelineService {
             && prevScene.sceneEnvironment
             && scene.sceneEnvironment === prevScene.sceneEnvironment
 
-          if (styleAnchor) {
-            if (isSameEnvironment && prevScene) {
-              // Mesmo ambiente → Anchor + Continuity
-              // Extrai elementos chave da descrição anterior para manter coerência de objetos
-              const continuityContext = prevScene.visualDescription.slice(0, 300)
-              visualPrompt = `${styleAnchor}\n[VISUAL CONTINUITY — same environment "${scene.sceneEnvironment}": ${continuityContext}]\n\n${visualPrompt}`
-              log.step(`Cena ${absoluteIndex + 1}`, `🔗 Continuity + Anchor (env: ${scene.sceneEnvironment})`)
-            } else {
-              // Novo ambiente → Só Anchor (transição limpa)
-              visualPrompt = `${styleAnchor}\n\n${visualPrompt}`
-              log.step(`Cena ${absoluteIndex + 1}`, `🎨 Anchor only${scene.sceneEnvironment ? ` (new env: ${scene.sceneEnvironment})` : ''}`)
-            }
+          // Montar prefixo: Anchor → Identity → Continuity (se aplicável)
+          const prefixParts: string[] = []
+          if (styleAnchor) prefixParts.push(styleAnchor)
+          if (visualIdentity) prefixParts.push(visualIdentity)
+
+          if (isSameEnvironment && prevScene) {
+            // Mesmo ambiente → Anchor + Identity + Continuity
+            const continuityContext = prevScene.visualDescription.slice(0, 300)
+            prefixParts.push(`[VISUAL CONTINUITY — same environment "${scene.sceneEnvironment}": ${continuityContext}]`)
+            log.step(`Cena ${absoluteIndex + 1}`, `🔗 Continuity + Anchor + Identity (env: ${scene.sceneEnvironment})`)
+          } else if (prefixParts.length > 0) {
+            log.step(`Cena ${absoluteIndex + 1}`, `🎨 Anchor + Identity${scene.sceneEnvironment ? ` (new env: ${scene.sceneEnvironment})` : ''}`)
+          }
+
+          if (prefixParts.length > 0) {
+            visualPrompt = `${prefixParts.join('\n')}\n\n${visualPrompt}`
           }
 
           const request: ImageGenerationRequest = {

@@ -22,6 +22,78 @@
       </div>
     </header>
 
+    <!-- INVESTIGADOR AUTÔNOMO -->
+    <div class="glass-card p-8 relative overflow-hidden mb-8 border border-amber-500/10">
+      <div class="absolute inset-0 pointer-events-none opacity-[0.02] bg-[radial-gradient(circle_at_30%_40%,rgba(245,158,11,0.15),transparent_70%)]"></div>
+
+      <header class="flex items-center gap-3 mb-6 relative">
+        <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.15)]">
+          <Radar :size="20" class="animate-pulse" />
+        </div>
+        <div>
+          <h2 class="text-xs font-black uppercase tracking-[0.3em] text-white">Investigador Autônomo</h2>
+          <p class="text-xs text-zinc-500 uppercase font-bold tracking-widest mt-0.5">Jogue uma semente — a IA faz o resto</p>
+        </div>
+      </header>
+
+      <div class="flex gap-3 relative">
+        <div class="flex-1 relative">
+          <input
+            v-model="investigateQuery"
+            type="text"
+            :disabled="investigating"
+            class="w-full bg-white/5 border border-amber-500/20 rounded-2xl px-5 py-4 text-white focus:border-amber-500 outline-none transition-all shadow-inner placeholder:text-zinc-600"
+            placeholder="Ex: Simão de Trento, MK-Ultra, Cleopatra poder..."
+            @keydown.enter.prevent="handleInvestigate"
+          />
+          <div v-if="investigating" class="absolute right-4 top-1/2 -translate-y-1/2">
+            <div class="w-5 h-5 border-2 border-amber-500/20 border-t-amber-500 rounded-full animate-spin"></div>
+          </div>
+        </div>
+        <button
+          type="button"
+          :disabled="investigating || !investigateQuery.trim()"
+          @click="handleInvestigate"
+          class="px-8 py-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-amber-500 font-black text-xs uppercase tracking-[0.2em] hover:bg-amber-500/20 hover:border-amber-500/40 transition-all disabled:opacity-30 disabled:cursor-not-allowed group/inv"
+        >
+          <span v-if="!investigating" class="flex items-center gap-2">
+            <Search :size="16" class="group-hover/inv:rotate-12 transition-transform" />
+            Investigar
+          </span>
+          <span v-else class="flex items-center gap-2">
+            <Radar :size="16" class="animate-spin" />
+            Buscando...
+          </span>
+        </button>
+      </div>
+
+      <!-- Loading State -->
+      <div v-if="investigating" class="mt-6 space-y-3">
+        <div class="flex items-center gap-3 text-amber-500/60">
+          <div class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
+          <span class="mono-label text-xs animate-pulse">{{ investigateStatus }}</span>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="h-12 bg-white/5 rounded-xl animate-pulse"></div>
+          <div class="h-12 bg-white/5 rounded-xl animate-pulse" style="animation-delay: 150ms"></div>
+          <div class="h-12 bg-white/5 rounded-xl animate-pulse" style="animation-delay: 300ms"></div>
+          <div class="h-12 bg-white/5 rounded-xl animate-pulse" style="animation-delay: 450ms"></div>
+        </div>
+      </div>
+
+      <!-- Resultado -->
+      <div v-if="investigateResult && !investigating" class="mt-6">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+            <span class="mono-label text-xs text-emerald-500">Investigação completa — Confiança: {{ investigateResult.confidence }}%</span>
+          </div>
+          <span class="mono-label text-[10px] text-zinc-600">{{ investigateResult.provider }} / {{ investigateResult.model }}</span>
+        </div>
+        <p class="text-xs text-zinc-500 mt-2 italic">{{ investigateResult.reasoning }}</p>
+      </div>
+    </div>
+
     <div class="glass-card p-10 relative overflow-hidden">
       <!-- Background Cyber Grid -->
       <div class="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]"></div>
@@ -228,9 +300,18 @@
 
           <!-- Contexto Visual (Seu aviso customizado) -->
           <div class="space-y-3">
-            <label class="mono-label text-xs text-zinc-500 flex items-center gap-2">
+            <label class="mono-label text-xs text-zinc-500 flex items-center gap-2 group/info relative">
               <AlertTriangle :size="12" />
               Diretrizes de Identidade do Universo (Warning Protocol)
+              <HelpCircle :size="14" class="text-zinc-600 hover:text-primary cursor-help transition-colors" />
+              
+              <!-- Tooltip -->
+              <div class="absolute left-0 bottom-full mb-2 w-64 p-3 bg-zinc-900 border border-white/10 rounded-xl shadow-2xl opacity-0 group-hover/info:opacity-100 pointer-events-none transition-all z-50 transform translate-y-2 group-hover/info:translate-y-0">
+                <p class="text-[10px] leading-relaxed text-zinc-300 normal-case tracking-normal">
+                  <strong class="text-primary block mb-1">A âncora visual do seu universo.</strong>
+                  Este campo injeta diretrizes estéticas diretas em cada imagem gerada. Use para definir texturas (concreto, ferrugem), iluminação (fluorescente, néon) e o tom emocional. Garante que a identidade do dossiê seja preservada mesmo em cenas complexas.
+                </p>
+              </div>
             </label>
             <textarea
               v-model="formData.visualIdentityContext"
@@ -239,6 +320,34 @@
               placeholder="Ex: Este dossiê pertence a um universo Noir. Evite cores vibrantes. Use sombras profundas e iluminação de alto contraste..."
             ></textarea>
           </div>
+        </div>
+
+        <!-- PROMPT DEEP RESEARCH (se investigação preencheu) -->
+        <div v-if="investigateResult?.researchPrompt" class="pt-10 border-t border-white/5 space-y-4">
+          <header class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-500 shadow-[0_0_20px_rgba(6,182,212,0.15)]">
+                <Search :size="20" />
+              </div>
+              <div>
+                <h2 class="text-xs font-black uppercase tracking-[0.3em] text-white">Prompt Gemini Research</h2>
+                <p class="text-xs text-zinc-500 uppercase font-bold tracking-widest mt-0.5">Prompt gerado para pesquisa profunda — copiável e editável</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              @click="copyResearchPrompt"
+              class="px-4 py-2 bg-cyan-500/10 border border-cyan-500/20 rounded-xl text-cyan-500 font-bold text-[10px] uppercase tracking-widest hover:bg-cyan-500/20 transition-all flex items-center gap-2"
+            >
+              <component :is="promptCopied ? CheckCheck : Copy" :size="14" />
+              {{ promptCopied ? 'Copiado!' : 'Copiar' }}
+            </button>
+          </header>
+          <textarea
+            v-model="investigateResult.researchPrompt"
+            rows="10"
+            class="w-full bg-white/5 border border-cyan-500/10 rounded-2xl px-5 py-4 text-white/80 focus:border-cyan-500/30 outline-none transition-all resize-none custom-scrollbar text-sm font-mono leading-relaxed"
+          ></textarea>
         </div>
 
         <!-- Botões -->
@@ -272,7 +381,8 @@
 import { 
   ArrowLeft, Zap, FileText, Target, Database, 
   ChevronDown, Tag, AlignCenter, Plus, Palette, Dna, AlertTriangle, Layout, Tv,
-  Skull, History, Beaker, User, Search, Moon, Eye, X
+  Skull, History, Beaker, User, Search, Moon, Eye, X, Radar, Copy, CheckCheck,
+  HelpCircle
 } from 'lucide-vue-next'
 
 interface ChannelOption {
@@ -298,6 +408,13 @@ const tagsInput = ref('')
 const submitting = ref(false)
 const isDropdownOpen = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)
+
+// ───── Investigador ─────
+const investigateQuery = ref('')
+const investigating = ref(false)
+const investigateStatus = ref('Preparando investigação...')
+const investigateResult = ref<any>(null)
+const promptCopied = ref(false)
 
 // Carregar estilos e seeds
 const visualStyles = ref<any[]>([])
@@ -393,6 +510,79 @@ watch(tagsInput, (value) => {
     .filter(t => t.length > 0)
 })
 
+// ───── Investigador ─────
+async function handleInvestigate() {
+  const query = investigateQuery.value.trim()
+  if (!query || investigating.value) return
+
+  investigating.value = true
+  investigateResult.value = null
+  investigateStatus.value = 'Conectando à rede de inteligência...'
+
+  // Animação de status
+  const statusMessages = [
+    'Vasculhando bancos de dados globais...',
+    'Analisando fontes primárias...',
+    'Cruzando referências históricas...',
+    'Classificando inteligência editorial...',
+    'Gerando vetor de retenção...',
+    'Compilando dossiê preliminar...'
+  ]
+  let statusIndex = 0
+  const statusInterval = setInterval(() => {
+    statusIndex = (statusIndex + 1) % statusMessages.length
+    investigateStatus.value = statusMessages[statusIndex] ?? 'Processando...'
+  }, 2500)
+
+  try {
+    const result = await $fetch<any>('/api/dossiers/investigate', {
+      method: 'POST',
+      body: { query }
+    })
+
+    investigateResult.value = result
+
+    // Auto-fill do formulário
+    formData.value.title = result.title || ''
+    formData.value.theme = result.theme || ''
+    formData.value.category = result.classificationId || ''
+    formData.value.visualIdentityContext = result.visualIdentityContext || ''
+    formData.value.preferredVisualStyleId = result.suggestedVisualStyleId || ''
+
+    // Tags
+    if (result.tags && result.tags.length > 0) {
+      formData.value.tags = result.tags
+      tagsInput.value = result.tags.join(', ')
+    }
+
+  } catch (error: any) {
+    console.error('Erro na investigação:', error)
+    alert(error.data?.message || 'Erro ao investigar semente')
+  } finally {
+    clearInterval(statusInterval)
+    investigating.value = false
+  }
+}
+
+async function copyResearchPrompt() {
+  if (!investigateResult.value?.researchPrompt) return
+  try {
+    await navigator.clipboard.writeText(investigateResult.value.researchPrompt)
+    promptCopied.value = true
+    setTimeout(() => { promptCopied.value = false }, 2000)
+  } catch {
+    // Fallback para navegadores sem clipboard API
+    const textarea = document.createElement('textarea')
+    textarea.value = investigateResult.value.researchPrompt
+    document.body.appendChild(textarea)
+    textarea.select()
+    document.execCommand('copy')
+    document.body.removeChild(textarea)
+    promptCopied.value = true
+    setTimeout(() => { promptCopied.value = false }, 2000)
+  }
+}
+
 async function handleSubmit() {
   if (submitting.value) return
 
@@ -406,6 +596,7 @@ async function handleSubmit() {
         tags: formData.value.tags,
         category: formData.value.category || undefined,
         visualIdentityContext: formData.value.visualIdentityContext || undefined,
+        researchPrompt: investigateResult.value?.researchPrompt || undefined,
         preferredVisualStyleId: formData.value.preferredVisualStyleId || undefined,
         preferredSeedId: formData.value.preferredSeedId || undefined,
         channelId: formData.value.channelId || undefined

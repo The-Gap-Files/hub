@@ -351,6 +351,56 @@ function normalizeMonetizationResponse(raw: any): any {
 }
 
 /**
+ * Escapa aspas duplas internas em valores de string JSON.
+ * 
+ * O Gemini frequentemente gera JSON com aspas não-escapadas dentro de strings:
+ *   "text": "algo ("aspas internas") algo"
+ * 
+ * Esta função processa caractere por caractere, rastreando se estamos dentro
+ * de uma string JSON, e escapa aspas que não são delimitadores estruturais.
+ */
+function escapeInternalJsonQuotes(jsonStr: string): string {
+  const chars = [...jsonStr]
+  const result: string[] = []
+  let inString = false
+  let stringStart = -1
+
+  for (let i = 0; i < chars.length; i++) {
+    const ch = chars[i]!
+    const prev = i > 0 ? chars[i - 1] : ''
+
+    if (ch === '"' && prev !== '\\') {
+      if (!inString) {
+        // Abrindo uma string JSON
+        inString = true
+        stringStart = i
+        result.push(ch)
+      } else {
+        // Estamos dentro de uma string — esta aspas é o FIM ou é interna?
+        // Verificar o que vem DEPOIS para decidir:
+        // Se depois vem : , } ] ou whitespace+esses, é fim da string
+        const rest = jsonStr.substring(i + 1).trimStart()
+        const nextSignificant = rest.charAt(0)
+
+        if (nextSignificant === ':' || nextSignificant === ',' ||
+          nextSignificant === '}' || nextSignificant === ']' ||
+          rest.length === 0) {
+          // É o fim legítimo da string
+          inString = false
+          result.push(ch)
+        } else {
+          // É uma aspas INTERNA — escapar
+          result.push('\\"')
+        }
+      }
+    } else {
+      result.push(ch)
+    }
+  }
+
+  return result.join('')
+}
+/**
  * Invoca o LLM com structured output. Para Gemini, se withStructuredOutput falhar com 400,
  * faz fallback para chamada raw + parsing manual do JSON.
  */
@@ -448,9 +498,10 @@ async function invokeWithFallback(
         } catch (secondParseErr: any) {
           console.warn(`${LOG} ⚠️ Sanitização básica falhou: ${secondParseErr.message}`)
 
-          // Tentativa avançada: escapar aspas internas (ex: "texto "interno" texto")
+          // Tentativa avançada: escapar aspas internas em valores de string JSON
+          // Gemini gera padrões como: "texto ("aspas internas") texto"
           try {
-            const escaped = sanitized.replace(/(\w)"(\w)/g, '$1\\"$2')
+            const escaped = escapeInternalJsonQuotes(sanitized)
             parsed = JSON.parse(escaped)
             console.log(`${LOG} ✅ JSON com aspas escapadas parseado com sucesso`)
           } catch (escapeErr) {
@@ -585,6 +636,8 @@ function createMonetizationPlanSchema(teaserCount: number = 6) {
   const max = Math.min(15, teaserCount + 1) // tolerância de +1
 
   return z.object({
+    // ── Título do Plano ───────────────────────────────────────────
+    planTitle: z.string().describe('Título criativo e descritivo do plano de monetização (ex: "A Anatomia do Ódio: De Simão de Trento ao Atentado de Poway")'),
     // ── Estilo Visual Único do Plano ───────────────────────────────
     visualStyleId: z.string().describe('ID do estilo visual ÚNICO para TODO o plano (ex: "ghibli-dark", "cyberpunk"). Todos os itens compartilham este estilo.'),
     visualStyleName: z.string().describe('Nome legível do estilo visual escolhido para o plano'),
@@ -639,10 +692,11 @@ export interface RegenerateItemResult {
 export interface MonetizationPlannerRequest {
   theme: string
   title: string
+  visualIdentityContext?: string
   sources?: Array<{ title: string; content: string; sourceType: string; weight?: number }>
   notes?: Array<{ content: string; noteType: string }>
   images?: Array<{ description: string }>
-  persons?: Array<{ name: string; role?: string | null; description?: string | null; relevance: string }>
+  persons?: Array<{ name: string; role?: string | null; description?: string | null; visualDescription?: string | null; relevance: string }>
   researchData?: any
   teaserDuration: 60 | 120 | 180
   fullVideoDuration: 300 | 600 | 900
@@ -687,15 +741,18 @@ export async function generateMonetizationPlan(
   const dossierBlock = buildDossierBlock({
     theme: request.theme,
     title: request.title,
+    visualIdentityContext: request.visualIdentityContext,
     sources: request.sources?.map(s => ({
       title: s.title, content: s.content, type: s.sourceType,
       weight: s.weight ?? 1.0
     })),
     userNotes: request.notes?.map(n => n.content),
+    imageDescriptions: request.images?.map(i => i.description).filter(Boolean),
     persons: request.persons?.map(p => ({
       name: p.name,
       role: p.role,
       description: p.description,
+      visualDescription: p.visualDescription,
       relevance: p.relevance
     }))
   })

@@ -37,6 +37,7 @@ model Dossier {
   tags                   String[]
   isProcessed            Boolean            @default(false)
   visualIdentityContext  String?            @db.VarChar(500) // Contexto visual do dossier
+  researchPrompt         String?            @db.Text // Prompt gerado pelo Investigador para Gemini Deep Research
   preferredVisualStyleId String?
   preferredSeedId        String?
   channelId              String? /// FK → Channel (nullable para migração gradual)
@@ -565,4 +566,22 @@ enum OutputStatus {
   COMPLETED
   FAILED
   CANCELLED
+}
+
+/// Notícia capturada pelo Radar de Inteligência (persistida para não perder quando RSS expirar)
+model NewsItem {
+  id          String    @id @default(uuid())
+  title       String
+  link        String    @unique // URL da notícia — deduplicação natural
+  summary     String?
+  source      String    @db.VarChar(100) // Nome do feed (ex: "CrimeReads")
+  category    String    @db.VarChar(50) // paranormal, science, true-crime, serial-killer, geopolitics, etc.
+  author      String?   @db.VarChar(200)
+  publishedAt DateTime? // Data de publicação original (do RSS)
+  fetchedAt   DateTime  @default(now()) // Quando foi capturada pelo sistema
+  dismissed   Boolean   @default(false) // Para filtrar sinais já descartados
+
+  @@index([category])
+  @@index([fetchedAt])
+  @@map("news_items")
 }

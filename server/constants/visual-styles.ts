@@ -5,7 +5,7 @@
  * Estilos visuais raramente mudam e não precisam de CRUD dinâmico.
  */
 
-export type VisualStyleId = 'epictok' | 'noir-cinematic' | 'noir-classic' | 'ghibli-dark' | 'gta6' | 'cyberpunk' | 'oil-painting' | 'photorealistic'
+export type VisualStyleId = 'epictok' | 'noir-cinematic' | 'noir-classic' | 'dark-reveal' | 'ghibli-dark' | 'gta6' | 'cyberpunk' | 'oil-painting' | 'photorealistic'
 
 export interface VisualStyle {
   id: VisualStyleId
@@ -61,6 +61,20 @@ export const NOIR_CLASSIC_STYLE: VisualStyle = {
   isActive: true
 }
 
+/** Dark Reveal: concept art de revelação — documento/objeto no foco de luz, fundo urbano ou distópico, silhuetas, acentos quentes (dourado/vermelho). Tom de “verdade oculta”, investigação, passado vs presente. Não é ink wash nem graphic novel. */
+export const DARK_REVEAL_STYLE: VisualStyle = {
+  id: 'dark-reveal',
+  name: 'Dark Reveal',
+  description: 'Concept art dramático de revelação: objeto ou documento iluminado por um foco de luz, fundo escuro (urbano ou distópico), silhuetas, acentos quentes dourados ou vermelhos. Tom de verdade oculta e investigação.',
+  baseStyle: 'Dramatic digital concept art, revelation and discovery aesthetic, single focal point in spotlight, dark environment, painterly with visible brushstrokes, not ink wash, not graphic novel',
+  lightingTags: 'single powerful spotlight or beam from above, warm golden or amber light on central subject, deep shadows, visible light rays or dust, cold blue-teal in shadows, optional red or orange glow accent',
+  atmosphereTags: 'solemn significance, uncovering hidden truth, investigative, mysterious, ominous, historical weight, past meeting present',
+  compositionTags: 'centered focal subject (scroll, document, monolith, figure), dramatic wide or medium shot, dark silhouetted background, urban or abstract blocky cityscape in shadow, figures as silhouettes when present',
+  tags: 'concept art aesthetic, dark fantasy illustrative, high contrast, warm gold and brown on scroll or object, desaturated cool background, painterly texture, no photograph, no anime, no Sin City style, no ink wash, revelation and discovery mood, document or artifact as hero',
+  order: 4,
+  isActive: true
+}
+
 /** Estilo Ghibli em tom sombrio: ilustração 2D à la Studio Ghibli mas com atmosfera de suspense, leve horror e noir. Genérico para true crime, mistério, investigação. */
 export const GHIBLI_DARK_STYLE: VisualStyle = {
   id: 'ghibli-dark',
@@ -71,7 +85,7 @@ export const GHIBLI_DARK_STYLE: VisualStyle = {
   atmosphereTags: 'suspenseful, subtle horror, noir mood, tense, mysterious, foreboding, solemn',
   compositionTags: 'wide establishing shot when revealing tension, low angle for unease, textured paper effect, shallow depth',
   tags: 'flat cell shading, inked outlines, Ghibli-style backgrounds but dark palette, desaturated greens and grays, no dreamlike or nostalgic, high contrast lighting, earthy muted tones, subtle grain',
-  order: 4,
+  order: 5,
   isActive: true
 }
 
@@ -84,7 +98,7 @@ export const GTA6_STYLE: VisualStyle = {
   atmosphereTags: 'energetic, luxurious, urban tropical paradise, high-octane',
   compositionTags: 'dynamic camera movement, establishing wide shots of cityscape, low angle hero shots',
   tags: 'saturated colors, photorealistic, neon lights, urban, tropical, palm trees swaying, ocean view, luxury cars gleaming, modern architecture',
-  order: 5,
+  order: 6,
   isActive: true
 }
 
@@ -97,7 +111,7 @@ export const CYBERPUNK_STYLE: VisualStyle = {
   atmosphereTags: 'dystopian, mysterious, tech-noir, rain-soaked melancholy',
   compositionTags: 'low angle looking up at megastructures, rain droplets on camera lens, holographic displays floating',
   tags: 'futuristic, advanced technology, dark atmosphere, sci-fi, holographic displays, flying cars passing by, megacity',
-  order: 6,
+  order: 7,
   isActive: true
 }
 
@@ -110,7 +124,7 @@ export const OIL_PAINTING_STYLE: VisualStyle = {
   atmosphereTags: 'timeless, contemplative, classical elegance, artistic reverence',
   compositionTags: 'traditional portrait framing, close-up with shallow depth, painterly brush strokes visible',
   tags: 'visible brush strokes, canvas texture, impressionist touches, artistic, painterly, traditional art',
-  order: 7,
+  order: 8,
   isActive: true
 }
 
@@ -123,7 +137,7 @@ export const PHOTOREALISTIC_STYLE: VisualStyle = {
   atmosphereTags: 'authentic, immersive, documentary realism, cinematic presence',
   compositionTags: 'shallow depth of field, cinematic aspect ratio, professional framing',
   tags: 'ultra detailed, realistic lighting, 4K, 8K, DSLR quality, professional camera work',
-  order: 8,
+  order: 9,
   isActive: true
 }
 
@@ -133,6 +147,7 @@ export const VISUAL_STYLES: Record<VisualStyleId, VisualStyle> = {
   epictok: EPICTOK_STYLE,
   'noir-cinematic': NOIR_CINEMATIC_STYLE,
   'noir-classic': NOIR_CLASSIC_STYLE,
+  'dark-reveal': DARK_REVEAL_STYLE,
   'ghibli-dark': GHIBLI_DARK_STYLE,
   gta6: GTA6_STYLE,
   cyberpunk: CYBERPUNK_STYLE,
