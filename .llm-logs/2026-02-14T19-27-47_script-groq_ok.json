@@ -1,0 +1,64 @@
+{
+  "timestamp": "2026-02-14T19:27:47.901Z",
+  "taskId": "script-groq",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "title": "O mito sangrento de Simão de Trento e sua sombra moderna",
+    "summary": "Em 1475, a misteriosa morte de um menino em Trento foi transformada em um libelo de sangue, alimentado por pregações inflamadas, tortura e uma suposta incorruptibilidade que selou a culpa dos judeus. Décadas de perseguição, confisco de bens e um culto que perdurou por séculos foram manipulados para servir a interesses políticos e econômicos. Mais de cinco séculos depois, o mesmo mito ressurgiu nas redes digitais, inspirando um jovem extremista a atacar uma sinagoga nos Estados Unidos, mostrando ... [truncated 47 chars]",
+    "scenes": [
+      {
+        "order": 0,
+        "narration": "A rope snaps around his throat, the strappado begins, and a child's fate hangs in terror.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, a dim stone courtroom, a wooden rack with a rope coiled, shadows stretching across cold stone walls, faint candlelight flickering.",
+        "sceneEnvironment": "courtroom_trento",
+        "motionDescription": "Slow dolly forward toward the wooden rack, rope swaying violently, candle flames flickering softly, dust particles drifting in the cold air.",
+        "audioDescription": "Heavy creaking of wood, rope tightening, distant murmurs, subtle heartbeat thump",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 1,
+        "narration": "Friar Bernardino's fiery sermons had already poisoned Trento, turning whispers into accusations against the Jewish families.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, a stone altar draped in red banners, a stern friar raising a hand, shadows engulfing the congregation.",
+        "sceneEnvironment": "church_altar",
+        "motionDescription": "Gentle left pan across the stone altar, red banners fluttering, friar’s cloak swaying in the dim light.",
+        "audioDescription": "Echoing chant, distant murmurs, rustling fabric, low drum thud",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 2,
+        "narration": "Samuel de Nuremberg found the child's limp corpse in his cellar, trembling, and rushed to the authorities.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, a cramped stone cellar, a pale child’s body lying on wet stones, Samuel’s shocked face illuminated by a single lantern.",
+        "sceneEnvironment": "samuel_cellar",
+        "motionDescription": "Slow zoom in on the lifeless child, lantern light flickering, water droplets glistening on stone walls.",
+        "audioDescription": "Soft clank of lantern, distant dripping water, hushed gasp",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 3,
+        "narration": "Under the brutal squassada, accused Jews screamed, their words twisted to fit the bishop’s murderous narrative.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, a stone torture chamber, a wooden rack, ropes binding a trembling figure, harsh torchlight casting grotesque shadows.",
+        "sceneEnvironment": "torture_chamber",
+        "motionDescription": "Subtle tilt up from bound hands to anguished faces, torch flames licking the stone walls, shadows shifting.",
+        "audioDescription": "Rope creaking, muffled cries, crackling fire, distant echo of a bishop’s voice demanding confession",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 4,
+        "narration": "When the body was lifted, it remained untouched by decay, a 'miracle' sealing the false verdict.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, a dim crypt, the child's corpse on a stone slab, a faint glow surrounding it, priests gazing in awe.",
+        "sceneEnvironment": "church_crypt",
+        "motionDescription": "Slow push‑in toward the stone slab, faint ethereal glow pulsing around the body, dust swirling.",
+        "audioDescription": "Whispered prayers, distant organ note, subtle wind through cracks, heartbeat thudding faintly",
+        "estimatedDuration": 5
+      }
+    ],
+    "backgroundMusic": {
+      "prompt": "Dark Ambient, Low Drone Synths, Sparse Piano Notes, Tension Strings, Eerie Pads, Subtle Heartbeat Rhythm, Minor Key, well-arranged composition, 70 BPM",
+      "volume": -12
+    },
+    "backgroundMusicTracks": null
+  },
+  "rawContent": "{\n  \"title\": \"O mito sangrento de Simão de Trento e sua sombra moderna\",\n  \"summary\": \"Em 1475, a misteriosa morte de um menino em Trento foi transformada em um libelo de sangue, alimentado por pregações inflamadas, tortura e uma suposta incorruptibilidade que selou a culpa dos judeus. Décadas de perseguição, confisco de bens e um culto que perdurou por séculos foram manipulados para servir a interesses políticos e econômicos. Mais de cinco séculos depois, o mesmo mito ressurgiu nas redes digitais, inspirando um jovem extremista a atacar uma sinagoga nos Estados Unidos, mostrando como a propaganda de ódio pode atravessar eras.\",\n  \"backgroundMusic\": {\n    \"prompt\": \"Dark Ambient, Low Drone Synths, Sparse Piano Notes, Tension Strings, Eerie Pads, Subtle Heartbeat Rhythm, Minor Key, well-arranged composition, 70 BPM\",\n    \"volume\": -12\n  },\n  \"backgroundMusicTracks\": null,\n  \"scenes\": [\n    {\n      \"order\": 0,\n      \"narration\": \"A rope snaps around his throat, the strappado begins, and a child's fate hangs in terror.\",\n      \"visualDescription\": \"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, a dim stone courtroom, a wooden rack with a rope coiled, shadows stretching across cold stone walls, faint candlelight flickering.\",\n      \"motionDescription\": \"Slow dolly forward toward the wooden rack, rope swaying violently, candle flames flickering softly, dust particles drifting in the cold air.\",\n      \"audioDescription\": \"Heavy creaking of wood, rope tightening, distant murmurs, subtle heartbeat thump\",\n      \"sceneEnvironment\": \"courtroom_trento\",\n      \"estimatedDuration\": 5\n    },\n    {\n      \"order\": 1,\n      \"narration\": \"Friar Bernardino's fiery sermons had already poisoned Trento, turning whispers into accusations against the Jewish families.\",\n      \"visualDescription\": \"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, a stone altar draped in red banners, a stern friar raising a hand, shadows engulfing the congregation.\",\n      \"motionDescription\": \"Gentle left pan across the stone altar, red banners fluttering, friar’s cloak swaying in the dim light.\",\n      \"audioDescription\": \"Echoing chant, distant murmurs, rustling fabric, low drum thud\",\n      \"sceneEnvironment\": \"church_altar\",\n      \"estimatedDuration\": 5\n    },\n    {\n      \"order\": 2,\n      \"narration\": \"Samuel de Nuremberg found the child's limp corpse in his cellar, trembling, and rushed to the authorities.\",\n      \"visualDescription\": \"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, a cramped stone cellar, a pale child’s body lying on wet stones, Samuel’s shocked face illuminated by a single lantern.\",\n      \"motionDescription\": \"Slow zoom in on the lifeless child, lantern light flickering, water droplets glistening on stone walls.\",\n      \"audioDescription\": \"Soft clank of lantern, distant dripping water, hushed gasp\",\n      \"sceneEnvironment\": \"samuel_cellar\",\n      \"estimatedDuration\": 5\n    },\n    {\n      \"order\": 3,\n      \"narration\": \"Under the brutal squassada, accused Jews screamed, their words twisted to fit the bishop’s murderous narrative.\",\n      \"visualDescription\": \"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, a stone torture chamber, a wooden rack, ropes binding a trembling figure, harsh torchlight casting grotesque shadows.\",\n      \"motionDescription\": \"Subtle tilt up from bound hands to anguished faces, torch flames licking the stone walls, shadows shifting.\",\n      \"audioDescription\": \"Rope creaking, muffled cries, crackling fire, distant echo of a bishop’s voice demanding confession\",\n      \"sceneEnvironment\": \"torture_chamber\",\n      \"estimatedDuration\": 5\n    },\n    {\n      \"order\": 4,\n      \"narration\": \"When the body was lifted, it remained untouched by decay, a 'miracle' sealing the false verdict.\",\n      \"visualDescription\": \"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, a dim crypt, the child's corpse on a stone slab, a faint glow surrounding it, priests gazing in awe.\",\n      \"motionDescription\": \"Slow push‑in toward the stone slab, faint ethereal glow pulsing around the body, dust swirling.\",\n      \"audioDescription\": \"Whispered prayers, distant organ note, subtle wind through cracks, heartbeat thudding faintly\",\n      \"sceneEnvironment\": \"church_crypt\",\n      \"estimatedDuration\": 5\n    }]}"
+}

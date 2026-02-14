@@ -103,7 +103,12 @@ export async function generateCreativeDirection(
   // Criar modelo via LLM Factory
   const assignment = await getAssignment('creative-direction')
   const model = await createLlmForTask('creative-direction')
-  const structuredLlm = (model as any).withStructuredOutput(CreativeDirectionSchema, { includeRaw: true })
+  const isReplicate = assignment.provider.toLowerCase().includes('replicate')
+  const isGroqLlama4 = assignment.provider.toLowerCase().includes('groq') && assignment.model.includes('llama-4')
+  const m = model as any
+  const structuredLlm = isReplicate && typeof m.withStructuredOutputReplicate === 'function'
+    ? m.withStructuredOutputReplicate(CreativeDirectionSchema, { includeRaw: true })
+    : m.withStructuredOutput(CreativeDirectionSchema, { includeRaw: true, ...(isGroqLlama4 ? { method: 'jsonMode' } : {}) })
 
   // Carregar skill + catálogo de constants
   const skillContent = loadSkill('creative-direction-advisor')
@@ -121,7 +126,12 @@ export async function generateCreativeDirection(
   ]
 
   const startTime = Date.now()
-  const result = await structuredLlm.invoke(messages)
+  const { invokeWithLogging } = await import('../utils/llm-invoke-wrapper')
+  const result = await invokeWithLogging(structuredLlm, messages, {
+    taskId: 'creative-direction-advisor',
+    provider: assignment.provider,
+    model: assignment.model
+  })
   const content = result.parsed as CreativeDirection
   const rawMessage = result.raw as any
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(2)

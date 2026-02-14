@@ -1,0 +1,88 @@
+{
+  "timestamp": "2026-02-14T18:49:54.498Z",
+  "taskId": "story-architect",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "hookStrategy": "Contradição histórica – abrir com a chocante ideia de que a mesma “fórmula mortal” de ódio usada na primeira imprensa de tipos móveis volta a aparecer nas redes digitais de hoje.",
+    "hookVariants": [
+      {
+        "level": "green",
+        "hook": "Primeira imprensa de ódio contra judeus, 1475, e 8chan, 2019: a mesma fórmula mortal ressurgiu em dois séculos diferentes.",
+        "rationale": "Um tom curioso e seguro que destaca o paralelo sem provocar."
+      },
+      {
+        "level": "moderate",
+        "hook": "Quando a imprensa de tipos móveis transformou um menino em mártir, 8chan fez o mesmo século depois – a mesma fórmula mortal.",
+        "rationale": "Provocativo, mas ainda controlado, gera tensão ao ligar passado e presente."
+      },
+      {
+        "level": "aggressive",
+        "hook": "A primeira máquina de propaganda da história criou um mito sanguinário; 8chan o reviveu para matar novamente – a mesma fórmula mortal.",
+        "rationale": "Direto ao ponto, desafia o espectador a confrontar a continuidade do ódio."
+      },
+      {
+        "level": "lawless",
+        "hook": "Imprensa renascentista assassinou inocentes; 8chan fez o mesmo, espalhando sangue digital – a mesma fórmula mortal, sem limites.",
+        "rationale": "Ultrapassa limites, maximiza choque e confronta a brutalidade do ciclo."
+      }
+    ],
+    "promiseSetup": "Trento. Descubra como a mesma fórmula de ódio via imprensa renascentista reaparece nas redes digitais de hoje.",
+    "risingBeats": [
+      {
+        "order": 1,
+        "revelation": "Os incunábulos de 1475 imprimiram uma xilogravura brutal de Simão, espalhando o mito como propaganda.",
+        "questionAnswered": "Como a imagem se difundiu pela Europa?",
+        "newQuestion": "Poderia a mesma lógica visual ser usada nos dias de hoje?",
+        "sourceReference": "[6]"
+      },
+      {
+        "order": 2,
+        "revelation": "Em 2019, John Earnest postou a mesma imagem no 8chan, usando‑a como justificativa para o ataque à sinagoga.",
+        "questionAnswered": "Qual plataforma amplificou a mensagem?",
+        "newQuestion": "Que outros mitos antigos estão sendo revividos online?",
+        "sourceReference": "[8]"
+      }
+    ],
+    "climaxMoment": "",
+    "climaxFormula": "",
+    "resolutionPoints": [],
+    "resolutionAngle": "",
+    "ctaApproach": "Corte seco após a última frase de impacto. The Gap Files.",
+    "emotionalArc": "",
+    "toneProgression": "",
+    "whatToReveal": [],
+    "whatToHold": [],
+    "whatToIgnore": [],
+    "segmentDistribution": {
+      "hook": 2,
+      "context": 0,
+      "rising": 2,
+      "climax": 1,
+      "resolution": 0,
+      "cta": 1
+    },
+    "tensionCurve": [
+      "low",
+      "medium",
+      "pause",
+      "high",
+      "peak"
+    ],
+    "openLoops": [
+      {
+        "question": "Why did the printed image become a weapon centuries later?",
+        "openedAtBeat": 2,
+        "closedAtBeat": null
+      },
+      {
+        "question": "How did a medieval pamphlet inspire a modern shooter?",
+        "openedAtBeat": 3,
+        "closedAtBeat": null
+      }
+    ],
+    "resolutionLevel": "none"
+  },
+  "rawContent": "{\n  \"hookStrategy\":\"Contradição histórica – abrir com a chocante ideia de que a mesma “fórmula mortal” de ódio usada na primeira imprensa de tipos móveis volta a aparecer nas redes digitais de hoje.\",\n  \"hookVariants\":[\n    {\n      \"level\":\"green\",\n      \"hook\":\"Primeira imprensa de ódio contra judeus, 1475, e 8chan, 2019: a mesma fórmula mortal ressurgiu em dois séculos diferentes.\",\n      \"rationale\":\"Um tom curioso e seguro que destaca o paralelo sem provocar.\"\n    },\n    {\n      \"level\":\"moderate\",\n      \"hook\":\"Quando a imprensa de tipos móveis transformou um menino em mártir, 8chan fez o mesmo século depois – a mesma fórmula mortal.\",\n      \"rationale\":\"Provocativo, mas ainda controlado, gera tensão ao ligar passado e presente.\"\n    },\n    {\n      \"level\":\"aggressive\",\n      \"hook\":\"A primeira máquina de propaganda da história criou um mito sanguinário; 8chan o reviveu para matar novamente – a mesma fórmula mortal.\",\n      \"rationale\":\"Direto ao ponto, desafia o espectador a confrontar a continuidade do ódio.\"\n    },\n    {\n      \"level\":\"lawless\",\n      \"hook\":\"Imprensa renascentista assassinou inocentes; 8chan fez o mesmo, espalhando sangue digital – a mesma fórmula mortal, sem limites.\",\n      \"rationale\":\"Ultrapassa limites, maximiza choque e confronta a brutalidade do ciclo.\"\n    }\n  ],\n  \"promiseSetup\":\"Trento. Descubra como a mesma fórmula de ódio via imprensa renascentista reaparece nas redes digitais de hoje.\",\n  \"risingBeats\":[\n    {\n      \"order\":1,\n      \"revelation\":\"Os incunábulos de 1475 imprimiram uma xilogravura brutal de Simão, espalhando o mito como propaganda.\",\n      \"questionAnswered\":\"Como a imagem se difundiu pela Europa?\",\n      \"newQuestion\":\"Poderia a mesma lógica visual ser usada nos dias de hoje?\",\n      \"sourceReference\":\"[6]\"\n    },\n    {\n      \"order\":2,\n      \"revelation\":\"Em 2019, John Earnest postou a mesma imagem no 8chan, usando‑a como justificativa para o ataque à sinagoga.\",\n      \"questionAnswered\":\"Qual plataforma amplificou a mensagem?\",\n      \"newQuestion\":\"Que outros mitos antigos estão sendo revividos online?\",\n      \"sourceReference\":\"[8]\"\n    }\n  ],\n  \"climaxMoment\":\"\",\n  \"climaxFormula\":\"\",\n  \"resolutionPoints\":[],\n  \"resolutionAngle\":\"\",\n  \"ctaApproach\":\"Corte seco após a última frase de impacto. The Gap Files.\",\n  \"emotionalArc\":\"\",\n  \"toneProgression\":\"\",\n  \"whatToReveal\":[],\n  \"whatToHold\":[],\n  \"whatToIgnore\":[],\n  \"segmentDistribution\":{\n    \"hook\":2,\n    \"context\":0,\n    \"rising\":2,\n    \"climax\":1,\n    \"resolution\":0,\n    \"cta\":1\n  },\n  \"tensionCurve\":[\"low\",\"medium\",\"pause\",\"high\",\"peak\"],\n  \"openLoops\":[\n    {\n      \"question\":\"Why did the printed image become a weapon centuries later?\",\n      \"openedAtBeat\":2,\n      \"closedAtBeat\":null\n    },\n    {\n      \"question\":\"How did a medieval pamphlet inspire a modern shooter?\",\n      \"openedAtBeat\":3,\n      \"closedAtBeat\":null\n    }\n  ],\n  \"resolutionLevel\":\"none\"\n}"
+}

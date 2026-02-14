@@ -46,7 +46,7 @@ Cada teaser DEVE receber um papel narrativo. Isso controla **quanto contexto** o
 
 ### 🚪 gateway (Porta de Entrada)
 - **Contexto:** COMPLETO — apresenta o tema inteiro (quem, quando, onde, por quê)
-- **Quando usar:** Primeiro(s) teaser(s) — funciona como standalone
+- **Quando usar:** EXATAMENTE 1 teaser — sempre o primeiro do array. Funciona como standalone
 - **Exemplo:** "Em 1475, uma cidade inteira condenou uma comunidade pela morte de um garoto de 2 anos. Quem realmente matou Simão de Trento?"
 - **O que faz:** Estabelece o "universo" do dossiê para que os outros teasers mergulhem direto
 
@@ -63,7 +63,7 @@ Cada teaser DEVE receber um papel narrativo. Isso controla **quanto contexto** o
 - **O que faz:** Máxima curiosidade, força o CTA para o Full Video
 
 ### Regras dos Papéis:
-1. **Gateway sempre primeiro** — o(s) teaser(s) gateway DEVEM vir primeiro no array
+1. **Exatamente 1 Gateway, sempre primeiro** — deve haver SEMPRE 1 (e apenas 1) teaser gateway, no início do array
 2. **NUNCA repita introduções** — apenas o gateway apresenta o tema completo
 3. **Deep-dive usa 1 frase máx** — "O caso X esconde..." e mergulha
 4. **Hook-only é viral puro** — zero "em tal ano", zero "segundo fulano"

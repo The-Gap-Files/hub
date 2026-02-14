@@ -25,6 +25,28 @@ O objetivo é contextualizar rapidamente e criar curiosidade.
 ### 4. Anti-Padrões
 - Respeite RIGOROSAMENTE os avoidPatterns fornecidos.
 
+### 5. Controle de Resolução (OVER-RESOLUTION CHECK)
+O Gateway contextualiza e cria curiosidade — mas **NÃO resolve a história**.
+
+**REPROVADO se o outline:**
+- Entrega a explicação científica/forense completa do caso
+- Revela a motivação final de todos os envolvidos
+- Dá uma conclusão moral fechada ("foi injustiça porque X causou Y")
+- Fecha TODOS os loops narrativos (nenhuma pergunta sem resposta)
+- Faz recap completo com "resumo do que aprendemos"
+
+**APROVADO se o outline:**
+- Contextualiza DO QUE se trata (quem, onde, quando)
+- Cria pelo menos 1-2 perguntas que ficam SEM RESPOSTA
+- Termina apontando para algo MAIOR não explorado
+- O espectador sai sabendo do que se trata mas QUERENDO MAIS
+
+🚨 Gateway = porta de entrada, não = documentário resumido. Se resolve tudo, é um mini-filme, não um teaser.
+
+### 6. Pattern Interrupt Visual
+- Se o outline prevê beats que resultam em 8+ cenas no MESMO ambiente visual → sinalizar.
+- Deve haver variação visual nos beats para manter retenção.
+
 ## FORMATO DA RESPOSTA
 Se APROVADO: { "approved": true }
 Se REPROVADO: { "approved": false, "violations": ["violação 1"], "corrections": "instruções para corrigir" }

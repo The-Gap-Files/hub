@@ -46,7 +46,13 @@ export class OpenAIScriptProvider implements IScriptGenerator {
     const LOG = '[OpenAI Script]'
     console.log(`${LOG} 🎬 Iniciando geração de roteiro via LangChain (${this.modelName})...`)
 
-    const structuredLlm = this.model.withStructuredOutput(ScriptResponseSchema, { includeRaw: true })
+    const m = this.model as any
+    // Groq Llama 4: forçar jsonMode (SDK não suporta jsonSchema para Llama).
+    // Groq GPT-OSS: SDK autodetecta jsonSchema pelo prefixo 'openai/gpt-oss' → sem override.
+    const isGroqLlama4 = (m.constructor?.name === 'ChatGroq' || this.modelName.includes('llama-4')) && !this.modelName.startsWith('openai/')
+    const structuredLlm = typeof m.withStructuredOutputReplicate === 'function'
+      ? m.withStructuredOutputReplicate(ScriptResponseSchema, { includeRaw: true })
+      : m.withStructuredOutput(ScriptResponseSchema, { includeRaw: true, ...(isGroqLlama4 ? { method: 'jsonMode' } : {}) })
 
     const systemPrompt = buildSystemPrompt(request)
     const userPrompt = buildUserPrompt(request, 'openai')
@@ -77,7 +83,8 @@ export class OpenAIScriptProvider implements IScriptGenerator {
       console.log(`${LOG} 📤 Enviando request multimodal para LangChain...`)
       console.log(`${LOG} 🔍 Schema esperado: title, summary, scenes, backgroundMusic, backgroundMusicTracks`)
 
-      const result = await structuredLlm.invoke(messages)
+      const { invokeWithLogging } = await import('../../../utils/llm-invoke-wrapper')
+      const result = await invokeWithLogging(structuredLlm, messages, { taskId: 'script-openai', provider: 'openai', model: 'unknown' })
       let content = result.parsed as ScriptResponse | null
       const rawMessage = result.raw as any
 

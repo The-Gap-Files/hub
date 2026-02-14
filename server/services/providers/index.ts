@@ -20,6 +20,7 @@ import type {
 import { OpenAIScriptProvider } from './script/openai-script.provider'
 import { AnthropicScriptProvider } from './script/anthropic-script.provider'
 import { GeminiScriptProvider } from './script/gemini-script.provider'
+import { GroqScriptProvider } from './script/groq-script.provider'
 import { ElevenLabsTTSProvider } from './tts/elevenlabs-tts.provider'
 import { ReplicateElevenLabsProvider } from './tts/replicate-elevenlabs.provider'
 import { ReplicateImageProvider } from './image/replicate-image.provider'
@@ -38,7 +39,8 @@ import { prisma } from '../../utils/prisma'
 const scriptProviders: Record<string, new (config: { apiKey: string; model?: string }) => IScriptGenerator> = {
   openai: OpenAIScriptProvider,
   anthropic: AnthropicScriptProvider,
-  gemini: GeminiScriptProvider
+  gemini: GeminiScriptProvider,
+  groq: GroqScriptProvider
 }
 
 const ttsProviders: Record<string, new (config: { apiKey: string }) => ITTSProvider> = {
@@ -258,6 +260,8 @@ export const providerManager = new ProviderManager()
 // Re-exportar provedores para uso direto se necessário
 export { OpenAIScriptProvider } from './script/openai-script.provider'
 export { AnthropicScriptProvider } from './script/anthropic-script.provider'
+export { GeminiScriptProvider } from './script/gemini-script.provider'
+export { GroqScriptProvider } from './script/groq-script.provider'
 export { ElevenLabsTTSProvider } from './tts/elevenlabs-tts.provider'
 export { ReplicateElevenLabsProvider } from './tts/replicate-elevenlabs.provider'
 export { ReplicateImageProvider } from './image/replicate-image.provider'

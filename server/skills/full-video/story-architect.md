@@ -213,6 +213,20 @@ Para full video, a distribuição muda vs. teaser:
 
 Sugira cenas por segmento para a duração total, respeitando: cada cena = 5 segundos.
 
+## ✅ CHECKLIST DE VALIDAÇÃO (ANTES DE ENVIAR)
+
+Antes de finalizar o outline, verifique se TODOS os campos obrigatórios estão preenchidos:
+
+- [ ] **promiseSetup** — Contém declaração explícita da promessa (NUNCA vazio)
+- [ ] **resolutionPoints** — Lista 3-5 pontos ESPECÍFICOS de recap (NUNCA genéricos)
+- [ ] **resolutionAngle** — Contém implicações beyond this story (NUNCA vazio)
+- [ ] **ctaApproach** — Descreve estratégia de CTA específica (NUNCA vazio)
+- [ ] **hookVariants** — Contém EXATAMENTE 4 variantes (green, moderate, aggressive, lawless)
+- [ ] **risingBeats** — Identifica qual beat é o MIDPOINT (~50%) e qual é All Is Lost (~75%)
+- [ ] **tensionCurve** — Escalação progressiva sem platôs
+
+**❌ Se qualquer campo obrigatório estiver vazio ou genérico, o outline será REJEITADO pelo validador.**
+
 ## 🚨 REGRAS CRÍTICAS
 
 1. **NÃO ESCREVA O ROTEIRO.** Apenas a estrutura/blueprint.

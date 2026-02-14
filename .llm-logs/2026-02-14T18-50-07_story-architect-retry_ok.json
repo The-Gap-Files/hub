@@ -1,0 +1,98 @@
+{
+  "timestamp": "2026-02-14T18:50:07.517Z",
+  "taskId": "story-architect-retry",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "hookStrategy": "Contradição histórica – abrir com a chocante ideia de que a mesma fórmula de ódio usada na primeira imprensa de tipos móveis reaparece nas redes digitais de hoje.",
+    "hookVariants": [
+      {
+        "level": "green",
+        "hook": "Primeira imprensa de ódio contra judeus cria um mito sanguinário; hoje 8chan revive a mesma fórmula mortal.",
+        "rationale": "Apresenta o paralelo de forma segura, despertando curiosidade sem agressividade."
+      },
+      {
+        "level": "moderate",
+        "hook": "Quando gravuras renascentistas transformaram um menino em mártir, a internet moderna reproduz o mesmo horror digital.",
+        "rationale": "Provoca tensão ao ligar a propaganda histórica ao ambiente online contemporâneo."
+      },
+      {
+        "level": "aggressive",
+        "hook": "A imprensa da Idade Média forjou sangue falso; 8chan o recicla para incitar assassinatos hoje.",
+        "rationale": "Direto ao ponto, desafia o espectador a reconhecer a continuidade do ódio."
+      },
+      {
+        "level": "lawless",
+        "hook": "Impressão antiga espalhou mentiras sangrentas; 8chan espalha o mesmo veneno, alimentando carnificina sem limites.",
+        "rationale": "Ultrapassa limites para maximizar choque e confrontar a brutalidade do ciclo."
+      }
+    ],
+    "promiseSetup": "Trento.",
+    "risingBeats": [
+      {
+        "order": 1,
+        "revelation": "Incunábulos imprimiram uma gravura que virou símbolo de ódio.",
+        "questionAnswered": "",
+        "newQuestion": "Como uma imagem pode sobreviver milênios?",
+        "sourceReference": "[6]"
+      },
+      {
+        "order": 2,
+        "revelation": "Silêncio que antecede a explosão da verdade.",
+        "questionAnswered": "",
+        "newQuestion": "O que acontece quando a história é silenciada?",
+        "sourceReference": "[1]"
+      },
+      {
+        "order": 3,
+        "revelation": "A mesma imagem incendiou um ataque moderno.",
+        "questionAnswered": "",
+        "newQuestion": "Que outras verdades forjadas podem estar circulando online?",
+        "sourceReference": "[8]"
+      }
+    ],
+    "climaxMoment": "",
+    "climaxFormula": "",
+    "resolutionPoints": [],
+    "resolutionAngle": "",
+    "ctaApproach": "Inscreva‑se no The Gap Files.",
+    "emotionalArc": "",
+    "toneProgression": "",
+    "whatToReveal": [],
+    "whatToHold": [],
+    "whatToIgnore": [],
+    "segmentDistribution": {
+      "hook": 1,
+      "context": 0,
+      "rising": 3,
+      "climax": 1,
+      "resolution": 0,
+      "cta": 1
+    },
+    "tensionCurve": [
+      "low",
+      "pause",
+      "peak"
+    ],
+    "openLoops": [
+      {
+        "question": "Como uma imagem pode sobreviver milênios?",
+        "openedAtBeat": 1,
+        "closedAtBeat": null
+      },
+      {
+        "question": "O que acontece quando a história é silenciada?",
+        "openedAtBeat": 2,
+        "closedAtBeat": null
+      },
+      {
+        "question": "Que outras verdades forjadas podem estar circulando online?",
+        "openedAtBeat": 3,
+        "closedAtBeat": null
+      }
+    ],
+    "resolutionLevel": "none"
+  },
+  "rawContent": "{\n  \"hookStrategy\": \"Contradição histórica – abrir com a chocante ideia de que a mesma fórmula de ódio usada na primeira imprensa de tipos móveis reaparece nas redes digitais de hoje.\",\n  \"hookVariants\": [\n    {\n      \"level\": \"green\",\n      \"hook\": \"Primeira imprensa de ódio contra judeus cria um mito sanguinário; hoje 8chan revive a mesma fórmula mortal.\",\n      \"rationale\": \"Apresenta o paralelo de forma segura, despertando curiosidade sem agressividade.\"\n    },\n    {\n      \"level\": \"moderate\",\n      \"hook\": \"Quando gravuras renascentistas transformaram um menino em mártir, a internet moderna reproduz o mesmo horror digital.\",\n      \"rationale\": \"Provoca tensão ao ligar a propaganda histórica ao ambiente online contemporâneo.\"\n    },\n    {\n      \"level\": \"aggressive\",\n      \"hook\": \"A imprensa da Idade Média forjou sangue falso; 8chan o recicla para incitar assassinatos hoje.\",\n      \"rationale\": \"Direto ao ponto, desafia o espectador a reconhecer a continuidade do ódio.\"\n    },\n    {\n      \"level\": \"lawless\",\n      \"hook\": \"Impressão antiga espalhou mentiras sangrentas; 8chan espalha o mesmo veneno, alimentando carnificina sem limites.\",\n      \"rationale\": \"Ultrapassa limites para maximizar choque e confrontar a brutalidade do ciclo.\"\n    }\n  ],\n  \"promiseSetup\": \"Trento.\",\n  \"risingBeats\": [\n    {\n      \"order\": 1,\n      \"revelation\": \"Incunábulos imprimiram uma gravura que virou símbolo de ódio.\",\n      \"questionAnswered\": \"\",\n      \"newQuestion\": \"Como uma imagem pode sobreviver milênios?\",\n      \"sourceReference\": \"[6]\"\n    },\n    {\n      \"order\": 2,\n      \"revelation\": \"Silêncio que antecede a explosão da verdade.\",\n      \"questionAnswered\": \"\",\n      \"newQuestion\": \"O que acontece quando a história é silenciada?\",\n      \"sourceReference\": \"[1]\"\n    },\n    {\n      \"order\": 3,\n      \"revelation\": \"A mesma imagem incendiou um ataque moderno.\",\n      \"questionAnswered\": \"\",\n      \"newQuestion\": \"Que outras verdades forjadas podem estar circulando online?\",\n      \"sourceReference\": \"[8]\"\n    }\n  ],\n  \"climaxMoment\": \"\",\n  \"climaxFormula\": \"\",\n  \"resolutionPoints\": [],\n  \"resolutionAngle\": \"\",\n  \"ctaApproach\": \"Inscreva‑se no The Gap Files.\",\n  \"emotionalArc\": \"\",\n  \"toneProgression\": \"\",\n  \"whatToReveal\": [],\n  \"whatToHold\": [],\n  \"whatToIgnore\": [],\n  \"segmentDistribution\": {\n    \"hook\": 1,\n    \"context\": 0,\n    \"rising\": 3,\n    \"climax\": 1,\n    \"resolution\": 0,\n    \"cta\": 1\n  },\n  \"tensionCurve\": [\n    \"low\",\n    \"pause\",\n    \"peak\"\n  ],\n  \"openLoops\": [\n    {\n      \"question\": \"Como uma imagem pode sobreviver milênios?\",\n      \"openedAtBeat\": 1,\n      \"closedAtBeat\": null\n    },\n    {\n      \"question\": \"O que acontece quando a história é silenciada?\",\n      \"openedAtBeat\": 2,\n      \"closedAtBeat\": null\n    },\n    {\n      \"question\": \"Que outras verdades forjadas podem estar circulando online?\",\n      \"openedAtBeat\": 3,\n      \"closedAtBeat\": null\n    }\n  ],\n  \"resolutionLevel\": \"none\"\n}"
+}

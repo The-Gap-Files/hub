@@ -43,8 +43,14 @@ export default defineEventHandler(async (event) => {
     )
     clearTimeout(timer)
 
-    const text = typeof response.content === 'string' ? response.content : String(response.content ?? '')
+    // LLM base (não BaseChatModel) pode retornar string direta em vez de AIMessage
+    const text =
+      typeof response === 'string'
+        ? response
+        : (typeof response.content === 'string' ? response.content : String(response.content ?? ''))
     const elapsed = `${((Date.now() - start) / 1000).toFixed(2)}s`
+
+    console.log('[test-model] 📥 response type:', typeof response, '| content type:', typeof (response as any)?.content, '| text length:', text?.length ?? 0, '| preview:', JSON.stringify(text?.slice(0, 200)))
 
     return {
       success: true,

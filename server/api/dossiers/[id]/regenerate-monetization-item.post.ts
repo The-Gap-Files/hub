@@ -82,7 +82,7 @@ export default defineEventHandler(async (event) => {
             noteType: n.noteType || 'insight'
           }))
         },
-        teaserDuration: (activePlan.teaserDuration ?? 60) as 60 | 120 | 180,
+        teaserDuration: (activePlan.teaserDuration ?? 35) as 35 | 55 | 115,
         fullVideoDuration: (type === 'fullVideo' && newDuration && [300, 600, 900].includes(newDuration)
           ? newDuration
           : (activePlan.fullVideoDuration ?? 600)) as 300 | 600 | 900,

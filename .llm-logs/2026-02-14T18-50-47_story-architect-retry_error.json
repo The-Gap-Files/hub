@@ -1,0 +1,24 @@
+{
+  "timestamp": "2026-02-14T18:50:47.705Z",
+  "taskId": "story-architect-retry",
+  "status": "error",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "errorMessage": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01kgxyqpgqf44bpvhs12mkfb2v` service tier `on_demand` on tokens per minute (TPM): Limit 250000, Used 181503, Requested 84722. Please try again in 3.894s. Need more tokens? Visit https://groq.com/self-serve-support/ to request higher limits.\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+  "errorCode": "rate_limit_exceeded",
+  "errorType": "tokens",
+  "validationError": "Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01kgxyqpgqf44bpvhs12mkfb2v` service tier `on_demand` on tokens per minute (TPM): Limit 250000, Used 181503, Requested 84722. Please try again in 3.894s. Need more tokens? Visit https://groq.com/self-serve-support/ to request higher limits.",
+  "errorStructure": {
+    "hasError": true,
+    "hasErrorError": true,
+    "hasResponseBody": false,
+    "errorKeys": [
+      "error"
+    ],
+    "errorErrorKeys": [
+      "message",
+      "type",
+      "code"
+    ]
+  }
+}

@@ -27,6 +27,26 @@ Ele deve pular o básico e ir direto para o "ouro" (detalhes específicos).
 - Respeite RIGOROSAMENTE os avoidPatterns.
 - Deep-dives frequentemente têm "NÃO explique o contexto" como avoidPattern.
 
+### 5. Controle de Resolução (OVER-RESOLUTION CHECK)
+O Deep-Dive aprofunda UM aspecto — mas **NÃO fecha o caso**.
+
+**REPROVADO se o outline:**
+- Entrega a conclusão final do caso inteiro (não apenas do aspecto focado)
+- Revela todas as causas e consequências
+- Fecha TODOS os loops narrativos — nenhuma pergunta fica sem resposta
+- O detalhe revelado simplifica em vez de COMPLICAR a compreensão
+
+**APROVADO se o outline:**
+- Aprofunda um aspecto específico com dados e evidências
+- A revelação do detalhe LEVANTA mais perguntas do que responde
+- Pelo menos 1-2 loops ficam abertos no final
+- O espectador sai com mais conhecimento sobre UM detalhe mas MAIS CURIOSO sobre o todo
+
+🚨 Deep-dive = zoom cirúrgico, não = enciclopédia. Se resolve tudo, falhou como funil.
+
+### 6. Pattern Interrupt Visual
+- Se o outline prevê beats que resultam em 8+ cenas no MESMO ambiente visual → sinalizar.
+
 ## EXEMPLOS DE VIOLAÇÃO COMUM
 
 ❌ **REPROVADO** (Contaminação Temporal):

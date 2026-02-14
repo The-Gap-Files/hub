@@ -94,6 +94,8 @@ export interface ScriptGenerationRequest {
 
   // Papel narrativo do item de monetização (governa profundidade de contextualização)
   narrativeRole?: 'gateway' | 'deep-dive' | 'hook-only'
+  /** Formato do short — define a mecânica narrativa (hook-brutal, plot-twist, etc.) */
+  shortFormatType?: string
   strategicNotes?: string // Notas estratégicas do plano de monetização
   avoidPatterns?: string[] // Anti-padrões do monetizador ("O que NÃO fazer")
 }

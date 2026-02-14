@@ -58,6 +58,18 @@ export function serializeConstantsCatalog(): string {
     catalog += `  _Ex:_ ${a.example}\n\n`
   })
 
+  // ── Short Format Types (Mecânica Narrativa) ────────────────────
+  catalog += '### 🎬 FORMATOS DE SHORT DISPONÍVEIS (OBRIGATÓRIO para cada teaser)\n\n'
+  catalog += '_Cada teaser DEVE usar um destes formatos. VARIE os formatos para testar mecânicas diferentes. NÃO use o mesmo formato em todos os teasers._\n\n'
+  catalog += '- **`hook-brutal`**: Frase chocante → corte seco (30-40s). Sem contexto. Impacto puro.\n'
+  catalog += '- **`pergunta-incomoda`**: Pergunta moral → micro-narrativa → pergunta final sem resposta (35-45s).\n'
+  catalog += '- **`plot-twist`**: História curta → virada inesperada → corte antes da explicação (40-55s).\n'
+  catalog += '- **`teaser-cinematografico`**: Clima pesado, ritmo lento → pausas dramáticas → corte (35-50s).\n'
+  catalog += '- **`mini-documento`**: Explica UM detalhe específico com profundidade e dados (45-60s).\n'
+  catalog += '- **`lista-rapida`**: "3 fatos que ninguém conta" → bullets impactantes (40-50s).\n'
+  catalog += '- **`frase-memoravel`**: Frase forte + contexto mínimo. Máximo impacto em mínimo tempo (25-35s).\n\n'
+  catalog += '⚠️ REGRA: Use PELO MENOS 3 formatos diferentes no plano. Máximo 50% dos teasers com o mesmo formato.\n\n'
+
   // ── Narrative Roles ────────────────────────────────────────────
   catalog += '### 🎭 PAPÉIS NARRATIVOS (OBRIGATÓRIO para cada teaser)\n\n'
   catalog += '_Cada teaser DEVE receber um papel. Isso define quanto contexto ele inclui._\n\n'
@@ -84,6 +96,11 @@ export function serializeRoleDistribution(teaserCount: number): string {
 /**
  * Retorna listas de IDs válidos para validação ou referência.
  */
+export const SHORT_FORMAT_TYPES = [
+  'hook-brutal', 'pergunta-incomoda', 'plot-twist',
+  'teaser-cinematografico', 'mini-documento', 'lista-rapida', 'frase-memoravel'
+] as const
+
 export function getValidConstantIds() {
   return {
     scriptStyleIds: getScriptStylesList().map(s => s.id),
@@ -91,5 +108,6 @@ export function getValidConstantIds() {
     editorialObjectiveIds: EDITORIAL_OBJECTIVES.map(o => o.id),
     narrativeAngleIds: NARRATIVE_ANGLES.map(a => a.id),
     narrativeRoleIds: NARRATIVE_ROLES.map(r => r.id),
+    shortFormatTypeIds: SHORT_FORMAT_TYPES as unknown as string[],
   }
 }

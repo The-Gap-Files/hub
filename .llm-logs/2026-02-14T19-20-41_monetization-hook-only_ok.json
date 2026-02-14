@@ -1,0 +1,162 @@
+{
+  "timestamp": "2026-02-14T19:20:41.867Z",
+  "taskId": "monetization-hook-only",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "teasers": [
+      {
+        "title": "Um mito que virou festa infantil",
+        "hook": "Um menino virou santo… e virou brinquedo.",
+        "angle": "Como o culto de Simão moldou a cultura popular",
+        "angleCategory": "cultural",
+        "narrativeRole": "hook-only",
+        "shortFormatType": "hook-brutal",
+        "scriptOutline": "Ruptura cognitiva 0‑2s → gravura medieval de Simão em preto‑e‑branco → corte rápido para um boneco de plástico colorido estampado com a mesma pose → zoom ultra‑rápido no rosto do boneco, detalhe que força replay → corte seco no pico + branding",
+        "visualSuggestion": "Close‑up da xilogravura de 1493 de Simão, seguida instantaneamente de um brinquedo infantil moderno reproduzindo a mesma imagem.",
+        "cta": "The Gap Files.",
+        "platform": "Instagram Reels",
+        "format": "teaser-reels",
+        "estimatedViews": 1500000,
+        "scriptStyleId": "narrative",
+        "scriptStyleName": "Narrative",
+        "editorialObjectiveId": "viral-hook",
+        "editorialObjectiveName": "Viral Hook",
+        "avoidPatterns": [
+          "NÃO explique contexto antes do choque",
+          "NÃO use nomes obscuros – troque por funções",
+          "NÃO inclua CTA visível",
+          "NÃO crie platô emocional"
+        ],
+        "visualPrompt": "A high‑contrast black‑and‑white woodcut of a medieval child martyr, eyes wide, hands bound, rendered in a noir cinematic style; instantly juxtaposed with a bright, glossy modern plastic figurine of the same child, positioned on a dark velvet surface, dramatic rim lighting highlighting the contrast."
+      },
+      {
+        "title": "Milagre ou fraude química?",
+        "hook": "O corpo que não apodreceu… era só gelo alpino.",
+        "angle": "Contradições do milagre: fé vs. ciência",
+        "angleCategory": "paradoxal",
+        "narrativeRole": "hook-only",
+        "shortFormatType": "frase-memoravel",
+        "scriptOutline": "Ruptura 0‑2s → flash de corpo preservado em água gelada → sobreposição de fórmula química da saponificação → batida rápida para símbolo de fé → pico visual de gelo estalando → corte seco + branding",
+        "visualSuggestion": "Corpo mumificado submerso em água cristalina, com partículas de gelo brilhando, sobreposto a equações químicas em tipografia vintage.",
+        "cta": "The Gap Files.",
+        "platform": "TikTok",
+        "format": "teaser-tiktok",
+        "estimatedViews": 2000000,
+        "scriptStyleId": "mystery",
+        "scriptStyleName": "Mystery",
+        "editorialObjectiveId": "controversy",
+        "editorialObjectiveName": "Controversy",
+        "avoidPatterns": [
+          "NÃO explique a química antes da ruptura",
+          "NÃO use nomes próprios de médicos medievais",
+          "NÃO inclua CTA óbvio",
+          "NÃO deixe a narrativa se estabilizar"
+        ],
+        "visualPrompt": "A frozen, translucent torso emerging from icy water, illuminated by a cold blue light, with faint, ghostly chemical formulae (C9H18O9) floating around; shot in a noir‑cinematic grainy texture, emphasizing the clash between faith and science."
+      },
+      {
+        "title": "Do papel ao gatilho",
+        "hook": "Uma impressão de 1475 ainda alimenta tiros em 2019.",
+        "angle": "Da impressão de 1475 ao manifesto de 2019: eco de ódio",
+        "angleCategory": "conexao-temporal",
+        "narrativeRole": "hook-only",
+        "shortFormatType": "pergunta-incomoda",
+        "scriptOutline": "Ruptura 0‑2s → página de incunábulo girando → transição rápida para tela de manifesto 8chan → zoom em frase sobre Simão → explosão de som de tiro → corte seco + branding",
+        "visualSuggestion": "Incunábulo aberto com gravura de Simão, que se transforma em um monitor de computador exibindo o manifesto de John Earnest.",
+        "cta": "The Gap Files.",
+        "platform": "YouTube Shorts",
+        "format": "teaser-reels",
+        "estimatedViews": 1800000,
+        "scriptStyleId": "documentary",
+        "scriptStyleName": "Documentary",
+        "editorialObjectiveId": "viral-hook",
+        "editorialObjectiveName": "Viral Hook",
+        "avoidPatterns": [
+          "NÃO dê contexto histórico antes da quebra",
+          "NÃO cite nomes completos de manifestos",
+          "NÃO use chamadas de ação visíveis",
+          "NÃO criar ritmo monótono"
+        ],
+        "visualPrompt": "A parchment page from a 1475 incunabulum showing a detailed woodcut of the child martyr, the paper rippling and morphing into a modern laptop screen displaying a dark forum post with the headline referencing Simão, all rendered in stark noir lighting with high contrast shadows."
+      },
+      {
+        "title": "Confissões escritas com dor",
+        "hook": "Sob a corda, eles inventaram o ritual de sangue.",
+        "angle": "Mentes torturadas: confissões sob sofrimento",
+        "angleCategory": "psicologico",
+        "narrativeRole": "hook-only",
+        "shortFormatType": "hook-brutal",
+        "scriptOutline": "Ruptura 0‑2s → mãos amarradas ao redor do pescoço → estrondo da corda puxando → texto rasgado surgindo como sangue → batida de coração acelerado → pico de grito abafado → corte seco + branding",
+        "visualSuggestion": "Close‑up de mãos amarradas em corda, a câmera sobe rapidamente ao rosto pálido de um acusado, enquanto palavras “confissão” surgem em tinta vermelha gotejante.",
+        "cta": "The Gap Files.",
+        "platform": "Instagram Reels",
+        "format": "teaser-reels",
+        "estimatedViews": 2200000,
+        "scriptStyleId": "narrative",
+        "scriptStyleName": "Narrative",
+        "editorialObjectiveId": "emotional-impact",
+        "editorialObjectiveName": "Emotional Impact",
+        "avoidPatterns": [
+          "NÃO contextualize o método de tortura antes do choque",
+          "NÃO mencionar nomes de acusados específicos",
+          "NÃO inserir CTA explícito",
+          "NÃO permitir queda de tensão"
+        ],
+        "visualPrompt": "A gritty close‑up of rough rope tightening around a medieval man's neck, blood‑red ink dripping to form the word \"confession\" on a dark background, shot with high‑contrast noir cinematography and a rapid push‑in camera movement."
+      },
+      {
+        "title": "Depois da abolição, o silêncio?",
+        "hook": "1965 cancelou o culto… mas o mito ainda sussurra.",
+        "angle": "Revisão histórica: o que mudou após 1965",
+        "angleCategory": "revisionista",
+        "narrativeRole": "hook-only",
+        "shortFormatType": "hook-brutal",
+        "scriptOutline": "Ruptura 0‑2s → documento papal de 1965 sendo rasgado → eco de sussurros antigos → sombra de criança no corredor de igreja vazia → batida final de relógio → corte seco + branding",
+        "visualSuggestion": "Papel antigo com selo papal rasgado ao meio, seguido de uma sombra projetada de um menino em um corredor de catedral deserto.",
+        "cta": "The Gap Files.",
+        "platform": "YouTube Shorts",
+        "format": "teaser-reels",
+        "estimatedViews": 1600000,
+        "scriptStyleId": "documentary",
+        "scriptStyleName": "Documentary",
+        "editorialObjectiveId": "hidden-truth",
+        "editorialObjectiveName": "Hidden Truth",
+        "avoidPatterns": [
+          "NÃO explique o concílio antes da ruptura",
+          "NÃO usar nomes de bispos obscuros",
+          "NÃO exibir CTA visível",
+          "NÃO criar ritmo estável"
+        ],
+        "visualPrompt": "A close‑up of a 1965 Vatican decree being torn, the torn edges fading into a dimly lit, empty cathedral hallway where a faint, translucent silhouette of a child lingers, rendered in noir style with deep shadows and a single shaft of light."
+      },
+      {
+        "title": "Da gravura ao meme viral",
+        "hook": "A xilogravura de 1493 virou sticker no celular.",
+        "angle": "A propaganda visual: da xilogravura ao meme",
+        "angleCategory": "propagandistico",
+        "narrativeRole": "hook-only",
+        "shortFormatType": "pergunta-incomoda",
+        "scriptOutline": "Ruptura 0‑2s → detalhe da gravura de 1493 → swipe rápido para tela de smartphone mostrando meme do mesmo rosto → vibração sonora → zoom no ícone de compartilhamento → corte brusco + branding",
+        "visualSuggestion": "Gravura medieval detalhada que se transforma em um emoji de meme colorido na tela de um smartphone.",
+        "cta": "The Gap Files.",
+        "platform": "Instagram Reels",
+        "format": "teaser-reels",
+        "estimatedViews": 2100000,
+        "scriptStyleId": "mystery",
+        "scriptStyleName": "Mystery",
+        "editorialObjectiveId": "viral-hook",
+        "editorialObjectiveName": "Viral Hook",
+        "avoidPatterns": [
+          "NÃO contextualize a história da impressão antes da ruptura",
+          "NÃO usar nomes de gravadores pouco conhecidos",
+          "NÃO inserir CTA perceptível",
+          "NÃO deixar a energia cair"
+        ],
+        "visualPrompt": "A high‑resolution view of a 1493 woodcut depicting the martyr, instantly morphing into a bright, animated meme sticker on a modern phone screen, with neon outlines and a pop‑up share icon, captured in a stark noir‑cinematic contrast."
+      }
+    ]
+  },
+  "rawContent": "{\n  \"teasers\": [\n    {\n      \"title\": \"Um mito que virou festa infantil\",\n      \"hook\": \"Um menino virou santo… e virou brinquedo.\",\n      \"angle\": \"Como o culto de Simão moldou a cultura popular\",\n      \"angleCategory\": \"cultural\",\n      \"narrativeRole\": \"hook-only\",\n      \"shortFormatType\": \"hook-brutal\",\n      \"scriptOutline\": \"Ruptura cognitiva 0‑2s → gravura medieval de Simão em preto‑e‑branco → corte rápido para um boneco de plástico colorido estampado com a mesma pose → zoom ultra‑rápido no rosto do boneco, detalhe que força replay → corte seco no pico + branding\",\n      \"visualSuggestion\": \"Close‑up da xilogravura de 1493 de Simão, seguida instantaneamente de um brinquedo infantil moderno reproduzindo a mesma imagem.\",\n      \"cta\": \"The Gap Files.\",\n      \"platform\": \"Instagram Reels\",\n      \"format\": \"teaser-reels\",\n      \"estimatedViews\": 1500000,\n      \"scriptStyleId\": \"narrative\",\n      \"scriptStyleName\": \"Narrative\",\n      \"editorialObjectiveId\": \"viral-hook\",\n      \"editorialObjectiveName\": \"Viral Hook\",\n      \"avoidPatterns\": [\n        \"NÃO explique contexto antes do choque\",\n        \"NÃO use nomes obscuros – troque por funções\",\n        \"NÃO inclua CTA visível\",\n        \"NÃO crie platô emocional\"\n      ],\n      \"visualPrompt\": \"A high‑contrast black‑and‑white woodcut of a medieval child martyr, eyes wide, hands bound, rendered in a noir cinematic style; instantly juxtaposed with a bright, glossy modern plastic figurine of the same child, positioned on a dark velvet surface, dramatic rim lighting highlighting the contrast.\"\n    },\n    {\n      \"title\": \"Milagre ou fraude química?\",\n      \"hook\": \"O corpo que não apodreceu… era só gelo alpino.\",\n      \"angle\": \"Contradições do milagre: fé vs. ciência\",\n      \"angleCategory\": \"paradoxal\",\n      \"narrativeRole\": \"hook-only\",\n      \"shortFormatType\": \"frase-memoravel\",\n      \"scriptOutline\": \"Ruptura 0‑2s → flash de corpo preservado em água gelada → sobreposição de fórmula química da saponificação → batida rápida para símbolo de fé → pico visual de gelo estalando → corte seco + branding\",\n      \"visualSuggestion\": \"Corpo mumificado submerso em água cristalina, com partículas de gelo brilhando, sobreposto a equações químicas em tipografia vintage.\",\n      \"cta\": \"The Gap Files.\",\n      \"platform\": \"TikTok\",\n      \"format\": \"teaser-tiktok\",\n      \"estimatedViews\": 2000000,\n      \"scriptStyleId\": \"mystery\",\n      \"scriptStyleName\": \"Mystery\",\n      \"editorialObjectiveId\": \"controversy\",\n      \"editorialObjectiveName\": \"Controversy\",\n      \"avoidPatterns\": [\n        \"NÃO explique a química antes da ruptura\",\n        \"NÃO use nomes próprios de médicos medievais\",\n        \"NÃO inclua CTA óbvio\",\n        \"NÃO deixe a narrativa se estabilizar\"\n      ],\n      \"visualPrompt\": \"A frozen, translucent torso emerging from icy water, illuminated by a cold blue light, with faint, ghostly chemical formulae (C9H18O9) floating around; shot in a noir‑cinematic grainy texture, emphasizing the clash between faith and science.\"\n    },\n    {\n      \"title\": \"Do papel ao gatilho\",\n      \"hook\": \"Uma impressão de 1475 ainda alimenta tiros em 2019.\",\n      \"angle\": \"Da impressão de 1475 ao manifesto de 2019: eco de ódio\",\n      \"angleCategory\": \"conexao-temporal\",\n      \"narrativeRole\": \"hook-only\",\n      \"shortFormatType\": \"pergunta-incomoda\",\n      \"scriptOutline\": \"Ruptura 0‑2s → página de incunábulo girando → transição rápida para tela de manifesto 8chan → zoom em frase sobre Simão → explosão de som de tiro → corte seco + branding\",\n      \"visualSuggestion\": \"Incunábulo aberto com gravura de Simão, que se transforma em um monitor de computador exibindo o manifesto de John Earnest.\",\n      \"cta\": \"The Gap Files.\",\n      \"platform\": \"YouTube Shorts\",\n      \"format\": \"teaser-reels\",\n      \"estimatedViews\": 1800000,\n      \"scriptStyleId\": \"documentary\",\n      \"scriptStyleName\": \"Documentary\",\n      \"editorialObjectiveId\": \"viral-hook\",\n      \"editorialObjectiveName\": \"Viral Hook\",\n      \"avoidPatterns\": [\n        \"NÃO dê contexto histórico antes da quebra\",\n        \"NÃO cite nomes completos de manifestos\",\n        \"NÃO use chamadas de ação visíveis\",\n        \"NÃO criar ritmo monótono\"\n      ],\n      \"visualPrompt\": \"A parchment page from a 1475 incunabulum showing a detailed woodcut of the child martyr, the paper rippling and morphing into a modern laptop screen displaying a dark forum post with the headline referencing Simão, all rendered in stark noir lighting with high contrast shadows.\"\n    },\n    {\n      \"title\": \"Confissões escritas com dor\",\n      \"hook\": \"Sob a corda, eles inventaram o ritual de sangue.\",\n      \"angle\": \"Mentes torturadas: confissões sob sofrimento\",\n      \"angleCategory\": \"psicologico\",\n      \"narrativeRole\": \"hook-only\",\n      \"shortFormatType\": \"hook-brutal\",\n      \"scriptOutline\": \"Ruptura 0‑2s → mãos amarradas ao redor do pescoço → estrondo da corda puxando → texto rasgado surgindo como sangue → batida de coração acelerado → pico de grito abafad"
+}

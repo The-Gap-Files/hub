@@ -114,6 +114,16 @@
                 <p class="mono-label text-xs text-zinc-500 uppercase tracking-widest mb-0.5">Scene count</p>
                 <p class="text-lg font-mono font-bold text-white">{{ output.scenes?.length ?? 0 }} <span class="text-zinc-500 text-sm font-normal">scenes</span></p>
               </div>
+              <!-- Export JSON Button -->
+              <button
+                v-if="output.scenes?.length"
+                @click="exportScenesJson"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-800/80 border border-white/10 text-zinc-300 text-xs font-medium hover:bg-zinc-700/80 hover:text-white hover:border-white/20 transition-all duration-200 cursor-pointer"
+                title="Exportar cenas como JSON (sem imagens/audio)"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export JSON
+              </button>
             </div>
             <!-- Constantes escolhidas -->
             <div class="flex flex-wrap items-center gap-2 sm:gap-3 pt-2 sm:pt-0 border-t border-white/5 sm:border-t-0 sm:border-l sm:border-white/10 sm:pl-6">
@@ -1004,6 +1014,20 @@
                   Replanejar
                 </button>
                 <component :is="outlineExpanded ? ChevronUp : ChevronDown" :size="20" class="text-cyan-400/50" />
+              </div>
+            </div>
+
+            <!-- Informativo: Campos vazios em hook-only -->
+            <div 
+              v-if="outlineExpanded && output.storyOutline.resolutionLevel === 'none'" 
+              class="mx-8 mt-6 p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl flex items-start gap-3"
+            >
+              <Info :size="16" class="text-amber-400 mt-0.5 flex-shrink-0" />
+              <div class="text-xs text-amber-200/70 leading-relaxed">
+                <strong class="text-amber-300">Hook-Only:</strong> Este plano é pura provocação (resolutionLevel = none). 
+                Campos como <code class="text-amber-300/80">climaxMoment</code>, <code class="text-amber-300/80">resolutionPoints</code>, 
+                <code class="text-amber-300/80">emotionalArc</code> e outros ficam vazios por design — o objetivo é criar curiosidade 
+                sem resolver nada. Apenas o hook, beats e loops abertos são preenchidos.
               </div>
             </div>
 
@@ -2721,6 +2745,40 @@ function copySocialField(text: string) {
   navigator.clipboard.writeText(text)
 }
 
+function exportScenesJson() {
+  if (!output.value?.scenes?.length) return
+  const scenes = output.value.scenes.map((scene: any) => ({
+    id: scene.id,
+    outputId: scene.outputId,
+    order: scene.order,
+    narration: scene.narration,
+    visualDescription: scene.visualDescription,
+    audioDescription: scene.audioDescription || null,
+    startTime: scene.startTime || null,
+    endTime: scene.endTime || null,
+    estimatedDuration: scene.estimatedDuration,
+    imageRestrictionReason: scene.imageRestrictionReason || null,
+    imageStatus: scene.imageStatus,
+    sceneEnvironment: scene.sceneEnvironment || null,
+    motionDescription: scene.motionDescription || null
+  }))
+  const exportData = {
+    outputId: output.value.id,
+    title: output.value.title || output.value.dossier?.theme || 'untitled',
+    totalScenes: scenes.length,
+    totalDuration: scenes.length * 5,
+    exportedAt: new Date().toISOString(),
+    scenes
+  }
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `scenes-${output.value.id.slice(0, 8)}.json`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 function openThumbnailPreview(idx: number) {
   selectedThumbnailIdx.value = idx
 }
@@ -3021,6 +3079,7 @@ const customHookText = ref('') // Texto do hook personalizado escrito pelo usuá
 async function confirmRegenerateOutline() {
   regeneratingOutline.value = true
   try {
+    // O backend recupera automaticamente o monetizationContext salvo no Output
     const result = await $fetch(`/api/outputs/${outputId}/generate-outline`, {
       method: 'POST',
       body: { feedback: outlineFeedback.value.trim() || undefined }

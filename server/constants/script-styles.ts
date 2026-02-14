@@ -38,6 +38,7 @@ export interface ScriptStyle {
 
 let _documentaryInstructions: string | null = null
 let _mysteryInstructions: string | null = null
+let _narrativeInstructions: string | null = null
 
 function getDocumentaryInstructions(): string {
   if (!_documentaryInstructions) {
@@ -57,6 +58,16 @@ function getMysteryInstructions(): string {
     )
   }
   return _mysteryInstructions
+}
+
+function getNarrativeInstructions(): string {
+  if (!_narrativeInstructions) {
+    _narrativeInstructions = loadSkillWithIdentity(
+      'narrative-storytelling',
+      'IDENTIDADE: Você é um bardo moderno do "The Gap Files". Suas narrativas transformam eventos históricos em jornadas emocionais profundas — épicas mas humanas, dramáticas mas nunca sensacionalistas.'
+    )
+  }
+  return _narrativeInstructions
 }
 
 // ─── Skill-based Styles (carregados LAZY de server/skills/) ─────
@@ -86,47 +97,8 @@ export const MYSTERY_STYLE: ScriptStyle = {
 export const NARRATIVE_STYLE: ScriptStyle = {
   id: 'narrative',
   name: 'Narrativo Épico',
-  description: 'Estilo de narrativa envolvente com arco dramático claro, foco em jornadas humanas e eventos transformadores. Tom emocional e cinematográfico.',
-  instructions: `IDENTIDADE: Você é um bardo moderno, mestre em contar histórias épicas e emocionantes.
-
-OBJETIVO: Criar uma jornada emocional profunda para o espectador através de personagens, eventos e transformações.
-
-ESTRUTURA DA JORNADA DO HERÓI:
-- O Chamado (Setup): Apresente o conflito central ou protagonista
-  - Estabeleça mundo ordinário antes da transformação
-  - Mostre o que está em jogo
-  
-- A Jornada (Desenvolvimento): Desafios, superações e crescimento
-  - Detalhes sensoriais da trajetória
-  - Momentos de dúvida e descoberta
-  - Aliados e antagonistas
-  
-- Resolução (Clímax + Desenlace): Transformação e legado
-  - Momento de maior tensão
-  - Mudança irreversível
-  - O que fica para o mundo
-
-TÉCNICAS NARRATIVAS:
-- Arco emocional claro: Setup → Conflito → Clímax → Resolução
-- Flashbacks estratégicos para profundidade
-- Simbolismo e metáforas visuais
-- Foreshadowing sutil
-
-ESTILO CINEMATOGRÁFICO:
-- Descrições épicas e grandiosas
-- Trilha emocional: música que eleva momentos-chave
-- Silêncios dramáticos em pontos de reflexão
-- Close-ups em momentos íntimos, wide shots em momentos épicos
-
-TOM E ATMOSFERA:
-- Épico mas humano
-- Emocional mas não melodramático
-- Inspirador sem ser piegas
-- Universal através do específico
-
-VOCABULÁRIO: Destino, Jornada, Legado, Coragem, Transformação, Épico, Memória, Sacrifício, Redenção, Triunfo.
-
-CTA: "E assim, [personagem/evento] mudou para sempre...", "Mas a jornada continua..."`,
+  description: 'Framework narrativo épico/emocional para jornadas humanas, dramas históricos e eventos transformadores. Foca na experiência emocional com resolução controlada para teasers.',
+  get instructions() { return getNarrativeInstructions() },
   order: 3,
   isActive: true,
   defaultVisualStyleId: 'epictok'

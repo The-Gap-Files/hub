@@ -1,0 +1,26 @@
+{
+  "timestamp": "2026-02-14T18:55:47.223Z",
+  "taskId": "story-architect-retry",
+  "status": "error",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "errorMessage": "400 {\"error\":{\"message\":\"Generated JSON does not match the expected schema. Please adjust your prompt. See 'failed_generation' for more details. Error: jsonschema: '/risingBeats/0' does not validate with /properties/risingBeats/items/required: missing properties: 'questionAnswered'\",\"type\":\"invalid_request_error\",\"code\":\"json_validate_failed\",\"failed_generation\":\"{\\\"hookStrategy\\\":\\\"Contradição chocante: a primeira imprensa de tipos móveis espalhou o mito de Simon de Trento e, séculos depois, 8c",
+  "errorCode": "json_validate_failed",
+  "errorType": "invalid_request_error",
+  "validationError": "Generated JSON does not match the expected schema. Please adjust your prompt. See 'failed_generation' for more details. Error: jsonschema: '/risingBeats/0' does not validate with /properties/risingBeats/items/required: missing properties: 'questionAnswered'",
+  "failedGeneration": "{\"hookStrategy\":\"Contradição chocante: a primeira imprensa de tipos móveis espalhou o mito de Simon de Trento e, séculos depois, 8chan faz o mesmo com a mesma fórmula mortal de ódio.\",\"hookVariants\":[{\"level\":\"green\",\"hook\":\"Primeira imprensa de ódio, a gravura de Trento, encontra 8chan: a mesma fórmula mortal que alimenta o ódio hoje.\",\"rationale\":\"Curiosidade intelectual, sem confrontação direta.\"},{\"level\":\"moderate\",\"hook\":\"Primeira imprensa de ódio, a gravura de Trento, encontra 8chan: a me... [truncated 1924 chars]",
+  "errorStructure": {
+    "hasError": true,
+    "hasErrorError": true,
+    "hasResponseBody": false,
+    "errorKeys": [
+      "error"
+    ],
+    "errorErrorKeys": [
+      "message",
+      "type",
+      "code",
+      "failed_generation"
+    ]
+  }
+}

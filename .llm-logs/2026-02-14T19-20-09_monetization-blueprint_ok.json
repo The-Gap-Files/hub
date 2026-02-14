@@ -1,0 +1,189 @@
+{
+  "timestamp": "2026-02-14T19:20:09.131Z",
+  "taskId": "monetization-blueprint",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "planTitle": "Blueprint de Monetização: Simão de Trento – Da Inquisição ao Ódio Digital",
+    "visualStyleId": "noir-cinematic",
+    "visualStyleName": "Noir Cinematográfico",
+    "fullVideo": {
+      "angle": "conspirativo",
+      "scriptStyleId": "documentary",
+      "scriptStyleName": "Documentário Profissional",
+      "editorialObjectiveId": "full-reveal",
+      "editorialObjectiveName": "Revelação Total"
+    },
+    "teaserSlots": [
+      {
+        "angleCategory": "cronologico",
+        "angleName": "Linha do tempo da morte de Simão de Trento",
+        "narrativeRole": "gateway",
+        "shortFormatType": "lista-rapida",
+        "platform": "TikTok",
+        "scriptStyleId": "documentary",
+        "scriptStyleName": "Documentário Profissional",
+        "editorialObjectiveId": "full-reveal",
+        "editorialObjectiveName": "Revelação Total"
+      },
+      {
+        "angleCategory": "economico",
+        "angleName": "Lucros e confisco: o ganho econômico por trás do julgamento",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "mini-documento",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "educational",
+        "scriptStyleName": "Educacional",
+        "editorialObjectiveId": "deep-analysis",
+        "editorialObjectiveName": "Análise Profunda"
+      },
+      {
+        "angleCategory": "ideologico",
+        "angleName": "Ideologia antijudaica: pregações que inflamaram Trento",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "plot-twist",
+        "platform": "Instagram Reels",
+        "scriptStyleId": "mystery",
+        "scriptStyleName": "Mistério Real - The Gap Files",
+        "editorialObjectiveId": "controversy",
+        "editorialObjectiveName": "Polêmica Controlada"
+      },
+      {
+        "angleCategory": "politico",
+        "angleName": "Poder e política: Hinderbach vs. o papado",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "pergunta-incomoda",
+        "platform": "TikTok",
+        "scriptStyleId": "documentary",
+        "scriptStyleName": "Documentário Profissional",
+        "editorialObjectiveId": "hidden-truth",
+        "editorialObjectiveName": "Verdade Oculta"
+      },
+      {
+        "angleCategory": "humano",
+        "angleName": "A vida de Simão: o menino e sua família",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "teaser-cinematografico",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "narrative",
+        "scriptStyleName": "Narrativo Épico",
+        "editorialObjectiveId": "emotional-impact",
+        "editorialObjectiveName": "Impacto Emocional"
+      },
+      {
+        "angleCategory": "conspirativo",
+        "angleName": "A conspiração do suspeito Schweitzer",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "plot-twist",
+        "platform": "Instagram Reels",
+        "scriptStyleId": "mystery",
+        "scriptStyleName": "Mistério Real - The Gap Files",
+        "editorialObjectiveId": "mystery-layers",
+        "editorialObjectiveName": "Camadas de Mistério"
+      },
+      {
+        "angleCategory": "cientifico",
+        "angleName": "A ciência da adipocera: mito do milagre",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "mini-documento",
+        "platform": "TikTok",
+        "scriptStyleId": "educational",
+        "scriptStyleName": "Educacional",
+        "editorialObjectiveId": "explainer",
+        "editorialObjectiveName": "Explainer Didático"
+      },
+      {
+        "angleCategory": "geopolitico",
+        "angleName": "Trento no tabuleiro europeu: rivalidades e alianças",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "pergunta-incomoda",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "documentary",
+        "scriptStyleName": "Documentário Profissional",
+        "editorialObjectiveId": "deep-analysis",
+        "editorialObjectiveName": "Análise Profunda"
+      },
+      {
+        "angleCategory": "cultural",
+        "angleName": "Como o culto de Simão moldou a cultura popular",
+        "narrativeRole": "hook-only",
+        "shortFormatType": "hook-brutal",
+        "platform": "Instagram Reels",
+        "scriptStyleId": "narrative",
+        "scriptStyleName": "Narrativo Épico",
+        "editorialObjectiveId": "viral-hook",
+        "editorialObjectiveName": "Gancho Viral"
+      },
+      {
+        "angleCategory": "paradoxal",
+        "angleName": "Contradições do milagre: fé vs. ciência",
+        "narrativeRole": "hook-only",
+        "shortFormatType": "frase-memoravel",
+        "platform": "TikTok",
+        "scriptStyleId": "mystery",
+        "scriptStyleName": "Mistério Real - The Gap Files",
+        "editorialObjectiveId": "controversy",
+        "editorialObjectiveName": "Polêmica Controlada"
+      },
+      {
+        "angleCategory": "conexao-temporal",
+        "angleName": "Da impressão de 1475 ao manifesto de 2019: eco de ódio",
+        "narrativeRole": "hook-only",
+        "shortFormatType": "pergunta-incomoda",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "documentary",
+        "scriptStyleName": "Documentário Profissional",
+        "editorialObjectiveId": "viral-hook",
+        "editorialObjectiveName": "Gancho Viral"
+      },
+      {
+        "angleCategory": "psicologico",
+        "angleName": "Mentes torturadas: confissões sob sofrimento",
+        "narrativeRole": "hook-only",
+        "shortFormatType": "hook-brutal",
+        "platform": "Instagram Reels",
+        "scriptStyleId": "narrative",
+        "scriptStyleName": "Narrativo Épico",
+        "editorialObjectiveId": "emotional-impact",
+        "editorialObjectiveName": "Impacto Emocional"
+      },
+      {
+        "angleCategory": "evidencial",
+        "angleName": "Provas forenses vs. relatos medievais",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "mini-documento",
+        "platform": "TikTok",
+        "scriptStyleId": "educational",
+        "scriptStyleName": "Educacional",
+        "editorialObjectiveId": "explainer",
+        "editorialObjectiveName": "Explainer Didático"
+      },
+      {
+        "angleCategory": "revisionista",
+        "angleName": "Revisão histórica: o que mudou após 1965",
+        "narrativeRole": "hook-only",
+        "shortFormatType": "hook-brutal",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "documentary",
+        "scriptStyleName": "Documentário Profissional",
+        "editorialObjectiveId": "hidden-truth",
+        "editorialObjectiveName": "Verdade Oculta"
+      },
+      {
+        "angleCategory": "propagandistico",
+        "angleName": "A propaganda visual: da xilogravura ao meme",
+        "narrativeRole": "hook-only",
+        "shortFormatType": "pergunta-incomoda",
+        "platform": "Instagram Reels",
+        "scriptStyleId": "mystery",
+        "scriptStyleName": "Mistério Real - The Gap Files",
+        "editorialObjectiveId": "viral-hook",
+        "editorialObjectiveName": "Gancho Viral"
+      }
+    ],
+    "estimatedTotalRevenue": "$15,000",
+    "strategicNotes": "Distribuição estratégica que usa o gateway para contextualizar toda a trama, deep‑dives para explorar economia, ciência, política e outros ângulos, e hook‑onlys de alto impacto viral. Formatos variados respeitam a matriz role×format e garantem diversidade visual (noir‑cinematic) para todos os canais."
+  },
+  "rawContent": "{\n  \"planTitle\":\"Blueprint de Monetização: Simão de Trento – Da Inquisição ao Ódio Digital\",\n  \"visualStyleId\":\"noir-cinematic\",\n  \"visualStyleName\":\"Noir Cinematográfico\",\n  \"estimatedTotalRevenue\":\"$15,000\",\n  \"strategicNotes\":\"Distribuição estratégica que usa o gateway para contextualizar toda a trama, deep‑dives para explorar economia, ciência, política e outros ângulos, e hook‑onlys de alto impacto viral. Formatos variados respeitam a matriz role×format e garantem diversidade visual (noir‑cinematic) para todos os canais.\",\n  \"fullVideo\":{\n    \"angle\":\"conspirativo\",\n    \"scriptStyleId\":\"documentary\",\n    \"scriptStyleName\":\"Documentário Profissional\",\n    \"editorialObjectiveId\":\"full-reveal\",\n    \"editorialObjectiveName\":\"Revelação Total\"\n  },\n  \"teaserSlots\":[\n    {\n      \"angleCategory\":\"cronologico\",\n      \"angleName\":\"Linha do tempo da morte de Simão de Trento\",\n      \"narrativeRole\":\"gateway\",\n      \"shortFormatType\":\"lista-rapida\",\n      \"platform\":\"TikTok\",\n      \"scriptStyleId\":\"documentary\",\n      \"scriptStyleName\":\"Documentário Profissional\",\n      \"editorialObjectiveId\":\"full-reveal\",\n      \"editorialObjectiveName\":\"Revelação Total\"\n    },\n    {\n      \"angleCategory\":\"economico\",\n      \"angleName\":\"Lucros e confisco: o ganho econômico por trás do julgamento\",\n      \"narrativeRole\":\"deep-dive\",\n      \"shortFormatType\":\"mini-documento\",\n      \"platform\":\"YouTube Shorts\",\n      \"scriptStyleId\":\"educational\",\n      \"scriptStyleName\":\"Educacional\",\n      \"editorialObjectiveId\":\"deep-analysis\",\n      \"editorialObjectiveName\":\"Análise Profunda\"\n    },\n    {\n      \"angleCategory\":\"ideologico\",\n      \"angleName\":\"Ideologia antijudaica: pregações que inflamaram Trento\",\n      \"narrativeRole\":\"deep-dive\",\n      \"shortFormatType\":\"plot-twist\",\n      \"platform\":\"Instagram Reels\",\n      \"scriptStyleId\":\"mystery\",\n      \"scriptStyleName\":\"Mistério Real - The Gap Files\",\n      \"editorialObjectiveId\":\"controversy\",\n      \"editorialObjectiveName\":\"Polêmica Controlada\"\n    },\n    {\n      \"angleCategory\":\"politico\",\n      \"angleName\":\"Poder e política: Hinderbach vs. o papado\",\n      \"narrativeRole\":\"deep-dive\",\n      \"shortFormatType\":\"pergunta-incomoda\",\n      \"platform\":\"TikTok\",\n      \"scriptStyleId\":\"documentary\",\n      \"scriptStyleName\":\"Documentário Profissional\",\n      \"editorialObjectiveId\":\"hidden-truth\",\n      \"editorialObjectiveName\":\"Verdade Oculta\"\n    },\n    {\n      \"angleCategory\":\"humano\",\n      \"angleName\":\"A vida de Simão: o menino e sua família\",\n      \"narrativeRole\":\"deep-dive\",\n      \"shortFormatType\":\"teaser-cinematografico\",\n      \"platform\":\"YouTube Shorts\",\n      \"scriptStyleId\":\"narrative\",\n      \"scriptStyleName\":\"Narrativo Épico\",\n      \"editorialObjectiveId\":\"emotional-impact\",\n      \"editorialObjectiveName\":\"Impacto Emocional\"\n    },\n    {\n      \"angleCategory\":\"conspirativo\",\n      \"angleName\":\"A conspiração do suspeito Schweitzer\",\n      \"narrativeRole\":\"deep-dive\",\n      \"shortFormatType\":\"plot-twist\",\n      \"platform\":\"Instagram Reels\",\n      \"scriptStyleId\":\"mystery\",\n      \"scriptStyleName\":\"Mistério Real - The Gap Files\",\n      \"editorialObjectiveId\":\"mystery-layers\",\n      \"editorialObjectiveName\":\"Camadas de Mistério\"\n    },\n    {\n      \"angleCategory\":\"cientifico\",\n      \"angleName\":\"A ciência da adipocera: mito do milagre\",\n      \"narrativeRole\":\"deep-dive\",\n      \"shortFormatType\":\"mini-documento\",\n      \"platform\":\"TikTok\",\n      \"scriptStyleId\":\"educational\",\n      \"scriptStyleName\":\"Educacional\",\n      \"editorialObjectiveId\":\"explainer\",\n      \"editorialObjectiveName\":\"Explainer Didático\"\n    },\n    {\n      \"angleCategory\":\"geopolitico\",\n      \"angleName\":\"Trento no tabuleiro europeu: rivalidades e alianças\",\n      \"narrativeRole\":\"deep-dive\",\n      \"shortFormatType\":\"pergunta-incomoda\",\n      \"platform\":\"YouTube Shorts\",\n      \"scriptStyleId\":\"documentary\",\n      \"scriptStyleName\":\"Documentário Profissional\",\n      \"editorialObjectiveId\":\"deep-analysis\",\n      \"editorialObjectiveName\":\"Análise Profunda\"\n    },\n    {\n      \"angleCategory\":\"cultural\",\n      \"angleName\":\"Como o culto de Simão moldou a cultura popular\",\n      \"narrativeRole\":\"hook-only\",\n      \"shortFormatType\":\"hook-brutal\",\n      \"platform\":\"Instagram Reels\",\n      \"scriptStyleId\":\"narrative\",\n      \"scriptStyleName\":\"Narrativo Épico\",\n      \"editorialObjectiveId\":\"viral-hook\",\n      \"editorialObjectiveName\":\"Gancho Viral\"\n    },\n    {\n      \"angleCategory\":\"paradoxal\",\n      \"angleName\":\"Contradições do milagre: fé vs. ciência\",\n      \"narrativeRole\":\"hook-only\",\n      \"shortFormatType\":\"frase-memoravel\",\n      \"platform\":\"TikTok\",\n      \"scriptStyleId\":\"mystery\",\n      \"scriptStyleName\":\"Mistério Real - The Gap Files\",\n      \"editorialObjectiveId\":\"controversy\",\n      \"editorialObjectiveName\":\"Polêmica Controlada\"\n    },\n    {\n      \"angleCategory\":\"conexao-temporal\",\n      \"angleName\":\"Da impressão de 1475 ao manifesto de 2019: eco de ódio\",\n      \"narrativeRole\":\"hook-only\",\n      \"shortFormatTyp"
+}

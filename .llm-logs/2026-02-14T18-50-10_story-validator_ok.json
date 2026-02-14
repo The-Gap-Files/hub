@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-02-14T18:50:10.441Z",
+  "taskId": "story-validator",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "approved": false,
+    "violations": [
+      "Missing required anchor (location + date) in the first beats",
+      "Contains contextual exposition in rising beats, violating zero-context rule",
+      "Hook variants mix historical and modern references without explicit temporal‑connection angle"
+    ],
+    "corrections": "Add an anchor phrase with location and date (e.g., \"Trento, 1475\") in the first 1‑2 beats. Remove explanatory revelations; keep only a shocking contradictory statement. Ensure all beats stay within the same temporal frame unless the angle is explicitly a temporal connection."
+  },
+  "rawContent": "{\"approved\":false,\"violations\":[\"Missing required anchor (location + date) in the first beats\",\"Contains contextual exposition in rising beats, violating zero-context rule\",\"Hook variants mix historical and modern references without explicit temporal‑connection angle\"],\"corrections\":\"Add an anchor phrase with location and date (e.g., \\\"Trento, 1475\\\") in the first 1‑2 beats. Remove explanatory revelations; keep only a shocking contradictory statement. Ensure all beats stay within the same temporal frame unless the angle is explicitly a temporal connection.\"}"
+}

@@ -1,0 +1,104 @@
+{
+  "timestamp": "2026-02-14T19:00:18.652Z",
+  "taskId": "story-architect-retry",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "hookStrategy": "In media res",
+    "hookVariants": [
+      {
+        "level": "green",
+        "hook": "A primeira imprensa de ódio em Trento – a mesma chama que arde em 8chan.",
+        "rationale": ""
+      },
+      {
+        "level": "moderate",
+        "hook": "A tipografia de Trento manipulou a verdade; 8chan faz o mesmo – medo constante.",
+        "rationale": ""
+      },
+      {
+        "level": "aggressive",
+        "hook": "Da prensa de Hinderbach ao 8chan, a fórmula mortal de propaganda persiste – ainda mata.",
+        "rationale": ""
+      },
+      {
+        "level": "lawless",
+        "hook": "Impressão medieval, 8chan digital: duas eras, um veneno que transforma crianças em mártires e gera tiroteios.",
+        "rationale": ""
+      }
+    ],
+    "promiseSetup": "Trento.",
+    "risingBeats": [
+      {
+        "order": 1,
+        "revelation": "Incunábulo de Trento e 8chan exibem a mesma criança sangrenta, alimentando medo.",
+        "questionAnswered": "",
+        "newQuestion": "Como a mesma imagem pode atravessar séculos?",
+        "sourceReference": "[1]"
+      },
+      {
+        "order": 2,
+        "revelation": "A cena viraliza, transformando história em violência atual.",
+        "questionAnswered": "",
+        "newQuestion": "Por que o ódio renasce a cada repostagem?",
+        "sourceReference": "[8]"
+      },
+      {
+        "order": 3,
+        "revelation": "Cada repostagem reacende a chama, garantindo que o ódio nunca morra.",
+        "questionAnswered": "",
+        "newQuestion": "Será que o medo pode ser eterno?",
+        "sourceReference": "[7]"
+      }
+    ],
+    "climaxMoment": "",
+    "climaxFormula": "",
+    "resolutionPoints": [],
+    "resolutionAngle": "",
+    "ctaApproach": "The Gap Files.",
+    "emotionalArc": "",
+    "toneProgression": "",
+    "whatToReveal": [],
+    "whatToHold": [],
+    "whatToIgnore": [
+      "explicações detalhadas",
+      "datas"
+    ],
+    "segmentDistribution": {
+      "hook": 2,
+      "context": 0,
+      "rising": 3,
+      "climax": 0,
+      "resolution": 0,
+      "cta": 1
+    },
+    "tensionCurve": [
+      "low",
+      "pause",
+      "medium",
+      "pause",
+      "high",
+      "high"
+    ],
+    "openLoops": [
+      {
+        "question": "Como a mesma imagem pode atravessar séculos?",
+        "openedAtBeat": 1,
+        "closedAtBeat": null
+      },
+      {
+        "question": "Por que o ódio renasce a cada repostagem?",
+        "openedAtBeat": 2,
+        "closedAtBeat": null
+      },
+      {
+        "question": "Será que o medo pode ser eterno?",
+        "openedAtBeat": 3,
+        "closedAtBeat": null
+      }
+    ],
+    "resolutionLevel": "none"
+  },
+  "rawContent": "{\"hookStrategy\":\"In media res\",\"hookVariants\":[{\"level\":\"green\",\"hook\":\"A primeira imprensa de ódio em Trento – a mesma chama que arde em 8chan.\",\"rationale\":\"\"},{\"level\":\"moderate\",\"hook\":\"A tipografia de Trento manipulou a verdade; 8chan faz o mesmo – medo constante.\",\"rationale\":\"\"},{\"level\":\"aggressive\",\"hook\":\"Da prensa de Hinderbach ao 8chan, a fórmula mortal de propaganda persiste – ainda mata.\",\"rationale\":\"\"},{\"level\":\"lawless\",\"hook\":\"Impressão medieval, 8chan digital: duas eras, um veneno que transforma crianças em mártires e gera tiroteios.\",\"rationale\":\"\"}],\"promiseSetup\":\"Trento.\",\"risingBeats\":[{\"order\":1,\"revelation\":\"Incunábulo de Trento e 8chan exibem a mesma criança sangrenta, alimentando medo.\",\"questionAnswered\":\"\",\"newQuestion\":\"Como a mesma imagem pode atravessar séculos?\",\"sourceReference\":\"[1]\"},{\"order\":2,\"revelation\":\"A cena viraliza, transformando história em violência atual.\",\"questionAnswered\":\"\",\"newQuestion\":\"Por que o ódio renasce a cada repostagem?\",\"sourceReference\":\"[8]\"},{\"order\":3,\"revelation\":\"Cada repostagem reacende a chama, garantindo que o ódio nunca morra.\",\"questionAnswered\":\"\",\"newQuestion\":\"Será que o medo pode ser eterno?\",\"sourceReference\":\"[7]\"}],\"climaxMoment\":\"\",\"climaxFormula\":\"\",\"resolutionPoints\":[],\"resolutionAngle\":\"\",\"ctaApproach\":\"The Gap Files.\",\"emotionalArc\":\"\",\"toneProgression\":\"\",\"whatToReveal\":[],\"whatToHold\":[],\"whatToIgnore\":[\"explicações detalhadas\",\"datas\"],\"segmentDistribution\":{\"hook\":2,\"context\":0,\"rising\":3,\"climax\":0,\"resolution\":0,\"cta\":1},\"tensionCurve\":[\"low\",\"pause\",\"medium\",\"pause\",\"high\",\"high\"],\"openLoops\":[{\"question\":\"Como a mesma imagem pode atravessar séculos?\",\"openedAtBeat\":1,\"closedAtBeat\":null},{\"question\":\"Por que o ódio renasce a cada repostagem?\",\"openedAtBeat\":2,\"closedAtBeat\":null},{\"question\":\"Será que o medo pode ser eterno?\",\"openedAtBeat\":3,\"closedAtBeat\":null}],\"resolutionLevel\":\"none\"}"
+}

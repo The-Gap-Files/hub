@@ -90,7 +90,8 @@ export class AnthropicScriptProvider implements IScriptGenerator {
       console.log(`${LOG} 📤 Enviando request para LangChain + Claude...`)
       console.log(`${LOG} 🔍 Schema esperado: title, summary, scenes, backgroundMusic, backgroundMusicTracks`)
 
-      const result = await structuredLlm.invoke(messages)
+      const { invokeWithLogging } = await import('../../../utils/llm-invoke-wrapper')
+      const result = await invokeWithLogging(structuredLlm, messages, { taskId: 'script-anthropic', provider: 'anthropic', model: 'unknown' })
       let content = result.parsed as ScriptResponse | null
       const rawMessage = result.raw as any
 

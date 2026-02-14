@@ -48,17 +48,22 @@ export async function intelligenceQuery(
 
   const assignment = await getAssignment('intelligence-query')
   const model = await createLlmForTask('intelligence-query')
-  const structuredLlm = (model as any).withStructuredOutput(QueryResponseSchema, { includeRaw: true })
+  const m = model as any
+  const isGroqLlama4 = assignment.provider.toLowerCase().includes('groq') && assignment.model.includes('llama-4')
+  const structuredLlm = assignment.provider === 'replicate' && typeof m.withStructuredOutputReplicate === 'function'
+    ? m.withStructuredOutputReplicate(QueryResponseSchema, { includeRaw: true })
+    : m.withStructuredOutput(QueryResponseSchema, { includeRaw: true, ...(isGroqLlama4 ? { method: 'jsonMode' } : {}) })
 
   const systemPrompt = buildQuerySystemPrompt(request.source)
   const userPrompt = buildQueryUserPrompt(request)
 
   const startTime = Date.now()
 
-  const response = await structuredLlm.invoke([
+  const { invokeWithLogging } = await import('../utils/llm-invoke-wrapper')
+  const response = await invokeWithLogging(structuredLlm, [
     { role: 'system', content: systemPrompt },
     { role: 'user', content: userPrompt }
-  ])
+  ], { taskId: 'intelligence-query', provider: assignment.provider, model: assignment.model })
 
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1)
   const content = response.parsed as z.infer<typeof QueryResponseSchema>

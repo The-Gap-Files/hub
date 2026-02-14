@@ -26,12 +26,12 @@ import { formatPersonsForPrompt, formatNeuralInsightsForPrompt } from '../../../
 
 export const ScriptSceneSchema = z.object({
   order: z.number().describe('A ordem sequencial da cena'),
-  narration: z.string().describe('O texto que será narrado pelo locutor'),
+  narration: z.string().describe('O texto que será narrado pelo locutor (DEVE ser no IDIOMA DO VÍDEO especificado na request, NUNCA em inglês — apenas visualDescription, motionDescription e audioDescription são em inglês)'),
   visualDescription: z.string().describe('Descrição técnica e sensorial para o modelo de geração de vídeo (SEMPRE EM INGLÊS)'),
   sceneEnvironment: z.string().describe('Identificador curto do ambiente/locação da cena em snake_case em inglês (ex: "bishop_study", "canal_dawn", "courtroom", "ocean_surface"). Cenas consecutivas no MESMO ambiente devem ter o MESMO valor.'),
   motionDescription: z.string().nullable().describe('Instruções de MOVIMENTO para o modelo image-to-video (SEMPRE EM INGLÊS). Descreva movimentos de câmera e sujeito: dolly, pan, tilt, zoom, elementos animados (chamas, água, vento, poeira). NÃO repita o que já está na imagem — foque no que se MOVE.'),
   audioDescription: z.string().nullable().describe('Atmosfera sonora e SFX em inglês técnico'),
-  estimatedDuration: z.number().describe('Duração estimada em segundos (entre 5 e 6 segundos)')
+  estimatedDuration: z.number().default(5).describe('Duração estimada em segundos (entre 5 e 6 segundos)')
 })
 
 export const BackgroundMusicTrackSchema = z.object({
@@ -159,6 +159,22 @@ O roteiro DEVE seguir proporções rígidas entre seus atos. Isso é CRÍTICO pa
 - A reflexão final deve ser CIRÚRGICA: poucos golpes precisos > muitas repetições diluídas.
 - PREFERÍVEL: Uma reflexão de 5 cenas devastadoras a uma reflexão de 25 cenas repetitivas.
 
+🚨 REGRA DE HOOK CONCEITUAL (CRÍTICO):
+- A primeira cena (hook) DEVE chocar com CONCEITO/IDEIA, não com DETALHE GRÁFICO/ANATÔMICO.
+- ❌ "Rasgavam os ligamentos usando gravidade" → gore explícito → espectador passa o dedo por repulsa
+- ✅ "A gravidade virou arma. E a confissão virou produto." → conceito perturbador → espectador para pra entender
+- Hooks que causam REPULSA perdem o espectador nos 2 primeiros segundos. Hooks que causam PERPLEXIDADE prendem.
+
+🚨 PATTERN INTERRUPT VISUAL (OBRIGATÓRIO):
+- Se o roteiro tem 8+ cenas, varie o sceneEnvironment. NÃO coloque todas as cenas no mesmo ambiente.
+- A cada 5-6 cenas no mesmo ambiente, insira 1 cena com ambiente DIFERENTE (documento, exterior, multidão, etc.)
+- Monotonia visual causa fadiga mesmo com boa narração. Variação = retenção.
+
+🚨 CTA CONVIDATIVO (NÃO EXCLUDENTE):
+- O CTA final deve CONVIDAR o público a ver mais, não FILTRAR quem pode ver.
+- ❌ "...se tiver estômago" / "...se você aguenta a verdade" (elitista, reduz compartilhamento)
+- ✅ "O resto deste arquivo está no The Gap Files." / "Se você quer a verdade inteira." (convidativo)
+
 ---
 🔬 TÉCNICAS NARRATIVAS AVANÇADAS (INTELIGÊNCIA NARRATIVA):
 
@@ -198,6 +214,7 @@ O roteiro DEVE seguir proporções rígidas entre seus atos. Isso é CRÍTICO pa
 ---
 DIRETRIZES TÉCNICAS (CRÍTICO):
 - SINCRONIA: Cada cena DEVE durar EXATAMENTE 5 segundos de narração.
+- 🌐 IDIOMA: O campo \"narration\" DEVE ser escrito no IDIOMA DO VÍDEO (definido na request). Os campos \"visualDescription\", \"motionDescription\" e \"audioDescription\" DEVEM ser SEMPRE em inglês. NUNCA misture — narração no idioma do vídeo, campos técnicos em inglês.
 - DENSIDADE OBRIGATÓRIA: Com base na velocidade de fala (${targetWPM} WPM), cada cena DEVE conter entre ${wordsPerScene - 1} e ${maxWordsHard} palavras. A conta é: ${targetWPM} WPM ÷ 60 × 5s = ${wordsPerScene} palavras ideais.
 - 🚨 HARD LIMIT: NUNCA exceda ${maxWordsHard} palavras por cena. Cenas com mais de ${maxWordsHard} palavras ultrapassam 5 segundos e quebram a sincronia do vídeo.
 - PROIBIDO FRASES CURTAS: Cenas com menos de ${wordsPerScene - 1} palavras geram "buracos" no áudio. Expanda com adjetivos, detalhes sensoriais ou contexto.
@@ -229,7 +246,7 @@ ${visualInstructions}`
 // USER PROMPT
 // =============================================================================
 
-export type ProviderHint = 'openai' | 'gemini' | 'anthropic'
+export type ProviderHint = 'openai' | 'gemini' | 'anthropic' | 'groq'
 
 export function buildUserPrompt(request: ScriptGenerationRequest, providerHint?: ProviderHint): string {
   const targetWPM = request.targetWPM || 150
@@ -337,7 +354,15 @@ Este vídeo é o PRIMEIRO CONTATO do espectador com o tema. DEVE contextualizar 
 - Quando e onde aconteceu
 - O que está em jogo
 - Por que o espectador deveria se importar
-O espectador NUNCA ouviu falar sobre este assunto. Trate como uma história sendo contada pela primeira vez.`,
+O espectador NUNCA ouviu falar sobre este assunto. Trate como uma história sendo contada pela primeira vez.
+
+🚨 RESOLUÇÃO PARCIAL — Este teaser é TOPO DE FUNIL:
+- Contextualiza DO QUE se trata, mas NÃO entrega a conclusão final
+- NÃO explique a causa real/científica do evento
+- NÃO revele a motivação completa dos envolvidos
+- NÃO dê conclusão moral fechada
+- DEIXE pelo menos 1-2 perguntas sem resposta — o espectador deve QUERER assistir o Full Video
+- Termine apontando para algo MAIOR que não foi explorado`,
       'deep-dive': `🔍 PAPEL NARRATIVO: DEEP-DIVE (MERGULHO DIRETO)
 🚨 REGRA CRÍTICA: Este vídeo NÃO É introdutório. O espectador JÁ CONHECE o tema básico.
 - NO MÁXIMO 1 frase de contextualização superficial (quem/onde/quando)
@@ -346,14 +371,40 @@ O espectador NUNCA ouviu falar sobre este assunto. Trate como uma história send
 - Comece DIRETO pelo ângulo específico do hook
 - Mergulhe IMEDIATAMENTE no aspecto que torna este vídeo único
 - A contextualização mínima (se necessária) deve estar numa ÚNICA cena, nunca 2+
-EXEMPLO DO QUE NÃO FAZER: Se o hook é sobre uma confissão sob tortura, NÃO comece com "Trento, 1475. Um menino..." — comece pela tortura/confissão.`,
-      'hook-only': `💥 PAPEL NARRATIVO: HOOK-ONLY (GANCHO PURO)
-🚨 REGRA CRÍTICA: ZERO contextualização. NENHUMA.
-- Comece DIRETO pela revelação ou contradição mais chocante
-- A falta de contexto é INTENCIONAL — força curiosidade extrema
-- O espectador deve ficar intrigado sem entender o quadro completo
-- NÃO explique quem, onde ou quando — vá DIRETO para o "quê" e o "por quê"
-- Máximo de impacto em tempo mínimo — cada cena deve ser um soco informacional`
+EXEMPLO DO QUE NÃO FAZER: Se o hook é sobre uma confissão sob tortura, NÃO comece com "Trento, 1475. Um menino..." — comece pela tortura/confissão.
+
+🚨 RESOLUÇÃO MÍNIMA — Este teaser é TOPO DE FUNIL:
+- Revela um aspecto profundo mas NÃO fecha o caso inteiro
+- O detalhe revelado deve ABRIR mais perguntas, não fechá-las
+- DEIXE pelo menos 1-2 perguntas sem resposta
+- Termine com contradição ou evidência que gera MAIS dúvidas`,
+      'hook-only': `💥 PAPEL NARRATIVO: HOOK-ONLY (ARMA VIRAL)
+🚨 REGRAS ABSOLUTAS QUE GOVERNAM ESTE ROTEIRO:
+
+RUPTURA EM 2 SEGUNDOS: A primeira cena DEVE causar ruptura cognitiva — o scroll para. Nada de construção antes do choque.
+- ❌ "Em uma cidade da Itália..." / "Há muitos séculos..." (construção)
+- ✅ "Uma criança morta. Uma confissão forjada. Ninguém sabe quem." (ruptura)
+
+1 CONCEITO CENTRAL: Todo o roteiro gira em torno de UMA ideia resumível em 1 frase. Se exige conectar 3+ entidades para entender, está denso demais.
+
+ESCALAÇÃO OBRIGATÓRIA: Cada cena MAIS intensa que a anterior. Zero platô. A penúltima cena é o PICO ABSOLUTO.
+
+NOMES UNIVERSAIS: Use funções ("o bispo", "o juiz", "o médico"), não nomes históricos obscuros (Hinderbach, Tiberino). Se o público não reconhece o nome em 1 segundo, use a função.
+
+RESOLUÇÃO ZERO — PURA PROVOCAÇÃO:
+- NENHUMA explicação, recap, conclusão moral ou reflexão filosófica
+- NÃO responda NENHUMA pergunta levantada — TODOS os loops ficam abertos
+- ❌ "alimentando ódio milenar sem fim" (conclusão moral = resolução)
+- ❌ "a verdade é que..." / "na realidade..." (explicação)
+
+CTA INVISÍVEL: Última cena = "The Gap Files." + silêncio. Corte seco. O público NÃO pode perceber que acabou.
+- ❌ "Siga The Gap Files para revelar..." (CTA visível = público sai)
+- ❌ "Quer saber como terminou?" (convite explícito)
+- ✅ "The Gap Files." (branding puro, silêncio)
+
+REPLAY BAIT: Pelo menos 1 cena com detalhe visual/narrativo rápido demais para absorver. Força re-assistir.
+
+DURAÇÃO: 4-6 cenas (22-30 segundos). Cada cena é um soco. Máximo absoluto: 8 cenas.`
     }
 
     baseInstruction += `\n\n${roleInstructions[request.narrativeRole] || ''}`

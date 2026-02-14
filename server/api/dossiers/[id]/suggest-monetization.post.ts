@@ -4,19 +4,16 @@
  * Analisa o dossiê via IA e gera um plano de monetização Document-First:
  * 1 Full Video (YouTube) + N Teasers (TikTok/Shorts/Reels)
  * 
+ * V2: Pipeline por etapas (Blueprint → Full Video → Gateway → Deep-Dives → Hook-Only → Schedule)
+ * Cada etapa é focada, com validação programática no blueprint.
+ * 
  * O plano é retornado para aprovação manual — NÃO cria outputs automaticamente.
  */
 
-import { z } from 'zod'
 import { prisma } from '../../../utils/prisma'
-import { generateMonetizationPlan } from '../../../services/monetization-planner.service'
+import { generateMonetizationPlanV2 } from '../../../services/monetization-planner-v2.service'
 import { costLogService } from '../../../services/cost-log.service'
 import { calculateLLMCost } from '../../../constants/pricing'
-
-const BodySchema = z.object({
-  teaserDuration: z.enum(['60', '120', '180']).transform(Number) as unknown as z.ZodNumber,
-  fullVideoDuration: z.enum(['300', '600', '900']).transform(Number) as unknown as z.ZodNumber
-})
 
 export default defineEventHandler(async (event) => {
   const dossierId = getRouterParam(event, 'id')
@@ -34,10 +31,10 @@ export default defineEventHandler(async (event) => {
   const fullVideoDuration = Number(rawBody?.fullVideoDuration)
   const teaserCount = rawBody?.teaserCount ? Number(rawBody.teaserCount) : 6
 
-  if (![60, 120, 180].includes(teaserDuration)) {
+  if (![35, 55, 115].includes(teaserDuration)) {
     throw createError({
       statusCode: 400,
-      message: 'teaserDuration deve ser 60, 120 ou 180 (segundos)'
+      message: 'teaserDuration deve ser 35, 55 ou 115 (segundos)'
     })
   }
 
@@ -74,47 +71,45 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const result = await generateMonetizationPlan(
-      {
-        theme: dossier.theme,
-        title: dossier.title,
-        visualIdentityContext: dossier.visualIdentityContext || undefined,
-        sources: dossier.sources.map(s => ({
-          title: s.title,
-          content: s.content,
-          sourceType: s.sourceType,
-          weight: s.weight ?? 1.0
-        })),
-        notes: dossier.notes.map(n => ({
-          content: n.content,
-          noteType: n.noteType || 'insight'
-        })),
-        images: dossier.images.map(i => ({
-          description: i.description
-        })),
-        persons: dossier.persons?.map(p => ({
-          name: p.name,
-          role: p.role,
-          description: p.description,
-          visualDescription: p.visualDescription,
-          relevance: p.relevance
-        })) || [],
-        researchData: dossier.researchData || undefined,
-        teaserDuration: teaserDuration as 60 | 120 | 180,
-        fullVideoDuration: fullVideoDuration as 300 | 600 | 900,
-        teaserCount,
-        creativeDirection: rawBody?.creativeDirection
-      }
-    )
+    console.log(`[SuggestMonetization] 🚀 Iniciando pipeline V2 para dossiê ${dossierId}`)
 
-    console.log(`[SuggestMonetization] ✅ Plano gerado para dossiê ${dossierId}`)
+    const result = await generateMonetizationPlanV2({
+      theme: dossier.theme,
+      title: dossier.title,
+      visualIdentityContext: dossier.visualIdentityContext || undefined,
+      sources: dossier.sources.map(s => ({
+        title: s.title,
+        content: s.content,
+        sourceType: s.sourceType,
+        weight: s.weight ?? 1.0
+      })),
+      notes: dossier.notes.map(n => ({
+        content: n.content,
+        noteType: n.noteType || 'insight'
+      })),
+      images: dossier.images.map(i => ({
+        description: i.description
+      })),
+      persons: dossier.persons?.map(p => ({
+        name: p.name,
+        role: p.role || '',
+        description: p.description || '',
+        visualDescription: p.visualDescription || undefined,
+        relevance: p.relevance || undefined
+      })) || [],
+      researchData: dossier.researchData || undefined,
+      teaserDuration: teaserDuration as 35 | 55 | 115,
+      fullVideoDuration: fullVideoDuration as 300 | 600 | 900,
+      teaserCount,
+      creativeDirection: rawBody?.creativeDirection
+    })
 
     // Calcular custo real
     const inputTokens = result.usage?.inputTokens ?? 0
     const outputTokens = result.usage?.outputTokens ?? 0
     const cost = calculateLLMCost(result.model, inputTokens, outputTokens)
 
-    console.log(`[SuggestMonetization] 💵 Custo: $${cost.toFixed(6)}`)
+    console.log(`[SuggestMonetization] 💵 Custo total: $${cost.toFixed(6)}`)
 
     // Desativar planos anteriores deste dossiê
     await prisma.monetizationPlan.updateMany({
@@ -149,8 +144,13 @@ export default defineEventHandler(async (event) => {
       provider: result.provider,
       model: result.model,
       cost,
-      metadata: { input_tokens: inputTokens, output_tokens: outputTokens, total_tokens: inputTokens + outputTokens },
-      detail: 'Plano de monetização Document-First'
+      metadata: {
+        input_tokens: inputTokens,
+        output_tokens: outputTokens,
+        total_tokens: inputTokens + outputTokens,
+        stage_timings: result.stageTimings
+      },
+      detail: 'Plano de monetização V2 (pipeline por etapas)'
     }).catch(err => console.error('[SuggestMonetization] CostLog:', err))
 
     return {
@@ -166,6 +166,7 @@ export default defineEventHandler(async (event) => {
         fullVideoDuration,
         teaserCount
       },
+      stageTimings: result.stageTimings,
       createdAt: savedPlan.createdAt
     }
   } catch (error: any) {
@@ -176,3 +177,4 @@ export default defineEventHandler(async (event) => {
     })
   }
 })
+

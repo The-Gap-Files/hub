@@ -1,0 +1,105 @@
+{
+  "timestamp": "2026-02-14T18:55:47.222Z",
+  "taskId": "storyarchitect",
+  "status": "partial",
+  "provider": "groq",
+  "model": "unknown",
+  "errorMessage": "400 {\"error\":{\"message\":\"Generated JSON does not match the expected schema. Please adjust your prompt. See 'failed_generation' for more details. Error: jsonschema: '/risingBeats/0' does not validate with /properties/risingBeats/items/required: missing properties: 'questionAnswered'\",\"type\":\"invalid_request_error\",\"code\":\"json_validate_failed\",\"failed_generation\":\"{\\\"hookStrategy\\\":\\\"Contradição chocante: a primeira imprensa de tipos móveis espalhou o mito de Simon de Trento e, séculos depois, 8c",
+  "errorCode": "json_validate_failed",
+  "errorType": "invalid_request_error",
+  "validationError": "Generated JSON does not match the expected schema. Please adjust your prompt. See 'failed_generation' for more details. Error: jsonschema: '/risingBeats/0' does not validate with /properties/risingBeats/items/required: missing properties: 'questionAnswered'",
+  "failedGeneration": {
+    "hookStrategy": "Contradição chocante: a primeira imprensa de tipos móveis espalhou o mito de Simon de Trento e, séculos depois, 8chan faz o mesmo com a mesma fórmula mortal de ódio.",
+    "hookVariants": [
+      {
+        "level": "green",
+        "hook": "Primeira imprensa de ódio, a gravura de Trento, encontra 8chan: a mesma fórmula mortal que alimenta o ódio hoje.",
+        "rationale": "Curiosidade intelectual, sem confrontação direta."
+      },
+      {
+        "level": "moderate",
+        "hook": "Primeira imprensa de ódio, a gravura de Trento, encontra 8chan: a mesma fórmula mortal que alimenta o ódio hoje.",
+        "rationale": "Provoca reflexão ao ligar passado e presente, ainda seguro."
+      },
+      {
+        "level": "aggressive",
+        "hook": "Primeira imprensa de ódio, a gravura de Trento, encontra 8chan: a mesma fórmula mortal que alimenta o ódio hoje.",
+        "rationale": "Desafia o espectador, forçando a encarar a continuidade do ódio."
+      },
+      {
+        "level": "lawless",
+        "hook": "Primeira imprensa de ódio, a gravura de Trento, encontra 8chan: a mesma fórmula mortal que alimenta o ódio hoje.",
+        "rationale": "Ultrapassa limites para gerar choque máximo."
+      }
+    ],
+    "promiseSetup": "Isso foi Trento. 8chan. A mesma fórmula mortal.",
+    "risingBeats": [
+      {
+        "order": 1,
+        "revelation": "A imprensa de tipos móveis foi usada para transformar um assassinato acidental em mito oficial de ódio.",
+        "newQuestion": "Como um meio de impressão pode criar uma verdade que perdura?",
+        "sourceReference": "[1] Investigação Histórico-Forense"
+      },
+      {
+        "order": 2,
+        "revelation": "A xilogravura de Nuremberg fixou visualmente o mito, tornando‑o inesquecível.",
+        "newQuestion": "Qual seria o equivalente visual na era digital?",
+        "sourceReference": "[1] Investigação Histórico-Forense"
+      },
+      {
+        "order": 3,
+        "revelation": "John Earnest usou 8chan e redes sociais para citar Simon de Trento como inspiração ao atacar uma sinagoga.",
+        "newQuestion": "De que forma a internet repete a mesma estratégia de propaganda?",
+        "sourceReference": "[6] Um morto e seis feridos em ataque a tiros contra uma sinagoga na Califórnia"
+      }
+    ],
+    "climaxMoment": "",
+    "climaxFormula": "",
+    "resolutionPoints": [],
+    "resolutionAngle": "",
+    "ctaApproach": "The Gap Files.",
+    "emotionalArc": "",
+    "toneProgression": "",
+    "whatToReveal": [],
+    "whatToHold": [],
+    "whatToIgnore": [],
+    "segmentDistribution": {
+      "hook": 1,
+      "context": 0,
+      "rising": 3,
+      "climax": 1,
+      "resolution": 0,
+      "cta": 1
+    },
+    "tensionCurve": [
+      "low",
+      "low",
+      "pause",
+      "medium",
+      "peak",
+      "pause"
+    ],
+    "openLoops": [
+      {
+        "question": "Como a imprensa de 1475 se compara à 8chan hoje?",
+        "openedAtBeat": 1,
+        "closedAtBeat": null
+      }
+    ],
+    "resolutionLevel": "none"
+  },
+  "errorStructure": {
+    "hasError": true,
+    "hasErrorError": true,
+    "hasResponseBody": false,
+    "errorKeys": [
+      "error"
+    ],
+    "errorErrorKeys": [
+      "message",
+      "type",
+      "code",
+      "failed_generation"
+    ]
+  }
+}

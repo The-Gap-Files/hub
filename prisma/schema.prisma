@@ -178,6 +178,7 @@ model Output {
   renderOptions        Json? // { includeLogo?: boolean, includeCaptions?: boolean, captionStyleId?: string | null }
   storyOutline         Json? // Story Architect: plano narrativo estruturado (etapa isolada)
   storyOutlineApproved Boolean             @default(false) // Validação obrigatória antes de gerar roteiro
+  monetizationContext  Json? // Contexto de monetização persistido: { itemType, narrativeRole, angleCategory, avoidPatterns, ... }
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
   completedAt          DateTime?
@@ -447,7 +448,7 @@ model MonetizationPlan {
   id                String   @id @default(uuid())
   dossierId         String
   planData          Json /// JSON completo do plano: fullVideo, teasers[], publicationSchedule[], etc.
-  teaserDuration    Int /// Duração configurada dos teasers (60, 120 ou 180 segundos)
+  teaserDuration    Int /// Duração configurada dos teasers (35, 55 ou 115 segundos)
   fullVideoDuration Int /// Duração configurada do full video (300, 600 ou 900 segundos)
   teaserCount       Int      @default(0) /// Quantidade de teasers no plano
   provider          String   @db.VarChar(30) /// "OPENAI" | "ANTHROPIC"
@@ -540,6 +541,7 @@ enum AIProvider {
   OPENAI
   ANTHROPIC
   GEMINI
+  GROQ
   ELEVENLABS
   MIDJOURNEY
   STABLE_DIFFUSION

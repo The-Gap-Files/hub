@@ -1,0 +1,18 @@
+{
+  "timestamp": "2026-02-14T18:55:40.187Z",
+  "taskId": "story-validator",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "approved": false,
+    "violations": [
+      "Dates are mentioned in promiseSetup and beats (e.g., '1493', '2019'), violating the avoid pattern prohibiting dates.",
+      "Explanatory context is provided in beats, including 'questionAnswered' fields, violating the zero-context requirement.",
+      "The CTA 'Quer saber como o mesmo medo se renova? Assista ao vídeo completo!' closes the loop, violating the no-resolution rule.",
+      "Multiple beats contain detailed explanations, contrary to the hook-only format."
+    ],
+    "corrections": "Remove all dates, eliminate all explanatory sentences and 'questionAnswered' fields, omit the CTA, and keep only a single shocking statement with a local anchor (e.g., 'Isso foi Trento.')."
+  },
+  "rawContent": "{\n  \"approved\": false,\n  \"violations\": [\n    \"Dates are mentioned in promiseSetup and beats (e.g., '1493', '2019'), violating the avoid pattern prohibiting dates.\",\n    \"Explanatory context is provided in beats, including 'questionAnswered' fields, violating the zero-context requirement.\",\n    \"The CTA 'Quer saber como o mesmo medo se renova? Assista ao vídeo completo!' closes the loop, violating the no-resolution rule.\",\n    \"Multiple beats contain detailed explanations, contrary to the hook-only format.\"\n  ],\n  \"corrections\": \"Remove all dates, eliminate all explanatory sentences and 'questionAnswered' fields, omit the CTA, and keep only a single shocking statement with a local anchor (e.g., 'Isso foi Trento.').\"\n}"
+}

@@ -78,7 +78,8 @@ export class GeminiScriptProvider implements IScriptGenerator {
       console.log(`${LOG} 📤 Enviando request multimodal para LangChain...`)
       console.log(`${LOG} 🔍 Schema esperado: title, summary, scenes, backgroundMusic, backgroundMusicTracks`)
 
-      const result = await structuredLlm.invoke(messages)
+      const { invokeWithLogging } = await import('../../../utils/llm-invoke-wrapper')
+      const result = await invokeWithLogging(structuredLlm, messages, { taskId: 'script-gemini', provider: 'gemini', model: 'unknown' })
       let content = result.parsed as ScriptResponse | null
       const rawMessage = result.raw as any
 

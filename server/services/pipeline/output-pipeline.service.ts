@@ -26,6 +26,7 @@ import { providerManager } from '../providers'
 import { costLogService } from '../cost-log.service'
 import { formatOutlineForPrompt } from '../story-architect.service'
 import type { StoryOutline } from '../story-architect.service'
+import { validateScript } from '../script-validator.service'
 import { getClassificationById } from '../../constants/intelligence-classifications'
 import { validateReplicatePricing } from '../../constants/pricing'
 import { mapPersonsFromPrisma, mapNeuralInsightsFromNotes } from '../../utils/format-intelligence-context'
@@ -219,6 +220,7 @@ export class OutputPipelineService {
     if (outlineData._monetizationMeta) {
       const meta = outlineData._monetizationMeta
       promptContext.narrativeRole = meta.narrativeRole || undefined
+      promptContext.shortFormatType = meta.shortFormatType || undefined
       promptContext.strategicNotes = meta.strategicNotes || undefined
 
       // Sobrescrever estilo de roteiro se o monetizador sugeriu um específico para este teaser
@@ -246,10 +248,12 @@ export class OutputPipelineService {
       scriptLog.info(`💰 Monetization meta: role=${meta.narrativeRole || 'none'}, style=${meta.scriptStyleId || 'default'}, editorial=${meta.editorialObjectiveId || 'default'}, avoidPatterns=${meta.avoidPatterns?.length || 0}, notes=${meta.strategicNotes ? 'yes' : 'no'}`)
     }
 
-    // Gerar roteiro
-    const scriptResponse = await scriptProvider.generate(promptContext)
+    // ── Gerar roteiro com loop de validação (máx 1 retry) ────────
+    const MAX_SCRIPT_RETRIES = 10
+    let scriptResponse = await scriptProvider.generate(promptContext)
+    let scriptValidation: { approved: boolean; violations?: string[]; corrections?: string; overResolution?: boolean } | undefined
 
-    // Registrar custo do script (fire-and-forget) — usa costInfo do provider
+    // Registrar custo da primeira geração
     costLogService.log({
       outputId,
       resource: 'script',
@@ -260,6 +264,71 @@ export class OutputPipelineService {
       metadata: scriptResponse.costInfo.metadata,
       detail: `Script generation - ${scriptResponse.wordCount} words, ${scriptResponse.scenes?.length || 0} scenes`
     }).catch(() => { })
+
+    // Validar e retry se reprovado (apenas para teasers com narrativeRole)
+    if (promptContext.narrativeRole && outlineData._monetizationMeta?.itemType === 'teaser') {
+      for (let attempt = 0; attempt <= MAX_SCRIPT_RETRIES; attempt++) {
+        try {
+          scriptValidation = await validateScript(
+            scriptResponse.scenes || [],
+            {
+              itemType: 'teaser',
+              narrativeRole: promptContext.narrativeRole,
+              angleCategory: outlineData._monetizationMeta?.angleCategory,
+              shortFormatType: promptContext.shortFormatType,
+              targetDuration: output.duration || undefined,
+              avoidPatterns: promptContext.avoidPatterns,
+              selectedHookLevel: (outlineData as any)._selectedHookLevel || undefined,
+              plannedOpenLoops: outlineData.openLoops?.filter((l: any) => l.closedAtBeat === null)
+            }
+          )
+
+          if (scriptValidation.approved) {
+            scriptLog.info(`✅ Script APROVADO pelo validador${attempt > 0 ? ` (após ${attempt} retry)` : ''}.`)
+            break
+          }
+
+          // Reprovado — tentar regenerar com feedback das violações
+          scriptLog.warn(`⚠️ Script REPROVADO (tentativa ${attempt + 1}/${MAX_SCRIPT_RETRIES + 1}): ${scriptValidation.violations?.join('; ')}`)
+          if (scriptValidation.overResolution) {
+            scriptLog.warn(`🚨 OVER-RESOLUTION: roteiro resolve demais para role "${promptContext.narrativeRole}"`)
+          }
+
+          if (attempt < MAX_SCRIPT_RETRIES) {
+            // Injetar feedback de validação no contexto e regenerar
+            const validationFeedback = [
+              `⚠️ CORREÇÃO OBRIGATÓRIA (VALIDADOR REPROVOU O ROTEIRO ANTERIOR):`,
+              ...(scriptValidation.violations || []).map(v => `- VIOLAÇÃO: ${v}`),
+              scriptValidation.corrections ? `\nINSTRUÇÕES DE CORREÇÃO: ${scriptValidation.corrections}` : '',
+              scriptValidation.overResolution ? `\n🚨 O roteiro RESOLVE DEMAIS para a role "${promptContext.narrativeRole}". Reduza explicações, remova conclusões e deixe loops abertos.` : ''
+            ].filter(Boolean).join('\n')
+
+            const retryContext = {
+              ...promptContext,
+              additionalContext: [promptContext.additionalContext || '', validationFeedback].filter(Boolean).join('\n\n')
+            }
+
+            scriptLog.info(`🔄 Regenerando script com feedback do validador...`)
+            scriptResponse = await scriptProvider.generate(retryContext)
+
+            // Registrar custo do retry
+            costLogService.log({
+              outputId,
+              resource: 'script',
+              action: 'recreate',
+              provider: scriptResponse.costInfo.provider,
+              model: scriptResponse.costInfo.model,
+              cost: scriptResponse.costInfo.cost,
+              metadata: scriptResponse.costInfo.metadata,
+              detail: `Script retry (validator feedback) - ${scriptResponse.wordCount} words, ${scriptResponse.scenes?.length || 0} scenes`
+            }).catch(() => { })
+          }
+        } catch (validationError: any) {
+          scriptLog.warn(`⚠️ Erro na validação do script (não-bloqueante): ${validationError?.message || validationError}`)
+          break // Se a validação falhar, não tenta retry
+        }
+      }
+    }
 
     // Salvar roteiro
     const script = await prisma.script.create({
@@ -290,11 +359,11 @@ export class OutputPipelineService {
         data: scriptResponse.scenes.map((scene, index) => ({
           outputId,
           order: index,
-          narration: scene.narration,
-          visualDescription: scene.visualDescription,
-          sceneEnvironment: scene.sceneEnvironment || null,
-          motionDescription: scene.motionDescription || null,
-          audioDescription: scene.audioDescription || null,
+          narration: scene.narration?.trim(),
+          visualDescription: scene.visualDescription?.trim(),
+          sceneEnvironment: scene.sceneEnvironment?.trim() || null,
+          motionDescription: scene.motionDescription?.trim() || null,
+          audioDescription: scene.audioDescription?.trim() || null,
           estimatedDuration: scene.estimatedDuration || 5
         }))
       })
@@ -713,13 +782,16 @@ export class OutputPipelineService {
       await Promise.all(chunk.map(async (scene) => {
         if (!scene.narration) return
 
-        const existing = await prisma.audioTrack.findFirst({
+        // Apagar áudio anterior se existir (sempre regenerar fresh)
+        const existingAudios = await prisma.audioTrack.findMany({
           where: { sceneId: scene.id, type: 'scene_narration' }
         })
 
-        if (existing) {
-          console.log(`[OutputPipeline] ⏭️ Scene ${scene.order + 1} already has audio.`)
-          return
+        if (existingAudios.length > 0) {
+          await prisma.audioTrack.deleteMany({
+            where: { sceneId: scene.id, type: 'scene_narration' }
+          })
+          console.log(`[OutputPipeline] 🗑️ Scene ${scene.order + 1}: ${existingAudios.length} áudio(s) anterior(es) apagado(s).`)
         }
 
         const targetWPM = output.targetWPM || 150 // Padrão 150 WPM (Conversa normal)

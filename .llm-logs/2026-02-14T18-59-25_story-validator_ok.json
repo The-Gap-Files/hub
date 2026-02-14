@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-02-14T18:59:25.040Z",
+  "taskId": "story-validator",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "approved": false,
+    "violations": [
+      "promiseSetup provides contextual information, violating zero-context rule",
+      "Rising beats contain explanatory context and temporal references, violating hook-only criteria",
+      "Temporal shift across centuries without explicit temporal-connection angle"
+    ],
+    "corrections": "Elimine o campo promiseSetup e todos os rising beats que dão explicações ou referências temporais. Mantenha apenas um único beat de choque que mencione um local (ex: \"Trento. 8chan.\") sem datas nem contexto adicional, garantindo que o loop permaneça aberto."
+  },
+  "rawContent": "{\"approved\":false,\"violations\":[\"promiseSetup provides contextual information, violating zero-context rule\",\"Rising beats contain explanatory context and temporal references, violating hook-only criteria\",\"Temporal shift across centuries without explicit temporal-connection angle\"],\"corrections\":\"Elimine o campo promiseSetup e todos os rising beats que dão explicações ou referências temporais. Mantenha apenas um único beat de choque que mencione um local (ex: \\\"Trento. 8chan.\\\") sem datas nem contexto adicional, garantindo que o loop permaneça aberto.\"}"
+}

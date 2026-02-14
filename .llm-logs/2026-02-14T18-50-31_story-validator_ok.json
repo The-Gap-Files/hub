@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-02-14T18:50:31.398Z",
+  "taskId": "story-validator",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "approved": false,
+    "violations": [
+      "Missing required anchor with both location and date in the first 2-3 beats (anchor must include a date, but the avoid‑patterns forbid mentioning dates, creating an unsolvable conflict)."
+    ],
+    "corrections": "Either allow a date in the anchor phrase (e.g., \"Trento, 1475.\") to satisfy the anchor requirement, or relax the anchor rule for this hook‑only teaser. As currently written, the outline cannot meet both constraints."
+  },
+  "rawContent": "{\n  \"approved\": false,\n  \"violations\": [\n    \"Missing required anchor with both location and date in the first 2-3 beats (anchor must include a date, but the avoid‑patterns forbid mentioning dates, creating an unsolvable conflict).\"\n  ],\n  \"corrections\": \"Either allow a date in the anchor phrase (e.g., \\\"Trento, 1475.\\\") to satisfy the anchor requirement, or relax the anchor rule for this hook‑only teaser. As currently written, the outline cannot meet both constraints.\"\n}"
+}

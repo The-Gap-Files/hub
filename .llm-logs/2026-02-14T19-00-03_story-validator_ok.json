@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-02-14T19:00:03.154Z",
+  "taskId": "story-validator",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "approved": false,
+    "violations": [
+      "Beats mix eras (medieval printing and modern 8chan) without explicit temporal connection, violating temporal contamination rule.",
+      "Hook variants also combine medieval and modern references, causing temporal contamination."
+    ],
+    "corrections": "Escolha um único período (ou declare explicitamente que o ângulo é uma conexão temporal). Remova ou ajuste referências que misturam imprensa medieval e 8chan para manter o foco temporal. Garanta que nenhum beat forneça contexto adicional ou explicação; mantenha apenas o choque imediato."
+  },
+  "rawContent": "{\"approved\":false,\"violations\":[\"Beats mix eras (medieval printing and modern 8chan) without explicit temporal connection, violating temporal contamination rule.\",\"Hook variants also combine medieval and modern references, causing temporal contamination.\"],\"corrections\":\"Escolha um único período (ou declare explicitamente que o ângulo é uma conexão temporal). Remova ou ajuste referências que misturam imprensa medieval e 8chan para manter o foco temporal. Garanta que nenhum beat forneça contexto adicional ou explicação; mantenha apenas o choque imediato.\"}"
+}

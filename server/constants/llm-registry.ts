@@ -13,7 +13,7 @@
 
 // ─── Tipos ──────────────────────────────────────────────────────
 
-export type LlmProviderId = 'openai' | 'anthropic' | 'groq' | 'gemini'
+export type LlmProviderId = 'openai' | 'anthropic' | 'groq' | 'gemini' | 'replicate'
 
 /** Tarefas que usam LLM — cada uma pode ter provider/modelo independente */
 export type LlmTaskId =
@@ -21,7 +21,9 @@ export type LlmTaskId =
   | 'analysis'            // Análise de insights neurais
   | 'story-architect'     // Planejamento narrativo / outline
   | 'story-validator'     // Validação de outline (checa aderência a regras narrativas)
+  | 'script-validator'    // Validação de roteiro final (checa resolução, open loops, duração)
   | 'monetization'        // Plano de monetização
+  | 'monetization-validator' // Validação do plano de monetização (diversidade, coerência, funil)
   | 'intelligence-query'  // Consulta manual ao dossiê
   | 'creative-direction'  // Consultoria de direção criativa
   | 'merge'               // Merge inteligente de prompts visuais
@@ -104,11 +106,14 @@ export const LLM_PROVIDERS: Record<LlmProviderId, LlmProvider> = {
     envKey: 'GROQ_API_KEY',
     iconKey: 'zap',
     models: [
+      { id: 'openai/gpt-oss-20b', name: 'GPT-OSS 20B', contextWindow: 131072, costTier: 1, supportsStructuredOutput: true, supportsVision: false },
+      { id: 'openai/gpt-oss-120b', name: 'GPT-OSS 120B', contextWindow: 131072, costTier: 2, supportsStructuredOutput: true, supportsVision: false },
       { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B', contextWindow: 128000, costTier: 2, supportsStructuredOutput: true, supportsVision: false },
       { id: 'llama-3.1-8b-instant', name: 'Llama 3.1 8B Instant', contextWindow: 128000, costTier: 1, supportsStructuredOutput: true, supportsVision: false },
       { id: 'deepseek-r1-distill-llama-70b', name: 'DeepSeek R1 70B', contextWindow: 128000, costTier: 2, supportsStructuredOutput: true, supportsVision: false },
       { id: 'mixtral-8x7b-32768', name: 'Mixtral 8x7B', contextWindow: 32768, costTier: 1, supportsStructuredOutput: true, supportsVision: false },
-      { id: 'meta-llama/llama-4-scout-17b-16e-instruct', name: 'Llama 4 Scout 17B', contextWindow: 512000, costTier: 1, supportsStructuredOutput: true, supportsVision: true }
+      { id: 'meta-llama/llama-4-maverick-17b-128e-instruct', name: 'Llama 4 Maverick 17B', contextWindow: 131072, costTier: 1, supportsStructuredOutput: true, supportsVision: true },
+      { id: 'meta-llama/llama-4-scout-17b-16e-instruct', name: 'Llama 4 Scout 17B', contextWindow: 131072, costTier: 1, supportsStructuredOutput: true, supportsVision: true }
     ]
   },
   gemini: {
@@ -122,6 +127,16 @@ export const LLM_PROVIDERS: Record<LlmProviderId, LlmProvider> = {
       { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', contextWindow: 1000000, costTier: 1, supportsStructuredOutput: true, supportsVision: true },
       { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', contextWindow: 2000000, costTier: 3, supportsStructuredOutput: true, supportsVision: true },
       { id: 'gemini-1.5-flash-8b', name: 'Gemini 1.5 Flash 8B', contextWindow: 1000000, costTier: 1, supportsStructuredOutput: true, supportsVision: true }
+    ]
+  },
+  replicate: {
+    id: 'replicate',
+    name: 'Replicate',
+    description: 'Llama 4 Maverick via Replicate — 17B params, 128 experts, multimodal, contexto longo',
+    envKey: 'REPLICATE_API_TOKEN',
+    iconKey: 'cpu',
+    models: [
+      { id: 'meta/llama-4-maverick-instruct', name: 'Llama 4 Maverick 17B', contextWindow: 1048576, costTier: 1, supportsStructuredOutput: false, supportsVision: true }
     ]
   }
 }
@@ -147,7 +162,7 @@ export const LLM_TASKS: Record<LlmTaskId, LlmTask> = {
     requiresStructuredOutput: true,
     requiresLargeContext: true,
     defaultProvider: 'groq',
-    defaultModel: 'llama-3.3-70b-versatile'
+    defaultModel: 'openai/gpt-oss-20b'
   },
   'story-architect': {
     id: 'story-architect',
@@ -167,7 +182,17 @@ export const LLM_TASKS: Record<LlmTaskId, LlmTask> = {
     requiresStructuredOutput: true,
     requiresLargeContext: false,
     defaultProvider: 'groq',
-    defaultModel: 'llama-3.3-70b-versatile'
+    defaultModel: 'openai/gpt-oss-20b'
+  },
+  'script-validator': {
+    id: 'script-validator',
+    label: 'Validador de Roteiro',
+    description: 'Valida roteiro final contra regras de resolução, open loops e duração. Verifica se shorts não resolvem demais.',
+    iconKey: 'file-check',
+    requiresStructuredOutput: true,
+    requiresLargeContext: false,
+    defaultProvider: 'groq',
+    defaultModel: 'openai/gpt-oss-20b'
   },
   monetization: {
     id: 'monetization',
@@ -179,6 +204,16 @@ export const LLM_TASKS: Record<LlmTaskId, LlmTask> = {
     defaultProvider: 'gemini',
     defaultModel: 'gemini-2.0-flash'
   },
+  'monetization-validator': {
+    id: 'monetization-validator',
+    label: 'Validador de Monetização',
+    description: 'Valida plano de monetização contra regras de diversidade, coerência role×format e estratégia de funil.',
+    iconKey: 'shield-check',
+    requiresStructuredOutput: true,
+    requiresLargeContext: false,
+    defaultProvider: 'groq',
+    defaultModel: 'openai/gpt-oss-20b'
+  },
   'intelligence-query': {
     id: 'intelligence-query',
     label: 'Consulta de Inteligência',
@@ -187,7 +222,7 @@ export const LLM_TASKS: Record<LlmTaskId, LlmTask> = {
     requiresStructuredOutput: false,
     requiresLargeContext: true,
     defaultProvider: 'groq',
-    defaultModel: 'llama-3.3-70b-versatile'
+    defaultModel: 'openai/gpt-oss-20b'
   },
   'creative-direction': {
     id: 'creative-direction',
@@ -197,7 +232,7 @@ export const LLM_TASKS: Record<LlmTaskId, LlmTask> = {
     requiresStructuredOutput: true,
     requiresLargeContext: false,
     defaultProvider: 'groq',
-    defaultModel: 'llama-3.3-70b-versatile'
+    defaultModel: 'openai/gpt-oss-20b'
   },
   merge: {
     id: 'merge',
@@ -207,7 +242,7 @@ export const LLM_TASKS: Record<LlmTaskId, LlmTask> = {
     requiresStructuredOutput: false,
     requiresLargeContext: false,
     defaultProvider: 'groq',
-    defaultModel: 'llama-3.3-70b-versatile'
+    defaultModel: 'openai/gpt-oss-20b'
   },
   summarize: {
     id: 'summarize',
@@ -257,7 +292,7 @@ export const LLM_TASKS: Record<LlmTaskId, LlmTask> = {
     requiresStructuredOutput: false,
     requiresLargeContext: false,
     defaultProvider: 'groq',
-    defaultModel: 'llama-3.3-70b-versatile'
+    defaultModel: 'openai/gpt-oss-20b'
   },
   'dossier-investigator': {
     id: 'dossier-investigator',

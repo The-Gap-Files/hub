@@ -6,6 +6,7 @@ import { getVisualStyleById } from '../../../constants/visual-styles'
 import { getScriptStyleById } from '../../../constants/script-styles'
 import { getClassificationById } from '../../../constants/intelligence-classifications'
 import { formatOutlineForPrompt, type StoryOutline } from '../../../services/story-architect.service'
+import { validateScript } from '../../../services/script-validator.service'
 import type { ScriptGenerationRequest } from '../../../types/ai-providers'
 
 export default defineEventHandler(async (event) => {
@@ -104,6 +105,7 @@ export default defineEventHandler(async (event) => {
 
     // 3.1 Extrair metadados de monetização do outline
     narrativeRole: (output.storyOutline as any)?._monetizationMeta?.narrativeRole || undefined,
+    shortFormatType: (output.storyOutline as any)?._monetizationMeta?.shortFormatType || undefined,
     strategicNotes: (output.storyOutline as any)?._monetizationMeta?.strategicNotes || undefined,
 
     // 4. INJETAR O ALINHAMENTO/FEEDBACK DO USUÁRIO
@@ -134,10 +136,11 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    // 4. Gerar Novo Roteiro
-    const scriptResponse = await scriptProvider.generate(promptContext)
+    // 4. Gerar Novo Roteiro com loop de validação (máx 3 retries)
+    const MAX_RETRIES = 10
+    let scriptResponse = await scriptProvider.generate(promptContext)
 
-    // 4.1 Registrar custo da regeneração (fire-and-forget) -- usa tokens reais quando disponíveis
+    // 4.1 Registrar custo da primeira geração
     const inputTokens = scriptResponse.usage?.inputTokens ?? 0
     const outputTokens = scriptResponse.usage?.outputTokens ?? 0
     const cost = calculateLLMCost(scriptResponse.model || 'claude-opus-4-6', inputTokens, outputTokens)
@@ -152,6 +155,68 @@ export default defineEventHandler(async (event) => {
       metadata: { input_tokens: inputTokens, output_tokens: outputTokens, total_tokens: inputTokens + outputTokens },
       detail: `Script regeneration - ${scriptResponse.wordCount} words, user feedback`
     }).catch(() => { })
+
+    // 4.2 Validar e retry se reprovado
+    const monetizationMeta = (output.storyOutline as any)?._monetizationMeta
+    let scriptValidation: { approved: boolean; violations?: string[]; corrections?: string; overResolution?: boolean } | undefined
+    if (promptContext.narrativeRole && monetizationMeta?.itemType === 'teaser') {
+      const outlineData = output.storyOutline as any
+      for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        try {
+          scriptValidation = await validateScript(
+            scriptResponse.scenes || [],
+            {
+              itemType: 'teaser',
+              narrativeRole: promptContext.narrativeRole,
+              angleCategory: monetizationMeta?.angleCategory,
+              shortFormatType: promptContext.shortFormatType,
+              targetDuration: output.duration || undefined,
+              avoidPatterns: monetizationMeta?.avoidPatterns,
+              selectedHookLevel: outlineData?._selectedHookLevel || undefined,
+              plannedOpenLoops: outlineData?.openLoops?.filter((l: any) => l.closedAtBeat === null)
+            }
+          )
+
+          if (scriptValidation.approved) {
+            console.log(`[RegenerateScript] ✅ Script APROVADO${attempt > 0 ? ` (após ${attempt} retry)` : ''}.`)
+            break
+          }
+
+          console.warn(`[RegenerateScript] ⚠️ Script REPROVADO (tentativa ${attempt + 1}/${MAX_RETRIES + 1}): ${scriptValidation.violations?.join('; ')}`)
+
+          if (attempt < MAX_RETRIES) {
+            const validationFeedback = [
+              `⚠️ CORREÇÃO OBRIGATÓRIA (VALIDADOR REPROVOU O ROTEIRO ANTERIOR):`,
+              ...(scriptValidation.violations || []).map(v => `- VIOLAÇÃO: ${v}`),
+              scriptValidation.corrections ? `\nINSTRUÇÕES DE CORREÇÃO: ${scriptValidation.corrections}` : '',
+              scriptValidation.overResolution ? `\n🚨 O roteiro RESOLVE DEMAIS para a role "${promptContext.narrativeRole}". Reduza explicações, remova conclusões e deixe loops abertos.` : ''
+            ].filter(Boolean).join('\n')
+
+            const retryContext = {
+              ...promptContext,
+              additionalContext: [promptContext.additionalContext || '', validationFeedback].filter(Boolean).join('\n\n')
+            }
+
+            console.log(`[RegenerateScript] 🔄 Regenerando com feedback do validador (retry ${attempt + 1})...`)
+            scriptResponse = await scriptProvider.generate(retryContext)
+
+            costLogService.log({
+              outputId,
+              resource: 'script',
+              action: 'recreate',
+              provider: scriptResponse.provider || 'ANTHROPIC',
+              model: scriptResponse.model || 'unknown',
+              cost: calculateLLMCost(scriptResponse.model || 'claude-opus-4-6', scriptResponse.usage?.inputTokens ?? 0, scriptResponse.usage?.outputTokens ?? 0),
+              metadata: { input_tokens: scriptResponse.usage?.inputTokens ?? 0, output_tokens: scriptResponse.usage?.outputTokens ?? 0 },
+              detail: `Script retry ${attempt + 1} (validator feedback)`
+            }).catch(() => { })
+          }
+        } catch (e: any) {
+          console.warn(`[RegenerateScript] ⚠️ Erro na validação (não-bloqueante): ${e?.message || e}`)
+          break
+        }
+      }
+    }
 
     // 5. Atualizar no Banco (Transação)
     await prisma.$transaction(async (tx: any) => {
@@ -209,11 +274,11 @@ export default defineEventHandler(async (event) => {
           data: scriptResponse.scenes.map((scene: any, index: number) => ({
             outputId,
             order: index,
-            narration: scene.narration,
-            visualDescription: scene.visualDescription,
-            sceneEnvironment: scene.sceneEnvironment || null,
-            motionDescription: scene.motionDescription || null,
-            audioDescription: scene.audioDescription || null,
+            narration: scene.narration?.trim(),
+            visualDescription: scene.visualDescription?.trim(),
+            sceneEnvironment: scene.sceneEnvironment?.trim() || null,
+            motionDescription: scene.motionDescription?.trim() || null,
+            audioDescription: scene.audioDescription?.trim() || null,
             estimatedDuration: scene.estimatedDuration || 5
           }))
         })
@@ -243,7 +308,11 @@ export default defineEventHandler(async (event) => {
       })
     })
 
-    return { success: true, message: 'Script regenerated successfully' }
+    return {
+      success: true,
+      message: 'Script regenerated successfully',
+      validation: scriptValidation || undefined
+    }
 
   } catch (error: any) {
     console.error('[API] Script regeneration failed:', error)

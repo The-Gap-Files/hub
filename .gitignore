@@ -21,8 +21,6 @@ yarn-error.log*
 
 # Storage & Logs
 storage/
-logs/
-*.log
 
 # OS files
 .DS_Store

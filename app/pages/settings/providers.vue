@@ -355,6 +355,47 @@ async function resetToDefault(taskId: string) {
   await updateAssignment(taskId, task.defaultProvider, task.defaultModel)
 }
 
+// ─── Bulk Apply (Aplicar a Todos) ──────────────────────────────
+const bulkProvider = ref<string | null>(null)
+const bulkModel = ref<string | null>(null)
+const bulkApplying = ref(false)
+const bulkApplied = ref(false)
+
+const bulkModels = computed(() => {
+  if (!bulkProvider.value) return []
+  const provider = providers.value.find(p => p.id === bulkProvider.value)
+  return provider?.models || []
+})
+
+function onBulkProviderChange(providerId: string) {
+  bulkProvider.value = providerId
+  const models = providers.value.find(p => p.id === providerId)?.models || []
+  bulkModel.value = models[0]?.modelId || models[0]?.id || null
+  bulkApplied.value = false
+}
+
+async function applyToAllTasks() {
+  if (!bulkProvider.value || !bulkModel.value) return
+  bulkApplying.value = true
+  bulkApplied.value = false
+  try {
+    const allTasks = tasks.value
+    for (const task of allTasks) {
+      await $fetch('/api/llm/assignments', {
+        method: 'PUT',
+        body: { taskId: task.id, provider: bulkProvider.value, model: bulkModel.value }
+      })
+    }
+    await refreshAssignments()
+    bulkApplied.value = true
+    setTimeout(() => { bulkApplied.value = false }, 3000)
+  } catch (error: any) {
+    alert(error.data?.message || 'Erro ao aplicar em massa')
+  } finally {
+    bulkApplying.value = false
+  }
+}
+
 /** Testa o modelo LLM da task: envia mensagem e exibe a resposta */
 async function testLlm(taskId: string) {
   const msg = llmTestMessage.value.trim()
@@ -1052,8 +1093,9 @@ const iconOptions = [
                     </span>
                     <span v-if="model.supportsStructuredOutput" class="px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400 text-xs font-bold">JSON</span>
                     <span v-if="model.supportsVision" class="px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 text-xs font-bold">V</span>
-                    <!-- Schema badge -->
+                    <!-- Schema badge (only for Replicate models) -->
                     <button
+                      v-if="dp.id === 'replicate'"
                       @click.stop="toggleEditSchema(model)"
                       class="px-1.5 py-0.5 rounded text-xs font-bold cursor-pointer transition-all"
                       :class="model.inputSchema ? 'bg-amber-500/10 text-amber-400 hover:bg-amber-500/20' : 'bg-white/5 text-zinc-600 hover:text-zinc-400'"
@@ -1149,8 +1191,8 @@ const iconOptions = [
                       <span class="text-xs text-zinc-400">Vision</span>
                     </label>
                   </div>
-                  <!-- Input Schema (JSON) -->
-                  <div class="col-span-full space-y-1.5">
+                  <!-- Input Schema (JSON) — only for Replicate -->
+                  <div v-if="dp.id === 'replicate'" class="col-span-full space-y-1.5">
                     <div class="flex items-center justify-between">
                       <label class="text-xs text-zinc-500 font-medium">Input Schema (JSON)</label>
                       <button
@@ -1279,14 +1321,88 @@ const iconOptions = [
 
       <!-- ─── Task Cards ──────────────────────────────────────── -->
       <div class="space-y-4 animate-in slide-in-from-bottom-10 duration-700 delay-200">
-        <div class="flex items-center gap-3 mb-6">
-          <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]">
-            <Brain :size="22" />
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]">
+              <Brain :size="22" />
+            </div>
+            <div>
+              <h2 class="text-lg font-black text-white uppercase tracking-wider">Inferência LLM</h2>
+              <p class="text-xs text-zinc-500">Roteamento de tarefas de linguagem natural</p>
+            </div>
           </div>
-          <div>
-            <h2 class="text-lg font-black text-white uppercase tracking-wider">Inferência LLM</h2>
-            <p class="text-xs text-zinc-500">Roteamento de tarefas de linguagem natural</p>
+        </div>
+
+        <!-- ─── Bulk Apply Panel ──────────────────────────────── -->
+        <div class="glass-card border-white/5 hover:border-amber-500/20 transition-all duration-300 p-5 mb-6">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20">
+              <Zap :size="14" />
+            </div>
+            <div>
+              <span class="text-sm font-bold text-white">Aplicar a Todos</span>
+              <span class="text-xs text-zinc-600 ml-2">{{ tasks.length }} tasks</span>
+            </div>
           </div>
+          
+          <div class="flex items-end gap-3 flex-wrap">
+            <!-- Provider Select -->
+            <div class="flex-1 min-w-[180px]">
+              <label class="text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-1.5 block">Provider</label>
+              <select
+                :value="bulkProvider || ''"
+                @change="onBulkProviderChange(($event.target as HTMLSelectElement).value)"
+                class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-amber-500/40 focus:outline-none focus:ring-1 focus:ring-amber-500/20 transition-colors appearance-none cursor-pointer"
+              >
+                <option value="" disabled>Selecionar provider...</option>
+                <option 
+                  v-for="p in providers.filter(p => providerStatus[p.id])" 
+                  :key="p.id" 
+                  :value="p.id"
+                >
+                  {{ p.name }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Model Select -->
+            <div class="flex-1 min-w-[220px]">
+              <label class="text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-1.5 block">Modelo</label>
+              <select
+                v-model="bulkModel"
+                :disabled="!bulkProvider"
+                class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-amber-500/40 focus:outline-none focus:ring-1 focus:ring-amber-500/20 transition-colors appearance-none cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <option value="" disabled>Selecionar modelo...</option>
+                <option 
+                  v-for="m in bulkModels" 
+                  :key="m.modelId || m.id" 
+                  :value="m.modelId || m.id"
+                >
+                  {{ m.name }} ({{ formatContextWindow(m.contextWindow) }})
+                </option>
+              </select>
+            </div>
+
+            <!-- Apply Button -->
+            <button
+              @click="applyToAllTasks"
+              :disabled="!bulkProvider || !bulkModel || bulkApplying"
+              class="flex items-center gap-2 px-6 py-2.5 rounded-xl border text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+              :class="bulkApplied 
+                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' 
+                : 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 hover:shadow-[0_0_15px_rgba(245,158,11,0.15)]'"
+            >
+              <Loader2 v-if="bulkApplying" :size="14" class="animate-spin" />
+              <Check v-else-if="bulkApplied" :size="14" />
+              <Zap v-else :size="14" />
+              <span>{{ bulkApplying ? 'Aplicando...' : bulkApplied ? 'Aplicado!' : 'Aplicar a Todos' }}</span>
+            </button>
+          </div>
+
+          <p class="text-xs text-zinc-600 mt-3">
+            Altera o provider e modelo de <strong class="text-zinc-500">todas as {{ tasks.length }} tasks</strong> de uma vez. Após aplicar, ajuste individualmente se necessário.
+          </p>
         </div>
 
         <div 

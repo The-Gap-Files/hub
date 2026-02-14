@@ -18,6 +18,7 @@ import { ChatOpenAI } from '@langchain/openai'
 import { ChatAnthropic } from '@langchain/anthropic'
 import { ChatGroq } from '@langchain/groq'
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai'
+import { ReplicateChatLLM } from './replicate-llm'
 import type { BaseChatModel } from '@langchain/core/language_models/chat_models'
 import {
   type LlmProviderId,
@@ -178,7 +179,7 @@ async function seedProvidersAndModels(): Promise<void> {
           taskId,
           provider: task.defaultProvider,
           model: task.defaultModel,
-          temperature: taskId === 'script' ? 0.8 : 0.7
+          temperature: taskId === 'script' ? 0.8 : 0.3
         }
       }).catch(() => { }) // Ignora se já existe (race condition)
       console.log(`[LLM Factory]   + Assignment "${taskId}" → ${task.defaultProvider}/${task.defaultModel}`)
@@ -264,7 +265,8 @@ async function getApiKey(provider: LlmProviderId): Promise<string> {
     openai: 'OPENAI_API_KEY',
     anthropic: 'ANTHROPIC_API_KEY',
     groq: 'GROQ_API_KEY',
-    gemini: 'GOOGLE_API_KEY'
+    gemini: 'GOOGLE_API_KEY',
+    replicate: 'REPLICATE_API_TOKEN'
   }
 
   const key = process.env[envMap[provider]]?.replace(/"/g, '')
@@ -339,15 +341,23 @@ export async function createChatModel(options: CreateLlmOptions): Promise<BaseCh
         }
       })
 
-    case 'groq':
+    case 'groq': {
+      // Groq: Llama 4 Maverick/Scout limita a 8192 tokens. GPT-OSS suporta até 65536.
+      const isLlama4 = model.includes('llama-4')
+      const groqMaxLimit = isLlama4 ? 8192 : 65536
+      const groqMaxTokens = maxTokens ? Math.min(maxTokens, groqMaxLimit) : undefined
+      if (maxTokens && maxTokens > groqMaxLimit) {
+        console.warn(`[LLM Factory] ⚠️ Groq (${model}): maxTokens ${maxTokens} excede limite de ${groqMaxLimit}. Limitando.`)
+      }
       return new ChatGroq({
         apiKey,
         model,
         temperature,
         maxRetries: 2,
         timeout: 60_000,
-        ...(maxTokens ? { maxTokens } : {})
+        ...(groqMaxTokens ? { maxTokens: groqMaxTokens } : {})
       })
+    }
 
     case 'gemini':
       return new ChatGoogleGenerativeAI({
@@ -357,6 +367,19 @@ export async function createChatModel(options: CreateLlmOptions): Promise<BaseCh
         maxRetries: 2,
         ...(maxTokens ? { maxOutputTokens: maxTokens } : {})
       })
+
+    case 'replicate':
+      // Wrapper customizado usando SDK nativo do Replicate (sem exigir version hash).
+      // Funciona com invoke() mas não suporta withStructuredOutput nativamente.
+      // Tasks que precisam de structured output usam fallback parsing (padrão Gemini raw).
+      return new ReplicateChatLLM({
+        model,
+        apiKey,
+        temperature,
+        maxTokens: maxTokens || 16384,
+        topK: 50,
+        topP: 0.9
+      }) as any // Cast: LLM → BaseChatModel (invoke funciona, structured output via fallback)
 
     default:
       throw new Error(`[LLM Factory] Provider desconhecido: "${provider}"`)
@@ -397,7 +420,7 @@ export async function getAssignment(taskId: LlmTaskId): Promise<LlmAssignment> {
     taskId,
     provider: task.defaultProvider,
     model: task.defaultModel,
-    temperature: taskId === 'script' ? 0.8 : 0.7
+    temperature: taskId === 'script' ? 0.8 : 0.3
   }
 
   await prisma.llmAssignment.create({
@@ -485,7 +508,7 @@ export async function isProviderAvailable(provider: LlmProviderId): Promise<bool
 
 /** Retorna quais providers estão disponíveis (com API Key no DB ou env) */
 export async function getAvailableProviders(): Promise<LlmProviderId[]> {
-  const all: LlmProviderId[] = ['openai', 'anthropic', 'groq', 'gemini']
+  const all: LlmProviderId[] = ['openai', 'anthropic', 'groq', 'gemini', 'replicate']
   const results = await Promise.all(all.map(async p => ({ p, ok: await isProviderAvailable(p) })))
   return results.filter(r => r.ok).map(r => r.p)
 }

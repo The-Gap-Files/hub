@@ -1,0 +1,101 @@
+{
+  "timestamp": "2026-02-14T18:59:34.331Z",
+  "taskId": "story-architect-retry",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "hookStrategy": "In media res com paradoxos: comparar a imprensa nascente de Trento à explosão do 8chan, mostrando que a mesma lógica de medo gera ódio.",
+    "hookVariants": [
+      {
+        "level": "green",
+        "hook": "A primeira imprensa de ódio surgindo em Trento, e 8chan incendiando mentes hoje – a mesma chama.",
+        "rationale": "Mostra a continuidade do medo de forma segura e curiosa."
+      },
+      {
+        "level": "moderate",
+        "hook": "Quando a tipografia de Trento manipulou a verdade, 8chan fez o mesmo milênios depois – o medo nunca mudou.",
+        "rationale": "Provoca reflexão sobre a repetição histórica sem ser agressivo."
+      },
+      {
+        "level": "aggressive",
+        "hook": "Da prensa de Hinderbach ao 8chan, a fórmula mortal de propaganda persiste – e ainda mata.",
+        "rationale": "Confronta o espectador com a brutalidade da repetição."
+      },
+      {
+        "level": "lawless",
+        "hook": "Impressão medieval, 8chan digital: duas eras, um veneno que transforma crianças em mártires e gera tiroteios.",
+        "rationale": "Ultrapassa limites para enfatizar o horror da técnica."
+      }
+    ],
+    "promiseSetup": "Trento. 8chan.",
+    "risingBeats": [
+      {
+        "order": 1,
+        "revelation": "Incunábulos de Trento mostraram um menino sangrento como verdade.",
+        "questionAnswered": "",
+        "newQuestion": "Como um livro impresso pode criar uma narrativa de sangue?",
+        "sourceReference": "[1]"
+      },
+      {
+        "order": 2,
+        "revelation": "Um manifesto de 8chan citou a mesma imagem para justificar violência.",
+        "questionAnswered": "",
+        "newQuestion": "Por que imagens antigas ainda inflamam ódio hoje?",
+        "sourceReference": "[8]"
+      },
+      {
+        "order": 3,
+        "revelation": "Memes virais repetem a cena, alimentando o ódio em novas gerações.",
+        "questionAnswered": "",
+        "newQuestion": "Será que o medo pode ser reativado a cada nova tecnologia?",
+        "sourceReference": "[7]"
+      }
+    ],
+    "climaxMoment": "",
+    "climaxFormula": "",
+    "resolutionPoints": [],
+    "resolutionAngle": "",
+    "ctaApproach": "The Gap Files.",
+    "emotionalArc": "",
+    "toneProgression": "",
+    "whatToReveal": [],
+    "whatToHold": [],
+    "whatToIgnore": [
+      "explicações detalhadas",
+      "datas"
+    ],
+    "segmentDistribution": {
+      "hook": 2,
+      "context": 0,
+      "rising": 3,
+      "climax": 0,
+      "resolution": 0,
+      "cta": 1
+    },
+    "tensionCurve": [
+      "low",
+      "pause",
+      "high"
+    ],
+    "openLoops": [
+      {
+        "question": "Como um livro impresso pode criar uma narrativa de sangue?",
+        "openedAtBeat": 1,
+        "closedAtBeat": null
+      },
+      {
+        "question": "Por que imagens antigas ainda inflamam ódio hoje?",
+        "openedAtBeat": 2,
+        "closedAtBeat": null
+      },
+      {
+        "question": "Será que o medo pode ser reativado a cada nova tecnologia?",
+        "openedAtBeat": 3,
+        "closedAtBeat": null
+      }
+    ],
+    "resolutionLevel": "none"
+  },
+  "rawContent": "{\"hookStrategy\":\"In media res com paradoxos: comparar a imprensa nascente de Trento à explosão do 8chan, mostrando que a mesma lógica de medo gera ódio.\",\"hookVariants\":[{\"level\":\"green\",\"hook\":\"A primeira imprensa de ódio surgindo em Trento, e 8chan incendiando mentes hoje – a mesma chama.\",\"rationale\":\"Mostra a continuidade do medo de forma segura e curiosa.\"},{\"level\":\"moderate\",\"hook\":\"Quando a tipografia de Trento manipulou a verdade, 8chan fez o mesmo milênios depois – o medo nunca mudou.\",\"rationale\":\"Provoca reflexão sobre a repetição histórica sem ser agressivo.\"},{\"level\":\"aggressive\",\"hook\":\"Da prensa de Hinderbach ao 8chan, a fórmula mortal de propaganda persiste – e ainda mata.\",\"rationale\":\"Confronta o espectador com a brutalidade da repetição.\"},{\"level\":\"lawless\",\"hook\":\"Impressão medieval, 8chan digital: duas eras, um veneno que transforma crianças em mártires e gera tiroteios.\",\"rationale\":\"Ultrapassa limites para enfatizar o horror da técnica.\"}],\"promiseSetup\":\"Trento. 8chan.\",\"risingBeats\":[{\"order\":1,\"revelation\":\"Incunábulos de Trento mostraram um menino sangrento como verdade.\",\"questionAnswered\":\"\",\"newQuestion\":\"Como um livro impresso pode criar uma narrativa de sangue?\",\"sourceReference\":\"[1]\"},{\"order\":2,\"revelation\":\"Um manifesto de 8chan citou a mesma imagem para justificar violência.\",\"questionAnswered\":\"\",\"newQuestion\":\"Por que imagens antigas ainda inflamam ódio hoje?\",\"sourceReference\":\"[8]\"},{\"order\":3,\"revelation\":\"Memes virais repetem a cena, alimentando o ódio em novas gerações.\",\"questionAnswered\":\"\",\"newQuestion\":\"Será que o medo pode ser reativado a cada nova tecnologia?\",\"sourceReference\":\"[7]\"}],\"climaxMoment\":\"\",\"climaxFormula\":\"\",\"resolutionPoints\":[],\"resolutionAngle\":\"\",\"ctaApproach\":\"The Gap Files.\",\"emotionalArc\":\"\",\"toneProgression\":\"\",\"whatToReveal\":[],\"whatToHold\":[],\"whatToIgnore\":[\"explicações detalhadas\",\"datas\"],\"segmentDistribution\":{\"hook\":2,\"context\":0,\"rising\":3,\"climax\":0,\"resolution\":0,\"cta\":1},\"tensionCurve\":[\"low\",\"pause\",\"high\"],\"openLoops\":[{\"question\":\"Como um livro impresso pode criar uma narrativa de sangue?\",\"openedAtBeat\":1,\"closedAtBeat\":null},{\"question\":\"Por que imagens antigas ainda inflamam ódio hoje?\",\"openedAtBeat\":2,\"closedAtBeat\":null},{\"question\":\"Será que o medo pode ser reativado a cada nova tecnologia?\",\"openedAtBeat\":3,\"closedAtBeat\":null}],\"resolutionLevel\":\"none\"}"
+}

@@ -66,7 +66,11 @@ export async function analyzeInsights(
   // Criar modelo via LLM Factory (provider/modelo configurável via UI)
   const assignment = await getAssignment('analysis')
   const model = await createLlmForTask('analysis')
-  const structuredLlm = (model as any).withStructuredOutput(AnalysisResponseSchema, { includeRaw: true })
+  const m = model as any
+  const isGroqLlama4 = assignment.provider.toLowerCase().includes('groq') && assignment.model.includes('llama-4')
+  const structuredLlm = assignment.provider === 'replicate' && typeof m.withStructuredOutputReplicate === 'function'
+    ? m.withStructuredOutputReplicate(AnalysisResponseSchema, { includeRaw: true })
+    : m.withStructuredOutput(AnalysisResponseSchema, { includeRaw: true, ...(isGroqLlama4 ? { method: 'jsonMode' } : {}) })
 
   // Montar o prompt
   const systemPrompt = buildSystemPrompt()
@@ -81,7 +85,12 @@ export async function analyzeInsights(
 
   try {
     const startTime = Date.now()
-    const result = await structuredLlm.invoke(messages)
+    const { invokeWithLogging } = await import('../utils/llm-invoke-wrapper')
+    const result = await invokeWithLogging(structuredLlm, messages, {
+      taskId: 'analyze-insights',
+      provider: assignment.provider,
+      model: assignment.model
+    })
     const content = result.parsed as AnalysisResponse
     const rawMessage = result.raw as any
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(2)
@@ -108,7 +117,21 @@ export async function analyzeInsights(
       provider: assignment.provider.toUpperCase(),
       model: assignment.model
     }
-  } catch (error) {
+  } catch (error: any) {
+    const { handleGroqJsonValidateError } = await import('../utils/groq-error-handler')
+    const result = handleGroqJsonValidateError<any>(error, '[AnalyzeInsights]')
+
+    if (result.success) {
+      console.warn('[AnalyzeInsights] ⚠️ Usando resposta parcial do failed_generation')
+      return {
+        items: result.data.items || [],
+        persons: result.data.persons || [],
+        usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+        provider: assignment.provider.toUpperCase(),
+        model: assignment.model
+      }
+    }
+
     console.error('[AnalyzeInsights] ❌ Erro na análise:', error)
     throw error
   }

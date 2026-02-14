@@ -706,7 +706,7 @@
         </div>
         <div class="space-y-2">
           <h4 class="text-sm font-black text-red-400 uppercase tracking-wider">Erro na Geração</h4>
-          <p class="text-xs text-zinc-400">{{ errorMessage }}</p>
+          <p class="text-xs text-zinc-400 whitespace-pre-line">{{ errorMessage }}</p>
           <button
             @click="errorMessage = ''; generating = false"
             class="text-xs font-black text-primary uppercase tracking-widest hover:underline mt-2"
@@ -733,7 +733,7 @@ const props = defineProps<{
 }>()
 
 // ───── State ─────
-const selectedTeaserDuration = ref<60 | 120 | 180>(60)
+const selectedTeaserDuration = ref<35 | 55 | 115>(35)
 const selectedFullDuration = ref<300 | 600 | 900>(600)
 const selectedTeaserCount = ref(6)
 const generating = ref(false)
@@ -761,9 +761,9 @@ const availableSeeds = ref<Array<{ id: string, value: number }>>([])
 
 // ───── Options ─────
 const teaserOptions = [
-  { value: 60 as const, label: '60s', description: 'Curto' },
-  { value: 120 as const, label: '120s', description: 'Médio' },
-  { value: 180 as const, label: '180s', description: 'Longo' }
+  { value: 35 as const, label: '35s', description: 'Ultra-curto' },
+  { value: 55 as const, label: '55s', description: 'Curto' },
+  { value: 115 as const, label: '115s', description: 'Médio' }
 ]
 
 const fullVideoOptions = [
@@ -782,7 +782,7 @@ async function loadExistingPlan() {
       plan.value = saved.planData
       usage.value = { inputTokens: saved.inputTokens, outputTokens: saved.outputTokens, totalTokens: saved.inputTokens + saved.outputTokens }
       provider.value = saved.provider
-      selectedTeaserDuration.value = saved.teaserDuration as 60 | 120 | 180
+      selectedTeaserDuration.value = saved.teaserDuration as 35 | 55 | 115
       selectedFullDuration.value = saved.fullVideoDuration as 300 | 600 | 900
       planCreatedAt.value = saved.createdAt
       planSavedInDb.value = true
@@ -811,6 +811,14 @@ async function generatePlan() {
         teaserCount: selectedTeaserCount.value
       }
     }) as any
+
+    if (!data.success && data.error === 'validation_failed') {
+      errorMessage.value = data.message || 'Plano reprovado pelo validador.'
+      if (data.violations?.length) {
+        errorMessage.value += '\n\n' + data.violations.join('\n• ')
+      }
+      return
+    }
 
     plan.value = data.plan
     usage.value = data.usage
@@ -1070,7 +1078,7 @@ function narrativeRoleTooltip(role: string): string {
 
 const roleDistributionLabel = computed(() => {
   const n = selectedTeaserCount.value
-  const gw = n >= 10 ? 2 : 1
+  const gw = 1
   const remaining = n - gw
   const dd = Math.ceil(remaining * 0.55)
   const ho = remaining - dd

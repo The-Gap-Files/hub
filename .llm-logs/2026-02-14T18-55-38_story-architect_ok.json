@@ -1,0 +1,98 @@
+{
+  "timestamp": "2026-02-14T18:55:38.196Z",
+  "taskId": "story-architect",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "hookStrategy": "Usar a técnica de Contradição chocante: apresentar a equivalência entre a primeira imprensa de tipos móveis que propagou o mito de Simon de Trento e o uso de 8chan/Facebook por John Earnest, destacando a continuidade da 'fórmula mortal' de ódio ao longo dos séculos.",
+    "hookVariants": [
+      {
+        "level": "green",
+        "hook": "Primeira imprensa de ódio, a gravura de Trento, encontra 8chan: a mesma fórmula mortal que alimenta o ódio hoje.",
+        "rationale": "Apela à curiosidade intelectual sem provocar confrontos, ideal para público amplo."
+      },
+      {
+        "level": "moderate",
+        "hook": "Primeira imprensa de ódio, a gravura de Trento, encontra 8chan: a mesma fórmula mortal que alimenta o ódio hoje.",
+        "rationale": "Mantém a provocação ao ligar passado e presente, mas com tom controlado."
+      },
+      {
+        "level": "aggressive",
+        "hook": "Primeira imprensa de ódio, a gravura de Trento, encontra 8chan: a mesma fórmula mortal que alimenta o ódio hoje.",
+        "rationale": "Desafia diretamente o espectador, forçando reflexão sobre a cumplicidade moderna."
+      },
+      {
+        "level": "lawless",
+        "hook": "Primeira imprensa de ódio, a gravura de Trento, encontra 8chan: a mesma fórmula mortal que alimenta o ódio hoje.",
+        "rationale": "Ultrapassa limites ao acusar agressivamente plataformas atuais, gerando choque máximo."
+      }
+    ],
+    "promiseSetup": "Trento. Uma cidade medieval. 8chan. Um fórum digital. Descubra como a mesma tática de manipulação se repete séculos depois.",
+    "risingBeats": [
+      {
+        "order": 1,
+        "revelation": "A primeira imprensa de tipos móveis foi usada para espalhar o mito de Simon de Trento, criando uma 'verdade' oficial.",
+        "questionAnswered": "Como a imprensa ajudou a criar uma narrativa de ódio?",
+        "newQuestion": "Como essa fórmula de propaganda se repete nas redes sociais atuais?",
+        "sourceReference": "[1] Investigação Histórico-Forense: Simão de Trento"
+      },
+      {
+        "order": 2,
+        "revelation": "A xilogravura de 1493 de Nuremberg fixou visualmente o mito, tornando‑o inesquecível.",
+        "questionAnswered": "Por que a imagem foi tão persuasiva?",
+        "newQuestion": "Qual seria o equivalente visual na era digital?",
+        "sourceReference": "[1] Investigação Histórico-Forense: Simão de Trento"
+      },
+      {
+        "order": 3,
+        "revelation": "Em 2019, John Earnest usou 8chan e Facebook para divulgar manifesto citando Simon de Trento como inspiração.",
+        "questionAnswered": "Como a internet replicou a estratégia da imprensa renascentista?",
+        "newQuestion": "Qual o impacto dessa nova 'imprensa' na violência contemporânea?",
+        "sourceReference": "[6] Um morto e seis feridos em ataque a tiros contra uma sinagoga na Califórnia"
+      },
+      {
+        "order": 4,
+        "revelation": "Ambas as mídias criam ciclos de medo que alimentam o ódio e justificam violência.",
+        "questionAnswered": "O que liga a impressão de 1475 ao ataque de Poway?",
+        "newQuestion": "Como podemos interromper esse ciclo de propaganda de ódio?",
+        "sourceReference": "[1] Investigação Histórico-Forense: Simão de Trento"
+      }
+    ],
+    "climaxMoment": "",
+    "climaxFormula": "",
+    "resolutionPoints": [],
+    "resolutionAngle": "",
+    "ctaApproach": "Quer saber como o mesmo medo se renova? Assista ao vídeo completo! The Gap Files.",
+    "emotionalArc": "",
+    "toneProgression": "",
+    "whatToReveal": [],
+    "whatToHold": [],
+    "whatToIgnore": [],
+    "segmentDistribution": {
+      "hook": 1,
+      "context": 0,
+      "rising": 4,
+      "climax": 1,
+      "resolution": 0,
+      "cta": 0
+    },
+    "tensionCurve": [
+      "low",
+      "low",
+      "pause",
+      "medium",
+      "peak",
+      "pause"
+    ],
+    "openLoops": [
+      {
+        "question": "Como a imprensa de 1475 se compara à 8chan hoje?",
+        "openedAtBeat": 1,
+        "closedAtBeat": null
+      }
+    ],
+    "resolutionLevel": "none"
+  },
+  "rawContent": "{\n  \"hookStrategy\": \"Usar a técnica de Contradição chocante: apresentar a equivalência entre a primeira imprensa de tipos móveis que propagou o mito de Simon de Trento e o uso de 8chan/Facebook por John Earnest, destacando a continuidade da 'fórmula mortal' de ódio ao longo dos séculos.\",\n  \"hookVariants\": [\n    {\n      \"level\": \"green\",\n      \"hook\": \"Primeira imprensa de ódio, a gravura de Trento, encontra 8chan: a mesma fórmula mortal que alimenta o ódio hoje.\",\n      \"rationale\": \"Apela à curiosidade intelectual sem provocar confrontos, ideal para público amplo.\"\n    },\n    {\n      \"level\": \"moderate\",\n      \"hook\": \"Primeira imprensa de ódio, a gravura de Trento, encontra 8chan: a mesma fórmula mortal que alimenta o ódio hoje.\",\n      \"rationale\": \"Mantém a provocação ao ligar passado e presente, mas com tom controlado.\"\n    },\n    {\n      \"level\": \"aggressive\",\n      \"hook\": \"Primeira imprensa de ódio, a gravura de Trento, encontra 8chan: a mesma fórmula mortal que alimenta o ódio hoje.\",\n      \"rationale\": \"Desafia diretamente o espectador, forçando reflexão sobre a cumplicidade moderna.\"\n    },\n    {\n      \"level\": \"lawless\",\n      \"hook\": \"Primeira imprensa de ódio, a gravura de Trento, encontra 8chan: a mesma fórmula mortal que alimenta o ódio hoje.\",\n      \"rationale\": \"Ultrapassa limites ao acusar agressivamente plataformas atuais, gerando choque máximo.\"\n    }\n  ],\n  \"promiseSetup\": \"Trento. Uma cidade medieval. 8chan. Um fórum digital. Descubra como a mesma tática de manipulação se repete séculos depois.\",\n  \"risingBeats\": [\n    {\n      \"order\": 1,\n      \"revelation\": \"A primeira imprensa de tipos móveis foi usada para espalhar o mito de Simon de Trento, criando uma 'verdade' oficial.\",\n      \"questionAnswered\": \"Como a imprensa ajudou a criar uma narrativa de ódio?\",\n      \"newQuestion\": \"Como essa fórmula de propaganda se repete nas redes sociais atuais?\",\n      \"sourceReference\": \"[1] Investigação Histórico-Forense: Simão de Trento\"\n    },\n    {\n      \"order\": 2,\n      \"revelation\": \"A xilogravura de 1493 de Nuremberg fixou visualmente o mito, tornando‑o inesquecível.\",\n      \"questionAnswered\": \"Por que a imagem foi tão persuasiva?\",\n      \"newQuestion\": \"Qual seria o equivalente visual na era digital?\",\n      \"sourceReference\": \"[1] Investigação Histórico-Forense: Simão de Trento\"\n    },\n    {\n      \"order\": 3,\n      \"revelation\": \"Em 2019, John Earnest usou 8chan e Facebook para divulgar manifesto citando Simon de Trento como inspiração.\",\n      \"questionAnswered\": \"Como a internet replicou a estratégia da imprensa renascentista?\",\n      \"newQuestion\": \"Qual o impacto dessa nova 'imprensa' na violência contemporânea?\",\n      \"sourceReference\": \"[6] Um morto e seis feridos em ataque a tiros contra uma sinagoga na Califórnia\"\n    },\n    {\n      \"order\": 4,\n      \"revelation\": \"Ambas as mídias criam ciclos de medo que alimentam o ódio e justificam violência.\",\n      \"questionAnswered\": \"O que liga a impressão de 1475 ao ataque de Poway?\",\n      \"newQuestion\": \"Como podemos interromper esse ciclo de propaganda de ódio?\",\n      \"sourceReference\": \"[1] Investigação Histórico-Forense: Simão de Trento\"\n    }\n  ],\n  \"climaxMoment\": \"\",\n  \"climaxFormula\": \"\",\n  \"resolutionPoints\": [],\n  \"resolutionAngle\": \"\",\n  \"ctaApproach\": \"Quer saber como o mesmo medo se renova? Assista ao vídeo completo! The Gap Files.\",\n  \"emotionalArc\": \"\",\n  \"toneProgression\": \"\",\n  \"whatToReveal\": [],\n  \"whatToHold\": [],\n  \"whatToIgnore\": [],\n  \"segmentDistribution\": {\n    \"hook\": 1,\n    \"context\": 0,\n    \"rising\": 4,\n    \"climax\": 1,\n    \"resolution\": 0,\n    \"cta\": 0\n  },\n  \"tensionCurve\": [\n    \"low\",\n    \"low\",\n    \"pause\",\n    \"medium\",\n    \"peak\",\n    \"pause\"\n  ],\n  \"openLoops\": [\n    {\n      \"question\": \"Como a imprensa de 1475 se compara à 8chan hoje?\",\n      \"openedAtBeat\": 1,\n      \"closedAtBeat\": null\n    }\n  ],\n  \"resolutionLevel\": \"none\"\n}"
+}

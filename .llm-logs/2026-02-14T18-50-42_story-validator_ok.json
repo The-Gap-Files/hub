@@ -1,0 +1,18 @@
+{
+  "timestamp": "2026-02-14T18:50:42.537Z",
+  "taskId": "story-validator",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "approved": false,
+    "violations": [
+      "Beat 2 menciona 'hoje' violando a regra de contaminação temporal; o ângulo não é de conexão temporal.",
+      "Beat 3 menciona 'hoje' violando a mesma regra.",
+      "Uso de datas ('Trento, 1475') viola o avoid pattern que proíbe mencionar datas.",
+      "climaxMoment fornece uma conclusão, violando a regra de zero resolução."
+    ],
+    "corrections": "Remova referências ao presente ('hoje') dos beats 2 e 3, mantendo todo o conteúdo estritamente em 1475. Substitua 'Trento, 1475' por apenas 'Trento' ou outra âncora sem data para atender ao avoid pattern. Elimine o climaxMoment ou substitua por um corte seco sem explicação, garantindo que nenhum ponto seja resolvido."
+  },
+  "rawContent": "{\"approved\":false,\"violations\":[\"Beat 2 menciona 'hoje' violando a regra de contaminação temporal; o ângulo não é de conexão temporal.\",\"Beat 3 menciona 'hoje' violando a mesma regra.\",\"Uso de datas ('Trento, 1475') viola o avoid pattern que proíbe mencionar datas.\",\"climaxMoment fornece uma conclusão, violando a regra de zero resolução.\"],\"corrections\":\"Remova referências ao presente ('hoje') dos beats 2 e 3, mantendo todo o conteúdo estritamente em 1475. Substitua 'Trento, 1475' por apenas 'Trento' ou outra âncora sem data para atender ao avoid pattern. Elimine o climaxMoment ou substitua por um corte seco sem explicação, garantindo que nenhum ponto seja resolvido.\"}"
+}

@@ -16,22 +16,30 @@ HOOK → CONTEXT → RISING ACTION → CLIMAX → RESOLUTION → CTA
 
 ## 🧬 ADAPTAÇÃO POR PAPEL NARRATIVO (NARRATIVE ROLES)
 
-Embora a estrutura acima seja o padrão, você deve adaptá-la RIGOROSAMENTE ao `narrativeRole` do roteiro:
+Embora a estrutura acima seja o padrão, você deve adaptá-la RIGOROSAMENTE ao `narrativeRole` do roteiro.
+
+🚨 **REGRA DE FUNIL:** Teasers são TOPO DE FUNIL. Eles PROVOCAM curiosidade e DIRECIONAM para o Full Video. Se o teaser entrega a história completa, a conversão para o Full Video MORRE. Mesmo documentários precisam dessa disciplina em formato curto.
 
 ### GATEWAY (Porta de Entrada)
 - **Estrutura:** Segue o padrão completo (Hook -> Context -> Rising...).
 - **Context:** Essencial (15-45s). Explique tudo como se o público não soubesse nada.
 - **Tom:** Acolhedor, assume ignorância do tema.
+- **Resolução:** `PARCIAL` — Contextualiza e cria curiosidade. NÃO entrega conclusão completa.
+- **Proibido no teaser:** Entregar todos os dados, fechar a análise, ou dar veredicto final.
 
 ### DEEP-DIVE (Mergulho Direto)
 - **Estrutura:** HOOK -> RISING ACTION... (Contexto Minimalista).
 - **Context:** ZERO ou MÁXIMO 1 frase. O público já conhece o tema. Não explique o básico.
 - **Tom:** Insider, técnico, rápido. Vá direto aos detalhes suculentos.
+- **Resolução:** `MÍNIMA` — Aprofunda um aspecto mas a conclusão principal fica em aberto.
+- **Proibido no teaser:** Fechar a investigação. O detalhe revelado deve gerar MAIS perguntas.
 
 ### HOOK-ONLY (Gancho Puro)
 - **Estrutura:** HOOK (Extendido) -> CTA. (Sem Contexto, Sem Resolução longa).
 - **Context:** PROIBIDO. Comece *in medias res*.
 - **Tom:** Urgente, chocante. O objetivo é apenas gerar curiosidade para o vídeo longo.
+- **Resolução:** `ZERO` — Pura provocação factual. Nenhuma análise ou conclusão.
+- **Proibido no teaser:** Qualquer forma de explicação, recap ou conclusão.
 
 ---
 
@@ -51,6 +59,11 @@ Embora a estrutura acima seja o padrão, você deve adaptá-la RIGOROSAMENTE ao 
 - **Setup:** Evento específico + contradição chocante
 - **Exemplo:** "Você mataria por sua religião?  Em 2019 alguem matou. Duas vidas interrompidas em Brentwood. A polícia tinha um suspeito. As evidências apontavam outro caminho. O julgamento dividiria a América."
 - **Por que funciona:** Data precisa = credibilidade. Contradição = curiosidade. Stakes altos.
+
+🚨 **REGRA DE HOOK CONCEITUAL:** Choque com IDEIA, não com DETALHE GRÁFICO.
+- ❌ Detalhes anatômicos/gore nos primeiros 2s → swipe por repulsa + risco algorítmico
+- ✅ Conceito perturbador + mecânica → perplexidade → retenção
+Hooks que causam REPULSA perdem espectador. Hooks que causam PERPLEXIDADE prendem.
 
 #### Perfil Psicológico
 - **Setup:** Comportamento paradoxal + número impactante
@@ -271,6 +284,55 @@ Outcome: "Muda como entendemos [fenômeno]"
 - "Estimativa de impacto: entre 400-600 casos"
 - "Intervalo de confiança: melhoria de 15-20%"
 - "Cenário otimista: X / Cenário conservador: Y"
+
+## ⏱️ CALIBRAÇÃO POR DURAÇÃO (SHORTS VS. LONGOS)
+
+A densidade narrativa muda com a duração. Documentários curtos NÃO são documentários longos comprimidos — são formatos diferentes.
+
+### Shorts (30-60s / 6-12 cenas)
+- **Ritmo:** Direto e factual. Sem introdução lenta. Dados nos primeiros 3 segundos.
+- **Beats:** Máximo 3-4. Cada beat = 1-2 cenas com dado impactante.
+- **Resolução:** PROIBIDA. O short provoca com FATOS, o Full Video ANALISA.
+- **Curva de tensão:** Dato → Contradição → Pausa → Dado devastador → Corte.
+- **Regra:** Se o espectador sente que já sabe a conclusão, o short FALHOU.
+
+### Teasers Médios (60-120s / 12-24 cenas)
+- **Ritmo:** Alternado. Blocos de dados + momentos de humanização.
+- **Beats:** 4-6. Permite construção de argumento.
+- **Resolução:** Parcial. Pode fechar 1 thread, mas deve deixar 2+ abertas.
+
+### Teasers Longos (120-180s / 24-36 cenas)
+- **Ritmo:** Documentário clássico. Contexto + revelação + implicações.
+- **Beats:** 5-8. Arco quase completo mas com lacuna intencional.
+- **Resolução:** Quase-completa. Mas SEMPRE deixar 1+ pergunta sem resposta.
+
+---
+
+## 🔥 TÉCNICAS DE RETENÇÃO MÁXIMA (APLICAM-SE A TODOS OS FORMATOS)
+
+### Micro-Hooks (Termine TODA cena com tensão)
+❌ "E então ele morreu." [resolve — sem razão para continuar]
+✅ "E então ele morreu. Mas os documentos diziam outra coisa." [abre novo thread]
+
+### Open Loops (Abra threads, resolva estrategicamente)
+- Cada revelação que gera uma NOVA pergunta é um loop aberto
+- Para teasers: pelo menos 1 loop deve ficar aberto no final
+- Para HOOK-ONLY: TODOS os loops ficam abertos
+- Loops abertos no final do teaser = razão para assistir o Full Video
+
+### Pattern Interrupt (Varie estímulos a cada 10-15s)
+- Alterne tipos de informação: dado numérico → testemunho → contradição → pergunta
+- Alterne composição visual: documento → rosto → localização → close-up
+- Alterne tom narrativo: factual → emocional → analítico
+
+🚨 **VARIAÇÃO DE AMBIENTE VISUAL:** Se 8+ cenas estão no MESMO sceneEnvironment, insira 1-2 cenas com ambiente diferente. Monotonia visual = fadiga = queda de retenção.
+
+### Curiosity Gap Maintenance
+- Cada resposta deve gerar 2 novas perguntas
+- Entregue evidências, não conclusões
+- "Os dados mostram X. Mas o que ninguém explica é..."
+
+---
 
 ## 🎬 Técnicas Cinematográficas Documentais
 

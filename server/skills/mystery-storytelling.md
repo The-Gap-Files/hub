@@ -16,22 +16,30 @@ HOOK → PROMISE → RISING MYSTERY → CLIMAX/TWIST → RESOLUTION → CTA
 
 ## 🧬 ADAPTAÇÃO POR PAPEL NARRATIVO (NARRATIVE ROLES)
 
-Embora o mistério seja a chave, o nível de contexto muda drasticamente conforme o ROLE:
+Embora o mistério seja a chave, o nível de contexto muda drasticamente conforme o ROLE.
+
+🚨 **REGRA DE FUNIL:** Teasers são TOPO DE FUNIL. Eles provocam. O Full Video resolve. Se o teaser entrega a história completa (explicação científica, motivação, conclusão moral), a conversão para o Full Video MORRE.
 
 ### GATEWAY (Porta de Entrada)
 - **Estrutura:** Completa (Hook -> Promise com Contexto -> Rising...).
 - **Context/Promise:** Essencial. Explique O QUE é o mistério para quem nunca ouviu falar.
 - **Tom:** Conspiratório convidativo. "Você sabia que...?"
+- **Resolução:** `PARCIAL` — Contextualiza mas NÃO entrega a conclusão final.
+- **Proibido no teaser:** Explicar a causa real, revelar quem lucrou, ou dar a resolução histórica.
 
 ### DEEP-DIVE (Mergulho Direto)
 - **Estrutura:** HOOK -> RISING MYSTERY (Sem re-explicar o básico).
 - **Context/Promise:** ZERO ou MÁXIMO 1 frase. O público já conhece a teoria. Vá para a evidência nova.
 - **Tom:** Insider, "apenas para quem sabe" (red pill).
+- **Resolução:** `MÍNIMA` — Revela um aspecto mas deixa a pergunta principal aberta.
+- **Proibido no teaser:** Fechar o caso. O detalhe revelado deve ABRIR mais perguntas, não fechá-las.
 
 ### HOOK-ONLY (Gancho Puro)
 - **Estrutura:** HOOK (Extendido) -> CTA.
 - **Context:** PROIBIDO. Jogue a evidência na cara do espectador.
 - **Tom:** Urgente, pânico, revelação súbita.
+- **Resolução:** `ZERO` — Corte seco. Nenhuma explicação. O cérebro PRECISA buscar resposta.
+- **Proibido no teaser:** Qualquer forma de explicação, recap, conclusão ou reflexão moral.
 
 ---
 
@@ -54,6 +62,11 @@ Três minutos depois, ele estava morto.
 O que estava naquele documento?"
 ```
 **Por que funciona:** Ação imediata + tempo específico + pergunta irresistível
+
+🚨 **REGRA DE HOOK CONCEITUAL:** Choque com IDEIA, não com DETALHE GRÁFICO.
+- ❌ "Rasgavam ligamentos usando gravidade" → gore explícito → swipe por repulsa
+- ✅ "A gravidade virou arma. E a confissão virou produto." → conceito → curiosidade
+Hooks que causam REPULSA nos primeiros 2s perdem o espectador. Hooks que causam PERPLEXIDADE prendem.
 
 #### Contradição Chocante
 ```
@@ -236,6 +249,10 @@ Próximo arquivo: [teaser]"
 - **História Oculta:** "O que os livros não contam, os arquivos revelam. Próximo caso: [teaser]."
 - **Crime Misterioso:** "Casos arquivados. Verdades enterradas. Próxima investigação: [teaser]."
 
+🚨 **CTA CONVIDATIVO:** O CTA deve CONVIDAR, não FILTRAR.
+- ❌ "...se tiver estômago" / "...se aguenta a verdade" (excludente, reduz compartilhamento)
+- ✅ "O resto está no arquivo. The Gap Files." / "Se você quer a verdade inteira." (convidativo)
+
 ---
 
 ## 🧠 PSICOLOGIA VIRAL (viral-generator-builder)
@@ -329,6 +346,33 @@ Outcome: "Muda tudo que você achava sobre Guerra Fria"
 
 ---
 
+## ⏱️ CALIBRAÇÃO POR DURAÇÃO (SHORTS VS. LONGOS)
+
+A densidade narrativa e o ritmo mudam drasticamente com a duração:
+
+### Shorts (30-60s / 6-12 cenas)
+- **Ritmo:** Staccato extremo. Frases curtas. Cortes rápidos.
+- **Beats:** Máximo 3-4. Cada beat = 1-2 cenas.
+- **Resolução:** PROIBIDA. O short é trailer, não filme.
+- **Curva de tensão:** Low → High → Pausa → Peak → Corte.
+- **CTA:** Integrado na última cena. Máximo 1 cena dedicada.
+- **Regra de ouro:** Se o espectador sente que "já entendeu a história", o short FALHOU como funil.
+
+### Teasers Médios (60-120s / 12-24 cenas)
+- **Ritmo:** Alternado. Blocos densos + momentos de respiração.
+- **Beats:** 4-6. Permite desenvolvimento.
+- **Resolução:** Parcial. Pode fechar 1 loop, mas deve deixar 2+ abertos.
+- **Curva de tensão:** Low → Medium → High → Pausa → Peak → Silêncio → Clímax → Corte.
+- **CTA:** 1 cena dedicada.
+
+### Teasers Longos (120-180s / 24-36 cenas)
+- **Ritmo:** Cinematográfico. Permite construção de atmosfera.
+- **Beats:** 5-8. Arco narrativo quase completo.
+- **Resolução:** Parcial a quase-completa. Mas SEMPRE deixar 1+ loop aberto.
+- **CTA:** 1-2 cenas.
+
+---
+
 ## 🔥 TÉCNICAS DE RETENÇÃO MÁXIMA
 
 ### Micro-Hooks (Termine TODA cena com pergunta)
@@ -357,6 +401,8 @@ Mas o terceiro mencionou um nome. Um nome que aparece em TODOS os casos. [Loop 2
 - Alterne: Rápido → Lento → Frenético
 - Alterne: Visual denso → Minimalista → Caótico
 - Alterne: Narração → Silêncio + visual → Narração
+
+🚨 **VARIAÇÃO DE AMBIENTE VISUAL:** Se 8+ cenas consecutivas estão no MESMO sceneEnvironment, insira 1-2 cenas com ambiente diferente no meio. Ex: 6 cenas em dungeon + 1 cena de documento sendo assinado + 1 cena de multidão. Monotonia visual = fadiga = queda de retenção.
 
 ---
 
@@ -455,17 +501,37 @@ Fato Documentado ←→ Teoria Fundamentada ←→ Especulação ←→ Fantasia
 
 ## 💬 VOCABULÁRIO ESTRATIFICADO
 
-### TIER 1: Power Words (primeiros 30s)
+### PACK PADRÃO (Conspiração Moderna / Geopolítica)
+
+#### TIER 1: Power Words (primeiros 30s)
 Revelado, Proibido, Classificado, Redigido (Redacted), Protocolo, Arquivo
 
-### TIER 2: Authority Words (estabelecer credibilidade)
+#### TIER 2: Authority Words (estabelecer credibilidade)
 Documentado, Registrado, Testemunhado, Evidenciado, Desclassificado, Oficial
 
-### TIER 3: Mystery Words (atmosfera)
+#### TIER 3: Mystery Words (atmosfera)
 Oculto, Sombras, Ecos, Fragmentos, Rastros, Vestígios, Lacunas (Gaps)
 
-### TIER 4: Action Words (momentum)
+#### TIER 4: Action Words (momentum)
 Descobrimos, Revelamos, Seguimos, Investigamos, Rastreamos, Conectamos
+
+### PACK HISTÓRICO (Medieval / Antiguidade / Pré-Moderno)
+
+Use este vocabulary pack quando o dossiê tratar de eventos anteriores ao século XIX ou quando o tema envolver documentos históricos, processos inquisitoriais, crônicas medievais, etc.
+
+#### TIER 1: Power Words (primeiros 30s)
+Selado, Enterrado, Apagado, Proibido, Condenado, Oculto nos arquivos
+
+#### TIER 2: Authority Words (credibilidade documental)
+Ata notarial, Crônica da época, Carta selada, Registro episcopal, Relato inquisitorial, Autos do processo, Decreto papal, Documento notarial
+
+#### TIER 3: Mystery Words (atmosfera histórica)
+Pergaminhos, Vestígios, Ruínas, Ecos seculares, Sombras do passado, Lacunas históricas, Arquivos esquecidos
+
+#### TIER 4: Action Words (investigação histórica)
+Desenterramos, Relemos os originais, Cruzamos registros, Reexaminamos as fontes, Rastreamos os documentos, Comparamos versões
+
+**REGRA DE SELEÇÃO:** Se o dossiê envolve datas antes de 1800 OU menciona documentos eclesiásticos, crônicas, atas ou processos inquisitoriais → use o PACK HISTÓRICO. Se envolve agências governamentais modernas, operações militares ou documentos classificados → use o PACK PADRÃO. Se mistura eras (ex: evento medieval com repercussão moderna) → use PACK HISTÓRICO para a narrativa principal e insira termos do PACK PADRÃO apenas na ponte temporal.
 
 ---
 

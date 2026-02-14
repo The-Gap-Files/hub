@@ -28,6 +28,7 @@ export default defineEventHandler(async (event) => {
     angle: string
     angleCategory: string
     narrativeRole?: string
+    shortFormatType?: string
     scriptOutline?: string
     cta?: string
     strategicNotes?: string
@@ -38,9 +39,7 @@ export default defineEventHandler(async (event) => {
     avoidPatterns?: string[]
   } | undefined
 
-  console.log(`[API] Generating story outline for Output ${outputId}${feedback ? ` with feedback: "${feedback}"` : ''}${monetizationContext ? ` from monetization (${monetizationContext.itemType}: ${monetizationContext.angleCategory})` : ''}`)
-
-  // 1. Buscar Output com Dossier
+  // 1. Buscar Output com Dossier (antes de tudo — precisamos do monetizationContext salvo)
   const output = await prisma.output.findUnique({
     where: { id: outputId },
     include: {
@@ -58,6 +57,11 @@ export default defineEventHandler(async (event) => {
   if (!output || !output.dossier) {
     throw createError({ statusCode: 404, message: 'Output or Dossier not found' })
   }
+
+  // Se não veio monetizationContext no body, recuperar do Output salvo
+  const effectiveMonetizationContext = monetizationContext || (output.monetizationContext as unknown as typeof monetizationContext) || undefined
+
+  console.log(`[API] Generating story outline for Output ${outputId}${feedback ? ` with feedback: "${feedback}"` : ''}${effectiveMonetizationContext ? ` from monetization (${effectiveMonetizationContext.itemType}: ${effectiveMonetizationContext.angleCategory})` : ''}`)
 
   const dossier = output.dossier
 
@@ -89,27 +93,21 @@ export default defineEventHandler(async (event) => {
       language: output.language || 'pt-BR',
       mustInclude: output.mustInclude || undefined,
       mustExclude: output.mustExclude || undefined,
-      monetizationContext
+      monetizationContext: effectiveMonetizationContext
     })
 
-    // 4. Salvar outline no banco (enriquecido com metadados de monetização)
-    const outlineToSave: any = { ...result.outline }
-    if (monetizationContext) {
-      outlineToSave._monetizationMeta = {
-        narrativeRole: monetizationContext.narrativeRole,
-        strategicNotes: monetizationContext.strategicNotes,
-        angleCategory: monetizationContext.angleCategory,
-        itemType: monetizationContext.itemType,
-        scriptStyleId: monetizationContext.scriptStyleId,
-        scriptStyleName: monetizationContext.scriptStyleName,
-        editorialObjectiveId: monetizationContext.editorialObjectiveId,
-        editorialObjectiveName: monetizationContext.editorialObjectiveName,
-        avoidPatterns: monetizationContext.avoidPatterns,
-      }
+    // 4. Salvar outline + monetizationContext no banco
+    const updateData: any = {
+      storyOutline: result.outline as any,
+      storyOutlineApproved: false
+    }
+    // Persistir monetizationContext no campo dedicado (primeira vez ou atualização)
+    if (effectiveMonetizationContext) {
+      updateData.monetizationContext = effectiveMonetizationContext as any
     }
     await prisma.output.update({
       where: { id: outputId },
-      data: { storyOutline: outlineToSave as any, storyOutlineApproved: false }
+      data: updateData
     })
 
     // 5. Registrar custo do plano (fire-and-forget) — resource 'outline', não 'script'

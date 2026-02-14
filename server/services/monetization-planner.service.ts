@@ -9,7 +9,7 @@
 import { z } from 'zod'
 import { SystemMessage, HumanMessage } from '@langchain/core/messages'
 import { loadSkill } from '../utils/skill-loader'
-import { serializeConstantsCatalog, serializeRoleDistribution } from '../utils/constants-catalog'
+import { serializeConstantsCatalog, serializeRoleDistribution, SHORT_FORMAT_TYPES } from '../utils/constants-catalog'
 import { createLlmForTask, getAssignment } from './llm/llm-factory'
 import type { CreativeDirection } from './creative-direction-advisor.service'
 import { buildDossierBlock } from '../utils/dossier-prompt-block'
@@ -23,8 +23,23 @@ const LOG = '[MonetizationPlanner]'
 // Se falhar, fallback para parsing manual do raw response.
 function createStructuredOutput(model: any, schema: any, provider: string) {
   const isGemini = provider.toLowerCase().includes('gemini') || provider.toLowerCase().includes('google')
-  const method = isGemini ? 'jsonSchema' : undefined
-  console.log(`${LOG} 🔧 Structured output method: ${method || 'default (functionCalling)'} (provider: ${provider})`)
+  const isReplicate = provider.toLowerCase().includes('replicate')
+  const isGroq = provider.toLowerCase().includes('groq')
+  if (isReplicate && typeof (model as any).withStructuredOutputReplicate === 'function') {
+    console.log(`${LOG} 🔧 Structured output: replicate (invoke + parse)`)
+    return (model as any).withStructuredOutputReplicate(schema, { includeRaw: true })
+  }
+  // Groq GPT-OSS: SDK detecta prefixo 'openai/gpt-oss' e usa jsonSchema nativamente → sem override.
+  // Groq Llama 4: SDK não suporta jsonSchema → forçar jsonMode para evitar tool_use_failed.
+  // Groq outros (Llama 3.3, etc.): functionCalling funciona bem → sem override.
+  let method: string | undefined
+  if (isGemini) method = 'jsonSchema'
+  else if (isGroq) {
+    const modelName = (model as any).model || (model as any).modelName || ''
+    if (modelName.includes('llama-4')) method = 'jsonMode'
+    // GPT-OSS: SDK autodetecta → undefined (deixa o SDK escolher)
+  }
+  console.log(`${LOG} 🔧 Structured output method: ${method || 'default (SDK auto)'} (provider: ${provider})`)
   return (model as any).withStructuredOutput(schema, {
     includeRaw: true,
     ...(method ? { method } : {})
@@ -192,6 +207,38 @@ function parseEstimatedViews(value: any): number {
   return Math.round(num)
 }
 
+/**
+ * Infere a categoria de ângulo narrativo a partir do texto do campo `angle`.
+ * Útil quando o modelo (ex: Groq jsonMode) preenche `angle` mas não `angleCategory`.
+ */
+const ANGLE_KEYWORDS: Array<{ category: string; patterns: RegExp }> = [
+  { category: 'economico', patterns: /dinheiro|financ|econom|lucro|custo|mercado|moeda|money|capital|fiscal|receita/i },
+  { category: 'ideologico', patterns: /ideolog|religi|crença|dogma|fé|fanatismo|doutrina|seita|belief/i },
+  { category: 'politico', patterns: /politic|poder|govern|estado|manipulaç|influên|regime|ditad|autorit/i },
+  { category: 'humano', patterns: /human|pessoal|drama|vítima|famíl|sofrim|empatia|destino|indivíd|tragéd/i },
+  { category: 'conspirativo', patterns: /conspir|oculto|escondid|segredo|encobr|silenciad|verdade.*oficial|cover.*up/i },
+  { category: 'cientifico', patterns: /cienti|evidênc|dado|prova|técnic|análise|pesquis|estudo|laborat/i },
+  { category: 'geopolitico', patterns: /geopolit|internacion|nação|país|fronteira|disputa.*territ|global/i },
+  { category: 'cultural', patterns: /cultur|socied|legado|relevância|tradição|costum|impacto.*social/i },
+  { category: 'paradoxal', patterns: /paradox|contradiç|ironi|absurd|incoerên|oposto|inversão/i },
+  { category: 'cronologico', patterns: /cronolog|timeline|temporal|data|época|quando|período|sequênc/i },
+  { category: 'conexao-temporal', patterns: /conexão.*temporal|passado.*presente|presente.*futuro|atualidade|eco.*modern/i },
+  { category: 'psicologico', patterns: /psicolog|mente|histeria|viés|manipulaç.*psic|comportament|cognit/i },
+  { category: 'evidencial', patterns: /evidenc|prova|registro|document|investiga|forense|perícia/i },
+  { category: 'revisionista', patterns: /revision|versão.*oficial|reescrev|reavali|reinterpret/i },
+  { category: 'propagandistico', patterns: /propagan|arma.*narrativ|desinform|manipulaç.*mídia|narrativ.*oficial/i },
+  { category: 'tecnologico', patterns: /tecnolog|inovaç|digital|algoritm|inteligên|máquina|automação/i },
+  { category: 'etico', patterns: /étic|moral|dilema|direito|consequência.*étic|justi[çc]/i },
+]
+
+function inferAngleCategoryFromText(angleText: string | undefined): string | null {
+  if (!angleText || typeof angleText !== 'string') return null
+  for (const { category, patterns } of ANGLE_KEYWORDS) {
+    if (patterns.test(angleText)) return category
+  }
+  return null
+}
+
 function normalizeMonetizationResponse(raw: any): any {
   // Passo 1: Unwrap — extrair do wrapper se existir
   let data = raw
@@ -218,27 +265,47 @@ function normalizeMonetizationResponse(raw: any): any {
     }
   }
 
+  const VALID_SHORT_FORMAT: readonly string[] = SHORT_FORMAT_TYPES
+  let _shortFormatFallbackIdx = 0
+  function toValidShortFormatType(v: any): string {
+    const s = String(v || '').trim()
+    if (VALID_SHORT_FORMAT.includes(s)) return s
+    // Fallback round-robin: distribui formatos quando o LLM retorna inválidos
+    const fallback = VALID_SHORT_FORMAT[_shortFormatFallbackIdx % VALID_SHORT_FORMAT.length] ?? 'plot-twist'
+    _shortFormatFallbackIdx++
+    console.warn(`${LOG} ⚠️ shortFormatType inválido "${s}" → fallback round-robin: "${fallback}"`)
+    return fallback
+  }
+
   // Passo 2: Se já tem fullVideo e teasers, normalizar aliases e retornar
   if (data.fullVideo && data.teasers) {
-    // Extrair visualStyle se veio como objeto { id, name } em vez de campos separados
+    const fv = data.fullVideo
+    // Extrair visualStyle — pode estar em root ou dentro de fullVideo (Llama)
     const vs = data.visualStyle || {}
-    const visualStyleId = data.visualStyleId || data.visual_style_id || vs.id || 'noir-cinematic'
-    const visualStyleName = data.visualStyleName || data.visual_style_name || vs.name || 'Noir Cinematic'
+    const visualStyleId = data.visualStyleId || data.visual_style_id || vs.id || fv.visualStyleId || fv.visual_style_id || 'noir-cinematic'
+    const visualStyleName = data.visualStyleName || data.visual_style_name || vs.name || fv.visualStyleName || fv.visual_style_name || 'Noir Cinematic'
 
     // Normalizar estimatedViews de string para número em todos os items
-    if (data.fullVideo.estimatedViews) {
-      data.fullVideo.estimatedViews = parseEstimatedViews(data.fullVideo.estimatedViews)
+    if (fv.estimatedViews) {
+      fv.estimatedViews = parseEstimatedViews(fv.estimatedViews)
     }
     if (Array.isArray(data.teasers)) {
-      data.teasers = data.teasers.map((t: any) => ({
-        ...t,
-        estimatedViews: parseEstimatedViews(t.estimatedViews || t.estimated_views || 0),
-        angleCategory: t.angleCategory || t.angle_category || 'cronologico',
-        narrativeRole: t.narrativeRole || t.narrative_role || undefined,
-        scriptOutline: t.scriptOutline || t.script_outline || '',
-        visualSuggestion: t.visualSuggestion || t.visual_suggestion || '',
-        cta: t.cta || t.callToAction || t.call_to_action || '',
-      }))
+      data.teasers = data.teasers.map((t: any) => {
+        const rawShortFormat = t.shortFormatType || t.short_format_type || t.formatType || t.format_type || t.format
+        const avoidRaw = t.avoidPatterns || t.avoid_patterns || t.antiPatterns || t.anti_patterns || []
+        const avoidArr = Array.isArray(avoidRaw) ? avoidRaw : []
+        return {
+          ...t,
+          estimatedViews: parseEstimatedViews(t.estimatedViews || t.estimated_views || 0),
+          angleCategory: t.angleCategory || t.angle_category || inferAngleCategoryFromText(t.angle) || 'cronologico',
+          narrativeRole: t.narrativeRole || t.narrative_role || t.role || undefined,
+          shortFormatType: toValidShortFormatType(rawShortFormat),
+          scriptOutline: t.scriptOutline || t.script_outline || '',
+          avoidPatterns: avoidArr.length >= 1 ? avoidArr : ['Evite contextualização excessiva'],
+          visualSuggestion: t.visualSuggestion || t.visual_suggestion || '',
+          cta: t.cta || t.callToAction || t.call_to_action || '',
+        }
+      })
     }
 
     // Resolver aliases de schedule: publishingSchedule, publication_schedule, schedule, cadence
@@ -246,8 +313,11 @@ function normalizeMonetizationResponse(raw: any): any {
       || data.publishingSchedule || data.publishing_schedule
       || data.schedule || data.cadence
 
+    const planTitle = data.planTitle || data.plan_title || fv.title || 'Plano de Monetização'
+
     const result = {
       ...data,
+      planTitle,
       visualStyleId,
       visualStyleName,
       visualStyle: undefined, // remover objeto wrapper
@@ -293,29 +363,33 @@ function normalizeMonetizationResponse(raw: any): any {
 
     // Spread-first: preserva TODOS os campos originais do modelo.
     // Só sobrescreve campos que sabemos ter nomes alternativos (snake_case → camelCase).
-    const normalizeItem = (item: any) => ({
-      ...item, // ← preserva tudo que o modelo retornou (duration, id, notes, etc.)
-      // Aliases — resolve nomes alternativos, mas NÃO sobrescreve se o campo canônico já existe
-      angle: item.angle || item.narrativeAngle || item.narrative_angle || '',
-      angleCategory: item.angleCategory || item.angle_category || 'cronologico',
-      narrativeRole: item.narrativeRole || item.narrative_role || undefined,
-      scriptOutline: item.scriptOutline || item.script_outline || item.structure || '',
-      visualSuggestion: item.visualSuggestion || item.visual_suggestion || '',
-      cta: item.cta || item.callToAction || item.call_to_action || '',
-      estimatedViews: parseEstimatedViews(item.estimatedViews || item.estimated_views || 0),
-      scriptStyleId: item.scriptStyleId || item.script_style_id || 'documentary',
-      scriptStyleName: item.scriptStyleName || item.script_style_name || 'Documentary',
-      editorialObjectiveId: item.editorialObjectiveId || item.editorial_objective_id || 'hidden-truth',
-      editorialObjectiveName: item.editorialObjectiveName || item.editorial_objective_name || 'Hidden Truth',
-      visualPrompt: item.visualPrompt || item.visual_prompt || item.imagePrompt || '',
-    })
+    const normalizeItem = (item: any) => {
+      const rawShortFormat = item.shortFormatType || item.short_format_type || item.formatType || item.format_type || item.format
+      const avoidRaw = item.avoidPatterns || item.avoid_patterns || item.antiPatterns || item.anti_patterns || []
+      const avoidArr = Array.isArray(avoidRaw) ? avoidRaw : []
+      return {
+        ...item, // ← preserva tudo que o modelo retornou (duration, id, notes, etc.)
+        angle: item.angle || item.narrativeAngle || item.narrative_angle || '',
+        angleCategory: item.angleCategory || item.angle_category || 'cronologico',
+        narrativeRole: item.narrativeRole || item.narrative_role || item.role || undefined,
+        shortFormatType: toValidShortFormatType(rawShortFormat),
+        scriptOutline: item.scriptOutline || item.script_outline || item.structure || '',
+        visualSuggestion: item.visualSuggestion || item.visual_suggestion || '',
+        cta: item.cta || item.callToAction || item.call_to_action || '',
+        avoidPatterns: avoidArr.length >= 1 ? avoidArr : ['Evite contextualização excessiva'],
+        estimatedViews: parseEstimatedViews(item.estimatedViews || item.estimated_views || 0),
+        scriptStyleId: item.scriptStyleId || item.script_style_id || 'documentary',
+        scriptStyleName: item.scriptStyleName || item.script_style_name || 'Documentary',
+        editorialObjectiveId: item.editorialObjectiveId || item.editorial_objective_id || 'hidden-truth',
+        editorialObjectiveName: item.editorialObjectiveName || item.editorial_objective_name || 'Hidden Truth',
+        visualPrompt: item.visualPrompt || item.visual_prompt || item.imagePrompt || '',
+      }
+    }
 
     const result: any = {
-      // Preservar campos extras do nível plan (id, title, notes, etc.)
       ...data,
-      // Remover items[] já que foi desestruturado
       items: undefined,
-      // Mapear campos com aliases
+      planTitle: data.planTitle || data.plan_title || resolvedFullVideo?.title || 'Plano de Monetização',
       visualStyleId: data.visualStyleId || data.visual_style_id || resolvedFullVideo?.visualStyleId || 'noir-cinematic',
       visualStyleName: data.visualStyleName || data.visual_style_name || resolvedFullVideo?.visualStyleName || 'Noir Cinematic',
       fullVideo: {
@@ -400,9 +474,132 @@ function escapeInternalJsonQuotes(jsonStr: string): string {
 
   return result.join('')
 }
+
 /**
- * Invoca o LLM com structured output. Para Gemini, se withStructuredOutput falhar com 400,
- * faz fallback para chamada raw + parsing manual do JSON.
+ * Tenta reparar JSON truncado fechando chaves/colchetes abertos.
+ * Estratégia: truncar na última propriedade completa e fechar estruturas pendentes.
+ */
+function tryRepairTruncatedJson(jsonStr: string, logPrefix: string): any | null {
+  console.warn(`${logPrefix} 🔧 Tentando reparar JSON truncado (${jsonStr.length} chars)...`)
+
+  // Encontrar o último }, ] ou "  que fecha algo válido
+  let repaired = jsonStr
+
+  // Remover string parcial no final (se termina no meio de uma string)
+  // Procurar a última aspas que fecha uma string e truncar depois dela
+  // Heurística: voltar até achar um ponto de corte seguro
+  const safeCutPoints = [
+    repaired.lastIndexOf('},'),   // Fim de objeto em array
+    repaired.lastIndexOf('],'),   // Fim de array em array
+    repaired.lastIndexOf('"}'),   // String seguida de fim de objeto
+    repaired.lastIndexOf('"]'),   // String seguida de fim de array
+    repaired.lastIndexOf('" }'),  // String seguida de fim de objeto (com espaço)
+    repaired.lastIndexOf('"\n'),  // String seguida de nova linha
+  ].filter(i => i > repaired.length * 0.5) // Só considerar se estiver na segunda metade
+
+  const bestCut = Math.max(...safeCutPoints)
+  if (bestCut > 0) {
+    // Cortar no ponto seguro (incluir o caractere)
+    const cutChar = repaired[bestCut]!
+    repaired = repaired.substring(0, bestCut + (cutChar === ',' ? 0 : 1))
+    // Remover trailing comma
+    repaired = repaired.replace(/,\s*$/, '')
+  }
+
+  // Contar chaves/colchetes abertos
+  let openBraces = 0
+  let openBrackets = 0
+  let inStr = false
+  for (let i = 0; i < repaired.length; i++) {
+    const ch = repaired[i]
+    const prev = i > 0 ? repaired[i - 1] : ''
+    if (ch === '"' && prev !== '\\') inStr = !inStr
+    if (!inStr) {
+      if (ch === '{') openBraces++
+      else if (ch === '}') openBraces--
+      else if (ch === '[') openBrackets++
+      else if (ch === ']') openBrackets--
+    }
+  }
+
+  // Fechar estruturas pendentes
+  while (openBrackets > 0) { repaired += ']'; openBrackets-- }
+  while (openBraces > 0) { repaired += '}'; openBraces-- }
+
+  try {
+    const result = JSON.parse(repaired)
+    console.log(`${logPrefix} ✅ JSON reparado com sucesso. Keys: ${Object.keys(result).join(', ')}`)
+    return result
+  } catch (e: any) {
+    console.warn(`${logPrefix} ❌ Reparo falhou: ${e.message}`)
+    return null
+  }
+}
+
+/** Invoca modelo raw (sem schema) e parseia JSON manualmente. Usado por Gemini/Replicate. */
+async function invokeRawAndParse(model: any, messages: any[], normalizeAliases: boolean): Promise<{ parsed: any; raw: any }> {
+  const rawResult = await model.invoke(messages)
+  // LLM base (Replicate) pode retornar string direta; BaseChatModel retorna AIMessage
+  const rawContent = typeof rawResult === 'string'
+    ? rawResult
+    : (rawResult?.lc_kwargs?.content || rawResult?.content)
+  let jsonText = typeof rawContent === 'string' ? rawContent : ''
+
+  if (Array.isArray(rawContent)) {
+    for (const part of rawContent) {
+      if (part?.type === 'text' && part?.text) {
+        jsonText = part.text
+        break
+      }
+      if (typeof part === 'string') {
+        jsonText = part
+        break
+      }
+    }
+  }
+
+  jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+  console.log(`${LOG} 🔍 Raw JSON text (primeiros 1000 chars): ${jsonText.substring(0, 1000)}`)
+  let parsed: any
+  try {
+    parsed = JSON.parse(jsonText)
+  } catch (firstParseErr: any) {
+    console.warn(`${LOG} ⚠️ JSON.parse direto falhou: ${firstParseErr.message}`)
+    let sanitized = jsonText
+      .replace(/,\s*([}\]])/g, '$1')
+      .replace(/[\u201C\u201D\u201E\u201F\u2033\u2036]/g, '"')
+      .replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g, "'")
+      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '')
+      .replace(/^\uFEFF/, '')
+    try {
+      parsed = JSON.parse(sanitized)
+    } catch {
+      try {
+        parsed = JSON.parse(escapeInternalJsonQuotes(sanitized))
+      } catch {
+        const jsonMatch = sanitized.match(/\{[\s\S]*\}/)
+        if (jsonMatch) {
+          try {
+            parsed = JSON.parse(jsonMatch[0])
+          } catch {
+            // Última tentativa: reparar JSON truncado fechando chaves/colchetes
+            parsed = tryRepairTruncatedJson(jsonMatch[0], LOG)
+            if (!parsed) throw firstParseErr
+          }
+        } else {
+          throw firstParseErr
+        }
+      }
+    }
+  }
+
+  if (normalizeAliases) parsed = normalizeMonetizationResponse(parsed)
+  return { parsed, raw: rawResult }
+}
+
+/**
+ * Invoca o LLM com structured output. Para Gemini/Replicate, usa chamada raw + parse
+ * (sem withStructuredOutput). Para OpenAI/Anthropic/Groq, usa withStructuredOutput.
  */
 async function invokeWithFallback(
   model: any,
@@ -411,11 +608,34 @@ async function invokeWithFallback(
   messages: any[]
 ): Promise<{ parsed: any; raw: any }> {
   const isGemini = provider.toLowerCase().includes('gemini') || provider.toLowerCase().includes('google')
+  const isReplicate = provider.toLowerCase().includes('replicate')
 
-  // Tentativa 1: withStructuredOutput (funciona para OpenAI/Anthropic/Groq, pode funcionar para Gemini)
+  // Replicate/Llama: usar withStructuredOutputReplicate (mesmo caminho que todos os outros serviços)
+  // + normalizeMonetizationResponse como pós-processamento para aliases (estimatedViews, shortFormatType, etc.)
+  if (isReplicate) {
+    console.log(`${LOG} 🔧 Provider replicate: withStructuredOutputReplicate + normalize`)
+    try {
+      const structuredLlm = createStructuredOutput(model, schema, provider)
+      const { invokeWithLogging } = await import('../utils/llm-invoke-wrapper')
+      const result = await invokeWithLogging(structuredLlm, messages, { taskId: 'monetization-planner', provider, model: model.constructor.name })
+      let parsed = result.parsed ?? result
+      // Se parsed for o wrapper { parsed, raw }, extrair
+      if (parsed && typeof parsed === 'object' && 'parsed' in parsed) parsed = parsed.parsed
+      // Normalizar aliases (estimatedViews string→number, shortFormatType, etc.)
+      parsed = normalizeMonetizationResponse(parsed)
+      return { parsed, raw: result.raw ?? result }
+    } catch (structuredErr: any) {
+      console.warn(`${LOG} ⚠️ withStructuredOutputReplicate falhou: ${structuredErr.message}. Tentando invokeRawAndParse...`)
+      // Fallback para invokeRawAndParse se o structured falhar (ex: schema.parse falhou)
+      return invokeRawAndParse(model, messages, true)
+    }
+  }
+
+  // Tentativa 1: withStructuredOutput (OpenAI/Anthropic/Groq; Gemini pode falhar)
   try {
     const structuredLlm = createStructuredOutput(model, schema, provider)
-    const result = await structuredLlm.invoke(messages)
+    const { invokeWithLogging } = await import('../utils/llm-invoke-wrapper')
+    const result = await invokeWithLogging(structuredLlm, messages, { taskId: 'monetization-planner', provider, model: model.constructor.name })
 
     if (result.parsed) {
       return { parsed: result.parsed, raw: result.raw }
@@ -428,8 +648,8 @@ async function invokeWithFallback(
 
     const fallback = fallbackParseFromRaw(result.raw, LOG)
     if (fallback) {
-      // Para Gemini, normalizar aliases mesmo no fallback parse
-      const normalized = isGemini ? normalizeMonetizationResponse(fallback) : fallback
+      // Normalizar aliases para qualquer provider no fallback (jsonMode, Gemini, etc.)
+      const normalized = normalizeMonetizationResponse(fallback)
       return { parsed: normalized, raw: result.raw }
     }
 
@@ -444,104 +664,21 @@ async function invokeWithFallback(
 
     throw new Error('Structured output retornou parsed=null e fallback falhou')
   } catch (error: any) {
-    // Se não é Gemini, propagar o erro normalmente
+    const { handleGroqJsonValidateError } = await import('../utils/groq-error-handler')
+    const result = handleGroqJsonValidateError<any>(error, LOG)
+
+    if (result.success) {
+      const normalized = normalizeMonetizationResponse(result.data)
+      return { parsed: normalized, raw: error }
+    }
+
     if (!isGemini) throw error
 
-    // Para Gemini: tentar chamada RAW (sem schema) e parsear manualmente
     console.warn(`${LOG} ⚠️ Gemini structured output falhou. Tentando chamada raw...`)
-    console.warn(`${LOG} 🔍 Erro original completo: ${error.message}`)
-
     try {
-      const rawResult = await model.invoke(messages)
-      const rawContent = rawResult?.lc_kwargs?.content || rawResult?.content
-      let jsonText = typeof rawContent === 'string' ? rawContent : ''
-
-      // Se for array (parts), extrair texto
-      if (Array.isArray(rawContent)) {
-        for (const part of rawContent) {
-          if (part?.type === 'text' && part?.text) {
-            jsonText = part.text
-            break
-          }
-          if (typeof part === 'string') {
-            jsonText = part
-            break
-          }
-        }
-      }
-
-      // Limpar e parsear
-      jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-      console.log(`${LOG} 🔍 Raw JSON text (primeiros 1000 chars): ${jsonText.substring(0, 1000)}`)
-      let parsed: any
-      try {
-        parsed = JSON.parse(jsonText)
-      } catch (firstParseErr: any) {
-        console.warn(`${LOG} ⚠️ JSON.parse direto falhou: ${firstParseErr.message}`)
-        console.warn(`${LOG} 🔧 Tentando sanitizar JSON...`)
-
-        // Sanitização: corrigir problemas comuns do Gemini
-        let sanitized = jsonText
-          // Remover trailing commas antes de } ou ]
-          .replace(/,\s*([}\]])/g, '$1')
-          // Fix aspas curly/smart quotes → aspas retas
-          .replace(/[\u201C\u201D\u201E\u201F\u2033\u2036]/g, '"')
-          .replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g, "'")
-          // Remover caracteres de controle (exceto \n \r \t)
-          .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '')
-          // Remover BOM
-          .replace(/^\uFEFF/, '')
-
-        try {
-          parsed = JSON.parse(sanitized)
-          console.log(`${LOG} ✅ JSON sanitizado parseado com sucesso`)
-        } catch (secondParseErr: any) {
-          console.warn(`${LOG} ⚠️ Sanitização básica falhou: ${secondParseErr.message}`)
-
-          // Tentativa avançada: escapar aspas internas em valores de string JSON
-          // Gemini gera padrões como: "texto ("aspas internas") texto"
-          try {
-            const escaped = escapeInternalJsonQuotes(sanitized)
-            parsed = JSON.parse(escaped)
-            console.log(`${LOG} ✅ JSON com aspas escapadas parseado com sucesso`)
-          } catch (escapeErr) {
-            // Última tentativa: extrair o primeiro bloco {} completo
-            const jsonMatch = sanitized.match(/\{[\s\S]*\}/)
-            if (jsonMatch) {
-              try {
-                parsed = JSON.parse(jsonMatch[0])
-                console.log(`${LOG} ✅ Bloco JSON extraído e parseado com sucesso`)
-              } catch (thirdParseErr: any) {
-                console.error(`${LOG} ❌ Todas as tentativas de parse falharam`)
-                console.error(`${LOG} 🔍 Texto recebido completo (${jsonText.length} chars):`)
-                console.error(jsonText)
-                throw firstParseErr // Lançar o erro original (mais preciso)
-              }
-            } else {
-              console.error(`${LOG} ❌ Nenhum bloco JSON encontrado no texto`)
-              console.error(`${LOG} 🔍 Texto recebido completo (${jsonText.length} chars):`)
-              console.error(jsonText)
-              throw firstParseErr
-            }
-          }
-        }
-      }
-
-      // Diagnóstico: logar estrutura do JSON
-      const topKeys = Object.keys(parsed)
-      console.log(`${LOG} 🔍 Raw JSON keys: [${topKeys.join(', ')}]`)
-
-      // SEMPRE normalizar — mesmo quando já tem fullVideo/teasers,
-      // precisa resolver aliases (publishingSchedule, visualStyle, estimatedViews string, etc.)
-      parsed = normalizeMonetizationResponse(parsed)
-
-      console.log(`${LOG} ✅ Gemini raw fallback bem sucedido (keys: [${Object.keys(parsed).join(', ')}])`)
-      return { parsed, raw: rawResult }
+      return await invokeRawAndParse(model, messages, true)
     } catch (rawError: any) {
-      console.error(`${LOG} ❌ Gemini raw fallback também falhou:`)
-      console.error(`${LOG} 🔍 Erro completo: ${rawError.message}`)
-      if (rawError.stack) console.error(`${LOG} 📎 Stack: ${rawError.stack}`)
-      // Lançar o erro ORIGINAL (mais informativo)
+      console.error(`${LOG} ❌ Gemini raw fallback também falhou: ${rawError.message}`)
       throw error
     }
   }
@@ -590,6 +727,20 @@ const TeaserSuggestionSchema = z.object({
   // ── Papel Narrativo ────────────────────────────────────────────
   narrativeRole: z.enum(['gateway', 'deep-dive', 'hook-only'])
     .describe('Papel narrativo: gateway (contexto completo), deep-dive (contexto mínimo), hook-only (zero contexto)'),
+  // ── Formato do Short (Mecânica Narrativa) ──────────────────────
+  shortFormatType: z.enum([
+    'hook-brutal', 'pergunta-incomoda', 'plot-twist',
+    'teaser-cinematografico', 'mini-documento', 'lista-rapida', 'frase-memoravel'
+  ]).describe(
+    'Formato narrativo do short — define a MECÂNICA, não o conteúdo. ' +
+    'hook-brutal: frase chocante → corte (30-40s). ' +
+    'pergunta-incomoda: pergunta moral → micro-narrativa → pergunta final (35-45s). ' +
+    'plot-twist: história curta → virada → corte antes da explicação (40-55s). ' +
+    'teaser-cinematografico: clima pesado → pausas → corte (35-50s). ' +
+    'mini-documento: explica UM detalhe específico com profundidade (45-60s). ' +
+    'lista-rapida: "3 fatos que ninguém conta" → bullets impactantes (40-50s). ' +
+    'frase-memoravel: frase forte + contexto mínimo (25-35s).'
+  ),
   scriptOutline: z.string().describe('Estrutura resumida do script (Hook → Setup → Revelação → CTA)'),
   visualSuggestion: z.string().describe('Descrição curta do visual sugerido'),
   cta: z.string().describe('Call-to-action para o Full Video'),
@@ -676,7 +827,7 @@ export interface RegenerateItemRequest {
     sources?: Array<{ title: string; content: string; sourceType: string; weight?: number }>
     notes?: Array<{ content: string; noteType: string }>
   }
-  teaserDuration: 60 | 120 | 180
+  teaserDuration: 35 | 55 | 115
   fullVideoDuration: 300 | 600 | 900
   userSuggestion?: string
 }
@@ -698,12 +849,14 @@ export interface MonetizationPlannerRequest {
   images?: Array<{ description: string }>
   persons?: Array<{ name: string; role?: string | null; description?: string | null; visualDescription?: string | null; relevance: string }>
   researchData?: any
-  teaserDuration: 60 | 120 | 180
+  teaserDuration: 35 | 55 | 115
   fullVideoDuration: 300 | 600 | 900
   /** Quantidade de teasers desejada (4-15, padrão: 6) */
   teaserCount?: number
   /** Direção criativa pré-gerada (opcional). Se fornecida, guia as escolhas de estilo. */
   creativeDirection?: CreativeDirection
+  /** Feedback de validação (retry): violações e correções para regenerar o plano. */
+  validationFeedback?: { violations: string[]; corrections?: string; warnings?: string[] }
 }
 
 export interface MonetizationPlannerResult {
@@ -821,7 +974,7 @@ export async function generateMonetizationPlan(
 
 function buildSystemPrompt(skillContent: string, request: MonetizationPlannerRequest): string {
   const teaserCount = Math.min(15, Math.max(4, request.teaserCount ?? 6))
-  const teaserLabel = request.teaserDuration === 60 ? 'curtos (60s)' : request.teaserDuration === 120 ? 'médios (120s)' : 'longos (180s)'
+  const teaserLabel = request.teaserDuration === 35 ? 'ultra-curtos (35s)' : request.teaserDuration === 55 ? 'curtos (55s)' : 'médios (115s)'
   const fullLabel = `${request.fullVideoDuration / 60} minutos`
 
   // Bloco de creative direction pré-gerada (se houver)
@@ -857,9 +1010,9 @@ ${creativeDirectionBlock}
 ### Calibração de profundidade por duração:
 
 **Teasers ${request.teaserDuration}s:**
-${request.teaserDuration === 60 ? '- Extremamente direto. Hook (3s) → 1 revelação impactante (40s) → CTA (5s).\n- Sem setup elaborado. Vá direto ao ponto mais chocante.\n- Cada teaser é uma única "bala" de conteúdo.' : ''}
-${request.teaserDuration === 120 ? '- Hook (3s) → Setup breve (25s) → Desenvolvimento (50s) → Revelação (30s) → CTA (10s).\n- Permite contexto e buildup antes da revelação.\n- Mais espaço para storytelling, mas ainda precisa ser tenso.' : ''}
-${request.teaserDuration === 180 ? '- Hook (5s) → Setup (30s) → Desenvolvimento com 2-3 beats (90s) → Revelação (40s) → CTA (15s).\n- Quase um mini-documentário. Permite arco narrativo completo.\n- Ideal para ângulos que precisam de contexto.' : ''}
+${request.teaserDuration === 35 ? '- Ultra-curto (35s / 7 cenas). Hook BRUTAL (2s) → 1 fato/contradição devastadora (25s) → corte seco (5s).\n- SEM setup. SEM resolução. Pura provocação.\n- Ideal para hook-brutal e frase-memoravel.\n- O espectador deve sair CONFUSO e CURIOSO — nunca satisfeito.' : ''}
+${request.teaserDuration === 55 ? '- Curto e direto (55s / 11 cenas). Hook (3s) → 1-2 revelações impactantes (40s) → tensão aberta + CTA (5s).\n- Sem setup elaborado. Vá direto ao ponto mais chocante.\n- Cada teaser é uma única "bala" de conteúdo. NÃO resolva — provoque.\n- Ideal para plot-twist, pergunta-incomoda, teaser-cinematografico.' : ''}
+${request.teaserDuration === 115 ? '- Médio com desenvolvimento (115s / 23 cenas). Hook (3s) → Setup breve (15s) → Desenvolvimento (55s) → Tensão aberta (30s) → CTA (10s).\n- Permite contexto e buildup antes da tensão.\n- Mais espaço para storytelling, mas NUNCA feche a história — deixe loops abertos.\n- Ideal para mini-documento, lista-rapida.' : ''}
 
 **Full Video ${fullLabel}:**
 ${request.fullVideoDuration === 300 ? '- Vídeo compacto. Hook forte → Contexto mínimo → 3 beats principais → Clímax → CTA rápido.\n- Sem filler. Cada segundo conta.' : ''}
@@ -1020,7 +1173,22 @@ function buildUserPrompt(request: MonetizationPlannerRequest): string {
   // O dossiê (theme, sources, notes, persons) agora vem via buildDossierBlock (cacheado)
   // Este prompt contém APENAS as instruções específicas de monetização
 
-  let prompt = `Crie um plano de monetização Document-First para o dossiê acima:\n\n`
+  let prompt = ''
+
+  // ── Feedback de validação (retry) ───────────────────────────────────
+  if (request.validationFeedback?.violations?.length) {
+    prompt += `⚠️ CORREÇÃO OBRIGATÓRIA (VALIDADOR REPROVOU O PLANO ANTERIOR):\n`
+    prompt += request.validationFeedback.violations.map(v => `- VIOLAÇÃO: ${v}`).join('\n')
+    if (request.validationFeedback.corrections) {
+      prompt += `\n\nINSTRUÇÕES DE CORREÇÃO: ${request.validationFeedback.corrections}`
+    }
+    if (request.validationFeedback.warnings?.length) {
+      prompt += `\n\nAvisos: ${request.validationFeedback.warnings.join('; ')}`
+    }
+    prompt += `\n\nCorrija o plano para atender às regras acima e gere novamente.\n\n`
+  }
+
+  prompt += `Crie um plano de monetização Document-First para o dossiê acima:\n\n`
 
   // ── Parâmetros de duração ──────────────────────────────────────────
   prompt += `⏱️ DURAÇÕES OBRIGATÓRIAS:\n`

@@ -55,6 +55,65 @@ export async function validateStoryOutline(
     return { approved: true } // Se não tem regra específica, aprova por padrão (safe fail)
   }
 
+  // 1.5. Validação Programática de Campos Obrigatórios (antes do LLM)
+  const isHookOnly = context.narrativeRole === 'hook-only'
+  const violations: string[] = []
+
+  // Campos que SEMPRE devem estar preenchidos
+  if (!outline.hookStrategy || outline.hookStrategy.trim() === '') {
+    violations.push('Campo obrigatório "hookStrategy" está vazio')
+  }
+  if (!outline.hookVariants || outline.hookVariants.length !== 4) {
+    violations.push('Campo "hookVariants" deve conter exatamente 4 variantes')
+  }
+  if (!outline.promiseSetup || outline.promiseSetup.trim() === '') {
+    violations.push('Campo obrigatório "promiseSetup" está vazio (mínimo: anchor com local)')
+  }
+  if (!outline.risingBeats || outline.risingBeats.length < 2) {
+    violations.push('Campo "risingBeats" deve conter pelo menos 2 beats')
+  }
+
+  // Campos que devem estar PREENCHIDOS para gateway/deep-dive, mas VAZIOS para hook-only
+  if (!isHookOnly) {
+    // Gateway/Deep-dive: exigir campos de resolução preenchidos
+    if (!outline.climaxMoment || outline.climaxMoment.trim() === '') {
+      violations.push('Campo obrigatório "climaxMoment" está vazio (obrigatório para gateway/deep-dive)')
+    }
+    if (!outline.climaxFormula || outline.climaxFormula.trim() === '') {
+      violations.push('Campo obrigatório "climaxFormula" está vazio (obrigatório para gateway/deep-dive)')
+    }
+    if (!outline.resolutionPoints || outline.resolutionPoints.length < 2) {
+      violations.push('Campo "resolutionPoints" deve conter pelo menos 2 pontos (obrigatório para gateway/deep-dive)')
+    }
+    if (!outline.resolutionAngle || outline.resolutionAngle.trim() === '') {
+      violations.push('Campo obrigatório "resolutionAngle" está vazio (obrigatório para gateway/deep-dive)')
+    }
+    if (!outline.ctaApproach || outline.ctaApproach.trim() === '') {
+      violations.push('Campo obrigatório "ctaApproach" está vazio (obrigatório para gateway/deep-dive)')
+    }
+    if (!outline.emotionalArc || outline.emotionalArc.trim() === '') {
+      violations.push('Campo obrigatório "emotionalArc" está vazio (obrigatório para gateway/deep-dive)')
+    }
+    if (!outline.toneProgression || outline.toneProgression.trim() === '') {
+      violations.push('Campo obrigatório "toneProgression" está vazio (obrigatório para gateway/deep-dive)')
+    }
+    if (!outline.whatToReveal || outline.whatToReveal.length < 1) {
+      violations.push('Campo "whatToReveal" deve conter pelo menos 1 item (obrigatório para gateway/deep-dive)')
+    }
+  }
+
+  // Se houver violações programáticas, retornar imediatamente
+  if (violations.length > 0) {
+    console.warn(`${LOG} ❌ Validação programática REPROVADA. Violações: ${violations.join(', ')}`)
+    return {
+      approved: false,
+      violations,
+      corrections: isHookOnly
+        ? 'Para hook-only, deixe os campos de resolução vazios (climaxMoment, climaxFormula, resolutionPoints, resolutionAngle, ctaApproach, emotionalArc, toneProgression, whatToReveal, whatToHold, whatToIgnore = "" ou []). Preencha apenas hookStrategy, hookVariants, promiseSetup (mínimo: anchor com local), e risingBeats.'
+        : 'Para gateway/deep-dive, todos os campos de resolução devem estar preenchidos com conteúdo específico (não genérico). Revise os campos vazios listados acima.'
+    }
+  }
+
   // 2. Montar o Prompt de Validação
   const roleLabel = isFullVideo ? 'Full Video' : context.narrativeRole
   const prompt = `
@@ -110,17 +169,18 @@ Responda APENAS no formato JSON definido.
 
     console.log(`${LOG} Usando ${assignment.provider} (${assignment.model}) para validação`)
 
-    // Usando structuredOutput do LangChain
-    const structuredLlm = (model as any).withStructuredOutput(ValidationResultSchema, {
-      includeRaw: true,
-      method: 'jsonSchema'
-    })
+    // Usando structuredOutput — com fallback para Replicate
+    const m = model as any
+    const structuredLlm = assignment.provider === 'replicate' && typeof m.withStructuredOutputReplicate === 'function'
+      ? m.withStructuredOutputReplicate(ValidationResultSchema, { includeRaw: true })
+      : m.withStructuredOutput(ValidationResultSchema, { includeRaw: true, method: 'jsonSchema' })
 
-    const result = await structuredLlm.invoke([
+    const { invokeWithLogging } = await import('../utils/llm-invoke-wrapper')
+    const result = await invokeWithLogging(structuredLlm, [
       { role: 'user', content: prompt }
-    ])
+    ], { taskId: 'story-validator', provider: assignment.provider, model: assignment.model })
 
-    const validation = result.parsed || result as ValidationResult
+    const validation = (result.parsed || result) as unknown as ValidationResult
 
     if (!validation.approved) {
       console.warn(`${LOG} ❌ Outline REPROVADO. Violações: ${validation.violations?.join(', ')}`)
@@ -130,7 +190,18 @@ Responda APENAS no formato JSON definido.
 
     return validation
 
-  } catch (error) {
+  } catch (error: any) {
+    const { handleGroqJsonValidateError } = await import('../utils/groq-error-handler')
+    const result = handleGroqJsonValidateError<ValidationResult>(error, LOG)
+
+    if (result.success) {
+      return {
+        approved: result.data.approved ?? true,
+        violations: result.data.violations,
+        corrections: result.data.corrections,
+      } as ValidationResult
+    }
+
     console.error(`${LOG} Erro na validação:`, error)
     return { approved: true }
   }

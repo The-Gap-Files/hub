@@ -1,0 +1,111 @@
+{
+  "timestamp": "2026-02-14T19:22:31.940Z",
+  "taskId": "story-architect-retry",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "hookStrategy": "In media res – começa com o som da corda esticada ao redor do pescoço, lançando o espectador direto no momento de confissão forçada.",
+    "hookVariants": [
+      {
+        "level": "green",
+        "hook": "Trento, mãos amarradas ao pescoço, o estalo da corda corta o silêncio, anunciando o início de uma tortura que cria confissões.",
+        "rationale": "Desperta curiosidade sem violência explícita, mantendo o suspense."
+      },
+      {
+        "level": "moderate",
+        "hook": "Trento, o som da corda se estica sobre o pescoço, forçando um grito mudo que se transforma em escrita de sangue.",
+        "rationale": "Intensifica a tensão ao sugerir que o medo gera um registro sangrento."
+      },
+      {
+        "level": "aggressive",
+        "hook": "Trento, a corda apertada ao redor do pescoço puxa até o limite, fazendo a verdade derreter em sangue e medo.",
+        "rationale": "Confronta o espectador com a brutal fusão de dor e mentira."
+      },
+      {
+        "level": "lawless",
+        "hook": "Trento, a corda rasga a carne, o sangue escorre como tinta, e a única prova aceita é o grito forçado.",
+        "rationale": "Ultrapassa limites ao misturar violência gráfica e a ideia de verdade fabricada."
+      }
+    ],
+    "promiseSetup": "Trento, onde a corda estica e o silêncio se rompe.",
+    "risingBeats": [
+      {
+        "order": 1,
+        "revelation": "A corda se aperta, as mãos apertam o pescoço, o medo começa a subir.",
+        "questionAnswered": "Não respondida",
+        "newQuestion": "Como a pressão pode transformar o medo em palavra?",
+        "sourceReference": "Investigação Histórico-Forense, seção tortura"
+      },
+      {
+        "order": 2,
+        "revelation": "Gotículas de sangue pingam como tinta na parede em um piscar, cada gota um grito silencioso.",
+        "questionAnswered": "Não respondida",
+        "newQuestion": "Quem está escrevendo esses gritos?",
+        "sourceReference": "Relatórios de julgamento, confissões"
+      },
+      {
+        "order": 3,
+        "revelation": "O rosto do inquisidor se aproxima, olhos vazios, exigindo detalhes que nunca aconteceram.",
+        "questionAnswered": "Não respondida",
+        "newQuestion": "Por que a verdade se curva diante da autoridade?",
+        "sourceReference": "Arquivos judiciais, depoimentos forçados"
+      },
+      {
+        "order": 4,
+        "revelation": "A corda se rompe, o silêncio explode, deixando apenas o eco de palavras arrancadas.",
+        "questionAnswered": "Não respondida",
+        "newQuestion": "O que resta quando o som desaparece?",
+        "sourceReference": "Narrativas de encerramento da tortura"
+      }
+    ],
+    "climaxMoment": "",
+    "climaxFormula": "",
+    "resolutionPoints": [],
+    "resolutionAngle": "",
+    "ctaApproach": "Corte seco imediatamente após o último beat, sem áudio, exibindo apenas o logotipo \"The Gap Files\" em tela negra.",
+    "emotionalArc": "",
+    "toneProgression": "",
+    "whatToReveal": [],
+    "whatToHold": [],
+    "whatToIgnore": [],
+    "segmentDistribution": {
+      "hook": 1,
+      "context": 0,
+      "rising": 4,
+      "climax": 1,
+      "resolution": 0,
+      "cta": 1
+    },
+    "tensionCurve": [
+      "low",
+      "medium",
+      "high",
+      "peak"
+    ],
+    "openLoops": [
+      {
+        "question": "Como a pressão pode transformar o medo em palavra?",
+        "openedAtBeat": 1,
+        "closedAtBeat": null
+      },
+      {
+        "question": "Quem está escrevendo esses gritos?",
+        "openedAtBeat": 2,
+        "closedAtBeat": null
+      },
+      {
+        "question": "Por que a verdade se curva diante da autoridade?",
+        "openedAtBeat": 3,
+        "closedAtBeat": null
+      },
+      {
+        "question": "O que resta quando o som desaparece?",
+        "openedAtBeat": 4,
+        "closedAtBeat": null
+      }
+    ],
+    "resolutionLevel": "none"
+  },
+  "rawContent": "{\n  \"hookStrategy\": \"In media res – começa com o som da corda esticada ao redor do pescoço, lançando o espectador direto no momento de confissão forçada.\",\n  \"hookVariants\": [\n    {\n      \"level\": \"green\",\n      \"hook\": \"Trento, mãos amarradas ao pescoço, o estalo da corda corta o silêncio, anunciando o início de uma tortura que cria confissões.\",\n      \"rationale\": \"Desperta curiosidade sem violência explícita, mantendo o suspense.\"\n    },\n    {\n      \"level\": \"moderate\",\n      \"hook\": \"Trento, o som da corda se estica sobre o pescoço, forçando um grito mudo que se transforma em escrita de sangue.\",\n      \"rationale\": \"Intensifica a tensão ao sugerir que o medo gera um registro sangrento.\"\n    },\n    {\n      \"level\": \"aggressive\",\n      \"hook\": \"Trento, a corda apertada ao redor do pescoço puxa até o limite, fazendo a verdade derreter em sangue e medo.\",\n      \"rationale\": \"Confronta o espectador com a brutal fusão de dor e mentira.\"\n    },\n    {\n      \"level\": \"lawless\",\n      \"hook\": \"Trento, a corda rasga a carne, o sangue escorre como tinta, e a única prova aceita é o grito forçado.\",\n      \"rationale\": \"Ultrapassa limites ao misturar violência gráfica e a ideia de verdade fabricada.\"\n    }\n  ],\n  \"promiseSetup\": \"Trento, onde a corda estica e o silêncio se rompe.\",\n  \"risingBeats\": [\n    {\n      \"order\": 1,\n      \"revelation\": \"A corda se aperta, as mãos apertam o pescoço, o medo começa a subir.\",\n      \"questionAnswered\": \"Não respondida\",\n      \"newQuestion\": \"Como a pressão pode transformar o medo em palavra?\",\n      \"sourceReference\": \"Investigação Histórico-Forense, seção tortura\"\n    },\n    {\n      \"order\": 2,\n      \"revelation\": \"Gotículas de sangue pingam como tinta na parede em um piscar, cada gota um grito silencioso.\",\n      \"questionAnswered\": \"Não respondida\",\n      \"newQuestion\": \"Quem está escrevendo esses gritos?\",\n      \"sourceReference\": \"Relatórios de julgamento, confissões\"\n    },\n    {\n      \"order\": 3,\n      \"revelation\": \"O rosto do inquisidor se aproxima, olhos vazios, exigindo detalhes que nunca aconteceram.\",\n      \"questionAnswered\": \"Não respondida\",\n      \"newQuestion\": \"Por que a verdade se curva diante da autoridade?\",\n      \"sourceReference\": \"Arquivos judiciais, depoimentos forçados\"\n    },\n    {\n      \"order\": 4,\n      \"revelation\": \"A corda se rompe, o silêncio explode, deixando apenas o eco de palavras arrancadas.\",\n      \"questionAnswered\": \"Não respondida\",\n      \"newQuestion\": \"O que resta quando o som desaparece?\",\n      \"sourceReference\": \"Narrativas de encerramento da tortura\"\n    }\n  ],\n  \"climaxMoment\": \"\",\n  \"climaxFormula\": \"\",\n  \"resolutionPoints\": [],\n  \"resolutionAngle\": \"\",\n  \"ctaApproach\": \"Corte seco imediatamente após o último beat, sem áudio, exibindo apenas o logotipo \\\"The Gap Files\\\" em tela negra.\",\n  \"emotionalArc\": \"\",\n  \"toneProgression\": \"\",\n  \"whatToReveal\": [],\n  \"whatToHold\": [],\n  \"whatToIgnore\": [],\n  \"segmentDistribution\": {\n    \"hook\": 1,\n    \"context\": 0,\n    \"rising\": 4,\n    \"climax\": 1,\n    \"resolution\": 0,\n    \"cta\": 1\n  },\n  \"tensionCurve\": [\n    \"low\",\n    \"medium\",\n    \"high\",\n    \"peak\"\n  ],\n  \"openLoops\": [\n    {\n      \"question\": \"Como a pressão pode transformar o medo em palavra?\",\n      \"openedAtBeat\": 1,\n      \"closedAtBeat\": null\n    },\n    {\n      \"question\": \"Quem está escrevendo esses gritos?\",\n      \"openedAtBeat\": 2,\n      \"closedAtBeat\": null\n    },\n    {\n      \"question\": \"Por que a verdade se curva diante da autoridade?\",\n      \"openedAtBeat\": 3,\n      \"closedAtBeat\": null\n    },\n    {\n      \"question\": \"O que resta quando o som desaparece?\",\n      \"openedAtBeat\": 4,\n      \"closedAtBeat\": null\n    }\n  ],\n  \"resolutionLevel\": \"none\"\n}"
+}

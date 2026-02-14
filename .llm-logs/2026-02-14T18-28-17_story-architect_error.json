@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-02-14T18:28:17.791Z",
+  "taskId": "story-architect",
+  "status": "error",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "errorMessage": "Connection error.",
+  "errorStructure": {
+    "hasError": false,
+    "hasErrorError": false,
+    "hasResponseBody": false,
+    "errorKeys": [],
+    "errorErrorKeys": []
+  }
+}

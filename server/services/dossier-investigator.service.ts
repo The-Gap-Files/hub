@@ -105,12 +105,17 @@ export async function investigateSeed(
   let result: z.infer<typeof InvestigateOutputSchema>
 
   try {
-    // Tentar structured output nativo
-    const structuredModel = model.withStructuredOutput(InvestigateOutputSchema)
-    result = await structuredModel.invoke([
+    // Tentar structured output nativo (com suporte Replicate)
+    const m = model as any
+    const isGroqLlama4 = assignment.provider.toLowerCase().includes('groq') && assignment.model.includes('llama-4')
+    const structuredModel = assignment.provider === 'replicate' && typeof m.withStructuredOutputReplicate === 'function'
+      ? m.withStructuredOutputReplicate(InvestigateOutputSchema, { includeRaw: true })
+      : m.withStructuredOutput(InvestigateOutputSchema, { ...(isGroqLlama4 ? { method: 'jsonMode' } : {}) })
+    const structuredResult = await structuredModel.invoke([
       new SystemMessage(systemPrompt),
       new HumanMessage(userPrompt)
     ])
+    result = structuredResult.parsed || structuredResult
   } catch (structuredError) {
     console.warn('[DossierInvestigator] ⚠️ Structured output falhou, usando fallback de parsing manual...')
 

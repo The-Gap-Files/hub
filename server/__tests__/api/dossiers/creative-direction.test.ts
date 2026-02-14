@@ -180,7 +180,7 @@ describe('Monetization Plan — Creative Direction Integration', () => {
         data: {
           dossierId,
           planData: planData as any,
-          teaserDuration: 60,
+          teaserDuration: 35,
           fullVideoDuration: 600,
           teaserCount: planData.teasers.length,
           provider: 'ANTHROPIC',
@@ -219,7 +219,7 @@ describe('Monetization Plan — Creative Direction Integration', () => {
         data: {
           dossierId,
           planData: planData as any,
-          teaserDuration: 120,
+          teaserDuration: 55,
           fullVideoDuration: 900,
           teaserCount: planData.teasers.length,
           provider: 'ANTHROPIC',
@@ -271,7 +271,7 @@ describe('Monetization Plan — Creative Direction Integration', () => {
         data: {
           dossierId,
           planData: planData as any,
-          teaserDuration: 60,
+          teaserDuration: 35,
           fullVideoDuration: 600,
           teaserCount: 4,
           provider: 'ANTHROPIC',
@@ -294,7 +294,7 @@ describe('Monetization Plan — Creative Direction Integration', () => {
         data: {
           dossierId,
           planData: planData as any,
-          teaserDuration: 120,
+          teaserDuration: 55,
           fullVideoDuration: 900,
           teaserCount: 4,
           provider: 'ANTHROPIC',
@@ -331,7 +331,7 @@ describe('Monetization Plan — Creative Direction Integration', () => {
         data: {
           dossierId,
           planData: planData as any,
-          teaserDuration: 60,
+          teaserDuration: 35,
           fullVideoDuration: 600,
           teaserCount: 4,
           provider: 'ANTHROPIC',

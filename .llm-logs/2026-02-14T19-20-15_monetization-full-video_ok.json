@@ -1,0 +1,29 @@
+{
+  "timestamp": "2026-02-14T19:20:15.648Z",
+  "taskId": "monetization-full-video",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "title": "Segredos Sangrentos: O Conluio que Perpetuou o Ódio | Simão de Trento",
+    "hook": "Descubra como um assassinato infantil de 1475 foi transformado em arma de ódio digital que ainda mata hoje.",
+    "angle": "conspirativo",
+    "structure": "Hook → Contextualização histórica e forense → Revelação das manipulações midiáticas → Conexão com a era digital e o ataque de Poway → Conclusão e chamada à ação",
+    "keyPoints": [
+      "A ciência forense atual desmonta o mito da incorruptibilidade do corpo, mostrando que a baixa temperatura da água alpina preservou o menino de forma natural.",
+      "As gravuras incunábulas criaram uma memória visual de ódio que se perpetuou por séculos, funcionando como um modelo precoce de propaganda massiva.",
+      "A continuidade da 'tecnologia de ódio' – da xilogravura do século XV à viralização de manifestos em 8chan e redes sociais – revela um padrão de manipulação idéntico.",
+      "O caso de Simão é citado no manifesto de John Earnest, ligando diretamente a farsa medieval ao ataque à sinagoga de Poway em 2019."
+    ],
+    "emotionalArc": "Curiosidade → Repulsa → Indignação → Compreensão → Determinação",
+    "estimatedViews": 250000,
+    "platform": "YouTube",
+    "format": "full-youtube",
+    "scriptStyleId": "documentary",
+    "scriptStyleName": "Documentary",
+    "editorialObjectiveId": "full-reveal",
+    "editorialObjectiveName": "Full Reveal",
+    "visualPrompt": "A dimly lit medieval courtroom in Trento, stone walls drenched in rain, a single candle flickering over the lifeless body of a two‑year‑old boy draped in a simple tunic, while in the foreground a modern laptop glows with the open manifesto of John Earnest, the screen casting a cold blue light onto the investigator’s face. Thick shadows, high‑contrast chiaroscuro, and a smoky atmosphere give the scene a noir‑cinematic feel, merging past and present to highlight the continuity of hate propaganda."
+  },
+  "rawContent": "{\"title\":\"Segredos Sangrentos: O Conluio que Perpetuou o Ódio | Simão de Trento\",\"hook\":\"Descubra como um assassinato infantil de 1475 foi transformado em arma de ódio digital que ainda mata hoje.\",\"angle\":\"conspirativo\",\"structure\":\"Hook → Contextualização histórica e forense → Revelação das manipulações midiáticas → Conexão com a era digital e o ataque de Poway → Conclusão e chamada à ação\",\"keyPoints\":[\"A ciência forense atual desmonta o mito da incorruptibilidade do corpo, mostrando que a baixa temperatura da água alpina preservou o menino de forma natural.\",\"As gravuras incunábulas criaram uma memória visual de ódio que se perpetuou por séculos, funcionando como um modelo precoce de propaganda massiva.\",\"A continuidade da 'tecnologia de ódio' – da xilogravura do século XV à viralização de manifestos em 8chan e redes sociais – revela um padrão de manipulação idéntico.\",\"O caso de Simão é citado no manifesto de John Earnest, ligando diretamente a farsa medieval ao ataque à sinagoga de Poway em 2019.\"],\"emotionalArc\":\"Curiosidade → Repulsa → Indignação → Compreensão → Determinação\",\"estimatedViews\":250000,\"platform\":\"YouTube\",\"format\":\"full-youtube\",\"scriptStyleId\":\"documentary\",\"scriptStyleName\":\"Documentary\",\"editorialObjectiveId\":\"full-reveal\",\"editorialObjectiveName\":\"Full Reveal\",\"visualPrompt\":\"A dimly lit medieval courtroom in Trento, stone walls drenched in rain, a single candle flickering over the lifeless body of a two‑year‑old boy draped in a simple tunic, while in the foreground a modern laptop glows with the open manifesto of John Earnest, the screen casting a cold blue light onto the investigator’s face. Thick shadows, high‑contrast chiaroscuro, and a smoky atmosphere give the scene a noir‑cinematic feel, merging past and present to highlight the continuity of hate propaganda.\"}"
+}
