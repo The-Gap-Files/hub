@@ -53,7 +53,7 @@ export class VideoPipelineService {
             include: {
               images: { where: { isSelected: true } },
               videos: { where: { isSelected: true } },
-              audioTracks: { where: { type: 'scene_narration' } }
+              audioTracks: { where: { type: { in: ['scene_narration', 'scene_sfx'] } } }
             }
           }
         }
@@ -76,7 +76,8 @@ export class VideoPipelineService {
         // Determinar asset visual (vídeo tem precedência sobre imagem)
         const videoAsset = scene.videos[0]
         const imageAsset = scene.images[0]
-        const audioAsset = scene.audioTracks[0]
+        const audioAsset = scene.audioTracks.find(t => t.type === 'scene_narration')
+        const sfxAsset = scene.audioTracks.find(t => t.type === 'scene_sfx')
 
         if (!audioAsset?.fileData) {
           log.warn(`Cena ${index + 1} sem áudio de narração; pulando.`)
@@ -86,9 +87,48 @@ export class VideoPipelineService {
         const sceneAudioPath = path.join(tempDir, `scene_${index}_audio.mp3`)
         await fs.writeFile(sceneAudioPath, audioAsset.fileData)
 
+        // Se a cena tem SFX, pré-mixar narração + SFX
+        let finalAudioPath = sceneAudioPath
+        if (sfxAsset?.fileData) {
+          const sfxPath = path.join(tempDir, `scene_${index}_sfx.mp3`)
+          await fs.writeFile(sfxPath, sfxAsset.fileData)
+
+          const mixedPath = path.join(tempDir, `scene_${index}_mixed.mp3`)
+          const sfxVolumeDb = scene.audioDescriptionVolume ?? -12
+
+          log.step(`Cena ${index + 1}`, `Mixando SFX (${sfxVolumeDb}dB) com narração`)
+
+          await new Promise<void>((resolve, reject) => {
+            ffmpeg()
+              .input(sceneAudioPath)
+              .input(sfxPath)
+              .complexFilter([
+                // Narração em volume normal, SFX com volume ajustado
+                `[1:a]volume=${sfxVolumeDb}dB[sfx]`,
+                `[0:a][sfx]amix=inputs=2:duration=first:dropout_transition=2[out]`
+              ])
+              .outputOptions(['-map', '[out]', '-ac', '2', '-ar', '44100'])
+              .output(mixedPath)
+              .on('end', () => resolve())
+              .on('error', (err) => {
+                log.warn(`Mix SFX falhou na cena ${index + 1}: ${err.message}. Usando só narração.`)
+                resolve() // Não falhar o render por causa de SFX
+              })
+              .run()
+          })
+
+          // Verificar se o mix foi criado com sucesso
+          try {
+            await fs.access(mixedPath)
+            finalAudioPath = mixedPath
+          } catch {
+            log.warn(`Mix SFX não gerou arquivo na cena ${index + 1}; usando narração pura.`)
+          }
+        }
+
         // Descobrir o tempo do áudio de maneira simples e direta (ffprobe no arquivo real)
         const realDuration = await new Promise<number>((resolve) => {
-          ffmpeg.ffprobe(sceneAudioPath, (err, metadata) => {
+          ffmpeg.ffprobe(finalAudioPath, (err, metadata) => {
             if (err) {
               log.warn(`ffprobe duração da cena ${index + 1} falhou; usando DB.`, { err: err.message })
               return resolve(audioAsset.duration || 5)
@@ -119,7 +159,7 @@ export class VideoPipelineService {
         // Renderizar clipe da cena usando o tempo REAL detectado
         await this.renderSceneClip({
           visualPath: visualInputPath,
-          audioPath: sceneAudioPath,
+          audioPath: finalAudioPath,
           outputPath: sceneOutputPath,
           isVideo,
           width,

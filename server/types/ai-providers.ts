@@ -107,6 +107,7 @@ export interface ScriptScene {
   sceneEnvironment?: string // Identificador do ambiente (ex: "bishop_study", "canal_dawn") para continuidade visual
   motionDescription?: string // Instruções de movimento para i2v (câmera, sujeito, atmosfera dinâmica)
   audioDescription?: string // Descrição de SFX ou atmosfera sonora
+  audioDescriptionVolume?: number // Volume do SFX em dB para mixagem (-24 a -6, default -12)
   estimatedDuration: number // em segundos
 }
 
@@ -377,7 +378,31 @@ export interface IMusicProvider {
 // PROVIDER FACTORY
 // =============================================================================
 
-export type ProviderType = 'script' | 'tts' | 'image' | 'video' | 'motion' | 'music'
+// =============================================================================
+// SFX GENERATION (ElevenLabs Sound Effects)
+// =============================================================================
+
+export interface SFXGenerationRequest {
+  prompt: string           // Descrição do SFX em inglês (vem do audioDescription)
+  durationSeconds?: number // Duração em segundos (0.1-30, auto se omitido)
+  promptInfluence?: number // 0-1, aderência ao prompt (default 0.3)
+}
+
+export interface SFXGenerationResponse {
+  audioBuffer: Buffer
+  duration: number         // Duração real do áudio gerado
+  format: 'mp3' | 'wav'
+  provider: string
+  model: string
+  costInfo: ProviderCostInfo
+}
+
+export interface ISFXProvider {
+  generate(request: SFXGenerationRequest): Promise<SFXGenerationResponse>
+  getName(): string
+}
+
+export type ProviderType = 'script' | 'tts' | 'image' | 'video' | 'motion' | 'music' | 'sfx'
 
 export interface ProviderConfig {
   type: ProviderType

@@ -82,6 +82,24 @@ export async function validateScript(
     return { approved: true }
   }
 
+  // 0. Check determinístico: CTA final em HOOK-ONLY deve ser exatamente "The Gap Files."
+  // (evita gastar tokens com validação LLM em algo que é regra hard)
+  if (context.itemType === 'teaser' && context.narrativeRole === 'hook-only' && scenes.length > 0) {
+    const last = scenes[scenes.length - 1]
+    const lastNarration = (last?.narration || '').trim().replace(/\s+/g, ' ')
+    if (lastNarration !== 'The Gap Files.') {
+      return {
+        approved: false,
+        violations: [
+          `CTA inválido em hook-only: a última cena deve ser EXATAMENTE "The Gap Files." (recebido: "${lastNarration || '[vazio]'}")`
+        ],
+        corrections:
+          'Reescreva a ÚLTIMA cena para ter a narração EXATAMENTE: "The Gap Files." (sem texto adicional antes/depois).',
+        overResolution: false
+      }
+    }
+  }
+
   // 1. Carregar skill de validação
   let validationSkill = ''
   try {
@@ -91,10 +109,14 @@ export async function validateScript(
     return { approved: true }
   }
 
-  // 2. Formatar cenas para análise
-  const scenesFormatted = scenes.map((s, i) =>
-    `Cena ${i}: "${s.narration}"`
-  ).join('\n')
+  // 2. Formatar cenas para análise (narração + visual + áudio)
+  const scenesFormatted = scenes.map((s, i) => {
+    let formatted = `Cena ${i}: "${s.narration}"`
+    if (s.visualDescription) {
+      formatted += `\n  Visual: "${s.visualDescription}"`
+    }
+    return formatted
+  }).join('\n')
 
   const totalDuration = scenes.length * 5
   const roleLabel = context.narrativeRole
@@ -144,10 +166,48 @@ ${scenesFormatted}
 INSTRUÇÃO FINAL:
 Analise CADA CENA do roteiro. Verifique TODOS os critérios da skill.
 
-FOCO PRINCIPAL: Verificar se o roteiro RESOLVE DEMAIS para a role "${roleLabel}".
+FOCO 1 — RESOLUÇÃO: Verificar se o roteiro RESOLVE DEMAIS para a role "${roleLabel}".
 - Se a role é gateway → resolução deve ser PARCIAL (contextualiza mas não fecha)
 - Se a role é deep-dive → resolução deve ser MÍNIMA (aprofunda mas não conclui)
 - Se a role é hook-only → resolução deve ser ZERO (pura provocação)
+
+FOCO 2 — MECANISMO > SINTOMA: Verificar narração E visual de CADA CENA.
+A narração e o visualDescription devem focar no SISTEMA (documentos, assinaturas, tribunais, confiscos, propaganda), não em violência física GRÁFICA.
+
+⚠️ DISTINÇÃO CRÍTICA — NÃO confunda:
+- DESCRIÇÃO GRÁFICA de violência = REPROVADO (detalhes de como a tortura/ataque aconteceu fisicamente)
+  Ex: "A corda rasgou seus pulsos", "Sangue escorria pelo altar", "Balas perfuraram as paredes"
+- REFERÊNCIA FACTUAL a evento = PERMITIDO (mencionar QUE algo aconteceu, sem descrever como)
+  Ex: "Ele atacou a sinagoga de Poway", "O mito inspirou um massacre em 2019", "A mentira matou novamente"
+Referências factuais a ataques, massacres, mortes são CADEIA DE TRANSMISSÃO — são o MECANISMO mostrando CONSEQUÊNCIA, não gore.
+
+PALAVRAS-GATILHO NA NARRAÇÃO (sinalizar só se usadas com DESCRIÇÃO GRÁFICA):
+  - tortura, squassada, strappado, corda, corrente, açoite, sangue escorrendo, ferida aberta, cadáver mutilado
+PALAVRAS PERMITIDAS (referência factual):
+  - atacou, massacre, ataque, assassinato, matou, morreu (quando descrevem FATO, não DETALHE GRÁFICO)
+PALAVRAS-GATILHO NO VISUAL (sinalizar sempre):
+  - torture, pulley, chain, rope, whip, blood, wound, corpse, hanged, suspended, shackle, iron maiden, gun, bullet
+SUBSTITUIÇÕES RECOMENDADAS (para descrições gráficas):
+  - "sob tortura, confessou" → "o tribunal registrou a confissão no terceiro dia"
+  - "iron pulley, condemned man suspended" → "bishop's study, illuminated ledger, sealed document"
+  - "gunshots echo" → "keyboard clicks, monitor hum"
+
+FOCO 3 — NOMES OBSCUROS (ESPECIALMENTE EM HOOK-ONLY E DEEP-DIVE):
+- Nomes históricos que NÃO são universalmente conhecidos quebram o fluxo cognitivo.
+- Em hook-only: QUALQUER nome obscuro é violação grave (o público médio não sabe quem é).
+- Em deep-dive: nomes devem ser acompanhados de função na primeira menção.
+- Em gateway: nomes podem aparecer desde que a função seja mencionada junto.
+EXEMPLOS:
+  - ❌ "Hinderbach ordenou" → ✅ "O bispo ordenou"
+  - ❌ "Tiberino analisou" → ✅ "O médico analisou"
+  - ❌ "John Earnest citou" → ✅ "O atirador citou" (se hook-only) ou "John Earnest, o atirador, citou" (se gateway)
+EXCEÇÃO: Nomes universalmente conhecidos (Hitler, Einstein, Napoleão) são permitidos.
+
+FOCO 4 — DENSIDADE / ANTI-FILLER (ESPECIALMENTE EM HOOK-ONLY):
+- Cada cena (exceto a última de CTA) deve carregar informação NOVA. Cena "bonita" mas vazia derruba retenção.
+- Se a narração de uma cena é puramente atmosférica/poética sem agente/artefato/ação/consequência → REPROVADO.
+- EXEMPLO RUIM (filler): "Um selo dourado pisca brevemente, desaparecendo como um sussurro na escuridão profunda."
+- EXEMPLO BOM (respiro com conteúdo): "O selo autorizou o confisco. E ninguém assinou por engano."
 
 Marque "overResolution: true" se o roteiro entrega conclusão/explicação demais para a role.
 
@@ -175,6 +235,12 @@ Responda APENAS no formato JSON definido.
     ], { taskId: 'script-validator', provider: assignment.provider, model: assignment.model })
 
     const validation = (result.parsed || result) as unknown as ScriptValidationResult
+
+    // Proteção contra approved:false sem violations (LLM pode omitir o campo)
+    if (!validation.approved && (!validation.violations || validation.violations.length === 0)) {
+      console.warn(`${LOG} ⚠️ LLM reprovou sem listar violações. Tratando como APROVADO (sem evidência de problema).`)
+      validation.approved = true
+    }
 
     if (!validation.approved) {
       console.warn(`${LOG} ❌ Roteiro REPROVADO. Violações: ${validation.violations?.join(', ')}`)

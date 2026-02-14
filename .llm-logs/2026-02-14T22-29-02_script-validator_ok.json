@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-02-14T22:29:02.134Z",
+  "taskId": "script-validator",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "approved": false,
+    "violations": [
+      "Cena 1 contém explicação ao revelar que o boneco de plástico é vendido como brinquedo, fechando o loop 'como essa imagem sagrada acabou se tornar um objeto de consumo?'.",
+      "Falta de alternância emocional e pico na penúltima cena: a intensidade da Cena 1 não supera a da Cena 0, violando a regra de pico na penúltima cena."
+    ],
+    "corrections": "1. Remova a explicação de que o boneco de plástico é vendido como brinquedo; mantenha apenas a descrição misteriosa do objeto sem indicar como ele se tornou um consumo. 2. Reestruture a curva emocional: faça da Cena 0 um choque de alta intensidade, da Cena 1 um momento de respiração (ex.: \"Um símbolo sagrado desaparece das relíquias, pairando no silêncio\"), e adicione ou transforme a Cena 2 em um pico de tensão que deixa um novo enigma antes do corte seco. 3. Garanta que nenhum loop seja fechado... [truncated 117 chars]",
+    "overResolution": true
+  },
+  "rawContent": "{\n  \"approved\": false,\n  \"violations\": [\n    \"Cena 1 contém explicação ao revelar que o boneco de plástico é vendido como brinquedo, fechando o loop 'como essa imagem sagrada acabou se tornar um objeto de consumo?'.\",\n    \"Falta de alternância emocional e pico na penúltima cena: a intensidade da Cena 1 não supera a da Cena 0, violando a regra de pico na penúltima cena.\"\n  ],\n  \"corrections\": \"1. Remova a explicação de que o boneco de plástico é vendido como brinquedo; mantenha apenas a descrição misteriosa do objeto sem indicar como ele se tornou um consumo. 2. Reestruture a curva emocional: faça da Cena 0 um choque de alta intensidade, da Cena 1 um momento de respiração (ex.: \\\"Um símbolo sagrado desaparece das relíquias, pairando no silêncio\\\"), e adicione ou transforme a Cena 2 em um pico de tensão que deixa um novo enigma antes do corte seco. 3. Garanta que nenhum loop seja fechado; o último enigma deve permanecer aberto. 4. Mantenha o CTA final apenas como \\\"The Gap Files.\\\" sem convite explícito.\",\n  \"overResolution\": true\n}"
+}

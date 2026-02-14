@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-02-14T22:43:24.648Z",
+  "taskId": "story-validator",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "approved": false,
+    "violations": [
+      "Hook variant \"lawless\" contains explicit violent description of a murdered child, violating the MECANISMO > SINTOMA rule (focus on symptom/gore instead of system).",
+      "Hook variant \"aggressive\" includes a direct question to the viewer, which acts as an explicit CTA and creates a closed loop, violating the CTA invisível and zero‑resolution requirements."
+    ],
+    "corrections": "Remova os hooks que apresentam violência explícita ou perguntas diretas. Substitua o hook \"lawless\" por uma versão que foque no mecanismo (ex.: \"Em Trento, o brinquedo misterioso surgiu sem explicação – ninguém sabe quem o aprovou.\"). Substitua o hook \"aggressive\" por uma frase que mantenha a ruptura sem solicitar resposta (ex.: \"Em Trento, o brinquedo do mártir circula nas prateleiras, sem explicação.\"). Mantenha apenas hooks que atendam ao critério de ruptura imediata, conceito único e ausênci... [truncated 17 chars]"
+  },
+  "rawContent": "{\"approved\":false,\"violations\":[\"Hook variant \\\"lawless\\\" contains explicit violent description of a murdered child, violating the MECANISMO > SINTOMA rule (focus on symptom/gore instead of system).\",\"Hook variant \\\"aggressive\\\" includes a direct question to the viewer, which acts as an explicit CTA and creates a closed loop, violating the CTA invisível and zero‑resolution requirements.\"],\"corrections\":\"Remova os hooks que apresentam violência explícita ou perguntas diretas. Substitua o hook \\\"lawless\\\" por uma versão que foque no mecanismo (ex.: \\\"Em Trento, o brinquedo misterioso surgiu sem explicação – ninguém sabe quem o aprovou.\\\"). Substitua o hook \\\"aggressive\\\" por uma frase que mantenha a ruptura sem solicitar resposta (ex.: \\\"Em Trento, o brinquedo do mártir circula nas prateleiras, sem explicação.\\\"). Mantenha apenas hooks que atendam ao critério de ruptura imediata, conceito único e ausência de CTA visível.\"}"
+}

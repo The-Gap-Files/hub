@@ -17,6 +17,7 @@ export type MediaTaskId =
   | 'background-music'    // Trilha sonora (Stable Audio)
   | 'motion-video'        // Animação de imagens em vídeo
   | 'thumbnail'           // Geração de thumbnails
+  | 'sfx'                 // Efeitos sonoros por cena (Sound Effects)
 
 export interface MediaModelInputSchema {
   /** Campo onde vai o prompt principal */
@@ -226,6 +227,18 @@ export const MEDIA_PROVIDERS: Record<MediaProviderId, MediaProvider> = {
           paramMapping: { stability: 'voice_settings.stability', similarity: 'voice_settings.similarity_boost', speed: 'voice_settings.speed' },
           outputMode: 'base64'
         }
+      },
+      {
+        id: 'sound-generation', name: 'Sound Effects', costTier: 2,
+        capabilities: ['sfx', 'sound-effects'],
+        inputSchema: {
+          promptField: 'text',
+          durationMode: 'seconds',
+          durationField: 'duration_seconds',
+          defaults: { prompt_influence: 0.3 },
+          paramMapping: { promptInfluence: 'prompt_influence' },
+          outputMode: 'buffer'
+        }
       }
     ]
   },
@@ -347,6 +360,14 @@ export const MEDIA_TASKS: Record<MediaTaskId, MediaTask> = {
     iconKey: 'layout',
     defaultProvider: 'replicate',
     defaultModel: 'luma/photon-flash'
+  },
+  'sfx': {
+    id: 'sfx',
+    label: 'Efeitos Sonoros (SFX)',
+    description: 'Gera efeitos sonoros ambientais por cena via IA. Mixados com a narração no render.',
+    iconKey: 'audio-waveform',
+    defaultProvider: 'elevenlabs',
+    defaultModel: 'sound-generation'
   }
 }
 

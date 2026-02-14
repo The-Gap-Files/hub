@@ -1563,6 +1563,30 @@
                      <Zap v-else :size="20" />
                      {{ generatingStage === 'AUDIO' || (output.status === 'PROCESSING' && !output.audioApproved) ? 'GERANDO...' : (allScenesHaveAudio || output.scenes?.some((s:any) => s.audioTracks?.some((a:any) => a.type === 'scene_narration')) ? 'REFAZER' : 'GERAR ÁUDIO') }}
                 </button>
+
+                <!-- SFX: Gerar efeitos sonoros (quando há cenas com audioDescription) -->
+                <button 
+                    v-if="hasSFXScenes && allScenesHaveAudio"
+                    @click="generateSFX"
+                    :disabled="generatingSFX"
+                    :class="allScenesHaveSFX ? 'px-6 py-4 bg-white/5 border border-white/10 text-zinc-400 hover:text-white hover:border-purple-500/50' : 'px-6 py-4 bg-purple-500/20 border border-purple-500/30 text-purple-300 hover:bg-purple-500/30 hover:text-purple-200'"
+                    class="font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-3 disabled:opacity-50 disabled:pointer-events-none text-xs"
+                  >
+                     <span v-if="generatingSFX" class="animate-spin w-4 h-4 border-2 border-purple-300/30 border-t-purple-300 rounded-full"></span>
+                     <RotateCw v-else-if="allScenesHaveSFX" :size="14" />
+                     <AudioWaveform v-else :size="16" />
+                     {{ generatingSFX ? 'GERANDO SFX...' : (allScenesHaveSFX ? 'REFAZER SFX' : 'GERAR SFX') }}
+                </button>
+              </div>
+              <!-- SFX Status Info -->
+              <div v-if="hasSFXScenes && allScenesHaveAudio" class="mt-3 flex items-center gap-2 text-xs">
+                <AudioWaveform :size="12" class="text-purple-400/60" />
+                <span v-if="allScenesHaveSFX" class="text-purple-300/60">
+                  SFX gerados para {{ sfxSceneCount }} cena(s)
+                </span>
+                <span v-else class="text-zinc-500">
+                  {{ sfxSceneCount }} cena(s) com efeitos sonoros programados
+                </span>
               </div>
            </div>
         </div>
@@ -1726,12 +1750,12 @@
               <div class="flex flex-col items-end gap-3">
                 <button 
                   @click="renderMaster"
-                  :disabled="rendering || (output.status === 'GENERATING' && !renderStale)"
+                  :disabled="isRenderingActive"
                   class="px-8 py-4 bg-emerald-500 text-white font-black uppercase tracking-widest rounded-xl hover:bg-emerald-400 hover:scale-105 transition-all shadow-glow-emerald flex items-center gap-3 disabled:opacity-50 disabled:pointer-events-none"
                 >
-                  <span v-if="rendering || (output.status === 'GENERATING' && !renderStale)" class="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full"></span>
+                  <span v-if="isRenderingActive" class="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full"></span>
                   <Zap v-else :size="20" />
-                  {{ rendering || (output.status === 'GENERATING' && !renderStale) ? 'RENDERIZANDO...' : 'RENDERIZAR MASTER' }}
+                  {{ isRenderingActive ? 'RENDERIZANDO...' : 'RENDERIZAR MASTER' }}
                 </button>
                 <!-- Aviso de render travado -->
                 <div v-if="renderStale" class="flex items-center gap-3 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 max-w-md">
@@ -1896,6 +1920,22 @@
                            controls 
                            class="w-full h-8 opacity-50 hover:opacity-100 transition-opacity"
                            :src="`/api/scenes/${scene.id}/audio`"
+                         >
+                           Seu navegador não suporta áudio.
+                         </audio>
+                      </div>
+
+                      <!-- Mini Player (SFX da Cena) -->
+                      <div v-if="scene.audioTracks?.some((a: any) => a.type === 'scene_sfx')" class="mt-3 pt-3 border-t border-purple-500/10">
+                         <div class="flex items-center gap-2 mb-2">
+                           <AudioWaveform :size="12" class="text-purple-400/70" />
+                           <span class="text-[10px] font-black uppercase tracking-widest text-purple-400/60">SFX</span>
+                           <span v-if="scene.audioDescription" class="text-[10px] text-purple-300/40 truncate max-w-[200px]">{{ scene.audioDescription }}</span>
+                         </div>
+                         <audio 
+                           controls 
+                           class="w-full h-8 opacity-40 hover:opacity-100 transition-opacity"
+                           :src="`/api/scenes/${scene.id}/sfx-audio`"
                          >
                            Seu navegador não suporta áudio.
                          </audio>
@@ -2413,7 +2453,7 @@ import {
   ArrowLeft, Download, RotateCw, ScrollText, ImageIcon, Mic, Film, CheckCircle2, 
   AlertTriangle, Edit, Eye, Music, X, Zap, Clapperboard, Subtitles, Radio, DollarSign, RefreshCw, Wrench,
   Map, ChevronUp, ChevronDown, Target, TrendingUp, Star, Heart, Volume2, BarChart3, ShieldAlert,
-  Undo2
+  Undo2, AudioWaveform
 } from 'lucide-vue-next'
 import VoiceSelector from '~/components/dossier/VoiceSelector.vue'
 
@@ -3526,6 +3566,42 @@ async function generateAudio() {
    }
 }
 
+// ── SFX (Sound Effects) ──
+const generatingSFX = ref(false)
+
+/** Cenas que possuem audioDescription preenchido */
+const hasSFXScenes = computed(() => {
+  return output.value?.scenes?.some((s: any) => s.audioDescription?.trim())
+})
+
+/** Quantas cenas possuem SFX programado */
+const sfxSceneCount = computed(() => {
+  return output.value?.scenes?.filter((s: any) => s.audioDescription?.trim()).length || 0
+})
+
+/** Todas as cenas com audioDescription já têm scene_sfx gerado */
+const allScenesHaveSFX = computed(() => {
+  if (!output.value?.scenes) return false
+  const sfxScenes = output.value.scenes.filter((s: any) => s.audioDescription?.trim())
+  if (sfxScenes.length === 0) return false
+  return sfxScenes.every((s: any) => s.audioTracks?.some((a: any) => a.type === 'scene_sfx'))
+})
+
+async function generateSFX() {
+  if (generatingSFX.value) return
+  generatingSFX.value = true
+  try {
+    await $fetch(`/api/outputs/${outputId}/generate-sfx`, { method: 'POST' })
+    // Fire-and-forget — poll para acompanhar
+    startPolling()
+  } catch (e: any) {
+    handleApiError(e, 'Erro ao iniciar geração de SFX')
+  } finally {
+    // Reset após 3s — SFX é assíncrono, o poll vai atualizar
+    setTimeout(() => { generatingSFX.value = false }, 3000)
+  }
+}
+
 async function approveAudio() {
   if (approving.value) return
   approving.value = true
@@ -3772,6 +3848,15 @@ const canRenderMaster = computed(() => {
     }
     return base
 })
+
+/**
+ * Detecta se o render está realmente em andamento.
+ * 
+ * Usa apenas o flag local. O status GENERATING residual é tratado no backend:
+ * approve-stage.patch.ts reseta o status para PENDING quando o GENERATING
+ * não pertence a um render ativo.
+ */
+const isRenderingActive = computed(() => rendering.value)
 
 function getStepClass(isCompleted: boolean, isPreviousCompleted: boolean) {
   if (isCompleted) return 'completed cursor-pointer hover:bg-white/5'

@@ -7,7 +7,7 @@ import {
   Loader2, Shield, Server, Key, Plus, Trash2,
   Eye, EyeOff, X,
   Image, Mic, Music, Video, Layout,
-  ArrowRightLeft
+  ArrowRightLeft, AudioWaveform
 } from 'lucide-vue-next'
 
 // ─── Types ──────────────────────────────────────────────────────
@@ -226,6 +226,7 @@ const mediaTaskIcons: Record<string, any> = {
   music: Music,
   video: Video,
   layout: Layout,
+  'audio-waveform': AudioWaveform,
 }
 
 const providerColors: Record<string, string> = {

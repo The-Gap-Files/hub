@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-02-14T22:28:51.018Z",
+  "taskId": "script-validator",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "approved": false,
+    "violations": [
+      "Cena 3 contém CTA visível com texto adicional além do branding ('The Gap Files. O eco da história continua, invisível, aguardando seu olhar.')"
+    ],
+    "corrections": "Remova o texto adicional da última cena, deixando apenas 'The Gap Files.' como corte seco sem nenhum comentário ou chamada à ação. Certifique‑se de que não haja nenhuma frase que funcione como CTA ou fechamento narrativo.",
+    "overResolution": false
+  },
+  "rawContent": "{\"approved\":false,\"violations\":[\"Cena 3 contém CTA visível com texto adicional além do branding ('The Gap Files. O eco da história continua, invisível, aguardando seu olhar.')\"],\"corrections\":\"Remova o texto adicional da última cena, deixando apenas 'The Gap Files.' como corte seco sem nenhum comentário ou chamada à ação. Certifique‑se de que não haja nenhuma frase que funcione como CTA ou fechamento narrativo.\",\"overResolution\":false}"
+}

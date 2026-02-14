@@ -15,6 +15,7 @@ export type PipelineStage =
   | 'Audio'
   | 'Motion'
   | 'BGM'
+  | 'SFX'
   | 'Render'
   | 'Captions'
   | 'AddCaptions'

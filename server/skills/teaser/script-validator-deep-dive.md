@@ -58,10 +58,19 @@ O Deep-Dive aprofunda UM aspecto — mas **NÃO fecha o caso**.
 ### 9. Hook Conceitual
 - A primeira cena deve chocar com CONCEITO, não com detalhe gráfico/gore.
 
-### 10. CTA Convidativo
-- ❌ "se tiver estômago" (excludente) → ✅ "Se você quer a verdade inteira." (convidativo)
+### 10. CTA por Compulsão
+- ❌ "se tiver estômago" (excludente)
+- ❌ "Inscreva-se" / "Siga" / "Nunca perca" (pedido explícito)
+- ✅ "A verdade está nos arquivos." / "Os documentos estão no arquivo." (compulsão)
 
-### 11. Palavras Conclusivas
+### 11. MECANISMO > SINTOMA
+- O roteiro deve focar no SISTEMA (quem autorizou, quem lucrou), não na violência.
+- Se a narração descreve tortura, gore ou violência física explícita → sinalizar.
+- Se o visualDescription mostra violência gráfica → sinalizar.
+- ❌ "A corda estala" / "Puxando vítimas" (sintoma)
+- ✅ "O tribunal pagou por dia" / "O bispo confiscou" (mecanismo)
+
+### 12. Palavras Conclusivas
 - Sinalizar se o roteiro usa palavras que entregam julgamento implícito: "falsamente", "injustamente", "a verdade é que", "na realidade". Essas palavras reduzem a necessidade de ver o Full Video.
 
 ## FORMATO DA RESPOSTA

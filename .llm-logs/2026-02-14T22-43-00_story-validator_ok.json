@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-02-14T22:43:00.801Z",
+  "taskId": "story-validator",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "approved": false,
+    "violations": [
+      "Primeiro beat inclui contexto de localização antes do choque, violando o padrão de evitar explicação prévia ao choque.",
+      "Curva emocional não apresenta pico claro antes do CTA, resultando em falta de alternância e pico penúltimo.",
+      "Ausência de detalhe visual rápido que induza replay bait."
+    ],
+    "corrections": "Inicie o beat 1 com uma ruptura imediata, por exemplo: \"Um menino mártir virou brinquedo nas prateleiras – ninguém sabe quem autorizou.\" Inclua o anchor \"Trento\" integrado ao choque, como \"Em Trento, o menino mártir virou brinquedo…\". Adicione um beat 2 de respiração e um beat 3 que contenha um detalhe visual ultra‑rápido (ex.: \"A pequena figura tem um selo de ouro piscando que desaparece em 0,2 s\"). Garanta que o beat 3 seja o pico máximo antes do corte \"The Gap Files.\"."
+  },
+  "rawContent": "{\"approved\":false,\"violations\":[\"Primeiro beat inclui contexto de localização antes do choque, violando o padrão de evitar explicação prévia ao choque.\",\"Curva emocional não apresenta pico claro antes do CTA, resultando em falta de alternância e pico penúltimo.\",\"Ausência de detalhe visual rápido que induza replay bait.\"],\"corrections\":\"Inicie o beat 1 com uma ruptura imediata, por exemplo: \\\"Um menino mártir virou brinquedo nas prateleiras – ninguém sabe quem autorizou.\\\" Inclua o anchor \\\"Trento\\\" integrado ao choque, como \\\"Em Trento, o menino mártir virou brinquedo…\\\". Adicione um beat 2 de respiração e um beat 3 que contenha um detalhe visual ultra‑rápido (ex.: \\\"A pequena figura tem um selo de ouro piscando que desaparece em 0,2 s\\\"). Garanta que o beat 3 seja o pico máximo antes do corte \\\"The Gap Files.\\\".\"}"
+}

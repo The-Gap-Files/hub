@@ -1,0 +1,59 @@
+{
+  "timestamp": "2026-02-14T22:29:56.416Z",
+  "taskId": "script-groq",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "title": "O ícone sagrado transformado em brinquedo",
+    "summary": "Um ícone religioso medieval foi transformado em um brinquedo barato e vendido nas ruas. O vídeo revela, sem explicações, a produção em massa desse objeto e deixa a pergunta: como a imagem sagrada se tornou mercadoria?",
+    "scenes": [
+      {
+        "order": 0,
+        "narration": "Um ícone sagrado, impresso em plástico barato, vendido nas ruas, sem explicação.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, a sacred medieval statue rendered in cheap plastic, lying on a gritty street stall, dim streetlamp casting long shadows, rain-slick cobblestones.",
+        "sceneEnvironment": "street_market",
+        "motionDescription": "Slow dolly forward toward the plastic statue, raindrops flickering, street lantern light trembling",
+        "audioDescription": "Distant city ambience, muted footsteps, soft rain patter, faint market murmurs",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 1,
+        "narration": "Nas sombras da fábrica, máquinas rangem, enquanto luzes tremulam sobre a produção.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, interior of a dim factory, massive iron machines grinding, shafts of weak light cutting through dust, shadows crawling across conveyor belts.",
+        "sceneEnvironment": "factory_dark",
+        "motionDescription": "Gentle pan left across the factory, gears slowly turning, dust particles drifting in the beam",
+        "audioDescription": "Low industrial hum, clanking metal, distant echoing clang, subtle wind through vents",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 2,
+        "narration": "Fileiras intermináveis de bonecos cintilam, replicando a mesma pose de mártir, um selo cintilando brevemente.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, endless rows of identical plastic figurines on a conveyor, each frozen in martyr pose, a fleeting silver sigil flashes on one unit, cold fluorescent glow.",
+        "sceneEnvironment": "assembly_line",
+        "motionDescription": "Slow push-in on the conveyor, figurines moving steadily, brief flash of a sigil shimmering, camera subtly tilts upward",
+        "audioDescription": "Steady mechanical whir, soft conveyor belt noise, occasional high-pitched metal click, ambient low drone",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 3,
+        "narration": "The Gap Files. The Gap Files. The Gap Files. The Gap Files.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, black screen with the white text 'The Gap Files.' repeated three times, subtle vignette, faint static overlay.",
+        "sceneEnvironment": "branding",
+        "motionDescription": "Static frame, subtle breathing motion of the text, faint glow pulsing",
+        "audioDescription": "Silence, ambient low drone fades out, no additional sounds",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      }
+    ],
+    "backgroundMusic": {
+      "prompt": "Dark Ambient, Low Drone Synths, Sparse Piano Notes, Tension Strings, Eerie Pads, Subtle Heartbeat Rhythm, Minor Key, well-arranged composition, 70 BPM",
+      "volume": -12
+    },
+    "backgroundMusicTracks": null
+  },
+  "rawContent": "{\"title\":\"O ícone sagrado transformado em brinquedo\",\"summary\":\"Um ícone religioso medieval foi transformado em um brinquedo barato e vendido nas ruas. O vídeo revela, sem explicações, a produção em massa desse objeto e deixa a pergunta: como a imagem sagrada se tornou mercadoria?\",\"backgroundMusic\":{\"prompt\":\"Dark Ambient, Low Drone Synths, Sparse Piano Notes, Tension Strings, Eerie Pads, Subtle Heartbeat Rhythm, Minor Key, well-arranged composition, 70 BPM\",\"volume\":-12},\"backgroundMusicTracks\":null,\"scenes\":[{\"order\":0,\"narration\":\"Um ícone sagrado, impresso em plástico barato, vendido nas ruas, sem explicação.\",\"visualDescription\":\"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, a sacred medieval statue rendered in cheap plastic, lying on a gritty street stall, dim streetlamp casting long shadows, rain-slick cobblestones.\",\"motionDescription\":\"Slow dolly forward toward the plastic statue, raindrops flickering, street lantern light trembling\",\"audioDescription\":\"Distant city ambience, muted footsteps, soft rain patter, faint market murmurs\",\"audioDescriptionVolume\":-12,\"estimatedDuration\":5,\"sceneEnvironment\":\"street_market\"},{\"order\":1,\"narration\":\"Nas sombras da fábrica, máquinas rangem, enquanto luzes tremulam sobre a produção.\",\"visualDescription\":\"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, interior of a dim factory, massive iron machines grinding, shafts of weak light cutting through dust, shadows crawling across conveyor belts.\",\"motionDescription\":\"Gentle pan left across the factory, gears slowly turning, dust particles drifting in the beam\",\"audioDescription\":\"Low industrial hum, clanking metal, distant echoing clang, subtle wind through vents\",\"audioDescriptionVolume\":-12,\"estimatedDuration\":5,\"sceneEnvironment\":\"factory_dark\"},{\"order\":2,\"narration\":\"Fileiras intermináveis de bonecos cintilam, replicando a mesma pose de mártir, um selo cintilando brevemente.\",\"visualDescription\":\"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, endless rows of identical plastic figurines on a conveyor, each frozen in martyr pose, a fleeting silver sigil flashes on one unit, cold fluorescent glow.\",\"motionDescription\":\"Slow push-in on the conveyor, figurines moving steadily, brief flash of a sigil shimmering, camera subtly tilts upward\",\"audioDescription\":\"Steady mechanical whir, soft conveyor belt noise, occasional high-pitched metal click, ambient low drone\",\"audioDescriptionVolume\":-12,\"estimatedDuration\":5,\"sceneEnvironment\":\"assembly_line\"},{\"order\":3,\"narration\":\"The Gap Files. The Gap Files. The Gap Files. The Gap Files.\",\"visualDescription\":\"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, black screen with the white text 'The Gap Files.' repeated three times, subtle vignette, faint static overlay.\",\"motionDescription\":\"Static frame, subtle breathing motion of the text, faint glow pulsing\",\"audioDescription\":\"Silence, ambient low drone fades out, no additional sounds\",\"audioDescriptionVolume\":-12,\"estimatedDuration\":5,\"sceneEnvironment\":\"branding\"}]}"
+}

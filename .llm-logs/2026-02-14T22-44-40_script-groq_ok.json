@@ -1,0 +1,69 @@
+{
+  "timestamp": "2026-02-14T22:44:40.686Z",
+  "taskId": "script-groq",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "title": "O mito do menino mártir: da imprensa à internet",
+    "summary": "Um assassinato infantil manipulado no século XV foi transformado em símbolo de santidade para enriquecer um bispo e reforçar o ódio contra os judeus. Centenas de anos depois, a mesma imagem ressurgiu nas redes, alimentando um atentado moderno contra uma sinagoga. O verdadeiro vilão não é a violência, mas o sistema que fabrica e perpetua a mentira.",
+    "scenes": [
+      {
+        "order": 0,
+        "narration": "Uma criança morta, uma confissão forjada. Quem realmente escreveu a história sombria desse mito?",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, blurred portrait of a toddler beside a forged confession parchment, candle flame flickering, shadows engulfing the room, low-key illumination",
+        "sceneEnvironment": "child_mortuary",
+        "motionDescription": "Slow dolly forward toward the child portrait, candle flames gently flickering, dust particles drifting in the light beam",
+        "audioDescription": "Distant church bells with reverb, low humming drone",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 1,
+        "narration": "O bispo comandou a imprensa, imprimindo imagens da criança como mártir para ganhar poder.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, bishop's study filled with a wooden printing press, sheets bearing the child's image, the bishop signing a decree, candlelight casting long shadows",
+        "sceneEnvironment": "bishop_study",
+        "motionDescription": "Gentle camera pan right across the press, paper sheets fluttering as they feed through",
+        "audioDescription": "Clacking of press gears, rustling parchment, faint crackle of candle",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 2,
+        "narration": "Séculos depois, um adolescente usou a internet para reviver o mito, atacando uma sinagoga.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, teenage bedroom at night, glowing laptop screen displaying a meme of the child martyr, walls covered in faint posters, blue LED light casting cold tones",
+        "sceneEnvironment": "teen_room",
+        "motionDescription": "Slow zoom into laptop screen, cursor flickering, subtle breath fog on the glass",
+        "audioDescription": "Soft electronic hum, notification ping echoing",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 3,
+        "narration": "A imagem da criança virou brinquedo, espalhando ódio silencioso em salas de jogos e memes.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, plastic figurine of the child placed on a cluttered gaming shelf, neon LED glow from consoles, shadows stretching across the room",
+        "sceneEnvironment": "toy_shelf",
+        "motionDescription": "Static wide shot with subtle dust drifting, soft focus on the figurine",
+        "audioDescription": "Low synth ambience from game console, faint electronic buzz",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 4,
+        "narration": "The Gap Files.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, black screen fading into faint white text \"The Gap Files.\" centered, minimal illumination",
+        "sceneEnvironment": "branding",
+        "motionDescription": "Slow fade to black, text appearing with subtle light bloom",
+        "audioDescription": null,
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      }
+    ],
+    "backgroundMusic": {
+      "prompt": "Dark Ambient, Low Drone Synths, Sparse Piano Notes, Tension Strings, Eerie Pads, Subtle Heartbeat Rhythm, Minor Key, well-arranged composition, 70 BPM",
+      "volume": -12
+    },
+    "backgroundMusicTracks": null
+  },
+  "rawContent": "{\n  \"title\":\"O mito do menino mártir: da imprensa à internet\",\n  \"summary\":\"Um assassinato infantil manipulado no século XV foi transformado em símbolo de santidade para enriquecer um bispo e reforçar o ódio contra os judeus. Centenas de anos depois, a mesma imagem ressurgiu nas redes, alimentando um atentado moderno contra uma sinagoga. O verdadeiro vilão não é a violência, mas o sistema que fabrica e perpetua a mentira.\",\n  \"backgroundMusic\":{\n    \"prompt\":\"Dark Ambient, Low Drone Synths, Sparse Piano Notes, Tension Strings, Eerie Pads, Subtle Heartbeat Rhythm, Minor Key, well-arranged composition, 70 BPM\",\n    \"volume\":-12\n  },\n  \"backgroundMusicTracks\":null,\n  \"scenes\":[\n    {\n      \"order\":0,\n      \"narration\":\"Uma criança morta, uma confissão forjada. Quem realmente escreveu a história sombria desse mito?\",\n      \"visualDescription\":\"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, blurred portrait of a toddler beside a forged confession parchment, candle flame flickering, shadows engulfing the room, low-key illumination\",\n      \"motionDescription\":\"Slow dolly forward toward the child portrait, candle flames gently flickering, dust particles drifting in the light beam\",\n      \"audioDescription\":\"Distant church bells with reverb, low humming drone\",\n      \"audioDescriptionVolume\":-12,\n      \"estimatedDuration\":5,\n      \"sceneEnvironment\":\"child_mortuary\"\n    },\n    {\n      \"order\":1,\n      \"narration\":\"O bispo comandou a imprensa, imprimindo imagens da criança como mártir para ganhar poder.\",\n      \"visualDescription\":\"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, bishop's study filled with a wooden printing press, sheets bearing the child's image, the bishop signing a decree, candlelight casting long shadows\",\n      \"motionDescription\":\"Gentle camera pan right across the press, paper sheets fluttering as they feed through\",\n      \"audioDescription\":\"Clacking of press gears, rustling parchment, faint crackle of candle\",\n      \"audioDescriptionVolume\":-12,\n      \"estimatedDuration\":5,\n      \"sceneEnvironment\":\"bishop_study\"\n    },\n    {\n      \"order\":2,\n      \"narration\":\"Séculos depois, um adolescente usou a internet para reviver o mito, atacando uma sinagoga.\",\n      \"visualDescription\":\"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, teenage bedroom at night, glowing laptop screen displaying a meme of the child martyr, walls covered in faint posters, blue LED light casting cold tones\",\n      \"motionDescription\":\"Slow zoom into laptop screen, cursor flickering, subtle breath fog on the glass\",\n      \"audioDescription\":\"Soft electronic hum, notification ping echoing\",\n      \"audioDescriptionVolume\":-12,\n      \"estimatedDuration\":5,\n      \"sceneEnvironment\":\"teen_room\"\n    },\n    {\n      \"order\":3,\n      \"narration\":\"A imagem da criança virou brinquedo, espalhando ódio silencioso em salas de jogos e memes.\",\n      \"visualDescription\":\"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, plastic figurine of the child placed on a cluttered gaming shelf, neon LED glow from consoles, shadows stretching across the room\",\n      \"motionDescription\":\"Static wide shot with subtle dust drifting, soft focus on the figurine\",\n      \"audioDescription\":\"Low synth ambience from game console, faint electronic buzz\",\n      \"audioDescriptionVolume\":-12,\n      \"estimatedDuration\":5,\n      \"sceneEnvironment\":\"toy_shelf\"\n    },\n    {\n      \"order\":4,\n      \"narration\":\"The Gap Files.\",\n      \"visualDescription\":\"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, black screen fading into faint white text \\\"The Gap Files.\\\" centered, minimal illumination\",\n      \"motionDescription\":\"Slow fade to black, text appearing with subtle light bloom\",\n      \"audioDescription\":null,\n      \"audioDescriptionVolume\":-12,\n      \"estimatedDuration\":5,\n      \"sceneEnvironment\":\"branding\"\n    }\n  ]\n}"
+}

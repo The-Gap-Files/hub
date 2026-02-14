@@ -1,0 +1,69 @@
+{
+  "timestamp": "2026-02-14T22:45:13.628Z",
+  "taskId": "script-groq",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "title": "O boneco que virou brinquedo: o legado sangrento de Trento",
+    "summary": "Um pequeno boneco de madeira, com olhos vazios, carrega o mistério de um assassinato medieval. Um selo dourado pisca por um instante, sugerindo um segredo guardado por séculos. Hoje, o mesmo objeto repousa em vitrines modernas, vendido como lembrança sem explicação, enquanto ninguém revela quem o transformou de símbolo de horror em objeto de consumo. O enigma permanece: quem manipulou o mito para perpetuar o ódio? The Gap Files.",
+    "scenes": [
+      {
+        "order": 0,
+        "narration": "Um boneco antigo, olhos vazios, carrega o sangue de um menino assassinado.",
+        "visualDescription": "Cinematic dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, an old wooden figurine of a child with hollow eyes placed on a dimly lit stone altar, shadows stretching across the floor, subtle dust particles drifting in the cold air",
+        "sceneEnvironment": "chapel_altar",
+        "motionDescription": "Slow dolly forward toward the altar, dust particles drifting through the faint light beam, camera gently pulling in on the figurine",
+        "audioDescription": "low ambient hum with distant echoing church bells, subtle reverberation",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 1,
+        "narration": "Um selo dourado cintila brevemente, como se guardasse um segredo proibido antigo.",
+        "visualDescription": "Cinematic dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, close-up of the figurine's chest revealing a gold seal that flashes faintly for a split second, dark background emphasizing the brief glint",
+        "sceneEnvironment": "chapel_altar",
+        "motionDescription": "Gentle camera zoom on the gold seal, light flickering on the surface, dust subtly swirling around",
+        "audioDescription": "soft metallic tick followed by a low, steady heartbeat rhythm",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 2,
+        "narration": "Hoje, o boneco repousa em vitrines, vendido como lembrança, sem explicação nenhuma.",
+        "visualDescription": "Cinematic dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, the figurine displayed on a bright modern toy store shelf among colorful toys, stark contrast with its dark aura, spotlight highlighting its eerie presence",
+        "sceneEnvironment": "toy_store",
+        "motionDescription": "Slow pan across the toy shelf, camera lingering on the figurine while background blurs",
+        "audioDescription": "soft shopping mall ambience with distant chatter and faint music",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 3,
+        "narration": "Mas quem transformou o símbolo de horror em objeto de consumo popular?",
+        "visualDescription": "Cinematic dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, a shadowy medieval study, the bishop's hand signing a decree, parchment glowing faintly, suggesting an order that spread the image across the land",
+        "sceneEnvironment": "bishop_study",
+        "motionDescription": "Slow dolly left across the study, parchment fluttering gently in a draft",
+        "audioDescription": "quill scratching on parchment, distant echo of a solemn voice reciting a decree",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 4,
+        "narration": "The Gap Files.",
+        "visualDescription": "Cinematic dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, black screen with faint vignette, no visible elements",
+        "sceneEnvironment": "branding",
+        "motionDescription": "Static frame, no movement",
+        "audioDescription": null,
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      }
+    ],
+    "backgroundMusic": {
+      "prompt": "Dark Ambient, Low Drone Synths, Sparse Piano Notes, Tension Strings, Eerie Pads, Subtle Heartbeat Rhythm, Minor Key, well-arranged composition, 70 BPM",
+      "volume": -12
+    },
+    "backgroundMusicTracks": null
+  },
+  "rawContent": "{\n  \"title\": \"O boneco que virou brinquedo: o legado sangrento de Trento\",\n  \"summary\": \"Um pequeno boneco de madeira, com olhos vazios, carrega o mistério de um assassinato medieval. Um selo dourado pisca por um instante, sugerindo um segredo guardado por séculos. Hoje, o mesmo objeto repousa em vitrines modernas, vendido como lembrança sem explicação, enquanto ninguém revela quem o transformou de símbolo de horror em objeto de consumo. O enigma permanece: quem manipulou o mito para perpetuar o ódio? The Gap Files.\",\n  \"backgroundMusic\": {\n    \"prompt\": \"Dark Ambient, Low Drone Synths, Sparse Piano Notes, Tension Strings, Eerie Pads, Subtle Heartbeat Rhythm, Minor Key, well-arranged composition, 70 BPM\",\n    \"volume\": -12\n  },\n  \"backgroundMusicTracks\": null,\n  \"scenes\": [\n    {\n      \"order\": 0,\n      \"narration\": \"Um boneco antigo, olhos vazios, carrega o sangue de um menino assassinado.\",\n      \"visualDescription\": \"Cinematic dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, an old wooden figurine of a child with hollow eyes placed on a dimly lit stone altar, shadows stretching across the floor, subtle dust particles drifting in the cold air\",\n      \"motionDescription\": \"Slow dolly forward toward the altar, dust particles drifting through the faint light beam, camera gently pulling in on the figurine\",\n      \"audioDescription\": \"low ambient hum with distant echoing church bells, subtle reverberation\",\n      \"audioDescriptionVolume\": -12,\n      \"estimatedDuration\": 5,\n      \"sceneEnvironment\": \"chapel_altar\"\n    },\n    {\n      \"order\": 1,\n      \"narration\": \"Um selo dourado cintila brevemente, como se guardasse um segredo proibido antigo.\",\n      \"visualDescription\": \"Cinematic dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, close-up of the figurine's chest revealing a gold seal that flashes faintly for a split second, dark background emphasizing the brief glint\",\n      \"motionDescription\": \"Gentle camera zoom on the gold seal, light flickering on the surface, dust subtly swirling around\",\n      \"audioDescription\": \"soft metallic tick followed by a low, steady heartbeat rhythm\",\n      \"audioDescriptionVolume\": -12,\n      \"estimatedDuration\": 5,\n      \"sceneEnvironment\": \"chapel_altar\"\n    },\n    {\n      \"order\": 2,\n      \"narration\": \"Hoje, o boneco repousa em vitrines, vendido como lembrança, sem explicação nenhuma.\",\n      \"visualDescription\": \"Cinematic dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, the figurine displayed on a bright modern toy store shelf among colorful toys, stark contrast with its dark aura, spotlight highlighting its eerie presence\",\n      \"motionDescription\": \"Slow pan across the toy shelf, camera lingering on the figurine while background blurs\",\n      \"audioDescription\": \"soft shopping mall ambience with distant chatter and faint music\",\n      \"audioDescriptionVolume\": -12,\n      \"estimatedDuration\": 5,\n      \"sceneEnvironment\": \"toy_store\"\n    },\n    {\n      \"order\": 3,\n      \"narration\": \"Mas quem transformou o símbolo de horror em objeto de consumo popular?\",\n      \"visualDescription\": \"Cinematic dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, a shadowy medieval study, the bishop's hand signing a decree, parchment glowing faintly, suggesting an order that spread the image across the land\",\n      \"motionDescription\": \"Slow dolly left across the study, parchment fluttering gently in a draft\",\n      \"audioDescription\": \"quill scratching on parchment, distant echo of a solemn voice reciting a decree\",\n      \"audioDescriptionVolume\": -12,\n      \"estimatedDuration\": 5,\n      \"sceneEnvironment\": \"bishop_study\"\n    },\n    {\n      \"order\": 4,\n      \"narration\": \"The Gap Files.\",\n      \"visualDescription\": \"Cinematic dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, black screen with faint vignette, no visible elements\",\n      \"motionDescription\": \"Static frame, no movement\",\n      \"audioDescription\": null,\n      \"audioDescriptionVolume\": -12,\n      \"estimatedDuration\": 5,\n      \"sceneEnvironment\": \"branding\"\n    }\n  ]\n}"
+}

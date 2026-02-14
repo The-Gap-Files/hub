@@ -1,0 +1,69 @@
+{
+  "timestamp": "2026-02-14T22:27:54.401Z",
+  "taskId": "script-groq",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "title": "Como um santo infantil virou brinquedo e inspirou ódio milenar",
+    "summary": "Um simples boneco de plástico, inspirado numa gravura de século XV, revela como uma mentira medieval foi transformada em produto de consumo. Do bispo que mandou imprimir a lenda, passando pelas xilogravuras que circulavam nas primeiras livrarias, até os memes digitais que alimentam ódio hoje, o caso de Simonino mostra o poder de um sistema de propaganda ao longo dos séculos. Quando a mesma imagem foi citada para justificar o ataque à sinagoga de Poway em 2019, ficou claro que o mecanismo de mani... [truncated 51 chars]",
+    "scenes": [
+      {
+        "order": 0,
+        "narration": "Um santo infantil virou brinquedo, e ninguém entende como chegou às lojas.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, plastic saint child toy displayed on a dimly lit store shelf, shadows stretching across the merchandise, muted dark tones, low-key lighting emphasizing the eerie figure",
+        "sceneEnvironment": "toy_store",
+        "motionDescription": "Slow dolly left across the shelf, toy rotating gently, dust particles drifting in the light beam",
+        "audioDescription": "soft ambient store murmurs, distant footsteps, faint hum of fluorescent lights",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 1,
+        "narration": "No século XV, o bispo mandou imprimir gravuras para vender a lenda como verdade.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, cramped 15th‑century printing workshop, wooden press and inked woodcut of the child martyr, candlelight casting dramatic shadows on the walls, muted earth tones",
+        "sceneEnvironment": "printing_workshop",
+        "motionDescription": "Gentle pan across the press, inked block descending, paper being pressed, subtle flicker of candle flame",
+        "audioDescription": "creaking wooden press, paper rustle, low crackle of candle",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 2,
+        "narration": "Hoje, a mesma imagem circula em fóruns, alimentando ódio com um clique.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, smartphone screen illuminated in a dark room, meme of the medieval martyr overlaid with hateful comments, cold blue‑teal ambient glow, shadows framing the device",
+        "sceneEnvironment": "digital_forum",
+        "motionDescription": "Slow zoom in on phone, notification badge flashing, cursor hovering over share button",
+        "audioDescription": "soft digital ping, low murmur of chat notifications",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 3,
+        "narration": "Um atirador usou a lenda para justificar massacre contra judeus em 2019.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, news studio with anchor behind desk, background screen showing shooter’s manifesto, muted reds and deep shadows, tense atmosphere",
+        "sceneEnvironment": "news_studio",
+        "motionDescription": "Slow dolly forward on anchor, background monitor flickering with image of shooter",
+        "audioDescription": "newsroom ambience, distant siren wail, low‑key voiceover",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 4,
+        "narration": "Descubra a verdade oculta por trás da lenda. The Gap Files agora.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, black screen fading into The Gap Files logo, subtle glow around letters, minimalistic composition, deep shadows",
+        "sceneEnvironment": "branding",
+        "motionDescription": "Fade in logo, slight zoom toward center, light particles drifting across screen",
+        "audioDescription": "subtle echoing tone then silence",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      }
+    ],
+    "backgroundMusic": {
+      "prompt": "Dark Ambient, Low Drone Synths, Sparse Piano Notes, Tension Strings, Eerie Pads, Subtle Heartbeat Rhythm, Minor Key, well-arranged composition, 70 BPM",
+      "volume": -12
+    },
+    "backgroundMusicTracks": null
+  },
+  "rawContent": "{\n  \"title\":\"Como um santo infantil virou brinquedo e inspirou ódio milenar\",\n  \"summary\":\"Um simples boneco de plástico, inspirado numa gravura de século XV, revela como uma mentira medieval foi transformada em produto de consumo. Do bispo que mandou imprimir a lenda, passando pelas xilogravuras que circulavam nas primeiras livrarias, até os memes digitais que alimentam ódio hoje, o caso de Simonino mostra o poder de um sistema de propaganda ao longo dos séculos. Quando a mesma imagem foi citada para justificar o ataque à sinagoga de Poway em 2019, ficou claro que o mecanismo de manipulação permanece vivo, independentemente da época.\",\n  \"backgroundMusic\":{\n    \"prompt\":\"Dark Ambient, Low Drone Synths, Sparse Piano Notes, Tension Strings, Eerie Pads, Subtle Heartbeat Rhythm, Minor Key, well-arranged composition, 70 BPM\",\n    \"volume\":-12\n  },\n  \"backgroundMusicTracks\":null,\n  \"scenes\":[\n    {\n      \"order\":0,\n      \"narration\":\"Um santo infantil virou brinquedo, e ninguém entende como chegou às lojas.\",\n      \"visualDescription\":\"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, plastic saint child toy displayed on a dimly lit store shelf, shadows stretching across the merchandise, muted dark tones, low-key lighting emphasizing the eerie figure\",\n      \"motionDescription\":\"Slow dolly left across the shelf, toy rotating gently, dust particles drifting in the light beam\",\n      \"audioDescription\":\"soft ambient store murmurs, distant footsteps, faint hum of fluorescent lights\",\n      \"audioDescriptionVolume\":-12,\n      \"estimatedDuration\":5,\n      \"sceneEnvironment\":\"toy_store\"\n    },\n    {\n      \"order\":1,\n      \"narration\":\"No século XV, o bispo mandou imprimir gravuras para vender a lenda como verdade.\",\n      \"visualDescription\":\"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, cramped 15th‑century printing workshop, wooden press and inked woodcut of the child martyr, candlelight casting dramatic shadows on the walls, muted earth tones\",\n      \"motionDescription\":\"Gentle pan across the press, inked block descending, paper being pressed, subtle flicker of candle flame\",\n      \"audioDescription\":\"creaking wooden press, paper rustle, low crackle of candle\",\n      \"audioDescriptionVolume\":-12,\n      \"estimatedDuration\":5,\n      \"sceneEnvironment\":\"printing_workshop\"\n    },\n    {\n      \"order\":2,\n      \"narration\":\"Hoje, a mesma imagem circula em fóruns, alimentando ódio com um clique.\",\n      \"visualDescription\":\"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, smartphone screen illuminated in a dark room, meme of the medieval martyr overlaid with hateful comments, cold blue‑teal ambient glow, shadows framing the device\",\n      \"motionDescription\":\"Slow zoom in on phone, notification badge flashing, cursor hovering over share button\",\n      \"audioDescription\":\"soft digital ping, low murmur of chat notifications\",\n      \"audioDescriptionVolume\":-12,\n      \"estimatedDuration\":5,\n      \"sceneEnvironment\":\"digital_forum\"\n    },\n    {\n      \"order\":3,\n      \"narration\":\"Um atirador usou a lenda para justificar massacre contra judeus em 2019.\",\n      \"visualDescription\":\"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, news studio with anchor behind desk, background screen showing shooter’s manifesto, muted reds and deep shadows, tense atmosphere\",\n      \"motionDescription\":\"Slow dolly forward on anchor, background monitor flickering with image of shooter\",\n      \"audioDescription\":\"newsroom ambience, distant siren wail, low‑key voiceover\",\n      \"audioDescriptionVolume\":-12,\n      \"estimatedDuration\":5,\n      \"sceneEnvironment\":\"news_studio\"\n    },\n    {\n      \"order\":4,\n      \"narration\":\"Descubra a verdade oculta por trás da lenda. The Gap Files agora.\",\n      \"visualDescription\":\"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, black screen fading into The Gap Files logo, subtle glow around letters, minimalistic composition, deep shadows\",\n      \"motionDescription\":\"Fade in logo, slight zoom toward center, light particles drifting across screen\",\n      \"audioDescription\":\"subtle echoing tone then silence\",\n      \"audioDescriptionVolume\":-12,\n      \"estimatedDuration\":5,\n      \"sceneEnvironment\":\"branding\"\n    }\n  ]\n}"
+}

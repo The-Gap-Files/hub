@@ -113,6 +113,9 @@ export default defineEventHandler(async (event): Promise<CloneOutputResponse> =>
           narration: scene.narration,
           visualDescription: scene.visualDescription,
           audioDescription: scene.audioDescription,
+          audioDescriptionVolume: scene.audioDescriptionVolume,
+          sceneEnvironment: scene.sceneEnvironment,
+          motionDescription: scene.motionDescription,
           startTime: scene.startTime,
           endTime: scene.endTime,
           estimatedDuration: scene.estimatedDuration

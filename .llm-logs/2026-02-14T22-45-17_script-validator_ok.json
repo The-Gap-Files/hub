@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-02-14T22:45:17.024Z",
+  "taskId": "script-validator",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "approved": false,
+    "violations": [
+      "Cena 3 fecha o loop aberto ao mostrar visual de bispo assinando decreto, revelando quem transformou o símbolo de horror em objeto de consumo popular.",
+      "Cena 1 e Cena 2 apresentam intensidade emocional semelhante, criando um platô emocional."
+    ],
+    "corrections": "Remova ou substitua o visual da cena 3 por um elemento que indique um mecanismo sem identificar o agente (ex.: um selo institucional ou documentos espalhando a imagem), mantendo a pergunta aberta. Ajuste a cena 2 para ter uma intensidade emocional mais baixa ou diferente da cena 1 (por exemplo, focando apenas em um detalhe estático ou em silêncio) para criar contraste antes do pico da cena 3.",
+    "overResolution": true
+  },
+  "rawContent": "{\"approved\":false,\"violations\":[\"Cena 3 fecha o loop aberto ao mostrar visual de bispo assinando decreto, revelando quem transformou o símbolo de horror em objeto de consumo popular.\",\"Cena 1 e Cena 2 apresentam intensidade emocional semelhante, criando um platô emocional.\"],\"corrections\":\"Remova ou substitua o visual da cena 3 por um elemento que indique um mecanismo sem identificar o agente (ex.: um selo institucional ou documentos espalhando a imagem), mantendo a pergunta aberta. Ajuste a cena 2 para ter uma intensidade emocional mais baixa ou diferente da cena 1 (por exemplo, focando apenas em um detalhe estático ou em silêncio) para criar contraste antes do pico da cena 3.\",\"overResolution\":true}"
+}

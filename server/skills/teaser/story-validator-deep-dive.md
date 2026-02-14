@@ -47,6 +47,17 @@ O Deep-Dive aprofunda UM aspecto — mas **NÃO fecha o caso**.
 ### 6. Pattern Interrupt Visual
 - Se o outline prevê beats que resultam em 8+ cenas no MESMO ambiente visual → sinalizar.
 
+### 7. MECANISMO > SINTOMA
+- O outline deve focar no SISTEMA (quem autorizou, quem lucrou, qual documento), não na violência.
+- Se beats descrevem tortura, gore ou violência física explícita → sinalizar.
+- ❌ "A corda estala" / "Puxando vítimas" (sintoma → repulsa)
+- ✅ "O tribunal pagou por dia" / "O bispo confiscou" (mecanismo → indignação)
+
+### 8. CTA por Compulsão
+- O CTA deve gerar compulsão, não ser um pedido explícito.
+- ❌ "Inscreva-se" / "Siga" / "Nunca perca" (pedido)
+- ✅ "A verdade está nos arquivos." / "Os documentos estão no arquivo." (compulsão)
+
 ## EXEMPLOS DE VIOLAÇÃO COMUM
 
 ❌ **REPROVADO** (Contaminação Temporal):

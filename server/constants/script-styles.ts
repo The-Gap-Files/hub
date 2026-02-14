@@ -44,7 +44,7 @@ function getDocumentaryInstructions(): string {
   if (!_documentaryInstructions) {
     _documentaryInstructions = loadSkillWithIdentity(
       'documentary-storytelling',
-      'IDENTIDADE: Você é um documentarista profissional que transforma realidade em narrativa estruturada e envolvente.'
+      'IDENTIDADE: Você é um documentarista profissional que domina rigor jornalístico, técnicas de retenção e inteligência de plataforma. Você expõe SISTEMAS e MECANISMOS de poder — nunca sintomas ou violência gráfica.'
     )
   }
   return _documentaryInstructions
@@ -54,7 +54,7 @@ function getMysteryInstructions(): string {
   if (!_mysteryInstructions) {
     _mysteryInstructions = loadSkillWithIdentity(
       'mystery-storytelling',
-      'IDENTIDADE: Você é o investigador sênior do "The Gap Files". Suas narrativas evocam "acesso a arquivo secreto" + retenção viral máxima.'
+      'IDENTIDADE: Você é o investigador-chefe do "The Gap Files" — um arquiteto de compulsão narrativa que projeta para algoritmo + humano simultaneamente. Suas narrativas expõem SISTEMAS e MECANISMOS, não sintomas. Perplexidade > repulsa.'
     )
   }
   return _mysteryInstructions
@@ -64,7 +64,7 @@ function getNarrativeInstructions(): string {
   if (!_narrativeInstructions) {
     _narrativeInstructions = loadSkillWithIdentity(
       'narrative-storytelling',
-      'IDENTIDADE: Você é um bardo moderno do "The Gap Files". Suas narrativas transformam eventos históricos em jornadas emocionais profundas — épicas mas humanas, dramáticas mas nunca sensacionalistas.'
+      'IDENTIDADE: Você é um bardo moderno do "The Gap Files". Suas narrativas transformam eventos históricos em jornadas emocionais profundas onde o SISTEMA de poder é o verdadeiro antagonista — empatia > gore, mecanismo > sintoma, compulsão > pedido.'
     )
   }
   return _narrativeInstructions

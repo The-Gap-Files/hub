@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-02-14T22:29:38.867Z",
+  "taskId": "script-validator",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "approved": false,
+    "violations": [
+      "Cena 0 contém explicação da transformação do ícone sagrado em plástico barato vendido nas ruas",
+      "Cena 3 contém CTA implícito ao adicionar \"profunda\" ao branding, parecendo convite"
+    ],
+    "corrections": "Remova a explicação explícita da produção do ícone (ex.: \"Um ícone sagrado, agora impresso em plástico barato, vendido nas ruas para crianças\" → \"Um ícone sagrado, vendido nas ruas como brinquedo\"). Mantenha a última cena como corte seco com apenas \"The Gap Files.\" sem palavras adicionais. Certifique‑se de que nenhuma cena forneça explicação ou conclusão; mantenha todos os loops abertos.",
+    "overResolution": true
+  },
+  "rawContent": "{\"approved\":false,\"violations\":[\"Cena 0 contém explicação da transformação do ícone sagrado em plástico barato vendido nas ruas\",\"Cena 3 contém CTA implícito ao adicionar \\\"profunda\\\" ao branding, parecendo convite\"],\"corrections\":\"Remova a explicação explícita da produção do ícone (ex.: \\\"Um ícone sagrado, agora impresso em plástico barato, vendido nas ruas para crianças\\\" → \\\"Um ícone sagrado, vendido nas ruas como brinquedo\\\"). Mantenha a última cena como corte seco com apenas \\\"The Gap Files.\\\" sem palavras adicionais. Certifique‑se de que nenhuma cena forneça explicação ou conclusão; mantenha todos os loops abertos.\",\"overResolution\":true}"
+}

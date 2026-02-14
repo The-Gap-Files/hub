@@ -245,6 +245,7 @@ model Scene {
   narration              String
   visualDescription      String
   audioDescription       String?
+  audioDescriptionVolume Float? /// Volume do SFX em dB (-24 a -6, null = default -12). Definido pelo roteirista, editável na UI.
   startTime              Float?
   endTime                Float?
   estimatedDuration      Float        @default(5)

@@ -14,6 +14,7 @@ import type {
   IImageGenerator,
   IMotionProvider,
   IMusicProvider,
+  ISFXProvider,
   ProviderConfig
 } from '../../types/ai-providers'
 
@@ -28,6 +29,7 @@ import { GeminiImageProvider } from './image/gemini-image.provider'
 import { ReplicateMotionProvider } from './motion/replicate-motion.provider'
 import { RunPodMotionProvider } from './motion/runpod-motion.provider'
 import { ReplicateMusicProvider } from './music/replicate-music.provider'
+import { ElevenLabsSFXProvider } from './sfx/elevenlabs-sfx.provider'
 import { getMediaProviderForTaskSync, getMediaProviderForTask } from '../media/media-factory'
 import { getAssignment } from '../llm/llm-factory'
 import { prisma } from '../../utils/prisma'
@@ -60,6 +62,10 @@ const motionProviders: Record<string, new (config: { apiKey: string }) => IMotio
 
 const musicProviders: Record<string, new (config: { apiKey: string }) => IMusicProvider> = {
   replicate: ReplicateMusicProvider
+}
+
+const sfxProviders: Record<string, new (config: { apiKey: string }) => ISFXProvider> = {
+  elevenlabs: ElevenLabsSFXProvider
 }
 
 // =============================================================================
@@ -106,6 +112,14 @@ export function createMusicProvider(name: string, apiKey: string, model?: string
   return new ProviderClass({ apiKey, model, inputSchema } as any)
 }
 
+export function createSFXProvider(name: string, apiKey: string): ISFXProvider {
+  const ProviderClass = sfxProviders[name.toLowerCase()]
+  if (!ProviderClass) {
+    throw new Error(`SFX provider "${name}" not found. Available: ${Object.keys(sfxProviders).join(', ')}`)
+  }
+  return new ProviderClass({ apiKey })
+}
+
 // =============================================================================
 // PROVIDER MANAGER (Singleton para uso em toda a aplicação)
 // =============================================================================
@@ -115,6 +129,7 @@ class ProviderManager {
   private imageProvider: IImageGenerator | null = null
   private motionProvider: IMotionProvider | null = null
   private musicProvider: IMusicProvider | null = null
+  private sfxProvider: ISFXProvider | null = null
 
   configure(configs: ProviderConfig[]): void {
     for (const config of configs) {
@@ -131,6 +146,9 @@ class ProviderManager {
         case 'music':
           this.musicProvider = createMusicProvider(config.name, config.apiKey!, config.model)
           break
+        case 'sfx':
+          this.sfxProvider = createSFXProvider(config.name, config.apiKey!)
+          break
       }
     }
   }
@@ -145,6 +163,7 @@ class ProviderManager {
     this.ttsProvider = null
     this.motionProvider = null
     this.musicProvider = null
+    this.sfxProvider = null
     console.log('[ProviderManager] All provider instances invalidated')
   }
 
@@ -252,6 +271,31 @@ class ProviderManager {
     }
     return this.musicProvider
   }
+
+  getSFXProvider(): ISFXProvider {
+    if (!this.sfxProvider) {
+      // SFX usa a mesma API key do TTS (ElevenLabs)
+      const config = getMediaProviderForTaskSync('sfx')
+      if (config?.apiKey) {
+        console.log(`[ProviderManager] SFX → ${config.providerId}/${config.model || 'default'} (Media Factory)`)
+        this.sfxProvider = createSFXProvider(config.providerId, config.apiKey)
+        return this.sfxProvider
+      }
+
+      // Fallback: tentar usar a mesma key do TTS
+      const ttsConfig = getMediaProviderForTaskSync('tts-narration')
+      if (ttsConfig?.apiKey) {
+        console.log(`[ProviderManager] SFX → elevenlabs (fallback da key TTS)`)
+        this.sfxProvider = createSFXProvider('elevenlabs', ttsConfig.apiKey)
+        return this.sfxProvider
+      }
+
+      throw new Error(
+        'SFX provider not configured. Configure via UI (Settings → Providers) ou defina ELEVENLABS_API_KEY no .env.'
+      )
+    }
+    return this.sfxProvider
+  }
 }
 
 // Singleton exportado
@@ -268,3 +312,4 @@ export { ReplicateImageProvider } from './image/replicate-image.provider'
 export { ReplicateMotionProvider } from './motion/replicate-motion.provider'
 export { RunPodMotionProvider } from './motion/runpod-motion.provider'
 export { ReplicateMusicProvider } from './music/replicate-music.provider'
+export { ElevenLabsSFXProvider } from './sfx/elevenlabs-sfx.provider'

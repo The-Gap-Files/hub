@@ -47,6 +47,18 @@ O Gateway contextualiza e cria curiosidade — mas **NÃO resolve a história**.
 - Se o outline prevê beats que resultam em 8+ cenas no MESMO ambiente visual → sinalizar.
 - Deve haver variação visual nos beats para manter retenção.
 
+### 7. MECANISMO > SINTOMA
+- O outline deve focar no SISTEMA (quem autorizou, quem lucrou, qual documento), não na violência.
+- Se beats descrevem tortura, gore ou violência física explícita → sinalizar.
+- ❌ "A corda estala" / "Puxando vítimas" (sintoma → repulsa)
+- ✅ "O bispo confiscou os bens" / "O tribunal pagou por dia" (mecanismo → indignação)
+
+### 8. CTA por Compulsão
+- O CTA deve gerar compulsão, não ser um pedido explícito.
+- ❌ "Inscreva-se para descobrir!" / "Siga e nunca perca" (pedido → o espectador percebe que acabou)
+- ✅ "A verdade está nos arquivos." / "Os documentos estão no arquivo." (compulsão)
+- O espectador vai ao perfil por NECESSIDADE, não por instrução.
+
 ## FORMATO DA RESPOSTA
 Se APROVADO: { "approved": true }
 Se REPROVADO: { "approved": false, "violations": ["violação 1"], "corrections": "instruções para corrigir" }

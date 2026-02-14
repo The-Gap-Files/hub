@@ -1,0 +1,69 @@
+{
+  "timestamp": "2026-02-14T22:28:36.688Z",
+  "taskId": "script-groq",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "title": "Quando um mártir medieval vira brinquedo",
+    "summary": "Um boneco infantil nas prateleiras de lojas carrega a imagem de um menino martirizado em 1475, transformada pela imprensa da época e reaproveitada pela tecnologia moderna. A história revela como um símbolo de ódio religioso foi reciclado como objeto de consumo, mantendo viva a injustiça sem que ninguém perceba.",
+    "scenes": [
+      {
+        "order": 1,
+        "narration": "Um menino santo, morto em 1475, agora aparece nas prateleiras de brinquedos inocentes.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, ancient stone wall museum gallery displaying a medieval woodcut of a child martyr, candlelight flickering, shadows dancing across the frame",
+        "sceneEnvironment": "museum_gallery",
+        "motionDescription": "Slow dolly forward toward the woodcut, candle flames gently swaying, dust particles drifting through the light beam",
+        "audioDescription": "Distant church bells with reverb, low ambient drone",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 2,
+        "narration": "A gravura medieval foi copiada, transformada em molde plástico, e lançada como colecionável.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, dim industrial factory line with vintage injection molding machines, plastic molds glowing, steam rising, cold steel surfaces",
+        "sceneEnvironment": "factory_line",
+        "motionDescription": "Gentle camera pan right along the conveyor, plastic parts glinting under cold industrial lights",
+        "audioDescription": "Low hum of machinery, metal clank echo",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 3,
+        "narration": "Crianças brincam com o boneco, sem saber que carregam séculos de ódio institucionalizado.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, bright toy store aisle, children holding a small plastic figurine, background shows faint outline of stained glass windows, light streaming, contrast of innocence and darkness",
+        "sceneEnvironment": "toy_store",
+        "motionDescription": "Slow zoom in on child's hand holding the figurine, light flickering like candle shadows",
+        "audioDescription": "Soft murmurs of shoppers, faint ambient music continues",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 4,
+        "narration": "Um detalhe passa rápido: o selo amarelo da comunidade aparece no peito do brinquedo.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, extreme close-up of the toy's torso, a yellow badge briefly flashing, reflective plastic surface, dark blurred background",
+        "sceneEnvironment": "toy_closeup",
+        "motionDescription": "Quick flash zoom on the toy's chest, badge appearing for a split second, then fading",
+        "audioDescription": "Brief metallic chime, then silence",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 5,
+        "narration": "The Gap Files.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, black screen with faint white text 'The Gap Files.' centered, subtle vignette",
+        "sceneEnvironment": "branding",
+        "motionDescription": "Static shot, subtle breathing motion of ambient darkness, text fades in briefly",
+        "audioDescription": null,
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      }
+    ],
+    "backgroundMusic": {
+      "prompt": "Dark Ambient, Low Drone Synths, Sparse Piano Notes, Tension Strings, Eerie Pads, Subtle Heartbeat Rhythm, Minor Key, well-arranged composition, 70 BPM",
+      "volume": -12
+    },
+    "backgroundMusicTracks": null
+  },
+  "rawContent": "{\n  \"title\": \"Quando um mártir medieval vira brinquedo\",\n  \"summary\": \"Um boneco infantil nas prateleiras de lojas carrega a imagem de um menino martirizado em 1475, transformada pela imprensa da época e reaproveitada pela tecnologia moderna. A história revela como um símbolo de ódio religioso foi reciclado como objeto de consumo, mantendo viva a injustiça sem que ninguém perceba.\",\n  \"backgroundMusic\": {\n    \"prompt\": \"Dark Ambient, Low Drone Synths, Sparse Piano Notes, Tension Strings, Eerie Pads, Subtle Heartbeat Rhythm, Minor Key, well-arranged composition, 70 BPM\",\n    \"volume\": -12\n  },\n  \"backgroundMusicTracks\": null,\n  \"scenes\": [\n    {\n      \"order\": 1,\n      \"narration\": \"Um menino santo, morto em 1475, agora aparece nas prateleiras de brinquedos inocentes.\",\n      \"visualDescription\": \"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, ancient stone wall museum gallery displaying a medieval woodcut of a child martyr, candlelight flickering, shadows dancing across the frame\",\n      \"motionDescription\": \"Slow dolly forward toward the woodcut, candle flames gently swaying, dust particles drifting through the light beam\",\n      \"audioDescription\": \"Distant church bells with reverb, low ambient drone\",\n      \"audioDescriptionVolume\": -12,\n      \"estimatedDuration\": 5,\n      \"sceneEnvironment\": \"museum_gallery\"\n    },\n    {\n      \"order\": 2,\n      \"narration\": \"A gravura medieval foi copiada, transformada em molde plástico, e lançada como colecionável.\",\n      \"visualDescription\": \"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, dim industrial factory line with vintage injection molding machines, plastic molds glowing, steam rising, cold steel surfaces\",\n      \"motionDescription\": \"Gentle camera pan right along the conveyor, plastic parts glinting under cold industrial lights\",\n      \"audioDescription\": \"Low hum of machinery, metal clank echo\",\n      \"audioDescriptionVolume\": -12,\n      \"estimatedDuration\": 5,\n      \"sceneEnvironment\": \"factory_line\"\n    },\n    {\n      \"order\": 3,\n      \"narration\": \"Crianças brincam com o boneco, sem saber que carregam séculos de ódio institucionalizado.\",\n      \"visualDescription\": \"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, bright toy store aisle, children holding a small plastic figurine, background shows faint outline of stained glass windows, light streaming, contrast of innocence and darkness\",\n      \"motionDescription\": \"Slow zoom in on child's hand holding the figurine, light flickering like candle shadows\",\n      \"audioDescription\": \"Soft murmurs of shoppers, faint ambient music continues\",\n      \"audioDescriptionVolume\": -12,\n      \"estimatedDuration\": 5,\n      \"sceneEnvironment\": \"toy_store\"\n    },\n    {\n      \"order\": 4,\n      \"narration\": \"Um detalhe passa rápido: o selo amarelo da comunidade aparece no peito do brinquedo.\",\n      \"visualDescription\": \"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, extreme close-up of the toy's torso, a yellow badge briefly flashing, reflective plastic surface, dark blurred background\",\n      \"motionDescription\": \"Quick flash zoom on the toy's chest, badge appearing for a split second, then fading\",\n      \"audioDescription\": \"Brief metallic chime, then silence\",\n      \"audioDescriptionVolume\": -12,\n      \"estimatedDuration\": 5,\n      \"sceneEnvironment\": \"toy_closeup\"\n    },\n    {\n      \"order\": 5,\n      \"narration\": \"The Gap Files.\",\n      \"visualDescription\": \"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, black screen with faint white text 'The Gap Files.' centered, subtle vignette\",\n      \"motionDescription\": \"Static shot, subtle breathing motion of ambient darkness, text fades in briefly\",\n      \"audioDescription\": null,\n      \"audioDescriptionVolume\": -12,\n      \"estimatedDuration\": 5,\n      \"sceneEnvironment\": \"branding\"\n    }\n  ]\n}"
+}

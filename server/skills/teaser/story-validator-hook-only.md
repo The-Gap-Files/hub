@@ -10,11 +10,12 @@ Não é um resumo. Não é um mini-documentário. Não é uma aula.
 É uma **detonação cognitiva** de 22-30 segundos que deixa o espectador obcecado.
 
 ### DNA do Hook-Only:
-- **Visceral** — O público SENTE antes de PENSAR
+- **Conceitual** — O público sente PERPLEXIDADE, não repulsa. Conceito > gore.
 - **Simples** — 1 conceito central resumível em 1 frase mental
-- **Escalante** — Cada beat é mais intenso que o anterior, sem platô
+- **Dinâmico** — Alternância emocional com respiração entre picos, PICO na penúltima
 - **Incompleto** — ZERO resolução, ZERO explicação, TODOS os loops abertos
 - **Replay-friendly** — Detalhes rápidos que forçam "pera, o que foi isso?"
+- **Sistêmico** — Mostra o MECANISMO (quem autorizou, quem lucrou), não o sintoma (violência)
 
 ## CRITÉRIOS DE APROVAÇÃO
 
@@ -22,9 +23,11 @@ Não é um resumo. Não é um mini-documentário. Não é uma aula.
 - O primeiro beat deve causar **ruptura cognitiva** — o espectador para de scrollar.
 - Se o primeiro beat constrói contexto antes do choque → REPROVADO.
 - Se o primeiro beat é explicativo ou narrativo → REPROVADO.
-- O beat 1 deve ser o mais forte sensorialmente.
+- O beat 1 deve causar PERPLEXIDADE, nunca REPULSA.
 - ❌ "Em uma cidade do norte da Itália..." (construção lenta)
-- ✅ "Uma criança morta. Uma confissão forjada. E ninguém sabe quem." (ruptura)
+- ❌ "A corda estala no ar, forçando a confissão" (violência explícita → repulsa)
+- ✅ "Uma criança morta. Uma confissão forjada. E ninguém sabe quem." (ruptura conceitual)
+- ✅ "Um bispo assinou. Uma comunidade desapareceu." (mecanismo + perplexidade)
 
 ### 2. Conceito Único (1 Ideia Central)
 - O outline inteiro deve girar em torno de **1 conceito** que cabe em 1 frase mental.
@@ -33,11 +36,15 @@ Não é um resumo. Não é um mini-documentário. Não é uma aula.
 - ❌ 5 ideias: "Trento + Hinderbach + xilogravura + 8chan + Poway" (denso demais)
 - ✅ 1 ideia: "Uma mentira medieval que ainda mata gente" (único, claro, viral)
 
-### 3. Escalação Obrigatória (Sem Platô Emocional)
-- A tensão deve **escalar perceptivelmente** de beat em beat.
-- Se dois beats consecutivos têm a mesma intensidade emocional → REPROVADO.
+### 3. Curva Emocional com Alternância (PICO na Penúltima)
+- A intensidade emocional deve variar com CONTRASTES — não escalar linearmente.
+- Após beat intenso, inserir beat de contexto/respiro para que o próximo pico seja mais forte.
+- Se todos os beats têm a mesma intensidade (platô) → REPROVADO.
+- Se todos os beats escalam sem respiração (saturação) → sinalizar.
 - O último beat de conteúdo (antes do CTA) DEVE ser o pico absoluto.
-- O espectador deve sentir que cada frase é mais perturbadora que a anterior.
+- ❌ 7/10 → 7/10 → 7/10 → 7/10 (platô — sem dinâmica)
+- ❌ 8/10 → 9/10 → 9/10 → 10/10 (saturação — sem respiro)
+- ✅ 8/10 → 6/10 → 9/10 → 10/10 (alternância — cada pico amplificado pelo respiro)
 
 ### 4. Nomes Universais (Sem Atrito Cognitivo)
 - Nomes próprios obscuros **quebram o fluxo cognitivo** do público médio.
@@ -47,25 +54,32 @@ Não é um resumo. Não é um mini-documentário. Não é uma aula.
 - **EXCEÇÃO**: Nomes universalmente conhecidos (Hitler, Einstein, Napoleão) são permitidos.
 - **REGRA**: Se precisar de 1 segundo para processar quem é → substitua pela função.
 
-### 5. Foco no Ângulo (ZERO CONTAMINAÇÃO TEMPORAL)
+### 5. MECANISMO > SINTOMA (CRÍTICO)
+- O outline deve focar no SISTEMA (quem autorizou, quem lucrou, qual documento) não na violência.
+- Se o outline descreve tortura, gore ou violência física explícita → sinalizar.
+- ❌ "A corda estala" / "Puxando vítimas pelos pulsos" (sintoma — repulsa)
+- ✅ "O bispo assinou a sentença" / "Confiscou bens para financiar" (mecanismo — indignação)
+- O espectador que vê tortura sente REPULSA e passa. O que vê o SISTEMA sente INDIGNAÇÃO e compartilha.
+
+### 6. Foco no Ângulo (ZERO CONTAMINAÇÃO TEMPORAL)
 - O choque deve vir do Ângulo (ex: a contradição evidencial, ou o horror emocional).
 - **REGRA CRÍTICA**: Se o ângulo é sobre um evento em 1475, TODOS os beats devem ser de 1475.
 - **PROIBIDO**: Pular para outros séculos/épocas (ex: mencionar 2019 num teaser de 1475).
 - **EXCEÇÃO**: Só é permitido mencionar outra época se o ângulo EXPLICITAMENTE for "conexão temporal" (ex: "Como fake news de 1475 inspirou ataque de 2019"). Se não for esse o ângulo, é VIOLAÇÃO.
 
-### 6. Anti-Padrões (PRIORIDADE MÁXIMA)
+### 7. Anti-Padrões (PRIORIDADE MÁXIMA)
 - Respeite os avoidPatterns. Eles vencem QUALQUER outra regra.
 - Se avoidPatterns proíbem datas → NENHUM campo pode ter datas.
 - Se avoidPatterns e outra regra conflitam → avoidPatterns vencem SEMPRE.
 
-### 7. Anchor Mínimo (Adaptável)
+### 8. Anchor Mínimo (Adaptável)
 - O outline DEVE prever pelo menos 1 fragmento de ancoragem nas primeiras 2 cenas.
 - O anchor **ideal** é local + data: "Trento. 1475."
 - **MAS**: Se os avoidPatterns proíbem datas, o anchor pode ser **APENAS local** (sem data). Isso é válido.
 - Se o outline não prevê NENHUM anchor (nem local, nada) → REPROVADO.
 - ⚠️ O anchor deve ser **integrado na ruptura**, não uma frase separada de contextualização.
 
-### 8. Controle de Resolução (ZERO)
+### 9. Controle de Resolução (ZERO)
 O Hook-Only é pura provocação. **ZERO resolução.**
 
 **REPROVADO se o outline contém QUALQUER um destes:**
@@ -85,7 +99,7 @@ O Hook-Only é pura provocação. **ZERO resolução.**
 
 🚨 Se explica QUALQUER COISA, deixou de ser hook-only e virou gateway disfarçado. REPROVE sem hesitar.
 
-### 9. CTA Invisível (Não Pode Parecer CTA)
+### 10. CTA Invisível (Não Pode Parecer CTA)
 - O público detecta CTA em milissegundos e sai ANTES do fim.
 - Se o CTA contém convite explícito ("Assista ao vídeo completo", "Siga para saber mais", "Inscreva-se") → REPROVADO.
 - Se o CTA fecha um loop narrativo → REPROVADO.
@@ -95,14 +109,12 @@ O Hook-Only é pura provocação. **ZERO resolução.**
 - ❌ "Quer saber como isso terminou? Assista ao vídeo completo."
 - ✅ "The Gap Files." (corte seco, logo, silêncio)
 
-### 10. Replay Bait (Otimização Algorítmica)
+### 11. Replay Bait (Otimização Algorítmica)
 - O outline deve prever pelo menos 1 beat com detalhe visual ou narrativo que passe RÁPIDO demais para ser totalmente absorvido.
 - Isso incentiva replay ("pera, o que foi isso?"), que é sinal forte para o algoritmo.
 - Se todos os beats são igualmente lentos e digeríveis → sinalizar.
-- ❌ Todas as cenas com ritmo uniforme e informação clara
-- ✅ 1 cena com detalhe visual rápido ou frase ambígua que exige re-assistir
 
-### 11. Título Viral
+### 12. Título Viral
 - Se o outline inclui título, verificar:
   - Máximo 8-10 palavras.
   - Deve conter tensão + curiosidade + clareza.
@@ -129,7 +141,13 @@ Beat 1: Arquivo aberto → Beat 2: Hinderbach → Beat 3: Xilogravura → Beat 4
 ❌ **REPROVADO** (Platô Emocional):
 ```
 Beat 1: intensidade 7/10 → Beat 2: 7/10 → Beat 3: 7/10 → Beat 4: 7/10
-→ VIOLAÇÃO: Tom uniforme. Sem escalação = sem pico = sem replay.
+→ VIOLAÇÃO: Tom uniforme. Sem dinâmica = sem impacto = sem replay.
+```
+
+❌ **REPROVADO** (SINTOMA ao invés de MECANISMO):
+```
+Beat 1: "A corda estala no ar, forçando a confissão"
+→ VIOLAÇÃO: Violência explícita (corda/tortura). Deveria ser: "O bispo assinou. A comunidade desapareceu."
 ```
 
 ❌ **REPROVADO** (Conclusão Moral):
@@ -138,13 +156,13 @@ Beat 5: "Da imprensa à internet, a mesma mentira viraliza, alimentando ódio mi
 → VIOLAÇÃO: Isso é RESOLUÇÃO. O espectador "já entendeu" a tese.
 ```
 
-✅ **APROVADO** (Hook-Only Viral):
+✅ **APROVADO** (Hook-Only Viral v2):
 ```
-Beat 1: [RUPTURA] Fato chocante, incompreensível, sem contexto
-Beat 2: [ESCALA] Detalhe que piora tudo
-Beat 3: [PICO] Revelação que muda o entendimento + detalhe visual rápido (replay bait)
-Beat 4: [CORTE] "The Gap Files." — silêncio
-→ OK: 1 conceito, escalação clara, zero resolução, CTA invisível.
+Beat 1: [RUPTURA 8/10] "Um bispo assinou. Uma comunidade inteira desapareceu."
+Beat 2: [RESPIRO 6/10] "O tribunal pagava os torturadores por dia."
+Beat 3: [PICO 10/10] "A confissão? Era um produto sob encomenda."
+Beat 4: [CTA] "The Gap Files." — silêncio
+→ OK: 1 conceito (fabricação de culpa), alternância com pico, MECANISMO > SINTOMA, zero resolução, CTA invisível.
 ```
 
 ## FORMATO DA RESPOSTA

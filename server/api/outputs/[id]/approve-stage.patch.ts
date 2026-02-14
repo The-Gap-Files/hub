@@ -58,6 +58,17 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 400, message: 'Invalid Stage' })
   }
 
+  // Se não é aprovação de render, resetar status GENERATING residual.
+  // O status GENERATING pode ficar "preso" se um processo anterior crashou
+  // ou foi interrompido. Aprovações de assets não devem herdar esse status.
+  if (stage !== 'RENDER' && approved) {
+    const current = await prisma.output.findUnique({ where: { id }, select: { status: true } })
+    if (current?.status === 'GENERATING') {
+      updateData.status = 'PENDING'
+      updateData.errorMessage = null
+    }
+  }
+
   const output = await prisma.output.update({
     where: { id },
     data: updateData,

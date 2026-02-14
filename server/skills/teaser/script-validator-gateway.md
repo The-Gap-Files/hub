@@ -60,10 +60,18 @@ O Gateway contextualiza e cria curiosidade — mas **NÃO fecha a história**.
 ### 9. Cliffhanger Específico
 - A penúltima cena deve ter algo ESPECÍFICO e irresistível, não pergunta genérica.
 
-### 10. CTA Convidativo
-- CTA deve CONVIDAR, não FILTRAR.
+### 10. CTA por Compulsão
+- CTA deve gerar compulsão, não ser pedido explícito.
 - ❌ "se tiver estômago" / "se aguenta" (excludente)
-- ✅ "Se você quer a verdade inteira." / "Os documentos estão no arquivo." (convidativo)
+- ❌ "Inscreva-se" / "Siga" / "Nunca perca" (pedido → o espectador percebe que acabou)
+- ✅ "A verdade está nos arquivos." / "Os documentos estão no arquivo." (compulsão)
+
+### 11. MECANISMO > SINTOMA
+- O roteiro deve focar no SISTEMA (quem autorizou, quem lucrou, qual documento), não na violência.
+- Se a narração descreve tortura, gore ou violência física explícita → sinalizar.
+- Se o visualDescription mostra violência gráfica (cordas, correntes, sangue) → sinalizar.
+- ❌ "A corda estala" / "Puxando vítimas pelos pulsos" (sintoma)
+- ✅ "O bispo confiscou os bens" / "O tribunal pagou por dia" (mecanismo)
 
 ## FORMATO DA RESPOSTA
 Se APROVADO: { "approved": true }

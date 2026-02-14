@@ -1,0 +1,81 @@
+{
+  "timestamp": "2026-02-14T22:43:09.407Z",
+  "taskId": "story-architect-retry",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "hookStrategy": "In media res com paradoxo: apresentamos de imediato a imagem chocante de um menino mártir que virou brinquedo, provocando perplexidade sobre como um símbolo de horror se transformou em diversão infantil.",
+    "hookVariants": [
+      {
+        "level": "green",
+        "hook": "Em Trento, um menino mártir virou brinquedo nas prateleiras – ninguém sabe quem autorizou.",
+        "rationale": "O tom curioso e informativo atrai o público geral sem provocar choque excessivo."
+      },
+      {
+        "level": "moderate",
+        "hook": "Em Trento, a figura do pequeno mártir virou brinquedo popular – e ninguém entende por quê.",
+        "rationale": "Provoca tensão ao sugerir um mistério cultural sem ser agressivo."
+      },
+      {
+        "level": "aggressive",
+        "hook": "Em Trento, o garoto usado como troféu de ódio agora está nas mãos das crianças como brinquedo. Você acha isso aceitável?",
+        "rationale": "Desafia o espectador com uma pergunta provocativa que incita debate."
+      },
+      {
+        "level": "lawless",
+        "hook": "Em Trento, o menino assassinado por fanatismo virou brinquedo de plástico; o horror está na prateleira da sua loja.",
+        "rationale": "Ultrapassa limites para gerar choque extremo e viralidade."
+      }
+    ],
+    "promiseSetup": "Trento, berço do culto de Simão, agora ecoa nas prateleiras de brinquedos infantis.",
+    "risingBeats": [
+      {
+        "order": 1,
+        "revelation": "A gravura medieval do mártir ainda circula, mas hoje paira silenciosa nas prateleiras como figura de brinquedo.",
+        "questionAnswered": "Não respondida",
+        "newQuestion": "Como essa imagem passou de livro antigo para brinquedo moderno?",
+        "sourceReference": "Incunábulo antigo da impressão"
+      },
+      {
+        "order": 2,
+        "revelation": "Um boneco de plástico reproduz a mesma pose, com um selo de ouro que pisca por 0,2 s antes de desaparecer – detalhe que você perde num piscar.",
+        "questionAnswered": "Não respondida",
+        "newQuestion": "Que mensagem secreta carrega esse brinquedo ao ser usado pelas crianças?",
+        "sourceReference": "Catálogo de brinquedos contemporâneo"
+      }
+    ],
+    "climaxMoment": "",
+    "climaxFormula": "",
+    "resolutionPoints": [],
+    "resolutionAngle": "",
+    "ctaApproach": "The Gap Files.",
+    "emotionalArc": "",
+    "toneProgression": "",
+    "whatToReveal": [],
+    "whatToHold": [],
+    "whatToIgnore": [],
+    "segmentDistribution": {
+      "hook": 1,
+      "context": 0,
+      "rising": 2,
+      "climax": 0,
+      "resolution": 0,
+      "cta": 0
+    },
+    "tensionCurve": [
+      "high",
+      "pause",
+      "peak"
+    ],
+    "openLoops": [
+      {
+        "question": "Como a imagem do menino virou brinquedo?",
+        "openedAtBeat": 1,
+        "closedAtBeat": null
+      }
+    ],
+    "resolutionLevel": "none"
+  },
+  "rawContent": "{\"hookStrategy\":\"In media res com paradoxo: apresentamos de imediato a imagem chocante de um menino mártir que virou brinquedo, provocando perplexidade sobre como um símbolo de horror se transformou em diversão infantil.\",\"hookVariants\":[{\"level\":\"green\",\"hook\":\"Em Trento, um menino mártir virou brinquedo nas prateleiras – ninguém sabe quem autorizou.\",\"rationale\":\"O tom curioso e informativo atrai o público geral sem provocar choque excessivo.\"},{\"level\":\"moderate\",\"hook\":\"Em Trento, a figura do pequeno mártir virou brinquedo popular – e ninguém entende por quê.\",\"rationale\":\"Provoca tensão ao sugerir um mistério cultural sem ser agressivo.\"},{\"level\":\"aggressive\",\"hook\":\"Em Trento, o garoto usado como troféu de ódio agora está nas mãos das crianças como brinquedo. Você acha isso aceitável?\",\"rationale\":\"Desafia o espectador com uma pergunta provocativa que incita debate.\"},{\"level\":\"lawless\",\"hook\":\"Em Trento, o menino assassinado por fanatismo virou brinquedo de plástico; o horror está na prateleira da sua loja.\",\"rationale\":\"Ultrapassa limites para gerar choque extremo e viralidade.\"}],\"promiseSetup\":\"Trento, berço do culto de Simão, agora ecoa nas prateleiras de brinquedos infantis.\",\"risingBeats\":[{\"order\":1,\"revelation\":\"A gravura medieval do mártir ainda circula, mas hoje paira silenciosa nas prateleiras como figura de brinquedo.\",\"questionAnswered\":\"Não respondida\",\"newQuestion\":\"Como essa imagem passou de livro antigo para brinquedo moderno?\",\"sourceReference\":\"Incunábulo antigo da impressão\"},{\"order\":2,\"revelation\":\"Um boneco de plástico reproduz a mesma pose, com um selo de ouro que pisca por 0,2 s antes de desaparecer – detalhe que você perde num piscar.\",\"questionAnswered\":\"Não respondida\",\"newQuestion\":\"Que mensagem secreta carrega esse brinquedo ao ser usado pelas crianças?\",\"sourceReference\":\"Catálogo de brinquedos contemporâneo\"}],\"climaxMoment\":\"\",\"climaxFormula\":\"\",\"resolutionPoints\":[],\"resolutionAngle\":\"\",\"ctaApproach\":\"The Gap Files.\",\"emotionalArc\":\"\",\"toneProgression\":\"\",\"whatToReveal\":[],\"whatToHold\":[],\"whatToIgnore\":[],\"segmentDistribution\":{\"hook\":1,\"context\":0,\"rising\":2,\"climax\":0,\"resolution\":0,\"cta\":0},\"tensionCurve\":[\"high\",\"pause\",\"peak\"],\"openLoops\":[{\"question\":\"Como a imagem do menino virou brinquedo?\",\"openedAtBeat\":1,\"closedAtBeat\":null}],\"resolutionLevel\":\"none\"}"
+}

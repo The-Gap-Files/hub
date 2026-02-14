@@ -38,6 +38,8 @@ import { videoPipelineService } from './video-pipeline.service'
 import { createPipelineLogger } from '../../utils/pipeline-logger'
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path)
+import os from 'node:os'
+import crypto from 'node:crypto'
 
 export interface OutputPipelineResult {
   outputId: string
@@ -267,6 +269,9 @@ export class OutputPipelineService {
 
     // Validar e retry se reprovado (apenas para teasers com narrativeRole)
     if (promptContext.narrativeRole && outlineData._monetizationMeta?.itemType === 'teaser') {
+      // Histórico acumulativo de feedbacks — garante que erros corrigidos não voltem
+      const validationHistory: string[] = []
+
       for (let attempt = 0; attempt <= MAX_SCRIPT_RETRIES; attempt++) {
         try {
           scriptValidation = await validateScript(
@@ -295,20 +300,27 @@ export class OutputPipelineService {
           }
 
           if (attempt < MAX_SCRIPT_RETRIES) {
-            // Injetar feedback de validação no contexto e regenerar
-            const validationFeedback = [
-              `⚠️ CORREÇÃO OBRIGATÓRIA (VALIDADOR REPROVOU O ROTEIRO ANTERIOR):`,
+            // Montar feedback desta tentativa
+            const currentFeedback = [
+              `⚠️ CORREÇÃO OBRIGATÓRIA (VALIDADOR REPROVOU O ROTEIRO — TENTATIVA ${attempt + 1}):`,
               ...(scriptValidation.violations || []).map(v => `- VIOLAÇÃO: ${v}`),
               scriptValidation.corrections ? `\nINSTRUÇÕES DE CORREÇÃO: ${scriptValidation.corrections}` : '',
               scriptValidation.overResolution ? `\n🚨 O roteiro RESOLVE DEMAIS para a role "${promptContext.narrativeRole}". Reduza explicações, remova conclusões e deixe loops abertos.` : ''
             ].filter(Boolean).join('\n')
 
+            // Acumular no histórico — o roteirista vê TODOS os feedbacks anteriores
+            validationHistory.push(currentFeedback)
+
+            const fullValidationFeedback = validationHistory.length > 1
+              ? `📋 HISTÓRICO DE CORREÇÕES (${validationHistory.length} tentativas reprovadas):\n${'─'.repeat(50)}\n${validationHistory.map((f, i) => `[Tentativa ${i + 1}]\n${f}`).join('\n\n')}\n${'─'.repeat(50)}\n\n🚨 NÃO repita NENHUM erro listado acima. Cada violação já corrigida que reaparecer é uma falha crítica.`
+              : currentFeedback
+
             const retryContext = {
               ...promptContext,
-              additionalContext: [promptContext.additionalContext || '', validationFeedback].filter(Boolean).join('\n\n')
+              additionalContext: [promptContext.additionalContext || '', fullValidationFeedback].filter(Boolean).join('\n\n')
             }
 
-            scriptLog.info(`🔄 Regenerando script com feedback do validador...`)
+            scriptLog.info(`🔄 Regenerando script com feedback do validador (histórico: ${validationHistory.length} tentativas)...`)
             scriptResponse = await scriptProvider.generate(retryContext)
 
             // Registrar custo do retry
@@ -364,6 +376,7 @@ export class OutputPipelineService {
           sceneEnvironment: scene.sceneEnvironment?.trim() || null,
           motionDescription: scene.motionDescription?.trim() || null,
           audioDescription: scene.audioDescription?.trim() || null,
+          audioDescriptionVolume: scene.audioDescriptionVolume ?? null,
           estimatedDuration: scene.estimatedDuration || 5
         }))
       })
@@ -864,6 +877,123 @@ export class OutputPipelineService {
   }
 
   /**
+   * Gera efeitos sonoros (SFX) para cada cena que tem audioDescription
+   * 
+   * Usa ElevenLabs Sound Effects API para gerar áudio a partir do prompt.
+   * A duração do SFX é calculada a partir da narração da cena (AudioTrack scene_narration).
+   * Salva como AudioTrack tipo 'scene_sfx'.
+   */
+  public async generateSFX(outputId: string) {
+    const log = createPipelineLogger({ stage: 'SFX', outputId })
+    log.info('Iniciando geração de SFX por cena.')
+
+    const scenes = await prisma.scene.findMany({
+      where: { outputId },
+      orderBy: { order: 'asc' },
+      include: {
+        audioTracks: {
+          where: { type: { in: ['scene_narration', 'scene_sfx'] } }
+        }
+      }
+    })
+
+    // Filtrar cenas que têm audioDescription e não têm SFX já gerado
+    const scenesWithSFX = scenes.filter(scene => {
+      const hasPrompt = scene.audioDescription && scene.audioDescription.trim().length > 0
+      const alreadyHasSFX = scene.audioTracks.some(t => t.type === 'scene_sfx')
+      if (alreadyHasSFX) {
+        log.info(`Cena ${scene.order + 1}: SFX já existe, pulando.`)
+      }
+      return hasPrompt && !alreadyHasSFX
+    })
+
+    if (scenesWithSFX.length === 0) {
+      log.info('Nenhuma cena necessita de SFX (sem audioDescription ou já gerado).')
+      return
+    }
+
+    log.info(`${scenesWithSFX.length}/${scenes.length} cenas com SFX para gerar.`)
+
+    const sfxProvider = providerManager.getSFXProvider()
+
+    const CONCURRENCY_LIMIT = 3 // SFX é mais lento que TTS
+    const sceneChunks = []
+    for (let i = 0; i < scenesWithSFX.length; i += CONCURRENCY_LIMIT) {
+      sceneChunks.push(scenesWithSFX.slice(i, i + CONCURRENCY_LIMIT))
+    }
+
+    let successCount = 0
+    let errorCount = 0
+
+    for (const chunk of sceneChunks) {
+      const results = await Promise.allSettled(chunk.map(async (scene) => {
+        // Calcular duração do SFX = duração EXATA da narração
+        const narrationTrack = scene.audioTracks.find(t => t.type === 'scene_narration')
+        if (!narrationTrack?.duration) {
+          log.warn(`Cena ${scene.order + 1}: sem narração com duração, pulando SFX.`)
+          return
+        }
+        const narrationDuration = narrationTrack.duration
+        // ElevenLabs SFX aceita até 22s de duração_seconds — acima disso, solicitar o máximo
+        const sfxRequestDuration = Math.min(22, narrationDuration)
+
+        log.step(`Cena ${scene.order + 1}`, `"${scene.audioDescription!.slice(0, 60)}..." → ${narrationDuration.toFixed(1)}s (req=${sfxRequestDuration.toFixed(1)}s), vol=${scene.audioDescriptionVolume ?? -12}dB`)
+
+        const sfxResponse = await sfxProvider.generate({
+          prompt: scene.audioDescription!,
+          durationSeconds: sfxRequestDuration,
+          promptInfluence: 0.3
+        })
+
+        // Pós-processamento: ajustar duração exata com FFmpeg (cortar ou padear com silêncio)
+        let finalBuffer = sfxResponse.audioBuffer
+        try {
+          finalBuffer = await adjustSfxDuration(Buffer.from(sfxResponse.audioBuffer), narrationDuration)
+          log.info(`Cena ${scene.order + 1}: SFX ajustado para ${narrationDuration.toFixed(1)}s exatos.`)
+        } catch (ffmpegErr) {
+          log.warn(`Cena ${scene.order + 1}: Falha ao ajustar duração do SFX, usando original. ${ffmpegErr}`)
+        }
+
+        await prisma.audioTrack.create({
+          data: {
+            outputId,
+            sceneId: scene.id,
+            type: 'scene_sfx',
+            provider: sfxProvider.getName().toUpperCase() as any,
+            fileData: Buffer.from(finalBuffer) as any,
+            mimeType: 'audio/mpeg',
+            originalSize: finalBuffer.length,
+            duration: narrationDuration // Duração exata da narração
+          }
+        })
+
+        // Registrar custo (fire-and-forget)
+        costLogService.log({
+          outputId,
+          resource: 'sfx',
+          action: 'create',
+          provider: sfxResponse.costInfo.provider,
+          model: sfxResponse.costInfo.model,
+          cost: sfxResponse.costInfo.cost,
+          metadata: sfxResponse.costInfo.metadata,
+          detail: `Scene ${scene.order + 1} SFX - ${narrationDuration.toFixed(1)}s audio`
+        }).catch(() => { })
+      }))
+
+      for (const result of results) {
+        if (result.status === 'fulfilled') {
+          successCount++
+        } else {
+          errorCount++
+          log.error(`SFX falhou: ${result.reason?.message?.slice(0, 100) || result.reason}`)
+        }
+      }
+    }
+
+    log.info(`SFX concluído: ${successCount} OK, ${errorCount} erros de ${scenesWithSFX.length} cenas.`)
+  }
+
+  /**
    * Regenera toda a narração com uma nova voz
    * 
    * Fluxo:
@@ -1150,3 +1280,43 @@ export class OutputPipelineService {
 
 export const outputPipelineService = new OutputPipelineService()
 
+// ─── Helper: Ajustar duração do SFX ─────────────────────────────
+
+/**
+ * Ajusta a duração de um buffer de áudio para a duração exata desejada.
+ * - Mais longo → corta
+ * - Mais curto → padea com silêncio
+ */
+async function adjustSfxDuration(audioBuffer: Buffer, targetDurationSeconds: number): Promise<Buffer> {
+  const tempDir = path.join(os.tmpdir(), 'sfx-adjust')
+  await fs.mkdir(tempDir, { recursive: true })
+
+  const id = crypto.randomUUID().slice(0, 8)
+  const inputPath = path.join(tempDir, `sfx-in-${id}.mp3`)
+  const outputPath = path.join(tempDir, `sfx-out-${id}.mp3`)
+
+  try {
+    await fs.writeFile(inputPath, audioBuffer)
+
+    await new Promise<void>((resolve, reject) => {
+      ffmpeg(inputPath)
+        .audioFilters([
+          `apad=whole_dur=${targetDurationSeconds}`,
+        ])
+        .duration(targetDurationSeconds)
+        .audioCodec('libmp3lame')
+        .audioBitrate('128k')
+        .audioChannels(2)
+        .audioFrequency(44100)
+        .output(outputPath)
+        .on('end', () => resolve())
+        .on('error', (err) => reject(err))
+        .run()
+    })
+
+    return await fs.readFile(outputPath)
+  } finally {
+    await fs.unlink(inputPath).catch(() => { })
+    await fs.unlink(outputPath).catch(() => { })
+  }
+}

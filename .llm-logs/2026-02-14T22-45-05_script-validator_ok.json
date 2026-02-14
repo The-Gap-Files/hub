@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-02-14T22:45:05.253Z",
+  "taskId": "script-validator",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "approved": false,
+    "violations": [
+      "Cena 2 fornece explicação ao revelar que o bispo mandou imprimir gravuras, respondendo ao loop aberto sobre como a imagem do menino virou brinquedo."
+    ],
+    "corrections": "Remova a explicação direta na Cena 2. Mantenha o foco no mecanismo de poder sem indicar que o bispo imprimiu as gravuras; por exemplo, altere para \"O bispo ordenou que o mito fosse espalhado, alimentando o medo e a riqueza da diocese.\" Evite fechar o loop sobre a origem da imagem. Certifique‑se de que nenhuma cena dê resposta ao questionamento inicial.",
+    "overResolution": true
+  },
+  "rawContent": "{\"approved\":false,\"violations\":[\"Cena 2 fornece explicação ao revelar que o bispo mandou imprimir gravuras, respondendo ao loop aberto sobre como a imagem do menino virou brinquedo.\"],\"corrections\":\"Remova a explicação direta na Cena 2. Mantenha o foco no mecanismo de poder sem indicar que o bispo imprimiu as gravuras; por exemplo, altere para \\\"O bispo ordenou que o mito fosse espalhado, alimentando o medo e a riqueza da diocese.\\\" Evite fechar o loop sobre a origem da imagem. Certifique‑se de que nenhuma cena dê resposta ao questionamento inicial.\",\"overResolution\":true}"
+}

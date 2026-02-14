@@ -97,8 +97,29 @@ export default defineEventHandler(async (event) => {
     })
 
     // 4. Salvar outline + monetizationContext no banco
+    // Injetar _monetizationMeta no outline para que o pipeline downstream
+    // (script generator, script validator) encontre narrativeRole, avoidPatterns, etc.
+    const outlineToSave = effectiveMonetizationContext
+      ? {
+        ...result.outline,
+        _monetizationMeta: {
+          itemType: effectiveMonetizationContext.itemType,
+          narrativeRole: effectiveMonetizationContext.narrativeRole,
+          shortFormatType: effectiveMonetizationContext.shortFormatType,
+          angleCategory: effectiveMonetizationContext.angleCategory,
+          angle: effectiveMonetizationContext.angle,
+          strategicNotes: effectiveMonetizationContext.strategicNotes,
+          scriptStyleId: effectiveMonetizationContext.scriptStyleId,
+          scriptStyleName: effectiveMonetizationContext.scriptStyleName,
+          editorialObjectiveId: effectiveMonetizationContext.editorialObjectiveId,
+          editorialObjectiveName: effectiveMonetizationContext.editorialObjectiveName,
+          avoidPatterns: effectiveMonetizationContext.avoidPatterns
+        }
+      }
+      : result.outline
+
     const updateData: any = {
-      storyOutline: result.outline as any,
+      storyOutline: outlineToSave as any,
       storyOutlineApproved: false
     }
     // Persistir monetizationContext no campo dedicado (primeira vez ou atualização)

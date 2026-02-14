@@ -157,10 +157,13 @@ export default defineEventHandler(async (event) => {
     }).catch(() => { })
 
     // 4.2 Validar e retry se reprovado
-    const monetizationMeta = (output.storyOutline as any)?._monetizationMeta
+    const regenMeta = (output.storyOutline as any)?._monetizationMeta
     let scriptValidation: { approved: boolean; violations?: string[]; corrections?: string; overResolution?: boolean } | undefined
-    if (promptContext.narrativeRole && monetizationMeta?.itemType === 'teaser') {
+    if (promptContext.narrativeRole && regenMeta?.itemType === 'teaser') {
       const outlineData = output.storyOutline as any
+      // Histórico acumulativo de feedbacks — garante que erros corrigidos não voltem
+      const validationHistory: string[] = []
+
       for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
         try {
           scriptValidation = await validateScript(
@@ -168,10 +171,10 @@ export default defineEventHandler(async (event) => {
             {
               itemType: 'teaser',
               narrativeRole: promptContext.narrativeRole,
-              angleCategory: monetizationMeta?.angleCategory,
+              angleCategory: regenMeta?.angleCategory,
               shortFormatType: promptContext.shortFormatType,
               targetDuration: output.duration || undefined,
-              avoidPatterns: monetizationMeta?.avoidPatterns,
+              avoidPatterns: regenMeta?.avoidPatterns,
               selectedHookLevel: outlineData?._selectedHookLevel || undefined,
               plannedOpenLoops: outlineData?.openLoops?.filter((l: any) => l.closedAtBeat === null)
             }
@@ -185,19 +188,27 @@ export default defineEventHandler(async (event) => {
           console.warn(`[RegenerateScript] ⚠️ Script REPROVADO (tentativa ${attempt + 1}/${MAX_RETRIES + 1}): ${scriptValidation.violations?.join('; ')}`)
 
           if (attempt < MAX_RETRIES) {
-            const validationFeedback = [
-              `⚠️ CORREÇÃO OBRIGATÓRIA (VALIDADOR REPROVOU O ROTEIRO ANTERIOR):`,
+            // Montar feedback desta tentativa
+            const currentFeedback = [
+              `⚠️ CORREÇÃO OBRIGATÓRIA (VALIDADOR REPROVOU O ROTEIRO — TENTATIVA ${attempt + 1}):`,
               ...(scriptValidation.violations || []).map(v => `- VIOLAÇÃO: ${v}`),
               scriptValidation.corrections ? `\nINSTRUÇÕES DE CORREÇÃO: ${scriptValidation.corrections}` : '',
               scriptValidation.overResolution ? `\n🚨 O roteiro RESOLVE DEMAIS para a role "${promptContext.narrativeRole}". Reduza explicações, remova conclusões e deixe loops abertos.` : ''
             ].filter(Boolean).join('\n')
 
+            // Acumular no histórico
+            validationHistory.push(currentFeedback)
+
+            const fullValidationFeedback = validationHistory.length > 1
+              ? `📋 HISTÓRICO DE CORREÇÕES (${validationHistory.length} tentativas reprovadas):\n${'─'.repeat(50)}\n${validationHistory.map((f, i) => `[Tentativa ${i + 1}]\n${f}`).join('\n\n')}\n${'─'.repeat(50)}\n\n🚨 NÃO repita NENHUM erro listado acima. Cada violação já corrigida que reaparecer é uma falha crítica.`
+              : currentFeedback
+
             const retryContext = {
               ...promptContext,
-              additionalContext: [promptContext.additionalContext || '', validationFeedback].filter(Boolean).join('\n\n')
+              additionalContext: [promptContext.additionalContext || '', fullValidationFeedback].filter(Boolean).join('\n\n')
             }
 
-            console.log(`[RegenerateScript] 🔄 Regenerando com feedback do validador (retry ${attempt + 1})...`)
+            console.log(`[RegenerateScript] 🔄 Regenerando com feedback do validador (retry ${attempt + 1}, histórico: ${validationHistory.length})...`)
             scriptResponse = await scriptProvider.generate(retryContext)
 
             costLogService.log({
@@ -279,6 +290,7 @@ export default defineEventHandler(async (event) => {
             sceneEnvironment: scene.sceneEnvironment?.trim() || null,
             motionDescription: scene.motionDescription?.trim() || null,
             audioDescription: scene.audioDescription?.trim() || null,
+            audioDescriptionVolume: scene.audioDescriptionVolume ?? null,
             estimatedDuration: scene.estimatedDuration || 5
           }))
         })

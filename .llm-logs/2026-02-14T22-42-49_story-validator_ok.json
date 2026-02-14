@@ -1,0 +1,19 @@
+{
+  "timestamp": "2026-02-14T22:42:49.863Z",
+  "taskId": "story-validator",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "approved": false,
+    "violations": [
+      "Primeiro beat contém contextualização (local e referência medieval) antes do choque, violando a regra de ruptura imediata.",
+      "O outline não segue o ângulo obrigatório cultural sobre o culto de Simão, violando a exigência de foco temático.",
+      "Ausência de CTA invisível ao final; o ctaApproach não está incluído como beat, violando a regra de CTA invisível.",
+      "Curva emocional incompleta: falta de beat de pico final conforme tensionCurve indica 'peak', resultando em falta de pico absoluto.",
+      "Nenhum detalhe de replay bait rápido foi incluído, violando a regra de otimização algorítmica."
+    ],
+    "corrections": "Reescreva o beat 1 para iniciar com uma ruptura conceitual sem contextualização prévia, por exemplo: \"Um menino mártir virou brinquedo — e ninguém sabe quem o autorizou.\" Inclua o culto de Simão no conceito central, mantendo um único conceito: \"O culto de Simão transformou um mártir medieval em ícone infantil.\" Adicione um beat final de pico com um detalhe visual rápido que force replay, e termine com o corte seco \"The Gap Files.\" como CTA invisível. Garanta que a curva emocional siga alta‑pausa... [truncated 58 chars]"
+  },
+  "rawContent": "{\"approved\":false,\"violations\":[\"Primeiro beat contém contextualização (local e referência medieval) antes do choque, violando a regra de ruptura imediata.\",\"O outline não segue o ângulo obrigatório cultural sobre o culto de Simão, violando a exigência de foco temático.\",\"Ausência de CTA invisível ao final; o ctaApproach não está incluído como beat, violando a regra de CTA invisível.\",\"Curva emocional incompleta: falta de beat de pico final conforme tensionCurve indica 'peak', resultando em falta de pico absoluto.\",\"Nenhum detalhe de replay bait rápido foi incluído, violando a regra de otimização algorítmica.\"],\"corrections\":\"Reescreva o beat 1 para iniciar com uma ruptura conceitual sem contextualização prévia, por exemplo: \\\"Um menino mártir virou brinquedo — e ninguém sabe quem o autorizou.\\\" Inclua o culto de Simão no conceito central, mantendo um único conceito: \\\"O culto de Simão transformou um mártir medieval em ícone infantil.\\\" Adicione um beat final de pico com um detalhe visual rápido que force replay, e termine com o corte seco \\\"The Gap Files.\\\" como CTA invisível. Garanta que a curva emocional siga alta‑pausa‑pico e que o anchor \\\"Trento\\\" esteja integrado na ruptura.\"}"
+}

@@ -21,7 +21,7 @@ import {
 // TIPOS
 // =============================================================================
 
-export type CostResource = 'outline' | 'script' | 'image' | 'narration' | 'bgm' | 'motion' | 'insights' | 'thumbnail'
+export type CostResource = 'outline' | 'script' | 'image' | 'narration' | 'bgm' | 'sfx' | 'motion' | 'insights' | 'thumbnail'
 export type CostAction = 'create' | 'recreate'
 
 export interface CostLogEntry {
