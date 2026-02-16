@@ -19,6 +19,172 @@ export interface GroqErrorResult {
 
 export type GroqErrorHandlerResult<T> = GroqFailedGenerationResult<T> | GroqErrorResult
 
+function stripCodeFences(input: string): string {
+  return input
+    .replace(/```json\s*/gi, '')
+    .replace(/```\s*/g, '')
+    .trim()
+}
+
+/**
+ * Tenta reparar JSON "quase válido" (ex: chaves/colchetes sobrando entre itens),
+ * e extrai o primeiro JSON balanceado possível.
+ *
+ * Estratégia:
+ * - ignora closers "sobrando" que não batem com a stack
+ * - interrompe ao fechar o primeiro root (stack volta a 0)
+ * - fecha o que faltou ao final (quando há truncamento)
+ *
+ * Importante: só usar como fallback quando JSON.parse falhar.
+ */
+function repairAndExtractBalancedJson(input: string): string {
+  const cleaned = stripCodeFences(input)
+  const startIdx = cleaned.search(/[\{\[]/)
+  if (startIdx < 0) return cleaned.trim()
+
+  const out: string[] = []
+  const stack: Array<'{' | '['> = []
+  let inString = false
+  let escaped = false
+
+  for (let i = startIdx; i < cleaned.length; i++) {
+    const ch = cleaned[i]!
+
+    if (inString) {
+      out.push(ch)
+      if (escaped) {
+        escaped = false
+        continue
+      }
+      if (ch === '\\') {
+        escaped = true
+        continue
+      }
+      if (ch === '"') {
+        inString = false
+      }
+      continue
+    }
+
+    // fora de string
+    if (ch === '"') {
+      inString = true
+      out.push(ch)
+      continue
+    }
+
+    if (ch === '{' || ch === '[') {
+      stack.push(ch)
+      out.push(ch)
+      continue
+    }
+
+    if (ch === '}' || ch === ']') {
+      const top = stack[stack.length - 1]
+      const matches = (ch === '}' && top === '{') || (ch === ']' && top === '[')
+      if (matches) {
+        stack.pop()
+        out.push(ch)
+
+        // Root fechado — ignorar qualquer trailing junk
+        if (stack.length === 0) {
+          break
+        }
+      } else {
+        // closer sobrando (ex: "}},{") — ignorar
+      }
+      continue
+    }
+
+    out.push(ch)
+  }
+
+  // Se truncou (faltaram closers), fechar o que ficou pendente
+  for (let i = stack.length - 1; i >= 0; i--) {
+    out.push(stack[i] === '{' ? '}' : ']')
+  }
+
+  return out.join('').trim()
+}
+
+/**
+ * Extrai TODOS os roots JSON balanceados de uma string.
+ * Útil quando o modelo retorna objetos concatenados (ex: JSON Schema + dados).
+ */
+function extractBalancedJsonRoots(input: string): string[] {
+  const cleaned = stripCodeFences(input)
+  const roots: string[] = []
+
+  let idx = 0
+  while (idx < cleaned.length) {
+    const startIdx = cleaned.slice(idx).search(/[\{\[]/)
+    if (startIdx < 0) break
+
+    const absoluteStart = idx + startIdx
+    const out: string[] = []
+    const stack: Array<'{' | '['> = []
+    let inString = false
+    let escaped = false
+    let endAt = -1
+
+    for (let i = absoluteStart; i < cleaned.length; i++) {
+      const ch = cleaned[i]!
+
+      if (inString) {
+        out.push(ch)
+        if (escaped) {
+          escaped = false
+          continue
+        }
+        if (ch === '\\') {
+          escaped = true
+          continue
+        }
+        if (ch === '"') inString = false
+        continue
+      }
+
+      if (ch === '"') {
+        inString = true
+        out.push(ch)
+        continue
+      }
+
+      if (ch === '{' || ch === '[') {
+        stack.push(ch)
+        out.push(ch)
+        continue
+      }
+
+      if (ch === '}' || ch === ']') {
+        const top = stack[stack.length - 1]
+        const matches = (ch === '}' && top === '{') || (ch === ']' && top === '[')
+        if (matches) {
+          stack.pop()
+          out.push(ch)
+          if (stack.length === 0) {
+            endAt = i
+            break
+          }
+        }
+        continue
+      }
+
+      out.push(ch)
+    }
+
+    if (out.length > 0 && endAt >= absoluteStart) {
+      roots.push(out.join('').trim())
+      idx = endAt + 1
+    } else {
+      // Evitar loop infinito em entrada malformada
+      idx = absoluteStart + 1
+    }
+  }
+
+  return roots
+}
+
 /**
  * Trata erros json_validate_failed do Groq extraindo failed_generation.
  * 
@@ -32,7 +198,8 @@ export function handleGroqJsonValidateError<T>(
   error: any,
   logPrefix: string,
   taskIdOrValidator?: string | ((data: any) => boolean),
-  validateData?: (data: any) => boolean
+  validateData?: (data: any) => boolean,
+  requestMessages?: any[]
 ): GroqErrorHandlerResult<T> {
   // Suporte a assinatura antiga: (error, logPrefix, validateData?)
   let taskId = 'unknown'
@@ -66,19 +233,54 @@ export function handleGroqJsonValidateError<T>(
   if (!failedGen) {
     console.warn(`${logPrefix} ⚠️ json_validate_failed mas sem failed_generation`)
     // Logar erro completo em arquivo para debug
-    logLlmError(taskId, { provider: 'groq', model: 'unknown', error }).catch(() => { })
+    logLlmError(taskId, { provider: 'groq', model: 'unknown', error, requestMessages }).catch(() => { })
     return { success: false, shouldRethrow: true }
   }
 
   try {
-    const partial = typeof failedGen === 'string' ? JSON.parse(failedGen) : failedGen
+    let partial: any
+    if (typeof failedGen === 'string') {
+      const cleaned = stripCodeFences(failedGen)
+      try {
+        partial = JSON.parse(cleaned)
+      } catch {
+        // 1) Tenta extrair roots concatenados (schema + dados, por exemplo)
+        const roots = extractBalancedJsonRoots(cleaned)
+        const parsedRoots: any[] = []
+        for (const root of roots) {
+          try {
+            parsedRoots.push(JSON.parse(root))
+          } catch {
+            // ignora roots inválidos e segue
+          }
+        }
+
+        // Prioriza um objeto de DADOS (não schema), idealmente com campo "approved"
+        const preferred = parsedRoots.find(
+          (r) => !(r?.$schema || (r?.properties && r?.type === 'object')) && typeof r?.approved === 'boolean'
+        ) || parsedRoots.find(
+          (r) => !(r?.$schema || (r?.properties && r?.type === 'object'))
+        )
+
+        if (preferred) {
+          partial = preferred
+        } else {
+          // 2) Fallback para reparo do primeiro root balanceado
+          const repaired = repairAndExtractBalancedJson(cleaned)
+          partial = JSON.parse(repaired)
+        }
+      }
+    } else {
+      partial = failedGen
+    }
 
     // Verificar se é o schema JSON Schema ao invés de dados
     if (partial?.$schema || (partial?.properties && partial?.type === 'object')) {
       console.error(`${logPrefix} ❌ Modelo retornou JSON Schema ao invés de dados. Schema muito complexo para este modelo.`)
       logLlmError(taskId, {
         provider: 'groq', model: 'unknown', error,
-        failedGeneration: partial
+        failedGeneration: partial,
+        requestMessages
       }).catch(() => { })
       return { success: false, shouldRethrow: true }
     }
@@ -88,7 +290,8 @@ export function handleGroqJsonValidateError<T>(
       console.warn(`${logPrefix} ⚠️ failed_generation não passou na validação customizada`)
       logLlmError(taskId, {
         provider: 'groq', model: 'unknown', error,
-        failedGeneration: partial
+        failedGeneration: partial,
+        requestMessages
       }).catch(() => { })
       return { success: false, shouldRethrow: true }
     }
@@ -98,7 +301,8 @@ export function handleGroqJsonValidateError<T>(
     // Logar como partial em arquivo para inspeção
     logLlmError(taskId, {
       provider: 'groq', model: 'unknown', error,
-      failedGeneration: partial
+      failedGeneration: partial,
+      requestMessages
     }).catch(() => { })
 
     return {
@@ -108,7 +312,13 @@ export function handleGroqJsonValidateError<T>(
     }
   } catch (parseErr) {
     console.error(`${logPrefix} ❌ Falha ao parsear failed_generation:`, parseErr)
-    logLlmError(taskId, { provider: 'groq', model: 'unknown', error }).catch(() => { })
+    logLlmError(taskId, {
+      provider: 'groq',
+      model: 'unknown',
+      error,
+      failedGeneration: failedGen,
+      requestMessages
+    }).catch(() => { })
     return { success: false, shouldRethrow: true }
   }
 }

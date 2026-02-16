@@ -13,6 +13,7 @@
 import { z } from 'zod'
 import { loadSkill } from '../utils/skill-loader'
 import { createLlmForTask, getAssignment } from './llm/llm-factory'
+import { validatorsEnabled } from '../utils/validators'
 
 // Schema de Resposta da Validação
 const MonetizationValidationResultSchema = z.object({
@@ -69,6 +70,11 @@ const LOG = '[MonetizationValidator]'
 export async function validateMonetizationPlan(
   plan: MonetizationPlanForValidation
 ): Promise<MonetizationValidationResult> {
+  if (!validatorsEnabled()) {
+    console.log(`${LOG} ⏭️ Validação DESABILITADA temporariamente (bypass global).`)
+    return { approved: true }
+  }
+
   // 1. Carregar skill de validação
   let validationSkill = ''
   try {

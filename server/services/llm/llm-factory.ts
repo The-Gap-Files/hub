@@ -179,7 +179,7 @@ async function seedProvidersAndModels(): Promise<void> {
           taskId,
           provider: task.defaultProvider,
           model: task.defaultModel,
-          temperature: taskId === 'script' ? 0.8 : 0.3
+          temperature: ['story-architect', 'script'].includes(taskId) ? 0.5 : 0.3
         }
       }).catch(() => { }) // Ignora se já existe (race condition)
       console.log(`[LLM Factory]   + Assignment "${taskId}" → ${task.defaultProvider}/${task.defaultModel}`)
@@ -420,7 +420,7 @@ export async function getAssignment(taskId: LlmTaskId): Promise<LlmAssignment> {
     taskId,
     provider: task.defaultProvider,
     model: task.defaultModel,
-    temperature: taskId === 'script' ? 0.8 : 0.3
+    temperature: ['story-architect', 'script'].includes(taskId) ? 0.5 : 0.3
   }
 
   await prisma.llmAssignment.create({

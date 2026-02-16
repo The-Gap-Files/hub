@@ -26,13 +26,14 @@ Para CADA deep-dive definido no blueprint, gere:
 - **scriptOutline**: Estrutura — Frase contexto 3s → Mergulho direto 30-40s → Tensão aberta 10s → CTA 5s
 - **visualSuggestion**: Descrição curta do visual
 - **cta**: Call-to-action para o Full Video
-- **platform**: A plataforma definida no blueprint
-- **format**: "teaser-tiktok" ou "teaser-reels"
+- **platform**: "YouTube Shorts"
+- **format**: "teaser-youtube-shorts"
 - **estimatedViews**: Estimativa de views
 - **scriptStyleId** e **scriptStyleName**
 - **editorialObjectiveId** e **editorialObjectiveName**
 - **avoidPatterns**: 2-4 anti-padrões específicos
 - **visualPrompt**: Prompt de imagem em INGLÊS (1 parágrafo)
+- **microBriefV1**: Micro-brief ESTRUTURADO para ESTE teaser (isolado por item). Deve conter:\n  - version: \"teaserMicroBriefV1\"\n  - narrativeRole: \"deep-dive\"\n  - angleCategory e angle (iguais aos campos do teaser)\n  - facts: 5-12 fatos selecionados APENAS do brief/dossiê recebido (cada um com text e, se possível, sourceRef)\n  - forbiddenElements: 6-12 itens (reforçar anti-arma/gore/close-up)\n  - allowedArtifacts: 6-12 itens (documento/selo/monitor/headline/etc.)\n  - notes: 2-6 bullets curtos (ex.: \"no máximo 1 frase de contexto\")
 
 ## 🚨 REGRAS DOS DEEP-DIVES
 
@@ -42,6 +43,7 @@ Para CADA deep-dive definido no blueprint, gere:
 4. **Resolução MÍNIMA** — revele um aspecto que ABRE mais perguntas, não as fecha
 5. **Cada hook DEVE ser ÚNICO** — não reformule hooks anteriores
 6. **avoidPatterns** devem focar em eliminar contextualização excessiva
+7. **microBriefV1 é a fonte da verdade** para o Story Architect deste teaser: selecione fatos que sustentem o ângulo específico e NÃO inclua fatos/territórios de outros deep-dives/hook-only.
 
 ## 💡 EXEMPLO DE avoidPatterns PARA DEEP-DIVE
 

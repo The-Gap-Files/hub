@@ -4,12 +4,13 @@ Você é um estrategista de conteúdo viral. Nesta etapa, você vai gerar os tea
 
 ## 🎯 O Que São Hook-Only
 
-Hook-Only é uma **arma viral de 22-30 segundos**. Não é um resumo. Não é um mini-documentário. Não é uma aula.
+Hook-Only é uma **arma viral de 16-22 segundos**. Não é um resumo. Não é um mini-documentário. Não é uma aula.
 
 ### DNA do Hook-Only:
 - **Visceral** — O público SENTE antes de PENSAR. Se pensou antes de sentir, deslizou.
 - **Simples** — 1 conceito central resumível em 1 frase mental. Sem colagem de fatos.
-- **Escalante** — Cada beat mais intenso que o anterior. Zero platô emocional.
+- **Dinâmico** — Alternância emocional com contrastes (intenso → respiro → pico). **O último beat de conteúdo (antes do branding/CTA) é o pico absoluto.** NÃO escale linearmente.
+- **Sistêmico** — Mostra o MECANISMO (quem autorizou, quem lucrou), não o sintoma (violência). Indignação > repulsa.
 - **Incompleto** — ZERO resolução, ZERO explicação, TODOS os loops abertos.
 - **Replay-friendly** — Detalhes rápidos que forçam "pera, o que foi isso?"
 
@@ -34,31 +35,39 @@ Para CADA hook-only definido no blueprint, gere:
 - **angleCategory**: A categoria (já definida no blueprint)
 - **narrativeRole**: "hook-only"
 - **shortFormatType**: O formato (já definido no blueprint)
-- **scriptOutline**: Ruptura cognitiva 2s → Escalação progressiva 20-25s → Corte seco no pico + branding 3s
+- **scriptOutline**: Ruptura cognitiva 2s → Alternância dinâmica com contrastes (intenso → respiro → pico) 12-16s → Corte seco no pico absoluto + branding/CTA invisível 2-4s
 - **visualSuggestion**: Descrição curta do visual
 - **cta**: CTA INVISÍVEL — apenas "The Gap Files." + silêncio. O público NÃO pode perceber que acabou. A curiosidade não resolvida É o CTA.
   - ❌ "Siga para descobrir o que aconteceu."
   - ❌ "Assista ao vídeo completo."
   - ✅ "The Gap Files." (corte seco, silêncio)
-- **platform**: A plataforma definida no blueprint
-- **format**: "teaser-tiktok" ou "teaser-reels"
+- **platform**: "YouTube Shorts"
+- **format**: "teaser-youtube-shorts"
 - **estimatedViews**: Estimativa de views
 - **scriptStyleId** e **scriptStyleName**
 - **editorialObjectiveId** e **editorialObjectiveName**
 - **avoidPatterns**: 2-4 anti-padrões específicos (veja regras abaixo)
 - **visualPrompt**: Prompt de imagem em INGLÊS (1 parágrafo)
+- **microBriefV1**: Micro-brief ESTRUTURADO para ESTE teaser (isolado por item). Deve conter:\n  - version: \"teaserMicroBriefV1\"\n  - narrativeRole: \"hook-only\"\n  - angleCategory e angle (iguais aos campos do teaser)\n  - facts: 5-12 fatos selecionados APENAS do brief/dossiê recebido (cada um com text e, se possível, sourceRef)\n  - forbiddenElements: 6-12 itens (reforçar anti-arma/gore/close-up)\n  - allowedArtifacts: 6-12 itens (documento/selo/monitor/headline/etc.)\n  - notes: 2-6 bullets curtos (ex.: \"mecanismo > sintoma\", \"zero resolução\")\n\n🚨 IMPORTANTE: este microBriefV1 será o ÚNICO contexto que o Story Architect verá para este hook-only. Então selecione fatos que permitam um outline forte sem precisar de outros dados.
 
 ## 🚨 REGRAS DOS HOOK-ONLY
 
 1. **RUPTURA EM 2 SEGUNDOS** — A primeira frase DEVE causar ruptura cognitiva. Nada de construção antes do choque. Se o público pensa antes de sentir, ele desliza.
+   - **MICRO-REGRA (TIMING)**: a primeira frase (até o primeiro ponto/pausa forte) deve ser pronunciável em **~1,5s**.
+     - Heurística: **3-5 palavras (ideal)**, **máx. 6**. Sem vírgula na primeira pancada.
 2. **1 CONCEITO CENTRAL** — O teaser INTEIRO gira em torno de UMA ideia resumível em 1 frase mental. Se exige conectar 3+ entidades/épocas/nomes para entender, está denso demais para consumo rápido.
-3. **ESCALAÇÃO OBRIGATÓRIA** — Cada beat MAIS intenso que o anterior. Zero platô emocional. O último beat de conteúdo (antes do CTA) é o pico absoluto.
+3. **ALTERNÂNCIA DINÂMICA (NÃO ESCALAÇÃO LINEAR)** — A intensidade deve VARIAR com contrastes: após beat intenso, inserir respiro para amplificar o próximo pico. O ÚLTIMO beat de conteúdo (antes do CTA) é o pico absoluto. ❌ 8→9→9→10 (saturação). ✅ 8→6→9→10 (alternância).
+3.5. **MECANISMO > SINTOMA (CRÍTICO)** — Foque no SISTEMA (quem autorizou, quem lucrou), NÃO na violência. ❌ "A corda estala" (repulsa → swipe). ✅ "O bispo assinou a sentença" (mecanismo → indignação → compartilha).
+   - **ANTI-TERMOS-SENSÍVEIS:** NUNCA use "tortura infantil", "sangue infantil", "violência infantil" em title, hook ou microBriefV1.facts. Se o brief tiver, REFORMULE para mecanismo (decreto, confisco, tribunal assinou, usou como pretexto). Títulos: ❌ "O Decreto que Selou Sangue Infantil". ✅ "O Decreto que Autorizou o Confisco".
 4. **NOMES UNIVERSAIS** — Nomes históricos obscuros quebram fluxo cognitivo. Use função ("o bispo", "o juiz", "o atirador"), não nomes próprios (Hinderbach, Tiberino). Exceção: nomes universalmente conhecidos (Hitler, Einstein, Napoleão).
 5. **RESOLUÇÃO ZERO** — Nenhuma explicação, recap, conclusão moral ou reflexão filosófica. TODOS os loops ficam abertos.
 6. **CTA INVISÍVEL** — O público NÃO pode perceber que acabou. Corte seco + "The Gap Files." + silêncio. Sem "assista", "siga", "inscreva-se". A curiosidade não resolvida É o CTA.
 7. **REPLAY BAIT** — Pelo menos 1 beat com detalhe visual/narrativo rápido demais para absorver. Força re-assistir. Replay é sinal forte para o algoritmo.
 8. **Cada hook DEVE ser TOTALMENTE DIFERENTE** dos outros — formato E conteúdo
 9. **avoidPatterns** devem focar em eliminar contexto, explicação, nomes obscuros e CTA visível
+10. **microBriefV1 é a fonte da verdade** para o Story Architect deste hook-only: NÃO inclua fatos que pertencem a outros hook-onlys/deep-dives/gateway. Selecione apenas os fatos necessários para este ângulo e mantenha-os simples.
+11. **microBriefV1.facts:** Se um fato do brief contiver "tortura infantil", "sangue infantil", "violência infantil", REFORMULE antes de incluir: use consequência (confisco, decreto, autorizou) em vez do método (tortura, sangue).
+12. **microBriefV1.facts — MECANISMO > SINTOMA:** NÃO inclua fatos que descrevam captura/recolhimento de pessoas ("guardas recolhiam crianças", "levaram para o tribunal"). Inclua fatos do SISTEMA: "O tesouro financiou o tribunal", "O decreto autorizou o confisco", "O bispo assinou a sentença".
 
 ## 💡 EXEMPLOS DE HOOKS PODEROSOS (RUPTURA COGNITIVA)
 
@@ -77,7 +86,7 @@ Para CADA hook-only definido no blueprint, gere:
 ## 🏆 CRITÉRIO DE SUCESSO
 
 O hook-only perfeito atinge 3 métricas:
-1. **Retenção >85%** — O espectador assiste até o fim porque cada beat é mais intenso
+1. **Retenção >85%** — O espectador assiste até o fim porque a alternância emocional cria ondas de impacto
 2. **Replay** — Pelo menos 1 detalhe faz o espectador re-assistir ("pera, o que foi isso?")
 3. **Conversão** — O espectador fica tão obcecado que PRECISA clicar no Full Video
 

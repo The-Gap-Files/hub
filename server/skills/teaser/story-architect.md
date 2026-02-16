@@ -30,8 +30,14 @@ Adapte a estrutura ao papel do vídeo. **REGRA FUNDAMENTAL: Shorts são topo de 
 
 - **HOOK-ONLY:** Arma de alcance viral. Detonação cognitiva que para o scroll, gera replay e converte.
   - **Resolução:** `ZERO` — Pura provocação. O cérebro do espectador deve COÇAR de necessidade de saber mais.
-  - **DNA Viral:** Visceral (sentir antes de pensar), Simples (1 conceito em 1 frase), Escalante (cada beat mais intenso), Incompleto (todos os loops abertos), Replay-friendly (detalhes rápidos que forçam re-assistir).
-  - **Proibido:** Explicação, recap, conclusão moral, nomes obscuros, CTA visível, platô emocional.
+  - **DNA Viral:** Visceral (sentir antes de pensar), Simples (1 conceito em 1 frase), Dinâmico (alternância emocional com pico no último beat de conteúdo — antes do CTA/branding — NÃO escalação linear), Incompleto (todos os loops abertos), Replay-friendly (detalhes rápidos que forçam re-assistir), Sistêmico (mostra o MECANISMO, não o sintoma).
+  - **Curva Emocional Hook-Only:** A intensidade deve VARIAR com contrastes — após beat intenso, inserir respiro para amplificar o próximo pico. O ÚLTIMO beat de conteúdo (antes do CTA) é o pico absoluto.
+    - ❌ 8/10 → 9/10 → 9/10 → 10/10 (saturação — sem respiro → Validator REPROVA)
+    - ✅ 8/10 → 6/10 → 9/10 → 10/10 (alternância — cada pico amplificado pelo contraste)
+  - **MECANISMO > SINTOMA (CRÍTICO):** O outline deve focar no SISTEMA (quem autorizou, quem lucrou, qual documento), NÃO na violência. O espectador que vê tortura sente REPULSA e passa. O que vê o SISTEMA sente INDIGNAÇÃO e compartilha.
+    - ❌ "A corda estala" / "Puxando vítimas pelos pulsos" (sintoma → repulsa)
+    - ✅ "O bispo assinou a sentença" / "Confiscou bens para financiar" (mecanismo → indignação)
+  - **Proibido:** Explicação, recap, conclusão moral, nomes obscuros, CTA visível, platô emocional, violência gráfica/sintomas.
 
 🚨 **POR QUÊ ISSO É CRÍTICO:** Shorts que resolvem a história completa matam a conversão para o Full Video. Analytics reais mostram: retenção alta + conversão baixa = short que entregou demais. O short é o TRAILER, não o filme.
 
@@ -97,9 +103,9 @@ Para cada variante, forneça:
 - Exemplo: "Você mataria uma criança em prol da sua religião?"
 
 #### ☠️ LAWLESS (Terra sem Lei)
-- ULTRAPASSA as diretrizes do YouTube intencionalmente. Referência extrema.
-- Sem filtros: linguagem crua, acusações diretas, provocação máxima.
-- NÃO é para publicação direta — serve para calibrar o tom ideal entre aggressive e lawless.
+- Referência extrema para calibração tonal — NÃO para publicação direta.
+- Serve para o usuário calibrar o tom ideal entre aggressive e lawless.
+- Mantém provocação conceitual, sem linguagem gráfica ou gore.
 - Exemplo: "A Igreja torturou e matou uma criança de dois anos — e você ainda reza para eles."
 
 ⚠️ As 4 variantes devem usar a MESMA técnica de abertura, calibrando APENAS a intensidade tonal.
@@ -330,11 +336,13 @@ Antes de finalizar o outline, verifique se TODOS os campos obrigatórios estão 
 - [ ] **Campos de resolução VAZIOS** — `climaxMoment`, `climaxFormula`, `resolutionPoints`, `resolutionAngle`, `emotionalArc`, `toneProgression`, `whatToReveal`, `whatToHold`, `whatToIgnore` devem ser vazios (`""` ou `[]`)
 - [ ] **ctaApproach** — Deve ser INVISÍVEL: apenas "The Gap Files." + corte seco. Sem convite explícito.
 - [ ] **Conceito único** — O outline inteiro gira em torno de 1 ideia resumível em 1 frase?
-- [ ] **Escalação** — Cada beat é mais intenso que o anterior? Sem platô?
+- [ ] **Alternância emocional** — Curva com contrastes (intenso → respiro → pico)? Sem platô NEM escalação linear pura? Pico no último beat de conteúdo (antes do CTA/branding)?
+- [ ] **Mecanismo > Sintoma** — Foco no SISTEMA (quem autorizou, quem lucrou), não em violência/gore?
 - [ ] **Nomes universais** — Nenhum nome obscuro? Todos substituídos por função?
 - [ ] **Ruptura imediata** — Beat 1 é detonação, não construção?
 - [ ] **Replay bait** — Pelo menos 1 detalhe visual/narrativo rápido demais para absorver?
 - [ ] **questionAnswered** — Todos preenchidos com "Não respondida" (hook-only NÃO responde)?
+- [ ] **Título viral** — Máximo 8-10 palavras, tensão + curiosidade, não acadêmico?
 
 **❌ Se qualquer campo obrigatório estiver vazio ou genérico, o outline será REJEITADO pelo validador.**
 

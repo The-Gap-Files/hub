@@ -1,9 +1,0 @@
-{
-  "timestamp": "2026-02-14T22:45:44.177Z",
-  "taskId": "script-validator",
-  "status": "ok",
-  "provider": "groq",
-  "model": "openai/gpt-oss-120b",
-  "parsed": null,
-  "rawContent": "{\"approved\":true,\"violations\":null,\"corrections\":null,\"overResolution\":false}"
-}

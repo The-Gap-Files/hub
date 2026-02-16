@@ -1,0 +1,140 @@
+{
+  "timestamp": "2026-02-15T23:27:32.429Z",
+  "taskId": "monetization-gateway",
+  "status": "partial",
+  "provider": "groq",
+  "model": "unknown",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Monetization — Gateway Teaser Generator\r\n\r\nVocê é um estrategista de conteúdo. Nesta etapa, você vai gerar o teaser GATEWAY — a porta de entrada para o universo do dossiê.\r\n\r\n## 🎯 O Que É o Gateway\r\n\r\nO Gateway é o ÚNICO teaser que apresenta o tema COMPLETO. Ele é um standalone — funciona para quem nunca ouviu falar do assunto. O espectador sai sabendo DO QUE se trata, mas sem saber COMO termina.\r\n\r\n## 📐 O QUE PRODUZIR\r\n\r\nGere TODOS os campos:\r\n- **title**: Título curto e impactante para a plataforma\r\n- **hook**: Frase de abertura (até 15 palavras). DEVE contextualizar o tema.\r\n- **angle**: O ângulo narrativo ÚNICO deste teaser (já definido no blueprint)\r\n- **angleCategory**: A categoria do ângulo (já definida no blueprint)\r\n- **narrativeRole**: \"gateway\"\r\n- **shortFormatType**: O formato (já definido no blueprint)\r\n- **scriptOutline**: Estrutura resumida — Hook 3s → Setup quem/quando/onde 15-20s → Revelação 20-25s → CTA 5s\r\n- **visualSuggestion**: Descrição curta do visual\r\n- **cta**: Call-to-action que direciona para o Full Video\r\n- **platform**: \"YouTube Shorts\"\r\n- **format**: \"teaser-youtube-shorts\"\r\n- **estimatedViews**: Estimativa de views\r\n- **scriptStyleId** e **scriptStyleName**\r\n- **editorialObjectiveId** e **editorialObjectiveName**\r\n- **avoidPatterns**: 2-4 anti-padrões ESPECÍFICOS ao conteúdo do dossiê\r\n- **visualPrompt**: Prompt de imagem em INGLÊS (1 parágrafo, 50-120 palavras)\r\n- **microBriefV1**: Micro-brief ESTRUTURADO para ESTE teaser (isolado por item). Deve conter:\\n  - version: \\\"teaserMicroBriefV1\\\"\\n  - narrativeRole: \\\"gateway\\\"\\n  - angleCategory e angle (iguais aos campos do teaser)\\n  - facts: 5-12 fatos selecionados APENAS do brief/dossiê recebido (cada um com text e, se possível, sourceRef)\\n  - forbiddenElements: 6-12 itens (reforçar anti-arma/gore/close-up)\\n  - allowedArtifacts: 6-12 itens (documento/selo/monitor/headline/etc.)\\n  - notes: 2-6 bullets curtos (ex.: \\\"use mecanismo, não violência\\\")\r\n\r\n## 🚨 REGRAS DO GATEWAY\r\n\r\n1. **Contexto COMPLETO** — quem, quando, onde, por quê. Funciona como standalone\r\n2. **Resolução PARCIAL** — contextualiza mas NÃO fecha a história\r\n3. **NÃO entregue** a explicação científica/forense completa\r\n4. **NÃO revele** a motivação final dos envolvidos\r\n5. **DEIXE** pelo menos 1-2 perguntas sem resposta\r\n6. **avoidPatterns** devem focar em evitar contar DEMAIS (não em falta de contexto)\r\n7. **Hook DIFERENTE** do Full Video\r\n8. **microBriefV1 é a fonte da verdade** para o Story Architect deste teaser: selecione fatos que sustentem o ângulo e NÃO inclua nada que pertença a outros teasers.\r\n\r\n## 💡 EXEMPLO DE avoidPatterns PARA GATEWAY\r\n\r\n- \"NÃO resolva o caso — apresente mas deixe em aberto\"\r\n- \"NÃO use tom enciclopédico — mantenha urgência\"\r\n- \"NÃO cubra TODOS os aspectos — foque no gancho principal e deixe ângulos para os outros teasers\"\n## ⚙️ CONFIGURAÇÃO (CENAS FIXAS)\n- Full Video: 150 cenas\n- Gateway: 5 cenas\n- Deep-Dive: 6 cenas\n- Hook-Only: 4 cenas\n- Quantidade de teasers: 12\n\n\nEstilo visual do plano: noir-cinematic (Noir Cinematográfico)\n\nHook do Full Video (NÃO repetir): \"Imagine descobrir que a primeira grande campanha de ódio foi escrita com tinta de imprensa e ainda ecoa nas redes sociais de hoje.\""
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "📋 TEMA: Injustiça histórica ou assassinato de criança por religião\n📋 TÍTULO: Simão de trento, itália\n🧾 BRIEF (TEASERS) — versão: briefBundleV1\n\n🛡️ REGRAS HARD (GLOBAL SAFETY)\n- ❌ arma de fogo\n- ❌ gore\n- ❌ close-up de rosto humano\n- ❌ símbolos extremistas\n- ❌ armas de fogo, rifles, pistolas, munição, gatilho\n- ❌ atirador, execução, assassinato explícito, violência gráfica\n- ❌ sangue, gore, corpos mutilados, tortura explícita\n- ❌ close-up de mãos humanas, close-up de rostos humanos (evitar macro/anatomia)\n- ❌ cenas em sinagogas/templos com ameaça explícita (substituir por artefatos: manifesto, tela, manchete)\n- ❌ símbolos/extremismo contemporâneo em destaque (substituir por “texto recortado/blur”)\n\n🧰 ARTEFATOS VISUAIS PERMITIDOS\n- ✅ manifesto\n- ✅ documento\n- ✅ registro\n- ✅ incunábulo\n- ✅ xilogravura\n- ✅ documento, decreto, registro, arquivo, dossiê, carimbo, selo de cera\n- ✅ moedas, cofre, livro-caixa, inventário, recibo, contrato\n- ✅ monitor, tela, manifesto (sem arma), headline, recorte de jornal, thread desfocada\n- ✅ mapa, corredor de arquivo, sala de leitura, prateleiras, luz de vela, sombras\n- ✅ silhuetas não-identificáveis sem rosto/mãos em close\n\n🔫 MUNIÇÃO NARRATIVA (FATOS SAFE)\n1. Em 1475, o príncipe‑bispo Johannes Hinderbach autorizou a abertura de processo contra a comunidade judaica de Trento, usando o desaparecimento da criança como pretexto. [fonte: [1]]\n2. O frade Bernardino da Feltre pregou contra a usura judaica semanas antes da Páscoa, criando clima de suspeita que facilitou a acusação. [fonte: [1]]\n3. O corpo de Simão foi encontrado na adega de Samuel de Nuremberg; o relato de Samuel ao tribunal foi usado como evidência de culpa judaica. [fonte: [1]]\n4. O médico Giovanni Mattia Tiberino produziu um relatório de autópsia que interpretou lesões como “sinais rituais”, reforçando a narrativa de assassinato ritual. [fonte: [1]]\n5. O método de tortura chamado “squassada” (strappado) foi aplicado aos acusados para extrair confissões que coincidiam com o roteiro esperado pelos inquisidores. [fonte: [1]]\n6. As confissões obtidas sob squassada incluíram detalhes teológicos que os juízes exigiam, como uso de sangue em vinho, consolidando o mito. [fonte: [1]]\n7. Após as condenações, os bens dos judeus – casas, dinheiro e livros de contabilidade – foram confiscados pelo tesouro episcopal, aliviando dívidas locais. [fonte: [1]]\n8. Hinderbach patrocinou a impressão de incunábulos, como o “Relatio de Simone puero tridentino”, que divulgou a história do suposto martírio em toda a Europa. [fonte: [4]]\n9. A xilogravura da Crônica de Nuremberg (1493) ilustrou o suposto assassinato, tornando‑se modelo visual para futuros libelos de sangue. [fonte: [4]]\n10. Em 1478, o Papa Sixto IV emitiu a bula “Facit nos pietas”, reconhecendo formalmente o processo como juridicamente correto, legitimando o confisco e a propaganda. [fonte: [1]]\n11. O comissário papal Battista dei Giudici investigou o caso e concluiu que as acusações eram fabricadas, mas foi impedido de reverter as sentenças. [fonte: [1]]\n12. O culto a Simão foi oficialmente abolido em 1965 por decreto do Arcebispo de Trento, reconhecendo a inocência dos judeus. [fonte: [1]]\n13. A iconografia de Simon continuou a ser usada por grupos neonazistas digitais, como a imagem da xilogravura circulada em fóruns online. [fonte: [1]]\n14. Em 2019, John Earnest citou o caso de Simão de Trento em seu manifesto antes do ataque à sinagoga de Poway, demonstrando a persistência do mito. [fonte: [3]]\n15. O ataque de Poway resultou na morte de Lori Gilbert‑Kaye, que tentou proteger o rabino, e foi motivado por discurso antissemita que remete ao libelo de sangue. [fonte: [6]]\n16. O manifesto de Earnest descreve a “tecnologia de ódio” como a transição da imprensa do século XV para as redes sociais do século XXI. [fonte: [1]]\n17. A hipótese “Schweitzer” aponta um cristão que sugeriu não procurar a criança, mas foi suprimida para evitar investigação de acidente. [fonte: [1]]\n18. O suposto “milagre” da incorruptibilidade do corpo foi explicado por processos de saponificação em água fria, usado como prova de santidade. [fonte: [1]]\n19. As execuções dos judeus incluíram decapitação para os que aceitaram batismo e queima para os que mantiveram a fé, conforme registros judiciais. [fonte: [1]]\n20. O caso de Trento estabeleceu um padrão de uso de documentos impressos e imagens para legitimar acusações de libelo de sangue por séculos. [fonte: [5]]\n\n🎭 DIRETRIZES POR PAPEL\n- gateway: contextLevel=medium, facts=10-22\n- deep-dive: contextLevel=low, facts=8-16\n- hook-only: contextLevel=minimal, facts=3-6\n\nGere o teaser GATEWAY para o dossiê.\n\nSlot definido no blueprint:\n- angleCategory: \"cronologico\"\n- angleName: \"Cronologia do caso Simão de Trento\"\n- shortFormatType: \"lista-rapida\"\n- platform: \"YouTube Shorts\"\n- scriptStyleId: \"documentary\"\n- editorialObjectiveId: \"explainer\"\n\nRetorne um JSON com campo \"teasers\" contendo exatamente 1 teaser."
+      }
+    ]
+  },
+  "errorMessage": "400 {\"error\":{\"message\":\"Generated JSON does not match the expected schema. Please adjust your prompt. See 'failed_generation' for more details. Error: jsonschema: '/teasers' does not validate with /properties/teasers/maxItems: maximum 1 items required, but found 2 items\",\"type\":\"invalid_request_error\",\"code\":\"json_validate_failed\",\"failed_generation\":\"{\\\"teasers\\\":[{\\\"title\\\":\\\"O Mistério de Simão de Trento\\\",\\\"hook\\\":\\\"Um menino desaparecido em 1475 desencadeou um mito que ecoa até hoje.\\\",\\\"a",
+  "errorCode": "json_validate_failed",
+  "errorType": "invalid_request_error",
+  "validationError": "Generated JSON does not match the expected schema. Please adjust your prompt. See 'failed_generation' for more details. Error: jsonschema: '/teasers' does not validate with /properties/teasers/maxItems: maximum 1 items required, but found 2 items",
+  "failedGeneration": {
+    "teasers": [
+      {
+        "title": "O Mistério de Simão de Trento",
+        "hook": "Um menino desaparecido em 1475 desencadeou um mito que ecoa até hoje.",
+        "angle": "Cronologia do caso Simão de Trento",
+        "angleCategory": "cronologico",
+        "narrativeRole": "gateway",
+        "shortFormatType": "lista-rapida",
+        "microBriefV1": {
+          "version": "teaserMicroBriefV1",
+          "narrativeRole": "gateway",
+          "angleCategory": "cronologico",
+          "angle": "Cronologia do caso Simão de Trento",
+          "facts": [
+            {
+              "text": "Em 1475, o príncipe‑bispo Johannes Hinderbach autorizou a abertura de processo contra a comunidade judaica de Trento, usando o desaparecimento da criança como pretexto.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "O frade Bernardino da Feltre pregou contra a usura judaica semanas antes da Páscoa, criando clima de suspeita que facilitou a acusação.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "O corpo de Simão foi encontrado na adega de Samuel de Nuremberg; o relato de Samuel ao tribunal foi usado como evidência de culpa judaica.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "O médico Giovanni Mattia Tiberino produziu um relatório de autópsia que interpretou lesões como “sinais rituais”, reforçando a narrativa de assassinato ritual.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "Hinderbach patrocinou a impressão de incunábulos, como o “Relatio de Simone puero tridentino”, que divulgou a história do suposto martírio em toda a Europa.",
+              "sourceRef": "[4]"
+            },
+            {
+              "text": "A xilogravura da Crônica de Nuremberg (1493) ilustrou o suposto assassinato, tornando‑se modelo visual para futuros libelos de sangue.",
+              "sourceRef": "[4]"
+            },
+            {
+              "text": "Em 1478, o Papa Sixto IV emitiu a bula “Facit nos pietas”, reconhecendo formalmente o processo como juridicamente correto, legitimando o confisco e a propaganda.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "O comissário papal Battista dei Giudici investigou o caso e concluiu que as acusações eram fabricadas, mas foi impedido de reverter as sentenças.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "O culto a Simão foi oficialmente abolido em 1965 por decreto do Arcebispo de Trento, reconhecendo a inocência dos judeus.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "Em 2019, John Earnest citou o caso de Simão de Trento em seu manifesto antes do ataque à sinagoga de Poway, demonstrando a persistência do mito.",
+              "sourceRef": "[3]"
+            }
+          ],
+          "forbiddenElements": [
+            "NÃO revele a motivação final dos envolvidos",
+            "NÃO resolva o caso — deixe perguntas em aberto",
+            "NÃO use tom enciclopédico — mantenha urgência",
+            "NÃO detalhe métodos de tortura ou violência explícita"
+          ],
+          "allowedArtifacts": [
+            "manifesto",
+            "incunábulo",
+            "xilogravura",
+            "documento",
+            "selo de cera",
+            "mapa",
+            "prateleiras de arquivo",
+            "luz de vela"
+          ],
+          "notes": [
+            "Use ritmo rápido, estilo lista",
+            "Foque na sequência cronológica",
+            "Mantenha visual noir-cinematic",
+            "Inclua chamadas para o vídeo completo"
+          ]
+        }
+      },
+      {
+        "scriptOutline": "Hook 3s → Setup (quem, quando, onde) 15‑20s → Revelação de documentos chave 20‑25s → CTA 5s",
+        "visualSuggestion": "Cenas de arquivos sombrios: manuscritos, incunábulos, xilogravuras, luz de vela projetando sombras sobre mesas de leitura.",
+        "cta": "Descubra todos os detalhes no vídeo completo – clique agora!",
+        "platform": "YouTube Shorts",
+        "format": "teaser-youtube-shorts",
+        "estimatedViews": 75000,
+        "scriptStyleId": "documentary",
+        "scriptStyleName": "Documentary Narrative",
+        "editorialObjectiveId": "explainer",
+        "editorialObjectiveName": "Explainer",
+        "avoidPatterns": [
+          "NÃO contar o desfecho final",
+          "NÃO aprofundar motivação dos acusadores",
+          "NÃO usar linguagem enciclopédica"
+        ],
+        "visualPrompt": "A dimly lit medieval archive room, candlelight flickering over wooden tables piled with parchment manuscripts, an incunabulum open to a page showing the title \"Relatio de Simone puero tridentino,\" a detailed woodcut illustration of the alleged crime, a wax seal glinting on a document, shadows casting dramatic noir‑cinematic atmosphere, muted earth tones, high contrast, cinematic depth of field, no faces visible.",
+        "sceneCount": 5
+      }
+    ]
+  },
+  "errorStructure": {
+    "hasError": true,
+    "hasErrorError": true,
+    "hasResponseBody": false,
+    "errorKeys": [
+      "error"
+    ],
+    "errorErrorKeys": [
+      "message",
+      "type",
+      "code",
+      "failed_generation"
+    ]
+  }
+}

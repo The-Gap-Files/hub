@@ -134,6 +134,14 @@
                 <span v-if="output.visualStyle" class="inline-flex items-center px-3 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-200 text-xs font-medium transition-colors duration-200 hover:bg-purple-500/15 cursor-default">{{ output.visualStyle.name }}</span>
                 <span v-if="!output.classification && !output.scriptStyle && !output.visualStyle" class="text-zinc-500 text-xs italic">Nenhuma</span>
               </div>
+              <button
+                @click="openOutputConfigModal"
+                class="ml-auto inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-zinc-300 text-xs font-bold uppercase tracking-widest hover:bg-white/10 hover:text-white hover:border-white/20 transition-all cursor-pointer"
+                title="Editar constantes/objetivo/seed/idiomas deste output"
+              >
+                <Edit :size="14" />
+                Editar
+              </button>
             </div>
           </div>
         </div>
@@ -777,12 +785,12 @@
                   <div v-else class="relative">
                     <div class="aspect-video bg-pink-500/5 rounded-xl flex flex-col items-center justify-center gap-3 border border-dashed border-pink-500/20 text-pink-500/50">
                       <Clapperboard :size="32" class="opacity-40" />
-                      <span class="text-xs uppercase tracking-wider">{{ output.enableMotion ? 'Sem motion gerado' : 'Motion desabilitado' }}</span>
+                      <span class="text-xs uppercase tracking-wider">Sem motion gerado</span>
                     </div>
 
                     <!-- Generate Motion Button (quando não tem) -->
                     <button 
-                      v-if="output.enableMotion && scene.images?.length > 0"
+                      v-if="scene.images?.length > 0"
                       @click="regenerateMotionCorrection(scene)"
                       :disabled="regeneratingMotionSceneIds.has(scene.id)"
                       class="mt-3 w-full px-4 py-3 bg-pink-500/10 border border-pink-500/30 text-pink-300 hover:bg-pink-500/20 hover:text-pink-200 rounded-xl transition-all flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider disabled:opacity-50 disabled:pointer-events-none"
@@ -794,7 +802,7 @@
                   </div>
 
                   <!-- Warning: imagem corrigida mas motion não reprocessado -->
-                  <div v-if="correctedScenes.has(scene.id) && !motionRegeneratedScenes.has(scene.id) && output.enableMotion"
+                  <div v-if="correctedScenes.has(scene.id) && !motionRegeneratedScenes.has(scene.id)"
                     class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg flex items-start gap-2"
                   >
                     <AlertTriangle :size="14" class="text-amber-400 shrink-0 mt-0.5" />
@@ -1241,7 +1249,7 @@
               </button>
               <button 
                 @click="confirmRegenerateOutline"
-                :disabled="regeneratingOutline"
+                :disabled="regeneratingOutline || needsSpeechConfig"
                 class="px-6 py-2 bg-cyan-500 text-black font-bold text-xs rounded-lg hover:bg-cyan-400 transition-colors disabled:opacity-50 flex items-center gap-2"
               >
                 <span v-if="regeneratingOutline" class="animate-spin w-3 h-3 border-2 border-black/30 border-t-black rounded-full"></span>
@@ -1259,24 +1267,46 @@
               <p class="text-zinc-400 text-sm max-w-md mx-auto mt-2">Gere o plano da história (Story Architect) e valide antes de criar o roteiro. O plano define hook, beats, clímax e distribuição de cenas.</p>
             </div>
 
+            <!-- Bloqueio: voz obrigatória antes do Story Architect -->
+            <div v-if="needsSpeechConfig" class="w-full max-w-3xl mx-auto p-4 rounded-2xl border border-amber-500/20 bg-amber-500/5">
+              <div class="flex items-start gap-3">
+                <AlertTriangle :size="18" class="text-amber-400 shrink-0 mt-0.5" />
+                <div class="flex-1">
+                  <p class="text-amber-200/90 text-sm font-bold">Pré-requisito: configure o narrador</p>
+                  <p class="text-amber-200/60 text-xs mt-1">
+                    Antes de gerar o plano narrativo (Story Architect), selecione a <strong>voz</strong> deste output.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  @click="openChangeVoiceModal"
+                  class="px-4 py-2 bg-amber-500 text-black font-black uppercase tracking-widest rounded-lg hover:bg-amber-400 transition-all text-[10px] shrink-0"
+                >
+                  Configurar
+                </button>
+              </div>
+            </div>
+
             <!-- Monetization Picker (quando existe plano ativo) -->
             <div v-if="monetizationPlan?.planData" class="w-full max-w-4xl mx-auto">
               <div class="flex items-center gap-2 mb-4 flex-wrap">
                 <Sparkles :size="14" class="text-purple-400" />
                 <span class="text-xs font-bold uppercase tracking-widest text-purple-300">{{ monetizationPlan.planData.planTitle || 'Plano de Monetização' }}</span>
-                <span class="text-xs text-zinc-600">(opcional — selecione um item ou escreva sugestão livre)</span>
+                <span v-if="!isMonetizationSelectionLocked" class="text-xs text-zinc-600">(opcional — selecione um item ou escreva sugestão livre)</span>
+                <span v-else class="text-xs text-amber-300/70 font-bold uppercase tracking-widest">(vinculado ao pacote — travado)</span>
               </div>
 
               <!-- Full Video Card -->
               <div v-if="monetizationPlan.planData.fullVideo" class="mb-3">
                 <button
-                  @click="selectMonetizationFullVideo(monetizationPlan.planData.fullVideo)"
+                  @click="isMonetizationSelectionLocked ? null : selectMonetizationFullVideo(monetizationPlan.planData.fullVideo)"
                   :class="[
                     'w-full text-left p-4 rounded-xl border transition-all duration-200',
                     selectedMonetizationItem?.itemType === 'fullVideo'
                       ? 'bg-cyan-500/10 border-cyan-500/40 ring-1 ring-cyan-500/30'
-                      : 'bg-black/30 border-white/5 hover:border-cyan-500/20 hover:bg-cyan-500/5'
+                      : (isMonetizationSelectionLocked ? 'bg-black/30 border-white/5 opacity-70' : 'bg-black/30 border-white/5 hover:border-cyan-500/20 hover:bg-cyan-500/5')
                   ]"
+                  :title="isMonetizationSelectionLocked ? 'Este output está vinculado ao item do pacote. Para trocar, crie um novo pacote.' : ''"
                 >
                   <div class="flex items-start justify-between gap-3">
                     <div class="flex-1 min-w-0">
@@ -1299,13 +1329,14 @@
                 <button
                   v-for="(teaser, idx) in monetizationPlan.planData.teasers"
                   :key="idx"
-                  @click="selectMonetizationTeaser(teaser, Number(idx))"
+                  @click="isMonetizationSelectionLocked ? null : selectMonetizationTeaser(teaser, Number(idx))"
                   :class="[
                     'text-left p-3 rounded-xl border transition-all duration-200',
                     selectedMonetizationItem?.title === teaser.title
                       ? 'bg-purple-500/10 border-purple-500/40 ring-1 ring-purple-500/30'
-                      : 'bg-black/30 border-white/5 hover:border-purple-500/20 hover:bg-purple-500/5'
+                      : (isMonetizationSelectionLocked ? 'bg-black/30 border-white/5 opacity-70' : 'bg-black/30 border-white/5 hover:border-purple-500/20 hover:bg-purple-500/5')
                   ]"
+                  :title="isMonetizationSelectionLocked ? 'Este output está vinculado ao item do pacote. Para trocar, crie um novo pacote.' : ''"
                 >
                   <div class="flex items-start justify-between gap-2">
                     <div class="flex-1 min-w-0">
@@ -1331,6 +1362,7 @@
                 <div class="flex items-center gap-2 mb-2">
                   <CheckCircle2 :size="14" class="text-purple-400" />
                   <span class="text-xs font-bold text-purple-300 uppercase tracking-wider">Selecionado</span>
+                  <span v-if="isMonetizationSelectionLocked" class="ml-auto text-[10px] font-black uppercase tracking-widest text-amber-300/70 border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 rounded">Travado</span>
                 </div>
                 <p class="text-sm text-white font-bold">{{ selectedMonetizationItem.title }}</p>
                 <p class="text-xs text-zinc-400 mt-1">
@@ -1372,7 +1404,7 @@
             <div class="text-center">
               <button 
                 @click="generateOutlineThenReload"
-                :disabled="generatingOutline"
+                :disabled="generatingOutline || needsSpeechConfig"
                 class="px-8 py-4 bg-cyan-500 text-black font-black uppercase tracking-widest rounded-xl hover:bg-cyan-400 transition-all flex items-center gap-3 disabled:opacity-50 mx-auto"
               >
                 <span v-if="generatingOutline" class="animate-spin w-5 h-5 border-2 border-black/30 border-t-black rounded-full"></span>
@@ -1684,7 +1716,7 @@
         </div>
 
         <!-- 5. Motion Approval Section -->
-        <div v-if="output.bgmApproved && output.enableMotion && !output.videosApproved" class="mb-12 bg-gradient-to-br from-pink-500/10 to-transparent border border-pink-500/30 p-8 rounded-3xl relative overflow-hidden group">
+        <div v-if="output.bgmApproved && !output.videosApproved" class="mb-12 bg-gradient-to-br from-pink-500/10 to-transparent border border-pink-500/30 p-8 rounded-3xl relative overflow-hidden group">
            <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
               <div>
                 <h3 class="text-xl font-bold text-pink-200 flex items-center gap-2 mb-2">
@@ -2033,7 +2065,7 @@
                 </div>
 
                 <!-- 🎥 Video/Motion Preview -->
-                <div v-if="output.enableMotion && (output.videosApproved || output.scenes?.some((s:any) => s.videos?.length))" class="mt-4 pt-4 border-t border-white/5">
+                <div v-if="output.videosApproved || output.scenes?.some((s:any) => s.videos?.length)" class="mt-4 pt-4 border-t border-white/5">
                     <h4 class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-pink-500/70 mb-2">
                         <Clapperboard :size="10" /> Motion Preview
                     </h4>
@@ -2206,6 +2238,119 @@
     </div>
   </div>
 
+  <!-- Output Config Modal (constantes / objetivo / seed / idiomas) -->
+  <div
+    v-if="showOutputConfigModal"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+    @click.self="showOutputConfigModal = false"
+  >
+    <div class="glass-card max-w-3xl w-full max-h-[90vh] overflow-y-auto p-8 rounded-3xl border-white/10 shadow-2xl">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-2xl font-black text-white flex items-center gap-3">
+            <Edit :size="28" class="text-primary" />
+            Configurações do Output
+          </h2>
+          <p class="text-zinc-400 text-sm mt-2">
+            Ajuste as constantes e diretrizes usadas na geração. Isso <strong>não</strong> dispara o pipeline automaticamente.
+          </p>
+        </div>
+        <button @click="showOutputConfigModal = false" class="p-2 hover:bg-white/10 rounded-lg transition-colors">
+          <X :size="24" />
+        </button>
+      </div>
+
+      <div v-if="outputConfigError" class="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-sm text-red-200">
+        {{ outputConfigError }}
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+        <div>
+          <label class="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Estilo de roteiro</label>
+          <select v-model="cfgScriptStyleId" class="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-primary/40">
+            <option value="">(vazio)</option>
+            <option v-for="s in scriptStylesOptions" :key="s.id" :value="s.id">{{ s.name }} ({{ s.id }})</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Estilo visual</label>
+          <select v-model="cfgVisualStyleId" class="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-primary/40">
+            <option value="">(vazio)</option>
+            <option v-for="s in visualStylesOptions" :key="s.id" :value="s.id">{{ s.name }} ({{ s.id }})</option>
+          </select>
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Preset de objetivo editorial (opcional)</label>
+          <select v-model="cfgEditorialObjectiveId" @change="applyObjectivePreset" class="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-primary/40">
+            <option value="">(nenhum)</option>
+            <option v-for="o in editorialObjectivesOptions" :key="o.id" :value="o.id">{{ o.name }} ({{ o.id }})</option>
+          </select>
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Objective (texto livre)</label>
+          <textarea v-model="cfgObjective" rows="4" class="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-primary/40" placeholder="Diretriz narrativa do output..."></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Idioma do vídeo</label>
+          <input v-model="cfgLanguage" type="text" class="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-primary/40" placeholder="pt-BR" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Idioma da narração</label>
+          <input v-model="cfgNarrationLanguage" type="text" class="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-primary/40" placeholder="pt-BR" />
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Seed</label>
+          <div class="flex flex-col md:flex-row gap-3">
+            <label class="flex items-center gap-2 px-4 py-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer">
+              <input type="radio" value="fixed" v-model="cfgSeedMode" class="w-4 h-4" />
+              <span class="text-sm text-white">Fixa</span>
+            </label>
+            <label class="flex items-center gap-2 px-4 py-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer">
+              <input type="radio" value="auto" v-model="cfgSeedMode" class="w-4 h-4" />
+              <span class="text-sm text-white">Automática</span>
+            </label>
+            <input
+              v-model.number="cfgSeedValue"
+              :disabled="cfgSeedMode !== 'fixed'"
+              type="number"
+              class="flex-1 bg-black/30 border border-white/10 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-primary/40 disabled:opacity-50"
+              placeholder="ex: 123456"
+            />
+          </div>
+          <p class="text-xs text-zinc-500 mt-2">Seed atual: <span class="font-mono text-zinc-300">{{ output?.seedValue ?? '—' }}</span></p>
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Must include (opcional)</label>
+          <textarea v-model="cfgMustInclude" rows="2" class="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-primary/40" placeholder="Coisas que devem aparecer..."></textarea>
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Must exclude (opcional)</label>
+          <textarea v-model="cfgMustExclude" rows="2" class="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-primary/40" placeholder="Coisas que devem ser evitadas..."></textarea>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between pt-4 border-t border-white/10">
+        <button @click="showOutputConfigModal = false" class="px-6 py-3 text-zinc-400 hover:text-white transition-colors">
+          Cancelar
+        </button>
+        <button
+          @click="saveOutputConfig"
+          :disabled="savingOutputConfig"
+          class="px-8 py-4 bg-primary text-black font-black uppercase tracking-widest rounded-xl hover:scale-105 transition-all shadow-[0_0_20px_rgba(124,58,237,0.25)] flex items-center gap-3 disabled:opacity-50 disabled:pointer-events-none"
+        >
+          <Edit :size="18" :class="savingOutputConfig ? 'animate-spin' : ''" />
+          {{ savingOutputConfig ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Change Voice Modal -->
   <div
     v-if="showChangeVoiceModal"
@@ -2243,22 +2388,6 @@
         />
       </div>
 
-      <!-- Speed Selector (WPM) -->
-      <div class="mb-6">
-        <label class="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Velocidade da narração (WPM)</label>
-        <div class="flex gap-2">
-          <button v-for="wpm in [120, 150, 180]" :key="wpm"
-            @click="newTargetWPM = wpm"
-            class="flex-1 py-3 rounded-xl text-xs font-bold uppercase border transition-all"
-            :class="[newTargetWPM === wpm ? 'bg-amber-500 border-amber-500 text-black' : 'bg-white/5 border-white/10 hover:border-white/20 text-zinc-400 hover:text-white']">
-            {{ wpm === 120 ? 'Lento' : wpm === 150 ? 'Normal' : 'Rápido' }} ({{ wpm }})
-          </button>
-        </div>
-        <p v-if="output.targetWPM && newTargetWPM !== output.targetWPM" class="text-xs text-amber-400/60 mt-1.5">
-          Atual: {{ output.targetWPM }} WPM → Nova: {{ newTargetWPM }} WPM
-        </p>
-      </div>
-
       <!-- Warning -->
       <div class="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl mb-6">
         <p class="text-amber-200/80 text-sm flex items-start gap-2">
@@ -2279,7 +2408,7 @@
         </button>
         <button
           @click="confirmChangeVoice"
-          :disabled="!newVoiceId || (newVoiceId === output.voiceId && newTargetWPM === (output.targetWPM || 150))"
+          :disabled="!newVoiceId || (newVoiceId === output.voiceId)"
           class="px-8 py-4 bg-amber-500 text-black font-black uppercase tracking-widest rounded-xl hover:bg-amber-400 hover:scale-105 transition-all shadow-[0_0_20px_rgba(245,158,11,0.3)] flex items-center gap-3 disabled:opacity-50 disabled:pointer-events-none"
         >
           <Mic :size="20" />
@@ -2466,6 +2595,29 @@ const loading = ref(true)
 const approving = ref(false)
 const addingCaptions = ref(false)
 
+// Pré-requisito do Story Architect: narrador (voz) + velocidade configurados
+const speechReady = computed(() => !!output.value?.voiceId && !!output.value?.speechConfiguredAt)
+const needsSpeechConfig = computed(() => !speechReady.value)
+
+// Output Config (constantes/objetivo/seed/idiomas)
+const showOutputConfigModal = ref(false)
+const savingOutputConfig = ref(false)
+const outputConfigError = ref<string | null>(null)
+const scriptStylesOptions = ref<any[]>([])
+const visualStylesOptions = ref<any[]>([])
+const editorialObjectivesOptions = ref<any[]>([])
+
+const cfgScriptStyleId = ref<string>('')
+const cfgVisualStyleId = ref<string>('')
+const cfgEditorialObjectiveId = ref<string>('')
+const cfgObjective = ref<string>('')
+const cfgLanguage = ref<string>('pt-BR')
+const cfgNarrationLanguage = ref<string>('pt-BR')
+const cfgSeedMode = ref<'fixed' | 'auto'>('fixed')
+const cfgSeedValue = ref<number | null>(null)
+const cfgMustInclude = ref<string>('')
+const cfgMustExclude = ref<string>('')
+
 // ═══════════════════════════════════════════════════════════
 // PIPELINE STAGE — separação total Plano vs Roteiro
 // ═══════════════════════════════════════════════════════════
@@ -2477,7 +2629,7 @@ const pipelineStage = computed(() => {
   if (!output.value.imagesApproved) return 'VISUAL'
   if (!output.value.audioApproved) return 'NARRACAO'
   if (!output.value.bgmApproved) return 'MUSICA'
-  if (output.value.enableMotion && !output.value.videosApproved) return 'MOTION'
+  if (!output.value.videosApproved) return 'MOTION'
   if (!output.value.hasVideo) return 'RENDER'
   return 'FINAL'
 })
@@ -2489,8 +2641,85 @@ const isRoteiroStage = computed(() => pipelineStage.value === 'ROTEIRO')
 // Change Voice
 const showChangeVoiceModal = ref(false)
 const newVoiceId = ref<string | null>(null)
-const newTargetWPM = ref(150)
 const changingVoice = ref(false)
+
+async function ensureOutputConfigOptionsLoaded() {
+  if (scriptStylesOptions.value.length && visualStylesOptions.value.length && editorialObjectivesOptions.value.length) return
+  const [scriptRes, visualRes, objRes] = await Promise.all([
+    $fetch('/api/script-styles'),
+    $fetch('/api/visual-styles'),
+    $fetch('/api/editorial-objectives')
+  ])
+  // shapes:
+  // - /api/script-styles => { success: true, data: ScriptStyle[] }
+  // - /api/visual-styles => { success: true, data: VisualStyle[] }
+  // - /api/editorial-objectives => { data: EditorialObjective[] }
+  scriptStylesOptions.value = (scriptRes as any)?.data || []
+  visualStylesOptions.value = (visualRes as any)?.data || []
+  editorialObjectivesOptions.value = (objRes as any)?.data || []
+}
+
+function applyObjectivePreset() {
+  const id = cfgEditorialObjectiveId.value
+  if (!id) return
+  const preset = editorialObjectivesOptions.value.find((o: any) => o.id === id)
+  if (preset?.instruction) cfgObjective.value = String(preset.instruction)
+}
+
+async function openOutputConfigModal() {
+  outputConfigError.value = null
+  await ensureOutputConfigOptionsLoaded()
+
+  // Preencher com valores atuais do output
+  const o = output.value || {}
+  cfgScriptStyleId.value = o.scriptStyleId || ''
+  cfgVisualStyleId.value = o.visualStyleId || ''
+  cfgEditorialObjectiveId.value = o.editorialObjectiveId || ''
+  cfgObjective.value = o.objective || ''
+  cfgLanguage.value = o.language || 'pt-BR'
+  cfgNarrationLanguage.value = o.narrationLanguage || 'pt-BR'
+  cfgMustInclude.value = o.mustInclude || ''
+  cfgMustExclude.value = o.mustExclude || ''
+
+  if (typeof o.seedValue === 'number') {
+    cfgSeedMode.value = 'fixed'
+    cfgSeedValue.value = o.seedValue
+  } else {
+    cfgSeedMode.value = 'auto'
+    cfgSeedValue.value = null
+  }
+
+  showOutputConfigModal.value = true
+}
+
+async function saveOutputConfig() {
+  if (savingOutputConfig.value) return
+  savingOutputConfig.value = true
+  outputConfigError.value = null
+  try {
+    await $fetch(`/api/outputs/${outputId}/metadata`, {
+      method: 'PATCH',
+      body: {
+        scriptStyleId: cfgScriptStyleId.value || null,
+        visualStyleId: cfgVisualStyleId.value || null,
+        editorialObjectiveId: cfgEditorialObjectiveId.value || null,
+        objective: cfgObjective.value?.trim() ? cfgObjective.value.trim() : null,
+        mustInclude: cfgMustInclude.value?.trim() ? cfgMustInclude.value.trim() : null,
+        mustExclude: cfgMustExclude.value?.trim() ? cfgMustExclude.value.trim() : null,
+        language: cfgLanguage.value?.trim() ? cfgLanguage.value.trim() : null,
+        narrationLanguage: cfgNarrationLanguage.value?.trim() ? cfgNarrationLanguage.value.trim() : null,
+        seedValue: cfgSeedMode.value === 'auto' ? null : (typeof cfgSeedValue.value === 'number' ? cfgSeedValue.value : null)
+      }
+    })
+    await loadOutput()
+    showOutputConfigModal.value = false
+  } catch (e: any) {
+    const msg = e?.data?.message || e?.message || 'Erro ao salvar configurações do output.'
+    outputConfigError.value = msg
+  } finally {
+    savingOutputConfig.value = false
+  }
+}
 
 // ═══════════════════════════════════════════════════════════
 // CORRECTION MODE STATE
@@ -2612,7 +2841,6 @@ async function saveAndRegenerateImage(scene: any) {
 }
 
 const pendingMotionScenes = computed(() => {
-  if (!output.value?.enableMotion) return []
   return [...correctedScenes.value].filter(id => !motionRegeneratedScenes.value.has(id))
 })
 
@@ -2648,12 +2876,10 @@ async function exitCorrectionMode() {
         method: 'PATCH',
         body: { stage: 'IMAGES', approved: true }
       })
-      if (output.value?.enableMotion) {
-        await $fetch(`/api/outputs/${outputId}/approve-stage`, {
-          method: 'PATCH',
-          body: { stage: 'MOTION', approved: true }
-        })
-      }
+      await $fetch(`/api/outputs/${outputId}/approve-stage`, {
+        method: 'PATCH',
+        body: { stage: 'MOTION', approved: true }
+      })
       correctedScenes.value = new Set()
       motionRegeneratedScenes.value = new Set()
     }
@@ -2728,12 +2954,10 @@ async function finishCorrectionsAndRender() {
         method: 'PATCH',
         body: { stage: 'IMAGES', approved: true }
       })
-      if (output.value?.enableMotion) {
-        await $fetch(`/api/outputs/${outputId}/approve-stage`, {
-          method: 'PATCH',
-          body: { stage: 'MOTION', approved: true }
-        })
-      }
+      await $fetch(`/api/outputs/${outputId}/approve-stage`, {
+        method: 'PATCH',
+        body: { stage: 'MOTION', approved: true }
+      })
       correctedScenes.value = new Set()
       motionRegeneratedScenes.value = new Set()
     }
@@ -2970,6 +3194,7 @@ async function loadOutput() {
   try {
     const data = await $fetch(`/api/outputs/${outputId}`)
     output.value = data
+    hydrateSelectedMonetizationFromOutput()
 
     // ── DEBUG: Estado completo do pipeline ──
     const d = data as any
@@ -2977,7 +3202,7 @@ async function loadOutput() {
     console.log('📋 [loadOutput] Estado do Pipeline:')
     console.log('  status:', d.status)
     console.log('  hasVideo:', d.hasVideo)
-    console.log('  enableMotion:', d.enableMotion)
+    console.log('  enableMotion (legacy):', d.enableMotion)
     console.log('  ── Aprovações ──')
     console.log('  storyOutlineApproved:', d.storyOutlineApproved)
     console.log('  scriptApproved:', d.scriptApproved)
@@ -2999,8 +3224,8 @@ async function loadOutput() {
     console.log('  rendering:', rendering.value)
     console.log('  approving:', approving.value)
     console.log('  correctionMode:', correctionMode.value)
-    console.log('  canRenderMaster:', d.scriptApproved && d.imagesApproved && d.bgmApproved && d.audioApproved && (d.enableMotion ? d.videosApproved : true))
-    console.log('  showRenderTrigger:', (d.scriptApproved && d.imagesApproved && d.bgmApproved && d.audioApproved && (d.enableMotion ? d.videosApproved : true)) && !d.hasVideo)
+    console.log('  canRenderMaster:', d.scriptApproved && d.imagesApproved && d.bgmApproved && d.audioApproved && d.videosApproved)
+    console.log('  showRenderTrigger:', (d.scriptApproved && d.imagesApproved && d.bgmApproved && d.audioApproved && d.videosApproved) && !d.hasVideo)
     console.log('═══════════════════════════════════════════')
 
     // ── Auto-clear generatingStage quando a geração termina ──
@@ -3117,6 +3342,11 @@ const selectedHookLevel = ref('moderate') // Nível tonal do hook selecionado pe
 const customHookText = ref('') // Texto do hook personalizado escrito pelo usuário
 
 async function confirmRegenerateOutline() {
+  if (needsSpeechConfig.value) {
+    openChangeVoiceModal()
+    alert('Antes de gerar o plano narrativo, selecione o narrador (voz) e a velocidade da fala (WPM).')
+    return
+  }
   regeneratingOutline.value = true
   try {
     // O backend recupera automaticamente o monetizationContext salvo no Output
@@ -3265,6 +3495,24 @@ async function revertToStage(targetStage: string) {
   const stageInfo = STAGE_ORDER[targetIdx]
   if (!stageInfo) return
   const targetLabel = stageInfo.label
+
+  // Regra especial: ao voltar para PLANO, resetar pipeline inteiro para estado inicial.
+  if (targetStage === 'STORY_OUTLINE') {
+    if (!confirm(`Voltar para a etapa "${targetLabel}"?\n\nIsso vai limpar o pipeline como no início do output (plano, roteiro, visual, narração, música, motion e render).\nConfigurações base como narrador, velocidade, idioma e estilos serão mantidas.`)) return
+
+    reverting.value = true
+    try {
+      await $fetch(`/api/outputs/${outputId}/reset-to-plan`, { method: 'POST' })
+      await loadOutput()
+    } catch (error: any) {
+      console.error('Erro ao resetar para plano:', error)
+      alert(error?.data?.message || 'Erro ao voltar para a etapa Plano.')
+      await loadOutput()
+    } finally {
+      reverting.value = false
+    }
+    return
+  }
   
   // Identificar quais etapas serão desaprovadas (a etapa clicada + todas as posteriores que estão aprovadas)
   const stagesToRevert = STAGE_ORDER.slice(targetIdx).filter(s => {
@@ -3332,6 +3580,15 @@ const generatingOutline = ref(false)
 // ── Monetization Context (para outline baseado em plano de monetização) ──
 const monetizationPlan = ref<any>(null)
 const loadingMonetization = ref(false)
+const isMonetizationSelectionLocked = computed(() => {
+  const o = output.value
+  const ctx = o?.monetizationContext
+  if (!o || !ctx || typeof ctx !== 'object') return false
+  const itemType = (ctx as any).itemType
+  if (itemType !== 'teaser' && itemType !== 'fullVideo') return false
+  return o.format === 'teaser-youtube-shorts' || o.format === 'full-youtube'
+})
+
 const selectedMonetizationItem = ref<{
   itemType: 'teaser' | 'fullVideo'
   title: string
@@ -3349,6 +3606,31 @@ const selectedMonetizationItem = ref<{
   avoidPatterns?: string[]
 } | null>(null)
 
+function hydrateSelectedMonetizationFromOutput() {
+  if (!isMonetizationSelectionLocked.value) return
+  const ctx = output.value?.monetizationContext
+  if (!ctx || typeof ctx !== 'object') return
+  const itemType = (ctx as any).itemType
+  if (itemType !== 'teaser' && itemType !== 'fullVideo') return
+  // Garantir shape mínima esperada pela UI
+  selectedMonetizationItem.value = {
+    itemType,
+    title: String((ctx as any).title || output.value?.title || ''),
+    hook: String((ctx as any).hook || ''),
+    angle: String((ctx as any).angle || ''),
+    angleCategory: String((ctx as any).angleCategory || ''),
+    narrativeRole: (ctx as any).narrativeRole,
+    scriptOutline: (ctx as any).scriptOutline,
+    cta: (ctx as any).cta,
+    strategicNotes: (ctx as any).strategicNotes,
+    scriptStyleId: (ctx as any).scriptStyleId,
+    scriptStyleName: (ctx as any).scriptStyleName,
+    editorialObjectiveId: (ctx as any).editorialObjectiveId,
+    editorialObjectiveName: (ctx as any).editorialObjectiveName,
+    avoidPatterns: (ctx as any).avoidPatterns
+  }
+}
+
 async function loadMonetizationPlan() {
   if (!output.value?.dossierId || monetizationPlan.value) return
   loadingMonetization.value = true
@@ -3356,8 +3638,11 @@ async function loadMonetizationPlan() {
     const response = await $fetch(`/api/dossiers/${output.value.dossierId}/monetization-plans`) as any
     const plans = response?.data || []
     if (plans.length > 0) {
-      // Pegar o plano ativo mais recente
-      monetizationPlan.value = plans.find((p: any) => p.isActive) || plans[0]
+      const preferredPlanId = (output.value?.monetizationContext as any)?.planId
+      monetizationPlan.value =
+        (preferredPlanId ? plans.find((p: any) => p.id === preferredPlanId) : null) ||
+        plans.find((p: any) => p.isActive) ||
+        plans[0]
     }
   } catch (e) {
     // Silencioso — monetização é opcional
@@ -3368,6 +3653,7 @@ async function loadMonetizationPlan() {
 }
 
 function selectMonetizationTeaser(teaser: any, index: number) {
+  if (isMonetizationSelectionLocked.value) return
   // Toggle: clicar de novo desmarca
   if (selectedMonetizationItem.value?.title === teaser.title) {
     selectedMonetizationItem.value = null
@@ -3392,6 +3678,7 @@ function selectMonetizationTeaser(teaser: any, index: number) {
 }
 
 function selectMonetizationFullVideo(fullVideo: any) {
+  if (isMonetizationSelectionLocked.value) return
   if (selectedMonetizationItem.value?.itemType === 'fullVideo') {
     selectedMonetizationItem.value = null
     return
@@ -3423,6 +3710,11 @@ function narrativeRoleBadge(role: string): { label: string; icon: string; color:
 }
 
 async function generateOutlineThenReload() {
+  if (needsSpeechConfig.value) {
+    openChangeVoiceModal()
+    alert('Antes de gerar o plano narrativo, selecione o narrador (voz) e a velocidade da fala (WPM).')
+    return
+  }
   generatingOutline.value = true
   try {
     const body: any = {}
@@ -3622,15 +3914,12 @@ async function approveAudio() {
 }
 
 function openChangeVoiceModal() {
-  // Inicializar WPM com o valor atual do output
-  newTargetWPM.value = output.value.targetWPM || 150
   showChangeVoiceModal.value = true
 }
 
 async function confirmChangeVoice() {
   const sameVoice = newVoiceId.value === output.value.voiceId
-  const sameWPM = newTargetWPM.value === (output.value.targetWPM || 150)
-  if (!newVoiceId.value || (sameVoice && sameWPM)) return
+  if (!newVoiceId.value || sameVoice) return
 
   showChangeVoiceModal.value = false
   changingVoice.value = true
@@ -3640,14 +3929,14 @@ async function confirmChangeVoice() {
   try {
     const result = await $fetch(`/api/outputs/${outputId}/change-voice`, {
       method: 'POST',
-      body: { voiceId: newVoiceId.value, targetWPM: newTargetWPM.value }
+      body: { voiceId: newVoiceId.value }
     })
 
     console.log('Troca de voz iniciada:', result)
 
-    // Atualizar voiceId e targetWPM locais
+    // Atualizar voiceId local
     output.value.voiceId = newVoiceId.value
-    output.value.targetWPM = newTargetWPM.value
+    output.value.speechConfiguredAt = new Date().toISOString()
 
     // Iniciar polling para acompanhar geração
     startPolling()
@@ -3842,11 +4131,11 @@ function getBgmTrackPrompt(idx: number): string | null {
 // Helper para Render Button visibility
 const canRenderMaster = computed(() => {
     if (!output.value) return false
-    const base = output.value.scriptApproved && output.value.imagesApproved && output.value.bgmApproved && output.value.audioApproved
-    if (output.value.enableMotion) {
-        return base && output.value.videosApproved
-    }
-    return base
+    return output.value.scriptApproved &&
+      output.value.imagesApproved &&
+      output.value.bgmApproved &&
+      output.value.audioApproved &&
+      output.value.videosApproved
 })
 
 /**

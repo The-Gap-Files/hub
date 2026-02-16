@@ -26,12 +26,12 @@ export class AnthropicScriptProvider implements IScriptGenerator {
   private model: ChatAnthropic
   private modelName: string
 
-  constructor(config: { apiKey: string; model?: string }) {
+  constructor(config: { apiKey: string; model?: string; temperature?: number }) {
     this.modelName = config.model ?? 'claude-opus-4-6'
     this.model = new ChatAnthropic({
       anthropicApiKey: config.apiKey,
       modelName: this.modelName,
-      temperature: 0.7,
+      temperature: config.temperature ?? 0.5, // Do LlmAssignment (script task)
       maxTokens: 64000, // Anthropic exige maxTokens explícito (64K — limite máximo do Sonnet 4; Opus aceita mais mas usamos o menor denominador)
       clientOptions: {
         timeout: 300000, // 5 minutos -- Opus com roteiros longos (YouTube Cinematic) pode demorar
@@ -61,7 +61,7 @@ export class AnthropicScriptProvider implements IScriptGenerator {
     console.log('Ideal Scene Count:', Math.ceil(request.targetDuration / 5))
 
     // ── Prompt Caching: montar dossiê canônico ──────────────────────
-    const dossierBlock = buildDossierBlock({
+    const fullDossierBlock = buildDossierBlock({
       theme: request.theme,
       visualIdentityContext: request.visualIdentityContext,
       sources: request.sources?.map(s => ({
@@ -74,7 +74,7 @@ export class AnthropicScriptProvider implements IScriptGenerator {
     })
 
     const { messages, cacheEnabled, estimatedCacheTokens } = buildCacheableMessages({
-      dossierBlock,
+      dossierBlock: fullDossierBlock,
       systemPrompt,
       taskPrompt: userPrompt,
       images: request.images,

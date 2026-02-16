@@ -22,6 +22,7 @@ import { OpenAIScriptProvider } from './script/openai-script.provider'
 import { AnthropicScriptProvider } from './script/anthropic-script.provider'
 import { GeminiScriptProvider } from './script/gemini-script.provider'
 import { GroqScriptProvider } from './script/groq-script.provider'
+import { HookOnlyScriptProvider } from './script/hook-only-script.provider'
 import { ElevenLabsTTSProvider } from './tts/elevenlabs-tts.provider'
 import { ReplicateElevenLabsProvider } from './tts/replicate-elevenlabs.provider'
 import { ReplicateImageProvider } from './image/replicate-image.provider'
@@ -38,7 +39,7 @@ import { prisma } from '../../utils/prisma'
 // PROVIDER REGISTRY
 // =============================================================================
 
-const scriptProviders: Record<string, new (config: { apiKey: string; model?: string }) => IScriptGenerator> = {
+const scriptProviders: Record<string, new (config: { apiKey: string; model?: string; temperature?: number }) => IScriptGenerator> = {
   openai: OpenAIScriptProvider,
   anthropic: AnthropicScriptProvider,
   gemini: GeminiScriptProvider,
@@ -72,12 +73,12 @@ const sfxProviders: Record<string, new (config: { apiKey: string }) => ISFXProvi
 // FACTORY FUNCTIONS
 // =============================================================================
 
-export function createScriptProvider(name: string, apiKey: string, model?: string): IScriptGenerator {
+export function createScriptProvider(name: string, apiKey: string, model?: string, temperature?: number): IScriptGenerator {
   const ProviderClass = scriptProviders[name.toLowerCase()]
   if (!ProviderClass) {
     throw new Error(`Script provider "${name}" not found. Available: ${Object.keys(scriptProviders).join(', ')}`)
   }
-  return new ProviderClass({ apiKey, model })
+  return new ProviderClass({ apiKey, model, temperature })
 }
 
 export function createTTSProvider(name: string, apiKey: string): ITTSProvider {
@@ -200,8 +201,48 @@ class ProviderManager {
       )
     }
 
-    console.log(`[ProviderManager] Script → ${assignment.provider}/${assignment.model} (LLM Factory)`)
-    return createScriptProvider(assignment.provider, apiKey, assignment.model)
+    console.log(`[ProviderManager] Script → ${assignment.provider}/${assignment.model} (temp=${assignment.temperature ?? 0.5})`)
+    return createScriptProvider(assignment.provider, apiKey, assignment.model, assignment.temperature)
+  }
+
+  /**
+   * Resolve o Hook-Only Script Provider dedicado.
+   * Usa o MESMO LLM configurado na UI (assignment 'script'), mas com prompts cirúrgicos
+   * específicos para hook-only — sem ruído das regras de full-video/gateway/deep-dive.
+   */
+  async getHookOnlyScriptProvider(): Promise<IScriptGenerator> {
+    const assignment = await getAssignment('script')
+
+    const dbProvider = await prisma.llmProvider.findUnique({
+      where: { id: assignment.provider },
+      select: { apiKey: true }
+    })
+
+    let apiKey = dbProvider?.apiKey || ''
+
+    if (!apiKey) {
+      const envMap: Record<string, string> = {
+        openai: 'OPENAI_API_KEY',
+        anthropic: 'ANTHROPIC_API_KEY',
+        groq: 'GROQ_API_KEY',
+        gemini: 'GOOGLE_API_KEY'
+      }
+      apiKey = process.env[envMap[assignment.provider] || '']?.replace(/"/g, '') || ''
+    }
+
+    if (!apiKey) {
+      throw new Error(
+        `[ProviderManager] API Key não configurada para hook-only script provider "${assignment.provider}".`
+      )
+    }
+
+    console.log(`[ProviderManager] 💥 HookOnly Script → ${assignment.provider}/${assignment.model} (temp=${assignment.temperature ?? 0.6})`)
+    return new HookOnlyScriptProvider({
+      apiKey,
+      model: assignment.model,
+      temperature: assignment.temperature ?? 0.6,
+      provider: assignment.provider
+    })
   }
 
   getTTSProvider(): ITTSProvider {
@@ -306,6 +347,7 @@ export { OpenAIScriptProvider } from './script/openai-script.provider'
 export { AnthropicScriptProvider } from './script/anthropic-script.provider'
 export { GeminiScriptProvider } from './script/gemini-script.provider'
 export { GroqScriptProvider } from './script/groq-script.provider'
+export { HookOnlyScriptProvider } from './script/hook-only-script.provider'
 export { ElevenLabsTTSProvider } from './tts/elevenlabs-tts.provider'
 export { ReplicateElevenLabsProvider } from './tts/replicate-elevenlabs.provider'
 export { ReplicateImageProvider } from './image/replicate-image.provider'

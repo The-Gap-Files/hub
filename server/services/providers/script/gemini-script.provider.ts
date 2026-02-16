@@ -24,12 +24,12 @@ export class GeminiScriptProvider implements IScriptGenerator {
   private model: ChatGoogleGenerativeAI
   private modelName: string
 
-  constructor(config: { apiKey: string; model?: string }) {
+  constructor(config: { apiKey: string; model?: string; temperature?: number }) {
     this.modelName = config.model ?? 'gemini-1.5-flash'
     this.model = new ChatGoogleGenerativeAI({
       apiKey: config.apiKey,
       model: this.modelName,
-      temperature: 0.7,
+      temperature: config.temperature ?? 0.5, // Do LlmAssignment (script task)
       maxRetries: 2,
       maxOutputTokens: 65536 // YouTube Cinematic pode gerar 100+ cenas; 8192 é insuficiente
     })
@@ -43,12 +43,11 @@ export class GeminiScriptProvider implements IScriptGenerator {
     const LOG = '[Gemini Script]'
     console.log(`${LOG} 🎬 Iniciando geração de roteiro via LangChain (${this.modelName})...`)
 
-    // IMPORTANTE: Usa 'jsonSchema' ao invés do default 'functionCalling' para evitar
-    // incompatibilidade Zod v4 + Gemini API (schema OBJECT error).
-    // jsonSchema → responseMimeType: "application/json" → modelo gera JSON completo.
+    // Gemini tem limitações em response_schema (const, default). jsonMode evita enviar
+    // schema à API; parseamos com Zod no client.
     const structuredLlm = this.model.withStructuredOutput(ScriptResponseSchema, {
       includeRaw: true,
-      method: 'jsonSchema'
+      method: 'jsonMode'
     })
 
     const systemPrompt = buildSystemPrompt(request)

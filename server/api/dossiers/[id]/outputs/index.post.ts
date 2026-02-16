@@ -114,6 +114,8 @@ export default defineEventHandler(async (event): Promise<CreateOutputsResponse> 
           language: outputData.language || 'pt-BR',
           narrationLanguage: outputData.narrationLanguage || 'pt-BR',
           voiceId: outputData.voiceId,
+          // Voice selection in /produce counts as speech configuration prerequisite.
+          speechConfiguredAt: outputData.voiceId ? new Date() : undefined,
           enableMotion: outputData.enableMotion || false,
           objective: outputData.objective,
           mustInclude: outputData.mustInclude,

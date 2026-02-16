@@ -18,11 +18,10 @@ export default defineEventHandler(async (event) => {
   }
 
   const body = await readBody(event)
-  const { type, index, userSuggestion, newDuration } = body as {
+  const { type, index, userSuggestion } = body as {
     type: 'teaser' | 'fullVideo'
     index?: number
     userSuggestion?: string
-    newDuration?: number
   }
 
   if (!type || !['teaser', 'fullVideo'].includes(type)) {
@@ -83,9 +82,8 @@ export default defineEventHandler(async (event) => {
           }))
         },
         teaserDuration: (activePlan.teaserDuration ?? 35) as 35 | 55 | 115,
-        fullVideoDuration: (type === 'fullVideo' && newDuration && [300, 600, 900].includes(newDuration)
-          ? newDuration
-          : (activePlan.fullVideoDuration ?? 600)) as 300 | 600 | 900,
+        // Monetização travada: Full sempre no formato longo padrão.
+        fullVideoDuration: 900 as 300 | 600 | 900,
         userSuggestion: userSuggestion?.trim() || undefined
       }
     )
@@ -94,9 +92,11 @@ export default defineEventHandler(async (event) => {
     const updatedPlan = { ...planData }
     if (type === 'teaser') {
       updatedPlan.teasers = [...(updatedPlan.teasers || [])]
-      updatedPlan.teasers[index!] = result.item
+      const role = result.item?.narrativeRole
+      const sceneCount = role === 'gateway' ? 5 : role === 'hook-only' ? 4 : 6
+      updatedPlan.teasers[index!] = { ...result.item, sceneCount }
     } else {
-      updatedPlan.fullVideo = result.item
+      updatedPlan.fullVideo = { ...result.item, sceneCount: 150 }
     }
 
     // Atualizar cronograma se a IA gerou um novo
@@ -113,11 +113,6 @@ export default defineEventHandler(async (event) => {
       inputTokens: activePlan.inputTokens + inputTokens,
       outputTokens: activePlan.outputTokens + outputTokens,
       cost: (activePlan.cost ?? 0) + cost
-    }
-
-    // Se mudou a duração do full video, persistir
-    if (type === 'fullVideo' && newDuration && [300, 600, 900].includes(newDuration)) {
-      updateData.fullVideoDuration = newDuration
     }
 
     await prisma.monetizationPlan.update({

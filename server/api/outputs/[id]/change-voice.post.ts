@@ -4,18 +4,19 @@ import { outputPipelineService } from '../../../services/pipeline/output-pipelin
 /**
  * POST /api/outputs/[id]/change-voice
  * 
- * Troca o narrador (voz) de um output e regenera toda a narração.
- * Mantém o script e as imagens intactas — só reprocessa o áudio.
+ * Configura/troca o narrador (voz) do output.
+ * 
+ * - Se o output já tem cenas, regenera toda a narração (mantém script/imagens).
+ * - Se o output ainda NÃO tem cenas, apenas salva as configurações (pré-requisito do Story Architect).
  * 
  * Body:
  *   - voiceId: string (obrigatório) — ID da nova voz do ElevenLabs
+ *   - targetWPM?: number (legado, opcional) — mantido apenas para backward-compat
  * 
  * Fluxo:
- *   1. Valida que o output existe e tem script/cenas
- *   2. Atualiza o voiceId no output
- *   3. Deleta todos os áudios de narração existentes
- *   4. Gera novo áudio para todas as cenas em background
- *   5. Reseta flags de aprovação de áudio (e render se necessário)
+ *   1. Valida que o output existe
+ *   2. Atualiza voiceId (+ targetWPM se enviado) + speechConfiguredAt
+ *   3. Se tiver cenas: regenera áudio em background
  */
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
@@ -32,9 +33,9 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Validar targetWPM (opcional) — 120 (lento), 150 (normal), 180 (rápido)
-  const targetWPM = body.targetWPM ? Number(body.targetWPM) : undefined
-  if (targetWPM !== undefined && (isNaN(targetWPM) || targetWPM < 100 || targetWPM > 200)) {
+  // targetWPM é legado/compat. Se vier, validar; caso contrário, manter valor atual do output.
+  const targetWPM = body?.targetWPM === undefined ? undefined : Number(body.targetWPM)
+  if (targetWPM !== undefined && (!Number.isFinite(targetWPM) || isNaN(targetWPM) || targetWPM < 100 || targetWPM > 200)) {
     throw createError({
       statusCode: 400,
       message: 'targetWPM deve ser um número entre 100 e 200.'
@@ -59,37 +60,43 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'Output não encontrado' })
   }
 
-  // Validar que tem cenas (script já foi gerado)
-  if (output._count.scenes === 0) {
-    throw createError({
-      statusCode: 400,
-      message: 'Este output não possui cenas. Gere o script primeiro.'
-    })
-  }
-
-  // Verificar se algo mudou (voz OU velocidade)
+  // Verificar se algo mudou (voz OU WPM legado)
   const sameVoice = output.voiceId === body.voiceId
-  const sameWPM = !targetWPM || output.targetWPM === targetWPM
+  const sameWPM = targetWPM === undefined ? true : (output.targetWPM === targetWPM)
   if (sameVoice && sameWPM) {
     throw createError({
       statusCode: 409,
-      message: 'Nenhuma alteração detectada. A voz e a velocidade são as mesmas do output atual.'
+      message: 'Nenhuma alteração detectada. A voz é a mesma do output atual.'
     })
   }
 
   const previousVoiceId = output.voiceId
 
-  console.log(`[ChangeVoice] Output ${id}: trocando voz de "${previousVoiceId}" para "${body.voiceId}"${targetWPM ? ` (WPM: ${targetWPM})` : ''}`)
+  console.log(`[ChangeVoice] Output ${id}: configurando voz de "${previousVoiceId}" para "${body.voiceId}"${targetWPM !== undefined ? ` (WPM: ${targetWPM})` : ''}`)
 
-  // Atualizar targetWPM no banco ANTES de regenerar (se foi enviado)
-  if (targetWPM) {
-    await prisma.output.update({
-      where: { id },
-      data: { targetWPM }
-    })
+  // Atualizar configurações no banco (pré-requisito do Story Architect)
+  await prisma.output.update({
+    where: { id },
+    data: {
+      voiceId: body.voiceId,
+      ...(targetWPM !== undefined ? { targetWPM } : {}),
+      speechConfiguredAt: new Date()
+    }
+  })
+
+  // Se ainda não existem cenas, só configurar (sem regenerar áudio)
+  if (output._count.scenes === 0) {
+    return {
+      success: true,
+      message: 'Voz configurada. O áudio será gerado quando o roteiro existir.',
+      previousVoiceId,
+      newVoiceId: body.voiceId,
+      scenesCount: 0,
+      targetWPM: targetWPM ?? output.targetWPM
+    }
   }
 
-  // Fire-and-forget: regenerar áudio em background
+  // Fire-and-forget: regenerar áudio em background (mantém script/imagens)
   outputPipelineService.regenerateAudioWithVoice(id, body.voiceId).catch(err => {
     console.error(`[ChangeVoice] Erro ao regenerar áudio para output ${id}:`, err)
   })
@@ -100,6 +107,6 @@ export default defineEventHandler(async (event) => {
     previousVoiceId,
     newVoiceId: body.voiceId,
     scenesCount: output._count.scenes,
-    ...(targetWPM ? { targetWPM } : {})
+    targetWPM: targetWPM ?? output.targetWPM
   }
 })

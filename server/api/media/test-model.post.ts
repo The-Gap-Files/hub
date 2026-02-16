@@ -68,6 +68,11 @@ export default defineEventHandler(async (event) => {
       const firstVoice = voicesData.voices?.[0]
       if (!firstVoice) throw new Error('Nenhuma voz encontrada na conta ElevenLabs')
 
+      // eleven_v3 suporta Audio Tags inline para emoções: [excited], [whispers], [sighs], [happily], etc.
+      const testText = ttsModelId === 'eleven_v3'
+        ? '[happily] Teste do modelo v3. [whispers] Você pode colocar emoções na fala. [sighs] Como assim? [excited] Incrível!'
+        : 'Teste de modelo de narração. Verificando funcionamento.'
+
       const ttsRes = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${firstVoice.voice_id}`, {
         method: 'POST',
         headers: {
@@ -75,7 +80,7 @@ export default defineEventHandler(async (event) => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          text: 'Teste de modelo de narração. Verificando funcionamento.',
+          text: testText,
           model_id: ttsModelId,
           voice_settings: { stability: 0.5, similarity_boost: 0.75 }
         })

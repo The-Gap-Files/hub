@@ -37,66 +37,45 @@
             <p class="text-xs text-zinc-400 leading-relaxed">
               A IA analisará o dossiê e sugerirá um pacote completo:
               <strong class="text-white">1 vídeo completo</strong> (YouTube) +
-              <strong class="text-white">N teasers</strong> (TikTok/Shorts/Reels),
+              <strong class="text-white">N shorts</strong> (YouTube Shorts),
               cada um com ângulo narrativo e papel narrativo diferentes para maximizar alcance e conversão.
             </p>
           </div>
         </div>
 
-        <!-- Seleção de durações -->
+        <!-- Configuração fixa por cenas -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <!-- Duração dos Teasers -->
           <div class="space-y-4">
             <label class="mono-label text-xs text-zinc-500 flex items-center gap-2">
-              <Clock :size="12" />
-              Duração dos Teasers
+              <Scissors :size="12" />
+              Cenas por Teaser (fixo)
             </label>
             <div class="grid grid-cols-3 gap-3">
-              <button
-                v-for="opt in teaserOptions"
-                :key="opt.value"
-                @click="selectedTeaserDuration = opt.value"
-                :class="[
-                  'relative px-4 py-4 rounded-xl border text-center transition-all duration-300 cursor-pointer group/opt',
-                  selectedTeaserDuration === opt.value
-                    ? 'border-emerald-500/50 bg-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.15)]'
-                    : 'border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'
-                ]"
-              >
-                <div class="text-lg font-black text-white tracking-tight">{{ opt.label }}</div>
-                <div class="text-xs text-zinc-500 font-mono uppercase tracking-wider mt-1">{{ opt.description }}</div>
-                <div v-if="selectedTeaserDuration === opt.value" class="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center">
-                  <Check :size="10" class="text-white" />
-                </div>
-              </button>
+              <div class="px-4 py-4 rounded-xl border border-amber-500/30 bg-amber-500/10 text-center">
+                <div class="text-lg font-black text-amber-300 tracking-tight">{{ SCENE_CONFIG.hookOnly }}</div>
+                <div class="text-xs text-zinc-500 font-mono uppercase tracking-wider mt-1">Hook-only</div>
+              </div>
+              <div class="px-4 py-4 rounded-xl border border-blue-500/30 bg-blue-500/10 text-center">
+                <div class="text-lg font-black text-blue-300 tracking-tight">{{ SCENE_CONFIG.deepDive }}</div>
+                <div class="text-xs text-zinc-500 font-mono uppercase tracking-wider mt-1">Deep-dive</div>
+              </div>
+              <div class="px-4 py-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-center">
+                <div class="text-lg font-black text-emerald-300 tracking-tight">{{ SCENE_CONFIG.gateway }}</div>
+                <div class="text-xs text-zinc-500 font-mono uppercase tracking-wider mt-1">Gateway</div>
+              </div>
             </div>
           </div>
 
-          <!-- Duração do Full Video -->
           <div class="space-y-4">
             <label class="mono-label text-xs text-zinc-500 flex items-center gap-2">
               <Film :size="12" />
-              Duração do Full Video
+              Vídeo Longo (fixo)
             </label>
-            <div class="grid grid-cols-3 gap-3">
-              <button
-                v-for="opt in fullVideoOptions"
-                :key="opt.value"
-                @click="selectedFullDuration = opt.value"
-                :class="[
-                  'relative px-4 py-4 rounded-xl border text-center transition-all duration-300 cursor-pointer group/opt',
-                  selectedFullDuration === opt.value
-                    ? 'border-blue-500/50 bg-blue-500/10 shadow-[0_0_20px_rgba(59,130,246,0.15)]'
-                    : 'border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'
-                ]"
-              >
-                <div class="text-lg font-black text-white tracking-tight">{{ opt.label }}</div>
-                <div class="text-xs text-zinc-500 font-mono uppercase tracking-wider mt-1">{{ opt.description }}</div>
-                <div v-if="selectedFullDuration === opt.value" class="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                  <Check :size="10" class="text-white" />
-                </div>
-              </button>
+            <div class="px-4 py-4 rounded-xl border border-blue-500/30 bg-blue-500/10">
+              <div class="text-lg font-black text-blue-300 tracking-tight">{{ SCENE_CONFIG.fullVideo }} cenas</div>
+              <div class="text-xs text-zinc-500 font-mono uppercase tracking-wider mt-1">Estrutura longa padrão</div>
             </div>
+            <p class="text-[11px] text-zinc-500">Tempo não é mais configurável na monetização. A análise agora é guiada por cenas fixas.</p>
           </div>
         </div>
 
@@ -131,6 +110,7 @@
 
         <!-- Botão Gerar -->
         <button
+          type="button"
           @click="generatePlan"
           class="w-full px-8 py-5 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl transition-all duration-500 shadow-[0_0_30px_rgba(16,185,129,0.2)] hover:shadow-[0_0_40px_rgba(16,185,129,0.35)] flex items-center justify-center gap-3 group"
         >
@@ -207,12 +187,123 @@
                 {{ usage.totalTokens?.toLocaleString() }} tokens · {{ provider }}
               </span>
               <button
-                @click="resetPlan"
+                v-if="planSavedInDb"
+                type="button"
+                @click="createYoutubePackage"
+                :disabled="creatingPackage || hasExistingPackage || !canCreateYoutubePackage"
+                class="px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/15 border border-emerald-500/20 text-emerald-300 hover:text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                :title="hasExistingPackage ? 'Pacote já foi criado para este plano.' : (canCreateYoutubePackage ? 'Cria 1 Full (150 cenas) + 12 Shorts no banco (sem rodar Arquiteto).' : 'Requer um plano salvo com 12 Shorts.')"
+              >
+                <Loader2 v-if="creatingPackage" :size="12" class="animate-spin" />
+                <Send v-else :size="12" />
+                {{ creatingPackage ? 'Criando...' : (hasExistingPackage ? 'Pacote Criado' : 'Criar Pacote') }}
+              </button>
+              <button
+                type="button"
+                @click="openRegenerationWarning"
+                :disabled="generating"
                 class="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-400 hover:text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-2"
               >
                 <RefreshCw :size="12" />
                 Regenerar
               </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Validação do plano (violations/warnings) -->
+      <section v-if="validation && (validation.violations?.length || validation.warnings?.length)" class="glass-card p-1 overflow-hidden">
+        <div class="p-6 space-y-4" :class="validation.approved === false ? 'bg-red-500/5 border-l-4 border-red-500/50' : 'bg-amber-500/5 border-l-4 border-amber-500/50'">
+          <div class="flex items-start gap-3">
+            <AlertTriangle v-if="validation.approved === false" :size="20" class="text-red-400 flex-shrink-0 mt-0.5" />
+            <AlertTriangle v-else :size="20" class="text-amber-400 flex-shrink-0 mt-0.5" />
+            <div class="space-y-2 flex-1 min-w-0">
+              <h4 class="text-xs font-black uppercase tracking-widest" :class="validation.approved === false ? 'text-red-300' : 'text-amber-300'">
+                {{ validation.approved === false ? 'Plano com violações' : 'Avisos do validador' }}
+              </h4>
+              <ul v-if="validation.violations?.length" class="list-disc pl-5 space-y-1 text-xs text-red-300">
+                <li v-for="(v, i) in validation.violations" :key="i">{{ v }}</li>
+              </ul>
+              <ul v-if="validation.warnings?.length" class="list-disc pl-5 space-y-1 text-xs text-amber-300">
+                <li v-for="(w, i) in validation.warnings" :key="i">{{ w }}</li>
+              </ul>
+              <p v-if="validation.corrections" class="text-xs text-zinc-400 mt-2 italic">{{ validation.corrections }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════ MSGBOX (MODAL) — REGENERAÇÃO ════════════ -->
+      <div
+        v-if="showMonetizationRegenerationWarning"
+        class="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+        @click.self="showMonetizationRegenerationWarning = false"
+      >
+        <div class="w-full max-w-lg glass-card p-1 overflow-hidden border-amber-500/30">
+          <div class="p-6 space-y-4">
+            <div class="flex items-start gap-3">
+              <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 flex items-center justify-center flex-shrink-0">
+                <AlertTriangle :size="18" />
+              </div>
+              <div class="space-y-1.5">
+                <h4 class="text-sm font-black uppercase tracking-widest text-amber-200">Atenção: Regenerar Monetização</h4>
+                <p class="text-xs text-zinc-300 leading-relaxed">
+                  Se você confirmar:
+                </p>
+                <ul class="text-xs text-zinc-300 leading-relaxed list-disc pl-5 space-y-1">
+                  <li>Todos os outputs já criados serão <strong>desvinculados</strong> do monetizador.</li>
+                  <li>Outputs concluídos permanecerão concluídos, porém <strong>sem relação</strong> com o plano.</li>
+                  <li>Outputs pendentes/em geração serão <strong>cancelados</strong>.</li>
+                  <li>O <strong>brief</strong> será refeito e sobrescrito.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                @click="showMonetizationRegenerationWarning = false"
+                class="px-3 py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white text-[11px] font-black uppercase tracking-wider transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                @click="confirmRegenerateMonetization"
+                :disabled="generating"
+                class="px-3 py-2 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/15 text-amber-200 hover:text-white text-[11px] font-black uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                <Loader2 v-if="generating" :size="12" class="animate-spin" />
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════ PACOTE YOUTUBE (DB) ════════════ -->
+      <section v-if="planSavedInDb && (packageError || packageResult)" class="glass-card p-1 overflow-hidden border-emerald-500/10">
+        <div class="p-6 space-y-4">
+          <div class="flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                <Send :size="16" />
+              </div>
+              <h4 class="text-xs font-black uppercase tracking-widest text-white">Pacote YouTube (apenas criação)</h4>
+            </div>
+            <span class="mono-label text-[10px] text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded-md">
+              1 Full + 12 Shorts
+            </span>
+          </div>
+
+          <div v-if="packageError" class="p-4 bg-red-500/5 border border-red-500/15 rounded-xl text-xs text-red-300 whitespace-pre-line">
+            {{ packageError }}
+          </div>
+
+          <div v-if="packageResult" class="space-y-3">
+            <div class="p-4 bg-emerald-500/5 border border-emerald-500/15 rounded-xl text-xs text-zinc-300">
+              Pacote criado com sucesso. Agora cada item (Full e cada Teaser) terá seu botão <strong>Abrir</strong> no próprio card abaixo.
             </div>
           </div>
         </div>
@@ -227,19 +318,30 @@
             </div>
             <h4 class="text-xs font-black uppercase tracking-widest text-white">Full Video · YouTube</h4>
             <span class="mono-label text-xs text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md">
-              {{ selectedFullDuration / 60 }}min
+              {{ SCENE_CONFIG.fullVideo }} cenas
             </span>
           </div>
-          <button
-            @click="showFullVideoRegenForm = !showFullVideoRegenForm"
-            :disabled="regeneratingFullVideo"
-            class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/8 border border-blue-500/15 text-blue-400 hover:bg-blue-500/15 hover:border-blue-500/30 transition-all text-xs font-bold uppercase tracking-wider disabled:opacity-50 disabled:cursor-wait"
-            title="Gerar alternativa diferente"
-          >
-            <Loader2 v-if="regeneratingFullVideo" :size="13" class="animate-spin" />
-            <RotateCcw v-else :size="13" />
-            <span class="hidden sm:inline">{{ regeneratingFullVideo ? 'Gerando...' : 'Outro ângulo' }}</span>
-          </button>
+          <div class="flex items-center gap-2">
+            <NuxtLink
+              v-if="packageResult?.fullOutputId"
+              :to="`/outputs/${packageResult.fullOutputId}`"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/20 text-blue-300 hover:text-white transition-all text-xs font-black uppercase tracking-wider"
+              title="Abrir este Full Video na tela de execução"
+            >
+              <Film :size="13" />
+              <span class="hidden sm:inline">Abrir</span>
+            </NuxtLink>
+            <button
+              @click="showFullVideoRegenForm = !showFullVideoRegenForm"
+              :disabled="regeneratingFullVideo"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/8 border border-blue-500/15 text-blue-400 hover:bg-blue-500/15 hover:border-blue-500/30 transition-all text-xs font-bold uppercase tracking-wider disabled:opacity-50 disabled:cursor-wait"
+              title="Gerar alternativa diferente"
+            >
+              <Loader2 v-if="regeneratingFullVideo" :size="13" class="animate-spin" />
+              <RotateCcw v-else :size="13" />
+              <span class="hidden sm:inline">{{ regeneratingFullVideo ? 'Gerando...' : 'Outro ângulo' }}</span>
+            </button>
+          </div>
         </div>
 
         <!-- Formulário de regeneração -->
@@ -252,25 +354,8 @@
               </button>
             </div>
 
-            <!-- Seletor de duração -->
-            <div class="space-y-2">
-              <label class="text-xs text-zinc-500 font-medium">Duração do novo vídeo</label>
-              <div class="grid grid-cols-3 gap-2">
-                <button
-                  v-for="opt in fullVideoOptions"
-                  :key="opt.value"
-                  @click="regenFullVideoDuration = opt.value"
-                  :class="[
-                    'px-3 py-2.5 rounded-lg border text-center transition-all cursor-pointer',
-                    regenFullVideoDuration === opt.value
-                      ? 'border-blue-500/50 bg-blue-500/10 text-white'
-                      : 'border-white/10 bg-white/[0.02] text-zinc-400 hover:border-white/20'
-                  ]"
-                >
-                  <div class="text-sm font-black">{{ opt.label }}</div>
-                  <div class="text-xs text-zinc-500 mt-0.5">{{ opt.description }}</div>
-                </button>
-              </div>
+            <div class="p-3 rounded-lg border border-blue-500/20 bg-blue-500/5 text-xs text-blue-200/80">
+              Full Video fixo em <strong>{{ SCENE_CONFIG.fullVideo }} cenas</strong>.
             </div>
 
             <!-- Campo de sugestão -->
@@ -461,7 +546,7 @@
             Teasers · {{ plan.teasers.length }} ângulos
           </h4>
           <span class="mono-label text-xs text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-md">
-            {{ selectedTeaserDuration }}s cada
+            {{ SCENE_CONFIG.gateway }}/{{ SCENE_CONFIG.deepDive }}/{{ SCENE_CONFIG.hookOnly }} cenas por papel
           </span>
         </div>
 
@@ -481,6 +566,14 @@
                 <span class="mono-label text-xs text-zinc-500 uppercase">{{ teaser.platform }}</span>
               </div>
               <div class="flex items-center gap-2">
+                <NuxtLink
+                  v-if="packageResult?.teaserOutputIds?.[Number(index)]"
+                  :to="`/outputs/${packageResult.teaserOutputIds[Number(index)]}`"
+                  class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all"
+                  title="Abrir este teaser na tela de execução"
+                >
+                  Abrir
+                </NuxtLink>
                 <span :class="[
                   'px-2 py-0.5 rounded-md text-xs font-black uppercase tracking-wider',
                   angleCategoryColor(teaser.angleCategory)
@@ -722,7 +815,7 @@
 
 <script setup lang="ts">
 import {
-  TrendingUp, Sparkles, Clock, Film, Check, ArrowRight,
+  TrendingUp, Sparkles, Film, Check, ArrowRight,
   RefreshCw, Scissors, Calendar, Lightbulb, AlertTriangle,
   Loader2, RotateCcw, X, Send, BookOpen, Palette, Target,
   Globe
@@ -733,24 +826,32 @@ const props = defineProps<{
 }>()
 
 // ───── State ─────
-const selectedTeaserDuration = ref<35 | 55 | 115>(35)
-const selectedFullDuration = ref<300 | 600 | 900>(600)
-const selectedTeaserCount = ref(6)
+const selectedTeaserCount = ref(12)
 const generating = ref(false)
 const loadingExisting = ref(true)
 const errorMessage = ref('')
+const showMonetizationRegenerationWarning = ref(false)
 const plan = ref<any>(null)
+const validation = ref<{ approved?: boolean; violations?: string[]; warnings?: string[]; corrections?: string } | null>(null)
 const usage = ref<any>(null)
 const provider = ref('')
 const planCreatedAt = ref<string | null>(null)
 const planSavedInDb = ref(false)
 const planCost = ref(0)
+const savedPlanId = ref<string | null>(null)
+
+// ───── YouTube Package State ─────
+const creatingPackage = ref(false)
+const packageError = ref('')
+const packageResult = ref<{ fullOutputId: string; teaserOutputIds: string[] } | null>(null)
+const hasExistingPackage = computed(() => {
+  return !!packageResult.value?.fullOutputId && (packageResult.value?.teaserOutputIds?.length || 0) > 0
+})
 
 // ───── Regeneration State ─────
 const regeneratingFullVideo = ref(false)
 const regeneratingTeaserIndex = ref<number | null>(null)
 const showFullVideoRegenForm = ref(false)
-const regenFullVideoDuration = ref<300 | 600 | 900>(600)
 const regenFullVideoSuggestion = ref('')
 
 // ───── Style Preview State ─────
@@ -759,18 +860,15 @@ const confirmingPreviewFor = ref<string | null>(null)
 const selectedSeedMode = ref<string>('random')
 const availableSeeds = ref<Array<{ id: string, value: number }>>([])
 
-// ───── Options ─────
-const teaserOptions = [
-  { value: 35 as const, label: '35s', description: 'Ultra-curto' },
-  { value: 55 as const, label: '55s', description: 'Curto' },
-  { value: 115 as const, label: '115s', description: 'Médio' }
-]
-
-const fullVideoOptions = [
-  { value: 300 as const, label: '5min', description: 'Compacto' },
-  { value: 600 as const, label: '10min', description: 'Clássico' },
-  { value: 900 as const, label: '15min', description: 'Completo' }
-]
+// ───── Configuração fixa por CENAS ─────
+const SCENE_CONFIG = {
+  hookOnly: 4,
+  deepDive: 6,
+  gateway: 5,
+  fullVideo: 150
+} as const
+const FIXED_TEASER_DURATION = 35 as const
+const FIXED_FULL_DURATION = 900 as const
 
 // ───── Actions ─────
 async function loadExistingPlan() {
@@ -779,11 +877,17 @@ async function loadExistingPlan() {
     const data = await $fetch(`/api/dossiers/${props.dossierId}/monetization-plans`) as any
     if (data?.data?.length > 0) {
       const saved = data.data[0]
+      savedPlanId.value = saved.id || null
       plan.value = saved.planData
+      const pkg = saved?.planData?._youtubePackage
+      if (pkg?.fullOutputId && Array.isArray(pkg?.teaserOutputIds)) {
+        packageResult.value = {
+          fullOutputId: pkg.fullOutputId,
+          teaserOutputIds: pkg.teaserOutputIds
+        }
+      }
       usage.value = { inputTokens: saved.inputTokens, outputTokens: saved.outputTokens, totalTokens: saved.inputTokens + saved.outputTokens }
       provider.value = saved.provider
-      selectedTeaserDuration.value = saved.teaserDuration as 35 | 55 | 115
-      selectedFullDuration.value = saved.fullVideoDuration as 300 | 600 | 900
       planCreatedAt.value = saved.createdAt
       planSavedInDb.value = true
       planCost.value = saved.cost ?? 0
@@ -796,19 +900,32 @@ async function loadExistingPlan() {
   }
 }
 
-async function generatePlan() {
+type GeneratePlanOptions = { confirmRegeneration?: boolean }
+
+async function generatePlan(arg?: PointerEvent | GeneratePlanOptions) {
+  const options: GeneratePlanOptions | undefined = (arg && typeof arg === 'object' && 'confirmRegeneration' in arg)
+    ? (arg as GeneratePlanOptions)
+    : undefined
   generating.value = true
+  showMonetizationRegenerationWarning.value = false
   errorMessage.value = ''
   plan.value = null
+  validation.value = null
   planSavedInDb.value = false
+  savedPlanId.value = null
+  packageError.value = ''
+  packageResult.value = null
 
   try {
     const data = await $fetch(`/api/dossiers/${props.dossierId}/suggest-monetization`, {
       method: 'POST',
       body: {
-        teaserDuration: selectedTeaserDuration.value,
-        fullVideoDuration: selectedFullDuration.value,
-        teaserCount: selectedTeaserCount.value
+        teaserDuration: FIXED_TEASER_DURATION,
+        fullVideoDuration: FIXED_FULL_DURATION,
+        sceneConfig: SCENE_CONFIG,
+        teaserCount: selectedTeaserCount.value,
+        confirmRegeneration: !!options?.confirmRegeneration,
+        forceBriefRegeneration: !!options?.confirmRegeneration
       }
     }) as any
 
@@ -821,26 +938,83 @@ async function generatePlan() {
     }
 
     plan.value = data.plan
+    validation.value = data.validation ?? null
     usage.value = data.usage
     provider.value = data.provider
     planCreatedAt.value = data.createdAt
     planSavedInDb.value = true
     planCost.value = data.cost ?? 0
+    savedPlanId.value = data.planId || null
   } catch (err: any) {
-    errorMessage.value = err?.data?.message || err?.message || 'Erro desconhecido ao gerar plano'
+    const apiMessage = err?.data?.message || err?.message || 'Erro desconhecido ao gerar plano'
+    if (err?.statusCode === 409 || err?.status === 409 || err?.data?.statusMessage === 'CONFIRM_REGENERATION_REQUIRED') {
+      showMonetizationRegenerationWarning.value = true
+    }
+    errorMessage.value = apiMessage
   } finally {
     generating.value = false
   }
 }
 
+function openRegenerationWarning() {
+  showMonetizationRegenerationWarning.value = true
+}
+
+async function confirmRegenerateMonetization() {
+  await generatePlan({ confirmRegeneration: true })
+}
+
+const canCreateYoutubePackage = computed(() => {
+  return !!plan.value && planSavedInDb.value && plan.value?.teasers?.length === 12
+})
+
+async function createYoutubePackage() {
+  if (creatingPackage.value) return
+  creatingPackage.value = true
+  packageError.value = ''
+  packageResult.value = null
+
+  try {
+    const data = await $fetch(`/api/dossiers/${props.dossierId}/create-youtube-package`, {
+      method: 'POST',
+      body: savedPlanId.value ? { planId: savedPlanId.value } : {}
+    }) as any
+
+    if (data?.success) {
+      packageResult.value = {
+        fullOutputId: data.fullOutputId,
+        teaserOutputIds: Array.isArray(data.teaserOutputIds) ? data.teaserOutputIds : []
+      }
+      // manter também dentro do objeto do plano atual (melhora UX ao navegar sem reload)
+      if (plan.value && typeof plan.value === 'object') {
+        plan.value._youtubePackage = {
+          fullOutputId: packageResult.value.fullOutputId,
+          teaserOutputIds: packageResult.value.teaserOutputIds,
+          createdAt: new Date().toISOString()
+        }
+      }
+    }
+  } catch (err: any) {
+    packageError.value = err?.data?.message || err?.message || 'Erro ao criar pacote YouTube'
+  } finally {
+    creatingPackage.value = false
+  }
+}
+
 function resetPlan() {
+  showMonetizationRegenerationWarning.value = false
   plan.value = null
+  validation.value = null
   usage.value = null
   provider.value = ''
   errorMessage.value = ''
   planCreatedAt.value = null
   planSavedInDb.value = false
   planCost.value = 0
+  savedPlanId.value = null
+  creatingPackage.value = false
+  packageError.value = ''
+  packageResult.value = null
 }
 
 // ───── Regenerate Individual Item ─────
@@ -878,8 +1052,7 @@ async function regenerateFullVideo() {
   regeneratingFullVideo.value = true
   try {
     const body: any = {
-      type: 'fullVideo',
-      newDuration: regenFullVideoDuration.value
+      type: 'fullVideo'
     }
     if (regenFullVideoSuggestion.value.trim()) {
       body.userSuggestion = regenFullVideoSuggestion.value.trim()
@@ -891,8 +1064,6 @@ async function regenerateFullVideo() {
     if (data.success && data.item) {
       plan.value.fullVideo = data.item
       if (data.cost) planCost.value += data.cost
-      // Atualizar duração selecionada se mudou
-      selectedFullDuration.value = regenFullVideoDuration.value
       // Limpar sugestão após sucesso
       regenFullVideoSuggestion.value = ''
       // Atualizar cronograma se a IA gerou um novo
@@ -1094,14 +1265,6 @@ function formatCost(cost: number): string {
   if (cost < 0.01) return `$${cost.toFixed(4)}`
   return `$${cost.toFixed(2)}`
 }
-
-// ───── Watchers ─────
-watch(showFullVideoRegenForm, (open) => {
-  if (open) {
-    // Inicializa com a duração atual ao abrir
-    regenFullVideoDuration.value = selectedFullDuration.value
-  }
-})
 
 // ───── Lifecycle ─────
 onMounted(() => {

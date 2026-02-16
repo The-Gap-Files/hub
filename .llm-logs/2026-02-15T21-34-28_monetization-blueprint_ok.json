@@ -1,0 +1,170 @@
+{
+  "timestamp": "2026-02-15T21:34:28.775Z",
+  "taskId": "monetization-blueprint",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Monetization Blueprint — Planejamento Estratégico\r\n\r\nVocê é um estrategista de conteúdo especializado em monetização de vídeos **100% para YouTube**: Full Video (YouTube) + Shorts (YouTube Shorts). Nesta etapa, você vai criar o **ESQUELETO** do plano de monetização — a distribuição estratégica de papéis, ângulos e formatos.\r\n\r\n## 🎯 Objetivo\r\n\r\nAnalisar o dossiê e produzir um BLUEPRINT ESTRATÉGICO contendo:\r\n1. Título do plano\r\n2. Estilo visual único para todo o plano\r\n3. Distribuição de ângulos narrativos (1 por teaser, sem duplicatas)\r\n4. Distribuição de papéis narrativos (gateway/deep-dive/hook-only)\r\n5. Formatos de short para cada teaser (respeitando compatibilidade role×format)\r\n6. Direção criativa por item (scriptStyleId, editorialObjectiveId)\r\n7. Receita estimada e notas estratégicas\r\n\r\n## 🚨 REGRAS CRÍTICAS DO BLUEPRINT\r\n\r\n### Distribuição de Roles\r\n- **Gateway:** EXATAMENTE 1, SEMPRE o primeiro item do array\r\n- **Deep-Dive:** ~50-60% dos teasers restantes\r\n- **Hook-Only:** ~30-45% dos teasers restantes\r\n\r\n### Ângulos Narrativos\r\n- Cada teaser DEVE ter um `angleCategory` DIFERENTE de todos os outros\r\n- NÃO repita ângulos — se são 15 teasers, use 15 ângulos diferentes\r\n- Use apenas ângulos RELEVANTES para o dossiê\r\n\r\n### Compatibilidade Role × Format (OBRIGATÓRIO)\r\nRespeite esta tabela rigorosamente:\r\n\r\n| Role | Formatos PERMITIDOS | Formatos PROIBIDOS |\r\n|------|--------------------|--------------------|\r\n| **gateway** | plot-twist, teaser-cinematografico, lista-rapida | hook-brutal, frase-memoravel |\r\n| **deep-dive** | plot-twist, mini-documento, pergunta-incomoda, teaser-cinematografico | frase-memoravel |\r\n| **hook-only** | hook-brutal, frase-memoravel, pergunta-incomoda | mini-documento, lista-rapida |\r\n\r\n### Diversidade de Formatos\r\n- Use pelo menos 3 formatos diferentes\r\n- Máximo 50% dos teasers com o mesmo formato\r\n\r\n## 📐 O QUE PRODUZIR\r\n\r\nPara CADA teaser, defina:\r\n- `angleCategory`: Ângulo narrativo (do catálogo)\r\n- `angleName`: Nome descritivo do ângulo aplicado ao dossiê\r\n- `narrativeRole`: gateway, deep-dive ou hook-only\r\n- `shortFormatType`: Formato do short (compatível com o role)\r\n- `platform`: **YouTube Shorts** (obrigatório; não escolha outra plataforma)\r\n- `scriptStyleId` + `scriptStyleName`: Estilo de roteiro\r\n- `editorialObjectiveId` + `editorialObjectiveName`: Objetivo editorial\r\n\r\nPara o Full Video:\r\n- `angle`: Ângulo narrativo principal\r\n- `scriptStyleId` + `scriptStyleName`: Estilo de roteiro\r\n- `editorialObjectiveId` + `editorialObjectiveName`: Objetivo editorial\r\n\r\n## 💡 PENSAMENTO ESTRATÉGICO\r\n\r\nAntes de definir os ângulos, pense:\r\n1. Quais aspectos do dossiê são MAIS controversos? → hook-only\r\n2. Quais exigem contexto para impactar? → gateway ou deep-dive\r\n3. Quais têm potencial viral natural? → hook-brutal ou pergunta-incomoda\r\n4. Quais são ricos em detalhes? → mini-documento ou lista-rapida\r\n\r\n## ⚠️ NÃO GERE NESTA ETAPA\r\n\r\n- NÃO gere títulos dos teasers (serão gerados na etapa seguinte)\r\n- NÃO gere hooks (serão gerados na etapa seguinte)\r\n- NÃO gere scriptOutline (será gerado na etapa seguinte)\r\n- NÃO gere visualPrompt (será gerado na etapa seguinte)\r\n- NÃO gere avoidPatterns (serão gerados na etapa seguinte)\r\n- NÃO gere CTA (será gerado na etapa seguinte)\r\n\r\nEsta etapa é APENAS sobre ESTRATÉGIA — a execução criativa vem depois.\n## ⚙️ CONFIGURAÇÃO (CENAS FIXAS)\n- Full Video: 150 cenas\n- Gateway: 5 cenas\n- Deep-Dive: 6 cenas\n- Hook-Only: 4 cenas\n- Quantidade de teasers: 12\n\n\n### 📝 ESTILOS DE ROTEIRO DISPONÍVEIS\n\n- **`documentary`**: \"Documentário Profissional\"\n  Framework documental estruturado para true crime, investigações, perfis, ciência e história. Combina rigor jornalístico com storytelling envolvente e técnicas de retenção comprovadas.\n\n- **`mystery`**: \"Mistério Real - The Gap Files\"\n  Framework viral para mistérios históricos, conspirações e teorias. Fórmula \"Gap Glitch\" de máxima retenção + técnicas comprovadas de storytelling investigativo.\n\n- **`narrative`**: \"Narrativo Épico\"\n  Framework narrativo épico/emocional para jornadas humanas, dramas históricos e eventos transformadores. Foca na experiência emocional com resolução controlada para teasers.\n\n- **`educational`**: \"Educacional\"\n  Estilo educativo e envolvente, explicando conceitos complexos de forma acessível. Usa metáforas visuais e analogias sem ser condescendente.\n\n### 🎨 ESTILOS VISUAIS DISPONÍVEIS\n\n- **`epictok`**: \"Epictok Imersivo\"\n  Estilo de ilustração 2D vintage, tipo Studio Ghibli e Eyvind Earle.\n  _Base:_ Cinematic 2D illustration, Studio Ghibli background art style, Eyvind Earle inspired\n  _Atmosfera:_ dreamlike, nostalgic, epic adventure, serene yet mysterious\n\n- **`noir-cinematic`**: \"Noir Cinematográfico\"\n  Pintura digital cinematográfica dark: concept art com chiaroscuro pesado, texturas pictóricas sutis e composição de cinema noir. Entre fotorrealismo e ilustração.\n  _Base:_ Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric\n  _Atmosfera:_ somber, ominous, foreboding, investigative noir, oppressive silence, tension, morally ambiguous, fatalistic\n\n- **`noir-classic`**: \"Noir Clássico\"\n  Ilustração noir pura: ink wash painting, alto contraste preto e branco com acentos seletivos de cor. Inspirado em Sin City, Batman Dark Deco e graphic novels sombrias.\n  _Base:_ Dark noir graphic novel illustration, ink wash painting style, heavy black shadows, stark high-contrast chiaroscuro, stylized and painterly, not photorealistic\n  _Atmosfera:_ somber, ominous, foreboding, investigative noir, oppressive silence, tension, morally ambiguous, fatalistic\n\n- **`dark-reveal`**: \"Dark Reveal\"\n  Concept art dramático de revelação: objeto ou documento iluminado por um foco de luz, fundo escuro (urbano ou distópico), silhuetas, acentos quentes dourados ou vermelhos. Tom de verdade oculta e investigação.\n  _Base:_ Dramatic digital concept art, revelation and discovery aesthetic, single focal point in spotlight, dark environment, painterly with visible brushstrokes, not ink wash, not graphic novel\n  _Atmosfera:_ solemn significance, uncovering hidden truth, investigative, mysterious, ominous, historical weight, past meeting present\n\n- **`ghibli-dark`**: \"Ghibli Sombrio\"\n  Estilo Studio Ghibli em versão dark: ilustração 2D rica, mas com atmosfera de suspense, leve horror e noir. Ideal para true crime, mistério e investigação.\n  _Base:_ Cinematic 2D illustration, Studio Ghibli art style dark variant, painterly anime aesthetic, moody and atmospheric\n  _Atmosfera:_ suspenseful, subtle horror, noir mood, tense, mysterious, foreboding, solemn\n\n- **`gta6`**: \"GTA 6 Vibes\"\n  Estilo vibrante com cores saturadas e iluminação de Miami.\n  _Base:_ Cinematic photorealistic, modern AAA game aesthetic, GTA VI style\n  _Atmosfera:_ energetic, luxurious, urban tropical paradise, high-octane\n\n- **`cyberpunk`**: \"Cyberpunk Neon\"\n  Estilo futurista com neon, chuva e tecnologia avançada.\n  _Base:_ Cinematic cyberpunk, Blade Runner inspired, dark sci-fi\n  _Atmosfera:_ dystopian, mysterious, tech-noir, rain-soaked melancholy\n\n- **`oil-painting`**: \"Pintura a Óleo\"\n  Estilo de pintura a óleo clássica com pinceladas visíveis.\n  _Base:_ Classic oil painting, renaissance and baroque style, museum quality\n  _Atmosfera:_ timeless, contemplative, classical elegance, artistic reverence\n\n- **`photorealistic`**: \"Fotorrealista\"\n  Estilo fotorrealista como fotografia de cinema em alta resolução.\n  _Base:_ Cinematic photorealistic, ARRI Alexa 65mm, professional cinema camera\n  _Atmosfera:_ authentic, immersive, documentary realism, cinematic presence\n\n### 🎯 OBJETIVOS EDITORIAIS DISPONÍVEIS\n\n- **`full-reveal`**: \"Revelação Total\" [reveal]\n  Expõe toda a verdade de forma direta e impactante\n  _Instrução:_ Revele TODA a verdade do assunto de forma direta, sem rodeios. O espectador deve terminar o vídeo sabendo absolutamente tudo. Use provas, dados e fatos concretos para construir uma narra... [truncated 7677 chars]"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "📋 TEMA: Injustiça histórica ou assassinato de uma criança por religião?\n\n📋 TÍTULO: Simão de trento, itália\n\n📚 FONTES DO DOSSIÊ (ordenadas por peso/relevância):\n[1] (text) Investigação Histórico-Forense: Simão de Trento [peso: 3]\nO Arquivo Trento: Uma Autópsia Histórica, Jurídica e Forense da Gênese, Consolidação e Persistência do Libelo de Sangue (1475–Presente)I. Introdução Epistemológica e Contextual: A Anatomia de um Mito FundadorO caso de Simão de Trento (Simonino), ocorrido na Páscoa de 1475, transcende a categoria de um mero episódio de violência medieval para se constituir como o evento fundacional da moderna propaganda antissemita. Diferente de acusações anteriores de assassinato ritual, como as de William de Norwich (1144) ou Hugh de Lincoln (1255), que permaneceram confinadas a hagiografias locais e crônicas monásticas, o caso de Trento foi deliberadamente arquitetado como um evento midiático transnacional. A presente investigação forense visa desconstruir as camadas sedimentares deste caso, operando em três eixos temporais distintos: o evento histórico (a morte da criança e o subsequente processo judicial de 1475–1478), a revisão eclesiástica e historiográfica (a abolição do culto em 1965 e a controvérsia de Ariel Toaff em 2007), e a ressignificação contemporânea (o uso da iconografia de Simonino em manifestos terroristas modernos, como o de Poway em 2019). O objetivo primordial é separar o fato forense da fabricação ideológica, analisando como uma morte acidental foi transmutada, através da tortura jurídica e da inovação tecnológica da imprensa, em um arquétipo de ódio que perdura por mais de meio milênio.Para compreender a mecânica da fabricação da culpa, é imperativo situar Trento em seu contexto geopolítico e demográfico. Em 1475, Trento era um principado-bispado sob a jurisdição do Sacro Império Romano-Germânico, mas cultural e geograficamente situado na fronteira com os territórios italianos e a poderosa República de Veneza. A cidade operava como um ponto de estrangulamento estratégico nas rotas comerciais alpinas, mas sofria com tensões internas e pressões externas. O Príncipe-Bispo Johannes Hinderbach, um humanista ambicioso e politicamente astuto, encontrava-se em uma posição precária, lutando para manter a autonomia de seu principado contra as ambições expansionistas venezianas e as demandas imperiais. Hinderbach, um homem de letras e patrono das artes, via na consolidação de um culto local uma oportunidade não apenas espiritual, mas política e econômica, capaz de colocar Trento no mapa das grandes peregrinações europeias, rivalizando com locais consagrados e gerando receitas substanciais para a renovação da catedral e da infraestrutura urbana.A comunidade judaica de Trento era minúscula, composta por apenas três famílias principais chefiadas por Samuel de Nuremberg (um banqueiro e prestamista que chegara em 1461), Tobias (um médico) e Engel. Esta comunidade, predominantemente de origem ashkenazi (alemã), servia como um pilar financeiro vital para a região, fornecendo crédito em uma economia onde a usura cristã era oficialmente proibida, embora praticada. Eles existiam em um estado de tolerância frágil, mediada por cartas de proteção (condotte) que podiam ser revogadas a qualquer momento. Nas semanas que antecederam a Páscoa de 1475, a atmosfera na cidade havia sido deliberadamente envenenada pelas pregações do frade franciscano observante Bernardino da Feltre. Bernardino, um demagogo carismático e figura central na fundação dos Monti di Pietà (bancos de penhores cristãos destinados a substituir os prestamistas judeus), havia profetizado explicitamente que os pecados da cidade atrairiam uma calamidade e focou sua retórica virulentamente contra a usura judaica. Ele criou, assim, um ambiente de histeria pré-existente e uma profecia autorrealizável onde qualquer infortúnio seria imediatamente atribuído aos judeus, estabelecendo o palco para o drama judicial que se seguiria.II. A Reconstrução Forense do Evento (23-26 de Março de 1475)2.1. O Desaparecimento e a Cronologia dos FatosA análise cronológica precisa dos eventos ocorridos entre a Quinta-Feira Santa e o Domingo de Páscoa de 1475 é fundamental para desmantelar a narrativa acusatória. Simon, uma criança de dois anos e meio, filho do curtidor Andreas Unverdorben, desapareceu na noite de 23 de março. O pai, Andreas, inicialmente suspeitou de um acidente, temendo que a criança tivesse caído no canal de água, o Adigetto, que corria próximo à sua casa e sob diversas residências da cidade, incluindo a do judeu Samuel. Durante os dias 24 e 25 de março (Sexta-Feira Santa e Sábado de Aleluia), buscas foram realizadas sem sucesso, enquanto rumores insuflados pela retórica prévia de Bernardino da Feltre começavam a circular, sugerindo que \"os judeus levaram a criança\" para rituais pascais. É crucial notar que a Páscoa judaica (Pessach) coincidia naquele ano com a Semana Santa cristã, uma convergência temporal frequentemente explorada nos libelos de sangue para maximizar a tensão teológica.No Domingo de Páscoa, 26 de março, o corpo de Simon foi descoberto. Contradizendo a lógica de um crime oculto, não foram as autoridades cristãs que encontraram o cadáver, mas sim o próprio Samuel de Nuremberg e membros de sua casa. O corpo estava preso em uma grade na vala de drenagem que passava por sua adega. Samuel, acreditando na proteção da lei e na sua inocência, dirigiu-se imediatamente às autoridades para relatar o achado, na esperança de evitar exatamente a acusação que se seguiu. Este ato de transparência, documentado nos registros iniciais, foi posteriormente distorcido pelas autoridades judiciais e eclesiásticas como uma tentativa falha de encobrir o crime após \"o corpo não ter afundado\" ou \"ter sido rejeitado pela água\", invocando tropos de milagres forenses comuns à hagiografia medieval para transformar uma notificação legal em prova de culpabilidade sobrenatural.2.2. A Autopsia Medieval: A Ciência a Serviço da IdeologiaA análise \"forense\" realizada em 1475 representa um dos primeiros e mais documentados exemplos de medicina legal sendo cooptada para validar uma narrativa política pré-determinada. O corpo foi examinado por Giovanni Mattia Tiberino, um médico e poeta áulico que se tornaria o principal propagandista do culto, juntamente com o médico Arcangelo Balduini e o cirurgião Cristoforo de Fatis. O relatório médico produzido por eles descrevia ferimentos que foram interpretados não como consequências post-mortem do arrasto no canal ou da decomposição subaquática, mas como \"sinais rituais\" de martírio.Os registros descrevem incisões no corpo, incluindo uma ferida na bochecha direita, outra na perna e, mais notavelmente, \"muitas pequenas marcas vermelhas semelhantes a picadas de mosquito\" e uma perfuração no pênis. Tiberino argumentou que a forma arredondada e a disposição ordenada das feridas demonstravam intencionalidade humana e organização ritual. A tese moderna, corroborada pela revisão de 1965 e por historiadores forenses, aponta para uma explicação muito mais mundana: as feridas são consistentes com a ação de fauna aquática (peixes, crustáceos ou larvas) e o trauma físico de um corpo sendo arrastado por uma correnteza forte, colidindo com detritos e pedras antes de ficar preso. A alegada \"frescura\" do cadáver após três dias, apresentada como milagre de incorruptibilidade, é explicável pela baixa temperatura da água do degelo alpino em março, que retardaria significativamente a putrefação (adipocera). A interpretação de Tiberino não foi um erro médico inocente, mas uma construção deliberada para fornecer a causa mortis necessária para a acusação de homicídio ritual, transformando lesões acidentais em estigmas de uma \"paixão\" imitativa de Cristo.2.3. O Suspeito Ignorado: A Hipótese \"Schweitzer\"Um elemento frequentemente marginalizado na historiografia tradicional, mas vital para a exculpação histórica, é a figura conhecida nos registros como \"Schweitzer\". Durante os interrogatór... [truncated 137301 chars]"
+      }
+    ]
+  },
+  "parsed": {
+    "planTitle": "Blueprint de Monetização: Simão de Trento – Desvendando o Libelo de Sangue",
+    "visualStyleId": "noir-cinematic",
+    "visualStyleName": "Noir Cinematográfico",
+    "fullVideo": {
+      "angle": "conspirativo",
+      "scriptStyleId": "documentary",
+      "scriptStyleName": "Documentário Profissional",
+      "editorialObjectiveId": "full-reveal",
+      "editorialObjectiveName": "Revelação Total"
+    },
+    "teaserSlots": [
+      {
+        "angleCategory": "politico",
+        "angleName": "Poder e manipulação: o bispo Hinderbach e a política de Trento",
+        "narrativeRole": "gateway",
+        "shortFormatType": "plot-twist",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "documentary",
+        "scriptStyleName": "Documentário Profissional",
+        "editorialObjectiveId": "full-reveal",
+        "editorialObjectiveName": "Revelação Total"
+      },
+      {
+        "angleCategory": "cronologico",
+        "angleName": "Linha do tempo da tragédia: de 23‑26 de março de 1475 ao culto de 1588",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "mini-documento",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "documentary",
+        "scriptStyleName": "Documentário Profissional",
+        "editorialObjectiveId": "deep-analysis",
+        "editorialObjectiveName": "Análise Profunda"
+      },
+      {
+        "angleCategory": "economico",
+        "angleName": "O ouro dos judeus: usura, confisco e lucro episcopal",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "pergunta-incomoda",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "educational",
+        "scriptStyleName": "Educacional",
+        "editorialObjectiveId": "explainer",
+        "editorialObjectiveName": "Explainer Didático"
+      },
+      {
+        "angleCategory": "ideologico",
+        "angleName": "Pregações de Bernardino da Feltre: a semente do ódio religioso",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "plot-twist",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "mystery",
+        "scriptStyleName": "Mistério Real - The Gap Files",
+        "editorialObjectiveId": "viral-hook",
+        "editorialObjectiveName": "Gancho Viral"
+      },
+      {
+        "angleCategory": "conspirativo",
+        "angleName": "O suspeito suprimido: quem foi Schweitzer?",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "teaser-cinematografico",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "mystery",
+        "scriptStyleName": "Mistério Real - The Gap Files",
+        "editorialObjectiveId": "controversy",
+        "editorialObjectiveName": "Polêmica Controlada"
+      },
+      {
+        "angleCategory": "cientifico",
+        "angleName": "A ‘incorruptibilidade’ de Simão: adipocera, temperatura e química",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "mini-documento",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "documentary",
+        "scriptStyleName": "Documentário Profissional",
+        "editorialObjectiveId": "deep-analysis",
+        "editorialObjectiveName": "Análise Profunda"
+      },
+      {
+        "angleCategory": "cultural",
+        "angleName": "Da xilogravura ao meme: a imagem de Simonino ao longo dos séculos",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "pergunta-incomoda",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "narrative",
+        "scriptStyleName": "Narrativo Épico",
+        "editorialObjectiveId": "emotional-impact",
+        "editorialObjectiveName": "Impacto Emocional"
+      },
+      {
+        "angleCategory": "geopolitico",
+        "angleName": "Trento vs. Roma: a batalha por soberania e lucro no Alto‑Alpino",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "teaser-cinematografico",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "documentary",
+        "scriptStyleName": "Documentário Profissional",
+        "editorialObjectiveId": "mystery-layers",
+        "editorialObjectiveName": "Camadas de Mistério"
+      },
+      {
+        "angleCategory": "paradoxal",
+        "angleName": "Milagre ou fraude? O paradoxo da ‘incorruptibilidade’ de um bebê de dois anos",
+        "narrativeRole": "hook-only",
+        "shortFormatType": "hook-brutal",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "narrative",
+        "scriptStyleName": "Narrativo Épico",
+        "editorialObjectiveId": "viral-hook",
+        "editorialObjectiveName": "Gancho Viral"
+      },
+      {
+        "angleCategory": "evidencial",
+        "angleName": "Provas forenses versus confissões sob tortura: o que realmente aconteceu?",
+        "narrativeRole": "hook-only",
+        "shortFormatType": "frase-memoravel",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "narrative",
+        "scriptStyleName": "Narrativo Épico",
+        "editorialObjectiveId": "controversy",
+        "editorialObjectiveName": "Polêmica Controlada"
+      },
+      {
+        "angleCategory": "revisionista",
+        "angleName": "1965: a abolição oficial do culto e a reescrita da história",
+        "narrativeRole": "hook-only",
+        "shortFormatType": "pergunta-incomoda",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "documentary",
+        "scriptStyleName": "Documentário Profissional",
+        "editorialObjectiveId": "cliffhanger",
+        "editorialObjectiveName": "Cliffhanger Estratégico"
+      },
+      {
+        "angleCategory": "propagandistico",
+        "angleName": "Do incunábulo de 1475 ao manifesto de 2019: mídia como arma de ódio",
+        "narrativeRole": "hook-only",
+        "shortFormatType": "hook-brutal",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "mystery",
+        "scriptStyleName": "Mistério Real - The Gap Files",
+        "editorialObjectiveId": "viral-hook",
+        "editorialObjectiveName": "Gancho Viral"
+      }
+    ],
+    "estimatedTotalRevenue": "$12,500",
+    "strategicNotes": "Distribuição de papéis conforme regras (1 gateway, 7 deep‑dive, 4 hook‑only). Cada teaser usa ângulo único para maximizar cobertura temática (política, econômica, ideológica, forense, cultural, etc.). Formatos variados (plot‑twist, mini‑documento, pergunta‑incomoda, teaser‑cinematografico, hook‑brutal, frase‑memoravel) respeitando compatibilidade role×format. Visual noir‑cinematic unifica a estética sombria do período medieval e da era digital, reforçando a narrativa de manipulação de mídia. Obj... [truncated 150 chars]"
+  },
+  "rawContent": "{\n  \"planTitle\":\"Blueprint de Monetização: Simão de Trento – Desvendando o Libelo de Sangue\",\n  \"visualStyleId\":\"noir-cinematic\",\n  \"visualStyleName\":\"Noir Cinematográfico\",\n  \"fullVideo\":{\n    \"angle\":\"conspirativo\",\n    \"scriptStyleId\":\"documentary\",\n    \"scriptStyleName\":\"Documentário Profissional\",\n    \"editorialObjectiveId\":\"full-reveal\",\n    \"editorialObjectiveName\":\"Revelação Total\"\n  },\n  \"estimatedTotalRevenue\":\"$12,500\",\n  \"strategicNotes\":\"Distribuição de papéis conforme regras (1 gateway, 7 deep‑dive, 4 hook‑only). Cada teaser usa ângulo único para maximizar cobertura temática (política, econômica, ideológica, forense, cultural, etc.). Formatos variados (plot‑twist, mini‑documento, pergunta‑incomoda, teaser‑cinematografico, hook‑brutal, frase‑memoravel) respeitando compatibilidade role×format. Visual noir‑cinematic unifica a estética sombria do período medieval e da era digital, reforçando a narrativa de manipulação de mídia. Objetivo editorial alterna entre deep‑analysis, explainer, viral‑hook e controversy para captar diferentes segmentos de audiência e gerar retenção viral.\",\n  \"teaserSlots\":[\n    {\n      \"angleCategory\":\"politico\",\n      \"angleName\":\"Poder e manipulação: o bispo Hinderbach e a política de Trento\",\n      \"narrativeRole\":\"gateway\",\n      \"shortFormatType\":\"plot-twist\",\n      \"platform\":\"YouTube Shorts\",\n      \"scriptStyleId\":\"documentary\",\n      \"scriptStyleName\":\"Documentário Profissional\",\n      \"editorialObjectiveId\":\"full-reveal\",\n      \"editorialObjectiveName\":\"Revelação Total\"\n    },\n    {\n      \"angleCategory\":\"cronologico\",\n      \"angleName\":\"Linha do tempo da tragédia: de 23‑26 de março de 1475 ao culto de 1588\",\n      \"narrativeRole\":\"deep-dive\",\n      \"shortFormatType\":\"mini-documento\",\n      \"platform\":\"YouTube Shorts\",\n      \"scriptStyleId\":\"documentary\",\n      \"scriptStyleName\":\"Documentário Profissional\",\n      \"editorialObjectiveId\":\"deep-analysis\",\n      \"editorialObjectiveName\":\"Análise Profunda\"\n    },\n    {\n      \"angleCategory\":\"economico\",\n      \"angleName\":\"O ouro dos judeus: usura, confisco e lucro episcopal\",\n      \"narrativeRole\":\"deep-dive\",\n      \"shortFormatType\":\"pergunta-incomoda\",\n      \"platform\":\"YouTube Shorts\",\n      \"scriptStyleId\":\"educational\",\n      \"scriptStyleName\":\"Educacional\",\n      \"editorialObjectiveId\":\"explainer\",\n      \"editorialObjectiveName\":\"Explainer Didático\"\n    },\n    {\n      \"angleCategory\":\"ideologico\",\n      \"angleName\":\"Pregações de Bernardino da Feltre: a semente do ódio religioso\",\n      \"narrativeRole\":\"deep-dive\",\n      \"shortFormatType\":\"plot-twist\",\n      \"platform\":\"YouTube Shorts\",\n      \"scriptStyleId\":\"mystery\",\n      \"scriptStyleName\":\"Mistério Real - The Gap Files\",\n      \"editorialObjectiveId\":\"viral-hook\",\n      \"editorialObjectiveName\":\"Gancho Viral\"\n    },\n    {\n      \"angleCategory\":\"conspirativo\",\n      \"angleName\":\"O suspeito suprimido: quem foi Schweitzer?\",\n      \"narrativeRole\":\"deep-dive\",\n      \"shortFormatType\":\"teaser-cinematografico\",\n      \"platform\":\"YouTube Shorts\",\n      \"scriptStyleId\":\"mystery\",\n      \"scriptStyleName\":\"Mistério Real - The Gap Files\",\n      \"editorialObjectiveId\":\"controversy\",\n      \"editorialObjectiveName\":\"Polêmica Controlada\"\n    },\n    {\n      \"angleCategory\":\"cientifico\",\n      \"angleName\":\"A ‘incorruptibilidade’ de Simão: adipocera, temperatura e química\",\n      \"narrativeRole\":\"deep-dive\",\n      \"shortFormatType\":\"mini-documento\",\n      \"platform\":\"YouTube Shorts\",\n      \"scriptStyleId\":\"documentary\",\n      \"scriptStyleName\":\"Documentário Profissional\",\n      \"editorialObjectiveId\":\"deep-analysis\",\n      \"editorialObjectiveName\":\"Análise Profunda\"\n    },\n    {\n      \"angleCategory\":\"cultural\",\n      \"angleName\":\"Da xilogravura ao meme: a imagem de Simonino ao longo dos séculos\",\n      \"narrativeRole\":\"deep-dive\",\n      \"shortFormatType\":\"pergunta-incomoda\",\n      \"platform\":\"YouTube Shorts\",\n      \"scriptStyleId\":\"narrative\",\n      \"scriptStyleName\":\"Narrativo Épico\",\n      \"editorialObjectiveId\":\"emotional-impact\",\n      \"editorialObjectiveName\":\"Impacto Emocional\"\n    },\n    {\n      \"angleCategory\":\"geopolitico\",\n      \"angleName\":\"Trento vs. Roma: a batalha por soberania e lucro no Alto‑Alpino\",\n      \"narrativeRole\":\"deep-dive\",\n      \"shortFormatType\":\"teaser-cinematografico\",\n      \"platform\":\"YouTube Shorts\",\n      \"scriptStyleId\":\"documentary\",\n      \"scriptStyleName\":\"Documentário Profissional\",\n      \"editorialObjectiveId\":\"mystery-layers\",\n      \"editorialObjectiveName\":\"Camadas de Mistério\"\n    },\n    {\n      \"angleCategory\":\"paradoxal\",\n      \"angleName\":\"Milagre ou fraude? O paradoxo da ‘incorruptibilidade’ de um bebê de dois anos\",\n      \"narrativeRole\":\"hook-only\",\n      \"shortFormatType\":\"hook-brutal\",\n      \"platform\":\"YouTube Shorts\",\n      \"scriptStyleId\":\"narrative\",\n      \"scriptStyleName\":\"Narrativo Épico\",\n      \"editorialObjectiveId\":\"viral-hook\",\n      \"editorialObjectiveName\":\"Gancho Viral\"\n    },\n    {\n      \"angleCategory\":\"evidenc"
+}

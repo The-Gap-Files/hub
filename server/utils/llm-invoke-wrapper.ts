@@ -36,6 +36,7 @@ export async function invokeWithLogging(
     logLlmResponse(ctx.taskId, {
       provider: ctx.provider,
       model: ctx.model,
+      requestMessages: messages,
       parsed: result.parsed,
       raw: result.raw
     }).catch(() => { })
@@ -46,6 +47,7 @@ export async function invokeWithLogging(
     logLlmError(ctx.taskId, {
       provider: ctx.provider,
       model: ctx.model,
+      requestMessages: messages,
       error
     }).catch(() => { })
 

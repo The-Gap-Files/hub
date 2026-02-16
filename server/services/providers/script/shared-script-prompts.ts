@@ -51,7 +51,7 @@ export const ScriptResponseSchema = z.object({
   title: z.string().describe('Título impactante para o vídeo'),
   summary: z.string().describe('Sinopse intrigante de 2-3 parágrafos'),
   scenes: z.array(ScriptSceneSchema).describe('Lista de cenas que compõem o vídeo'),
-  backgroundMusic: BackgroundMusicSchema.nullable().describe('Música de fundo única para TODO o vídeo (use apenas para vídeos curtos TikTok/Instagram). Use null para vídeos longos. Regra: "video todo"'),
+  backgroundMusic: BackgroundMusicSchema.nullable().describe('Música de fundo única para TODO o vídeo (use apenas para vídeos curtos YouTube Shorts). Use null para vídeos longos. Regra: "video todo"'),
   backgroundMusicTracks: z.array(BackgroundMusicTrackSchema).nullable().describe('Lista de tracks de música de fundo por segmento de cenas (use apenas para vídeos longos YouTube Cinematic). Use null para vídeos curtos. Cada track define uma música com prompt, volume, startScene e endScene.')
 })
 
@@ -91,14 +91,14 @@ export function buildSystemPrompt(request: ScriptGenerationRequest): string {
 
   // Determinar formato do vídeo para instruções de música
   const videoFormat = request.format || request.outputType || 'full-youtube'
-  const isShortFormat = videoFormat.includes('tiktok') || videoFormat.includes('reels') || videoFormat.includes('teaser')
+  const isShortFormat = videoFormat.includes('tiktok') || videoFormat.includes('reels') || videoFormat.includes('teaser') || videoFormat.includes('shorts')
   const isYouTubeCinematic = videoFormat.includes('youtube') || videoFormat.includes('full')
 
   let musicInstructions = ''
   if (isShortFormat) {
     musicInstructions = `
 ---
-🎵 ESTRATÉGIA DE MÚSICA DE FUNDO (TikTok/Instagram):
+🎵 ESTRATÉGIA DE MÚSICA DE FUNDO (YouTube Shorts):
 - 🚨 REGRA: "video todo" - Use UMA música de fundo para TODO o vídeo do início ao fim
 - Use o campo "backgroundMusic" com "prompt" e "volume"
 - O "prompt" será usado diretamente no modelo Stable Audio 2.5 para gerar a música
@@ -174,7 +174,7 @@ A retenção é máxima quando há CONTRASTE entre cenas. O cérebro reage a MUD
 - ✅ CERTO: 8/10 → 6/10 → 8/10 → 5/10 → 10/10 (cada pico mais forte por causa do respiro)
 - NUNCA 3+ cenas consecutivas na mesma intensidade emocional.
 - Após revelação intensa, inserir cena de contexto ou respiro visual.
-- O PICO MÁXIMO deve ser na penúltima ou antepenúltima cena.
+- O PICO MÁXIMO deve ser no último beat de conteúdo (antes do CTA/branding) ou, em vídeos muito longos, na antepenúltima (para permitir “impacto residual” + encerramento).
 - Para montar a curva, considere estes tipos: RUPTURA (9-10), REVELAÇÃO (7-8), RESPIRO (5-6), PONTE (6-7), ESCALADA (8-9), IMPACTO (10).
 
 🚨 MECANISMO > SINTOMA (PRINCÍPIO FUNDAMENTAL):
@@ -252,7 +252,7 @@ DIRETRIZES TÉCNICAS (CRÍTICO):
 - PROIBIDO FRASES CURTAS: Cenas com menos de ${wordsPerScene - 1} palavras geram "buracos" no áudio. Expanda com adjetivos, detalhes sensoriais ou contexto.
 - FLUIDEZ: O texto deve preencher exatamente 5 segundos de fala contínua. Nem mais, nem menos.
 - SOUND DESIGN: Descreva a atmosfera sonora (SFX/Ambience) em inglês técnico para cada cena.
-- MÚSICA DE FUNDO: Use "backgroundMusic" para vídeos curtos (TikTok/Instagram) ou "backgroundMusicTracks" para vídeos longos (YouTube). O campo "prompt" deve ser compatível com Stable Audio 2.5 (gênero, instrumentos, BPM, mood). O campo "volume" (dB) será aplicado via FFmpeg na mixagem.
+- MÚSICA DE FUNDO: Use "backgroundMusic" para vídeos curtos (YouTube Shorts) ou "backgroundMusicTracks" para vídeos longos (YouTube). O campo "prompt" deve ser compatível com Stable Audio 2.5 (gênero, instrumentos, BPM, mood). O campo "volume" (dB) será aplicado via FFmpeg na mixagem.
 - CAMADA SENSORIAL: Nas descrições visuais, inclua sentimentos, texturas e atmosfera.
 - 🎬 MOTION DESCRIPTION (motionDescription — OBRIGATÓRIO): Cada cena DEVE ter um campo "motionDescription" com instruções de MOVIMENTO em inglês para o modelo image-to-video. Este prompt descreve O QUE SE MOVE, não o que existe (a imagem já contém isso). REGRAS: (1) Foque em movimentos de CÂMERA (slow dolly forward, gentle pan left, subtle tilt up, slow zoom in) e SUJEITO (flames flickering, water rippling, dust floating, wind moving fabric, shadows shifting). (2) Mantenha entre 15-40 palavras — prompts curtos e diretos funcionam melhor. (3) NÃO repita a descrição visual — o modelo já vê a imagem. (4) Combine 1 movimento de câmera + 1-2 elementos animados. (5) Use verbos de ação: flickering, drifting, swaying, rippling, shifting, crawling, floating.
   EXEMPLOS:
@@ -285,18 +285,18 @@ export function buildUserPrompt(request: ScriptGenerationRequest, providerHint?:
   const wordsPerScene = Math.round((targetWPM / 60) * 5) // 150 WPM = 12-13 palavras por 5s
   const minWords = wordsPerScene - 1
   const maxWords = wordsPerScene + 2 // Hard limit para não ultrapassar 5s
-  const idealSceneCount = Math.ceil(request.targetDuration / 5)
+  const idealSceneCount = request.targetSceneCount ?? Math.ceil(request.targetDuration / 5)
   const maxExtraScenes = 4 // margem para concluir a história e CTA sem cortar frase
   const maxSceneCount = idealSceneCount + maxExtraScenes
 
   // Determinar formato do vídeo
   const videoFormat = request.format || request.outputType || 'full-youtube'
-  const isShortFormat = videoFormat.includes('tiktok') || videoFormat.includes('reels') || videoFormat.includes('teaser')
+  const isShortFormat = videoFormat.includes('tiktok') || videoFormat.includes('reels') || videoFormat.includes('teaser') || videoFormat.includes('shorts')
   const isYouTubeCinematic = videoFormat.includes('youtube') || videoFormat.includes('full')
 
   let formatContext = ''
   if (isShortFormat) {
-    formatContext = `\n\n📱 FORMATO DO VÍDEO: TikTok/Instagram (vídeo curto, 30-180s)
+    formatContext = `\n\n📱 FORMATO DO VÍDEO: YouTube Shorts (vídeo curto, 15-180s)
 🚨 REGRA CRÍTICA DE MÚSICA DE FUNDO:
 - Use o campo "backgroundMusic" com { prompt, volume } para definir UMA música para TODO o vídeo
 - O "prompt" deve ser compatível com Stable Audio 2.5 (gênero, instrumentos, BPM, mood)
@@ -428,10 +428,10 @@ ANTI-FILLER (DENSIDADE): Em hook-only, cada cena é cara. PROIBIDO gastar 1 cena
 - ❌ Errado (filler): "Um selo dourado pisca, como um sussurro na escuridão."
 - ✅ Certo (respiro com conteúdo): "O selo autorizou o confisco. E ninguém assinou por engano."
 
-CURVA EMOCIONAL COM PICO FINAL: Em 4-6 cenas, cada cena intensa mas com RESPIRAÇÃO entre picos. O cérebro reage a MUDANÇAS, não a intensidade constante.
-- ✅ CERTO: 8 → 6 → 9 → 10 → 5 (alternância com pico na penúltima)
-- ❌ ERRADO: 8 → 9 → 9 → 10 → 10 (saturação)
-- A penúltima cena é o PICO ABSOLUTO. A última é branding/respiro.
+CURVA EMOCIONAL COM PICO FINAL: Em **3 cenas de conteúdo + 1 CTA**, use alternância (high → pause → peak). O cérebro reage a MUDANÇAS, não a intensidade constante.
+- ✅ CERTO (conteúdo): 9 → 6 → 10 (alternância com pico na ÚLTIMA cena de conteúdo)
+- ❌ ERRADO: 9 → 9 → 9 (platô) ou 9 → 10 → 10 (saturação)
+- A última cena é CTA/branding + silêncio (não conta como “conteúdo”).
 
 NOMES UNIVERSAIS: Use funções ("o bispo", "o juiz", "o médico"), não nomes históricos obscuros (Hinderbach, Tiberino). Se o público não reconhece o nome em 1 segundo, use a função.
 
@@ -451,7 +451,7 @@ CTA INVISÍVEL: A narração da ÚLTIMA CENA deve ser EXATAMENTE: "The Gap Files
 
 REPLAY BAIT: Pelo menos 1 cena com detalhe visual/narrativo rápido demais para absorver. Força re-assistir.
 
-DURAÇÃO: 4-6 cenas (22-30 segundos). Cada cena é um soco cognitivo. Máximo absoluto: 8 cenas.`
+DURAÇÃO: **3 cenas de conteúdo + 1 CTA** (**16-22 segundos**). Cada cena é um soco cognitivo. Máximo absoluto: **5 cenas**.`
     }
 
     baseInstruction += `\n\n${roleInstructions[request.narrativeRole] || ''}`
@@ -481,7 +481,7 @@ DURAÇÃO: 4-6 cenas (22-30 segundos). Cada cena é um soco cognitivo. Máximo a
 
   let musicWarning = ''
   if (isShortFormat) {
-    musicWarning = `\n\n🚨 REGRA CRÍTICA DE MÚSICA DE FUNDO (TikTok/Instagram):
+    musicWarning = `\n\n🚨 REGRA CRÍTICA DE MÚSICA DE FUNDO (YouTube Shorts):
 Use "backgroundMusic": { "prompt": "...", "volume": -12 } para definir UMA música para TODO o vídeo (prefira volume entre -12 e -10 para ficar audível).
 O prompt deve seguir o formato Stable Audio 2.5: gênero, instrumentos, BPM, mood.
 Defina "backgroundMusicTracks" como null.`

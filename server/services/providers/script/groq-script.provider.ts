@@ -24,13 +24,13 @@ export class GroqScriptProvider implements IScriptGenerator {
   private model: ChatGroq
   private modelName: string
 
-  constructor(config: { apiKey: string; model?: string }) {
+  constructor(config: { apiKey: string; model?: string; temperature?: number }) {
     // Padrão: GPT-OSS 120B (melhor para structured output)
     this.modelName = config.model ?? 'openai/gpt-oss-120b'
     this.model = new ChatGroq({
       apiKey: config.apiKey,
       model: this.modelName, // ChatGroq usa 'model', não 'modelName'
-      temperature: 0.8, // Script generation precisa de criatividade
+      temperature: config.temperature ?? 0.5, // Do LlmAssignment (script task)
       maxTokens: 65536, // Máximo suportado pelo GPT-OSS 120B — necessário para vídeos longos (170+ cenas)
       timeout: 120000, // 2 minutos
       maxRetries: 2

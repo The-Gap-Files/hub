@@ -8,6 +8,7 @@ import { getClassificationById } from '../../../constants/intelligence-classific
 import { formatOutlineForPrompt, type StoryOutline } from '../../../services/story-architect.service'
 import { validateScript } from '../../../services/script-validator.service'
 import type { ScriptGenerationRequest } from '../../../types/ai-providers'
+import { validatorsEnabled } from '../../../utils/validators'
 
 export default defineEventHandler(async (event) => {
   const outputId = getRouterParam(event, 'id')
@@ -38,7 +39,6 @@ export default defineEventHandler(async (event) => {
   }
 
   const dossier = output.dossier
-  const scriptProvider = await providerManager.getScriptProvider()
 
   // Resolver estilos a partir das constantes
   const scriptStyle = output.scriptStyleId ? getScriptStyleById(output.scriptStyleId) : undefined
@@ -76,7 +76,10 @@ export default defineEventHandler(async (event) => {
     musicMood: output.classificationId ? getClassificationById(output.classificationId)?.musicMood : undefined,
     visualGuidance: output.classificationId ? getClassificationById(output.classificationId)?.visualGuidance : undefined,
 
-    targetDuration: output.duration || 300,
+    targetDuration: (output.monetizationContext as any)?.sceneCount
+      ? (output.monetizationContext as any).sceneCount * 5
+      : (output.duration || 300),
+    targetSceneCount: (output.monetizationContext as any)?.sceneCount,
     targetWPM: output.targetWPM || 150,
 
     outputType: output.outputType as any,
@@ -135,6 +138,27 @@ export default defineEventHandler(async (event) => {
     }
   }
 
+  // Teasers: depender do outline aprovado (sem dossiê/brief global)
+  if (monetizationMeta?.itemType === 'teaser') {
+    promptContext.sources = []
+    promptContext.additionalSources = []
+    promptContext.userNotes = []
+    promptContext.visualReferences = []
+    promptContext.researchData = undefined
+    ;(promptContext as any).persons = []
+    ;(promptContext as any).neuralInsights = []
+  }
+
+  // ── Resolver Script Provider (ROTEAMENTO SOLID) ────────
+  const isHookOnly = promptContext.narrativeRole === 'hook-only'
+  const scriptProvider = isHookOnly
+    ? await providerManager.getHookOnlyScriptProvider()
+    : await providerManager.getScriptProvider()
+
+  if (isHookOnly) {
+    console.log(`[RegenerateScript] 💥 HOOK-ONLY: usando provider dedicado (${scriptProvider.getName()}).`)
+  }
+
   try {
     // 4. Gerar Novo Roteiro com loop de validação (máx 3 retries)
     const MAX_RETRIES = 10
@@ -159,7 +183,10 @@ export default defineEventHandler(async (event) => {
     // 4.2 Validar e retry se reprovado
     const regenMeta = (output.storyOutline as any)?._monetizationMeta
     let scriptValidation: { approved: boolean; violations?: string[]; corrections?: string; overResolution?: boolean } | undefined
-    if (promptContext.narrativeRole && regenMeta?.itemType === 'teaser') {
+    if (!validatorsEnabled()) {
+      console.log('[RegenerateScript] ⏭️ Validação DESABILITADA temporariamente (bypass global).')
+    }
+    if (validatorsEnabled() && promptContext.narrativeRole && regenMeta?.itemType === 'teaser') {
       const outlineData = output.storyOutline as any
       // Histórico acumulativo de feedbacks — garante que erros corrigidos não voltem
       const validationHistory: string[] = []

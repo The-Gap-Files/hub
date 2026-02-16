@@ -24,7 +24,7 @@ export class OpenAIScriptProvider implements IScriptGenerator {
   private model: ChatOpenAI
   private modelName: string
 
-  constructor(config: { apiKey: string; model?: string; baseUrl?: string }) {
+  constructor(config: { apiKey: string; model?: string; baseUrl?: string; temperature?: number }) {
     this.modelName = config.model ?? 'gpt-4o'
     this.model = new ChatOpenAI({
       openAIApiKey: config.apiKey,
@@ -32,7 +32,7 @@ export class OpenAIScriptProvider implements IScriptGenerator {
       configuration: {
         baseURL: config.baseUrl ?? 'https://api.openai.com/v1'
       },
-      temperature: 0.7,
+      temperature: config.temperature ?? 0.5, // Do LlmAssignment (script task)
       timeout: 120000, // 2 minutos de timeout para chamadas multimodais complexas
       maxRetries: 2
     })

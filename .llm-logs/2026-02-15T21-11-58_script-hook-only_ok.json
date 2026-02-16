@@ -1,0 +1,59 @@
+{
+  "timestamp": "2026-02-15T21:11:58.830Z",
+  "taskId": "script-hook-only",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "title": "O selo que alimentou séculos de ódio",
+    "summary": "Um simples selo episcopal, assinado em 1475, transformou a morte de um menino em um mito de sangue que financiou a perseguição judaica por séculos. O mesmo mito reapareceu nas mãos de um jovem extremista, que o usou como justificativa para um ataque a uma sinagoga nos Estados Unidos. A história revela como o poder institucional cria narrativas de ódio que atravessam milênios, sem jamais ser contestado.\n\nDescubra o mecanismo que converteu um documento em arma, e como a tecnologia de comunicação –... [truncated 118 chars]",
+    "scenes": [
+      {
+        "order": 0,
+        "narration": "Um bispo assinou. A morte ecoou séculos depois em Trento.",
+        "visualDescription": "Cinematic 2D illustration, Studio Ghibli art style dark variant, painterly anime aesthetic, moody and atmospheric, close-up of a bishop's hand pressing a wax seal on a parchment, low-key candlelight flickering, shadows dancing on stone walls, wide shot of a dim chapel interior, light filtering through stained glass, subtle dust motes drifting, composition focused on the seal as the focal point",
+        "sceneEnvironment": "bishop_study",
+        "motionDescription": "camera slowly dolly in towards the seal, candle flame gently swaying, dust particles floating upward",
+        "audioDescription": "soft candle crackle, distant choir echo, faint parchment rustle",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 1,
+        "narration": "Ele autorizou o confisco dos bens judaicos, enchendo o cofre da igreja.",
+        "visualDescription": "Cinematic 2D illustration, Studio Ghibli art style dark variant, painterly anime aesthetic, moody and atmospheric, heavy wooden chest overflowing with gold coins and scrolls bearing a bishop's seal, dramatic side lighting casting long shadows, low-key ambience with a faint metallic clink, composition showing the chest open on a stone floor, light glinting off the coins",
+        "sceneEnvironment": "bishop_study",
+        "motionDescription": "camera pans left across the chest, coins shimmering as if a breeze passes",
+        "audioDescription": "metallic clink of coins, echoing footsteps in stone corridor, low hum of distant organ",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 2,
+        "narration": "Um jovem usou esse mito para atirar na sinagoga de Poway, 2019.",
+        "visualDescription": "Cinematic 2D illustration, Studio Ghibli art style dark variant, painterly anime aesthetic, moody and atmospheric, modern shooter silhouette holding an AR‑15, background wall displaying a faded medieval illustration of the signed seal, cold blue‑teal ambient lighting, harsh spotlight on the rifle, composition juxtaposing past and present, subtle rain streaks on glass",
+        "sceneEnvironment": "modern_synagogue",
+        "motionDescription": "camera tilts down from the illustration to the shooter, rain droplets sliding down the window",
+        "audioDescription": "sharp gun click, distant siren wail, rain pattering on glass",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 3,
+        "narration": "The Gap Files.",
+        "visualDescription": "Cinematic 2D illustration, Studio Ghibli art style dark variant, painterly anime aesthetic, moody and atmospheric, black screen with faint white text \"The Gap Files.\" centered, soft vignette edges, subtle grain texture, no additional elements",
+        "sceneEnvironment": "branding",
+        "motionDescription": null,
+        "audioDescription": null,
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      }
+    ],
+    "backgroundMusic": {
+      "prompt": "Dark Ambient, Low Drone, Tension Strings, Cinematic, Mysterious, Pulsing, 90 BPM",
+      "volume": -12
+    },
+    "backgroundMusicTracks": null
+  },
+  "rawContent": "{\n  \"title\": \"O selo que alimentou séculos de ódio\",\n  \"summary\": \"Um simples selo episcopal, assinado em 1475, transformou a morte de um menino em um mito de sangue que financiou a perseguição judaica por séculos. O mesmo mito reapareceu nas mãos de um jovem extremista, que o usou como justificativa para um ataque a uma sinagoga nos Estados Unidos. A história revela como o poder institucional cria narrativas de ódio que atravessam milênios, sem jamais ser contestado.\\n\\nDescubra o mecanismo que converteu um documento em arma, e como a tecnologia de comunicação – da imprensa de tipos móveis ao 8chan – perpetua a mesma mentira, alimentando o medo e a violência em diferentes eras.\",\n  \"backgroundMusic\": {\n    \"prompt\": \"Dark Ambient, Low Drone, Tension Strings, Cinematic, Mysterious, Pulsing, 90 BPM\",\n    \"volume\": -12\n  },\n  \"backgroundMusicTracks\": null,\n  \"scenes\": [\n    {\n      \"order\": 0,\n      \"narration\": \"Um bispo assinou. A morte ecoou séculos depois em Trento.\",\n      \"visualDescription\": \"Cinematic 2D illustration, Studio Ghibli art style dark variant, painterly anime aesthetic, moody and atmospheric, close-up of a bishop's hand pressing a wax seal on a parchment, low-key candlelight flickering, shadows dancing on stone walls, wide shot of a dim chapel interior, light filtering through stained glass, subtle dust motes drifting, composition focused on the seal as the focal point\",\n      \"motionDescription\": \"camera slowly dolly in towards the seal, candle flame gently swaying, dust particles floating upward\",\n      \"audioDescription\": \"soft candle crackle, distant choir echo, faint parchment rustle\",\n      \"audioDescriptionVolume\": -12,\n      \"estimatedDuration\": 5,\n      \"sceneEnvironment\": \"bishop_study\"\n    },\n    {\n      \"order\": 1,\n      \"narration\": \"Ele autorizou o confisco dos bens judaicos, enchendo o cofre da igreja.\",\n      \"visualDescription\": \"Cinematic 2D illustration, Studio Ghibli art style dark variant, painterly anime aesthetic, moody and atmospheric, heavy wooden chest overflowing with gold coins and scrolls bearing a bishop's seal, dramatic side lighting casting long shadows, low-key ambience with a faint metallic clink, composition showing the chest open on a stone floor, light glinting off the coins\",\n      \"motionDescription\": \"camera pans left across the chest, coins shimmering as if a breeze passes\",\n      \"audioDescription\": \"metallic clink of coins, echoing footsteps in stone corridor, low hum of distant organ\",\n      \"audioDescriptionVolume\": -12,\n      \"estimatedDuration\": 5,\n      \"sceneEnvironment\": \"bishop_study\",\n      \"audioDescription\": \"metallic clink of coins, echoing footsteps in stone corridor, low hum of distant organ\"\n    },\n    {\n      \"order\": 2,\n      \"narration\": \"Um jovem usou esse mito para atirar na sinagoga de Poway, 2019.\",\n      \"visualDescription\": \"Cinematic 2D illustration, Studio Ghibli art style dark variant, painterly anime aesthetic, moody and atmospheric, modern shooter silhouette holding an AR‑15, background wall displaying a faded medieval illustration of the signed seal, cold blue‑teal ambient lighting, harsh spotlight on the rifle, composition juxtaposing past and present, subtle rain streaks on glass\",\n      \"motionDescription\": \"camera tilts down from the illustration to the shooter, rain droplets sliding down the window\",\n      \"audioDescription\": \"sharp gun click, distant siren wail, rain pattering on glass\",\n      \"audioDescriptionVolume\": -12,\n      \"estimatedDuration\": 5,\n      \"sceneEnvironment\": \"modern_synagogue\"\n    },\n    {\n      \"order\": 3,\n      \"narration\": \"The Gap Files.\",\n      \"visualDescription\": \"Cinematic 2D illustration, Studio Ghibli art style dark variant, painterly anime aesthetic, moody and atmospheric, black screen with faint white text \\\"The Gap Files.\\\" centered, soft vignette edges, subtle grain texture, no additional elements\",\n      \"motionDescription\": null,\n      \"audioDescription\": null,\n      \"audioDescriptionVolume\": -12,\n      \"estimatedDuration\": 5,\n      \"sceneEnvironment\": \"branding\"\n    }\n  ]\n}"
+}

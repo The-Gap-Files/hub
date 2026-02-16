@@ -13,7 +13,7 @@ Você recebe:
 
 Um array de `publicationSchedule` com:
 - **dayOfWeek**: Dia da semana (ex: "Segunda", "Terça")
-- **content**: O que publicar (ex: "Full Video no YouTube", "Teaser 1 (Gateway) - TikTok")
+- **content**: O que publicar (ex: "Full Video no YouTube", "Teaser 1 (Gateway) - YouTube Shorts")
 - **platform**: Plataforma alvo
 - **notes**: Notas sobre timing (opcional)
 
@@ -21,8 +21,10 @@ Um array de `publicationSchedule` com:
 
 1. **Full Video PRIMEIRO** — sempre publicado antes dos teasers
 2. **1 teaser por dia** (ou 2 se >10 teasers)
-3. **Alternar plataformas** — TikTok → Shorts → Reels → TikTok
-4. **Gateway logo após o Full Video** — é a porta de entrada
-5. **Hook-only no final** — são os "lembretes virais"
+3. **Plataforma fixa (YouTube-first)**:
+   - Full Video: **YouTube**
+   - Teasers: **YouTube Shorts**
+4. **Gateway logo após o Full Video** — é a porta de entrada (primeiro Short do pacote)
+5. **Hook-only no final** — são os "lembretes virais" (alta repetição e replay)
 6. **Para 10+ teasers**, distribuir em 2 semanas
 7. **Evitar fins de semana** para o Full Video (melhor performance seg-qui)

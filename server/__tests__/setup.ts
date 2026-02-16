@@ -18,6 +18,10 @@ if (!testDbUrl) {
   process.exit(1)
 }
 
+// Garantir que TODO o código do app (incluindo `server/utils/prisma.ts`) use o mesmo banco de teste.
+process.env.DATABASE_URL = testDbUrl
+process.env.NODE_ENV = 'test'
+
 // Guard: Se não é DATABASE_URL_TEST explícita, verificar que o banco tem nome seguro
 if (!process.env.DATABASE_URL_TEST) {
   const dbMatch = testDbUrl.match(/\/([^/?]+)(\?|$)/)

@@ -58,7 +58,7 @@ O Gateway contextualiza e cria curiosidade — mas **NÃO fecha a história**.
 - ✅ Mecânica perturbadora, paradoxo, conceito que causa perplexidade
 
 ### 9. Cliffhanger Específico
-- A penúltima cena deve ter algo ESPECÍFICO e irresistível, não pergunta genérica.
+- A última cena de conteúdo (antes do CTA/branding) deve ter algo ESPECÍFICO e irresistível, não pergunta genérica.
 
 ### 10. CTA por Compulsão
 - CTA deve gerar compulsão, não ser pedido explícito.

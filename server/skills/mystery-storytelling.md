@@ -379,12 +379,12 @@ O espectador compartilha quando:
 
 ## ⏱️ CALIBRAÇÃO POR DURAÇÃO
 
-### Hook-Only (22-30s / 4-6 cenas)
+### Hook-Only (16-22s / 3 cenas + 1 CTA)
 - **Ritmo:** Staccato extremo. Cada cena é um soco cognitivo.
 - **Beats:** Máximo 3-4. Sem construção, sem explicação.
 - **Resolução:** ZERO. Pura provocação. TODOS os loops ficam abertos.
-- **Curva:** 8 → 6 → 8 → 10 → 5 (impacto residual) → branding
-- **CTA:** "The Gap Files." + silêncio. Corte seco. Máximo absoluto: 8 cenas.
+- **Curva:** 9 → 6 → 10 → branding/silêncio
+- **CTA:** "The Gap Files." + silêncio. Corte seco. Máximo absoluto: 5 cenas.
 - **Regra:** Se o espectador sente que "já entendeu", FALHOU.
 
 ### Shorts (30-60s / 6-12 cenas)

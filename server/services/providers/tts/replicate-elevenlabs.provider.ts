@@ -24,6 +24,15 @@ export class ReplicateElevenLabsProvider implements ITTSProvider {
     console.log(`[ReplicateElevenLabs] 🚀 Sending request. Voice: ${request.voiceId || 'Rachel'}`)
 
     try {
+      // Replicate NÃO entende tags inline do Eleven v3 nem SSML.
+      // Para evitar que o modelo "leia" tokens como "[pause]" ou "<break .../>",
+      // removemos essas marcações do texto enviado.
+      const cleanedText = String(request.text || '')
+        .replace(/<break\b[^>]*\/?>/gi, '')
+        .replace(/\[[^\]]+\]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+
       // Lista de vozes suportadas pelo Replicate
       const supportedVoices = [
         "Rachel", "Drew", "Clyde", "Paul", "Aria", "Domi", "Dave", "Roger", "Fin", "Sarah",
@@ -47,7 +56,7 @@ export class ReplicateElevenLabsProvider implements ITTSProvider {
 
       // Mapear request para o schema do Replicate
       const input = {
-        prompt: request.text,
+        prompt: cleanedText,
         voice: voice,
         language_code: request.language?.split('-')[0] || 'pt', // 'pt-BR' -> 'pt'
         stability: request.stability ?? 0.35, // Default Mistério
@@ -93,7 +102,7 @@ export class ReplicateElevenLabsProvider implements ITTSProvider {
       console.log(`[ReplicateElevenLabs] ✅ Buffer created. Size: ${audioBuffer.length}`)
 
       // Estimar duração (fallback)
-      const wordCount = request.text.split(/\s+/).length
+      const wordCount = cleanedText.split(/\s+/).filter(Boolean).length
       const estimatedDuration = (wordCount / (150 * (request.speed || 1.0))) * 60
 
       // predictTime da API ou estimativa baseada na duração do áudio (proxy para GPU time)
@@ -108,7 +117,7 @@ export class ReplicateElevenLabsProvider implements ITTSProvider {
           cost: calculateReplicateTimeCost(model, predictTimeForCost),
           provider: 'REPLICATE',
           model,
-          metadata: { characters: request.text.length, predict_time: predictTimeForCost }
+          metadata: { characters: cleanedText.length, predict_time: predictTimeForCost }
         }
       }
 

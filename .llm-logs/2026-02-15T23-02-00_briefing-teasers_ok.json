@@ -1,0 +1,241 @@
+{
+  "timestamp": "2026-02-15T23:02:00.010Z",
+  "taskId": "briefing-teasers",
+  "status": "ok",
+  "provider": "anthropic",
+  "model": "claude-sonnet-4-20250514",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Briefing Step — Bundle de Briefs para TEASERS (V1)\r\n\r\nVocê é um **Briefing Generator**. Sua função é transformar um dossiê bruto (fontes longas, notas, persons) em um **brief enxuto e seguro** para alimentar as etapas de TEASERS:\r\n- Monetization (gateway/deep-dive/hook-only)\r\n- Story Architect (teasers)\r\n- Script (teasers)\r\n\r\n## Objetivo\r\n\r\nGerar um JSON no formato **BriefBundleV1** com:\r\n- fatos reutilizáveis (“munição narrativa”) sem ruído\r\n- regras hard de segurança (visual e linguagem) para não contaminar o funil\r\n- diretrizes por papel narrativo (gateway / deep-dive / hook-only)\r\n\r\nO brief deve ser **curto**, **estruturado**, **não-didático** e **sem elementos proibidos**.\r\n\r\n## Regras Hard (INVIOLÁVEIS)\r\n\r\n1. **PROIBIDO** gerar ou sugerir:\r\n   - armas de fogo, rifles, pistolas, munição\r\n   - atirador, execução, “tiro” como ação visual\r\n   - gore/violência gráfica/tortura explícita\r\n   - close-up de mãos humanas e close-up de rostos humanos (macro/anatomia)\r\n   - símbolos extremistas contemporâneos em destaque\r\n2. Se o dossiê mencionar ataques/armas/sangue, **transforme em artefatos**:\r\n   - manifesto (texto), headline, recorte, tela/monitor, documento, registro\r\n3. **Fatos devem ser safe**:\r\n   - Foque em **mecanismo/sistema** (quem autorizou, qual documento, qual incentivo)\r\n   - Evite descrever violência; descreva “decisão”, “ordem”, “confisco”, “propaganda”, “registro”\r\n\r\n## Como escolher fatos (facts[])\r\n\r\n- Produza entre **12 e 40** fatos.\r\n- Cada fato:\r\n  - 1–2 linhas\r\n  - linguagem objetiva (sem tese/conclusão moral)\r\n  - se possível, inclua `sourceRef` curto (título/índice da fonte)\r\n- Se houver dados concretos (ano, cidade), inclua **somente se estiver explícito no dossiê**.\r\n\r\n## Diretrizes por papel (roleBriefs)\r\n\r\n- **gateway**: precisa de contexto suficiente para standalone (mas sem enciclopédia).\r\n- **deep-dive**: foco em 1 ângulo; mínimo contexto; “1 frase de setup no máximo”.\r\n- **hook-only**: mínimo absoluto; 1 conceito central; 1–3 fatos mais chocantes (mecanismo), zero explicação.\r\n\r\n## Output\r\n\r\nRetorne **APENAS** um JSON válido (sem markdown, sem ```json, sem explicações), no schema `BriefBundleV1`."
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": [
+          {
+            "type": "text",
+            "text": "📦 DOSSIÊ DO CONTEÚDO (BASE DE CONHECIMENTO):\n\n📋 TEMA: Injustiça histórica ou assassinato de uma criança por religião?\n\n📋 TÍTULO: Simão de trento, itália\n\n📚 FONTES DO DOSSIÊ (ordenadas por peso/relevância):\n[1] (text) Investigação Histórico-Forense: Simão de Trento [peso: 3]\nO Arquivo Trento: Uma Autópsia Histórica, Jurídica e Forense da Gênese, Consolidação e Persistência do Libelo de Sangue (1475–Presente)I. Introdução Epistemológica e Contextual: A Anatomia de um Mito FundadorO caso de Simão de Trento (Simonino), ocorrido na Páscoa de 1475, transcende a categoria de um mero episódio de violência medieval para se constituir como o evento fundacional da moderna propaganda antissemita. Diferente de acusações anteriores de assassinato ritual, como as de William de Norwich (1144) ou Hugh de Lincoln (1255), que permaneceram confinadas a hagiografias locais e crônicas monásticas, o caso de Trento foi deliberadamente arquitetado como um evento midiático transnacional. A presente investigação forense visa desconstruir as camadas sedimentares deste caso, operando em três eixos temporais distintos: o evento histórico (a morte da criança e o subsequente processo judicial de 1475–1478), a revisão eclesiástica e historiográfica (a abolição do culto em 1965 e a controvérsia de Ariel Toaff em 2007), e a ressignificação contemporânea (o uso da iconografia de Simonino em manifestos terroristas modernos, como o de Poway em 2019). O objetivo primordial é separar o fato forense da fabricação ideológica, analisando como uma morte acidental foi transmutada, através da tortura jurídica e da inovação tecnológica da imprensa, em um arquétipo de ódio que perdura por mais de meio milênio.Para compreender a mecânica da fabricação da culpa, é imperativo situar Trento em seu contexto geopolítico e demográfico. Em 1475, Trento era um principado-bispado sob a jurisdição do Sacro Império Romano-Germânico, mas cultural e geograficamente situado na fronteira com os territórios italianos e a poderosa República de Veneza. A cidade operava como um ponto de estrangulamento estratégico nas rotas comerciais alpinas, mas sofria com tensões internas e pressões externas. O Príncipe-Bispo Johannes Hinderbach, um humanista ambicioso e politicamente astuto, encontrava-se em uma posição precária, lutando para manter a autonomia de seu principado contra as ambições expansionistas venezianas e as demandas imperiais. Hinderbach, um homem de letras e patrono das artes, via na consolidação de um culto local uma oportunidade não apenas espiritual, mas política e econômica, capaz de colocar Trento no mapa das grandes peregrinações europeias, rivalizando com locais consagrados e gerando receitas substanciais para a renovação da catedral e da infraestrutura urbana.A comunidade judaica de Trento era minúscula, composta por apenas três famílias principais chefiadas por Samuel de Nuremberg (um banqueiro e prestamista que chegara em 1461), Tobias (um médico) e Engel. Esta comunidade, predominantemente de origem ashkenazi (alemã), servia como um pilar financeiro vital para a região, fornecendo crédito em uma economia onde a usura cristã era oficialmente proibida, embora praticada. Eles existiam em um estado de tolerância frágil, mediada por cartas de proteção (condotte) que podiam ser revogadas a qualquer momento. Nas semanas que antecederam a Páscoa de 1475, a atmosfera na cidade havia sido deliberadamente envenenada pelas pregações do frade franciscano observante Bernardino da Feltre. Bernardino, um demagogo carismático e figura central na fundação dos Monti di Pietà (bancos de penhores cristãos destinados a substituir os prestamistas judeus), havia profetizado explicitamente que os pecados da cidade atrairiam uma calamidade e focou sua retórica virulentamente contra a usura judaica. Ele criou, assim, um ambiente de histeria pré-existente e uma profecia autorrealizável onde qualquer infortúnio seria imediatamente atribuído aos judeus, estabelecendo o palco para o drama judicial que se seguiria.II. A Reconstrução Forense do Evento (23-26 de Março de 1475)2.1. O Desaparecimento e a Cronologia dos FatosA análise cronológica precisa dos eventos ocorridos entre a Quinta-Feira Santa e o Domingo de Páscoa de 1475 é fundamental para desmantelar a narrativa acusatória. Simon, uma criança de dois anos e meio, filho do curtidor Andreas Unverdorben, desapareceu na noite de 23 de março. O pai, Andreas, inicialmente suspeitou de um acidente, temendo que a criança tivesse caído no canal de água, o Adigetto, que corria próximo à sua casa e sob diversas residências da cidade, incluindo a do judeu Samuel. Durante os dias 24 e 25 de março (Sexta-Feira Santa e Sábado de Aleluia), buscas foram realizadas sem sucesso, enquanto rumores insuflados pela retórica prévia de Bernardino da Feltre começavam a circular, sugerindo que \"os judeus levaram a criança\" para rituais pascais. É crucial notar que a Páscoa judaica (Pessach) coincidia naquele ano com a Semana Santa cristã, uma convergência temporal frequentemente explorada nos libelos de sangue para maximizar a tensão teológica.No Domingo de Páscoa, 26 de março, o corpo de Simon foi descoberto. Contradizendo a lógica de um crime oculto, não foram as autoridades cristãs que encontraram o cadáver, mas sim o próprio Samuel de Nuremberg e membros de sua casa. O corpo estava preso em uma grade na vala de drenagem que passava por sua adega. Samuel, acreditando na proteção da lei e na sua inocência, dirigiu-se imediatamente às autoridades para relatar o achado, na esperança de evitar exatamente a acusação que se seguiu. Este ato de transparência, documentado nos registros iniciais, foi posteriormente distorcido pelas autoridades judiciais e eclesiásticas como uma tentativa falha de encobrir o crime após \"o corpo não ter afundado\" ou \"ter sido rejeitado pela água\", invocando tropos de milagres forenses comuns à hagiografia medieval para transformar uma notificação legal em prova de culpabilidade sobrenatural.2.2. A Autopsia Medieval: A Ciência a Serviço da IdeologiaA análise \"forense\" realizada em 1475 representa um dos primeiros e mais documentados exemplos de medicina legal sendo cooptada para validar uma narrativa política pré-determinada. O corpo foi examinado por Giovanni Mattia Tiberino, um médico e poeta áulico que se tornaria o principal propagandista do culto, juntamente com o médico Arcangelo Balduini e o cirurgião Cristoforo de Fatis. O relatório médico produzido por eles descrevia ferimentos que foram interpretados não como consequências post-mortem do arrasto no canal ou da decomposição subaquática, mas como \"sinais rituais\" de martírio.Os registros descrevem incisões no corpo, incluindo uma ferida na bochecha direita, outra na perna e, mais notavelmente, \"muitas pequenas marcas vermelhas semelhantes a picadas de mosquito\" e uma perfuração no pênis. Tiberino argumentou que a forma arredondada e a disposição ordenada das feridas demonstravam intencionalidade humana e organização ritual. A tese moderna, corroborada pela revisão de 1965 e por historiadores forenses, aponta para uma explicação muito mais mundana: as feridas são consistentes com a ação de fauna aquática (peixes, crustáceos ou larvas) e o trauma físico de um corpo sendo arrastado por uma correnteza forte, colidindo com detritos e pedras antes de ficar preso. A alegada \"frescura\" do cadáver após três dias, apresentada como milagre de incorruptibilidade, é explicável pela baixa temperatura da água do degelo alpino em março, que retardaria significativamente a putrefação (adipocera). A interpretação de Tiberino não foi um erro médico inocente, mas uma construção deliberada para fornecer a causa mortis necessária para a acusação de homicídio ritual, transformando lesões acidentais em estigmas de uma \"paixão\" imitativa de Cristo.2.3. O Suspeito Ignorado: A Hipótese \"Schweitzer\"Um elemento frequentemente marginalizado na historiografia tradicional, mas vital para a exculpação histórica, é a figura conhecida nos regis... [truncated 137241 chars]"
+          },
+          {
+            "type": "text",
+            "text": "Gere o BriefBundleV1 para o dossiê acima.\n\nRegras:\n- Idioma: pt-BR\n- Retorne APENAS JSON válido\n- NÃO invente fatos que não estejam nas fontes\n"
+          }
+        ]
+      }
+    ]
+  },
+  "parsed": {
+    "version": "briefBundleV1",
+    "language": "pt-BR",
+    "theme": "Simão de Trento: libelo de sangue histórico e terrorismo moderno",
+    "title": "Simão de Trento, Itália",
+    "globalSafety": {
+      "forbiddenElements": [
+        "armas de fogo em close-up",
+        "rifles ou pistolas sendo empunhados",
+        "atirador em ação",
+        "execução por tiro",
+        "close-up de mãos humanas",
+        "close-up de rostos humanos",
+        "gore explícito",
+        "violência gráfica detalhada",
+        "tortura sendo aplicada",
+        "sangue em abundância",
+        "símbolos extremistas contemporâneos",
+        "suásticas ou símbolos nazistas",
+        "uniformes militares nazistas"
+      ],
+      "allowedArtifacts": [
+        "manuscritos históricos",
+        "documentos de arquivo",
+        "registros judiciais medievais",
+        "incunábulos e xilogravuras",
+        "mapas de Trento século XV",
+        "arquitetura medieval",
+        "vestes episcopais históricas",
+        "símbolos religiosos tradicionais",
+        "moedas e objetos de época",
+        "retratos pintados históricos",
+        "telas de computador com textos",
+        "headlines de jornais",
+        "capas de livros acadêmicos",
+        "fotografias de arquivo histórico"
+      ],
+      "forbiddenNarrationTerms": [
+        "atirador",
+        "execução a tiros",
+        "fuzilamento",
+        "massacre armado",
+        "carnificina",
+        "banho de sangue"
+      ],
+      "notes": [
+        "Transformar violência em artefatos documentais",
+        "Focar em mecanismos jurídicos e políticos",
+        "Evitar descrições gráficas de tortura",
+        "Usar termos como 'registro', 'documento', 'processo'"
+      ]
+    },
+    "facts": [
+      {
+        "text": "Simão Unverdorben, criança de 2 anos e meio, desapareceu em 23 de março de 1475 em Trento e foi encontrado morto em 26 de março na vala de drenagem da casa do judeu Samuel de Nuremberg.",
+        "sourceRef": "Investigação Histórico-Forense"
+      },
+      {
+        "text": "O próprio Samuel de Nuremberg encontrou o corpo e imediatamente notificou as autoridades, acreditando na proteção da lei e em sua inocência.",
+        "sourceRef": "Investigação Histórico-Forense"
+      },
+      {
+        "text": "O Príncipe-Bispo Johannes Hinderbach viu no caso uma oportunidade política e econômica para colocar Trento no mapa das grandes peregrinações europeias.",
+        "sourceRef": "Investigação Histórico-Forense"
+      },
+      {
+        "text": "Bernardino da Feltre, frade franciscano, havia profetizado semanas antes que os pecados da cidade atrairiam uma calamidade, focando sua retórica contra a usura judaica.",
+        "sourceRef": "A fake news que levou ao massacre"
+      },
+      {
+        "text": "A comunidade judaica de Trento era minúscula, composta por apenas três famílias principais chefiadas por Samuel de Nuremberg, Tobias e Engel.",
+        "sourceRef": "Investigação Histórico-Forense"
+      },
+      {
+        "text": "Durante os interrogatórios iniciais, um cristão conhecido como 'Schweitzer' teve contato com o pai da criança e sugeriu que provavelmente havia caído no canal.",
+        "sourceRef": "Investigação Histórico-Forense"
+      },
+      {
+        "text": "O método de tortura 'squassada' foi aplicado: vítimas eram içadas por polias com as mãos amarradas nas costas, às vezes com pesos nos pés.",
+        "sourceRef": "Investigação Histórico-Forense"
+      },
+      {
+        "text": "Giovanni Mattia Tiberino realizou a autópsia e interpretou feridas post-mortem como 'sinais rituais', ignorando explicações de trauma aquático e fauna.",
+        "sourceRef": "Investigação Histórico-Forense"
+      },
+      {
+        "text": "Todos os bens dos acusados foram confiscados pelo Príncipe-Bispo Hinderbach, incluindo os livros de contabilidade com dívidas dos cristãos.",
+        "sourceRef": "Investigação Histórico-Forense"
+      },
+      {
+        "text": "Entre junho de 1475 e janeiro de 1477, a comunidade judaica masculina foi sistematicamente exterminada através de execuções públicas.",
+        "sourceRef": "Investigação Histórico-Forense"
+      },
+      {
+        "text": "O Papa Sixto IV enviou Battista dei Giudici como comissário apostólico, que concluiu inequivocamente que os judeus eram inocentes.",
+        "sourceRef": "Investigação Histórico-Forense"
+      },
+      {
+        "text": "A bula papal 'Facit nos pietas' de 1478 validou formalmente o processo de Trento, representando uma capitulação política que selou o destino da memória judaica.",
+        "sourceRef": "Investigação Histórico-Forense"
+      },
+      {
+        "text": "O caso foi um dos primeiros a usar a imprensa de tipos móveis para propaganda, com dezenas de incunábulos ilustrados circulando pela Europa.",
+        "sourceRef": "TCC"
+      },
+      {
+        "text": "A xilogravura da Crônica de Nuremberg (1493) mostrava o suposto assassinato com detalhes gráficos, influenciando representações antissemitas por séculos.",
+        "sourceRef": "TCC"
+      },
+      {
+        "text": "O culto a Simão foi oficialmente beatificado em 1588 pelo Papa Sisto V e mantido por quase 500 anos até sua abolição em 1965.",
+        "sourceRef": "Simão de Trento – Wikipédia"
+      },
+      {
+        "text": "Em 1965, o Arcebispo de Trento Alessandro Maria Gottardi aboliu o culto após investigação histórica que provou a inocência dos judeus.",
+        "sourceRef": "Investigação Histórico-Forense"
+      },
+      {
+        "text": "John Earnest, de 19 anos, atacou a sinagoga Chabad de Poway em 27 de abril de 2019, matando Lori Gilbert-Kaye e ferindo três pessoas.",
+        "sourceRef": "Poway synagogue shooting"
+      },
+      {
+        "text": "No manifesto de Earnest, ele escreveu: 'Você não foi esquecido Simão de Trento, o horror que você e inúmeras crianças sofreram nas mãos dos judeus jamais será perdoado'.",
+        "sourceRef": "Manifesto terrorista John Earnest"
+      },
+      {
+        "text": "Earnest havia tentado incendiar uma mesquita em Escondido um mês antes do ataque à sinagoga, deixando grafite referenciando Brenton Tarrant.",
+        "sourceRef": "Poway synagogue shooting"
+      },
+      {
+        "text": "O terrorista era estudante de enfermagem na California State University San Marcos e pianista, citando o 'Scherzo No. 2' de Chopin como sua peça favorita.",
+        "sourceRef": "Earnest Manifesto"
+      },
+      {
+        "text": "A comunidade judaica de Veneza emitiu um 'cherem' (excomunhão) contra Trento em 1476, proibindo judeus de estabelecerem relações comerciais com a cidade.",
+        "sourceRef": "A fake news que levou ao massacre"
+      },
+      {
+        "text": "O historiador Ariel Toaff causou controvérsia em 2007 ao sugerir que alguns grupos judaicos medievais poderiam ter praticado rituais com sangue, mas depois se retratou.",
+        "sourceRef": "A fake news que levou ao massacre"
+      },
+      {
+        "text": "A suposta incorruptibilidade do corpo de Simão era explicável pela baixa temperatura da água do degelo alpino, que causou adipocera (saponificação).",
+        "sourceRef": "Investigação Histórico-Forense"
+      },
+      {
+        "text": "O processo durou menos de 90 dias, desde a acusação sem provas até as execuções públicas, violando normas jurídicas da época.",
+        "sourceRef": "A fake news que levou ao massacre"
+      },
+      {
+        "text": "As mulheres da comunidade judaica foram forçadas à conversão após torturas, recebendo novos nomes cristãos e tendo seus filhos entregues a famílias cristãs.",
+        "sourceRef": "Investigação Histórico-Forense"
+      },
+      {
+        "text": "Aproximadamente 30 títulos sobre o assassinato foram impressos entre 1475 e 1500, fazendo de Simão o primeiro 'santo tipográfico'.",
+        "sourceRef": "TCC"
+      },
+      {
+        "text": "O caso estabeleceu um modelo de 'tecnologia de ódio' que se adaptou da imprensa medieval às redes sociais modernas como 8chan.",
+        "sourceRef": "Investigação Histórico-Forense"
+      },
+      {
+        "text": "Earnest foi condenado à prisão perpétua sem possibilidade de liberdade condicional, mais 121 anos adicionais em setembro de 2021.",
+        "sourceRef": "Poway synagogue shooting"
+      },
+      {
+        "text": "A investigação de Schweitzer foi ativamente suprimida por Hinderbach, pois não servia aos objetivos de confisco de bens judaicos.",
+        "sourceRef": "Investigação Histórico-Forense"
+      },
+      {
+        "text": "O cherem contra Trento permaneceu ativo por quase 500 anos, sendo revogado apenas em 1965 junto com a abolição do culto católico.",
+        "sourceRef": "Insights e Notas"
+      }
+    ],
+    "roleBriefs": {
+      "gateway": {
+        "contextLevel": "medium",
+        "suggestedFactsMin": 12,
+        "suggestedFactsMax": 18,
+        "notes": [
+          "Precisa estabelecer conexão histórica entre 1475 e 2019",
+          "Explicar o conceito de libelo de sangue sem detalhes gráficos",
+          "Mostrar como tecnologia de mídia foi usada em ambos os casos",
+          "Contextualizar Trento como principado episcopal estratégico"
+        ]
+      },
+      "deep-dive": {
+        "contextLevel": "low",
+        "suggestedFactsMin": 8,
+        "suggestedFactsMax": 14,
+        "notes": [
+          "Focar em um ângulo específico: processo judicial manipulado ou propaganda impressa",
+          "Detalhar mecanismo da squassada sem descrição gráfica",
+          "Explorar figura suprimida de Schweitzer como suspeito alternativo",
+          "Analisar confisco de bens como motivação econômica real"
+        ]
+      },
+      "hook-only": {
+        "contextLevel": "minimal",
+        "suggestedFactsMin": 4,
+        "suggestedFactsMax": 8,
+        "notes": [
+          "Conexão direta: manifesto terrorista de 2019 cita caso de 1475",
+          "Contraste: estudante de enfermagem vira terrorista citando caso medieval",
+          "Ironia: primeiro 'santo tipográfico' vira ícone digital de ódio",
+          "Persistência: 544 anos entre os dois eventos ligados"
+        ]
+      }
+    }
+  },
+  "rawContent": ""
+}

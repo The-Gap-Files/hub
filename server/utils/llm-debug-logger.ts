@@ -39,6 +39,7 @@ function buildFilename(taskId: string, status: 'ok' | 'error' | 'partial'): stri
 export async function logLlmResponse(taskId: string, data: {
   provider: string
   model: string
+  requestMessages?: any[]
   parsed?: any
   raw?: any
   usage?: any
@@ -52,6 +53,7 @@ export async function logLlmResponse(taskId: string, data: {
       provider: data.provider,
       model: data.model,
       usage: data.usage,
+      request: data.requestMessages ? { messages: sanitizeMessagesForLog(data.requestMessages) } : undefined,
       parsed: sanitizeBinaryData(data.parsed),
       rawContent: extractContent(data.raw)
     }
@@ -71,6 +73,7 @@ export async function logLlmError(taskId: string, data: {
   model: string
   error: any
   failedGeneration?: any
+  requestMessages?: any[]
 }): Promise<void> {
   try {
     await ensureLogDir()
@@ -82,6 +85,7 @@ export async function logLlmError(taskId: string, data: {
       status: data.failedGeneration ? 'partial' : 'error',
       provider: data.provider,
       model: data.model,
+      request: data.requestMessages ? { messages: sanitizeMessagesForLog(data.requestMessages) } : undefined,
       errorMessage: err?.message?.substring(0, 500),
       errorCode: errorBody?.code,
       errorType: errorBody?.type,
@@ -123,6 +127,66 @@ function extractContent(raw: any): string | undefined {
   } catch {
     return undefined
   }
+}
+
+function sanitizeMessagesForLog(messages: any[], maxMessages = 16): any[] {
+  const sliced = Array.isArray(messages) ? messages.slice(0, maxMessages) : []
+  return sliced.map((m: any, idx: number) => sanitizeSingleMessageForLog(m, idx))
+}
+
+function sanitizeSingleMessageForLog(message: any, idx: number): any {
+  try {
+    const type = typeof message?._getType === 'function'
+      ? message._getType()
+      : (message?.constructor?.name || message?.type || 'message')
+
+    const content = message?.lc_kwargs?.content ?? message?.content ?? message?.text
+    return {
+      index: idx,
+      type,
+      content: sanitizeMessageContentForLog(content)
+    }
+  } catch (e: any) {
+    return { index: idx, type: 'message', content: `[unserializable message: ${e?.message || e}]` }
+  }
+}
+
+function sanitizeMessageContentForLog(content: any): any {
+  // Conteúdo texto simples
+  if (typeof content === 'string') {
+    const maxLen = 8000
+    return content.length > maxLen
+      ? content.substring(0, maxLen) + `... [truncated ${content.length - maxLen} chars]`
+      : content
+  }
+
+  // Conteúdo multimodal (ex: Gemini / LangChain parts)
+  if (Array.isArray(content)) {
+    return content.map((part: any) => {
+      if (!part || typeof part !== 'object') return part
+      if (part.type === 'text') {
+        return {
+          type: 'text',
+          text: sanitizeMessageContentForLog(part.text ?? '')
+        }
+      }
+      if (part.type === 'image_url') {
+        const url = part?.image_url?.url
+        const isDataUrl = typeof url === 'string' && url.startsWith('data:')
+        return {
+          type: 'image_url',
+          image_url: {
+            url: isDataUrl ? '[data_url omitted]' : '[url omitted]',
+            detail: part?.image_url?.detail
+          }
+        }
+      }
+      return { type: part.type || 'unknown' }
+    })
+  }
+
+  // Objetos arbitrários — sanitizar para evitar base64/buffers
+  return sanitizeBinaryData(content, 800)
 }
 
 /**

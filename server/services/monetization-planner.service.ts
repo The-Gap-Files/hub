@@ -3,7 +3,7 @@
  * 
  * Usa LangChain + Structured Output para analisar o conteúdo do dossiê
  * e gerar um plano de monetização Document-First:
- * 1 Full Video (YouTube) + 4-6 Teasers (TikTok/Shorts/Reels)
+ * 1 Full Video (YouTube) + N Teasers (YouTube Shorts)
  */
 
 import { z } from 'zod'
@@ -744,8 +744,8 @@ const TeaserSuggestionSchema = z.object({
   scriptOutline: z.string().describe('Estrutura resumida do script (Hook → Setup → Revelação → CTA)'),
   visualSuggestion: z.string().describe('Descrição curta do visual sugerido'),
   cta: z.string().describe('Call-to-action para o Full Video'),
-  platform: z.enum(['TikTok', 'YouTube Shorts', 'Instagram Reels']).describe('Plataforma alvo'),
-  format: z.enum(['teaser-tiktok', 'teaser-reels']).describe('ID do formato de vídeo'),
+  platform: z.enum(['YouTube Shorts']).describe('Plataforma obrigatória: YouTube Shorts'),
+  format: z.enum(['teaser-youtube-shorts']).describe('Formato obrigatório: teaser-youtube-shorts'),
   estimatedViews: z.number().describe('Estimativa de views na plataforma'),
   // ── Creative Direction (ATENÇÃO: roteiro ≠ visual) ─────────────
   scriptStyleId: z.string().describe(
@@ -1059,7 +1059,7 @@ Se a sugestão não fizer sentido para o conteúdo, ignore-a e siga o melhor cam
   // Catálogo de constants para regeneração
   const catalog = serializeConstantsCatalog()
 
-  const systemMsg = `Você é um estrategista de conteúdo especializado em Document-First para YouTube, TikTok, Shorts e Reels.
+  const systemMsg = `Você é um estrategista de conteúdo especializado em Document-First **100% para YouTube** (Full Video no YouTube + teasers no YouTube Shorts).
 
 O usuário já tem um plano de monetização gerado. Ele quer REGENERAR apenas ${isTeaser ? 'um teaser específico' : 'o Full Video'} com um ângulo COMPLETAMENTE DIFERENTE.
 

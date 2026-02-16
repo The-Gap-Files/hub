@@ -1,0 +1,582 @@
+{
+  "timestamp": "2026-02-15T23:27:48.971Z",
+  "taskId": "monetization-deep-dives",
+  "status": "partial",
+  "provider": "groq",
+  "model": "unknown",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Monetization — Deep-Dive Teasers Generator\r\n\r\nVocê é um estrategista de conteúdo. Nesta etapa, você vai gerar os teasers DEEP-DIVE — mergulhos diretos em ângulos específicos.\r\n\r\n## 🎯 O Que São Deep-Dives\r\n\r\nDeep-Dives assumem que o espectador já tem noção básica do tema (pode ter visto o gateway ou já conhecer o assunto). Usam NO MÁXIMO 1 frase de contextualização superficial e vão DIRETO para o ângulo.\r\n\r\n## 📐 CONTEXTO RECEBIDO\r\n\r\nVocê recebe:\r\n- O dossiê completo\r\n- O teaser Gateway já gerado (para NÃO repetir informações)\r\n- Os hooks já usados (para NÃO repetir)\r\n- A lista de ângulos e formatos definidos no blueprint para cada deep-dive\r\n\r\n## 📐 O QUE PRODUZIR\r\n\r\nPara CADA deep-dive definido no blueprint, gere:\r\n- **title**: Título curto e impactante\r\n- **hook**: Frase de abertura (até 15 palavras). DIFERENTE de todos os anteriores.\r\n- **angle**: Descrição do ângulo ESPECÍFICO (já definido no blueprint)\r\n- **angleCategory**: A categoria (já definida no blueprint)\r\n- **narrativeRole**: \"deep-dive\"\r\n- **shortFormatType**: O formato (já definido no blueprint)\r\n- **scriptOutline**: Estrutura — Frase contexto 3s → Mergulho direto 30-40s → Tensão aberta 10s → CTA 5s\r\n- **visualSuggestion**: Descrição curta do visual\r\n- **cta**: Call-to-action para o Full Video\r\n- **platform**: \"YouTube Shorts\"\r\n- **format**: \"teaser-youtube-shorts\"\r\n- **estimatedViews**: Estimativa de views\r\n- **scriptStyleId** e **scriptStyleName**\r\n- **editorialObjectiveId** e **editorialObjectiveName**\r\n- **avoidPatterns**: 2-4 anti-padrões específicos\r\n- **visualPrompt**: Prompt de imagem em INGLÊS (1 parágrafo)\r\n- **microBriefV1**: Micro-brief ESTRUTURADO para ESTE teaser (isolado por item). Deve conter:\\n  - version: \\\"teaserMicroBriefV1\\\"\\n  - narrativeRole: \\\"deep-dive\\\"\\n  - angleCategory e angle (iguais aos campos do teaser)\\n  - facts: 5-12 fatos selecionados APENAS do brief/dossiê recebido (cada um com text e, se possível, sourceRef)\\n  - forbiddenElements: 6-12 itens (reforçar anti-arma/gore/close-up)\\n  - allowedArtifacts: 6-12 itens (documento/selo/monitor/headline/etc.)\\n  - notes: 2-6 bullets curtos (ex.: \\\"no máximo 1 frase de contexto\\\")\r\n\r\n## 🚨 REGRAS DOS DEEP-DIVES\r\n\r\n1. **Contexto MÍNIMO** — máximo 1 frase de setup superficial. Ex: \"O caso X esconde...\"\r\n2. **NÃO recontar a história** — zero \"em tal ano, fulano...\"\r\n3. **NÃO repetir informações do gateway** — assuma que o espectador já sabe o básico\r\n4. **Resolução MÍNIMA** — revele um aspecto que ABRE mais perguntas, não as fecha\r\n5. **Cada hook DEVE ser ÚNICO** — não reformule hooks anteriores\r\n6. **avoidPatterns** devem focar em eliminar contextualização excessiva\r\n7. **microBriefV1 é a fonte da verdade** para o Story Architect deste teaser: selecione fatos que sustentem o ângulo específico e NÃO inclua fatos/territórios de outros deep-dives/hook-only.\r\n\r\n## 💡 EXEMPLO DE avoidPatterns PARA DEEP-DIVE\r\n\r\n- \"NÃO comece explicando quem foi [personagem] — o espectador já sabe\"\r\n- \"NÃO repita a cronologia do caso — vá direto ao ângulo\"\r\n- \"NÃO use a mesma estrutura narrativa do teaser sobre [ângulo anterior]\"\r\n- \"NÃO explique termos técnicos — use-os como gancho de curiosidade\"\r\n\r\n## ⚠️ ANTI-REDUNDÂNCIA\r\n\r\nCada deep-dive mergulha em UM aspecto diferente. Se o gateway cobriu \"o que aconteceu\", os deep-dives exploram \"por quê\", \"quem lucrou\", \"o que foi escondido\", etc. NUNCA sobreponha territórios narrativos entre deep-dives.\n## ⚙️ CONFIGURAÇÃO (CENAS FIXAS)\n- Full Video: 150 cenas\n- Gateway: 5 cenas\n- Deep-Dive: 6 cenas\n- Hook-Only: 4 cenas\n- Quantidade de teasers: 12\n\n\nEstilo visual: noir-cinematic (Noir Cinematográfico)\n\n## HOOKS JÁ USADOS (NÃO REPETIR)\n1. \"Imagine descobrir que a primeira grande campanha de ódio foi escrita com tinta de imprensa e ainda ecoa nas redes sociais de hoje.\"\n2. \"Um menino desaparecido em 1475 desencadeou um mito que ecoa até hoje.\"\n\n## GATEWAY JÁ GERADO (NÃO repetir informações)\nHook: \"Um menino desaparecido em 1475 desencadeou um mito que ecoa até hoje.\"\nÂngulo: cronologico\nOutline: undefined"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "📋 TEMA: Injustiça histórica ou assassinato de criança por religião\n📋 TÍTULO: Simão de trento, itália\n🧾 BRIEF (TEASERS) — versão: briefBundleV1\n\n🛡️ REGRAS HARD (GLOBAL SAFETY)\n- ❌ arma de fogo\n- ❌ gore\n- ❌ close-up de rosto humano\n- ❌ símbolos extremistas\n- ❌ armas de fogo, rifles, pistolas, munição, gatilho\n- ❌ atirador, execução, assassinato explícito, violência gráfica\n- ❌ sangue, gore, corpos mutilados, tortura explícita\n- ❌ close-up de mãos humanas, close-up de rostos humanos (evitar macro/anatomia)\n- ❌ cenas em sinagogas/templos com ameaça explícita (substituir por artefatos: manifesto, tela, manchete)\n- ❌ símbolos/extremismo contemporâneo em destaque (substituir por “texto recortado/blur”)\n\n🧰 ARTEFATOS VISUAIS PERMITIDOS\n- ✅ manifesto\n- ✅ documento\n- ✅ registro\n- ✅ incunábulo\n- ✅ xilogravura\n- ✅ documento, decreto, registro, arquivo, dossiê, carimbo, selo de cera\n- ✅ moedas, cofre, livro-caixa, inventário, recibo, contrato\n- ✅ monitor, tela, manifesto (sem arma), headline, recorte de jornal, thread desfocada\n- ✅ mapa, corredor de arquivo, sala de leitura, prateleiras, luz de vela, sombras\n- ✅ silhuetas não-identificáveis sem rosto/mãos em close\n\n🔫 MUNIÇÃO NARRATIVA (FATOS SAFE)\n1. Em 1475, o príncipe‑bispo Johannes Hinderbach autorizou a abertura de processo contra a comunidade judaica de Trento, usando o desaparecimento da criança como pretexto. [fonte: [1]]\n2. O frade Bernardino da Feltre pregou contra a usura judaica semanas antes da Páscoa, criando clima de suspeita que facilitou a acusação. [fonte: [1]]\n3. O corpo de Simão foi encontrado na adega de Samuel de Nuremberg; o relato de Samuel ao tribunal foi usado como evidência de culpa judaica. [fonte: [1]]\n4. O médico Giovanni Mattia Tiberino produziu um relatório de autópsia que interpretou lesões como “sinais rituais”, reforçando a narrativa de assassinato ritual. [fonte: [1]]\n5. O método de tortura chamado “squassada” (strappado) foi aplicado aos acusados para extrair confissões que coincidiam com o roteiro esperado pelos inquisidores. [fonte: [1]]\n6. As confissões obtidas sob squassada incluíram detalhes teológicos que os juízes exigiam, como uso de sangue em vinho, consolidando o mito. [fonte: [1]]\n7. Após as condenações, os bens dos judeus – casas, dinheiro e livros de contabilidade – foram confiscados pelo tesouro episcopal, aliviando dívidas locais. [fonte: [1]]\n8. Hinderbach patrocinou a impressão de incunábulos, como o “Relatio de Simone puero tridentino”, que divulgou a história do suposto martírio em toda a Europa. [fonte: [4]]\n9. A xilogravura da Crônica de Nuremberg (1493) ilustrou o suposto assassinato, tornando‑se modelo visual para futuros libelos de sangue. [fonte: [4]]\n10. Em 1478, o Papa Sixto IV emitiu a bula “Facit nos pietas”, reconhecendo formalmente o processo como juridicamente correto, legitimando o confisco e a propaganda. [fonte: [1]]\n11. O comissário papal Battista dei Giudici investigou o caso e concluiu que as acusações eram fabricadas, mas foi impedido de reverter as sentenças. [fonte: [1]]\n12. O culto a Simão foi oficialmente abolido em 1965 por decreto do Arcebispo de Trento, reconhecendo a inocência dos judeus. [fonte: [1]]\n13. A iconografia de Simon continuou a ser usada por grupos neonazistas digitais, como a imagem da xilogravura circulada em fóruns online. [fonte: [1]]\n14. Em 2019, John Earnest citou o caso de Simão de Trento em seu manifesto antes do ataque à sinagoga de Poway, demonstrando a persistência do mito. [fonte: [3]]\n15. O ataque de Poway resultou na morte de Lori Gilbert‑Kaye, que tentou proteger o rabino, e foi motivado por discurso antissemita que remete ao libelo de sangue. [fonte: [6]]\n16. O manifesto de Earnest descreve a “tecnologia de ódio” como a transição da imprensa do século XV para as redes sociais do século XXI. [fonte: [1]]\n17. A hipótese “Schweitzer” aponta um cristão que sugeriu não procurar a criança, mas foi suprimida para evitar investigação de acidente. [fonte: [1]]\n18. O suposto “milagre” da incorruptibilidade do corpo foi explicado por processos de saponificação em água fria, usado como prova de santidade. [fonte: [1]]\n19. As execuções dos judeus incluíram decapitação para os que aceitaram batismo e queima para os que mantiveram a fé, conforme registros judiciais. [fonte: [1]]\n20. O caso de Trento estabeleceu um padrão de uso de documentos impressos e imagens para legitimar acusações de libelo de sangue por séculos. [fonte: [5]]\n\n🎭 DIRETRIZES POR PAPEL\n- gateway: contextLevel=medium, facts=10-22\n- deep-dive: contextLevel=low, facts=8-16\n- hook-only: contextLevel=minimal, facts=3-6\n\nGere 7 teasers DEEP-DIVE para o dossiê.\n\nSlots definidos no blueprint:\n1. angleCategory=\"economico\", angleName=\"Financeiro por trás das confissões e confiscos\", shortFormatType=\"plot-twist\", platform=\"YouTube Shorts\", scriptStyleId=\"mystery\", editorialObjectiveId=\"deep-analysis\"\n2. angleCategory=\"ideologico\", angleName=\"Ideologia anti‑judaica e seu uso político\", shortFormatType=\"mini-documento\", platform=\"YouTube Shorts\", scriptStyleId=\"educational\", editorialObjectiveId=\"deep-analysis\"\n3. angleCategory=\"politico\", angleName=\"Poder e manipulação papal\", shortFormatType=\"pergunta-incomoda\", platform=\"YouTube Shorts\", scriptStyleId=\"documentary\", editorialObjectiveId=\"hidden-truth\"\n4. angleCategory=\"humano\", angleName=\"Histórias das vítimas e testemunhas\", shortFormatType=\"teaser-cinematografico\", platform=\"YouTube Shorts\", scriptStyleId=\"narrative\", editorialObjectiveId=\"emotional-impact\"\n5. angleCategory=\"conspirativo\", angleName=\"Conspiração da imprensa e incunábulos\", shortFormatType=\"plot-twist\", platform=\"YouTube Shorts\", scriptStyleId=\"mystery\", editorialObjectiveId=\"controversy\"\n6. angleCategory=\"cientifico\", angleName=\"Análise forense dos supostos rituais\", shortFormatType=\"mini-documento\", platform=\"YouTube Shorts\", scriptStyleId=\"educational\", editorialObjectiveId=\"deep-analysis\"\n7. angleCategory=\"cultural\", angleName=\"Legado cultural e uso da xilogravura\", shortFormatType=\"pergunta-incomoda\", platform=\"YouTube Shorts\", scriptStyleId=\"documentary\", editorialObjectiveId=\"mystery-layers\"\n\nRetorne um JSON com campo \"teasers\" contendo exatamente 7 teasers."
+      }
+    ]
+  },
+  "errorMessage": "400 {\"error\":{\"message\":\"Generated JSON does not match the expected schema. Please adjust your prompt. See 'failed_generation' for more details. Error: jsonschema: '/teasers/3/microBriefV1/facts' does not validate with /properties/teasers/items/properties/microBriefV1/properties/facts/minItems: minimum 5 items required, but found 4 items\",\"type\":\"invalid_request_error\",\"code\":\"json_validate_failed\",\"failed_generation\":\"{\\n  \\\"teasers\\\": [\\n    {\\n      \\\"title\\\": \\\"O Dinheiro por Trás das Confis",
+  "errorCode": "json_validate_failed",
+  "errorType": "invalid_request_error",
+  "validationError": "Generated JSON does not match the expected schema. Please adjust your prompt. See 'failed_generation' for more details. Error: jsonschema: '/teasers/3/microBriefV1/facts' does not validate with /properties/teasers/items/properties/microBriefV1/properties/facts/minItems: minimum 5 items required, but found 4 items",
+  "failedGeneration": {
+    "teasers": [
+      {
+        "title": "O Dinheiro por Trás das Confissões",
+        "hook": "Quem lucrou com as falsas confissões de Trento?",
+        "angle": "Financeiro por trás das confissões e confiscos",
+        "angleCategory": "economico",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "plot-twist",
+        "scriptOutline": "Frase contexto 3s → Mergulho direto 30-40s → Tensão aberta 10s → CTA 5s",
+        "visualSuggestion": "Mesa de arquivo com documentos antigos, selo de cera, moedas espalhadas, luz de vela.",
+        "cta": "Descubra toda a trama no vídeo completo.",
+        "platform": "YouTube Shorts",
+        "format": "teaser-youtube-shorts",
+        "estimatedViews": 150000,
+        "scriptStyleId": "mystery",
+        "scriptStyleName": "Mystery",
+        "editorialObjectiveId": "deep-analysis",
+        "editorialObjectiveName": "Deep Analysis",
+        "avoidPatterns": [
+          "NÃO comece explicando quem foi Hinderbach — o espectador já sabe",
+          "NÃO repita a cronologia do caso — vá direto ao ângulo",
+          "NÃO use a mesma estrutura narrativa do teaser anterior"
+        ],
+        "visualPrompt": "A dimly lit medieval archive table covered with aged parchment documents, a wax seal, scattered silver coins, and a single candle flame casting soft shadows, captured in a noir cinematic style.",
+        "sceneCount": 6,
+        "microBriefV1": {
+          "version": "teaserMicroBriefV1",
+          "narrativeRole": "deep-dive",
+          "angleCategory": "economico",
+          "angle": "Financeiro por trás das confissões e confiscos",
+          "facts": [
+            {
+              "text": "O método de tortura chamado “squassada” foi usado para extrair confissões que sustentavam a acusação.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "Após as condenações, os bens dos judeus – casas, dinheiro e livros de contabilidade – foram confiscados pelo tesouro episcopal.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "Hinderbach patrocinou a impressão de incunábulos, como o “Relatio de Simone puero tridentino”, que divulgou a história do suposto martírio em toda a Europa.",
+              "sourceRef": "[4]"
+            },
+            {
+              "text": "O Papa Sixto IV emitiu a bula “Facit nos pietas”, legitimando o confisco e a propaganda.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "O caso de Trento estabeleceu um padrão de uso de documentos impressos e imagens para legitimar acusações de libelo de sangue por séculos.",
+              "sourceRef": "[5]"
+            },
+            {
+              "text": "O comissário papal Battista dei Giudici investigou o caso e concluiu que as acusações eram fabricadas, mas foi impedido de reverter as sentenças.",
+              "sourceRef": "[1]"
+            }
+          ],
+          "forbiddenElements": [
+            "gore",
+            "explicit violence",
+            "close-up of faces",
+            "weapons",
+            "blood",
+            "graphic torture details",
+            "religious symbols as threat"
+          ],
+          "allowedArtifacts": [
+            "incunábulo",
+            "documento",
+            "selo de cera",
+            "registro",
+            "moedas",
+            "mapa",
+            "arquivo",
+            "livro-caixa",
+            "manuscrito",
+            "monitor"
+          ],
+          "notes": [
+            "no máximo 1 frase de contexto",
+            "foco no aspecto financeiro",
+            "evitar detalhes de violência"
+          ]
+        }
+      },
+      {
+        "title": "Ideologia que Alimentou o Ódio",
+        "hook": "Como o ódio religioso virou ferramenta de poder?",
+        "angle": "Ideologia anti‑judaica e seu uso político",
+        "angleCategory": "ideologico",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "mini-documento",
+        "scriptOutline": "Frase contexto 3s → Mergulho direto 30-40s → Tensão aberta 10s → CTA 5s",
+        "visualSuggestion": "Tela de computador exibindo manuscrito antigo ao lado de manifesto digital, sombras de silhuetas indistintas ao fundo.",
+        "cta": "Veja a análise completa no vídeo completo.",
+        "platform": "YouTube Shorts",
+        "format": "teaser-youtube-shorts",
+        "estimatedViews": 130000,
+        "scriptStyleId": "educational",
+        "scriptStyleName": "Educational",
+        "editorialObjectiveId": "deep-analysis",
+        "editorialObjectiveName": "Deep Analysis",
+        "avoidPatterns": [
+          "NÃO repita a cronologia dos discursos — vá direto ao uso ideológico",
+          "NÃO explique termos teológicos em detalhe — use-os como gatilho de curiosidade",
+          "NÃO reutilize a estrutura do teaser anterior"
+        ],
+        "visualPrompt": "A split-screen showing a high‑contrast scan of a 15th‑century manuscript on the left and a modern manifesto screenshot on the right, with faint, non‑identifiable silhouettes in the background, rendered in noir cinematic lighting.",
+        "sceneCount": 6,
+        "microBriefV1": {
+          "version": "teaserMicroBriefV1",
+          "narrativeRole": "deep-dive",
+          "angleCategory": "ideologico",
+          "angle": "Ideologia anti‑judaica e seu uso político",
+          "facts": [
+            {
+              "text": "O frade Bernardino da Feltre pregou contra a usura judaica semanas antes da Páscoa, criando clima de suspeita que facilitou a acusação.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "O método de tortura “squassada” extraiu confissões contendo detalhes teológicos que os juízes exigiam, consolidando o mito de sangue ritual.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "A bula papal “Facit nos pietas” de Sixto IV reconheceu o processo como juridicamente correto, reforçando a narrativa anti‑judaica.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "A xilogravura da Crônica de Nuremberg (1493) ilustrou o suposto assassinato, tornando‑se modelo visual para futuros libelos de sangue.",
+              "sourceRef": "[4]"
+            },
+            {
+              "text": "Em 2019, John Earnest citou o caso de Simão de Trento em seu manifesto, demonstrando a persistência do mito na ideologia neonazista.",
+              "sourceRef": "[3]"
+            },
+            {
+              "text": "O culto a Simão foi oficialmente abolido em 1965, reconhecendo a inocência dos judeus, mas a ideologia persiste.",
+              "sourceRef": "[1]"
+            }
+          ],
+          "forbiddenElements": [
+            "gore",
+            "blood",
+            "explicit torture description",
+            "close-up of faces",
+            "weapon imagery",
+            "religious symbols used as threat"
+          ],
+          "allowedArtifacts": [
+            "manifesto",
+            "documento",
+            "incunábulo",
+            "registro",
+            "xilogravura",
+            "monitor",
+            "headline",
+            "recorte de jornal",
+            "mapa",
+            "arquivo"
+          ],
+          "notes": [
+            "não repetir informação do gateway",
+            "máximo 1 frase de contexto",
+            "foco na manipulação ideológica"
+          ]
+        }
+      },
+      {
+        "title": "Poder Papal nas Sombras",
+        "hook": "Até que ponto o Papa controlou o veredicto?",
+        "angle": "Poder e manipulação papal",
+        "angleCategory": "politico",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "pergunta-incomoda",
+        "scriptOutline": "Frase contexto 3s → Mergulho direto 30-40s → Tensão aberta 10s → CTA 5s",
+        "visualSuggestion": "Close-up de um selo papal antigo sobre um pergaminho, luz de vela projetando sombras dramáticas.",
+        "cta": "Explore o jogo de poder no vídeo completo.",
+        "platform": "YouTube Shorts",
+        "format": "teaser-youtube-shorts",
+        "estimatedViews": 120000,
+        "scriptStyleId": "documentary",
+        "scriptStyleName": "Documentary",
+        "editorialObjectiveId": "hidden-truth",
+        "editorialObjectiveName": "Hidden Truth",
+        "avoidPatterns": [
+          "NÃO explique a história completa do papa — vá direto ao ponto de manipulação",
+          "NÃO repita datas — foco na ação papal",
+          "NÃO usar a mesma sequência de perguntas do teaser anterior"
+        ],
+        "visualPrompt": "A dramatic noir shot of an ancient papal seal embossed on parchment, illuminated by a single candle, with a faint shadow of a throne in the background, emphasizing secrecy and authority.",
+        "sceneCount": 6,
+        "microBriefV1": {
+          "version": "teaserMicroBriefV1",
+          "narrativeRole": "deep-dive",
+          "angleCategory": "politico",
+          "angle": "Poder e manipulação papal",
+          "facts": [
+            {
+              "text": "Em 1475, o príncipe‑bispo Johannes Hinderbach autorizou a abertura de processo contra a comunidade judaica de Trento, usando o desaparecimento da criança como pretexto.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "Hinderbach patrocinou a impressão de incunábulos, como o “Relatio de Simone puero tridentino”, que divulgou a história do suposto martírio em toda a Europa.",
+              "sourceRef": "[4]"
+            },
+            {
+              "text": "Em 1478, o Papa Sixto IV emitiu a bula “Facit nos pietas”, reconhecendo formalmente o processo como juridicamente correto, legitimando o confisco e a propaganda.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "O comissário papal Battista dei Giudici investigou o caso e concluiu que as acusações eram fabricadas, mas foi impedido de reverter as sentenças.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "O culto a Simão foi oficialmente abolido em 1965 por decreto do Arcebispo de Trento, reconhecendo a inocência dos judeus.",
+              "sourceRef": "[1]"
+            }
+          ],
+          "forbiddenElements": [
+            "gore",
+            "blood",
+            "explicit violence",
+            "close-up of faces",
+            "weapon imagery",
+            "religious symbols as threat"
+          ],
+          "allowedArtifacts": [
+            "documento",
+            "incunábulo",
+            "selo de cera",
+            "bula papal",
+            "registro",
+            "arquivo",
+            "mapa",
+            "monitor",
+            "headline",
+            "recorte de jornal"
+          ],
+          "notes": [
+            "máximo 1 frase de contexto",
+            "foco na manipulação política",
+            "não repetir fatos do gateway"
+          ]
+        }
+      },
+      {
+        "title": "Vozes Silenciadas",
+        "hook": "O que o testemunho de Samuel revela sobre o medo?",
+        "angle": "Histórias das vítimas e testemunhas",
+        "angleCategory": "humano",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "teaser-cinematografico",
+        "scriptOutline": "Frase contexto 3s → Mergulho direto 30-40s → Tensão aberta 10s → CTA 5s",
+        "visualSuggestion": "Corredor de biblioteca com luz de vela, manuscritos empilhados, sombra de uma silhueta de um homem sem rosto.",
+        "cta": "Conheça as histórias completas no vídeo completo.",
+        "platform": "YouTube Shorts",
+        "format": "teaser-youtube-shorts",
+        "estimatedViews": 110000,
+        "scriptStyleId": "narrative",
+        "scriptStyleName": "Narrative",
+        "editorialObjectiveId": "emotional-impact",
+        "editorialObjectiveName": "Emotional Impact",
+        "avoidPatterns": [
+          "NÃO descreva detalhes gráficos do corpo — foco nas emoções",
+          "NÃO repita a cronologia dos eventos — vá direto ao relato pessoal",
+          "NÃO usar a mesma narrativa visual do teaser anterior"
+        ],
+        "visualPrompt": "A dimly lit library corridor with flickering candlelight, stacked parchment scrolls, and a faceless silhouette standing in the distance, rendered in a noir cinematic aesthetic.",
+        "sceneCount": 6,
+        "microBriefV1": {
+          "version": "teaserMicroBriefV1",
+          "narrativeRole": "deep-dive",
+          "angleCategory": "humano",
+          "angle": "Histórias das vítimas e testemunhas",
+          "facts": [
+            {
+              "text": "O corpo de Simão foi encontrado na adega de Samuel de Nuremberg; o relato de Samuel ao tribunal foi usado como evidência de culpa judaica.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "O médico Giovanni Mattia Tiberino produziu um relatório de autópsia que interpretou lesões como “sinais rituais”, reforçando a narrativa de assassinato ritual.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "A xilogravura da Crônica de Nuremberg (1493) ilustrou o suposto assassinato, tornando‑se modelo visual para futuros libelos de sangue.",
+              "sourceRef": "[4]"
+            },
+            {
+              "text": "As execuções dos judeus incluíram decapitação para os que aceitaram batismo e queima para os que mantiveram a fé, conforme registros judiciais.",
+              "sourceRef": "[1]"
+            }
+          ],
+          "forbiddenElements": [
+            "gore",
+            "blood",
+            "explicit torture description",
+            "close-up of faces",
+            "weapon imagery",
+            "religious symbols as threat"
+          ],
+          "allowedArtifacts": [
+            "documento",
+            "registro",
+            "incunábulo",
+            "xilogravura",
+            "mapa",
+            "arquivo",
+            "livro-caixa",
+            "monitor",
+            "recorte de jornal",
+            "selo de cera"
+          ],
+          "notes": [
+            "máximo 1 frase de contexto",
+            "foco nas emoções das testemunhas",
+            "evitar detalhes gráficos"
+          ]
+        }
+      },
+      {
+        "title": "Imprensa que Manipulou a História",
+        "hook": "Quem escreveu a história que mudou a Europa?",
+        "angle": "Conspiração da imprensa e incunábulos",
+        "angleCategory": "conspirativo",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "plot-twist",
+        "scriptOutline": "Frase contexto 3s → Mergulho direto 30-40s → Tensão aberta 10s → CTA 5s",
+        "visualSuggestion": "Mesa de impressão com tipografia antiga, rolos de papel, e uma sombra de figura anônima ao fundo.",
+        "cta": "Descubra a trama completa no vídeo completo.",
+        "platform": "YouTube Shorts",
+        "format": "teaser-youtube-shorts",
+        "estimatedViews": 125000,
+        "scriptStyleId": "mystery",
+        "scriptStyleName": "Mystery",
+        "editorialObjectiveId": "controversy",
+        "editorialObjectiveName": "Controversy",
+        "avoidPatterns": [
+          "NÃO explicar todo o processo de impressão — vá direto ao ponto conspiratório",
+          "NÃO repetir fatos já usados em outros deep-dives — foco nos incunábulos",
+          "NÃO usar a mesma ritmo narrativo do teaser anterior"
+        ],
+        "visualPrompt": "A noir‑style shot of an early printing press with wooden type blocks, scattered parchment sheets, and a dim silhouette of an unknown figure looming behind, emphasizing secrecy and conspiracy.",
+        "sceneCount": 6,
+        "microBriefV1": {
+          "version": "teaserMicroBriefV1",
+          "narrativeRole": "deep-dive",
+          "angleCategory": "conspirativo",
+          "angle": "Conspiração da imprensa e incunábulos",
+          "facts": [
+            {
+              "text": "Hinderbach patrocinou a impressão de incunábulos, como o “Relatio de Simone puero tridentino”, que divulgou a história do suposto martírio em toda a Europa.",
+              "sourceRef": "[4]"
+            },
+            {
+              "text": "A xilogravura da Crônica de Nuremberg (1493) ilustrou o suposto assassinato, tornando‑se modelo visual para futuros libelos de sangue.",
+              "sourceRef": "[4]"
+            },
+            {
+              "text": "O caso de Trento estabeleceu um padrão de uso de documentos impressos e imagens para legitimar acusações de libelo de sangue por séculos.",
+              "sourceRef": "[5]"
+            },
+            {
+              "text": "O método de tortura chamado “squassada” foi aplicado aos acusados para extrair confissões que coincidiam com o roteiro esperado pelos inquisidores.",
+              "sourceRef": "[1]"
+            }
+          ],
+          "forbiddenElements": [
+            "gore",
+            "blood",
+            "explicit violence",
+            "close-up of faces",
+            "weapon imagery",
+            "religious symbols as threat"
+          ],
+          "allowedArtifacts": [
+            "incunábulo",
+            "manifesto",
+            "documento",
+            "xilogravura",
+            "registro",
+            "mapa",
+            "arquivo",
+            "selo de cera",
+            "monitor",
+            "recorte de jornal"
+          ],
+          "notes": [
+            "máximo 1 frase de contexto",
+            "foco na conspiração da imprensa",
+            "não repetir fatos de outros teasers"
+          ]
+        }
+      },
+      {
+        "title": "A Autópsia que Inventou um Ritual",
+        "hook": "A autópsia que inventou um ritual de sangue?",
+        "angle": "Análise forense dos supostos rituais",
+        "angleCategory": "cientifico",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "mini-documento",
+        "scriptOutline": "Frase contexto 3s → Mergulho direto 30-40s → Tensão aberta 10s → CTA 5s",
+        "visualSuggestion": "Mesa de laboratório com frascos de tinta, manuscritos médicos, e luz de lâmpada de óleo projetando sombras.",
+        "cta": "Veja a investigação completa no vídeo completo.",
+        "platform": "YouTube Shorts",
+        "format": "teaser-youtube-shorts",
+        "estimatedViews": 115000,
+        "scriptStyleId": "educational",
+        "scriptStyleName": "Educational",
+        "editorialObjectiveId": "deep-analysis",
+        "editorialObjectiveName": "Deep Analysis",
+        "avoidPatterns": [
+          "NÃO detalhar procedimentos de tortura — foco na análise forense",
+          "NÃO repetir explicações já dadas nos outros deep-dives",
+          "NÃO usar a mesma sequência visual do teaser anterior"
+        ],
+        "visualPrompt": "A noir‑inspired laboratory table illuminated by an oil lamp, displaying antique medical scrolls, ink bottles, and a faded portrait of a 15th‑century physician, creating a mysterious forensic atmosphere.",
+        "sceneCount": 6,
+        "microBriefV1": {
+          "version": "teaserMicroBriefV1",
+          "narrativeRole": "deep-dive",
+          "angleCategory": "cientifico",
+          "angle": "Análise forense dos supostos rituais",
+          "facts": [
+            {
+              "text": "O médico Giovanni Mattia Tiberino produziu um relatório de autópsia que interpretou lesões como “sinais rituais”, reforçando a narrativa de assassinato ritual.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "O método de tortura chamado “squassada” foi aplicado aos acusados para extrair confissões que coincidiam com o roteiro esperado pelos inquisidores.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "As confissões obtidas sob squassada incluíram detalhes teológicos que os juízes exigiam, como uso de sangue em vinho, consolidando o mito.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "O suposto “milagre” da incorruptibilidade do corpo foi explicado por processos de saponificação em água fria, usado como prova de santidade.",
+              "sourceRef": "[1]"
+            }
+          ],
+          "forbiddenElements": [
+            "gore",
+            "blood",
+            "explicit torture description",
+            "close-up of faces",
+            "weapon imagery",
+            "religious symbols as threat"
+          ],
+          "allowedArtifacts": [
+            "documento",
+            "incunábulo",
+            "registro",
+            "manuscrito médico",
+            "frascos de tinta",
+            "monitor",
+            "mapa",
+            "arquivo",
+            "selo de cera",
+            "recorte de jornal"
+          ],
+          "notes": [
+            "máximo 1 frase de contexto",
+            "foco na análise forense",
+            "evitar detalhes sangrentos"
+          ]
+        }
+      },
+      {
+        "title": "A Xilogravura que Ainda Assombra",
+        "hook": "Por que a xilogravura ainda assombra a internet?",
+        "angle": "Legado cultural e uso da xilogravura",
+        "angleCategory": "cultural",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "pergunta-incomoda",
+        "scriptOutline": "Frase contexto 3s → Mergulho direto 30-40s → Tensão aberta 10s → CTA 5s",
+        "visualSuggestion": "Parede de galeria com a xilogravura de 1493 iluminada por luz de vela, sombras projetando figuras digitais ao fundo.",
+        "cta": "Descubra o impacto cultural no vídeo completo.",
+        "platform": "YouTube Shorts",
+        "format": "teaser-youtube-shorts",
+        "estimatedViews": 118000,
+        "scriptStyleId": "documentary",
+        "scriptStyleName": "Documentary",
+        "editorialObjectiveId": "mystery-layers",
+        "editorialObjectiveName": "Mystery Layers",
+        "avoidPatterns": [
+          "NÃO repetir a história da xilogravura — foque no legado atual",
+          "NÃO usar termos técnicos demais — mantenha curiosidade",
+          "NÃO repetir estrutura do teaser anterior"
+        ],
+        "visualPrompt": "A noir‑styled gallery wall bathed in candlelight, showcasing the 1493 Nuremberg woodcut, with faint digital glitch effects overlaying the image, hinting at its modern internet resurgence.",
+        "sceneCount": 6,
+        "microBriefV1": {
+          "version": "teaserMicroBriefV1",
+          "narrativeRole": "deep-dive",
+          "angleCategory": "cultural",
+          "angle": "Legado cultural e uso da xilogravura",
+          "facts": [
+            {
+              "text": "A xilogravura da Crônica de Nuremberg (1493) ilustrou o suposto assassinato, tornando‑se modelo visual para futuros libelos de sangue.",
+              "sourceRef": "[4]"
+            },
+            {
+              "text": "A iconografia de Simon continuou a ser usada por grupos neonazistas digitais, como a imagem da xilogravura circulada em fóruns online.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "Em 2019, John Earnest citou o caso de Simão de Trento em seu manifesto antes do ataque à sinagoga de Poway, demonstrando a persistência do mito.",
+              "sourceRef": "[3]"
+            },
+            {
+              "text": "O caso de Trento estabeleceu um padrão de uso de documentos impressos e imagens para legitimar acusações de libelo de sangue por séculos.",
+              "sourceRef": "[5]"
+            }
+          ],
+          "forbiddenElements": [
+            "gore",
+            "blood",
+            "explicit violence",
+            "close-up of faces",
+            "weapon imagery",
+            "religious symbols as threat"
+          ],
+          "allowedArtifacts": [
+            "xilogravura",
+            "manifesto",
+            "documento",
+            "incunábulo",
+            "recorte de jornal",
+            "monitor",
+            "mapa",
+            "arquivo",
+            "selo de cera",
+            "headline"
+          ],
+          "notes": [
+            "máximo 1 frase de contexto",
+            "foco no legado cultural contemporâneo",
+            "evitar repetir fatos de outros teasers"
+          ]
+        }
+      }
+    ]
+  },
+  "errorStructure": {
+    "hasError": true,
+    "hasErrorError": true,
+    "hasResponseBody": false,
+    "errorKeys": [
+      "error"
+    ],
+    "errorErrorKeys": [
+      "message",
+      "type",
+      "code",
+      "failed_generation"
+    ]
+  }
+}

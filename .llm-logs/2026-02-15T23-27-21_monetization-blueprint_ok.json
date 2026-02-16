@@ -1,0 +1,170 @@
+{
+  "timestamp": "2026-02-15T23:27:21.532Z",
+  "taskId": "monetization-blueprint",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Monetization Blueprint — Planejamento Estratégico\r\n\r\nVocê é um estrategista de conteúdo especializado em monetização de vídeos **100% para YouTube**: Full Video (YouTube) + Shorts (YouTube Shorts). Nesta etapa, você vai criar o **ESQUELETO** do plano de monetização — a distribuição estratégica de papéis, ângulos e formatos.\r\n\r\n## 🎯 Objetivo\r\n\r\nAnalisar o dossiê e produzir um BLUEPRINT ESTRATÉGICO contendo:\r\n1. Título do plano\r\n2. Estilo visual único para todo o plano\r\n3. Distribuição de ângulos narrativos (1 por teaser, sem duplicatas)\r\n4. Distribuição de papéis narrativos (gateway/deep-dive/hook-only)\r\n5. Formatos de short para cada teaser (respeitando compatibilidade role×format)\r\n6. Direção criativa por item (scriptStyleId, editorialObjectiveId)\r\n7. Receita estimada e notas estratégicas\r\n\r\n## 🚨 REGRAS CRÍTICAS DO BLUEPRINT\r\n\r\n### Distribuição de Roles\r\n- **Gateway:** EXATAMENTE 1, SEMPRE o primeiro item do array\r\n- **Deep-Dive:** ~50-60% dos teasers restantes\r\n- **Hook-Only:** ~30-45% dos teasers restantes\r\n\r\n### Ângulos Narrativos\r\n- Cada teaser DEVE ter um `angleCategory` DIFERENTE de todos os outros\r\n- NÃO repita ângulos — se são 15 teasers, use 15 ângulos diferentes\r\n- Use apenas ângulos RELEVANTES para o dossiê\r\n\r\n### Compatibilidade Role × Format (OBRIGATÓRIO)\r\nRespeite esta tabela rigorosamente:\r\n\r\n| Role | Formatos PERMITIDOS | Formatos PROIBIDOS |\r\n|------|--------------------|--------------------|\r\n| **gateway** | plot-twist, teaser-cinematografico, lista-rapida | hook-brutal, frase-memoravel |\r\n| **deep-dive** | plot-twist, mini-documento, pergunta-incomoda, teaser-cinematografico | frase-memoravel |\r\n| **hook-only** | hook-brutal, frase-memoravel, pergunta-incomoda | mini-documento, lista-rapida |\r\n\r\n### Diversidade de Formatos\r\n- Use pelo menos 3 formatos diferentes\r\n- Máximo 50% dos teasers com o mesmo formato\r\n\r\n## 📐 O QUE PRODUZIR\r\n\r\nPara CADA teaser, defina:\r\n- `angleCategory`: Ângulo narrativo (do catálogo)\r\n- `angleName`: Nome descritivo do ângulo aplicado ao dossiê\r\n- `narrativeRole`: gateway, deep-dive ou hook-only\r\n- `shortFormatType`: Formato do short (compatível com o role)\r\n- `platform`: **YouTube Shorts** (obrigatório; não escolha outra plataforma)\r\n- `scriptStyleId` + `scriptStyleName`: Estilo de roteiro\r\n- `editorialObjectiveId` + `editorialObjectiveName`: Objetivo editorial\r\n\r\nPara o Full Video:\r\n- `angle`: Ângulo narrativo principal\r\n- `scriptStyleId` + `scriptStyleName`: Estilo de roteiro\r\n- `editorialObjectiveId` + `editorialObjectiveName`: Objetivo editorial\r\n\r\n## 💡 PENSAMENTO ESTRATÉGICO\r\n\r\nAntes de definir os ângulos, pense:\r\n1. Quais aspectos do dossiê são MAIS controversos? → hook-only\r\n2. Quais exigem contexto para impactar? → gateway ou deep-dive\r\n3. Quais têm potencial viral natural? → hook-brutal ou pergunta-incomoda\r\n4. Quais são ricos em detalhes? → mini-documento ou lista-rapida\r\n\r\n## ⚠️ NÃO GERE NESTA ETAPA\r\n\r\n- NÃO gere títulos dos teasers (serão gerados na etapa seguinte)\r\n- NÃO gere hooks (serão gerados na etapa seguinte)\r\n- NÃO gere scriptOutline (será gerado na etapa seguinte)\r\n- NÃO gere visualPrompt (será gerado na etapa seguinte)\r\n- NÃO gere avoidPatterns (serão gerados na etapa seguinte)\r\n- NÃO gere CTA (será gerado na etapa seguinte)\r\n\r\nEsta etapa é APENAS sobre ESTRATÉGIA — a execução criativa vem depois.\n## ⚙️ CONFIGURAÇÃO (CENAS FIXAS)\n- Full Video: 150 cenas\n- Gateway: 5 cenas\n- Deep-Dive: 6 cenas\n- Hook-Only: 4 cenas\n- Quantidade de teasers: 12\n\n\n### 📝 ESTILOS DE ROTEIRO DISPONÍVEIS\n\n- **`documentary`**: \"Documentário Profissional\"\n  Framework documental estruturado para true crime, investigações, perfis, ciência e história. Combina rigor jornalístico com storytelling envolvente e técnicas de retenção comprovadas.\n\n- **`mystery`**: \"Mistério Real - The Gap Files\"\n  Framework viral para mistérios históricos, conspirações e teorias. Fórmula \"Gap Glitch\" de máxima retenção + técnicas comprovadas de storytelling investigativo.\n\n- **`narrative`**: \"Narrativo Épico\"\n  Framework narrativo épico/emocional para jornadas humanas, dramas históricos e eventos transformadores. Foca na experiência emocional com resolução controlada para teasers.\n\n- **`educational`**: \"Educacional\"\n  Estilo educativo e envolvente, explicando conceitos complexos de forma acessível. Usa metáforas visuais e analogias sem ser condescendente.\n\n### 🎨 ESTILOS VISUAIS DISPONÍVEIS\n\n- **`epictok`**: \"Epictok Imersivo\"\n  Estilo de ilustração 2D vintage, tipo Studio Ghibli e Eyvind Earle.\n  _Base:_ Cinematic 2D illustration, Studio Ghibli background art style, Eyvind Earle inspired\n  _Atmosfera:_ dreamlike, nostalgic, epic adventure, serene yet mysterious\n\n- **`noir-cinematic`**: \"Noir Cinematográfico\"\n  Pintura digital cinematográfica dark: concept art com chiaroscuro pesado, texturas pictóricas sutis e composição de cinema noir. Entre fotorrealismo e ilustração.\n  _Base:_ Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric\n  _Atmosfera:_ somber, ominous, foreboding, investigative noir, oppressive silence, tension, morally ambiguous, fatalistic\n\n- **`noir-classic`**: \"Noir Clássico\"\n  Ilustração noir pura: ink wash painting, alto contraste preto e branco com acentos seletivos de cor. Inspirado em Sin City, Batman Dark Deco e graphic novels sombrias.\n  _Base:_ Dark noir graphic novel illustration, ink wash painting style, heavy black shadows, stark high-contrast chiaroscuro, stylized and painterly, not photorealistic\n  _Atmosfera:_ somber, ominous, foreboding, investigative noir, oppressive silence, tension, morally ambiguous, fatalistic\n\n- **`dark-reveal`**: \"Dark Reveal\"\n  Concept art dramático de revelação: objeto ou documento iluminado por um foco de luz, fundo escuro (urbano ou distópico), silhuetas, acentos quentes dourados ou vermelhos. Tom de verdade oculta e investigação.\n  _Base:_ Dramatic digital concept art, revelation and discovery aesthetic, single focal point in spotlight, dark environment, painterly with visible brushstrokes, not ink wash, not graphic novel\n  _Atmosfera:_ solemn significance, uncovering hidden truth, investigative, mysterious, ominous, historical weight, past meeting present\n\n- **`ghibli-dark`**: \"Ghibli Sombrio\"\n  Estilo Studio Ghibli em versão dark: ilustração 2D rica, mas com atmosfera de suspense, leve horror e noir. Ideal para true crime, mistério e investigação.\n  _Base:_ Cinematic 2D illustration, Studio Ghibli art style dark variant, painterly anime aesthetic, moody and atmospheric\n  _Atmosfera:_ suspenseful, subtle horror, noir mood, tense, mysterious, foreboding, solemn\n\n- **`gta6`**: \"GTA 6 Vibes\"\n  Estilo vibrante com cores saturadas e iluminação de Miami.\n  _Base:_ Cinematic photorealistic, modern AAA game aesthetic, GTA VI style\n  _Atmosfera:_ energetic, luxurious, urban tropical paradise, high-octane\n\n- **`cyberpunk`**: \"Cyberpunk Neon\"\n  Estilo futurista com neon, chuva e tecnologia avançada.\n  _Base:_ Cinematic cyberpunk, Blade Runner inspired, dark sci-fi\n  _Atmosfera:_ dystopian, mysterious, tech-noir, rain-soaked melancholy\n\n- **`oil-painting`**: \"Pintura a Óleo\"\n  Estilo de pintura a óleo clássica com pinceladas visíveis.\n  _Base:_ Classic oil painting, renaissance and baroque style, museum quality\n  _Atmosfera:_ timeless, contemplative, classical elegance, artistic reverence\n\n- **`photorealistic`**: \"Fotorrealista\"\n  Estilo fotorrealista como fotografia de cinema em alta resolução.\n  _Base:_ Cinematic photorealistic, ARRI Alexa 65mm, professional cinema camera\n  _Atmosfera:_ authentic, immersive, documentary realism, cinematic presence\n\n### 🎯 OBJETIVOS EDITORIAIS DISPONÍVEIS\n\n- **`full-reveal`**: \"Revelação Total\" [reveal]\n  Expõe toda a verdade de forma direta e impactante\n  _Instrução:_ Revele TODA a verdade do assunto de forma direta, sem rodeios. O espectador deve terminar o vídeo sabendo absolutamente tudo. Use provas, dados e fatos concretos para construir uma narra... [truncated 7677 chars]"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "📋 TEMA: Injustiça histórica ou assassinato de criança por religião\n📋 TÍTULO: Simão de trento, itália\n🧾 BRIEF (TEASERS) — versão: briefBundleV1\n\n🛡️ REGRAS HARD (GLOBAL SAFETY)\n- ❌ arma de fogo\n- ❌ gore\n- ❌ close-up de rosto humano\n- ❌ símbolos extremistas\n- ❌ armas de fogo, rifles, pistolas, munição, gatilho\n- ❌ atirador, execução, assassinato explícito, violência gráfica\n- ❌ sangue, gore, corpos mutilados, tortura explícita\n- ❌ close-up de mãos humanas, close-up de rostos humanos (evitar macro/anatomia)\n- ❌ cenas em sinagogas/templos com ameaça explícita (substituir por artefatos: manifesto, tela, manchete)\n- ❌ símbolos/extremismo contemporâneo em destaque (substituir por “texto recortado/blur”)\n\n🧰 ARTEFATOS VISUAIS PERMITIDOS\n- ✅ manifesto\n- ✅ documento\n- ✅ registro\n- ✅ incunábulo\n- ✅ xilogravura\n- ✅ documento, decreto, registro, arquivo, dossiê, carimbo, selo de cera\n- ✅ moedas, cofre, livro-caixa, inventário, recibo, contrato\n- ✅ monitor, tela, manifesto (sem arma), headline, recorte de jornal, thread desfocada\n- ✅ mapa, corredor de arquivo, sala de leitura, prateleiras, luz de vela, sombras\n- ✅ silhuetas não-identificáveis sem rosto/mãos em close\n\n🔫 MUNIÇÃO NARRATIVA (FATOS SAFE)\n1. Em 1475, o príncipe‑bispo Johannes Hinderbach autorizou a abertura de processo contra a comunidade judaica de Trento, usando o desaparecimento da criança como pretexto. [fonte: [1]]\n2. O frade Bernardino da Feltre pregou contra a usura judaica semanas antes da Páscoa, criando clima de suspeita que facilitou a acusação. [fonte: [1]]\n3. O corpo de Simão foi encontrado na adega de Samuel de Nuremberg; o relato de Samuel ao tribunal foi usado como evidência de culpa judaica. [fonte: [1]]\n4. O médico Giovanni Mattia Tiberino produziu um relatório de autópsia que interpretou lesões como “sinais rituais”, reforçando a narrativa de assassinato ritual. [fonte: [1]]\n5. O método de tortura chamado “squassada” (strappado) foi aplicado aos acusados para extrair confissões que coincidiam com o roteiro esperado pelos inquisidores. [fonte: [1]]\n6. As confissões obtidas sob squassada incluíram detalhes teológicos que os juízes exigiam, como uso de sangue em vinho, consolidando o mito. [fonte: [1]]\n7. Após as condenações, os bens dos judeus – casas, dinheiro e livros de contabilidade – foram confiscados pelo tesouro episcopal, aliviando dívidas locais. [fonte: [1]]\n8. Hinderbach patrocinou a impressão de incunábulos, como o “Relatio de Simone puero tridentino”, que divulgou a história do suposto martírio em toda a Europa. [fonte: [4]]\n9. A xilogravura da Crônica de Nuremberg (1493) ilustrou o suposto assassinato, tornando‑se modelo visual para futuros libelos de sangue. [fonte: [4]]\n10. Em 1478, o Papa Sixto IV emitiu a bula “Facit nos pietas”, reconhecendo formalmente o processo como juridicamente correto, legitimando o confisco e a propaganda. [fonte: [1]]\n11. O comissário papal Battista dei Giudici investigou o caso e concluiu que as acusações eram fabricadas, mas foi impedido de reverter as sentenças. [fonte: [1]]\n12. O culto a Simão foi oficialmente abolido em 1965 por decreto do Arcebispo de Trento, reconhecendo a inocência dos judeus. [fonte: [1]]\n13. A iconografia de Simon continuou a ser usada por grupos neonazistas digitais, como a imagem da xilogravura circulada em fóruns online. [fonte: [1]]\n14. Em 2019, John Earnest citou o caso de Simão de Trento em seu manifesto antes do ataque à sinagoga de Poway, demonstrando a persistência do mito. [fonte: [3]]\n15. O ataque de Poway resultou na morte de Lori Gilbert‑Kaye, que tentou proteger o rabino, e foi motivado por discurso antissemita que remete ao libelo de sangue. [fonte: [6]]\n16. O manifesto de Earnest descreve a “tecnologia de ódio” como a transição da imprensa do século XV para as redes sociais do século XXI. [fonte: [1]]\n17. A hipótese “Schweitzer” aponta um cristão que sugeriu não procurar a criança, mas foi suprimida para evitar investigação de acidente. [fonte: [1]]\n18. O suposto “milagre” da incorruptibilidade do corpo foi explicado por processos de saponificação em água fria, usado como prova de santidade. [fonte: [1]]\n19. As execuções dos judeus incluíram decapitação para os que aceitaram batismo e queima para os que mantiveram a fé, conforme registros judiciais. [fonte: [1]]\n20. O caso de Trento estabeleceu um padrão de uso de documentos impressos e imagens para legitimar acusações de libelo de sangue por séculos. [fonte: [5]]\n\n🎭 DIRETRIZES POR PAPEL\n- gateway: contextLevel=medium, facts=10-22\n- deep-dive: contextLevel=low, facts=8-16\n- hook-only: contextLevel=minimal, facts=3-6\n\nCrie o blueprint estratégico para o dossiê acima. Gere 12 slots de teasers com ângulos, roles e formatos."
+      }
+    ]
+  },
+  "parsed": {
+    "planTitle": "Blueprint de Monetização – Simão de Trento",
+    "visualStyleId": "noir-cinematic",
+    "visualStyleName": "Noir Cinematográfico",
+    "fullVideo": {
+      "angle": "conspirativo",
+      "scriptStyleId": "documentary",
+      "scriptStyleName": "Documentário Profissional",
+      "editorialObjectiveId": "hidden-truth",
+      "editorialObjectiveName": "Verdade Oculta"
+    },
+    "teaserSlots": [
+      {
+        "angleCategory": "cronologico",
+        "angleName": "Cronologia do caso Simão de Trento",
+        "narrativeRole": "gateway",
+        "shortFormatType": "lista-rapida",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "documentary",
+        "scriptStyleName": "Documentário Profissional",
+        "editorialObjectiveId": "explainer",
+        "editorialObjectiveName": "Explainer Didático"
+      },
+      {
+        "angleCategory": "economico",
+        "angleName": "Financeiro por trás das confissões e confiscos",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "plot-twist",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "mystery",
+        "scriptStyleName": "Mistério Real - The Gap Files",
+        "editorialObjectiveId": "deep-analysis",
+        "editorialObjectiveName": "Análise Profunda"
+      },
+      {
+        "angleCategory": "ideologico",
+        "angleName": "Ideologia anti‑judaica e seu uso político",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "mini-documento",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "educational",
+        "scriptStyleName": "Educacional",
+        "editorialObjectiveId": "deep-analysis",
+        "editorialObjectiveName": "Análise Profunda"
+      },
+      {
+        "angleCategory": "politico",
+        "angleName": "Poder e manipulação papal",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "pergunta-incomoda",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "documentary",
+        "scriptStyleName": "Documentário Profissional",
+        "editorialObjectiveId": "hidden-truth",
+        "editorialObjectiveName": "Verdade Oculta"
+      },
+      {
+        "angleCategory": "humano",
+        "angleName": "Histórias das vítimas e testemunhas",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "teaser-cinematografico",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "narrative",
+        "scriptStyleName": "Narrativo Épico",
+        "editorialObjectiveId": "emotional-impact",
+        "editorialObjectiveName": "Impacto Emocional"
+      },
+      {
+        "angleCategory": "conspirativo",
+        "angleName": "Conspiração da imprensa e incunábulos",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "plot-twist",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "mystery",
+        "scriptStyleName": "Mistério Real - The Gap Files",
+        "editorialObjectiveId": "controversy",
+        "editorialObjectiveName": "Polêmica Controlada"
+      },
+      {
+        "angleCategory": "cientifico",
+        "angleName": "Análise forense dos supostos rituais",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "mini-documento",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "educational",
+        "scriptStyleName": "Educacional",
+        "editorialObjectiveId": "deep-analysis",
+        "editorialObjectiveName": "Análise Profunda"
+      },
+      {
+        "angleCategory": "cultural",
+        "angleName": "Legado cultural e uso da xilogravura",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "pergunta-incomoda",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "documentary",
+        "scriptStyleName": "Documentário Profissional",
+        "editorialObjectiveId": "mystery-layers",
+        "editorialObjectiveName": "Camadas de Mistério"
+      },
+      {
+        "angleCategory": "paradoxal",
+        "angleName": "Paradoxo: santidade vs. saponificação",
+        "narrativeRole": "hook-only",
+        "shortFormatType": "hook-brutal",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "narrative",
+        "scriptStyleName": "Narrativo Épico",
+        "editorialObjectiveId": "viral-hook",
+        "editorialObjectiveName": "Gancho Viral"
+      },
+      {
+        "angleCategory": "evidencial",
+        "angleName": "Evidências fabricadas no julgamento",
+        "narrativeRole": "hook-only",
+        "shortFormatType": "frase-memoravel",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "documentary",
+        "scriptStyleName": "Documentário Profissional",
+        "editorialObjectiveId": "controversy",
+        "editorialObjectiveName": "Polêmica Controlada"
+      },
+      {
+        "angleCategory": "psicologico",
+        "angleName": "Manipulação psicológica das confissões",
+        "narrativeRole": "hook-only",
+        "shortFormatType": "pergunta-incomoda",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "mystery",
+        "scriptStyleName": "Mistério Real - The Gap Files",
+        "editorialObjectiveId": "viral-hook",
+        "editorialObjectiveName": "Gancho Viral"
+      },
+      {
+        "angleCategory": "propagandistico",
+        "angleName": "Propaganda moderna: de incunábulos a memes",
+        "narrativeRole": "hook-only",
+        "shortFormatType": "hook-brutal",
+        "platform": "YouTube Shorts",
+        "scriptStyleId": "educational",
+        "scriptStyleName": "Educacional",
+        "editorialObjectiveId": "viral-hook",
+        "editorialObjectiveName": "Gancho Viral"
+      }
+    ],
+    "estimatedTotalRevenue": "$15,000",
+    "strategicNotes": "Distribuição balanceada de papéis e formatos para maximizar retenção e engajamento; gateway estabelece contexto amplo, deep-dives aprofundam aspectos específicos, hook-only geram viralidade; uso de visual noir reforça atmosfera sombria."
+  },
+  "rawContent": "{\"planTitle\":\"Blueprint de Monetização – Simão de Trento\",\"visualStyleId\":\"noir-cinematic\",\"visualStyleName\":\"Noir Cinematográfico\",\"fullVideo\":{\"angle\":\"conspirativo\",\"scriptStyleId\":\"documentary\",\"scriptStyleName\":\"Documentário Profissional\",\"editorialObjectiveId\":\"hidden-truth\",\"editorialObjectiveName\":\"Verdade Oculta\"},\"estimatedTotalRevenue\":\"$15,000\",\"strategicNotes\":\"Distribuição balanceada de papéis e formatos para maximizar retenção e engajamento; gateway estabelece contexto amplo, deep-dives aprofundam aspectos específicos, hook-only geram viralidade; uso de visual noir reforça atmosfera sombria.\",\"teaserSlots\":[{\"angleCategory\":\"cronologico\",\"angleName\":\"Cronologia do caso Simão de Trento\",\"narrativeRole\":\"gateway\",\"shortFormatType\":\"lista-rapida\",\"platform\":\"YouTube Shorts\",\"scriptStyleId\":\"documentary\",\"scriptStyleName\":\"Documentário Profissional\",\"editorialObjectiveId\":\"explainer\",\"editorialObjectiveName\":\"Explainer Didático\"},{\"angleCategory\":\"economico\",\"angleName\":\"Financeiro por trás das confissões e confiscos\",\"narrativeRole\":\"deep-dive\",\"shortFormatType\":\"plot-twist\",\"platform\":\"YouTube Shorts\",\"scriptStyleId\":\"mystery\",\"scriptStyleName\":\"Mistério Real - The Gap Files\",\"editorialObjectiveId\":\"deep-analysis\",\"editorialObjectiveName\":\"Análise Profunda\"},{\"angleCategory\":\"ideologico\",\"angleName\":\"Ideologia anti‑judaica e seu uso político\",\"narrativeRole\":\"deep-dive\",\"shortFormatType\":\"mini-documento\",\"platform\":\"YouTube Shorts\",\"scriptStyleId\":\"educational\",\"scriptStyleName\":\"Educacional\",\"editorialObjectiveId\":\"deep-analysis\",\"editorialObjectiveName\":\"Análise Profunda\"},{\"angleCategory\":\"politico\",\"angleName\":\"Poder e manipulação papal\",\"narrativeRole\":\"deep-dive\",\"shortFormatType\":\"pergunta-incomoda\",\"platform\":\"YouTube Shorts\",\"scriptStyleId\":\"documentary\",\"scriptStyleName\":\"Documentário Profissional\",\"editorialObjectiveId\":\"hidden-truth\",\"editorialObjectiveName\":\"Verdade Oculta\"},{\"angleCategory\":\"humano\",\"angleName\":\"Histórias das vítimas e testemunhas\",\"narrativeRole\":\"deep-dive\",\"shortFormatType\":\"teaser-cinematografico\",\"platform\":\"YouTube Shorts\",\"scriptStyleId\":\"narrative\",\"scriptStyleName\":\"Narrativo Épico\",\"editorialObjectiveId\":\"emotional-impact\",\"editorialObjectiveName\":\"Impacto Emocional\"},{\"angleCategory\":\"conspirativo\",\"angleName\":\"Conspiração da imprensa e incunábulos\",\"narrativeRole\":\"deep-dive\",\"shortFormatType\":\"plot-twist\",\"platform\":\"YouTube Shorts\",\"scriptStyleId\":\"mystery\",\"scriptStyleName\":\"Mistério Real - The Gap Files\",\"editorialObjectiveId\":\"controversy\",\"editorialObjectiveName\":\"Polêmica Controlada\"},{\"angleCategory\":\"cientifico\",\"angleName\":\"Análise forense dos supostos rituais\",\"narrativeRole\":\"deep-dive\",\"shortFormatType\":\"mini-documento\",\"platform\":\"YouTube Shorts\",\"scriptStyleId\":\"educational\",\"scriptStyleName\":\"Educacional\",\"editorialObjectiveId\":\"deep-analysis\",\"editorialObjectiveName\":\"Análise Profunda\"},{\"angleCategory\":\"cultural\",\"angleName\":\"Legado cultural e uso da xilogravura\",\"narrativeRole\":\"deep-dive\",\"shortFormatType\":\"pergunta-incomoda\",\"platform\":\"YouTube Shorts\",\"scriptStyleId\":\"documentary\",\"scriptStyleName\":\"Documentário Profissional\",\"editorialObjectiveId\":\"mystery-layers\",\"editorialObjectiveName\":\"Camadas de Mistério\"},{\"angleCategory\":\"paradoxal\",\"angleName\":\"Paradoxo: santidade vs. saponificação\",\"narrativeRole\":\"hook-only\",\"shortFormatType\":\"hook-brutal\",\"platform\":\"YouTube Shorts\",\"scriptStyleId\":\"narrative\",\"scriptStyleName\":\"Narrativo Épico\",\"editorialObjectiveId\":\"viral-hook\",\"editorialObjectiveName\":\"Gancho Viral\"},{\"angleCategory\":\"evidencial\",\"angleName\":\"Evidências fabricadas no julgamento\",\"narrativeRole\":\"hook-only\",\"shortFormatType\":\"frase-memoravel\",\"platform\":\"YouTube Shorts\",\"scriptStyleId\":\"documentary\",\"scriptStyleName\":\"Documentário Profissional\",\"editorialObjectiveId\":\"controversy\",\"editorialObjectiveName\":\"Polêmica Controlada\"},{\"angleCategory\":\"psicologico\",\"angleName\":\"Manipulação psicológica das confissões\",\"narrativeRole\":\"hook-only\",\"shortFormatType\":\"pergunta-incomoda\",\"platform\":\"YouTube Shorts\",\"scriptStyleId\":\"mystery\",\"scriptStyleName\":\"Mistério Real - The Gap Files\",\"editorialObjectiveId\":\"viral-hook\",\"editorialObjectiveName\":\"Gancho Viral\"},{\"angleCategory\":\"propagandistico\",\"angleName\":\"Propaganda moderna: de incunábulos a memes\",\"narrativeRole\":\"hook-only\",\"shortFormatType\":\"hook-brutal\",\"platform\":\"YouTube Shorts\",\"scriptStyleId\":\"educational\",\"scriptStyleName\":\"Educacional\",\"editorialObjectiveId\":\"viral-hook\",\"editorialObjectiveName\":\"Gancho Viral\"}]}"
+}

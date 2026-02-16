@@ -29,7 +29,9 @@ export interface ScriptGenerationRequest {
   visualIdentityContext?: string
   language: string
   narrationLanguage?: string // Idioma da narração (pode ser diferente do roteiro)
-  targetDuration: number // em segundos
+  targetDuration: number // em segundos (derivado de targetSceneCount*5 quando targetSceneCount presente)
+  /** Fonte da verdade: quantidade alvo de cenas. Quando presente, prevalece sobre targetDuration. */
+  targetSceneCount?: number
   style?: string // ID do estilo de roteiro
   scriptStyleDescription?: string // Descrição do estilo de roteiro do banco
   scriptStyleInstructions?: string // Instruções do estilo de roteiro do banco
@@ -98,6 +100,9 @@ export interface ScriptGenerationRequest {
   shortFormatType?: string
   strategicNotes?: string // Notas estratégicas do plano de monetização
   avoidPatterns?: string[] // Anti-padrões do monetizador ("O que NÃO fazer")
+
+  /** Brief persistido do Dossier (para reduzir contexto em TEASERS) */
+  briefBundleV1?: any
 }
 
 export interface ScriptScene {
@@ -158,8 +163,16 @@ export interface TTSRequest {
   text: string
   voiceId: string
   language?: string
-  speed?: number // 0.5 a 2.0
-  stability?: number // 0 a 1
+  /** ElevenLabs voice_settings.speed (oficial: 0.7 a 1.2). */
+  speed?: number
+  /** ElevenLabs model_id (ex: "eleven_v3", "eleven_multilingual_v2"). */
+  modelId?: string
+  /**
+   * ElevenLabs stability.
+   * Observação: a API pode aceitar somente {0.0, 0.5, 1.0} (Creative/Natural/Robust).
+   * Mantemos como number para compatibilidade e normalizamos no provider.
+   */
+  stability?: number
   similarity?: number // 0 a 1
 }
 

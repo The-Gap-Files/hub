@@ -10,10 +10,14 @@
  * O plano é retornado para aprovação manual — NÃO cria outputs automaticamente.
  */
 
+import { Prisma } from '@prisma/client'
 import { prisma } from '../../../utils/prisma'
 import { generateMonetizationPlanV2 } from '../../../services/monetization-planner-v2.service'
+import { validateMonetizationPlan } from '../../../services/monetization-validator.service'
 import { costLogService } from '../../../services/cost-log.service'
 import { calculateLLMCost } from '../../../constants/pricing'
+import { validatorsEnabled } from '../../../utils/validators'
+import { getOrCreateBriefBundleV1ForDossier } from '../../../services/briefing/briefing.service'
 
 export default defineEventHandler(async (event) => {
   const dossierId = getRouterParam(event, 'id')
@@ -27,23 +31,19 @@ export default defineEventHandler(async (event) => {
 
   // Validar body
   const rawBody = await readBody(event)
-  const teaserDuration = Number(rawBody?.teaserDuration)
-  const fullVideoDuration = Number(rawBody?.fullVideoDuration)
-  const teaserCount = rawBody?.teaserCount ? Number(rawBody.teaserCount) : 6
-
-  if (![35, 55, 115].includes(teaserDuration)) {
-    throw createError({
-      statusCode: 400,
-      message: 'teaserDuration deve ser 35, 55 ou 115 (segundos)'
-    })
-  }
-
-  if (![300, 600, 900].includes(fullVideoDuration)) {
-    throw createError({
-      statusCode: 400,
-      message: 'fullVideoDuration deve ser 300, 600 ou 900 (segundos = 5, 10 ou 15 minutos)'
-    })
-  }
+  const confirmRegeneration = !!rawBody?.confirmRegeneration
+  const forceBriefRegeneration = !!rawBody?.forceBriefRegeneration
+  // 🔒 Monetização agora é orientada por CENAS (não por seleção de tempo na UI).
+  // Mantemos duração técnica fixa para compatibilidade do pipeline atual.
+  const teaserDuration = 35
+  const fullVideoDuration = 900
+  const teaserCount = rawBody?.teaserCount ? Number(rawBody.teaserCount) : 12
+  const sceneConfig = {
+    hookOnly: 4,
+    deepDive: 6,
+    gateway: 5,
+    fullVideo: 150
+  } as const
 
   if (teaserCount < 4 || teaserCount > 15) {
     throw createError({
@@ -71,12 +71,105 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
+    // Se já houver outputs criados a partir do plano ativo, exigir confirmação explícita
+    // para desvincular/cancelar conforme regra de negócio.
+    const activePlans = await prisma.monetizationPlan.findMany({
+      where: { dossierId, isActive: true },
+      select: { id: true, planData: true }
+    })
+
+    const candidateOutputIds = new Set<string>()
+    for (const plan of activePlans) {
+      const pkg = (plan.planData as any)?._youtubePackage
+      if (pkg?.fullOutputId) candidateOutputIds.add(String(pkg.fullOutputId))
+      if (Array.isArray(pkg?.teaserOutputIds)) {
+        for (const id of pkg.teaserOutputIds) {
+          if (id) candidateOutputIds.add(String(id))
+        }
+      }
+    }
+
+    const outputWhereOr: any[] = []
+    if (candidateOutputIds.size > 0) {
+      outputWhereOr.push({ id: { in: Array.from(candidateOutputIds) } })
+    }
+    for (const plan of activePlans) {
+      outputWhereOr.push({
+        monetizationContext: {
+          path: ['planId'],
+          equals: plan.id
+        }
+      })
+    }
+
+    const linkedOutputs = outputWhereOr.length > 0
+      ? await prisma.output.findMany({
+        where: {
+          dossierId,
+          OR: outputWhereOr
+        },
+        select: {
+          id: true,
+          status: true
+        }
+      })
+      : []
+
+    const completedStatuses = new Set(['COMPLETED', 'RENDERED'])
+    const completedCount = linkedOutputs.filter(o => completedStatuses.has(o.status)).length
+    const pendingCount = linkedOutputs.filter(o => o.status === 'PENDING' || o.status === 'GENERATING').length
+
+    if (linkedOutputs.length > 0 && !confirmRegeneration) {
+      throw createError({
+        statusCode: 409,
+        statusMessage: 'CONFIRM_REGENERATION_REQUIRED',
+        message: `Esta regeneração vai desvincular ${linkedOutputs.length} output(s) do monetizador. ${pendingCount} pendente(s) será(ão) cancelado(s) e ${completedCount} concluído(s) ficará(ão) concluído(s), porém sem relação com o plano de monetização.`
+      })
+    }
+
+    if (linkedOutputs.length > 0 && confirmRegeneration) {
+      const linkedIds = linkedOutputs.map(o => o.id)
+      await prisma.$transaction([
+        prisma.output.updateMany({
+          where: {
+            id: { in: linkedIds },
+            status: { in: ['PENDING', 'GENERATING'] }
+          },
+          data: {
+            status: 'CANCELLED',
+            errorMessage: 'Cancelado automaticamente após regeneração da monetização.'
+          }
+        }),
+        prisma.output.updateMany({
+          where: {
+            id: { in: linkedIds }
+          },
+          data: {
+            monetizationContext: Prisma.DbNull
+          }
+        }),
+        prisma.outputRelation.deleteMany({
+          where: {
+            OR: [
+              { mainOutputId: { in: linkedIds } },
+              { relatedOutputId: { in: linkedIds } }
+            ]
+          }
+        })
+      ])
+    }
+
     console.log(`[SuggestMonetization] 🚀 Iniciando pipeline V2 para dossiê ${dossierId}`)
+
+    // Brief persistido (contexto reduzido) para TEASERS — Full Video permanece com dossiê completo.
+    // TEMPORÁRIO: forceBriefRegeneration=true ao regenerar monetização (brief refeito e sobrescrito).
+    const brief = await getOrCreateBriefBundleV1ForDossier(dossierId, { force: forceBriefRegeneration })
 
     const result = await generateMonetizationPlanV2({
       theme: dossier.theme,
       title: dossier.title,
       visualIdentityContext: dossier.visualIdentityContext || undefined,
+      briefBundleV1: brief.bundle,
       sources: dossier.sources.map(s => ({
         title: s.title,
         content: s.content,
@@ -101,8 +194,34 @@ export default defineEventHandler(async (event) => {
       teaserDuration: teaserDuration as 35 | 55 | 115,
       fullVideoDuration: fullVideoDuration as 300 | 600 | 900,
       teaserCount,
+      sceneConfig,
       creativeDirection: rawBody?.creativeDirection
     })
+
+    // Validação LLM do plano completo (diversidade, coerência, funil)
+    // TEMPORÁRIO: validadores e loops de repair desativados globalmente.
+    const validationResult = validatorsEnabled()
+      ? await validateMonetizationPlan({
+        fullVideo: {
+          title: result.plan.fullVideo.title,
+          hook: result.plan.fullVideo.hook,
+          angle: result.plan.fullVideo.angle,
+          scriptStyleId: result.plan.fullVideo.scriptStyleId,
+          keyPoints: result.plan.fullVideo.keyPoints,
+          emotionalArc: result.plan.fullVideo.emotionalArc
+        },
+        teasers: result.plan.teasers.map((t: any) => ({
+          title: t.title,
+          hook: t.hook,
+          angle: t.angle,
+          angleCategory: t.angleCategory,
+          narrativeRole: t.narrativeRole,
+          shortFormatType: t.shortFormatType,
+          scriptOutline: t.scriptOutline,
+          avoidPatterns: t.avoidPatterns
+        }))
+      })
+      : { approved: true }
 
     // Calcular custo real
     const inputTokens = result.usage?.inputTokens ?? 0
@@ -157,6 +276,7 @@ export default defineEventHandler(async (event) => {
       success: true,
       planId: savedPlan.id,
       plan: result.plan,
+      validation: validationResult,
       usage: result.usage,
       cost,
       provider: result.provider,
@@ -164,7 +284,8 @@ export default defineEventHandler(async (event) => {
       config: {
         teaserDuration,
         fullVideoDuration,
-        teaserCount
+        teaserCount,
+        sceneConfig
       },
       stageTimings: result.stageTimings,
       createdAt: savedPlan.createdAt

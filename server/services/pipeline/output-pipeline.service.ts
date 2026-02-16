@@ -32,10 +32,24 @@ import { validateReplicatePricing } from '../../constants/pricing'
 import { mapPersonsFromPrisma, mapNeuralInsightsFromNotes } from '../../utils/format-intelligence-context'
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { spawn } from 'node:child_process'
 import ffmpeg from 'fluent-ffmpeg'
 import ffmpegInstaller from '@ffmpeg-installer/ffmpeg'
+import ffprobeInstaller from '@ffprobe-installer/ffprobe'
 import { videoPipelineService } from './video-pipeline.service'
 import { createPipelineLogger } from '../../utils/pipeline-logger'
+import { validatorsEnabled } from '../../utils/validators'
+import {
+  appendPauseTagsForV3,
+  clamp,
+  computeHookOnlySceneBudgetsSeconds,
+  computeSpeedForBudget,
+  countWords,
+  estimateSpeechSeconds,
+  resolveHookOnlyTotalDurationSeconds,
+  stripInlineAudioTags,
+  stripSsmlBreakTags
+} from '../../utils/hook-only-audio-timing'
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path)
 import os from 'node:os'
@@ -63,14 +77,15 @@ export class OutputPipelineService {
         script: output.scriptApproved,
         images: output.imagesApproved,
         audio: output.audioApproved,
-        motion: output.enableMotion ? output.videosApproved : 'N/A'
+        motion: output.videosApproved
       })
 
       // Validate Approvals
       if (!output.scriptApproved) throw new Error("Aprovação pendente: Roteiro")
       if (!output.imagesApproved) throw new Error("Aprovação pendente: Imagens (Visual)")
       if (!output.audioApproved) throw new Error("Aprovação pendente: Áudio (Narração)")
-      if (output.enableMotion && !output.videosApproved) throw new Error("Aprovação pendente: Motion (Vídeos)")
+      // Motion agora é etapa obrigatória (sempre) antes do render.
+      if (!output.videosApproved) throw new Error("Aprovação pendente: Motion (Vídeos)")
 
       // Execute Render
       await this.logExecution(outputId, 'render', 'started', 'Renderizando Master...')
@@ -125,7 +140,6 @@ export class OutputPipelineService {
    */
   public async generateScript(outputId: string) {
     const output = await this.loadOutputContext(outputId)
-    const scriptProvider = await providerManager.getScriptProvider()
     const dossier = output.dossier
 
     // Construir prompt com TODAS as fontes
@@ -166,8 +180,11 @@ export class OutputPipelineService {
       musicMood: output.classificationId ? getClassificationById(output.classificationId)?.musicMood : undefined,
       visualGuidance: output.classificationId ? getClassificationById(output.classificationId)?.visualGuidance : undefined,
 
-      // Configuração de duração e tipo
-      targetDuration: output.duration || 300,
+      // Configuração de duração e tipo (fonte da verdade: cena; duration derivado quando sceneCount existe)
+      targetDuration: (output.monetizationContext as any)?.sceneCount
+        ? (output.monetizationContext as any).sceneCount * 5
+        : (output.duration || 300),
+      targetSceneCount: (output.monetizationContext as any)?.sceneCount,
       targetWPM: output.targetWPM || 150,
 
       // OUTPUT TYPE ESPECÍFICO
@@ -250,6 +267,30 @@ export class OutputPipelineService {
       scriptLog.info(`💰 Monetization meta: role=${meta.narrativeRole || 'none'}, style=${meta.scriptStyleId || 'default'}, editorial=${meta.editorialObjectiveId || 'default'}, avoidPatterns=${meta.avoidPatterns?.length || 0}, notes=${meta.strategicNotes ? 'yes' : 'no'}`)
     }
 
+    // ── Teasers: depender do outline aprovado (sem dossiê/brief global) ─────────
+    if (outlineData._monetizationMeta?.itemType === 'teaser') {
+      promptContext.sources = []
+      promptContext.additionalSources = []
+      promptContext.userNotes = []
+      promptContext.visualReferences = []
+      promptContext.researchData = undefined
+      promptContext.persons = []
+      promptContext.neuralInsights = []
+      scriptLog.info('🧼 Teaser: contexto do dossiê removido (roteiro depende do outline aprovado)')
+    }
+
+    // ── Resolver Script Provider (ROTEAMENTO SOLID) ────────
+    // Hook-only usa provider dedicado com prompts cirúrgicos (~130 linhas, sem ruído).
+    // Outros roles usam o provider genérico (~270 linhas, regras completas).
+    const isHookOnly = promptContext.narrativeRole === 'hook-only'
+    const scriptProvider = isHookOnly
+      ? await providerManager.getHookOnlyScriptProvider()
+      : await providerManager.getScriptProvider()
+
+    if (isHookOnly) {
+      scriptLog.info(`💥 HOOK-ONLY: usando provider dedicado (${scriptProvider.getName()}) com prompts cirúrgicos.`)
+    }
+
     // ── Gerar roteiro com loop de validação (máx 1 retry) ────────
     const MAX_SCRIPT_RETRIES = 10
     let scriptResponse = await scriptProvider.generate(promptContext)
@@ -268,7 +309,11 @@ export class OutputPipelineService {
     }).catch(() => { })
 
     // Validar e retry se reprovado (apenas para teasers com narrativeRole)
-    if (promptContext.narrativeRole && outlineData._monetizationMeta?.itemType === 'teaser') {
+    // TEMPORÁRIO: validadores e loops de retry desativados globalmente.
+    if (!validatorsEnabled()) {
+      scriptLog.info('⏭️ Validação DESABILITADA temporariamente (bypass global).')
+    }
+    if (validatorsEnabled() && promptContext.narrativeRole && outlineData._monetizationMeta?.itemType === 'teaser') {
       // Histórico acumulativo de feedbacks — garante que erros corrigidos não voltem
       const validationHistory: string[] = []
 
@@ -281,7 +326,7 @@ export class OutputPipelineService {
               narrativeRole: promptContext.narrativeRole,
               angleCategory: outlineData._monetizationMeta?.angleCategory,
               shortFormatType: promptContext.shortFormatType,
-              targetDuration: output.duration || undefined,
+              targetDuration: promptContext.targetDuration || output.duration || undefined,
               avoidPatterns: promptContext.avoidPatterns,
               selectedHookLevel: (outlineData as any)._selectedHookLevel || undefined,
               plannedOpenLoops: outlineData.openLoops?.filter((l: any) => l.closedAtBeat === null)
@@ -785,6 +830,11 @@ export class OutputPipelineService {
 
     const ttsProvider = providerManager.getTTSProvider()
 
+    const narrativeRole = (output.monetizationContext as any)?.narrativeRole
+    const isHookOnly = narrativeRole === 'hook-only'
+    const hookOnlyTotalSeconds = isHookOnly ? resolveHookOnlyTotalDurationSeconds(output.duration) : undefined
+    const hookOnlyBudgets = isHookOnly ? computeHookOnlySceneBudgetsSeconds(hookOnlyTotalSeconds!) : undefined
+
     const CONCURRENCY_LIMIT = 5
     const sceneChunks = []
     for (let i = 0; i < scenes.length; i += CONCURRENCY_LIMIT) {
@@ -807,35 +857,127 @@ export class OutputPipelineService {
           console.log(`[OutputPipeline] 🗑️ Scene ${scene.order + 1}: ${existingAudios.length} áudio(s) anterior(es) apagado(s).`)
         }
 
-        const targetWPM = output.targetWPM || 150 // Padrão 150 WPM (Conversa normal)
-
-        // Calcular velocidade baseada no WPM desejado
-        // 150 WPM = 1.0x (Normal)
-        // 180 WPM = 1.2x (Rápido)
-        // 120 WPM = 0.8x (Lento)
-        const calculatedSpeed = targetWPM / 150
-
-        // Garantir limites da API do ElevenLabs (0.7 a 1.2 oficial)
-        const safeSpeed = Math.max(0.7, Math.min(1.2, calculatedSpeed))
-
-        const wordCount = scene.narration.split(/\s+/).length
-        const estimatedAudioDuration = (wordCount / targetWPM) * 60
-
-        console.log(`[OutputPipeline] 🗣️ Generating audio for scene ${scene.order + 1}. WPM: ${targetWPM}, Speed: ${safeSpeed.toFixed(2)}x, Est. Duration: ${estimatedAudioDuration.toFixed(2)}s`)
+        const targetWPM = output.targetWPM || 150 // legado (não é mais UX), ainda útil como default geral
+        const calculatedSpeedFromWPM = targetWPM / 150
+        const safeSpeedFromWPM = Math.max(0.7, Math.min(1.2, calculatedSpeedFromWPM))
 
         // Validação: Voice ID é obrigatório
         if (!output.voiceId) {
           throw new Error('[OutputPipeline] ❌ Voice ID is required. Please select a voice before generating output.')
         }
 
-        const request: TTSRequest = {
-          text: scene.narration,
-          voiceId: output.voiceId,
-          language: output.narrationLanguage || 'pt-BR',
-          speed: safeSpeed
+        // ---------------------------------------------------------------------
+        // Hook-Only timing (16–22s) — controle interno por budgets + speed + tags v3
+        // Sem FFmpeg determinístico de silêncio: usamos apenas tags inline do Eleven v3.
+        // ---------------------------------------------------------------------
+        const sceneIndex = scene.order // 0-based
+        const targetBudgetSeconds = (isHookOnly && hookOnlyBudgets)
+          ? (hookOnlyBudgets[sceneIndex] ?? 5)
+          : 5
+
+        // Texto base enviado ao TTS: permitir tags inline v3 ([pause], [breathes], etc.),
+        // mas bloquear SSML <break> (queremos SOMENTE tags inline).
+        const narrationRawForTTS = stripSsmlBreakTags(scene.narration).trim()
+        // Texto para contagem de palavras: remove tags v3 inline (não devem contar como palavras)
+        const narrationForCounting = stripInlineAudioTags(scene.narration)
+        const wc = countWords(narrationForCounting)
+
+        let speed = isHookOnly
+          ? computeSpeedForBudget(wc, targetBudgetSeconds)
+          : safeSpeedFromWPM
+
+        // Para Hook-Only, vamos ajustar por tentativa (máx 3) usando:
+        // - speed (0.7–1.2)
+        // - [pause] tags (Eleven v3) no texto enviado ao TTS
+        let pauseCount = 0
+        if (isHookOnly) {
+          const estSpeech = estimateSpeechSeconds(wc, speed)
+          const estRemaining = targetBudgetSeconds - estSpeech
+          // Se for CTA (última cena), permitir preencher o tempo com pausas (silêncio)
+          const isLastScene = sceneIndex === scenes.length - 1
+          if (isLastScene && estRemaining > 0.8) {
+            pauseCount = clamp(Math.ceil(estRemaining / 0.6), 0, 14)
+          }
         }
 
-        const audioResponse = await ttsProvider.synthesize(request)
+        const maxAttempts = isHookOnly ? 3 : 1
+        const toleranceSeconds = isHookOnly ? 0.35 : 999
+
+        let audioResponse: any | null = null
+        let realDuration = 0
+
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+          const ttsText = isHookOnly
+            ? appendPauseTagsForV3(narrationRawForTTS, pauseCount)
+            : narrationRawForTTS
+
+          if (isHookOnly) {
+            console.log(`[OutputPipeline] 🗣️ Scene ${scene.order + 1} hook-only attempt ${attempt}: budget=${targetBudgetSeconds.toFixed(2)}s speed=${speed.toFixed(2)} pauses=${pauseCount} words=${wc}`)
+          } else {
+            const estimatedAudioDuration = wc > 0 ? (wc / targetWPM) * 60 : 0
+            console.log(`[OutputPipeline] 🗣️ Generating audio for scene ${scene.order + 1}. WPM: ${targetWPM}, Speed: ${speed.toFixed(2)}x, Est. Duration: ${estimatedAudioDuration.toFixed(2)}s`)
+          }
+
+          const request: TTSRequest = {
+            text: ttsText,
+            voiceId: output.voiceId,
+            language: output.narrationLanguage || 'pt-BR',
+            speed,
+            ...(isHookOnly ? { modelId: 'eleven_v3' } : {})
+          }
+
+          audioResponse = await ttsProvider.synthesize(request)
+
+          // Registrar custo por tentativa (hook-only pode ter retries)
+          costLogService.log({
+            outputId,
+            resource: 'narration',
+            action: 'create',
+            provider: audioResponse.costInfo.provider,
+            model: audioResponse.costInfo.model,
+            cost: audioResponse.costInfo.cost,
+            metadata: {
+              ...audioResponse.costInfo.metadata,
+              attempt,
+              speed,
+              pauseCount,
+              isHookOnly,
+              targetBudgetSeconds
+            },
+            detail: `Scene ${scene.order + 1} narration attempt ${attempt} - ${ttsText.length} chars`
+          }).catch(() => { })
+
+          if (!isHookOnly) {
+            realDuration = audioResponse.duration
+            break
+          }
+
+          // Medir duração REAL do MP3 (com pausas) para fitting.
+          realDuration = await this.probeAudioDuration(Buffer.from(audioResponse.audioBuffer)).catch(() => audioResponse.duration)
+          const diff = realDuration - targetBudgetSeconds
+
+          if (Math.abs(diff) <= toleranceSeconds || attempt === maxAttempts) {
+            break
+          }
+
+          // Ajuste de speed com base na razão real/target (controle proporcional)
+          const ratio = realDuration / Math.max(0.1, targetBudgetSeconds)
+          speed = clamp(speed * ratio, 0.7, 1.2)
+
+          if (diff > 0) {
+            // longo demais: reduzir pausas primeiro
+            if (pauseCount > 0) {
+              pauseCount = Math.max(0, pauseCount - Math.ceil(diff / 0.6))
+            }
+          } else {
+            // curto demais: se já estamos no limite de speed lento, acrescentar pausas
+            if (speed <= 0.71) {
+              pauseCount = clamp(pauseCount + Math.ceil((-diff) / 0.6), 0, 18)
+            }
+          }
+        }
+
+        if (!audioResponse) return
 
         await prisma.audioTrack.create({
           data: {
@@ -847,23 +989,11 @@ export class OutputPipelineService {
             fileData: Buffer.from(audioResponse.audioBuffer) as any,
             mimeType: 'audio/mpeg',
             originalSize: audioResponse.audioBuffer.length,
-            duration: audioResponse.duration,
+            duration: realDuration || audioResponse.duration,
             // Word-level timestamps do ElevenLabs /with-timestamps
             alignment: audioResponse.wordTimings ? audioResponse.wordTimings as any : undefined
           }
         })
-
-        // Registrar custo da narração (fire-and-forget) — usa costInfo do provider
-        costLogService.log({
-          outputId,
-          resource: 'narration',
-          action: 'create',
-          provider: audioResponse.costInfo.provider,
-          model: audioResponse.costInfo.model,
-          cost: audioResponse.costInfo.cost,
-          metadata: audioResponse.costInfo.metadata,
-          detail: `Scene ${scene.order + 1} narration - ${scene.narration.length} chars`
-        }).catch(() => { })
       }))
     }
 
@@ -873,6 +1003,51 @@ export class OutputPipelineService {
         where: { id: outputId },
         data: { ttsProvider: ttsProvider.getName().toUpperCase() }
       })
+    }
+  }
+
+  /**
+   * Extrai a duração real de um buffer MP3 usando ffprobe.
+   * Usado no fitting do Hook-Only (pausas inline v3 afetam a duração real).
+   */
+  private async probeAudioDuration(audioBuffer: Buffer): Promise<number> {
+    const tempPath = path.join(os.tmpdir(), `tts-probe-${Date.now()}-${Math.random().toString(36).slice(2)}.mp3`)
+
+    try {
+      await fs.writeFile(tempPath, audioBuffer)
+
+      const duration = await new Promise<number>((resolve, reject) => {
+        const proc = spawn(ffprobeInstaller.path, [
+          '-v', 'quiet',
+          '-print_format', 'json',
+          '-show_format',
+          tempPath
+        ])
+
+        let stdout = ''
+        let stderr = ''
+
+        proc.stdout.on('data', (data: Buffer) => { stdout += data.toString() })
+        proc.stderr.on('data', (data: Buffer) => { stderr += data.toString() })
+
+        proc.on('close', (code: number | null) => {
+          if (code !== 0) return reject(new Error(`ffprobe exit code ${code}: ${stderr}`))
+          try {
+            const parsed = JSON.parse(stdout)
+            const dur = parseFloat(parsed?.format?.duration)
+            if (isNaN(dur) || dur <= 0) return reject(new Error('ffprobe retornou duração inválida'))
+            resolve(dur)
+          } catch (e) {
+            reject(new Error(`Erro ao parsear saída do ffprobe: ${e}`))
+          }
+        })
+
+        proc.on('error', (err: Error) => reject(new Error(`ffprobe spawn error: ${err.message}`)))
+      })
+
+      return duration
+    } finally {
+      await fs.unlink(tempPath).catch(() => { })
     }
   }
 

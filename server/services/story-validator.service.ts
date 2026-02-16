@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { loadSkill } from '../utils/skill-loader'
 import { createLlmForTask, getAssignment } from './llm/llm-factory'
+import { validatorsEnabled } from '../utils/validators'
 
 // Schema de Resposta da Validação
 const ValidationResultSchema = z.object({
@@ -43,6 +44,11 @@ export async function validateStoryOutline(
   outline: any,
   context: ValidationContext
 ): Promise<ValidationResult> {
+  if (!validatorsEnabled()) {
+    console.log(`${LOG} ⏭️ Validação DESABILITADA temporariamente (bypass global).`)
+    return { approved: true }
+  }
+
   const isFullVideo = context.itemType === 'fullVideo' || context.narrativeRole === 'full-video'
   const skillName = resolveValidationSkillName(context)
 
@@ -66,7 +72,9 @@ export async function validateStoryOutline(
   if (!outline.hookVariants || outline.hookVariants.length !== 4) {
     violations.push('Campo "hookVariants" deve conter exatamente 4 variantes')
   }
-  if (!outline.promiseSetup || outline.promiseSetup.trim() === '') {
+  // promiseSetup: obrigatório para gateway/deep-dive, opcional para hook-only
+  // (hook-only integra o anchor na ruptura, não num campo separado)
+  if (!isHookOnly && (!outline.promiseSetup || outline.promiseSetup.trim() === '')) {
     violations.push('Campo obrigatório "promiseSetup" está vazio (mínimo: anchor com local)')
   }
   if (!outline.risingBeats || outline.risingBeats.length < 2) {
@@ -109,7 +117,7 @@ export async function validateStoryOutline(
       approved: false,
       violations,
       corrections: isHookOnly
-        ? 'Para hook-only, deixe os campos de resolução vazios (climaxMoment, climaxFormula, resolutionPoints, resolutionAngle, ctaApproach, emotionalArc, toneProgression, whatToReveal, whatToHold, whatToIgnore = "" ou []). Preencha apenas hookStrategy, hookVariants, promiseSetup (mínimo: anchor com local), e risingBeats.'
+        ? 'Para hook-only, deixe os campos de resolução vazios (climaxMoment, climaxFormula, resolutionPoints, resolutionAngle, ctaApproach, emotionalArc, toneProgression, whatToReveal, whatToHold, whatToIgnore = "" ou []). Preencha hookStrategy, hookVariants e risingBeats. O campo promiseSetup pode ficar vazio (anchor vai integrado na ruptura).'
         : 'Para gateway/deep-dive, todos os campos de resolução devem estar preenchidos com conteúdo específico (não genérico). Revise os campos vazios listados acima.'
     }
   }
@@ -169,11 +177,21 @@ Responda APENAS no formato JSON definido.
 
     console.log(`${LOG} Usando ${assignment.provider} (${assignment.model}) para validação`)
 
-    // Usando structuredOutput — com fallback para Replicate
+    // Determinar method de structured output baseado no provider
+    const isGemini = assignment.provider.toLowerCase().includes('gemini') || assignment.provider.toLowerCase().includes('google')
+    const isGroqLlama4 = assignment.provider.toLowerCase().includes('groq') && assignment.model.includes('llama-4')
+
     const m = model as any
-    const structuredLlm = assignment.provider === 'replicate' && typeof m.withStructuredOutputReplicate === 'function'
-      ? m.withStructuredOutputReplicate(ValidationResultSchema, { includeRaw: true })
-      : m.withStructuredOutput(ValidationResultSchema, { includeRaw: true, method: 'jsonSchema' })
+    let structuredLlm: any
+    if (assignment.provider === 'replicate' && typeof m.withStructuredOutputReplicate === 'function') {
+      structuredLlm = m.withStructuredOutputReplicate(ValidationResultSchema, { includeRaw: true })
+    } else {
+      const method = isGemini ? 'jsonMode' : isGroqLlama4 ? 'jsonMode' : undefined
+      structuredLlm = m.withStructuredOutput(ValidationResultSchema, {
+        includeRaw: true,
+        ...(method ? { method } : {})
+      })
+    }
 
     const { invokeWithLogging } = await import('../utils/llm-invoke-wrapper')
     const result = await invokeWithLogging(structuredLlm, [

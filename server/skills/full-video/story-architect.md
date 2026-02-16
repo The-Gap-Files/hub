@@ -121,10 +121,9 @@ Para cada variante, forneça:
 - Exemplo: "Você mataria uma criança em prol da sua religião?"
 
 #### ☠️ LAWLESS (Terra sem Lei)
-- ULTRAPASSA as diretrizes do YouTube intencionalmente. Existe como referência extrema.
-- Sem filtros: linguagem crua, acusações diretas, provocação máxima, choque visceral.
-- Usa violência verbal, ironia corrosiva, declarações que seriam censuradas.
-- Este nível NÃO é para publicação direta — serve para o usuário mesclar com o Aggressive e calibrar o tom ideal.
+- Referência extrema para calibração tonal — NÃO para publicação direta.
+- Serve para o usuário calibrar o tom ideal entre aggressive e lawless.
+- Mantém provocação conceitual, sem linguagem gráfica ou gore.
 - Exemplo: "A Igreja torturou e matou uma criança de dois anos para encobrir os crimes dos seus sacerdotes — e você ainda reza para eles."
 
 ⚠️ As 4 variantes devem usar a MESMA técnica de cold open, calibrando APENAS a intensidade tonal.

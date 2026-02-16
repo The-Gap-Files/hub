@@ -171,7 +171,7 @@
       <section v-show="currentStep === 5" class="animate-in fade-in duration-200 space-y-8">
         <div class="mb-8">
           <h2 class="text-2xl font-black uppercase tracking-tight">Inteligência adicional</h2>
-          <p class="text-zinc-500 mt-1">Voz, velocidade, motion, objetivo editorial e DNA.</p>
+          <p class="text-zinc-500 mt-1">Voz, motion, objetivo editorial e DNA.</p>
         </div>
 
         <div v-if="!selectedVoiceId" class="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-2xl flex items-center gap-4">
@@ -199,17 +199,6 @@
               <span class="font-bold uppercase tracking-wider text-sm">Habilitar Motion (IA)</span>
               <input type="checkbox" v-model="enableMotion" class="rounded border-white/20 bg-white/5 text-primary focus:ring-primary" />
             </label>
-            <div>
-              <label class="block text-xs font-bold text-zinc-500 uppercase mb-2">Velocidade da narração (WPM)</label>
-              <div class="flex gap-2">
-                <button v-for="wpm in [120, 150, 180]" :key="wpm"
-                  @click="selectedWPM = wpm"
-                  class="flex-1 py-3 rounded-xl text-xs font-bold uppercase border transition-all"
-                  :class="[selectedWPM === wpm ? 'bg-primary border-primary text-white' : 'bg-white/5 border-white/10 hover:border-white/20']">
-                  {{ wpm === 120 ? 'Lento' : wpm === 150 ? 'Normal' : 'Rápido' }} ({{ wpm }})
-                </button>
-              </div>
-            </div>
             <VoiceSelector
               v-model="selectedVoiceId"
               :initial-voices="availableVoices"
@@ -343,7 +332,6 @@ const formatDurations = ref<Record<string, number>>({})
 const selectedScriptStyle = ref('')
 const selectedVisualStyle = ref('')
 const selectedSeed = ref('')
-const selectedWPM = ref(150)
 const selectedVoiceId = ref('')
 const enableMotion = ref(true)
 const generatingOutputs = ref(false)
@@ -525,7 +513,6 @@ async function generateOutputs() {
         visualStyleId: selectedVisualStyle.value,
         seedId: selectedSeed.value || undefined,
         enableMotion: enableMotion.value,
-        targetWPM: selectedWPM.value,
         voiceId: selectedVoiceId.value || undefined,
         objective: resolvedObjective.value || undefined
       }

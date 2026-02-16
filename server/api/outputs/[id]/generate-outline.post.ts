@@ -14,6 +14,7 @@ import { costLogService } from '../../../services/cost-log.service'
 import { calculateLLMCost } from '../../../constants/pricing'
 import { getScriptStyleById } from '../../../constants/script-styles'
 import { mapPersonsFromPrisma, mapNeuralInsightsFromNotes } from '../../../utils/format-intelligence-context'
+import { TeaserMicroBriefV1Schema, formatTeaserMicroBriefV1ForPrompt } from '../../../types/briefing.types'
 
 export default defineEventHandler(async (event) => {
   const outputId = getRouterParam(event, 'id')
@@ -37,6 +38,8 @@ export default defineEventHandler(async (event) => {
     editorialObjectiveId?: string
     editorialObjectiveName?: string
     avoidPatterns?: string[]
+    /** Fonte da verdade: quantidade alvo de cenas. Quando presente, prevalece sobre duração. */
+    sceneCount?: number
   } | undefined
 
   // 1. Buscar Output com Dossier (antes de tudo — precisamos do monetizationContext salvo)
@@ -58,38 +61,72 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'Output or Dossier not found' })
   }
 
-  // Se não veio monetizationContext no body, recuperar do Output salvo
-  const effectiveMonetizationContext = monetizationContext || (output.monetizationContext as unknown as typeof monetizationContext) || undefined
+  // Pré-requisito: voz + velocidade configuradas antes do Story Architect
+  if (!output.voiceId || !output.speechConfiguredAt) {
+    throw createError({
+      statusCode: 400,
+      message: 'Antes de gerar o plano narrativo, selecione o narrador (voz) e a velocidade da fala (WPM) no output.'
+    })
+  }
+
+  const storedMonetizationContext = (output.monetizationContext as unknown as typeof monetizationContext) || undefined
+
+  // Se o output já nasceu vinculado a um item do monetizador (ex: pacote YouTube),
+  // NÃO permitir sobrescrever via body (evita duplicação/deriva do blueprint).
+  const isBoundToStoredMonetization =
+    !!storedMonetizationContext?.itemType &&
+    (output.format === 'teaser-youtube-shorts' || output.format === 'full-youtube')
+
+  const effectiveMonetizationContext = isBoundToStoredMonetization
+    ? storedMonetizationContext
+    : (monetizationContext || storedMonetizationContext || undefined)
 
   console.log(`[API] Generating story outline for Output ${outputId}${feedback ? ` with feedback: "${feedback}"` : ''}${effectiveMonetizationContext ? ` from monetization (${effectiveMonetizationContext.itemType}: ${effectiveMonetizationContext.angleCategory})` : ''}`)
 
   const dossier = output.dossier
 
   // 3. Montar request
-  const userNotes = dossier.notes?.map((n: any) => n.content) || []
-  if (feedback) {
-    userNotes.push(`⚠️ FEEDBACK DO USUÁRIO PARA O PLANO NARRATIVO: ${feedback}`)
-  }
+  const userNotes: string[] = []
+  if (feedback) userNotes.push(`⚠️ FEEDBACK DO USUÁRIO PARA O PLANO NARRATIVO: ${feedback}`)
+
+  // Fonte da verdade: quantidade de cenas. Quando sceneCount existe, prevalece sobre targetDuration.
+  const sceneCount = effectiveMonetizationContext?.sceneCount
+  const targetDuration = sceneCount ? sceneCount * 5 : (output.duration || 300)
+  const targetSceneCount = sceneCount ? sceneCount : undefined
 
   try {
-    const result = await generateStoryOutline({
-      theme: dossier.theme,
-      visualIdentityContext: dossier.visualIdentityContext || undefined,
-      sources: dossier.sources?.map((s: any) => ({
+    const microBriefParsed = effectiveMonetizationContext?.itemType === 'teaser'
+      ? TeaserMicroBriefV1Schema.safeParse((effectiveMonetizationContext as any)?.microBriefV1)
+      : { success: false as const }
+
+    const sources = microBriefParsed.success
+      ? [{
+        title: 'Micro-brief do teaser (fonte da verdade)',
+        content: formatTeaserMicroBriefV1ForPrompt(microBriefParsed.data),
+        type: 'brief',
+        weight: 2.0
+      }]
+      : (dossier.sources?.map((s: any) => ({
         title: s.title,
         content: s.content,
         type: s.sourceType,
         weight: s.weight ?? 1.0
-      })) || [],
+      })) || [])
+
+    const result = await generateStoryOutline({
+      theme: dossier.theme,
+      visualIdentityContext: dossier.visualIdentityContext || undefined,
+      sources,
       userNotes,
-      persons: mapPersonsFromPrisma(dossier.persons),
-      neuralInsights: mapNeuralInsightsFromNotes(dossier.notes),
-      imageDescriptions: dossier.images?.map((i: any) => i.description).filter(Boolean) || [],
-      researchData: dossier.researchData || undefined,
+      persons: microBriefParsed.success ? [] : mapPersonsFromPrisma(dossier.persons),
+      neuralInsights: microBriefParsed.success ? [] : mapNeuralInsightsFromNotes(dossier.notes),
+      imageDescriptions: microBriefParsed.success ? [] : (dossier.images?.map((i: any) => i.description).filter(Boolean) || []),
+      researchData: microBriefParsed.success ? undefined : (dossier.researchData || undefined),
       editorialObjective: output.objective || undefined,
       scriptStyleId: output.scriptStyleId || undefined,
       dossierCategory: output.classificationId || undefined,
-      targetDuration: output.duration || 300,
+      targetDuration,
+      targetSceneCount,
       language: output.language || 'pt-BR',
       mustInclude: output.mustInclude || undefined,
       mustExclude: output.mustExclude || undefined,

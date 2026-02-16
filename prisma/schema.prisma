@@ -34,6 +34,12 @@ model Dossier {
   title                  String             @db.VarChar(255)
   theme                  String
   researchData           Json?
+  /// Brief persistido para uso em TEASERS (gateway/deep-dive/hook-only)
+  briefBundleV1          Json?
+  /// Hash determinístico do dossiê canônico usado para invalidar o brief
+  briefBundleV1Hash      String?            @db.VarChar(64)
+  /// Última atualização do brief persistido
+  briefBundleV1UpdatedAt DateTime?
   tags                   String[]
   isProcessed            Boolean            @default(false)
   visualIdentityContext  String?            @db.VarChar(500) // Contexto visual do dossier
@@ -146,6 +152,8 @@ model Output {
   language             String              @default("pt-BR") @db.VarChar(10)
   narrationLanguage    String              @default("pt-BR") @db.VarChar(10)
   voiceId              String?             @db.VarChar(100)
+  /// Marca que o usuário já configurou voz + velocidade (pré-requisito para Story Architect)
+  speechConfiguredAt   DateTime?
   ttsProvider          String?             @db.VarChar(50) /// Provider TTS usado (ex: ELEVENLABS, REPLICATE)
   enableMotion         Boolean             @default(false)
   objective            String? // Objetivo editorial: diretriz narrativa que governa a geração do roteiro

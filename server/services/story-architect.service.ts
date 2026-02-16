@@ -18,6 +18,7 @@ import type { PersonContext, NeuralInsightContext } from '../utils/format-intell
 import { formatPersonsForPrompt, formatNeuralInsightsForPrompt } from '../utils/format-intelligence-context'
 import { buildDossierBlock } from '../utils/dossier-prompt-block'
 import { buildCacheableMessages, logCacheMetrics, shouldApplyCache } from './llm/anthropic-cache-helper'
+import { validatorsEnabled } from '../utils/validators'
 
 // =============================================================================
 // SCHEMA - Formato estruturado que a IA deve retornar
@@ -25,7 +26,7 @@ import { buildCacheableMessages, logCacheMetrics, shouldApplyCache } from './llm
 
 const HookVariantSchema = z.object({
   level: z.enum(['green', 'moderate', 'aggressive', 'lawless']).describe(
-    'Nível tonal: green (seguro/informativo), moderate (provocativo mas contido), aggressive (no limite do YouTube), lawless (ultrapassa diretrizes — referência extrema)'
+    'Nível tonal: green (seguro/informativo), moderate (provocativo mas contido), aggressive (no limite do YouTube), lawless (referência extrema para calibração — sem linguagem gráfica)'
   ),
   hook: z.string().describe('Frase de hook (15-30 palavras) calibrada para o nível tonal'),
   rationale: z.string().describe('Por que esse tom funciona para este tema (1 frase)')
@@ -122,7 +123,9 @@ export interface StoryArchitectRequest {
   editorialObjective?: string // Texto do editorial objective
   scriptStyleId?: string // 'documentary' | 'mystery' | etc.
   dossierCategory?: string // Classificação temática: 'true-crime', 'conspiração', etc.
-  targetDuration: number // Em segundos
+  targetDuration: number // Em segundos (derivado de targetSceneCount*5 quando targetSceneCount presente)
+  /** Fonte da verdade: quantidade alvo de cenas. Quando presente, prevalece sobre targetDuration. */
+  targetSceneCount?: number
   language?: string
 
   // Persons & Neural Insights (Intelligence Center)
@@ -152,6 +155,8 @@ export interface StoryArchitectRequest {
     cta?: string
     strategicNotes?: string
     avoidPatterns?: string[]
+    /** Fonte da verdade: quantidade alvo de cenas. Quando presente, prevalece sobre targetDuration. */
+    sceneCount?: number
   }
 }
 
@@ -174,7 +179,7 @@ export async function generateStoryOutline(
   const assignment = await getAssignment('story-architect')
   const model = await createLlmForTask('story-architect')
 
-  // Gemini API requer method 'jsonSchema' (Zod v4 compat)
+  // Gemini: jsonMode evita limitações de response_schema (const, default)
   const isGemini = assignment.provider.toLowerCase().includes('gemini') || assignment.provider.toLowerCase().includes('google')
   const isReplicate = assignment.provider.toLowerCase().includes('replicate')
   // Groq Llama 4: forçar jsonMode. GPT-OSS: SDK autodetecta jsonSchema → sem override.
@@ -185,7 +190,7 @@ export async function generateStoryOutline(
     console.log('[StoryArchitect] 🔧 Structured output: replicate (invoke + parse)')
     structuredLlm = (model as any).withStructuredOutputReplicate(StoryOutlineSchema, { includeRaw: true })
   } else {
-    const method = isGemini ? 'jsonSchema' : isGroqLlama4 ? 'jsonMode' : undefined
+    const method = isGemini ? 'jsonMode' : isGroqLlama4 ? 'jsonMode' : undefined
     structuredLlm = (model as any).withStructuredOutput(StoryOutlineSchema, {
       includeRaw: true,
       ...(method ? { method } : {})
@@ -269,15 +274,20 @@ export async function generateStoryOutline(
     }
 
     // -- VALIDAÇÃO NARRATIVA (AUTO-CORREÇÃO) --
-    // Trigger: teasers com narrativeRole OU fullVideo (que não tem narrativeRole)
-    const hasValidationContext = content && request.monetizationContext && (
+    // TEMPORÁRIO: validadores e loops de auto-correção desativados globalmente.
+    if (!validatorsEnabled()) {
+      console.log('[StoryArchitect] ⏭️ Validação DESABILITADA temporariamente (bypass global).')
+    }
+    const hasValidationContext = validatorsEnabled() && content && request.monetizationContext && (
       request.monetizationContext.narrativeRole || request.monetizationContext.itemType === 'fullVideo'
     )
     if (hasValidationContext) {
       const { narrativeRole, angleCategory, avoidPatterns, itemType, angle } = request.monetizationContext!
-      const maxRetries = 5
+      const maxRetries = 10
       let attempts = 0
       let isValid = false
+      // Histórico acumulativo de feedbacks — evita repetição de erros entre retries
+      const validationHistory: string[] = []
 
       // Import dinâmico para evitar dependência circular se houver
       const { validateStoryOutline } = await import('./story-validator.service')
@@ -301,17 +311,19 @@ export async function generateStoryOutline(
           console.warn(`[StoryArchitect] ❌ Outline REPROVADO. Violações: ${validation.violations?.join(' | ')}`)
 
           if (attempts <= maxRetries) {
+            const currentFeedback = [
+              `[Tentativa ${attempts}] VIOLAÇÕES:`,
+              ...(validation.violations || []).map(v => `- ${v}`),
+              validation.corrections ? `INSTRUÇÃO DE CORREÇÃO: ${validation.corrections}` : ''
+            ].filter(Boolean).join('\n')
+            validationHistory.push(currentFeedback)
+
+            const fullFeedback = validationHistory.length > 1
+              ? `📋 HISTÓRICO DE CORREÇÕES (${validationHistory.length} tentativas reprovadas):\n${'─'.repeat(50)}\n${validationHistory.map((f, i) => `[Tentativa ${i + 1}]\n${f}`).join('\n\n')}\n${'─'.repeat(50)}\n\n🚨 NÃO repita NENHUM erro listado acima. Cada violação já corrigida que reaparecer é uma falha crítica.\n\n⚠️ GERE O OUTLINE NOVAMENTE CORRIGINDO OS PONTOS ACIMA.`
+              : `🚨 FEEDBACK CRÍTICO DE CORREÇÃO (O ANTERIOR FOI REPROVADO):\nO outline gerado VIOLOU as regras narrativas do ângulo/role.\n\n${currentFeedback}\n\n⚠️ GERE O OUTLINE NOVAMENTE CORRIGINDO ESSES PONTOS.\nMANTENHA O QUE ESTAVA BOM, MAS REMOVA/ALTERE O QUE VIOLOU AS REGRAS.`
+
             const correctionInstruction = `
-🚨 FEEDBACK CRÍTICO DE CORREÇÃO (O ANTERIOR FOI REPROVADO):
-O outline gerado VIOLOU as regras narrativas do ângulo/role.
-MOTIVOS:
-${validation.violations?.map(v => `- ${v}`).join('\n')}
-
-INSTRUÇÃO DE CORREÇÃO:
-${validation.corrections}
-
-⚠️ GERE O OUTLINE NOVAMENTE CORRIGINDO ESSES PONTOS.
-MANTENHA O QUE ESTAVA BOM, MAS REMOVA/ALTERE O QUE VIOLOU AS REGRAS.
+${fullFeedback}
 
 ⚠️ REGRA DE PRIORIDADE: Os avoidPatterns SEMPRE têm prioridade sobre qualquer outra regra.
 Se datas são proibidas nos avoidPatterns, NÃO inclua datas (nem no anchor). Use apenas local.
@@ -384,7 +396,7 @@ Se datas são proibidas nos avoidPatterns, NÃO inclua datas (nem no anchor). Us
 
     // Validar distribuição de cenas
     const totalScenes = Object.values(content.segmentDistribution).reduce((a, b) => a + b, 0)
-    const expectedScenes = Math.ceil(request.targetDuration / 5)
+    const expectedScenes = request.targetSceneCount ?? Math.ceil(request.targetDuration / 5)
     console.log(`[StoryArchitect] 📐 Distribuição: ${totalScenes} cenas planejadas (esperado: ${expectedScenes})`)
 
     return {
@@ -426,23 +438,32 @@ Se datas são proibidas nos avoidPatterns, NÃO inclua datas (nem no anchor). Us
 // =============================================================================
 
 function buildSystemPrompt(request: StoryArchitectRequest): string {
-  // Carregar a skill do Story Architect — usa skill especializada para full video
+  // Carregar a skill do Story Architect — usa skill especializada por tipo
   const isFullVideo = request.monetizationContext?.itemType === 'fullVideo'
-  const skillName = isFullVideo ? 'full-video/story-architect' : 'teaser/story-architect'
-  const architectSkill = loadSkill(skillName)
+  const isHookOnly = request.monetizationContext?.narrativeRole === 'hook-only'
 
+  let skillName: string
   if (isFullVideo) {
+    skillName = 'full-video/story-architect'
     console.log('[StoryArchitect] 🎬 Usando skill FULL VIDEO para outline')
+  } else if (isHookOnly) {
+    skillName = 'teaser/story-architect-hook-only'
+    console.log('[StoryArchitect] 💥 Usando skill HOOK-ONLY DEDICADO para outline')
+  } else {
+    skillName = 'teaser/story-architect'
   }
 
+  const architectSkill = loadSkill(skillName)
+
+  const expectedScenes = request.targetSceneCount ?? Math.ceil(request.targetDuration / 5)
   return `${architectSkill}
 
 ---
 PARÂMETROS TÉCNICOS:
-- Duração total do vídeo: ${request.targetDuration} segundos
+- Duração total do vídeo: ${request.targetDuration} segundos (derivado de ${expectedScenes} cenas × 5s)
 - Cada cena dura 5 segundos
-- Total de cenas esperado: ${Math.ceil(request.targetDuration / 5)}
-- A soma de todas as cenas na distribuição DEVE ser igual a ${Math.ceil(request.targetDuration / 5)}
+- Total de cenas esperado (FONTE DA VERDADE): ${expectedScenes}
+- A soma de todas as cenas na distribuição DEVE ser igual a ${expectedScenes}
 - Idioma do roteiro: ${request.language || 'pt-BR'}
 - Tipo de conteúdo: ${isFullVideo ? 'FULL VIDEO (vídeo completo longo)' : 'TEASER (vídeo curto)'}`
 }
@@ -459,6 +480,7 @@ function buildUserPrompt(request: StoryArchitectRequest): string {
     prompt += `Este outline deve seguir a direção de um **${mc.itemType === 'teaser' ? 'teaser' : 'full video'}** planejado:\n`
     prompt += `- **Título planejado:** ${mc.title}\n`
     prompt += `- **Hook sugerido:** "${mc.hook}"\n`
+    prompt += `  → 🚨 REGRA OBRIGATÓRIA: As 4 variantes em hookVariants DEVEM SEGUIR este gancho. Cada variante (green, moderate, aggressive, lawless) calibra o MESMO conceito em níveis tonais diferentes — NÃO invente um gancho novo. O hook do plano de monetização é a fonte da verdade.\n`
     prompt += `- **Ângulo narrativo:** ${mc.angle} (categoria: ${mc.angleCategory})\n`
     if (mc.narrativeRole) {
       prompt += `- **Papel narrativo:** ${mc.narrativeRole}\n`
@@ -469,15 +491,21 @@ function buildUserPrompt(request: StoryArchitectRequest): string {
         prompt += `  → Este é um MERGULHO DIRETO. Assume que o espectador já tem noção básica do tema. NO MÁXIMO 1 frase de contextualização. Vá DIRETO para o ângulo específico.\n`
         prompt += `  → RESOLUÇÃO MÍNIMA: revela um aspecto mas NÃO fecha o caso. O detalhe deve abrir MAIS perguntas.\n`
       } else if (mc.narrativeRole === 'hook-only') {
-        prompt += `  → Este é um HOOK-ONLY — arma de alcance viral. Detonação cognitiva de 22-30 segundos.\n`
+        prompt += `  → Este é um HOOK-ONLY — arma de alcance viral. Detonação cognitiva de 16-22 segundos.\n`
         prompt += `  → RUPTURA EM 2 SEGUNDOS: O primeiro beat DEVE causar ruptura cognitiva. Nada de construção antes do choque. Se o público pensa antes de sentir, ele desliza.\n`
+        prompt += `  → MICRO-REGRA (TIMING): A primeira frase deve ser pronunciável em ~1,5s (3-5 palavras; máx. 6). Sem vírgula na primeira pancada.\n`
         prompt += `  → 1 CONCEITO CENTRAL: O outline INTEIRO gira em torno de UMA ideia resumível em 1 frase mental. Se exige conectar 3+ entidades para entender, está denso demais.\n`
-        prompt += `  → ESCALAÇÃO OBRIGATÓRIA: Cada beat MAIS intenso que o anterior. Zero platô. O último beat de conteúdo é o pico absoluto.\n`
+        prompt += `  → ALTERNÂNCIA DINÂMICA (NÃO ESCALAÇÃO LINEAR): A intensidade deve VARIAR com contrastes — após beat intenso, inserir respiro para amplificar o próximo pico. O ÚLTIMO beat de conteúdo (antes do CTA) é o pico absoluto. NÃO faça escalação linear pura (8→9→9→10 = saturação → REPROVADO). FAÇA alternância (8→6→9→10 = cada pico amplificado pelo contraste → APROVADO).\n`
+        prompt += `  → MECANISMO > SINTOMA (CRÍTICO): Foque no SISTEMA (quem autorizou, quem lucrou, qual documento), NÃO na violência. ❌ "A corda estala" (sintoma → repulsa). ✅ "O bispo assinou a sentença" (mecanismo → indignação).\n`
         prompt += `  → NOMES UNIVERSAIS: Nomes obscuros quebram fluxo cognitivo. Use função ("o bispo", "o juiz"), não nomes históricos (Hinderbach, Tiberino). Exceção: nomes universalmente conhecidos.\n`
         prompt += `  → RESOLUÇÃO ZERO: Pura provocação. Nenhuma explicação, recap, conclusão moral ou reflexão filosófica. TODOS os loops ficam abertos.\n`
         prompt += `  → CTA INVISÍVEL: O público NÃO pode perceber que acabou. Corte seco + "The Gap Files." + silêncio. Sem "assista", "siga", "inscreva-se".\n`
         prompt += `  → REPLAY BAIT: Pelo menos 1 beat com detalhe visual/narrativo rápido demais para absorver totalmente. Força re-assistir.\n`
         prompt += `  → Para risingBeats: o campo "questionAnswered" DEVE ser "Não respondida" — hook-only NÃO responde perguntas.\n`
+        prompt += `  → HOOKVARIANTS = RUPTURA CONCEITUAL, NÃO CONSTRUÇÃO:\n`
+        prompt += `    - PROIBIDO nas variantes: "Um pregador grita", "Um padre declara", "ecoa nas ruas", "A pregação enlouquece...", "Um sermão incendiário ecoa" — isso é cena, não ruptura.\n`
+        prompt += `    - FORMATO CORRETO: conceito + consequência em frases curtas (ex: "Um sermão incendiou a cidade e nasceu um monstro."). O espectador SENTE antes de PENSAR.\n`
+        prompt += `    - Cada variante calibra o MESMO conceito em níveis tonais (green/moderate/aggressive/lawless).\n`
       }
     }
     if (mc.shortFormatType) {
@@ -516,7 +544,7 @@ function buildUserPrompt(request: StoryArchitectRequest): string {
       prompt += `\n📊 **REGRA DE DISTRIBUIÇÃO – HOOK-ONLY:** context=0, resolution=0, cta=1. Todas as cenas vão para hook + rising. O último beat de rising é o pico absoluto. CTA = corte seco + branding.\n`
     }
 
-    prompt += `\n⚠️ INSTRUÇÃO CRÍTICA: Use o hook, ângulo e papel narrativo acima como GUIA. O plano narrativo deve ser coerente com essas diretrizes. Não invente um ângulo diferente.\n`
+    prompt += `\n⚠️ INSTRUÇÃO CRÍTICA: SIGA o hook sugerido (as hookVariants devem derivar dele), o ângulo e o papel narrativo acima. O plano narrativo deve ser coerente com essas diretrizes. Não invente um ângulo nem um gancho diferente.\n`
 
     // Regra de foco no ângulo — evitar contaminação narrativa
     if (mc.narrativeRole === 'deep-dive' || mc.narrativeRole === 'hook-only') {
@@ -665,13 +693,16 @@ export function formatOutlineForPrompt(outline: StoryOutline & { _monetizationMe
 ━━ 💥 PAPEL NARRATIVO: HOOK-ONLY (ARMA VIRAL) ━━
 🚨 REGRAS ABSOLUTAS QUE GOVERNAM ESTE ROTEIRO:
 - RUPTURA EM 2 SEGUNDOS: A primeira frase DEVE causar ruptura cognitiva. Sem construção.
+- MICRO-REGRA (TIMING): a primeira frase deve ser pronunciável em ~1,5s (3-5 palavras; máx. 6). Sem vírgula na primeira pancada.
 - 1 CONCEITO CENTRAL: Todo o roteiro gira em torno de UMA ideia. Sem colagem de fatos.
-- ESCALAÇÃO: Cada cena MAIS intensa que a anterior. Sem platô. A penúltima cena é o PICO.
+- ALTERNÂNCIA DINÂMICA: A intensidade deve VARIAR com contrastes (intenso → respiro → pico). O PICO ABSOLUTO é a última cena/beat de conteúdo (antes do CTA/branding). NÃO escale linearmente (8→9→10 = saturação). FAÇA ondas (8→6→10 = contraste amplifica impacto).
+- MECANISMO > SINTOMA: Foque no SISTEMA (quem autorizou, quem lucrou), NÃO na violência. ❌ "A corda estala" (repulsa). ✅ "O bispo assinou" (indignação).
 - NOMES UNIVERSAIS: Use funções ("o bispo", "o juiz"), não nomes obscuros. Se o público não conhece, use a função.
 - ZERO RESOLUÇÃO: Nenhuma explicação, recap, conclusão moral ou reflexão. TODOS os loops abertos.
 - CTA INVISÍVEL: Última cena = "The Gap Files." + silêncio. Sem "assista", "siga", "inscreva-se".
 - REPLAY BAIT: Pelo menos 1 cena com detalhe que passa rápido demais → força re-assistir.
-- Ignore a seção CONTEXT/SETUP completamente.
+- Ignore a seção CONTEXT/SETUP como “setup explicativo”.  
+  ✅ Permitido: micro-anchor implícito dentro da ruptura/rising (local, função, época sem aula).
 `
   } else if (role === 'gateway') {
     narrativeRoleBlock = `
@@ -696,6 +727,44 @@ Não usar. Pular direto para RISING ACTION.`
   // Emoji do nível tonal selecionado
   const levelEmoji = hookLevel === 'green' ? '🟢' : hookLevel === 'aggressive' ? '🔴' : hookLevel === 'lawless' ? '☠️' : hookLevel === 'custom' ? '✍️' : '🟡'
 
+  // ══════════════════════════════════════════════════════════════════
+  // HOOK-ONLY: outline enxuto — sem seções irrelevantes que confundem o modelo
+  // ══════════════════════════════════════════════════════════════════
+  if (role === 'hook-only') {
+    return `🏗️ PLANO NARRATIVO (HOOK-ONLY — OUTLINE ENXUTO):
+${narrativeRoleBlock}
+
+━━ 🎯 HOOK (INSPIRAÇÃO — NÃO copie literalmente) ━━
+Estratégia: ${outline.hookStrategy}
+${levelEmoji} Tom selecionado: ${hookLevel.toUpperCase()}
+💡 Referência de tom (use como INSPIRAÇÃO, reescreva com perplexidade): "${hookText}"
+⚠️ NÃO use esta frase literalmente se ela for uma tese acadêmica/título de artigo.
+Se a frase conecta 3+ entidades ou soa como resumo, REFORMULE como ruptura cognitiva curta.
+
+━━ 🔫 MUNIÇÃO NARRATIVA (escolha 1-3 fatos mais chocantes) ━━
+${beats}
+⚠️ HOOK-ONLY: NÃO cubra todos os beats. Selecione 1-3 e construa em torno deles.
+
+━━ DECISÕES EDITORIAIS ━━
+INCLUIR: ${outline.whatToReveal.join('; ')}
+SEGURAR: ${outline.whatToHold.length > 0 ? outline.whatToHold.join('; ') : 'Nenhum'}
+IGNORAR: ${outline.whatToIgnore.length > 0 ? outline.whatToIgnore.join('; ') : 'Nenhum'}
+${outline.tensionCurve ? `
+━━ CURVA DE TENSÃO ━━
+${outline.tensionCurve.map((level, i) => `Beat ${i + 1}: ${level.toUpperCase()}`).join(' → ')}` : ''}
+${outline.openLoops && outline.openLoops.length > 0 ? `
+━━ OPEN LOOPS (TODOS ficam abertos — RESOLUÇÃO ZERO) ━━
+${outline.openLoops.filter(l => l.closedAtBeat === null).map(loop => `• "${loop.question}" — NÃO RESPONDER`).join('\n')}` : ''}
+
+━━ NÍVEL DE RESOLUÇÃO: ZERO ━━
+🚨 RESOLUÇÃO ZERO — Pura provocação. NENHUMA explicação, recap ou conclusão. Corte seco.
+
+🚨 Este outline é MUNIÇÃO, não uma ordem literal. O provider de hook-only tem suas próprias regras — use os fatos acima como matéria-prima.`
+  }
+
+  // ══════════════════════════════════════════════════════════════════
+  // OUTROS ROLES (gateway, deep-dive, full): outline completo
+  // ══════════════════════════════════════════════════════════════════
   return `🏗️ PLANO NARRATIVO (SIGA ESTE BLUEPRINT OBRIGATORIAMENTE):
 ${narrativeRoleBlock}
 ━━ HOOK (${dist.hook} cenas) ━━

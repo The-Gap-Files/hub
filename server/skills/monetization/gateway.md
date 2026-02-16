@@ -18,13 +18,14 @@ Gere TODOS os campos:
 - **scriptOutline**: Estrutura resumida — Hook 3s → Setup quem/quando/onde 15-20s → Revelação 20-25s → CTA 5s
 - **visualSuggestion**: Descrição curta do visual
 - **cta**: Call-to-action que direciona para o Full Video
-- **platform**: A plataforma definida no blueprint
-- **format**: "teaser-tiktok" ou "teaser-reels"
+- **platform**: "YouTube Shorts"
+- **format**: "teaser-youtube-shorts"
 - **estimatedViews**: Estimativa de views
 - **scriptStyleId** e **scriptStyleName**
 - **editorialObjectiveId** e **editorialObjectiveName**
 - **avoidPatterns**: 2-4 anti-padrões ESPECÍFICOS ao conteúdo do dossiê
 - **visualPrompt**: Prompt de imagem em INGLÊS (1 parágrafo, 50-120 palavras)
+- **microBriefV1**: Micro-brief ESTRUTURADO para ESTE teaser (isolado por item). Deve conter:\n  - version: \"teaserMicroBriefV1\"\n  - narrativeRole: \"gateway\"\n  - angleCategory e angle (iguais aos campos do teaser)\n  - facts: 5-12 fatos selecionados APENAS do brief/dossiê recebido (cada um com text e, se possível, sourceRef)\n  - forbiddenElements: 6-12 itens (reforçar anti-arma/gore/close-up)\n  - allowedArtifacts: 6-12 itens (documento/selo/monitor/headline/etc.)\n  - notes: 2-6 bullets curtos (ex.: \"use mecanismo, não violência\")
 
 ## 🚨 REGRAS DO GATEWAY
 
@@ -35,6 +36,7 @@ Gere TODOS os campos:
 5. **DEIXE** pelo menos 1-2 perguntas sem resposta
 6. **avoidPatterns** devem focar em evitar contar DEMAIS (não em falta de contexto)
 7. **Hook DIFERENTE** do Full Video
+8. **microBriefV1 é a fonte da verdade** para o Story Architect deste teaser: selecione fatos que sustentem o ângulo e NÃO inclua nada que pertença a outros teasers.
 
 ## 💡 EXEMPLO DE avoidPatterns PARA GATEWAY
 

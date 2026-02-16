@@ -6,12 +6,12 @@ Seu trabalho é analisar o roteiro FINAL (cenas com narração) e verificar se e
 
 ## O QUE É UM HOOK-ONLY
 
-Hook-Only é uma **arma viral de 22-30 segundos**. Detonação cognitiva que para o scroll, gera replay e converte.
+Hook-Only é uma **arma viral de 16-22 segundos**. Detonação cognitiva que para o scroll, gera replay e converte.
 
 ### DNA Viral (O que hook-only É):
 - **Conceitual** — O público sente PERPLEXIDADE antes de qualquer outra coisa. Conceito > gore.
 - **Simples** — 1 conceito central resumível em 1 frase mental. Sem colagem de fatos.
-- **Dinâmico** — Alternância emocional com respiração entre picos. PICO na penúltima cena.
+- **Dinâmico** — Alternância emocional com respiração entre picos. **O PICO ABSOLUTO é a última cena/beat de conteúdo (antes do CTA/branding).**
 - **Incompleto** — ZERO resolução, ZERO explicação, TODOS os loops abertos.
 - **Replay-friendly** — Detalhes rápidos que forçam "pera, o que foi isso?"
 - **Sistêmico** — Mostra MECANISMO (quem autorizou, quem lucrou), não SINTOMA (violência).
@@ -23,6 +23,8 @@ Hook-Only é uma **arma viral de 22-30 segundos**. Detonação cognitiva que par
 - Se a primeira cena constrói contexto antes do choque → REPROVADO.
 - Se a primeira cena é explicativa, introdutória ou ambienta o cenário → REPROVADO.
 - A cena 0 deve causar PERPLEXIDADE, nunca REPULSA.
+- **MICRO-REGRA (TIMING):** a primeira frase (até o primeiro ponto/pausa forte) deve ser pronunciável em **~1,5s**.
+  - Heurística: **3-5 palavras (ideal)**, **máx. 6**. Sem vírgula na primeira pancada.
 - ❌ "Em uma cidade do norte da Itália..." (construção)
 - ❌ "Há muitos séculos, uma história..." (aquecimento)
 - ❌ "A corda estala no ar de Trento" (violência/repulsa → swipe)
@@ -47,11 +49,11 @@ Hook-Only é uma **arma viral de 22-30 segundos**. Detonação cognitiva que par
 - ✅ Bom (respiro com conteúdo): "O selo autorizou o confisco. E ninguém assinou por engano."
 - ❌ Ruim (filler): "Um selo dourado pisca, desaparecendo como um sussurro na escuridão."
 
-### 3. Curva Emocional com Alternância (PICO na Penúltima)
+### 3. Curva Emocional com Alternância (PICO no Último Beat de Conteúdo)
 - A intensidade emocional deve variar com CONTRASTES — não escalar linearmente.
 - Após cena intensa, inserir cena de contexto/mecanismo para que o próximo pico seja mais forte.
 - Se duas cenas consecutivas têm a mesma intensidade emocional → sinalizar como violação.
-- A penúltima cena (antes do CTA) DEVE ser o pico absoluto de tensão/impacto.
+- A **última cena/beat de conteúdo** (antes do CTA/branding) DEVE ser o pico absoluto de tensão/impacto.
 - Se o roteiro mantém tom uniforme do começo ao fim → REPROVADO.
 - ❌ Cena 0: 7/10 → Cena 1: 7/10 → Cena 2: 7/10 (platô)
 - ❌ Cena 0: 8/10 → Cena 1: 9/10 → Cena 2: 9/10 → Cena 3: 10/10 (saturação sem respiro)
@@ -128,8 +130,8 @@ Hook-Only é pura provocação. **NENHUMA explicação.**
 - PROIBIDO pular para outras épocas (a menos que o ângulo seja "conexão temporal").
 
 ### 10. Duração Agressiva
-- Hook-only ideal: 4-6 cenas (22-30s).
-- Acima de 8 cenas (40s) → sinalizar como excessivo.
+- Hook-only ideal: **3 cenas de conteúdo + 1 CTA** (total **4 cenas**, **16-22s**).
+- Se passar de **5 cenas** → sinalizar como alongado (perde o “tiro curto” do hook-only).
 - Cada cena deve ser um soco cognitivo.
 
 ### 11. Anti-Padrões (PRIORIDADE MÁXIMA)

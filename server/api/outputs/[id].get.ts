@@ -2,6 +2,7 @@ import { prisma } from '../../utils/prisma'
 import { getVisualStyleById } from '../../constants/visual-styles'
 import { getScriptStyleById } from '../../constants/script-styles'
 import { getClassificationById } from '../../constants/intelligence-classifications'
+import { getEditorialObjectiveById } from '../../constants/editorial-objectives'
 import type { OutputWithRelationsResponse } from '../../types/output.types'
 
 export default defineEventHandler(async (event): Promise<OutputWithRelationsResponse> => {
@@ -95,6 +96,12 @@ export default defineEventHandler(async (event): Promise<OutputWithRelationsResp
             }
           }
         }
+      },
+      seed: {
+        select: {
+          id: true,
+          value: true
+        }
       }
     }
   })
@@ -109,6 +116,14 @@ export default defineEventHandler(async (event): Promise<OutputWithRelationsResp
   const thumbnailCandidates = output.thumbnailCandidates as Array<{ base64: string; prompt: string }> | null
   const hasThumbnail = !!output.thumbnailData
 
+  const monetizationContext = (output.monetizationContext && typeof output.monetizationContext === 'object')
+    ? output.monetizationContext
+    : null
+  const editorialObjectiveId = typeof (monetizationContext as any)?.editorialObjectiveId === 'string'
+    ? (monetizationContext as any).editorialObjectiveId
+    : undefined
+  const editorialObjective = editorialObjectiveId ? getEditorialObjectiveById(editorialObjectiveId) : undefined
+
   return {
     id: output.id,
     dossierId: output.dossierId,
@@ -118,6 +133,12 @@ export default defineEventHandler(async (event): Promise<OutputWithRelationsResp
     duration: output.duration || undefined,
     aspectRatio: output.aspectRatio || undefined,
     platform: output.platform || undefined,
+    targetWPM: output.targetWPM,
+    language: output.language,
+    narrationLanguage: output.narrationLanguage,
+    voiceId: output.voiceId || undefined,
+    speechConfiguredAt: output.speechConfiguredAt || undefined,
+    ttsProvider: output.ttsProvider || undefined,
     enableMotion: output.enableMotion,
     status: output.status,
     storyOutlineApproved: output.storyOutlineApproved,
@@ -139,6 +160,17 @@ export default defineEventHandler(async (event): Promise<OutputWithRelationsResp
     hasCaptionedVideo: !!output.captionedVideoData,
     captionedVideoSize: output.captionedVideoSize || 0,
     storyOutline: output.storyOutline || undefined,
+    objective: output.objective || undefined,
+    mustInclude: output.mustInclude || undefined,
+    mustExclude: output.mustExclude || undefined,
+    classificationId: output.classificationId || undefined,
+    scriptStyleId: output.scriptStyleId || undefined,
+    visualStyleId: output.visualStyleId || undefined,
+    seedId: output.seedId || undefined,
+    seedValue: output.seed?.value ?? undefined,
+    monetizationContext,
+    editorialObjectiveId,
+    editorialObjective: editorialObjective ? { id: editorialObjective.id, name: editorialObjective.name, category: editorialObjective.category } : undefined,
     dossier: output.dossier,
     scriptStyle: output.scriptStyleId ? getScriptStyleById(output.scriptStyleId) : undefined,
     visualStyle: output.visualStyleId ? getVisualStyleById(output.visualStyleId) : undefined,

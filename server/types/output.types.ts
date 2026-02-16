@@ -48,6 +48,28 @@ export interface OutputResponse {
   duration?: number
   aspectRatio?: string
   platform?: string
+  targetWPM?: number
+  language?: string
+  narrationLanguage?: string
+  voiceId?: string
+  /** Indica que voz + velocidade já foram configuradas (pré-requisito para Story Architect). */
+  speechConfiguredAt?: Date
+  ttsProvider?: string
+  objective?: string
+  mustInclude?: string
+  mustExclude?: string
+  classificationId?: string
+  scriptStyleId?: string
+  visualStyleId?: string
+  seedId?: string
+  seedValue?: number
+  monetizationContext?: any
+  editorialObjectiveId?: string
+  editorialObjective?: {
+    id: string
+    name: string
+    category: string
+  }
   status: OutputStatus
   storyOutlineApproved?: boolean
   scriptApproved: boolean

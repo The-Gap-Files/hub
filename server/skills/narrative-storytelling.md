@@ -250,9 +250,9 @@ O espectador compartilha quando:
 
 ## ⏱️ CALIBRAÇÃO POR DURAÇÃO
 
-### Hook-Only (22-30s / 4-6 cenas)
+### Hook-Only (16-22s / 3 cenas + 1 CTA)
 - **Ritmo:** 1 momento emocional devastador. Sem arco.
-- **Curva:** 8 → 5 → 9 → 10 → 5 → branding
+- **Curva:** 9 → 6 → 10 → branding/silêncio
 - **Resolução:** ZERO. Pura empatia + curiosidade.
 
 ### Shorts (30-60s / 6-12 cenas)

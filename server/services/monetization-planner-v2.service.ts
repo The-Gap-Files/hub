@@ -29,6 +29,7 @@ import { buildCacheableMessages, logCacheMetrics } from './llm/anthropic-cache-h
 import { calculateRoleDistribution } from '../constants/narrative-roles'
 import { invokeWithLogging } from '../utils/llm-invoke-wrapper'
 import { handleGroqJsonValidateError } from '../utils/groq-error-handler'
+import { BriefBundleV1Schema, formatBriefBundleV1AsDossierBlock, TeaserMicroBriefV1Schema } from '../types/briefing.types'
 
 const LOG = '[MonetizationV2]'
 
@@ -45,7 +46,7 @@ const BlueprintTeaserSlotSchema = z.object({
     'hook-brutal', 'pergunta-incomoda', 'plot-twist',
     'teaser-cinematografico', 'mini-documento', 'lista-rapida', 'frase-memoravel'
   ]).describe('Formato do short'),
-  platform: z.enum(['TikTok', 'YouTube Shorts', 'Instagram Reels']).describe('Plataforma alvo'),
+  platform: z.enum(['YouTube Shorts']).describe('Plataforma alvo (obrigatória)'),
   scriptStyleId: z.string().describe('ID do estilo de roteiro'),
   scriptStyleName: z.string().describe('Nome do estilo de roteiro'),
   editorialObjectiveId: z.string().describe('ID do objetivo editorial'),
@@ -89,7 +90,8 @@ const FullVideoSchema = z.object({
   scriptStyleName: z.string(),
   editorialObjectiveId: z.string(),
   editorialObjectiveName: z.string(),
-  visualPrompt: z.string().describe('Prompt de imagem em inglês')
+  visualPrompt: z.string().describe('Prompt de imagem em inglês'),
+  sceneCount: z.number().int().optional().describe('Quantidade alvo de cenas para o vídeo longo (definida pelo sistema)')
 })
 
 // ── Etapa 3-5: Teasers (por categoria) ──────────────────────────────────────
@@ -103,18 +105,20 @@ const TeaserSchema = z.object({
     'hook-brutal', 'pergunta-incomoda', 'plot-twist',
     'teaser-cinematografico', 'mini-documento', 'lista-rapida', 'frase-memoravel'
   ]),
+  microBriefV1: TeaserMicroBriefV1Schema.describe('Micro-brief isolado por teaser (fatos e safety específicos)'),
   scriptOutline: z.string().describe('Estrutura resumida do script'),
   visualSuggestion: z.string().describe('Descrição curta do visual'),
   cta: z.string().describe('Call-to-action para o Full Video'),
-  platform: z.enum(['TikTok', 'YouTube Shorts', 'Instagram Reels']),
-  format: z.enum(['teaser-tiktok', 'teaser-reels']),
+  platform: z.enum(['YouTube Shorts']).describe('YouTube Shorts (obrigatório)'),
+  format: z.enum(['teaser-youtube-shorts']).describe('Formato obrigatório: teaser-youtube-shorts'),
   estimatedViews: z.number(),
   scriptStyleId: z.string(),
   scriptStyleName: z.string(),
   editorialObjectiveId: z.string(),
   editorialObjectiveName: z.string(),
   avoidPatterns: z.array(z.string()).min(1).max(4),
-  visualPrompt: z.string().describe('Prompt de imagem em inglês')
+  visualPrompt: z.string().describe('Prompt de imagem em inglês'),
+  sceneCount: z.number().int().optional().describe('Quantidade alvo de cenas do teaser (definida pelo sistema)')
 })
 
 // ── Etapa 6: Schedule ──────────────────────────────────────────────────────────
@@ -138,9 +142,17 @@ export interface MonetizationPlannerV2Request {
   images?: Array<{ description: string }>
   persons?: Array<{ name: string; role: string; description: string; visualDescription?: string; relevance?: string }>
   researchData?: any
+  /** Brief persistido do Dossier para reduzir contexto em TEASERS */
+  briefBundleV1?: any
   teaserDuration: 35 | 55 | 115
   fullVideoDuration: 300 | 600 | 900
   teaserCount?: number
+  sceneConfig?: {
+    hookOnly: number
+    deepDive: number
+    gateway: number
+    fullVideo: number
+  }
   creativeDirection?: CreativeDirection
 }
 
@@ -295,7 +307,7 @@ function createStructuredOutput(model: any, schema: any, provider: string) {
     return (model as any).withStructuredOutputReplicate(schema, { includeRaw: true })
   }
   let method: string | undefined
-  if (isGemini) method = 'jsonSchema'
+  if (isGemini) method = 'jsonMode' // Gemini tem limitações em response_schema (const, default)
   else if (isGroq) {
     const modelName = (model as any).model || (model as any).modelName || ''
     if (modelName.includes('llama-4')) method = 'jsonMode'
@@ -338,7 +350,7 @@ async function invokeStage(
   } catch (error: any) {
     // Tratar erro Groq json_validate_failed — extrair dados do failed_generation
     const groqResult = handleGroqJsonValidateError(
-      error, `${LOG} [${stageName}]`, `monetization-${stageName}`
+      error, `${LOG} [${stageName}]`, `monetization-${stageName}`, undefined, cacheResult.messages
     )
     if (groqResult.success) {
       console.warn(`${LOG} ⚠️ ${stageName}: Groq json_validate_failed — usando failed_generation`)
@@ -424,6 +436,12 @@ export async function generateMonetizationPlanV2(
   request: MonetizationPlannerV2Request
 ): Promise<MonetizationPlannerV2Result> {
   const teaserCount = Math.min(15, Math.max(4, request.teaserCount ?? 6))
+  const sceneConfig = request.sceneConfig ?? {
+    hookOnly: 4,
+    deepDive: 6,
+    gateway: 5,
+    fullVideo: 150
+  }
   const stageTimings: Record<string, number> = {}
   const totalUsage = { inputTokens: 0, outputTokens: 0, totalTokens: 0 }
 
@@ -432,8 +450,9 @@ export async function generateMonetizationPlanV2(
   const assignment = await getAssignment('monetization')
   console.log(`${LOG} Usando ${assignment.provider} (${assignment.model})`)
 
-  // ── Dossiê block (reutilizado em todas as etapas) ──────────────
-  const dossierBlock = buildDossierBlock({
+  // ── Dossiê block ────────────────────────────────────────────────
+  // Full Video continua usando o dossiê completo. Teasers podem usar brief.
+  const fullDossierBlock = buildDossierBlock({
     theme: request.theme,
     title: request.title,
     visualIdentityContext: request.visualIdentityContext,
@@ -449,6 +468,17 @@ export async function generateMonetizationPlanV2(
     }))
   })
 
+  const briefParsed = BriefBundleV1Schema.safeParse(request.briefBundleV1)
+  const teaserDossierBlock = briefParsed.success
+    ? formatBriefBundleV1AsDossierBlock(briefParsed.data)
+    : fullDossierBlock
+
+  if (briefParsed.success) {
+    console.log(`${LOG} 🧾 Teasers usando BriefBundleV1 (contexto reduzido)`)
+  } else {
+    console.log(`${LOG} 🧾 Teasers usando dossiê completo (sem briefBundleV1)`)
+  }
+
   // Creative direction block (se houver)
   let creativeDirectionBlock = ''
   if (request.creativeDirection) {
@@ -458,10 +488,8 @@ export async function generateMonetizationPlanV2(
       `**Teasers:**\n${cd.teaserRecommendations.map((t, i) => `${i + 1}. Ângulo "${t.suggestedAngle}": roteiro=\`${t.scriptStyle.id}\`, editorial=\`${t.editorialObjective.id}\``).join('\n')}\n`
   }
 
-  // Configuração de duração
-  const teaserLabel = request.teaserDuration === 35 ? 'ultra-curtos (35s)' : request.teaserDuration === 55 ? 'curtos (55s)' : 'médios (115s)'
-  const fullLabel = `${request.fullVideoDuration / 60} minutos`
-  const configBlock = `\n## ⚙️ CONFIGURAÇÃO\n- Teasers: ${teaserCount}x ${teaserLabel}\n- Full Video: ${fullLabel}\n`
+  // Configuração orientada por CENAS (tempo é técnico/interno)
+  const configBlock = `\n## ⚙️ CONFIGURAÇÃO (CENAS FIXAS)\n- Full Video: ${sceneConfig.fullVideo} cenas\n- Gateway: ${sceneConfig.gateway} cenas\n- Deep-Dive: ${sceneConfig.deepDive} cenas\n- Hook-Only: ${sceneConfig.hookOnly} cenas\n- Quantidade de teasers: ${teaserCount}\n`
 
   // =====================================================================
   // ETAPA 1: BLUEPRINT ESTRATÉGICO
@@ -474,16 +502,20 @@ export async function generateMonetizationPlanV2(
 
   let blueprint: any
   let violations: string[] = []
-  const MAX_BLUEPRINT_RETRIES = 5
+  const MAX_BLUEPRINT_RETRIES = 10
+  // Histórico acumulativo de violações — evita repetição de erros entre retries
+  const violationHistory: string[] = []
 
   for (let attempt = 0; attempt <= MAX_BLUEPRINT_RETRIES; attempt++) {
     const blueprintSystemPrompt = `${blueprintSkill}${creativeDirectionBlock}${configBlock}\n\n${catalogBlock}\n\n${roleDistBlock}`
     const blueprintUserPrompt = attempt === 0
       ? `Crie o blueprint estratégico para o dossiê acima. Gere ${teaserCount} slots de teasers com ângulos, roles e formatos.`
-      : `CORREÇÃO OBRIGATÓRIA:\n${violations.join('\n')}\n\nRegere o blueprint corrigindo as violações acima.`
+      : violationHistory.length > 1
+        ? `📋 HISTÓRICO DE CORREÇÕES (${violationHistory.length} tentativas reprovadas):\n${'─'.repeat(50)}\n${violationHistory.map((v, i) => `[Tentativa ${i + 1}]\n${v}`).join('\n\n')}\n${'─'.repeat(50)}\n\n🚨 NÃO repita NENHUM erro listado acima. Regere o blueprint corrigindo todas as violações.`
+        : `CORREÇÃO OBRIGATÓRIA:\n${violations.join('\n')}\n\nRegere o blueprint corrigindo as violações acima.`
 
     const BlueprintSchema = createBlueprintSchema(teaserCount)
-    const result = await invokeStage('blueprint', BlueprintSchema, blueprintSystemPrompt, blueprintUserPrompt, dossierBlock, assignment)
+    const result = await invokeStage('blueprint', BlueprintSchema, blueprintSystemPrompt, blueprintUserPrompt, teaserDossierBlock, assignment)
     stageTimings['blueprint'] = result.elapsed
     totalUsage.inputTokens += result.usage.inputTokens
     totalUsage.outputTokens += result.usage.outputTokens
@@ -505,11 +537,19 @@ export async function generateMonetizationPlanV2(
     }
 
     violations = validation.violations
+    violationHistory.push(violations.join('\n'))
     console.warn(`${LOG} ❌ Blueprint REPROVADO (tentativa ${attempt + 1}/${MAX_BLUEPRINT_RETRIES + 1}): ${violations.join('; ')}`)
 
     if (attempt >= MAX_BLUEPRINT_RETRIES) {
       throw new Error(`Blueprint reprovado após ${MAX_BLUEPRINT_RETRIES + 1} tentativas: ${violations.join('; ')}`)
     }
+  }
+
+  // ── Guard pós-loop: NUNCA prosseguir com blueprint reprovado ──
+  const finalValidation = validateBlueprint(blueprint, teaserCount)
+  if (!finalValidation.valid) {
+    console.error(`${LOG} 🚨 Blueprint REPROVADO no guard pós-loop. Violações: ${finalValidation.violations.join('; ')}`)
+    throw new Error(`Blueprint reprovado (guard pós-loop): ${finalValidation.violations.join('; ')}`)
   }
 
   const slots = blueprint.teaserSlots
@@ -531,14 +571,17 @@ export async function generateMonetizationPlanV2(
     'full-video', FullVideoSchema,
     `${fullVideoSkill}${creativeDirectionBlock}${configBlock}${teaserAnglesBlock}\n\nEstilo visual do plano: ${blueprint.visualStyleId} (${blueprint.visualStyleName})`,
     `Gere a sugestão completa do Full Video.\n\nÂngulo principal definido no blueprint: "${blueprint.fullVideo.angle}"\nscriptStyleId: "${blueprint.fullVideo.scriptStyleId}"\neditorialObjectiveId: "${blueprint.fullVideo.editorialObjectiveId}"`,
-    dossierBlock, assignment
+    fullDossierBlock, assignment
   )
   stageTimings['full-video'] = fullVideoResult.elapsed
   totalUsage.inputTokens += fullVideoResult.usage.inputTokens
   totalUsage.outputTokens += fullVideoResult.usage.outputTokens
   totalUsage.totalTokens += fullVideoResult.usage.totalTokens
 
-  const fullVideo = fullVideoResult.parsed
+  const fullVideo = {
+    ...fullVideoResult.parsed,
+    sceneCount: sceneConfig.fullVideo
+  }
 
   // =====================================================================
   // ETAPA 3: GATEWAY (1 teaser)
@@ -553,7 +596,7 @@ export async function generateMonetizationPlanV2(
     z.object({ teasers: z.array(TeaserSchema).length(1) }),
     `${gatewaySkill}${configBlock}\n\nEstilo visual do plano: ${blueprint.visualStyleId} (${blueprint.visualStyleName})\n\nHook do Full Video (NÃO repetir): "${fullVideo.hook}"`,
     `Gere o teaser GATEWAY para o dossiê.\n\nSlot definido no blueprint:\n- angleCategory: "${gwSlot.angleCategory}"\n- angleName: "${gwSlot.angleName}"\n- shortFormatType: "${gwSlot.shortFormatType}"\n- platform: "${gwSlot.platform}"\n- scriptStyleId: "${gwSlot.scriptStyleId}"\n- editorialObjectiveId: "${gwSlot.editorialObjectiveId}"\n\nRetorne um JSON com campo "teasers" contendo exatamente 1 teaser.`,
-    dossierBlock, assignment
+    teaserDossierBlock, assignment
   )
   stageTimings['gateway'] = gatewayResult.elapsed
   totalUsage.inputTokens += gatewayResult.usage.inputTokens
@@ -580,7 +623,7 @@ export async function generateMonetizationPlanV2(
       z.object({ teasers: z.array(TeaserSchema).min(deepDiveSlots.length).max(deepDiveSlots.length + 1) }),
       `${deepDiveSkill}${configBlock}\n\nEstilo visual: ${blueprint.visualStyleId} (${blueprint.visualStyleName})\n\n## HOOKS JÁ USADOS (NÃO REPETIR)\n${usedHooks.map((h, i) => `${i + 1}. "${h}"`).join('\n')}\n\n## GATEWAY JÁ GERADO (NÃO repetir informações)\nHook: "${gatewayTeaser.hook}"\nÂngulo: ${gatewayTeaser.angleCategory}\nOutline: ${gatewayTeaser.scriptOutline}`,
       `Gere ${deepDiveSlots.length} teasers DEEP-DIVE para o dossiê.\n\nSlots definidos no blueprint:\n${slotsBlock}\n\nRetorne um JSON com campo "teasers" contendo exatamente ${deepDiveSlots.length} teasers.`,
-      dossierBlock, assignment
+      teaserDossierBlock, assignment
     )
     stageTimings['deep-dives'] = deepDiveResult.elapsed
     totalUsage.inputTokens += deepDiveResult.usage.inputTokens
@@ -608,7 +651,7 @@ export async function generateMonetizationPlanV2(
       z.object({ teasers: z.array(TeaserSchema).min(hookOnlySlots.length).max(hookOnlySlots.length + 1) }),
       `${hookOnlySkill}${configBlock}\n\nEstilo visual: ${blueprint.visualStyleId} (${blueprint.visualStyleName})\n\n## HOOKS JÁ USADOS (NÃO REPETIR)\n${usedHooks.map((h, i) => `${i + 1}. "${h}"`).join('\n')}\n\n## TEASERS JÁ GERADOS (NÃO repetir territórios)\n${allTeasers.map((t, i) => `${i + 1}. [${t.narrativeRole}] ${t.angleCategory}: "${t.hook}"`).join('\n')}`,
       `Gere ${hookOnlySlots.length} teasers HOOK-ONLY para o dossiê.\n\nSlots definidos no blueprint:\n${slotsBlock}\n\nRetorne um JSON com campo "teasers" contendo exatamente ${hookOnlySlots.length} teasers.`,
-      dossierBlock, assignment
+      teaserDossierBlock, assignment
     )
     stageTimings['hook-only'] = hookOnlyResult.elapsed
     totalUsage.inputTokens += hookOnlyResult.usage.inputTokens
@@ -653,13 +696,23 @@ export async function generateMonetizationPlanV2(
   console.log(`${LOG} ⏱️ Timings: ${Object.entries(stageTimings).map(([k, v]) => `${k}=${v.toFixed(1)}s`).join(' | ')}`)
   console.log(`${LOG} 📊 Tokens totais: ${totalUsage.inputTokens} in + ${totalUsage.outputTokens} out = ${totalUsage.totalTokens}`)
 
+  const teasersWithSceneCount = allTeasers.map((t: any) => {
+    const role = t?.narrativeRole
+    const sceneCount = role === 'gateway'
+      ? sceneConfig.gateway
+      : role === 'hook-only'
+        ? sceneConfig.hookOnly
+        : sceneConfig.deepDive
+    return { ...t, sceneCount }
+  })
+
   return {
     plan: {
       planTitle: blueprint.planTitle,
       visualStyleId: blueprint.visualStyleId,
       visualStyleName: blueprint.visualStyleName,
       fullVideo,
-      teasers: allTeasers,
+      teasers: teasersWithSceneCount,
       publicationSchedule: schedule,
       estimatedTotalRevenue: blueprint.estimatedTotalRevenue,
       strategicNotes: blueprint.strategicNotes

@@ -209,7 +209,8 @@ export const MEDIA_PROVIDERS: Record<MediaProviderId, MediaProvider> = {
           promptField: 'text',
           defaults: {
             model_id: 'eleven_multilingual_v2',
-            voice_settings: { stability: 0.35, similarity_boost: 0.8, style: 0.7, use_speaker_boost: true }
+            // ElevenLabs: estabilidade discreta (0.0, 0.5, 1.0). Use 0.5 como default seguro.
+            voice_settings: { stability: 0.5, similarity_boost: 0.8, style: 0.7, use_speaker_boost: true }
           },
           paramMapping: { stability: 'voice_settings.stability', similarity: 'voice_settings.similarity_boost', speed: 'voice_settings.speed' },
           outputMode: 'base64'
@@ -222,7 +223,8 @@ export const MEDIA_PROVIDERS: Record<MediaProviderId, MediaProvider> = {
           promptField: 'text',
           defaults: {
             model_id: 'eleven_turbo_v2_5',
-            voice_settings: { stability: 0.35, similarity_boost: 0.8, style: 0.7, use_speaker_boost: true }
+            // ElevenLabs: estabilidade discreta (0.0, 0.5, 1.0). Use 0.5 como default seguro.
+            voice_settings: { stability: 0.5, similarity_boost: 0.8, style: 0.7, use_speaker_boost: true }
           },
           paramMapping: { stability: 'voice_settings.stability', similarity: 'voice_settings.similarity_boost', speed: 'voice_settings.speed' },
           outputMode: 'base64'

@@ -15,6 +15,7 @@
 import { z } from 'zod'
 import { loadSkill } from '../utils/skill-loader'
 import { createLlmForTask, getAssignment } from './llm/llm-factory'
+import { validatorsEnabled } from '../utils/validators'
 
 // Schema de Resposta da Validação
 const ScriptValidationResultSchema = z.object({
@@ -75,6 +76,11 @@ export async function validateScript(
   scenes: ScriptScene[],
   context: ScriptValidationContext
 ): Promise<ScriptValidationResult> {
+  if (!validatorsEnabled()) {
+    console.log(`${LOG} ⏭️ Validação DESABILITADA temporariamente (bypass global).`)
+    return { approved: true }
+  }
+
   const skillName = resolveScriptValidationSkillName(context)
 
   if (!skillName) {
@@ -96,6 +102,31 @@ export async function validateScript(
         corrections:
           'Reescreva a ÚLTIMA cena para ter a narração EXATAMENTE: "The Gap Files." (sem texto adicional antes/depois).',
         overResolution: false
+      }
+    }
+
+    // 0b. Check determinístico: conclusão moral em hook-only (resolução zero)
+    const moralConclusionPatterns = [
+      /aliment[aáou].*ódio/i, // alimentou, alimentam, alimentando, alimenta, alimentar
+      /discursos?\s+de\s+ódio/i, // discursos de ódio, discurso de ódio
+      /séculos\s+de\s+ódio/i, // séculos de ódio
+      /conclusão\s+moral/i,
+      /a\s+verdade\s+é\s+que/i,
+      /na\s+realidade/i,
+      /isso\s+mostra\s+que/i,
+      /isso\s+nos\s+faz\s+pensar/i
+    ]
+    for (let i = 0; i < scenes.length - 1; i++) {
+      const n = (scenes[i]?.narration || '').toLowerCase()
+      for (const pat of moralConclusionPatterns) {
+        if (pat.test(n)) {
+          return {
+            approved: false,
+            violations: [`Cena ${i} contém conclusão moral/resolução: "${scenes[i]?.narration?.slice(0, 80)}..." — hook-only exige resolução ZERO.`],
+            corrections: 'Remova conclusões morais, explicações e frases que fecham a narrativa. Mantenha apenas provocação e fatos sobre o sistema.',
+            overResolution: true
+          }
+        }
       }
     }
   }
@@ -208,6 +239,9 @@ FOCO 4 — DENSIDADE / ANTI-FILLER (ESPECIALMENTE EM HOOK-ONLY):
 - Se a narração de uma cena é puramente atmosférica/poética sem agente/artefato/ação/consequência → REPROVADO.
 - EXEMPLO RUIM (filler): "Um selo dourado pisca brevemente, desaparecendo como um sussurro na escuridão profunda."
 - EXEMPLO BOM (respiro com conteúdo): "O selo autorizou o confisco. E ninguém assinou por engano."
+${context.narrativeRole === 'hook-only' ? `
+FOCO 5 — RUPTURA NA CENA 0 (hook-only):
+A primeira cena DEVE ser ruptura conceitual. Se a narração começa com CONSTRUÇÃO ("Um pregador grita", "Um padre declara", "Em uma cidade...", "A pregação enlouquece...") → REPROVADO. O hook deve chocar com CONCEITO em frases curtas, não com descrição de cena.` : ''}
 
 Marque "overResolution: true" se o roteiro entrega conclusão/explicação demais para a role.
 
@@ -266,7 +300,11 @@ Responda APENAS no formato JSON definido.
     }
 
     console.error(`${LOG} Erro na validação:`, error)
-    // Falha silenciosa — não bloqueia o pipeline
-    return { approved: true }
+    return {
+      approved: false,
+      violations: ['Erro técnico na validação — reprovar por segurança'],
+      corrections: 'Tente regenerar o roteiro.',
+      overResolution: false
+    }
   }
 }

@@ -1,0 +1,59 @@
+{
+  "timestamp": "2026-02-15T21:16:10.221Z",
+  "taskId": "script-hook-only",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "parsed": {
+    "title": "O Bispo que Criou o Ódio que Ainda Mata",
+    "summary": "Um simples selo assinado por um bispo no século XV desencadeou um mito de sangue que alimentou a perseguição aos judeus por séculos. O mesmo documento foi usado como moeda de poder, financiando catedrais e enriquecendo a hierarquia e, mais de 500 anos depois, inspirou um jovem a justificar um ataque mortal a uma sinagoga. Quando o dinheiro do confisco pagou a arma que ceifou uma vida, o eco da injustiça medieval se fez presente no presente, revelando como o mecanismo de poder persiste e se renov... [truncated 2 chars]",
+    "scenes": [
+      {
+        "order": 1,
+        "narration": "Um bispo assinou. 500 anos depois, o mesmo mito ressurgiu.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, close-up of a medieval bishop's seal pressed into parchment, low angle, candlelight flickering on the wax seal, dust particles swirling in the beam, the same seal reflected on a modern computer monitor displaying the digitized image, shadows dancing across the desk, bishop_study",
+        "sceneEnvironment": "bishop_study",
+        "motionDescription": "camera slowly dolly in on the seal, then a subtle pan to the monitor screen as the digital image appears",
+        "audioDescription": "soft rustle of parchment, distant echo of a quill scratching, faint hum of a computer fan",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 2,
+        "narration": "Ele confiscou bens judaicos, encher a catedral; séculos depois, um atirador usou o mito.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, ledger open on a wooden table showing rows of confiscated assets, illuminated by a single candle, beside it a modern laptop screen displaying a manifesto excerpt referencing the medieval case, light filtering through a cracked window, bishop_study",
+        "sceneEnvironment": "bishop_study",
+        "motionDescription": "slow zoom on the ledger entries, then a quick tilt to the laptop screen as the manifesto scrolls",
+        "audioDescription": "paper pages turning, low electronic beep, murmured typing in the background",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 3,
+        "narration": "O dinheiro do confisco pagou a arma que matou uma mulher na sinagoga.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, newspaper front page on a desk, headline about a synagogue shooting, photo of a grieving woman in black, soft rain streaking the window, monitor displaying the article, monitor_room",
+        "sceneEnvironment": "monitor_room",
+        "motionDescription": "camera pans from the headline to the woman's face, then a subtle focus pull on the article text",
+        "audioDescription": "distant siren wail, hushed crowd murmurs, rain tapping against glass",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 4,
+        "narration": "The Gap Files.",
+        "visualDescription": "Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, empty dimly lit study with a single candle burning low, shadows stretched across the floor, silence envelops the space, bishop_study",
+        "sceneEnvironment": "bishop_study",
+        "motionDescription": "static shot, lingering on the empty chair as the candle flickers and fades",
+        "audioDescription": null,
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      }
+    ],
+    "backgroundMusic": {
+      "prompt": "Dark Ambient, Low Drone, Subtle Strings, Tension, Cinematic, Mysterious, 80 BPM",
+      "volume": -12
+    },
+    "backgroundMusicTracks": null
+  },
+  "rawContent": "{\n  \"title\": \"O Bispo que Criou o Ódio que Ainda Mata\",\n  \"summary\": \"Um simples selo assinado por um bispo no século XV desencadeou um mito de sangue que alimentou a perseguição aos judeus por séculos. O mesmo documento foi usado como moeda de poder, financiando catedrais e enriquecendo a hierarquia e, mais de 500 anos depois, inspirou um jovem a justificar um ataque mortal a uma sinagoga. Quando o dinheiro do confisco pagou a arma que ceifou uma vida, o eco da injustiça medieval se fez presente no presente, revelando como o mecanismo de poder persiste e se renova.\",\n  \"backgroundMusic\": {\n    \"prompt\": \"Dark Ambient, Low Drone, Subtle Strings, Tension, Cinematic, Mysterious, 80 BPM\",\n    \"volume\": -12\n  },\n  \"backgroundMusicTracks\": null,\n  \"scenes\": [\n    {\n      \"order\": 1,\n      \"narration\": \"Um bispo assinou. 500 anos depois, o mesmo mito ressurgiu.\",\n      \"visualDescription\": \"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, close-up of a medieval bishop's seal pressed into parchment, low angle, candlelight flickering on the wax seal, dust particles swirling in the beam, the same seal reflected on a modern computer monitor displaying the digitized image, shadows dancing across the desk, bishop_study\",\n      \"motionDescription\": \"camera slowly dolly in on the seal, then a subtle pan to the monitor screen as the digital image appears\",\n      \"audioDescription\": \"soft rustle of parchment, distant echo of a quill scratching, faint hum of a computer fan\",\n      \"audioDescriptionVolume\": -12,\n      \"estimatedDuration\": 5,\n      \"sceneEnvironment\": \"bishop_study\"\n    },\n    {\n      \"order\": 2,\n      \"narration\": \"Ele confiscou bens judaicos, encher a catedral; séculos depois, um atirador usou o mito.\",\n      \"visualDescription\": \"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, ledger open on a wooden table showing rows of confiscated assets, illuminated by a single candle, beside it a modern laptop screen displaying a manifesto excerpt referencing the medieval case, light filtering through a cracked window, bishop_study\",\n      \"motionDescription\": \"slow zoom on the ledger entries, then a quick tilt to the laptop screen as the manifesto scrolls\",\n      \"audioDescription\": \"paper pages turning, low electronic beep, murmured typing in the background\",\n      \"audioDescriptionVolume\": -12,\n      \"estimatedDuration\": 5,\n      \"sceneEnvironment\": \"bishop_study\"\n    },\n    {\n      \"order\": 3,\n      \"narration\": \"O dinheiro do confisco pagou a arma que matou uma mulher na sinagoga.\",\n      \"visualDescription\": \"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, newspaper front page on a desk, headline about a synagogue shooting, photo of a grieving woman in black, soft rain streaking the window, monitor displaying the article, monitor_room\",\n      \"motionDescription\": \"camera pans from the headline to the woman's face, then a subtle focus pull on the article text\",\n      \"audioDescription\": \"distant siren wail, hushed crowd murmurs, rain tapping against glass\",\n      \"audioDescriptionVolume\": -12,\n      \"estimatedDuration\": 5,\n      \"sceneEnvironment\": \"monitor_room\"\n    },\n    {\n      \"order\": 4,\n      \"narration\": \"The Gap Files.\",\n      \"visualDescription\": \"Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric, empty dimly lit study with a single candle burning low, shadows stretched across the floor, silence envelops the space, bishop_study\",\n      \"motionDescription\": \"static shot, lingering on the empty chair as the candle flickers and fades\",\n      \"audioDescription\": null,\n      \"audioDescriptionVolume\": -12,\n      \"estimatedDuration\": 5,\n      \"sceneEnvironment\": \"bishop_study\"\n    }\n  ]\n}"
+}

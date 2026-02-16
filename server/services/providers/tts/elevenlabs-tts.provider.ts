@@ -18,6 +18,20 @@ import type {
 } from '../../../types/ai-providers'
 import { calculateElevenLabsCost } from '../../../constants/pricing'
 
+/**
+ * ElevenLabs (TTD) stability recentemente passou a aceitar apenas valores discretos.
+ * A API retorna: invalid_ttd_stability se enviarmos floats arbitrários (ex.: 0.35).
+ *
+ * Aceitos: 0.0 (Creative), 0.5 (Natural), 1.0 (Robust)
+ * Mantemos compatibilidade: mapeamos 0..1 para o valor permitido mais próximo.
+ */
+function normalizeElevenTtdStability(input: number | undefined): 0 | 0.5 | 1 {
+  if (typeof input !== 'number' || Number.isNaN(input)) return 0.5
+  if (input <= 0.25) return 0
+  if (input <= 0.75) return 0.5
+  return 1
+}
+
 export class ElevenLabsTTSProvider implements ITTSProvider {
   private apiKey: string
   private baseUrl: string
@@ -38,9 +52,13 @@ export class ElevenLabsTTSProvider implements ITTSProvider {
       throw new Error('[ElevenLabs] ❌ Voice ID is required. Please select a voice from the list or provide a custom Voice ID.')
     }
 
+    const modelId = request.modelId || process.env.ELEVENLABS_MODEL_ID || 'eleven_multilingual_v2'
+
     console.log(`[ElevenLabs] 🚀 Sending request to /with-timestamps. Voice: ${voiceId}, Text len: ${request.text.length}`)
 
     try {
+      const stability = normalizeElevenTtdStability(request.stability)
+
       // Usar endpoint /with-timestamps para obter character-level alignment
       const response = await fetch(
         `${this.baseUrl}/text-to-speech/${voiceId}/with-timestamps`,
@@ -52,9 +70,9 @@ export class ElevenLabsTTSProvider implements ITTSProvider {
           },
           body: JSON.stringify({
             text: request.text,
-            model_id: 'eleven_multilingual_v2',
+            model_id: modelId,
             voice_settings: {
-              stability: request.stability ?? 0.35,
+              stability,
               similarity_boost: request.similarity ?? 0.8,
               style: 0.7,
               use_speaker_boost: true,
@@ -104,7 +122,6 @@ export class ElevenLabsTTSProvider implements ITTSProvider {
         console.warn(`[ElevenLabs] ⚠️ No alignment data, using estimated duration: ${duration.toFixed(2)}s`)
       }
 
-      const model = 'eleven_multilingual_v2'
       return {
         audioBuffer,
         duration,
@@ -113,9 +130,9 @@ export class ElevenLabsTTSProvider implements ITTSProvider {
         alignment,
         wordTimings,
         costInfo: {
-          cost: calculateElevenLabsCost(model, request.text.length),
+          cost: calculateElevenLabsCost(modelId, request.text.length),
           provider: 'ELEVENLABS',
-          model,
+          model: modelId,
           metadata: { characters: request.text.length }
         }
       }
@@ -138,11 +155,34 @@ export class ElevenLabsTTSProvider implements ITTSProvider {
 
     let currentWord = ''
     let wordStartTime = -1
+    let inAudioTag = false // ignore anything inside [ ... ] (Eleven v3 audio tags)
 
     for (let i = 0; i < characters.length; i++) {
       const char = characters[i]!
       const charStart = starts[i]!
       const charEnd = ends[i]!
+
+      // Eleven v3 Audio Tags: ignore bracketed directives like [pause], [breathes], [whispers], etc.
+      if (char === '[') {
+        // boundary: finalize any current word before entering the tag
+        if (currentWord.trim()) {
+          words.push({
+            word: currentWord,
+            startTime: wordStartTime,
+            endTime: charStart
+          })
+        }
+        currentWord = ''
+        wordStartTime = -1
+        inAudioTag = true
+        continue
+      }
+      if (inAudioTag) {
+        if (char === ']') {
+          inAudioTag = false
+        }
+        continue
+      }
 
       // Espaço ou quebra de linha = fim da palavra atual
       if (char === ' ' || char === '\n' || char === '\r' || char === '\t') {
