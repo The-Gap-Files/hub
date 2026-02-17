@@ -57,9 +57,11 @@ describe('POST /api/dossiers/[id]/create-youtube-package', () => {
         narrativeRole: role,
         shortFormatType: 'plot-twist',
         microBriefV1: buildMicroBrief(i, role as any),
-        scriptOutline: 'Hook → Beat → Gap → CTA',
+        scriptOutline: role === 'hook-only'
+          ? 'Loop-B → Respiro → Replay bait → Loop-A'
+          : 'Hook → Beat → Gap → CTA',
         visualSuggestion: 'Documentos e sombras',
-        cta: 'The Gap Files.',
+        cta: role === 'hook-only' ? null : 'The Gap Files.',
         platform: 'YouTube Shorts',
         format: 'teaser-youtube-shorts',
         estimatedViews: 1234,

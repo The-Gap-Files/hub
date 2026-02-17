@@ -1,0 +1,111 @@
+{
+  "timestamp": "2026-02-17T15:13:35.535Z",
+  "taskId": "monetization-hook-only-4",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Monetization — Hook-Only Teasers Generator\n\nVocê é um estrategista de conteúdo viral. Nesta etapa, você vai gerar os teasers HOOK-ONLY — arma de alcance viral, detonação cognitiva que para o scroll, gera replay e converte.\n\n## 🎯 O Que São Hook-Only\n\nHook-Only é uma **arma viral de 16-22 segundos**. Não é um resumo. Não é um mini-documentário. Não é uma aula.\n\n### DNA do Hook-Only:\n- **Visceral** — O público SENTE antes de PENSAR. Se pensou antes de sentir, deslizou.\n- **Simples** — 1 conceito central resumível em 1 frase mental. Sem colagem de fatos.\n- **Dinâmico** — Alternância emocional: Cena 1 (Ruptura/Loop-B) → Cena 2 (Respiro) → Cena 3 (Replay bait/impacto) → Cena 4 (Pico/Loop-A).\n- **Sistêmico** — Mostra o MECANISMO (quem autorizou, quem lucrou), não o sintoma (violência). Indignação > repulsa.\n- **Incompleto** — ZERO resolução, ZERO explicação, TODOS os loops abertos.\n- **Replay-friendly** — Detalhes rápidos que forçam \"pera, o que foi isso?\"\n- **Loop Infinito (Loop-A/Loop-B)** — Escreva de trás pra frente. A frase final (Cena 4) é incompleta e só faz sentido quando o vídeo reinicia na Cena 1.\n- **Safe** — Postura \"Neutral Documentarian\". Gore explícito = desmonetização. Use substituição semântica.\n\n## 📐 CONTEXTO RECEBIDO\n\nVocê recebe:\n- O dossiê completo\n- O teaser Gateway já gerado\n- Os teasers Deep-Dive já gerados\n- TODOS os hooks já usados (para NÃO repetir)\n- A lista de ângulos e formatos definidos no blueprint para cada hook-only\n\n## 📐 O QUE PRODUZIR\n\nPara CADA hook-only definido no blueprint, gere:\n- **title**: Máximo 8-10 palavras. Tensão + curiosidade + clareza. Sem nomes obscuros, sem subtítulos com dois-pontos.\n  - ❌ \"O mito sangrento que atravessou séculos: de Trento a Poway\" (14 palavras, denso)\n  - ✅ \"A mesma mentira. 500 anos depois.\" (6 palavras, pura tensão)\n  - ✅ \"Um menino morto e uma mentira eterna.\" (7 palavras, impacto)\n- **hook**: Frase que causa RUPTURA COGNITIVA em 2 segundos (até 15 palavras). Sem construção, sem contextualização. O espectador SENTE antes de pensar. DIFERENTE de tudo anterior.\n- **angle**: Descrição do ângulo (já definido no blueprint)\n- **angleCategory**: A categoria (já definida no blueprint)\n- **narrativeRole**: \"hook-only\"\n- **shortFormatType**: O formato (já definido no blueprint)\n- **scriptOutline**: Loop-B (final da frase do loop) → Respiro (contexto sistêmico) → Replay bait/impacto → Loop-A (começo da frase do loop, SUSPENSA).\n- **visualSuggestion**: Descrição curta do visual\n- **loopSentence**: Objeto com `fullSentence`, `partA` e `partB` definindo a mecânica do loop.\n- **cta**: **NENHUM**. Campo deve ser vazio ou null. O loop é a retenção.\n- **platform**: \"YouTube Shorts\"\n- **format**: \"teaser-youtube-shorts\"\n- **estimatedViews**: Estimativa de views\n- **scriptStyleId** e **scriptStyleName**\n- **editorialObjectiveId** e **editorialObjectiveName**\n- **avoidPatterns**: 2-4 anti-padrões específicos (veja regras abaixo)\n- **visualPrompt**: Prompt de imagem em INGLÊS (1 parágrafo)\n- **microBriefV1**: Micro-brief ESTRUTURADO para ESTE teaser (isolado por item). Deve conter:\\n  - version: \\\"teaserMicroBriefV1\\\"\\n  - narrativeRole: \\\"hook-only\\\"\\n  - angleCategory e angle (iguais aos campos do teaser)\\n  - facts: 5-12 fatos selecionados APENAS do brief/dossiê recebido (cada um com text e, se possível, sourceRef)\\n  - forbiddenElements: 6-12 itens (reforçar anti-arma/gore/close-up)\\n  - allowedArtifacts: 6-12 itens (documento/selo/monitor/headline/etc.)\\n  - notes: 2-6 bullets curtos (ex.: \\\"mecanismo > sintoma\\\", \\\"zero resolução\\\")\\n\\n🚨 IMPORTANTE: este microBriefV1 será o ÚNICO contexto que o Story Architect verá para este hook-only. Então selecione fatos que permitam um outline forte sem precisar de outros dados.\n\n## 🚨 REGRAS DOS HOOK-ONLY\n\n1. **RUPTURA EM 2 SEGUNDOS** — A primeira frase DEVE causar ruptura cognitiva. Nada de construção antes do choque. Se o público pensa antes de sentir, ele desliza.\n   - **MICRO-REGRA (TIMING)**: a primeira frase (até o primeiro ponto/pausa forte) deve ser pronunciável em **~1,5s**.\n     - Heurística: **3-5 palavras (ideal)**, **máx. 6**. Sem vírgula na primeira pancada.\n2. **1 CONCEITO CENTRAL** — O teaser INTEIRO gira em torno de UMA ideia resumível em 1 frase mental. Se exige conectar 3+ entidades/épocas/nomes para entender, está denso demais para consumo rápido.\n3. **ALTERNÂNCIA DINÂMICA (NÃO ESCALAÇÃO LINEAR)** — A intensidade deve VARIAR com contrastes: após beat intenso, inserir respiro para amplificar o próximo pico. O ÚLTIMO beat (corte seco — sem CTA) é o pico absoluto. ❌ 8→9→9→10 (saturação). ✅ 8→6→9→10 (alternância).\n3.5. **MECANISMO > SINTOMA (CRÍTICO)** — Foque no SISTEMA (quem autorizou, quem lucrou), NÃO na violência. ❌ \"A corda estala\" (repulsa → swipe). ✅ \"O bispo assinou a sentença\" (mecanismo → indignação → compartilha).\n   - **ANTI-TERMOS-SENSÍVEIS:** NUNCA use \"tortura infantil\", \"sangue infantil\", \"violência infantil\" em title, hook ou microBriefV1.facts. Se o brief tiver, REFORMULE para mecanismo (decreto, confisco, tribunal assinou, usou como pretexto). Títulos: ❌ \"O Decreto que Selou Sangue Infantil\". ✅ \"O Decreto que Autorizou o Confisco\".\n4. **NOMES UNIVERSAIS** — Nomes históricos obscuros quebram fluxo cognitivo. Use função (\"o bispo\", \"o juiz\", \"o atirador\"), não nomes próprios (Hinderbach, Tiberino). Exceção: nomes universalmente conhecidos (Hitler, Einstein, Napoleão).\n5. **RESOLUÇÃO ZERO** — Nenhuma explicação, recap, conclusão moral ou reflexão filosófica. TODOS os loops ficam abertos.\n6. **ZERO CTA** — O público NÃO pode perceber que acabou. Corte seco no meio da frase (Loop-A). Sem branding, sem \"The Gap Files.\".\n7. **REPLAY BAIT** — Pelo menos 1 beat com detalhe visual/narrativo rápido demais para absorver. Força re-assistir. Replay é sinal forte para o algoritmo.\n8. **Cada hook DEVE ser TOTALMENTE DIFERENTE** dos outros — formato E conteúdo\n9. **avoidPatterns** devem focar em eliminar contexto, explicação, nomes obscuros e CTA visível\n10. **microBriefV1 é a fonte da verdade** para o Story Architect deste hook-only: NÃO inclua fatos que pertencem a outros hook-onlys/deep-dives/gateway. Selecione apenas os fatos necessários para este ângulo e mantenha-os simples.\n11. **microBriefV1.facts:** Se um fato do brief contiver \"tortura infantil\", \"sangue infantil\", \"violência infantil\", REFORMULE antes de incluir: use consequência (confisco, decreto, autorizou) em vez do método (tortura, sangue).\n12. **microBriefV1.facts — MECANISMO > SINTOMA:** NÃO inclua fatos que descrevam captura/recolhimento de pessoas (\"guardas recolhiam crianças\", \"levaram para o tribunal\"). Inclua fatos do SISTEMA: \"O tesouro financiou o tribunal\", \"O decreto autorizou o confisco\", \"O bispo assinou a sentença\".\n\n## 🛡️ BRAND SAFETY E VISUAL NOISE (YOUTUBE 2026)\n\n1. **SUBSTITUIÇÃO SEMÂNTICA (OBRIGATÓRIA):**\n   - ❌ \"Assassino serial matou 20\" → 🟢 \"O responsável por 20 fins trágicos\"\n   - ❌ \"Sangue no chão\" → 🟢 \"A cena marcada\" / \"Vestígios vitais\"\n   - ❌ \"Estripado/Mutilado\" → 🟢 \"Fragmentado\" / \"Cena desfeita\"\n   - **Postura:** \"Neutral Documentarian\". Clínico, solene, nunca sensacionalista.\n\n2. **IMPERFEIÇÃO VISUAL CONTEXTUAL (Decisão de Direção):**\n   - **Esqueça o \"ruído aleatório\".** Escolha uma textura que AMPLIFIQUE a narrativa.\n   - **Documentos Antigos:** Textura de papel rasgado, granulação de filme 16mm, bordas queimadas.\n   - **Relatos Policiais/Modernos:** Glitch digital, compressão de CCTV, ruído de ISO alto (câmera noturna).\n   - **Memórias/Relatos:** Desfoque nas bordas (tilt-shift), aberração cromática leve.\n   - **Regra:** A imagem não pode ser \"lisa\" (cara de IA pura). Ela deve parecer um registro físico ou digital real.\n   - **Loop Visual:** O frame final deve ter iluminação/composição similar ao inicial para loop invisível.\n\n## 💡 EXEMPLOS DE HOOKS PODEROSOS (RUPTURA COGNITIVA)\n\n- \"A Igreja declarou ele santo… e depois RETIROU a santidade.\"\n- \"3 famílias lucraram com a morte dele. Ninguém foi preso.\"\n- \"O DNA não bate. A confissã... [truncated 6742 chars]"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "📋 TEMA: Injustiça histórica e libelo de sangue\n📋 TÍTULO: Simão de trento, itália\n🧾 BRIEF (TEASERS) — versão: briefBundleV1\n\n🛡️ REGRAS HARD (GLOBAL SAFETY)\n- ❌ armas de fogo\n- ❌ gore\n- ❌ close‑up de mãos humanas\n- ❌ close‑up de rostos humanos\n- ❌ símbolos extremistas\n- ❌ armas de fogo, rifles, pistolas, munição, gatilho\n- ❌ atirador, execução, assassinato explícito, violência gráfica\n- ❌ sangue, gore, corpos mutilados, tortura explícita\n- ❌ close-up de mãos humanas, close-up de rostos humanos (evitar macro/anatomia)\n- ❌ cenas em sinagogas/templos com ameaça explícita (substituir por artefatos: manifesto, tela, manchete)\n- ❌ símbolos/extremismo contemporâneo em destaque (substituir por “texto recortado/blur”)\n\n🧰 ARTEFATOS VISUAIS PERMITIDOS\n- ✅ documento\n- ✅ manuscrito\n- ✅ crônica\n- ✅ incunábulo\n- ✅ registro judicial\n- ✅ decreto\n- ✅ propaganda impressa\n- ✅ documento, decreto, registro, arquivo, dossiê, carimbo, selo de cera\n- ✅ moedas, cofre, livro-caixa, inventário, recibo, contrato\n- ✅ monitor, tela, manifesto (sem arma), headline, recorte de jornal, thread desfocada\n- ✅ mapa, corredor de arquivo, sala de leitura, prateleiras, luz de vela, sombras\n- ✅ silhuetas não-identificáveis sem rosto/mãos em close\n\n🔫 MUNIÇÃO NARRATIVA (FATOS SAFE)\n1. Em 1475, durante a Semana Santa, o menino Simão de Trento, de dois anos e meio, desapareceu em Trento. [fonte: Fonte 1]\n2. O corpo foi encontrado em 26 de março de 1475 numa vala de drenagem próxima à casa do banqueiro judeu Samuel de Nuremberg. [fonte: Fonte 1]\n3. O príncipe‑bispo Johannes Hinderbach aproveitou o caso para criar um culto local e gerar receitas de peregrinação. [fonte: Fonte 1]\n4. A comunidade judaica de Trento era composta por três famílias lideradas por Samuel de Nuremberg, Tobias e Engel. [fonte: Fonte 1]\n5. O frade Bernardino da Feltre pregou contra os judeus nas semanas que antecederam o desaparecimento, alimentando a hostilidade. [fonte: Fonte 1]\n6. O tribunal utilizou o método de “squassada”, variante do strappado, para obter confissões dos acusados. [fonte: Fonte 1]\n7. As confissões, obtidas sob coação, apontaram os judeus como responsáveis por um suposto ritual de assassinato, sem evidência física. [fonte: Fonte 1]\n8. O processo resultou no confisco dos bens e das contas de crédito dos judeus, enriquecendo o tesouro episcopal. [fonte: Fonte 1]\n9. O Papa Sixto IV enviou o bispo Battista dei Giudici, que concluiu que os judeus eram inocentes e o julgamento foi fabricado. [fonte: Fonte 1]\n10. Em 1478, a bula papal “Facit nos pietas” reconheceu a forma legal do processo, permitindo a continuidade do culto. [fonte: Fonte 1]\n11. A narrativa foi difundida por incunábulos, como a “Relatio de Simone puero tridentino” (1475) e a xilogravura da Crônica de Nuremberg (1493). [fonte: Fonte 1]\n12. O culto a Simão perdurou até 1965, quando um decreto do Vaticano aboliu a veneração e retirou as relíquias. [fonte: Fonte 1]\n13. Em 2019, John Earnest citou Simão de Trento em seu manifesto para justificar o ataque à sinagoga de Poway. [fonte: Fonte 3]\n14. O ataque de Poway matou Lori Gilbert‑Kaye e feriu três pessoas; o autor usou um rifle estilo AR‑15. [fonte: Fonte 6]\n15. O manifesto de Earnest transformou o libelo medieval em um artefato digital usado para incitar ódio contemporâneo. [fonte: Fonte 3]\n16. A hipótese “Schweitzer” indica que um cristão teria sugerido que a criança poderia ter se afogado, mas o relato foi suprimido. [fonte: Fonte 1]\n17. O suposto milagre da incorruptibilidade do corpo foi explicado por baixa temperatura da água, que retardou a decomposição (adipocera). [fonte: Fonte 1]\n18. O decreto de 1965 removeu o relicário, reconheceu a falsidade das acusações e encerrou o culto oficial. [fonte: Fonte 1]\n\n🎭 DIRETRIZES POR PAPEL\n- gateway: contextLevel=medium, facts=10-22\n- deep-dive: contextLevel=low, facts=8-16\n- hook-only: contextLevel=minimal, facts=3-6\n\nGere 1 teaser HOOK-ONLY para o dossiê.\n\nSlot definido no blueprint:\n- angleCategory: \"evidencial\"\n- angleName: \"Provas Forenses Versus Testemunhos Forçados\"\n- shortFormatType: \"hook-brutal\"\n- platform: \"YouTube Shorts\"\n- scriptStyleId: \"documentary\"\n- editorialObjectiveId: \"viral-hook\"\n\nRetorne um JSON com campo \"teasers\" contendo exatamente 1 teaser."
+      }
+    ]
+  },
+  "parsed": {
+    "teasers": [
+      {
+        "title": "Evidências forenses contra confissões forçadas: o mito exposto",
+        "hook": "O selo assinou a mentira",
+        "angle": "Provas Forenses Versus Testemunhos Forçados",
+        "angleCategory": "evidencial",
+        "narrativeRole": "hook-only",
+        "shortFormatType": "hook-brutal",
+        "microBriefV1": {
+          "version": "teaserMicroBriefV1",
+          "narrativeRole": "hook-only",
+          "angleCategory": "evidencial",
+          "angle": "Provas Forenses Versus Testemunhos Forçados",
+          "facts": [
+            {
+              "text": "O príncipe‑bispo Johannes Hinderbach transformou o caso em um culto local que gerou receitas de peregrinação.",
+              "sourceRef": "Fonte 1"
+            },
+            {
+              "text": "O processo resultou no confisco dos bens e das contas de crédito dos judeus, enriquecendo o tesouro episcopal.",
+              "sourceRef": "Fonte 1"
+            },
+            {
+              "text": "O Papa Sixto IV enviou o bispo Battista dei Giudici, que concluiu que o julgamento foi fabricado.",
+              "sourceRef": "Fonte 1"
+            },
+            {
+              "text": "A bula papal de 1478, ‘Facit nos pietas’, reconheceu legalmente o processo, permitindo a continuidade do culto.",
+              "sourceRef": "Fonte 1"
+            },
+            {
+              "text": "Em 1965, um decreto do Vaticano aboliu a veneração e retirou as relíquias, reconhecendo a falsidade das acusações.",
+              "sourceRef": "Fonte 1"
+            }
+          ],
+          "forbiddenElements": [
+            "gore",
+            "blood",
+            "explicit violence",
+            "weapons",
+            "close-up of faces",
+            "close-up of hands",
+            "graphic torture",
+            "extremist symbols",
+            "firearms",
+            "mutilation"
+          ],
+          "allowedArtifacts": [
+            "medieval decree",
+            "papal bull",
+            "wax seal",
+            "parchment document",
+            "court record",
+            "ledger",
+            "candlelit archive",
+            "inked manuscript",
+            "old map",
+            "archival shelf"
+          ],
+          "notes": [
+            "mecanismo > sintoma",
+            "zero resolução",
+            "loop aberto",
+            "replay bait via selo",
+            "neutral documentary tone"
+          ]
+        },
+        "scriptOutline": "Loop-B: O selo assinou a mentira... → Respiro: O bispo usou o caso para arrecadar fundos e confiscar bens... → Replay bait: documentos mostram o tesouro episcopal crescendo enquanto as confissões eram forçadas... → Loop-A: Evidências forenses revelam a verdade incompleta",
+        "visualSuggestion": "Parchment with a medieval wax seal illuminated by a trembling candle, background of dusty archive shelves.",
+        "cta": null,
+        "platform": "YouTube Shorts",
+        "format": "teaser-youtube-shorts",
+        "estimatedViews": 920000,
+        "scriptStyleId": "documentary",
+        "scriptStyleName": "Documentary",
+        "editorialObjectiveId": "viral-hook",
+        "editorialObjectiveName": "Viral Hook",
+        "avoidPatterns": [
+          "Não explique contexto antes do impacto",
+          "Não use nomes próprios obscuros",
+          "Não incluir CTA visível",
+          "Não usar linguagem sensacionalista"
+        ],
+        "visualPrompt": "A close-up of an aged parchment bearing a prominent medieval wax seal, soft candlelight casting warm shadows, with blurred shelves of ancient documents in the background, noir cinematic style, high contrast, grainy film texture.",
+        "sceneCount": 4
+      }
+    ]
+  },
+  "rawContent": "{\n  \"teasers\": [\n    {\n      \"title\": \"Evidências forenses contra confissões forçadas: o mito exposto\",\n      \"hook\": \"O selo assinou a mentira\",\n      \"angle\": \"Provas Forenses Versus Testemunhos Forçados\",\n      \"angleCategory\": \"evidencial\",\n      \"narrativeRole\": \"hook-only\",\n      \"shortFormatType\": \"hook-brutal\",\n      \"microBriefV1\": {\n        \"version\": \"teaserMicroBriefV1\",\n        \"narrativeRole\": \"hook-only\",\n        \"angleCategory\": \"evidencial\",\n        \"angle\": \"Provas Forenses Versus Testemunhos Forçados\",\n        \"facts\": [\n          {\n            \"text\": \"O príncipe‑bispo Johannes Hinderbach transformou o caso em um culto local que gerou receitas de peregrinação.\",\n            \"sourceRef\": \"Fonte 1\"\n          },\n          {\n            \"text\": \"O processo resultou no confisco dos bens e das contas de crédito dos judeus, enriquecendo o tesouro episcopal.\",\n            \"sourceRef\": \"Fonte 1\"\n          },\n          {\n            \"text\": \"O Papa Sixto IV enviou o bispo Battista dei Giudici, que concluiu que o julgamento foi fabricado.\",\n            \"sourceRef\": \"Fonte 1\"\n          },\n          {\n            \"text\": \"A bula papal de 1478, ‘Facit nos pietas’, reconheceu legalmente o processo, permitindo a continuidade do culto.\",\n            \"sourceRef\": \"Fonte 1\"\n          },\n          {\n            \"text\": \"Em 1965, um decreto do Vaticano aboliu a veneração e retirou as relíquias, reconhecendo a falsidade das acusações.\",\n            \"sourceRef\": \"Fonte 1\"\n          }\n        ],\n        \"forbiddenElements\": [\n          \"gore\",\n          \"blood\",\n          \"explicit violence\",\n          \"weapons\",\n          \"close-up of faces\",\n          \"close-up of hands\",\n          \"graphic torture\",\n          \"extremist symbols\",\n          \"firearms\",\n          \"mutilation\"\n        ],\n        \"allowedArtifacts\": [\n          \"medieval decree\",\n          \"papal bull\",\n          \"wax seal\",\n          \"parchment document\",\n          \"court record\",\n          \"ledger\",\n          \"candlelit archive\",\n          \"inked manuscript\",\n          \"old map\",\n          \"archival shelf\"\n        ],\n        \"notes\": [\n          \"mecanismo > sintoma\",\n          \"zero resolução\",\n          \"loop aberto\",\n          \"replay bait via selo\",\n          \"neutral documentary tone\"\n        ]\n      },\n      \"scriptOutline\": \"Loop-B: O selo assinou a mentira... → Respiro: O bispo usou o caso para arrecadar fundos e confiscar bens... → Replay bait: documentos mostram o tesouro episcopal crescendo enquanto as confissões eram forçadas... → Loop-A: Evidências forenses revelam a verdade incompleta\",\n      \"visualSuggestion\": \"Parchment with a medieval wax seal illuminated by a trembling candle, background of dusty archive shelves.\",\n      \"cta\": null,\n      \"platform\": \"YouTube Shorts\",\n      \"format\": \"teaser-youtube-shorts\",\n      \"estimatedViews\": 920000,\n      \"scriptStyleId\": \"documentary\",\n      \"scriptStyleName\": \"Documentary\",\n      \"editorialObjectiveId\": \"viral-hook\",\n      \"editorialObjectiveName\": \"Viral Hook\",\n      \"avoidPatterns\": [\n        \"Não explique contexto antes do impacto\",\n        \"Não use nomes próprios obscuros\",\n        \"Não incluir CTA visível\",\n        \"Não usar linguagem sensacionalista\"\n      ],\n      \"visualPrompt\": \"A close-up of an aged parchment bearing a prominent medieval wax seal, soft candlelight casting warm shadows, with blurred shelves of ancient documents in the background, noir cinematic style, high contrast, grainy film texture.\",\n      \"sceneCount\": 4\n    }\n  ]\n}"
+}

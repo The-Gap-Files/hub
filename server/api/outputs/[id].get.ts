@@ -57,6 +57,7 @@ export default defineEventHandler(async (event): Promise<OutputWithRelationsResp
               height: true,
               isSelected: true,
               variantIndex: true,
+              role: true,
               createdAt: true
             }
           },

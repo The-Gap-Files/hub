@@ -76,6 +76,8 @@ DIRETRIZES VISUAIS OBRIGATÓRIAS (Estilo: ${styleData.baseStyle}):
 
 Each visualDescription must be a COMPLETE, STANDALONE image-generation prompt in English. It will be sent directly to the image model with no further processing or merge. You MUST incorporate the visual style (base, lighting, atmosphere, composition) into each scene description in natural language.
 
+**CRITICAL — Narration Governs Visual:** The visualDescription MUST visually represent what the narration is saying in that scene. If the narration says "The bishop signed the sentence", the visual MUST show a document being signed, an episcopal seal, a quill on parchment, or similar — NEVER an unrelated candle or landscape. Test: "If someone SEES this image and HEARS this narration together, does it make immediate sense?" If NOT → rewrite.
+
 **CRITICAL — Âncora de estilo:** Start EVERY visualDescription with the exact base style phrase (or its full wording). For example, if the style is "Cinematic 2D illustration, Studio Ghibli art style dark variant, painterly anime aesthetic, moody and atmospheric", the first phrase of each prompt MUST include that same anchor so the image model keeps a consistent look. Do not shorten to just "Cinematic 2D illustration"; include the full style identifier (e.g. "Studio Ghibli", "painterly anime") when provided.
 
 **Lighting**: ${styleData.lightingTags}
@@ -97,7 +99,7 @@ Each visualDescription must be a COMPLETE, STANDALONE image-generation prompt in
 - When the story involves religious holidays or specific dates (e.g. Holy Week, Easter, Holy Thursday), add subtle visual cues in visualDescription: church or cathedral visible, empty or solemn streets, quiet morning light, period-appropriate religious context.
 - When the theme is conspiracy, paranoia, or "being watched", consider in visualDescription: implied surveillance, shadows suggesting observation, architecture of power (e.g. tribunals, corridors), hidden documents, feeling of unease.
 
-**Format**: One continuous prompt per scene: "[BASE STYLE ANCHOR], [SCENE DESCRIPTION WITH ACTION], [COMPOSITION], [LIGHTING + ATMOSPHERE], [MOTION DETAILS]"
+**Format**: One continuous prompt per scene: "[BASE STYLE ANCHOR], [SCENE DESCRIPTION REPRESENTING THE NARRATION], [COMPOSITION], [LIGHTING + ATMOSPHERE], [MOTION DETAILS]"
 
 Example: "Cinematic 2D illustration, Studio Ghibli art style dark variant, painterly anime aesthetic, ancient temple ruins with vines growing over stone pillars, wide establishing shot from low angle, warm golden hour light filtering through clouds creating a dreamlike atmosphere, dust particles dancing in the light beams"
 `.trim()

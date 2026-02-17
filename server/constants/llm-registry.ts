@@ -34,6 +34,7 @@ export type LlmTaskId =
   | 'social-kit'          // Kit de publicação para redes sociais
   | 'deep-research-prompt' // Gera prompt otimizado para Deep Research
   | 'dossier-investigator'  // Investiga uma semente e preenche metadados do dossiê
+  | 'filmmaker-director'    // Direção de fotografia e movimento (pós-roteiro)
 
 export interface LlmModel {
   id: string
@@ -312,6 +313,16 @@ export const LLM_TASKS: Record<LlmTaskId, LlmTask> = {
     iconKey: 'search',
     requiresStructuredOutput: true,
     requiresLargeContext: false,
+    defaultProvider: 'gemini',
+    defaultModel: 'gemini-2.0-flash'
+  },
+  'filmmaker-director': {
+    id: 'filmmaker-director',
+    label: 'Diretor de Fotografia (Cineasta)',
+    description: 'Lê o roteiro e refina prompts visuais (start/end image) e coreografia de movimento. Pós-processamento criativo.',
+    iconKey: 'clapperboard',
+    requiresStructuredOutput: true,
+    requiresLargeContext: true,
     defaultProvider: 'gemini',
     defaultModel: 'gemini-2.0-flash'
   }

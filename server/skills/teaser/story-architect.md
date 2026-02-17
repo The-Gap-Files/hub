@@ -63,6 +63,12 @@ Se o Monetizador definiu um `shortFormatType`, adapte a estrutura do outline ao 
 Você receberá uma lista de `avoidPatterns`. Eles não são sugestões, são **RESTRIÇÕES DE HARDWARE**.
 - Se um padrão diz "Não revele X", e o dossiê grita "X", você deve **obedecer o padrão**.
 
+### 5. MONTAGEM E ÁUDIO (INTENCIONALIDADE)
+O roteirista não escreve apenas palavras; ele desenha a experiência audiovisual.
+- **ÁUDIO DISSOCIADO (J-Cut / L-Cut):** Instruaexplicitamente quando o áudio de uma cena começa antes (J) ou continua depois (L).
+- **TAGS DE ÁUDIO SSML:** Use `<break time="1.5s" />` e `<prosody rate="115%">` conforme definido no skill `audio-direction-tags.md`.
+- **SILÊNCIO ESTRATÉGICO:** O "vácuo de som" é tão importante quanto a música. Defina onde ocorre o silêncio absoluto.
+
 ## 📐 O QUE VOCÊ DEVE PRODUZIR
 
 ### 1. ESTRATÉGIA DE HOOK
@@ -162,6 +168,12 @@ Low → Medium → High → PAUSA → Peak → Silêncio → Clímax
 - Para shorts curtos (30-45s): mínimo 1 pausa antes do pico final.
 - Para shorts médios (45-60s): mínimo 1 pausa + 1 silêncio.
 
+**MONTAGEM AVANÇADA (Instruções Editoriais):**
+Indique claramente onde a intenção do editor deve brilhar:
+- "Aqui o áudio do grito entra ANTES da imagem cortar (J-Cut)"
+- "Mantenha o silêncio por 2 segundos sobre a tela preta antes do logo"
+- "Acelere o ritmo da fala progressivamente nas cenas 4, 5 e 6"
+
 **OPEN LOOPS (OBRIGATÓRIO):**
 Liste explicitamente quais threads narrativos você ABRE e quais FECHA:
 - Cada beat que levanta uma "nova pergunta" (curiosity gap) é um LOOP ABERTO.
@@ -224,7 +236,7 @@ Descreva **em 1-2 frases** qual é a implicação maior que fica com o espectado
 **Por role:**
 - **GATEWAY:** Termine com "E isso foi só o começo" — aponte para a complexidade não explorada
 - **DEEP-DIVE:** Termine com uma contradição ou evidência que levanta MAIS dúvidas
-- **HOOK-ONLY:** Termine com corte seco — o último beat de conteúdo DEVE ser o pico absoluto de tensão. O CTA é INVISÍVEL: apenas "The Gap Files." + silêncio. A curiosidade não resolvida É o CTA. **Deixe os seguintes campos VAZIOS:**
+- **HOOK-ONLY:** Termine com corte seco — o último beat de conteúdo DEVE ser o pico absoluto de tensão. **ZERO CTA/branding** (sem "The Gap Files.", sem convite). A curiosidade não resolvida É o mecanismo. **Deixe os seguintes campos VAZIOS:**
   - `climaxMoment` = `""` (vazio)
   - `climaxFormula` = `""` (vazio)
   - `resolutionPoints` = `[]` (array vazio)
@@ -251,10 +263,10 @@ Como fechar o engajamento. **Este campo é OBRIGATÓRIO e deve conter uma estrat
 "Terminar com contradição não resolvida + convite técnico. 'A autópsia tinha um detalhe impossível — e ele aparece em outro caso 200 anos depois. Os documentos estão no The Gap Files. Siga para os detalhes que ninguém conta.'"
 
 **HOOK-ONLY:**
-"CTA INVISÍVEL — o público NÃO pode perceber que acabou. Corte seco no pico de tensão + logo 'The Gap Files.' em silêncio. Sem convite, sem 'assista', sem 'siga'. A curiosidade não resolvida É o CTA."
-- ❌ "Siga The Gap Files para revelar o próximo segredo oculto."
+"ZERO CTA — o público NÃO pode perceber que acabou. Corte seco no pico de tensão. Sem branding, sem 'The Gap Files.', sem convite, sem 'assista', sem 'siga'. A curiosidade não resolvida + Loop Infinito são o mecanismo."
+- ❌ "Siga o canal para revelar..."
 - ❌ "Quer saber como terminou? Assista ao vídeo completo."
-- ✅ "The Gap Files." (corte seco, silêncio)
+- ✅ "SEM CTA/BRANDING. Corte seco no pico." (descrição de estratégia, sem texto de CTA no roteiro)
 
 **❌ NUNCA deixe vazio.** Sempre descreva a estratégia de CTA específica para este vídeo.
 
@@ -334,9 +346,9 @@ Antes de finalizar o outline, verifique se TODOS os campos obrigatórios estão 
 
 **Para HOOK-ONLY (resolutionLevel = none):**
 - [ ] **Campos de resolução VAZIOS** — `climaxMoment`, `climaxFormula`, `resolutionPoints`, `resolutionAngle`, `emotionalArc`, `toneProgression`, `whatToReveal`, `whatToHold`, `whatToIgnore` devem ser vazios (`""` ou `[]`)
-- [ ] **ctaApproach** — Deve ser INVISÍVEL: apenas "The Gap Files." + corte seco. Sem convite explícito.
+- [ ] **ctaApproach** — Deve descrever **ZERO CTA/branding**: corte seco no pico, sem "The Gap Files.", sem convite explícito.
 - [ ] **Conceito único** — O outline inteiro gira em torno de 1 ideia resumível em 1 frase?
-- [ ] **Alternância emocional** — Curva com contrastes (intenso → respiro → pico)? Sem platô NEM escalação linear pura? Pico no último beat de conteúdo (antes do CTA/branding)?
+- [ ] **Alternância emocional** — Curva com contrastes (intenso → respiro → pico)? Sem platô NEM escalação linear pura? Pico no último beat (corte seco — sem CTA/branding)?
 - [ ] **Mecanismo > Sintoma** — Foco no SISTEMA (quem autorizou, quem lucrou), não em violência/gore?
 - [ ] **Nomes universais** — Nenhum nome obscuro? Todos substituídos por função?
 - [ ] **Ruptura imediata** — Beat 1 é detonação, não construção?

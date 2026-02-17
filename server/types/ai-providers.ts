@@ -109,6 +109,8 @@ export interface ScriptScene {
   order: number
   narration: string
   visualDescription: string
+  endVisualDescription?: string // Descrição visual do FINAL da cena (keyframe final para motion i2v)
+  endImageReferenceWeight?: number // Peso da imagem START como referência para gerar a END image (0.0-1.0). Decidido pelo roteirista.
   sceneEnvironment?: string // Identificador do ambiente (ex: "bishop_study", "canal_dawn") para continuidade visual
   motionDescription?: string // Instruções de movimento para i2v (câmera, sujeito, atmosfera dinâmica)
   audioDescription?: string // Descrição de SFX ou atmosfera sonora
@@ -243,6 +245,10 @@ export interface ImageGenerationRequest {
   seed?: number
   numVariants?: number // Quantas variantes gerar
   aspectRatio?: string // Formato das imagens (ex: "16:9", "9:16")
+  /** Buffer da imagem de referência (start image) para guiar a geração — usado no Photon Flash image_reference */
+  imageReference?: Buffer
+  /** Peso da referência visual (0.0-1.0). Controla quanto a imagem de referência influencia o resultado. Default: 0.5 */
+  imageReferenceWeight?: number
 }
 
 export interface GeneratedImage {
@@ -273,6 +279,7 @@ export interface IImageGenerator {
 export interface MotionGenerationRequest {
   imagePath?: string // Caminho local ou URL da imagem de origem (deprecated)
   imageBuffer?: Buffer // Buffer da imagem (preferido)
+  endImageBuffer?: Buffer // Buffer da imagem final (keyframe end para last_image)
   endImagePath?: string // Caminho local ou URL da imagem final (para transição)
   duration?: number // Duração desejada (2-4s geralmente)
   motionBucketId?: number // Intensidade do movimento (1-255, default 127)

@@ -43,3 +43,18 @@ Gere TODOS os campos:
 - "NÃO resolva o caso — apresente mas deixe em aberto"
 - "NÃO use tom enciclopédico — mantenha urgência"
 - "NÃO cubra TODOS os aspectos — foque no gancho principal e deixe ângulos para os outros teasers"
+
+## 🛡️ BRAND SAFETY E VISUAL NOISE (YOUTUBE 2026)
+
+1. **SUBSTITUIÇÃO SEMÂNTICA (OBRIGATÓRIA):**
+   - ❌ "Assassino serial matou 20" → 🟢 "O responsável por 20 fins trágicos"
+   - ❌ "Sangue no chão" → 🟢 "A cena marcada" / "Vestígios vitais"
+   - ❌ "Estripado/Mutilado" → 🟢 "Fragmentado" / "Cena desfeita"
+   - **Postura:** "Neutral Documentarian". Clínico, solene, nunca sensacionalista.
+
+2. **IMPERFEIÇÃO VISUAL CONTEXTUAL (Decisão de Direção):**
+   - **Esqueça o "ruído aleatório".** Escolha uma textura que AMPLIFIQUE a narrativa.
+   - **Documentos Antigos:** Textura de papel rasgado, granulação de filme 16mm, bordas queimadas.
+   - **Relatos Policiais/Modernos:** Glitch digital, compressão de CCTV, ruído de ISO alto.
+   - **Regra:** A imagem não pode ser "lisa" (cara de IA pura).
+   - **Loop Visual:** O frame final deve ter iluminação/composição similar ao inicial.

@@ -1,0 +1,115 @@
+{
+  "timestamp": "2026-02-17T15:12:47.606Z",
+  "taskId": "monetization-deep-dive-3",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Monetization — Deep-Dive Teasers Generator\n\nVocê é um estrategista de conteúdo. Nesta etapa, você vai gerar os teasers DEEP-DIVE — mergulhos diretos em ângulos específicos.\n\n## 🎯 O Que São Deep-Dives\n\nDeep-Dives assumem que o espectador já tem noção básica do tema (pode ter visto o gateway ou já conhecer o assunto). Usam NO MÁXIMO 1 frase de contextualização superficial e vão DIRETO para o ângulo.\n\n## 📐 CONTEXTO RECEBIDO\n\nVocê recebe:\n- O dossiê completo\n- O teaser Gateway já gerado (para NÃO repetir informações)\n- Os hooks já usados (para NÃO repetir)\n- A lista de ângulos e formatos definidos no blueprint para cada deep-dive\n\n## 📐 O QUE PRODUZIR\n\nPara CADA deep-dive definido no blueprint, gere:\n- **title**: Título curto e impactante\n- **hook**: Frase de abertura (até 15 palavras). DIFERENTE de todos os anteriores.\n- **angle**: Descrição do ângulo ESPECÍFICO (já definido no blueprint)\n- **angleCategory**: A categoria (já definida no blueprint)\n- **narrativeRole**: \"deep-dive\"\n- **shortFormatType**: O formato (já definido no blueprint)\n- **scriptOutline**: Estrutura — Frase contexto 3s → Mergulho direto 30-40s → Tensão aberta 10s → CTA 5s\n- **visualSuggestion**: Descrição curta do visual\n- **cta**: Call-to-action para o Full Video\n- **platform**: \"YouTube Shorts\"\n- **format**: \"teaser-youtube-shorts\"\n- **estimatedViews**: Estimativa de views\n- **scriptStyleId** e **scriptStyleName**\n- **editorialObjectiveId** e **editorialObjectiveName**\n- **avoidPatterns**: 2-4 anti-padrões específicos\n- **visualPrompt**: Prompt de imagem em INGLÊS (1 parágrafo)\n- **microBriefV1**: Micro-brief ESTRUTURADO para ESTE teaser (isolado por item). Deve conter:\\n  - version: \\\"teaserMicroBriefV1\\\"\\n  - narrativeRole: \\\"deep-dive\\\"\\n  - angleCategory e angle (iguais aos campos do teaser)\\n  - facts: 5-12 fatos selecionados APENAS do brief/dossiê recebido (cada um com text e, se possível, sourceRef)\\n  - forbiddenElements: 6-12 itens (reforçar anti-arma/gore/close-up)\\n  - allowedArtifacts: 6-12 itens (documento/selo/monitor/headline/etc.)\\n  - notes: 2-6 bullets curtos (ex.: \\\"no máximo 1 frase de contexto\\\")\n\n## 🚨 REGRAS DOS DEEP-DIVES\n\n1. **Contexto MÍNIMO** — máximo 1 frase de setup superficial. Ex: \"O caso X esconde...\"\n2. **NÃO recontar a história** — zero \"em tal ano, fulano...\"\n3. **NÃO repetir informações do gateway** — assuma que o espectador já sabe o básico\n4. **Resolução MÍNIMA** — revele um aspecto que ABRE mais perguntas, não as fecha\n5. **Cada hook DEVE ser ÚNICO** — não reformule hooks anteriores\n6. **avoidPatterns** devem focar em eliminar contextualização excessiva\n7. **microBriefV1 é a fonte da verdade** para o Story Architect deste teaser: selecione fatos que sustentem o ângulo específico e NÃO inclua fatos/territórios de outros deep-dives/hook-only.\n\n## 💡 EXEMPLO DE avoidPatterns PARA DEEP-DIVE\n\n- \"NÃO comece explicando quem foi [personagem] — o espectador já sabe\"\n- \"NÃO repita a cronologia do caso — vá direto ao ângulo\"\n- \"NÃO use a mesma estrutura narrativa do teaser sobre [ângulo anterior]\"\n- \"NÃO explique termos técnicos — use-os como gancho de curiosidade\"\n\n## ⚠️ ANTI-REDUNDÂNCIA\n\nCada deep-dive mergulha em UM aspecto diferente. Se o gateway cobriu \"o que aconteceu\", os deep-dives exploram \"por quê\", \"quem lucrou\", \"o que foi escondido\", etc. NUNCA sobreponha territórios narrativos entre deep-dives.\n\n## 🛡️ BRAND SAFETY E VISUAL NOISE (YOUTUBE 2026)\n\n1. **SUBSTITUIÇÃO SEMÂNTICA (OBRIGATÓRIA):**\n   - ❌ \"Assassino serial matou 20\" → 🟢 \"O responsável por 20 fins trágicos\"\n   - ❌ \"Sangue no chão\" → 🟢 \"A cena marcada\" / \"Vestígios vitais\"\n   - ❌ \"Estripado/Mutilado\" → 🟢 \"Fragmentado\" / \"Cena desfeita\"\n   - **Postura:** \"Neutral Documentarian\". Clínico, solene, nunca sensacionalista.\n\n2. **IMPERFEIÇÃO VISUAL CONTEXTUAL (Decisão de Direção):**\n   - **Esqueça o \"ruído aleatório\".** Escolha uma textura que AMPLIFIQUE a narrativa.\n   - **Documentos Antigos:** Textura de papel rasgado, granulação de filme 16mm, bordas queimadas.\n   - **Relatos Policiais/Modernos:** Glitch digital, compressão de CCTV, ruído de ISO alto.\n   - **Regra:** A imagem não pode ser \"lisa\" (cara de IA pura).\n   - **Loop Visual:** O frame final deve ter iluminação/composição similar ao inicial.\n\n# 🛡️ PROTOCOLO DE BRAND SAFETY E IMUNIZAÇÃO ALGORMÍTMICA (YOUTUBE 2026)\r\n\r\nEste protocolo define as regras OBRIGATÓRIAS para evitar supressão algorítmica, desmonetização (\"Yellow Icon\") e restrições de idade, mantendo a integridade narrativa do gênero \"Mystery/Dark\".\r\n\r\n## 1. POSTURA DO NARRADOR: \"NEUTRAL DOCUMENTARIAN\"\r\nO narrador nunca deve expressar prazer, condenação moral excessiva ou choque visceral.\r\n- **ERRADO (Sensacionalista):** \"O assassino SÁDICO estripou a vítima e riu!\"\r\n- **CORRETO (Documental):** \"O agressor cometeu atos de extrema brutalidade antes de deixar a cena.\"\r\n- **REGRA:** Adote um tom clínico, investigativo e solene. A emoção vem dos fatos, não dos adjetivos.\r\n\r\n## 2. GLOSSÁRIO DE SUBSTITUIÇÃO SEMÂNTICA (OBRIGATÓRIO)\r\nA IA deve substituir AUTOMATICAMENTE termos de \"Gore/Violence\" por equivalentes semânticos seguros (\"Safe-Words\") que mantenham o impacto psicológico sem acionar os filtros de metadados.\r\n\r\n| TERMO PROIBIDO (\"Trigger\") | SUBSTITUIÇÃO SEGURA (\"Safe-Word\") |\r\n| :--- | :--- |\r\n| Assassinato / Assassino | O Fim Trágico / O Perpetrador / O Responsável |\r\n| Estupro / Abuso Sexual | Violência Íntima / O Ato Imperdoável / Viio Absoluto |\r\n| Sangue / Poça de Sangue | A Cena Vermelha / Vestígios Vitais / A Marca do Crime |\r\n| Suicídio / Se Matou | Tirou a Própria Vida / O Gesto Final / A Partida Escolhida |\r\n| Esquartejado / Mutilado | Fragmentado / A Cena Desfeita / Danos Extremos |\r\n| Pedofilia / Abuso Infantil | Crimes Contra Inocentes / A Sombra na Infância |\r\n| Tortura | Interrogatório Extremo / Métodos Desumanos / Sofrimento Prolongado |\r\n| Canibalismo | O Ato Final de Consumo / A Transgressão Antropofágica |\r\n| Massacre / Chacina | O Evento Fatal / A Perda Coletiva / A Noite Silenciosa |\r\n| Drogas / Heroína / Cocaína | Substâncias Ilícitas / O Vício Químico / O Pó Branco |\r\n\r\n## 3. A REGRA \"NO GORE, JUST IMPLICATION\"\r\nO YouTube 2026 pune a representação visual ou textual visceral de fluidos corporais e órgãos internos.\r\n- **Regra:** Nunca descreva a *anatomia* da violência. Descreva o *cenário*, o *som*, a *consequência* ou o *objeto*.\r\n- **Técnica de Desvio:** Em vez de focar na ferida, foque na \"ferramenta caída no chão\" ou na \"mancha na parede\".\r\n- **Exemplo:** \"A sala estava pintada de vermelho\" (Aprovado) vs \"Havia tripas no chão\" (Banido).\r\n\r\n## 4. CONTEXTO EDSA (Educational, Documentary, Scientific, Artistic)\r\nTodo conteúdo \"Borderline\" (conspiração, crimes reais) deve ser enquadrado explicitamente como EDUCACIONAL ou DOCUMENTAL.\r\n- Use frases de ancoragem: \"Registros históricos indicam...\", \"O relatório policial descreve...\", \"Teóricos sugerem...\".\r\n- Nunca afirme teorias da conspiração como fatos absolutos. Use: \"Uma narrativa persistente afirma que...\".\r\n\r\n## 5. PROTEÇÃO CONTRA \"INAUTHENTIC CONTENT\" (ANTI-AI)\r\nPara evitar que o roteiro seja marcado como \"Lixo Gerado por IA\" (spammy content):\r\n- **Adicione Nuance e Dúvida:** A IA tende a ser assertiva. Adicione: \"Talvez...\", \"É possível que...\", \"Ainda resta a dúvida...\".\r\n- **Ironia Dramática:** O narrador sabe algo que o espectador (ou a vítima histórica) ainda não sabe.\r\n- **Imperfeição Humana:** Evite estruturas perfeitamente simétricas. Use pausas, perguntas retóricas e mudanças de ritmo.\r\n\r\n## 6. SEGURANÇA INFANTIL (HARD LINE)\r\nQualquer menção a violência contra crianças deve ser **extremamente sanitizada** e indireta. Se o dossiê envolver crimes contra menores, foque inteiramente na investigação e na busca por justiça, nunca no ato em si.\r\n\r\n---\r\n**INSTRUÇÃO FINAL:** Ao gerar qualquer texto (hook, roteiro, post), passe um \"scan\" mental usando este protocolo. Se encontrar um termo da coluna da esquerda, substitua imediatamente. Se descrever vísceras, apague e descreva a sombra.\n## ... [truncated 983 chars]"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "📋 TEMA: Injustiça histórica e libelo de sangue\n📋 TÍTULO: Simão de trento, itália\n🧾 BRIEF (TEASERS) — versão: briefBundleV1\n\n🛡️ REGRAS HARD (GLOBAL SAFETY)\n- ❌ armas de fogo\n- ❌ gore\n- ❌ close‑up de mãos humanas\n- ❌ close‑up de rostos humanos\n- ❌ símbolos extremistas\n- ❌ armas de fogo, rifles, pistolas, munição, gatilho\n- ❌ atirador, execução, assassinato explícito, violência gráfica\n- ❌ sangue, gore, corpos mutilados, tortura explícita\n- ❌ close-up de mãos humanas, close-up de rostos humanos (evitar macro/anatomia)\n- ❌ cenas em sinagogas/templos com ameaça explícita (substituir por artefatos: manifesto, tela, manchete)\n- ❌ símbolos/extremismo contemporâneo em destaque (substituir por “texto recortado/blur”)\n\n🧰 ARTEFATOS VISUAIS PERMITIDOS\n- ✅ documento\n- ✅ manuscrito\n- ✅ crônica\n- ✅ incunábulo\n- ✅ registro judicial\n- ✅ decreto\n- ✅ propaganda impressa\n- ✅ documento, decreto, registro, arquivo, dossiê, carimbo, selo de cera\n- ✅ moedas, cofre, livro-caixa, inventário, recibo, contrato\n- ✅ monitor, tela, manifesto (sem arma), headline, recorte de jornal, thread desfocada\n- ✅ mapa, corredor de arquivo, sala de leitura, prateleiras, luz de vela, sombras\n- ✅ silhuetas não-identificáveis sem rosto/mãos em close\n\n🔫 MUNIÇÃO NARRATIVA (FATOS SAFE)\n1. Em 1475, durante a Semana Santa, o menino Simão de Trento, de dois anos e meio, desapareceu em Trento. [fonte: Fonte 1]\n2. O corpo foi encontrado em 26 de março de 1475 numa vala de drenagem próxima à casa do banqueiro judeu Samuel de Nuremberg. [fonte: Fonte 1]\n3. O príncipe‑bispo Johannes Hinderbach aproveitou o caso para criar um culto local e gerar receitas de peregrinação. [fonte: Fonte 1]\n4. A comunidade judaica de Trento era composta por três famílias lideradas por Samuel de Nuremberg, Tobias e Engel. [fonte: Fonte 1]\n5. O frade Bernardino da Feltre pregou contra os judeus nas semanas que antecederam o desaparecimento, alimentando a hostilidade. [fonte: Fonte 1]\n6. O tribunal utilizou o método de “squassada”, variante do strappado, para obter confissões dos acusados. [fonte: Fonte 1]\n7. As confissões, obtidas sob coação, apontaram os judeus como responsáveis por um suposto ritual de assassinato, sem evidência física. [fonte: Fonte 1]\n8. O processo resultou no confisco dos bens e das contas de crédito dos judeus, enriquecendo o tesouro episcopal. [fonte: Fonte 1]\n9. O Papa Sixto IV enviou o bispo Battista dei Giudici, que concluiu que os judeus eram inocentes e o julgamento foi fabricado. [fonte: Fonte 1]\n10. Em 1478, a bula papal “Facit nos pietas” reconheceu a forma legal do processo, permitindo a continuidade do culto. [fonte: Fonte 1]\n11. A narrativa foi difundida por incunábulos, como a “Relatio de Simone puero tridentino” (1475) e a xilogravura da Crônica de Nuremberg (1493). [fonte: Fonte 1]\n12. O culto a Simão perdurou até 1965, quando um decreto do Vaticano aboliu a veneração e retirou as relíquias. [fonte: Fonte 1]\n13. Em 2019, John Earnest citou Simão de Trento em seu manifesto para justificar o ataque à sinagoga de Poway. [fonte: Fonte 3]\n14. O ataque de Poway matou Lori Gilbert‑Kaye e feriu três pessoas; o autor usou um rifle estilo AR‑15. [fonte: Fonte 6]\n15. O manifesto de Earnest transformou o libelo medieval em um artefato digital usado para incitar ódio contemporâneo. [fonte: Fonte 3]\n16. A hipótese “Schweitzer” indica que um cristão teria sugerido que a criança poderia ter se afogado, mas o relato foi suprimido. [fonte: Fonte 1]\n17. O suposto milagre da incorruptibilidade do corpo foi explicado por baixa temperatura da água, que retardou a decomposição (adipocera). [fonte: Fonte 1]\n18. O decreto de 1965 removeu o relicário, reconheceu a falsidade das acusações e encerrou o culto oficial. [fonte: Fonte 1]\n\n🎭 DIRETRIZES POR PAPEL\n- gateway: contextLevel=medium, facts=10-22\n- deep-dive: contextLevel=low, facts=8-16\n- hook-only: contextLevel=minimal, facts=3-6\n\nGere 1 teaser DEEP-DIVE para o dossiê.\n\nSlot definido no blueprint:\n- angleCategory: \"politico\"\n- angleName: \"Poder e Manipulação Eclesiástica\"\n- shortFormatType: \"pergunta-incomoda\"\n- platform: \"YouTube Shorts\"\n- scriptStyleId: \"documentary\"\n- editorialObjectiveId: \"viral-hook\"\n\nRetorne um JSON com campo \"teasers\" contendo exatamente 1 teaser."
+      }
+    ]
+  },
+  "parsed": {
+    "teasers": [
+      {
+        "title": "Poder e lucro do culto de Simão",
+        "hook": "Como o bispo transformou um desaparecimento infantil em fonte de poder e lucro?",
+        "angle": "Poder e Manipulação Eclesiástica",
+        "angleCategory": "politico",
+        "narrativeRole": "deep-dive",
+        "shortFormatType": "pergunta-incomoda",
+        "microBriefV1": {
+          "version": "teaserMicroBriefV1",
+          "narrativeRole": "deep-dive",
+          "angleCategory": "politico",
+          "angle": "Poder e Manipulação Eclesiástica",
+          "facts": [
+            {
+              "text": "O príncipe‑bispo Johannes Hinderbach aproveitou o caso para criar um culto local e gerar receitas de peregrinação.",
+              "sourceRef": "Fonte 1"
+            },
+            {
+              "text": "O processo resultou no confisco dos bens e das contas de crédito dos judeus, enriquecendo o tesouro episcopal.",
+              "sourceRef": "Fonte 1"
+            },
+            {
+              "text": "O Papa Sixto IV enviou o bispo Battista dei Giudici, que concluiu que os judeus eram inocentes e o julgamento foi fabricado.",
+              "sourceRef": "Fonte 1"
+            },
+            {
+              "text": "Em 1478, a bula papal “Facit nos pietas” reconheceu a forma legal do processo, permitindo a continuidade do culto.",
+              "sourceRef": "Fonte 1"
+            },
+            {
+              "text": "O culto a Simão perdurou até 1965, quando um decreto do Vaticano aboliu a veneração e retirou as relíquias.",
+              "sourceRef": "Fonte 1"
+            },
+            {
+              "text": "A narrativa foi difundida por incunábulos, como a “Relatio de Simone puero tridentino” (1475) e a xilogravura da Crônica de Nuremberg (1493).",
+              "sourceRef": "Fonte 1"
+            }
+          ],
+          "forbiddenElements": [
+            "gore",
+            "blood",
+            "close‑up de rostos humanos",
+            "close‑up de mãos humanas",
+            "representação de armas de fogo",
+            "violência gráfica explícita",
+            "símbolos extremistas em destaque",
+            "descrição detalhada de tortura",
+            "abuso infantil explícito",
+            "imagens de cadáveres"
+          ],
+          "allowedArtifacts": [
+            "documento antigo",
+            "decreto papal",
+            "incunábulo impresso",
+            "selo de cera",
+            "registro judicial",
+            "livro‑caixa episcopal",
+            "mapa medieval",
+            "arquivo de pergaminho",
+            "candlelight illumination",
+            "arquivamento em prateleiras de pedra"
+          ],
+          "notes": [
+            "máximo 1 frase de contexto superficial",
+            "foco no uso político e financeiro da acusação",
+            "tom neutro, documental",
+            "evitar termos de violência explícita",
+            "usar linguagem de investigação histórica"
+          ]
+        },
+        "scriptOutline": "Contexto 3s → Mergulho direto 30-40s → Tensão aberta 10s → CTA 5s",
+        "visualSuggestion": "Papel antigo com selo de cera iluminado por luz de vela, sombras de arcos góticos ao fundo.",
+        "cta": "Assista ao vídeo completo para descobrir quem realmente lucrou com o culto.",
+        "platform": "YouTube Shorts",
+        "format": "teaser-youtube-shorts",
+        "estimatedViews": 120000,
+        "scriptStyleId": "documentary",
+        "scriptStyleName": "Documentary",
+        "editorialObjectiveId": "viral-hook",
+        "editorialObjectiveName": "Viral Hook",
+        "avoidPatterns": [
+          "NÃO comece explicando quem foi Simão — o espectador já conhece",
+          "NÃO repita a cronologia dos eventos — vá direto ao poder e manipulação",
+          "NÃO use estrutura de pergunta já usada nos hooks anteriores",
+          "NÃO detalhar violência gráfica ou sangue"
+        ],
+        "visualPrompt": "A dimly lit medieval study table with an aged parchment decree bearing a wax seal, candlelight flickering, background of stone vaulted arches, subtle dust particles in the air, noir cinematic style, no faces or hands in close-up.",
+        "sceneCount": 6
+      }
+    ]
+  },
+  "rawContent": "{\n  \"teasers\": [\n    {\n      \"title\": \"Poder e lucro do culto de Simão\",\n      \"hook\": \"Como o bispo transformou um desaparecimento infantil em fonte de poder e lucro?\",\n      \"angle\": \"Poder e Manipulação Eclesiástica\",\n      \"angleCategory\": \"politico\",\n      \"narrativeRole\": \"deep-dive\",\n      \"shortFormatType\": \"pergunta-incomoda\",\n      \"scriptOutline\": \"Contexto 3s → Mergulho direto 30-40s → Tensão aberta 10s → CTA 5s\",\n      \"visualSuggestion\": \"Papel antigo com selo de cera iluminado por luz de vela, sombras de arcos góticos ao fundo.\",\n      \"cta\": \"Assista ao vídeo completo para descobrir quem realmente lucrou com o culto.\",\n      \"platform\": \"YouTube Shorts\",\n      \"format\": \"teaser-youtube-shorts\",\n      \"estimatedViews\": 120000,\n      \"scriptStyleId\": \"documentary\",\n      \"scriptStyleName\": \"Documentary\",\n      \"editorialObjectiveId\": \"viral-hook\",\n      \"editorialObjectiveName\": \"Viral Hook\",\n      \"avoidPatterns\": [\n        \"NÃO comece explicando quem foi Simão — o espectador já conhece\",\n        \"NÃO repita a cronologia dos eventos — vá direto ao poder e manipulação\",\n        \"NÃO use estrutura de pergunta já usada nos hooks anteriores\",\n        \"NÃO detalhar violência gráfica ou sangue\"\n      ],\n      \"visualPrompt\": \"A dimly lit medieval study table with an aged parchment decree bearing a wax seal, candlelight flickering, background of stone vaulted arches, subtle dust particles in the air, noir cinematic style, no faces or hands in close-up.\",\n      \"sceneCount\": 6,\n      \"microBriefV1\": {\n        \"version\": \"teaserMicroBriefV1\",\n        \"narrativeRole\": \"deep-dive\",\n        \"angleCategory\": \"politico\",\n        \"angle\": \"Poder e Manipulação Eclesiástica\",\n        \"facts\": [\n          {\n            \"text\": \"O príncipe‑bispo Johannes Hinderbach aproveitou o caso para criar um culto local e gerar receitas de peregrinação.\",\n            \"sourceRef\": \"Fonte 1\"\n          },\n          {\n            \"text\": \"O processo resultou no confisco dos bens e das contas de crédito dos judeus, enriquecendo o tesouro episcopal.\",\n            \"sourceRef\": \"Fonte 1\"\n          },\n          {\n            \"text\": \"O Papa Sixto IV enviou o bispo Battista dei Giudici, que concluiu que os judeus eram inocentes e o julgamento foi fabricado.\",\n            \"sourceRef\": \"Fonte 1\"\n          },\n          {\n            \"text\": \"Em 1478, a bula papal “Facit nos pietas” reconheceu a forma legal do processo, permitindo a continuidade do culto.\",\n            \"sourceRef\": \"Fonte 1\"\n          },\n          {\n            \"text\": \"O culto a Simão perdurou até 1965, quando um decreto do Vaticano aboliu a veneração e retirou as relíquias.\",\n            \"sourceRef\": \"Fonte 1\"\n          },\n          {\n            \"text\": \"A narrativa foi difundida por incunábulos, como a “Relatio de Simone puero tridentino” (1475) e a xilogravura da Crônica de Nuremberg (1493).\",\n            \"sourceRef\": \"Fonte 1\"\n          }\n        ],\n        \"forbiddenElements\": [\n          \"gore\",\n          \"blood\",\n          \"close‑up de rostos humanos\",\n          \"close‑up de mãos humanas\",\n          \"representação de armas de fogo\",\n          \"violência gráfica explícita\",\n          \"símbolos extremistas em destaque\",\n          \"descrição detalhada de tortura\",\n          \"abuso infantil explícito\",\n          \"imagens de cadáveres\"\n        ],\n        \"allowedArtifacts\": [\n          \"documento antigo\",\n          \"decreto papal\",\n          \"incunábulo impresso\",\n          \"selo de cera\",\n          \"registro judicial\",\n          \"livro‑caixa episcopal\",\n          \"mapa medieval\",\n          \"arquivo de pergaminho\",\n          \"candlelight illumination\",\n          \"arquivamento em prateleiras de pedra\"\n        ],\n        \"notes\": [\n          \"máximo 1 frase de contexto superficial\",\n          \"foco no uso político e financeiro da acusação\",\n          \"tom neutro, documental\",\n          \"evitar termos de violência explícita\",\n          \"usar linguagem de investigação histórica\"\n        ]\n      }\n    }\n  ]\n}"
+}

@@ -50,6 +50,7 @@ import {
   stripInlineAudioTags,
   stripSsmlBreakTags
 } from '../../utils/hook-only-audio-timing'
+import { filmmakerDirector } from '../filmmaker-director.service'
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path)
 import os from 'node:os'
@@ -387,6 +388,51 @@ export class OutputPipelineService {
       }
     }
 
+    // ─── AGENTE CINEASTA (FILMMAKER DIRECTOR) — PÓS-PROCESSAMENTO ───
+    // Entra aqui para polir a "Visão" do roteiro.
+    // Transforma descrições genéricas em prompts técnicos de cinema (Kodak Vision3, Gerúndios, Movimentos).
+    if (scriptResponse.scenes && scriptResponse.scenes.length > 0) {
+      try {
+        scriptLog.info('🎬 Acionando o Agente Cineasta para direção de fotografia e movimento...')
+
+        // Determinar estilo base para o Cineasta
+        const baseStyleForDirector = promptContext.visualBaseStyle ||
+          "Cinematic 35mm photography, hyperrealistic dark mystery style"
+
+        const refinedScenes = await filmmakerDirector.refineScript(
+          scriptResponse.scenes.map(s => ({
+            order: 0, // A ordem relativa é mantida pelo índice do map
+            narration: s.narration,
+            currentVisual: s.visualDescription,
+            currentEnvironment: s.sceneEnvironment,
+            estimatedDuration: s.estimatedDuration || 5
+          })),
+          baseStyleForDirector
+        )
+
+        // Mesclar refinamentos de volta nas cenas originais
+        if (refinedScenes && refinedScenes.length === scriptResponse.scenes.length) {
+          scriptResponse.scenes = scriptResponse.scenes.map((original, i) => {
+            const refined = refinedScenes?.[i]
+            if (!refined) return original
+
+            return {
+              ...original,
+              visualDescription: refined.visualDescription || original.visualDescription,
+              motionDescription: refined.motionDescription || original.motionDescription, // Novo campo crucial
+              endVisualDescription: refined.endVisualDescription || original.endVisualDescription,
+              sceneEnvironment: refined.sceneEnvironment || original.sceneEnvironment
+            }
+          })
+          scriptLog.info('✅ Cineasta refinou todas as cenas com sucesso.')
+        } else {
+          scriptLog.warn(`⚠️ Cineasta retornou número incorreto de cenas (${refinedScenes?.length} vs ${scriptResponse.scenes.length}). Ignorando refinamento para evitar desincronia.`)
+        }
+      } catch (directorError) {
+        scriptLog.error('❌ Erro crítico no Agente Cineasta (ignorando e salvando roteiro bruto):', directorError)
+      }
+    }
+
     // Salvar roteiro
     const script = await prisma.script.create({
       data: {
@@ -418,6 +464,8 @@ export class OutputPipelineService {
           order: index,
           narration: scene.narration?.trim(),
           visualDescription: scene.visualDescription?.trim(),
+          endVisualDescription: scene.endVisualDescription?.trim() || null,
+          endImageReferenceWeight: scene.endImageReferenceWeight ?? null,
           sceneEnvironment: scene.sceneEnvironment?.trim() || null,
           motionDescription: scene.motionDescription?.trim() || null,
           audioDescription: scene.audioDescription?.trim() || null,
@@ -549,7 +597,16 @@ export class OutputPipelineService {
             visualPrompt = `${prefixParts.join('\n')}\n\n${visualPrompt}`
           }
 
-          const request: ImageGenerationRequest = {
+
+          // ── GERAÇÃO DE IMAGENS (DUAL: Start + End com Image Reference) ──
+          // Se houver endVisualDescription, gera START primeiro, depois END usando
+          // a imagem START como referência visual (image_reference) para manter
+          // consistência de objetos, ambiente e iluminação entre os dois keyframes.
+
+          // 1. Sempre gerar START image
+          log.step(`Cena ${absoluteIndex + 1}/${scenes.length} [START]`, `prompt: ${visualPrompt.slice(0, 80)}...`)
+
+          const startRequest: ImageGenerationRequest = {
             prompt: visualPrompt,
             width,
             height,
@@ -558,38 +615,91 @@ export class OutputPipelineService {
             numVariants: 1
           }
 
-          log.step(`Cena ${absoluteIndex + 1}/${scenes.length}`, `prompt: ${request.prompt.slice(0, 120)}...`)
+          const startResponse = await imageProvider.generate(startRequest)
+          const startImage = startResponse.images[0]
 
-          const imageResponse = await imageProvider.generate(request)
-          const firstImage = imageResponse.images[0]
-          if (!firstImage) return
+          if (startImage) {
+            await prisma.sceneImage.create({
+              data: {
+                sceneId: scene.id,
+                role: 'start',
+                provider: imageProvider.getName() as any,
+                promptUsed: scene.visualDescription,
+                fileData: Buffer.from(startImage.buffer) as any,
+                mimeType: 'image/png',
+                originalSize: startImage.buffer.length,
+                width: startImage.width,
+                height: startImage.height,
+                isSelected: true,
+                variantIndex: 0
+              }
+            })
 
-          await prisma.sceneImage.create({
-            data: {
-              sceneId: scene.id,
-              provider: imageProvider.getName() as any,
-              promptUsed: scene.visualDescription,
-              fileData: Buffer.from(firstImage.buffer) as any,
-              mimeType: 'image/png',
-              originalSize: firstImage.buffer.length,
-              width: firstImage.width,
-              height: firstImage.height,
-              isSelected: true,
-              variantIndex: 0
+            costLogService.log({
+              outputId,
+              resource: 'image',
+              action: 'create',
+              provider: startResponse.costInfo.provider,
+              model: startResponse.costInfo.model,
+              cost: startResponse.costInfo.cost,
+              metadata: startResponse.costInfo.metadata,
+              detail: `Scene ${absoluteIndex + 1} (start) - image generation`
+            }).catch(() => { })
+          }
+
+          // 2. Se houver endVisualDescription, gerar END image com START como referência
+          if (scene.endVisualDescription && startImage) {
+            let endPrompt = scene.endVisualDescription
+            if (prefixParts.length > 0) {
+              endPrompt = `${prefixParts.join('\n')}\n\n${endPrompt}`
             }
-          })
 
-          // Registrar custo da imagem (fire-and-forget) — usa costInfo do provider
-          costLogService.log({
-            outputId,
-            resource: 'image',
-            action: 'create',
-            provider: imageResponse.costInfo.provider,
-            model: imageResponse.costInfo.model,
-            cost: imageResponse.costInfo.cost,
-            metadata: imageResponse.costInfo.metadata,
-            detail: `Scene ${absoluteIndex + 1}/${scenes.length} - image generation${imageResponse.predictTime ? ` (${imageResponse.predictTime.toFixed(1)}s GPU)` : ''}`
-          }).catch(() => { })
+            const refWeight = scene.endImageReferenceWeight ?? 0.5
+            log.step(`Cena ${absoluteIndex + 1}/${scenes.length} [END]`, `prompt: ${endPrompt.slice(0, 80)}... | imageRef weight: ${refWeight}`)
+
+            const endRequest: ImageGenerationRequest = {
+              prompt: endPrompt,
+              width,
+              height,
+              aspectRatio: output.aspectRatio || '16:9',
+              seed: output.seed?.value,
+              numVariants: 1,
+              imageReference: Buffer.from(startImage.buffer),
+              imageReferenceWeight: refWeight
+            }
+
+            const endResponse = await imageProvider.generate(endRequest)
+            const endImage = endResponse.images[0]
+
+            if (endImage) {
+              await prisma.sceneImage.create({
+                data: {
+                  sceneId: scene.id,
+                  role: 'end',
+                  provider: imageProvider.getName() as any,
+                  promptUsed: scene.endVisualDescription,
+                  fileData: Buffer.from(endImage.buffer) as any,
+                  mimeType: 'image/png',
+                  originalSize: endImage.buffer.length,
+                  width: endImage.width,
+                  height: endImage.height,
+                  isSelected: true,
+                  variantIndex: 0
+                }
+              })
+
+              costLogService.log({
+                outputId,
+                resource: 'image',
+                action: 'create',
+                provider: endResponse.costInfo.provider,
+                model: endResponse.costInfo.model,
+                cost: endResponse.costInfo.cost,
+                metadata: { ...endResponse.costInfo.metadata, imageReferenceWeight: refWeight },
+                detail: `Scene ${absoluteIndex + 1} (end) - image generation with START reference (weight: ${refWeight})`
+              }).catch(() => { })
+            }
+          }
         }))
 
         // Processar resultados do allSettled
@@ -835,6 +945,20 @@ export class OutputPipelineService {
     const hookOnlyTotalSeconds = isHookOnly ? resolveHookOnlyTotalDurationSeconds(output.duration) : undefined
     const hookOnlyBudgets = isHookOnly ? computeHookOnlySceneBudgetsSeconds(hookOnlyTotalSeconds!) : undefined
 
+    // -------------------------------------------------------------------------
+    // Configuração de Modelo (Núcleo de IA)
+    // Consultar banco para saber qual modelo usar (v2, v2.5, v3, etc.)
+    // -------------------------------------------------------------------------
+    const ttsAssignment = await prisma.mediaAssignment.findUnique({
+      where: { taskId: 'tts-narration' }
+    })
+    const dbModelId = ttsAssignment?.model
+    if (dbModelId) {
+      console.log(`[OutputPipeline] 🤖 Usando modelo configurado no banco (tts-narration): ${dbModelId}`)
+    } else {
+      console.log(`[OutputPipeline] ⚠️ Nenhuma configuração de 'tts-narration' encontrada no banco. Usando fallback.`)
+    }
+
     const CONCURRENCY_LIMIT = 5
     const sceneChunks = []
     for (let i = 0; i < scenes.length; i += CONCURRENCY_LIMIT) {
@@ -842,6 +966,7 @@ export class OutputPipelineService {
     }
 
     for (const chunk of sceneChunks) {
+
       await Promise.all(chunk.map(async (scene) => {
         if (!scene.narration) return
 
@@ -886,19 +1011,8 @@ export class OutputPipelineService {
           ? computeSpeedForBudget(wc, targetBudgetSeconds)
           : safeSpeedFromWPM
 
-        // Para Hook-Only, vamos ajustar por tentativa (máx 3) usando:
-        // - speed (0.7–1.2)
-        // - [pause] tags (Eleven v3) no texto enviado ao TTS
-        let pauseCount = 0
-        if (isHookOnly) {
-          const estSpeech = estimateSpeechSeconds(wc, speed)
-          const estRemaining = targetBudgetSeconds - estSpeech
-          // Se for CTA (última cena), permitir preencher o tempo com pausas (silêncio)
-          const isLastScene = sceneIndex === scenes.length - 1
-          if (isLastScene && estRemaining > 0.8) {
-            pauseCount = clamp(Math.ceil(estRemaining / 0.6), 0, 14)
-          }
-        }
+        // Hook-Only: sem injeção artificial de [pause] — a duração natural do áudio é respeitada.
+        const pauseCount = 0
 
         const maxAttempts = isHookOnly ? 3 : 1
         const toleranceSeconds = isHookOnly ? 0.35 : 999
@@ -918,12 +1032,14 @@ export class OutputPipelineService {
             console.log(`[OutputPipeline] 🗣️ Generating audio for scene ${scene.order + 1}. WPM: ${targetWPM}, Speed: ${speed.toFixed(2)}x, Est. Duration: ${estimatedAudioDuration.toFixed(2)}s`)
           }
 
+          console.log(`[OutputPipeline] 📝 Scene ${scene.order + 1} TTS TEXT (íntegra):\n────────────────────────────────────\n${ttsText}\n────────────────────────────────────`)
+
           const request: TTSRequest = {
             text: ttsText,
             voiceId: output.voiceId,
             language: output.narrationLanguage || 'pt-BR',
             speed,
-            ...(isHookOnly ? { modelId: 'eleven_v3' } : {})
+            modelId: dbModelId || (isHookOnly ? 'eleven_v3' : undefined)
           }
 
           audioResponse = await ttsProvider.synthesize(request)
@@ -965,15 +1081,9 @@ export class OutputPipelineService {
           speed = clamp(speed * ratio, 0.7, 1.2)
 
           if (diff > 0) {
-            // longo demais: reduzir pausas primeiro
-            if (pauseCount > 0) {
-              pauseCount = Math.max(0, pauseCount - Math.ceil(diff / 0.6))
-            }
+            // longo demais: speed será ajustado na próxima iteração (ratio acima)
           } else {
-            // curto demais: se já estamos no limite de speed lento, acrescentar pausas
-            if (speed <= 0.71) {
-              pauseCount = clamp(pauseCount + Math.ceil((-diff) / 0.6), 0, 18)
-            }
+            // curto demais: speed já foi ajustado via ratio
           }
         }
 
@@ -1005,6 +1115,7 @@ export class OutputPipelineService {
       })
     }
   }
+
 
   /**
    * Extrai a duração real de um buffer MP3 usando ffprobe.
@@ -1239,8 +1350,12 @@ export class OutputPipelineService {
 
     for (const chunk of sceneChunks) {
       await Promise.all(chunk.map(async (scene) => {
-        const selectedImage = scene.images[0]
-        if (!selectedImage?.fileData) return
+        // Buscar startImage (role='start' ou fallback sem role) e endImage (role='end')
+        // Como o include traz todas isSelected=true, filtramos aqui.
+        const startImage = scene.images.find(img => img.role === 'start') || scene.images[0]
+        const endImage = scene.images.find(img => img.role === 'end')
+
+        if (!startImage?.fileData) return
 
         // Motion prompt: prefere motionDescription (focado em movimento)
         // Fallback: visualDescription (backward-compatible com roteiros antigos)
@@ -1248,7 +1363,8 @@ export class OutputPipelineService {
 
         const durationSeconds = scene.audioTracks[0]?.duration ?? scene.estimatedDuration ?? 5
         const request: MotionGenerationRequest = {
-          imageBuffer: Buffer.from(selectedImage.fileData!) as any,
+          imageBuffer: Buffer.from(startImage.fileData!) as any,
+          endImageBuffer: endImage ? Buffer.from(endImage.fileData!) as any : undefined,
           prompt: motionPrompt,
           duration: durationSeconds,
           aspectRatio: output.aspectRatio || '16:9'
@@ -1266,7 +1382,7 @@ export class OutputPipelineService {
             mimeType: 'video/mp4',
             originalSize: videoResponse.video.videoBuffer.length,
             duration: videoResponse.video.duration || 5,
-            sourceImageId: selectedImage.id,
+            sourceImageId: startImage.id,
             isSelected: true,
             variantIndex: 0
           }
@@ -1286,6 +1402,7 @@ export class OutputPipelineService {
       }))
     }
   }
+
 
   /**
    * Regenera motion (image-to-video) para UMA cena específica.
@@ -1314,7 +1431,12 @@ export class OutputPipelineService {
     if (!scene.images[0]?.fileData) throw new Error('Cena não possui imagem selecionada para gerar motion')
 
     const output = scene.output
-    const selectedImage = scene.images[0]
+
+    // Identificar start e end images selecionadas
+    const startImage = scene.images.find(img => img.role === 'start') || scene.images[0]
+    const endImage = scene.images.find(img => img.role === 'end')
+
+    if (!startImage) throw new Error('Imagem inicial não encontrada')
 
     // 2. Obter provider de motion
     const motionProvider = providerManager.getMotionProvider()
@@ -1334,7 +1456,8 @@ export class OutputPipelineService {
 
     const durationSeconds = scene.audioTracks[0]?.duration ?? scene.estimatedDuration ?? 5
     const request: MotionGenerationRequest = {
-      imageBuffer: Buffer.from(selectedImage.fileData!) as any,
+      imageBuffer: Buffer.from(startImage.fileData!) as any,
+      endImageBuffer: endImage ? Buffer.from(endImage.fileData!) as any : undefined,
       prompt: motionPrompt,
       duration: durationSeconds,
       aspectRatio: output.aspectRatio || '16:9'
@@ -1353,7 +1476,7 @@ export class OutputPipelineService {
         mimeType: 'video/mp4',
         originalSize: videoResponse.video.videoBuffer.length,
         duration: videoResponse.video.duration || 5,
-        sourceImageId: selectedImage.id,
+        sourceImageId: startImage.id,
         isSelected: true,
         variantIndex: 0
       }

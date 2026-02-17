@@ -108,7 +108,7 @@ const TeaserSchema = z.object({
   microBriefV1: TeaserMicroBriefV1Schema.describe('Micro-brief isolado por teaser (fatos e safety específicos)'),
   scriptOutline: z.string().describe('Estrutura resumida do script'),
   visualSuggestion: z.string().describe('Descrição curta do visual'),
-  cta: z.string().describe('Call-to-action para o Full Video'),
+  cta: z.string().nullable().optional().describe('Call-to-action para o Full Video (hook-only: null/empty)'),
   platform: z.enum(['YouTube Shorts']).describe('YouTube Shorts (obrigatório)'),
   format: z.enum(['teaser-youtube-shorts']).describe('Formato obrigatório: teaser-youtube-shorts'),
   estimatedViews: z.number(),
@@ -497,6 +497,7 @@ export async function generateMonetizationPlanV2(
   console.log(`${LOG} ── ETAPA 1/6: Blueprint Estratégico ──`)
 
   const blueprintSkill = loadSkill('monetization/blueprint')
+  const brandSafetySkill = loadSkill('brand-safety')
   const catalogBlock = serializeConstantsCatalog()
   const roleDistBlock = serializeRoleDistribution(teaserCount)
 
@@ -507,7 +508,7 @@ export async function generateMonetizationPlanV2(
   const violationHistory: string[] = []
 
   for (let attempt = 0; attempt <= MAX_BLUEPRINT_RETRIES; attempt++) {
-    const blueprintSystemPrompt = `${blueprintSkill}${creativeDirectionBlock}${configBlock}\n\n${catalogBlock}\n\n${roleDistBlock}`
+    const blueprintSystemPrompt = `${blueprintSkill}\n\n${brandSafetySkill}${creativeDirectionBlock}${configBlock}\n\n${catalogBlock}\n\n${roleDistBlock}`
     const blueprintUserPrompt = attempt === 0
       ? `Crie o blueprint estratégico para o dossiê acima. Gere ${teaserCount} slots de teasers com ângulos, roles e formatos.`
       : violationHistory.length > 1
@@ -569,7 +570,7 @@ export async function generateMonetizationPlanV2(
 
   const fullVideoResult = await invokeStage(
     'full-video', FullVideoSchema,
-    `${fullVideoSkill}${creativeDirectionBlock}${configBlock}${teaserAnglesBlock}\n\nEstilo visual do plano: ${blueprint.visualStyleId} (${blueprint.visualStyleName})`,
+    `${fullVideoSkill}\n\n${brandSafetySkill}${creativeDirectionBlock}${configBlock}${teaserAnglesBlock}\n\nEstilo visual do plano: ${blueprint.visualStyleId} (${blueprint.visualStyleName})`,
     `Gere a sugestão completa do Full Video.\n\nÂngulo principal definido no blueprint: "${blueprint.fullVideo.angle}"\nscriptStyleId: "${blueprint.fullVideo.scriptStyleId}"\neditorialObjectiveId: "${blueprint.fullVideo.editorialObjectiveId}"`,
     fullDossierBlock, assignment
   )
@@ -594,7 +595,7 @@ export async function generateMonetizationPlanV2(
   const gatewayResult = await invokeStage(
     'gateway',
     z.object({ teasers: z.array(TeaserSchema).length(1) }),
-    `${gatewaySkill}${configBlock}\n\nEstilo visual do plano: ${blueprint.visualStyleId} (${blueprint.visualStyleName})\n\nHook do Full Video (NÃO repetir): "${fullVideo.hook}"`,
+    `${gatewaySkill}\n\n${brandSafetySkill}${configBlock}\n\nEstilo visual do plano: ${blueprint.visualStyleId} (${blueprint.visualStyleName})\n\nHook do Full Video (NÃO repetir): "${fullVideo.hook}"`,
     `Gere o teaser GATEWAY para o dossiê.\n\nSlot definido no blueprint:\n- angleCategory: "${gwSlot.angleCategory}"\n- angleName: "${gwSlot.angleName}"\n- shortFormatType: "${gwSlot.shortFormatType}"\n- platform: "${gwSlot.platform}"\n- scriptStyleId: "${gwSlot.scriptStyleId}"\n- editorialObjectiveId: "${gwSlot.editorialObjectiveId}"\n\nRetorne um JSON com campo "teasers" contendo exatamente 1 teaser.`,
     teaserDossierBlock, assignment
   )
@@ -614,25 +615,83 @@ export async function generateMonetizationPlanV2(
 
   if (deepDiveSlots.length > 0) {
     const deepDiveSkill = loadSkill('monetization/deep-dive')
-    const slotsBlock = deepDiveSlots.map((s: any, i: number) =>
-      `${i + 1}. angleCategory="${s.angleCategory}", angleName="${s.angleName}", shortFormatType="${s.shortFormatType}", platform="${s.platform}", scriptStyleId="${s.scriptStyleId}", editorialObjectiveId="${s.editorialObjectiveId}"`
-    ).join('\n')
+    const isGroqProvider = assignment.provider.toLowerCase().includes('groq')
 
-    const deepDiveResult = await invokeStage(
-      'deep-dives',
-      z.object({ teasers: z.array(TeaserSchema).min(deepDiveSlots.length).max(deepDiveSlots.length + 1) }),
-      `${deepDiveSkill}${configBlock}\n\nEstilo visual: ${blueprint.visualStyleId} (${blueprint.visualStyleName})\n\n## HOOKS JÁ USADOS (NÃO REPETIR)\n${usedHooks.map((h, i) => `${i + 1}. "${h}"`).join('\n')}\n\n## GATEWAY JÁ GERADO (NÃO repetir informações)\nHook: "${gatewayTeaser.hook}"\nÂngulo: ${gatewayTeaser.angleCategory}\nOutline: ${gatewayTeaser.scriptOutline}`,
-      `Gere ${deepDiveSlots.length} teasers DEEP-DIVE para o dossiê.\n\nSlots definidos no blueprint:\n${slotsBlock}\n\nRetorne um JSON com campo "teasers" contendo exatamente ${deepDiveSlots.length} teasers.`,
-      teaserDossierBlock, assignment
-    )
-    stageTimings['deep-dives'] = deepDiveResult.elapsed
-    totalUsage.inputTokens += deepDiveResult.usage.inputTokens
-    totalUsage.outputTokens += deepDiveResult.usage.outputTokens
-    totalUsage.totalTokens += deepDiveResult.usage.totalTokens
+    // Groq + batches grandes tendem a estourar JSON strict (json_validate_failed).
+    // Estratégia: quando Groq, gerar 1 por vez (mais confiável).
+    if (isGroqProvider) {
+      let elapsedTotal = 0
+      for (let i = 0; i < deepDiveSlots.length; i++) {
+        const s = deepDiveSlots[i]
+        const alreadyGeneratedDeepDives = allTeasers
+          .filter((t: any) => t?.narrativeRole === 'deep-dive')
+          .map((t: any, idx: number) => `${idx + 1}. ${t.angleCategory}: "${t.hook}"`)
+          .join('\n')
 
-    const ddTeasers = deepDiveResult.parsed.teasers || []
-    allTeasers.push(...ddTeasers)
-    usedHooks.push(...ddTeasers.map((t: any) => t.hook))
+        const singleSystemPrompt =
+          `${deepDiveSkill}\n\n${brandSafetySkill}${configBlock}\n\n` +
+          `Estilo visual: ${blueprint.visualStyleId} (${blueprint.visualStyleName})\n\n` +
+          `## HOOKS JÁ USADOS (NÃO REPETIR)\n${usedHooks.map((h, hi) => `${hi + 1}. "${h}"`).join('\n')}\n\n` +
+          `## GATEWAY JÁ GERADO (NÃO repetir informações)\n` +
+          `Hook: "${gatewayTeaser.hook}"\nÂngulo: ${gatewayTeaser.angleCategory}\nOutline: ${gatewayTeaser.scriptOutline}\n\n` +
+          (alreadyGeneratedDeepDives
+            ? `## DEEP-DIVES JÁ GERADOS (NÃO sobrepor territórios)\n${alreadyGeneratedDeepDives}\n`
+            : '')
+
+        const singleUserPrompt =
+          `Gere 1 teaser DEEP-DIVE para o dossiê.\n\n` +
+          `Slot definido no blueprint:\n` +
+          `- angleCategory: "${s.angleCategory}"\n` +
+          `- angleName: "${s.angleName}"\n` +
+          `- shortFormatType: "${s.shortFormatType}"\n` +
+          `- platform: "${s.platform}"\n` +
+          `- scriptStyleId: "${s.scriptStyleId}"\n` +
+          `- editorialObjectiveId: "${s.editorialObjectiveId}"\n\n` +
+          `Retorne um JSON com campo "teasers" contendo exatamente 1 teaser.`
+
+        const r = await invokeStage(
+          `deep-dive-${i + 1}`,
+          z.object({ teasers: z.array(TeaserSchema).length(1) }),
+          singleSystemPrompt,
+          singleUserPrompt,
+          teaserDossierBlock,
+          assignment
+        )
+
+        elapsedTotal += r.elapsed
+        totalUsage.inputTokens += r.usage.inputTokens
+        totalUsage.outputTokens += r.usage.outputTokens
+        totalUsage.totalTokens += r.usage.totalTokens
+
+        const teaser = r.parsed?.teasers?.[0]
+        if (teaser) {
+          allTeasers.push(teaser)
+          usedHooks.push(teaser.hook)
+        }
+      }
+
+      stageTimings['deep-dives'] = elapsedTotal
+    } else {
+      const slotsBlock = deepDiveSlots.map((s: any, i: number) =>
+        `${i + 1}. angleCategory="${s.angleCategory}", angleName="${s.angleName}", shortFormatType="${s.shortFormatType}", platform="${s.platform}", scriptStyleId="${s.scriptStyleId}", editorialObjectiveId="${s.editorialObjectiveId}"`
+      ).join('\n')
+
+      const deepDiveResult = await invokeStage(
+        'deep-dives',
+        z.object({ teasers: z.array(TeaserSchema).min(deepDiveSlots.length).max(deepDiveSlots.length + 1) }),
+        `${deepDiveSkill}\n\n${brandSafetySkill}${configBlock}\n\nEstilo visual: ${blueprint.visualStyleId} (${blueprint.visualStyleName})\n\n## HOOKS JÁ USADOS (NÃO REPETIR)\n${usedHooks.map((h, i) => `${i + 1}. "${h}"`).join('\n')}\n\n## GATEWAY JÁ GERADO (NÃO repetir informações)\nHook: "${gatewayTeaser.hook}"\nÂngulo: ${gatewayTeaser.angleCategory}\nOutline: ${gatewayTeaser.scriptOutline}`,
+        `Gere ${deepDiveSlots.length} teasers DEEP-DIVE para o dossiê.\n\nSlots definidos no blueprint:\n${slotsBlock}\n\nRetorne um JSON com campo "teasers" contendo exatamente ${deepDiveSlots.length} teasers.`,
+        teaserDossierBlock, assignment
+      )
+      stageTimings['deep-dives'] = deepDiveResult.elapsed
+      totalUsage.inputTokens += deepDiveResult.usage.inputTokens
+      totalUsage.outputTokens += deepDiveResult.usage.outputTokens
+      totalUsage.totalTokens += deepDiveResult.usage.totalTokens
+
+      const ddTeasers = deepDiveResult.parsed.teasers || []
+      allTeasers.push(...ddTeasers)
+      usedHooks.push(...ddTeasers.map((t: any) => t.hook))
+    }
   }
 
   // =====================================================================
@@ -642,24 +701,72 @@ export async function generateMonetizationPlanV2(
 
   if (hookOnlySlots.length > 0) {
     const hookOnlySkill = loadSkill('monetization/hook-only')
-    const slotsBlock = hookOnlySlots.map((s: any, i: number) =>
-      `${i + 1}. angleCategory="${s.angleCategory}", angleName="${s.angleName}", shortFormatType="${s.shortFormatType}", platform="${s.platform}", scriptStyleId="${s.scriptStyleId}", editorialObjectiveId="${s.editorialObjectiveId}"`
-    ).join('\n')
+    const isGroqProvider = assignment.provider.toLowerCase().includes('groq')
 
-    const hookOnlyResult = await invokeStage(
-      'hook-only',
-      z.object({ teasers: z.array(TeaserSchema).min(hookOnlySlots.length).max(hookOnlySlots.length + 1) }),
-      `${hookOnlySkill}${configBlock}\n\nEstilo visual: ${blueprint.visualStyleId} (${blueprint.visualStyleName})\n\n## HOOKS JÁ USADOS (NÃO REPETIR)\n${usedHooks.map((h, i) => `${i + 1}. "${h}"`).join('\n')}\n\n## TEASERS JÁ GERADOS (NÃO repetir territórios)\n${allTeasers.map((t, i) => `${i + 1}. [${t.narrativeRole}] ${t.angleCategory}: "${t.hook}"`).join('\n')}`,
-      `Gere ${hookOnlySlots.length} teasers HOOK-ONLY para o dossiê.\n\nSlots definidos no blueprint:\n${slotsBlock}\n\nRetorne um JSON com campo "teasers" contendo exatamente ${hookOnlySlots.length} teasers.`,
-      teaserDossierBlock, assignment
-    )
-    stageTimings['hook-only'] = hookOnlyResult.elapsed
-    totalUsage.inputTokens += hookOnlyResult.usage.inputTokens
-    totalUsage.outputTokens += hookOnlyResult.usage.outputTokens
-    totalUsage.totalTokens += hookOnlyResult.usage.totalTokens
+    if (isGroqProvider) {
+      let elapsedTotal = 0
+      for (let i = 0; i < hookOnlySlots.length; i++) {
+        const s = hookOnlySlots[i]
 
-    const hoTeasers = hookOnlyResult.parsed.teasers || []
-    allTeasers.push(...hoTeasers)
+        const singleSystemPrompt =
+          `${hookOnlySkill}\n\n${brandSafetySkill}${configBlock}\n\n` +
+          `Estilo visual: ${blueprint.visualStyleId} (${blueprint.visualStyleName})\n\n` +
+          `## HOOKS JÁ USADOS (NÃO REPETIR)\n${usedHooks.map((h, hi) => `${hi + 1}. "${h}"`).join('\n')}\n\n` +
+          `## TEASERS JÁ GERADOS (NÃO repetir territórios)\n${allTeasers.map((t: any, ti: number) => `${ti + 1}. [${t.narrativeRole}] ${t.angleCategory}: "${t.hook}"`).join('\n')}`
+
+        const singleUserPrompt =
+          `Gere 1 teaser HOOK-ONLY para o dossiê.\n\n` +
+          `Slot definido no blueprint:\n` +
+          `- angleCategory: "${s.angleCategory}"\n` +
+          `- angleName: "${s.angleName}"\n` +
+          `- shortFormatType: "${s.shortFormatType}"\n` +
+          `- platform: "${s.platform}"\n` +
+          `- scriptStyleId: "${s.scriptStyleId}"\n` +
+          `- editorialObjectiveId: "${s.editorialObjectiveId}"\n\n` +
+          `Retorne um JSON com campo "teasers" contendo exatamente 1 teaser.`
+
+        const r = await invokeStage(
+          `hook-only-${i + 1}`,
+          z.object({ teasers: z.array(TeaserSchema).length(1) }),
+          singleSystemPrompt,
+          singleUserPrompt,
+          teaserDossierBlock,
+          assignment
+        )
+
+        elapsedTotal += r.elapsed
+        totalUsage.inputTokens += r.usage.inputTokens
+        totalUsage.outputTokens += r.usage.outputTokens
+        totalUsage.totalTokens += r.usage.totalTokens
+
+        const teaser = r.parsed?.teasers?.[0]
+        if (teaser) {
+          allTeasers.push(teaser)
+          usedHooks.push(teaser.hook)
+        }
+      }
+
+      stageTimings['hook-only'] = elapsedTotal
+    } else {
+      const slotsBlock = hookOnlySlots.map((s: any, i: number) =>
+        `${i + 1}. angleCategory="${s.angleCategory}", angleName="${s.angleName}", shortFormatType="${s.shortFormatType}", platform="${s.platform}", scriptStyleId="${s.scriptStyleId}", editorialObjectiveId="${s.editorialObjectiveId}"`
+      ).join('\n')
+
+      const hookOnlyResult = await invokeStage(
+        'hook-only',
+        z.object({ teasers: z.array(TeaserSchema).min(hookOnlySlots.length).max(hookOnlySlots.length + 1) }),
+        `${hookOnlySkill}\n\n${brandSafetySkill}${configBlock}\n\nEstilo visual: ${blueprint.visualStyleId} (${blueprint.visualStyleName})\n\n## HOOKS JÁ USADOS (NÃO REPETIR)\n${usedHooks.map((h, i) => `${i + 1}. "${h}"`).join('\n')}\n\n## TEASERS JÁ GERADOS (NÃO repetir territórios)\n${allTeasers.map((t, i) => `${i + 1}. [${t.narrativeRole}] ${t.angleCategory}: "${t.hook}"`).join('\n')}`,
+        `Gere ${hookOnlySlots.length} teasers HOOK-ONLY para o dossiê.\n\nSlots definidos no blueprint:\n${slotsBlock}\n\nRetorne um JSON com campo "teasers" contendo exatamente ${hookOnlySlots.length} teasers.`,
+        teaserDossierBlock, assignment
+      )
+      stageTimings['hook-only'] = hookOnlyResult.elapsed
+      totalUsage.inputTokens += hookOnlyResult.usage.inputTokens
+      totalUsage.outputTokens += hookOnlyResult.usage.outputTokens
+      totalUsage.totalTokens += hookOnlyResult.usage.totalTokens
+
+      const hoTeasers = hookOnlyResult.parsed.teasers || []
+      allTeasers.push(...hoTeasers)
+    }
   }
 
   // =====================================================================
@@ -703,7 +810,12 @@ export async function generateMonetizationPlanV2(
       : role === 'hook-only'
         ? sceneConfig.hookOnly
         : sceneConfig.deepDive
-    return { ...t, sceneCount }
+    return {
+      ...t,
+      // Hook-only não tem CTA/branding: normalize para null
+      cta: role === 'hook-only' ? null : (t?.cta ?? null),
+      sceneCount
+    }
   })
 
   return {

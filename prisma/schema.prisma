@@ -252,6 +252,8 @@ model Scene {
   order                  Int
   narration              String
   visualDescription      String
+  endVisualDescription   String? /// Descrição visual do FINAL da cena (keyframe final para motion i2v). Se presente, gera uma segunda imagem (role=end) usada como last_image no Wan 2.2.
+  endImageReferenceWeight Float? /// Peso (0.0-1.0) da imagem START como referência visual para gerar a END image. Decidido pelo roteirista. Ex: 0.8 (sutil), 0.5 (moderado), 0.3 (drástico).
   audioDescription       String?
   audioDescriptionVolume Float? /// Volume do SFX em dB (-24 a -6, null = default -12). Definido pelo roteirista, editável na UI.
   startTime              Float?
@@ -293,6 +295,7 @@ model BackgroundMusicTrack {
 model SceneImage {
   id           String     @id @default(uuid())
   sceneId      String
+  role         String     @default("start") @db.VarChar(10) /// "start" = imagem de início da cena, "end" = imagem de final (keyframe para motion last_image)
   provider     AIProvider
   promptUsed   String
   fileData     Bytes?

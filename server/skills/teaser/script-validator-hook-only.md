@@ -80,6 +80,13 @@ Hook-Only é uma **arma viral de 16-22 segundos**. Detonação cognitiva que par
 - ✅ "O bispo confiscou os bens" (sistema de poder)
 - ✅ Visual: "bishop's study, illuminated ledger, gold coins, sealed document" (atmosférico)
 
+### 5.5. BRAND SAFETY & GORE (CRÍTICO)
+- REPROVADO se usar termos: "Assassinato", "Estupro", "Pedofilia", "Mutilado", "Tripas", "Poça de Sangue".
+- REPROVADO se descrever anatomia visceral (vísceras, feridas abertas, abuso sexual).
+- APROVADO se usar substituição semântica: "Fim Trágico", "Ato Imperdoável", "Crimes contra Inocentes", "Cena Marcada".
+- APROVADO se descrever a SOMBRA ou o OBJETO, não o ferimento.
+- Postura exigida: "Neutral Documentarian". Clínico e solene, nunca sádico.
+
 ### 6. Resolução ZERO (O MAIS CRÍTICO)
 Hook-Only é pura provocação. **NENHUMA explicação.**
 
@@ -103,26 +110,19 @@ Hook-Only é pura provocação. **NENHUMA explicação.**
 
 🚨 Se explica QUALQUER COISA, deixou de ser hook-only e virou gateway disfarçado. REPROVE sem hesitar.
 
-### 7. CTA Invisível (NÃO Pode Parecer CTA)
-- O público detecta CTA em milissegundos e sai ANTES do fim.
-- Se a última cena contém convite explícito → REPROVADO.
-- Se a última cena fecha um loop narrativo → REPROVADO.
-- Se a última cena tem tagline, reflexão ou tese → REPROVADO.
-- CTA aprovado = **SOMENTE** "The Gap Files." — nada mais, nada menos.
-- A narração da última cena deve ser EXATAMENTE: "The Gap Files." (4 palavras, ponto final)
-- QUALQUER texto adicional antes ou depois é violação:
-  - ❌ "The Gap Files. O silêncio revela o que o poder não quer contar." (tagline — texto extra)
-  - ❌ "The Gap Files. A verdade está nos arquivos." (tese — texto extra)
-  - ❌ "Siga The Gap Files para revelar o próximo segredo oculto." (CTA explícito)
-  - ❌ "Quer saber como isso terminou? Assista ao vídeo completo." (CTA explícito)
-  - ❌ "Siga a investigação, nunca aceite mentiras novamente." (pedido explícito)
-  - ❌ "A verdade está nos arquivos." (fecha promessa — sem branding)
-  - ✅ "The Gap Files." (corte seco, silêncio, branding puro — ÚNICO FORMATO APROVADO)
+### 7. BRANDING / CTA (ZERO CTA)
+- OBRIGATÓRIO: **ZERO CTA**. Sem "The Gap Files.", sem logo final, sem pedido de like/follow.
+- A retenção vem do Loop Infinito.
+- Se tiver QUALQUER menção à marca ou convite, REPROVE.
 
-### 8. Replay Bait
-- O roteiro deve ter pelo menos 1 cena com detalhe visual ou narrativo que passe RÁPIDO demais para ser totalmente absorvido.
-- Isso incentiva replay ("pera, o que foi isso?"), que é sinal forte para o algoritmo.
-- Se todas as cenas são igualmente lentas e digeríveis → sinalizar.
+- Hook-only ideal: **4 cenas EXATAS** (Parte B → Respiro → Replay bait/impacto → Parte A).
+
+### 8. Loop Infinito (Conexão Mecânica A → B)
+- **REGRA DE OURO:** A última frase do vídeo (Cena 4) DEVE ser a PRIMEIRA metade de uma sentença cuja SEGUNDA metade é a frase inicial (Cena 1).
+- **Cena 4 (Final):** Deve terminar suspensa, sem ponto final conceitual (ex: "E por causa disso...").
+- **Cena 1 (Início):** Deve completar sintaticamente a Cena 4 (ex: "...ninguém visita a ilha.").
+- Se o vídeo termina com conclusão fechada ("E assim terminou."), REPROVE.
+- Se o início não faz sentido como continuação do fim, REPROVE.
 
 ### 9. Foco no Ângulo (ZERO CONTAMINAÇÃO TEMPORAL)
 - O choque deve vir do ângulo definido.
@@ -130,8 +130,8 @@ Hook-Only é pura provocação. **NENHUMA explicação.**
 - PROIBIDO pular para outras épocas (a menos que o ângulo seja "conexão temporal").
 
 ### 10. Duração Agressiva
-- Hook-only ideal: **3 cenas de conteúdo + 1 CTA** (total **4 cenas**, **16-22s**).
-- Se passar de **5 cenas** → sinalizar como alongado (perde o “tiro curto” do hook-only).
+- Hook-only ideal: **4 cenas EXATAS** (Parte B, Respiro, Replay bait/impacto, Parte A).
+- Se tiver 5 ou mais cenas → REPROVADO.
 - Cada cena deve ser um soco cognitivo.
 
 ### 11. Anti-Padrões (PRIORIDADE MÁXIMA)
@@ -147,10 +147,10 @@ Cena 4: "Da imprensa à internet, a mesma mentira viraliza, alimentando ódio mi
 → VIOLAÇÃO: CONCLUSÃO MORAL. O espectador "já entendeu" a tese. Isso é resolução.
 ```
 
-❌ **REPROVADO** (CTA Visível):
+❌ **REPROVADO** (Loop Quebrado):
 ```
-Cena 5: "Siga The Gap Files para revelar o próximo segredo oculto."
-→ VIOLAÇÃO: CTA EXPLÍCITO. O público percebe que acabou e sai. Deveria ser: "The Gap Files."
+Cena 3: "E assim terminou a história do bispo assassino."
+→ VIOLAÇÃO: Fim definitivo. O loop deve ser uma frase INCOMPLETA que conecta ao início.
 ```
 
 ❌ **REPROVADO** (SINTOMA ao invés de MECANISMO):
@@ -167,13 +167,13 @@ Cena 0: 7/10 → Cena 1: 7/10 → Cena 2: 7/10
 → VIOLAÇÃO: Tom uniforme sem dinâmica.
 ```
 
-✅ **APROVADO** (Hook-Only Viral v2):
+✅ **APROVADO** (Hook-Only Loop):
 ```
-Cena 0: [RUPTURA 8/10] "Um bispo assinou. Uma comunidade inteira desapareceu."
-Cena 1: [RESPIRO 6/10] "O tribunal pagava os torturadores por dia."
-Cena 2: [PICO 10/10] "A confissão? Era um produto sob encomenda."
-Cena 3: [CTA] "The Gap Files." (corte seco, silêncio)
-→ OK: 1 conceito (fabricação de culpa), alternância com pico, MECANISMO > SINTOMA, zero resolução, CTA invisível.
+Cena 1: [LOOP-B 9/10] "...autorizou o confisco de uma comunidade inteira."
+Cena 2: [RESPIRO 6/10] "O tribunal usou a morte como pretexto para encher os cofres."
+Cena 3: [REPLAY 9/10] "O selo está no registro. O dinheiro também."
+Cena 4: [LOOP-A 10/10] "E a assinatura naquele documento secreto"
+→ OK: Loop semântico perfeito ("E a assinatura... autorizou..."), 4 cenas, zero CTA.
 ```
 
 ## FORMATO DA RESPOSTA

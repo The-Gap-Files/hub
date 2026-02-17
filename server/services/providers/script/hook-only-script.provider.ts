@@ -152,15 +152,16 @@ export class HookOnlyScriptProvider implements IScriptGenerator {
       console.log(`${LOG} Título: ${content.title}`)
       console.log(`${LOG} Cenas: ${content.scenes.length}`)
 
-      // Validar que a última cena é "The Gap Files."
+      // Loop Infinito: A última cena (4) deve conectar com a primeira (1)
       const lastScene = content.scenes[content.scenes.length - 1]
-      if (lastScene && !lastScene.narration.trim().startsWith('The Gap Files')) {
-        console.warn(`${LOG} ⚠️ Última cena NÃO é "The Gap Files." — narração: "${lastScene.narration.slice(0, 50)}"`)
+      const firstScene = content.scenes[0]
+      if (lastScene && firstScene) {
+        console.log(`${LOG} 🔄 Loop Check: "${lastScene.narration.slice(-20)}..." -> "${firstScene.narration.slice(0, 20)}..."`)
       }
 
-      // Validar quantidade de cenas
-      if (content.scenes.length > 8) {
-        console.warn(`${LOG} ⚠️ Hook-only gerou ${content.scenes.length} cenas (esperado 4-7). Pode indicar que o modelo ignorou as regras.`)
+      // Validar quantidade de cenas (expectativa estrita: 4)
+      if (content.scenes.length !== 4) {
+        console.warn(`${LOG} ⚠️ Hook-only gerou ${content.scenes.length} cenas (esperado estritamente 4 para Loop Infinito).`)
       }
 
       return parseScriptResponse(content, request, this.getName(), this.modelName, tokenUsage)

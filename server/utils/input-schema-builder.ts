@@ -83,6 +83,7 @@ export function buildImageInput(
 
 export interface MotionInputContext {
   imageBuffer?: Buffer
+  endImageBuffer?: Buffer
   imagePath?: string
   prompt?: string
   duration?: number
@@ -108,6 +109,16 @@ export function buildMotionInput(
     } else {
       // buffer direto (Replicate aceita Buffer)
       input[schema.imageField] = ctx.imageBuffer
+    }
+  }
+
+  // End Image (last frame para transição)
+  if (ctx.endImageBuffer) {
+    const endField = schema.endImageField || 'last_image'
+    if (schema.imageInputMode === 'base64') {
+      input[endField] = ctx.endImageBuffer.toString('base64')
+    } else {
+      input[endField] = ctx.endImageBuffer
     }
   }
 

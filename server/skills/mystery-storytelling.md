@@ -345,14 +345,14 @@ Shorts de 500k views não pedem inscrição. Eles criam uma necessidade neuroló
 
 | ❌ CTA Visível (público sai) | ✅ CTA Invisível (público fica) |
 |------------------------------|-------------------------------|
-| "Siga The Gap Files para revelar..." | "The Gap Files." + silêncio. Corte seco. |
+| "Siga The Gap Files para revelar..." | Corte seco no pico (ZERO branding/CTA). |
 | "Inscreva-se e descubra!" | "A verdade está nos arquivos." |
 | "Quer saber como terminou?" | — (não pergunte, provoque) |
 | "...se tiver estômago" (excludente) | — (nunca filtre, convide) |
 
 **Por que funciona:** O cérebro que NÃO recebe resolução busca compulsivamente. O espectador vai ao perfil, assiste mais vídeos, segue. Tudo sem você pedir.
 
-**HOOK-ONLY (CTA Máximo):** Última cena = branding puro. "The Gap Files." Sem convite. Sem explicação. O conteúdo faz o trabalho.
+**HOOK-ONLY (ZERO CTA/branding):** Corte seco no pico. Sem "The Gap Files.", sem convite. O Loop Infinito faz o trabalho.
 
 **GATEWAY/DEEP-DIVE (CTA Suave):** "O resto está nos arquivos." / "A verdade completa? Está em outro arquivo."
 
@@ -379,12 +379,12 @@ O espectador compartilha quando:
 
 ## ⏱️ CALIBRAÇÃO POR DURAÇÃO
 
-### Hook-Only (16-22s / 3 cenas + 1 CTA)
+### Hook-Only (16-22s / 4 cenas — ZERO CTA)
 - **Ritmo:** Staccato extremo. Cada cena é um soco cognitivo.
 - **Beats:** Máximo 3-4. Sem construção, sem explicação.
 - **Resolução:** ZERO. Pura provocação. TODOS os loops ficam abertos.
-- **Curva:** 9 → 6 → 10 → branding/silêncio
-- **CTA:** "The Gap Files." + silêncio. Corte seco. Máximo absoluto: 5 cenas.
+- **Curva:** 9 → 6 → 9 → 10 (corte seco)
+- **CTA/branding:** PROIBIDO. Máximo absoluto: 5 cenas.
 - **Regra:** Se o espectador sente que "já entendeu", FALHOU.
 
 ### Shorts (30-60s / 6-12 cenas)

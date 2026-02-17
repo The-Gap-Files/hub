@@ -101,109 +101,140 @@ export default defineEventHandler(async (event) => {
     && prevScene.sceneEnvironment
     && scene.sceneEnvironment === prevScene.sceneEnvironment
 
-  // Construir prompt visual com Anchor + Continuity
-  let promptToUse = body.prompt ?? scene.visualDescription
+  // Construir lista de gerações necessárias
+  const requestedRole = body.role as 'start' | 'end' | undefined
+  const generationsNeeded: Array<{ prompt: string; role: 'start' | 'end' }> = []
 
-  if (styleAnchor) {
-    if (isSameEnvironment && prevScene) {
-      // Mesmo ambiente → Anchor + Continuity
-      const continuityContext = prevScene.visualDescription.slice(0, 300)
-      promptToUse = `${styleAnchor}\n[VISUAL CONTINUITY — same environment "${scene.sceneEnvironment}": ${continuityContext}]\n\n${promptToUse}`
-      console.log(`[API] 🔗 Regeneração com Continuity + Anchor (env: ${scene.sceneEnvironment})`)
-    } else {
-      // Novo ambiente → Só Anchor (transição limpa)
-      promptToUse = `${styleAnchor}\n\n${promptToUse}`
-      console.log(`[API] 🎨 Regeneração com Anchor only${scene.sceneEnvironment ? ` (env: ${scene.sceneEnvironment})` : ''}`)
+  if (!requestedRole || requestedRole === 'start') {
+    generationsNeeded.push({ prompt: body.prompt ?? scene.visualDescription, role: 'start' })
+  }
+
+  if ((!requestedRole || requestedRole === 'end') && scene.endVisualDescription) {
+    generationsNeeded.push({ prompt: body.endPrompt ?? scene.endVisualDescription, role: 'end' })
+  }
+
+  // 4. Executar Gerações
+  const results: any[] = []
+
+  for (const gen of generationsNeeded) {
+    // Aplicar Style Anchor + Continuity Engine para cada prompt
+    let promptToUse = gen.prompt
+
+    if (styleAnchor) {
+      if (isSameEnvironment && prevScene) {
+        // Mesmo ambiente → Anchor + Continuity
+        // NOTA: Para o keyframe de fim, a continuidade é com o início da própria cena ou com a cena anterior?
+        // Geralmente continuidade visual é entre cenas. Manteremos a lógica atual.
+        const continuityContext = prevScene.visualDescription.slice(0, 300)
+        promptToUse = `${styleAnchor}\n[VISUAL CONTINUITY — same environment "${scene.sceneEnvironment}": ${continuityContext}]\n\n${promptToUse}`
+      } else {
+        // Novo ambiente → Só Anchor
+        promptToUse = `${styleAnchor}\n\n${promptToUse}`
+      }
     }
-  }
 
-  const request: ImageGenerationRequest = {
-    prompt: promptToUse,
-    width,
-    height,
-    aspectRatio: output.aspectRatio || '16:9',
-    seed: body.seed || undefined,
-    numVariants: 1
-  }
+    const request: ImageGenerationRequest = {
+      prompt: promptToUse,
+      width,
+      height,
+      aspectRatio: output.aspectRatio || '16:9',
+      seed: body.seed || undefined,
+      numVariants: 1
+    }
 
-  console.log(`[API] 🖼️ [DEBUG] Regenerar imagem — Scene ${sceneId} — prompt com anchor/continuity:\n${request.prompt}`)
+    // === IMAGE REFERENCE para END images ===
+    // Se estamos gerando a END image, buscar a START image existente como referência
+    if (gen.role === 'end') {
+      const startImage = await prisma.sceneImage.findFirst({
+        where: { sceneId, role: 'start', isSelected: true },
+        select: { fileData: true }
+      })
 
-  // 4. Gerar (com detecção de safety filter)
-  let response
-  try {
-    response = await imageProvider.generate(request)
-  } catch (err: any) {
-    if (err instanceof ContentRestrictedError) {
-      // Atualizar status da cena para restrita (persistir a tentativa)
-      await prisma.scene.update({
-        where: { id: sceneId },
+      if (startImage?.fileData) {
+        request.imageReference = Buffer.from(startImage.fileData as any)
+        request.imageReferenceWeight = scene.endImageReferenceWeight ?? 0.5
+        console.log(`[API] 🔗 Using START image as reference for END (weight: ${request.imageReferenceWeight})`)
+      }
+    }
+
+    console.log(`[API] 🖼️ Regenerando ${gen.role} para Scene ${sceneId}`)
+
+    try {
+      const response = await imageProvider.generate(request)
+      const generated = response.images[0]
+      if (!generated) continue
+
+      // Salvar no Banco — desmarcar anteriores do MESMO role como selecionadas
+      // Se for regeneração de 'start', também desmarca imagens sem role (legado)
+      if (gen.role === 'start') {
+        await prisma.sceneImage.updateMany({
+          where: {
+            sceneId,
+            NOT: { role: 'end' }
+          },
+          data: { isSelected: false }
+        })
+      } else {
+        await prisma.sceneImage.updateMany({
+          where: { sceneId, role: 'end' },
+          data: { isSelected: false }
+        })
+      }
+
+      const newImage = await prisma.sceneImage.create({
         data: {
-          imageStatus: 'restricted',
-          imageRestrictionReason: err.message
+          sceneId,
+          role: gen.role,
+          provider: imageProvider.getName() as any,
+          promptUsed: request.prompt,
+          fileData: Buffer.from(generated.buffer) as any,
+          mimeType: 'image/png',
+          originalSize: generated.buffer.length,
+          width: generated.width,
+          height: generated.height,
+          isSelected: true,
+          variantIndex: 0
         }
       })
 
-      throw createError({
-        statusCode: 422,
-        data: {
-          code: 'CONTENT_RESTRICTED',
-          prompt: promptToUse,
-          reason: err.message
-        },
-        message: `O prompt foi rejeitado pelo filtro de conteúdo do modelo de imagem. Tente editar o prompt para usar termos mais abstratos.`
-      })
+      results.push(newImage)
+
+      // Registrar custo
+      const imgModel = response.model || 'luma/photon-flash'
+      const imgCost = calculateReplicateOutputCost(imgModel, 1) ?? 0
+
+      costLogService.log({
+        outputId: output.id,
+        resource: 'image',
+        action: 'recreate',
+        provider: 'REPLICATE',
+        model: imgModel,
+        cost: imgCost,
+        metadata: { num_images: 1, cost_per_image: imgCost, role: gen.role },
+        detail: `Scene image regeneration (${gen.role})`
+      }).catch(() => { })
+
+    } catch (err: any) {
+      if (err instanceof ContentRestrictedError) {
+        await prisma.scene.update({
+          where: { id: sceneId },
+          data: { imageStatus: 'restricted', imageRestrictionReason: err.message }
+        })
+        throw createError({
+          statusCode: 422,
+          data: { code: 'CONTENT_RESTRICTED', role: gen.role, reason: err.message },
+          message: `O prompt (${gen.role}) foi rejeitado pelo filtro de conteúdo.`
+        })
+      }
+      throw err
     }
-    throw err
   }
 
-  const generated = response.images[0]
-
-  if (!generated) throw createError({ statusCode: 500, message: 'No image generated' })
-
-  // 5. Salvar no Banco — desmarcar anteriores como selecionadas
-  await prisma.sceneImage.updateMany({
-    where: { sceneId },
-    data: { isSelected: false }
-  })
-
-  const newImage = await prisma.sceneImage.create({
-    data: {
-      sceneId,
-      provider: imageProvider.getName() as any,
-      promptUsed: request.prompt,
-      fileData: Buffer.from(generated.buffer) as any,
-      mimeType: 'image/png',
-      originalSize: generated.buffer.length,
-      width: generated.width,
-      height: generated.height,
-      isSelected: true,
-      variantIndex: 0
-    }
-  })
-
-  // 6. Limpar status de restrição da cena (regeneração com sucesso)
+  // 6. Limpar status de restrição da cena
   await prisma.scene.update({
     where: { id: sceneId },
-    data: {
-      imageStatus: 'generated',
-      imageRestrictionReason: null
-    }
+    data: { imageStatus: 'generated', imageRestrictionReason: null }
   })
 
-  // Registrar custo da regeneração de imagem (fire-and-forget)
-  const imgModel = response.model || 'luma/photon-flash'
-  const imgCost = calculateReplicateOutputCost(imgModel, 1) ?? 0
-
-  costLogService.log({
-    outputId: output.id,
-    resource: 'image',
-    action: 'recreate',
-    provider: 'REPLICATE',
-    model: imgModel,
-    cost: imgCost,
-    metadata: { num_images: 1, cost_per_image: imgCost },
-    detail: `Scene image regeneration (single)`
-  }).catch(() => { })
-
-  return newImage
+  return results.length === 1 ? results[0] : results
 })

@@ -19,6 +19,7 @@ export type PipelineStage =
   | 'Render'
   | 'Captions'
   | 'AddCaptions'
+  | 'Filmmaker'
   | 'API'
 
 function prefix(stage: PipelineStage, outputId?: string | null): string {

@@ -27,11 +27,13 @@ import { formatPersonsForPrompt, formatNeuralInsightsForPrompt } from '../../../
 export const ScriptSceneSchema = z.object({
   order: z.number().describe('A ordem sequencial da cena'),
   narration: z.string().describe('O texto que será narrado pelo locutor (DEVE ser no IDIOMA DO VÍDEO especificado na request, NUNCA em inglês — apenas visualDescription, motionDescription e audioDescription são em inglês)'),
-  visualDescription: z.string().describe('Descrição técnica e sensorial para o modelo de geração de vídeo (SEMPRE EM INGLÊS)'),
+  visualDescription: z.string().describe('Descrição técnica e sensorial para o modelo de geração de imagem (SEMPRE EM INGLÊS). DEVE representar visualmente o que a narração diz. Se a narração fala de "bispo assinou sentença", o visual DEVE mostrar documento/selo/assinatura — NUNCA uma vela ou paisagem desconectada.'),
+  endVisualDescription: z.string().nullable().describe('Estado visual FINAL da cena (SEMPRE EM INGLÊS). OBRIGATÓRIO quando motionDescription não é null. DEVE ser o MESMO cenário e MESMOS objetos do visualDescription, apenas com PROGRESSÃO (mudança de enquadramento, luz ou estado). PROIBIDO mostrar objetos/cenários diferentes do START. Usado como keyframe final (last_image) no modelo I2V. Use null APENAS se motionDescription também for null.'),
   sceneEnvironment: z.string().describe('Identificador curto do ambiente/locação da cena em snake_case em inglês (ex: "bishop_study", "canal_dawn", "courtroom", "ocean_surface"). Cenas consecutivas no MESMO ambiente devem ter o MESMO valor.'),
-  motionDescription: z.string().nullable().describe('Instruções de MOVIMENTO para o modelo image-to-video (SEMPRE EM INGLÊS). Descreva movimentos de câmera e sujeito: dolly, pan, tilt, zoom, elementos animados (chamas, água, vento, poeira). NÃO repita o que já está na imagem — foque no que se MOVE.'),
+  motionDescription: z.string().nullable().describe('Instruções de MOVIMENTO para o modelo image-to-video (SEMPRE EM INGLÊS). Descreve a TRANSIÇÃO entre visualDescription (keyframe START) e endVisualDescription (keyframe END). Descreva movimentos de câmera (dolly, pan, tilt, zoom) e elementos animados (chamas, água, vento, poeira). DEVE ser coerente com ambos keyframes: se START é wide e END é close-up, motion DEVE ser dolly forward. NÃO repita o que já está na imagem — foque no que se MOVE. 15-40 palavras.'),
   audioDescription: z.string().nullable().describe('Atmosfera sonora e SFX em inglês técnico. Descreva sons de ambiente (rain, wind, crowd murmur), impactos (door slam, thunder crack), e atmosfera (eerie drone, tension strings). Seja ESPECÍFICO: "distant church bells with reverb" é melhor que "bells".'),
   audioDescriptionVolume: z.number().min(-24).max(-6).default(-12).describe('Volume do SFX em dB para mixagem com a narração. Range: -24 (quase inaudível) a -6 (proeminente). Default: -12 (equilíbrio). Sons de ambiente: -18 a -15. Impactos dramáticos: -9 a -6.'),
+  endImageReferenceWeight: z.number().min(0).max(1).default(0.5).describe('Peso da referência visual da imagem START na geração da imagem END (0.0 a 1.0). Controla quanto a imagem de início influencia a imagem final da cena. Valores altos (0.7-0.85) para cenas onde o ambiente muda pouco (mesma sala, luz mudando). Valores médios (0.4-0.6) para transições de câmera moderadas (dolly, pan). Valores baixos (0.2-0.35) para mudanças drásticas de enquadramento (wide → extreme close-up). Use null se endVisualDescription for null (cena estática).').nullable(),
   estimatedDuration: z.number().default(5).describe('Duração estimada em segundos (entre 5 e 6 segundos)')
 })
 
@@ -197,7 +199,7 @@ Quando a narrativa envolve violência, injustiça ou material sensível:
 - ❌ "Inscreva-se para descobrir!" / "Siga The Gap Files para revelar..." (pedido explícito → algoritmo sabe que o conteúdo acabou)
 - ❌ "...se tiver estômago" / "...se aguenta a verdade" (excludente, reduz compartilhamento)
 - ✅ "A verdade está nos arquivos." / "Da imprensa à internet, a mesma mentira atravessou séculos." (compulsão — o espectador vai ao perfil por necessidade, não por pedido)
-- Para HOOK-ONLY: "The Gap Files." + silêncio. Corte seco. Sem convite. Sem explicação.
+- Para HOOK-ONLY: ZERO CTA/branding. Corte seco. Sem convite. Sem explicação.
 - Para GATEWAY/DEEP-DIVE: Frase-tese poderosa que encerra + menção orgânica ao canal.
 - Para FULL VIDEO (YouTube longo): Convite direto mas orgânico é ESPERADO e benéfico. Use frase-tese + convite natural ("Se essa história te fez pensar, se inscreva no The Gap Files"). Em vídeos longos, o espectador espera ser convidado — a ausência parece um descuido.
 
@@ -254,20 +256,56 @@ DIRETRIZES TÉCNICAS (CRÍTICO):
 - SOUND DESIGN: Descreva a atmosfera sonora (SFX/Ambience) em inglês técnico para cada cena.
 - MÚSICA DE FUNDO: Use "backgroundMusic" para vídeos curtos (YouTube Shorts) ou "backgroundMusicTracks" para vídeos longos (YouTube). O campo "prompt" deve ser compatível com Stable Audio 2.5 (gênero, instrumentos, BPM, mood). O campo "volume" (dB) será aplicado via FFmpeg na mixagem.
 - CAMADA SENSORIAL: Nas descrições visuais, inclua sentimentos, texturas e atmosfera.
-- 🎬 MOTION DESCRIPTION (motionDescription — OBRIGATÓRIO): Cada cena DEVE ter um campo "motionDescription" com instruções de MOVIMENTO em inglês para o modelo image-to-video. Este prompt descreve O QUE SE MOVE, não o que existe (a imagem já contém isso). REGRAS: (1) Foque em movimentos de CÂMERA (slow dolly forward, gentle pan left, subtle tilt up, slow zoom in) e SUJEITO (flames flickering, water rippling, dust floating, wind moving fabric, shadows shifting). (2) Mantenha entre 15-40 palavras — prompts curtos e diretos funcionam melhor. (3) NÃO repita a descrição visual — o modelo já vê a imagem. (4) Combine 1 movimento de câmera + 1-2 elementos animados. (5) Use verbos de ação: flickering, drifting, swaying, rippling, shifting, crawling, floating.
-  EXEMPLOS:
-  - "Slow dolly forward toward the desk, candle flames gently swaying, dust particles drifting through the light beam"
-  - "Gentle camera drift to the right, water surface barely rippling, a flower petal slowly falling"
-  - "Static wide shot with subtle breathing motion, torch flames dancing, shadows crawling along stone walls"
-  - "Slow push-in on the document, smoke wisps rising from cooling wax, ambient light subtly shifting"
-- DIRETRIZ VISUAL: As descrições visuais ('visualDescription') DEVEM SER SEMPRE EM INGLÊS e COMPLETAS: cada uma é o prompt final que será enviado diretamente ao modelo de imagem, sem etapa de merge. Incorpore estilo (base, iluminação, atmosfera, composição) em linguagem natural em cada cena. Seja VISUAL e CINEMATOGRÁFICO — descreva cenas com impacto máximo, texturas, atmosferas sombrias e composições dramáticas. Use linguagem artística intensa sem filtrar o tom.
+- 🔗 SINCRONIZAÇÃO NARRATIVA — VISUAL — MOTION (REGRA MAIS IMPORTANTE DO PIPELINE):
+  O pipeline gera: (1) imagem START a partir do visualDescription, (2) imagem END a partir do endVisualDescription, (3) vídeo animado (motion) interpolando entre as duas imagens usando motionDescription. Os 3 campos + a narração DEVEM ser UM ÚNICO MOMENTO NARRATIVO COERENTE.
+
+  🚨 NARRAÇÃO GOVERNA O VISUAL: O visualDescription DEVE representar visualmente O QUE A NARRAÇÃO ESTÁ DIZENDO naquela cena.
+  - Se a narração diz "O bispo assinou a sentença", o visual DEVE mostrar: um documento sendo assinado, um selo episcopal, uma pena sobre pergaminho.
+  - ❌ PROIBIDO: Narração fala de "bispo assinou sentença" mas visualDescription mostra "a candle on a wooden table" (DESCONEXO)
+  - ❌ PROIBIDO: Narração fala de "confisco de bens" mas visualDescription mostra "fog drifting over a lake" (ATMOSFÉRICO SEM RELAÇÃO)
+  - ✅ CORRETO: Narração "O bispo assinou" → visualDescription "Wide shot of a dark study, sealed document on desk, episcopal wax seal catching candlelight, quill pen resting beside ink pot"
+  PERGUNTA-TESTE: "Se alguém VÊ esta imagem e OUVE esta narração juntos, faz sentido imediato?" Se NÃO → reescreva.
+
+- 🎬 MOTION DESCRIPTION (motionDescription — OBRIGATÓRIO): Cada cena DEVE ter um campo "motionDescription" com instruções de MOVIMENTO em inglês para o modelo image-to-video. Este prompt descreve O QUE SE MOVE, não o que existe (a imagem já contém isso). REGRAS: (1) Foque em movimentos de CÂMERA (slow dolly forward, gentle pan left, subtle tilt up, slow zoom in) e SUJEITO (flames flickering, water rippling, dust floating, wind moving fabric, shadows shifting). (2) Mantenha entre 15-40 palavras — prompts curtos e diretos funcionam melhor. (3) NÃO repita a descrição visual — o modelo já vê a imagem. (4) Combine 1 movimento de câmera + 1-2 elementos animados. (5) Use verbos de ação: flickering, drifting, swaying, rippling, shifting, crawling, floating. (6) 🚨 ALINHAMENTO COM KEYFRAMES: O motionDescription descreve a TRANSIÇÃO entre visualDescription (imagem INICIAL) e endVisualDescription (imagem FINAL). Os três campos DEVEM ser coerentes: se visualDescription é "wide shot" e endVisualDescription é "close-up of desk", o motionDescription DEVE ser "slow dolly forward toward desk" — e NÃO "pan left" ou algo incompatível. (7) 🚨 ALINHAMENTO COM NARRAÇÃO: O motion deve refletir a AÇÃO narrada. Se a narração fala de "assinar", o motion pode incluir "hand shadow moving across document" ou "quill settling on parchment".
+  EXEMPLOS (trio coerente: start → motion → end):
+  - START: "Wide shot of a dark study, candlelight on desk" → MOTION: "Slow dolly forward toward desk, candle flames gently swaying" → END: "Close-up of desk surface, warm candlelight illuminating scattered documents"
+  - START: "Overhead view of ancient map spread on table" → MOTION: "Gentle camera drift to the right, dust particles floating" → END: "Close-up of a circled location on the map edge, ink still glistening"
+  - START: "Wide shot of stone corridor, torches on walls" → MOTION: "Static wide shot with subtle breathing motion, torch flames dancing, shadows crawling" → END: "Same wide shot, torches dimmed, deeper shadows consuming the corridor"
+  - START: "Medium shot of sealed document on desk" → MOTION: "Slow push-in on the document, smoke wisps rising from cooling wax" → END: "Extreme close-up of broken wax seal, intricate pattern visible"
+
+- 🔚 END VISUAL (endVisualDescription — OBRIGATÓRIO quando motionDescription não é null): Descreva como a cena TERMINA visualmente (SEMPRE EM INGLÊS). Este campo define o ESTADO FINAL da cena — a segunda imagem gerada (keyframe final last_image) que o modelo I2V usa como DESTINO para interpolar o movimento.
+  REGRAS: (1) SEMPRE EM INGLÊS; (2) Descreva a composição/iluminação/atmosfera FINAL; (3) Se a câmera se move (dolly, pan), descreva o ENQUADRAMENTO FINAL após o movimento; (4) Se há mudança de iluminação, descreva a LUZ FINAL; (5) Use null APENAS se motionDescription TAMBÉM for null (cena 100% estática).
+  🚨 REGRA CRÍTICA — MESMO CENÁRIO, PROGRESSÃO SUTIL: O endVisualDescription DEVE ser o MESMO cenário e MESMOS objetos do visualDescription, apenas com PROGRESSÃO (mudança de enquadramento, luz, ou estado).
+  - ❌ PROIBIDO: visualDescription "document on desk" → endVisualDescription "smoke behind a candle" (OBJETOS DIFERENTES = CENAS DIFERENTES)
+  - ❌ PROIBIDO: visualDescription "wide shot of study" → endVisualDescription "flying book in clouds" (CENÁRIO COMPLETAMENTE DIFERENTE)
+  - ✅ CORRETO: visualDescription "Wide shot study, sealed document" → endVisualDescription "Close-up of same desk, document now unrolled, candlelight illuminating text, shadows from bookcases framing edges"
+  PERGUNTA-TESTE: "Se eu comparar START e END lado a lado, consigo ver que são o MESMO lugar/momento com variação leve?" Se NÃO → reescreva.
+
+- 🔗 IMAGE REFERENCE WEIGHT (endImageReferenceWeight — OBRIGATÓRIO quando endVisualDescription não é null): O peso (0.0 a 1.0) que controla QUANTO a imagem START influencia a geração da imagem END. A imagem START é enviada como referência visual ao modelo, garantindo que objetos, cenário e iluminação sejam consistentes entre os dois keyframes. REGRAS DE CALIBRAÇÃO: (1) ALTO (0.7-0.85): câmera quase parada, mesma sala, apenas mudança de luz ou atmosfera sutil (ex: torches dimming, fog thickening). (2) MÉDIO (0.4-0.6): transição moderada de câmera (dolly forward, slow pan, gentle zoom). O modelo preserva o cenário mas tem liberdade para recompor o enquadramento. (3) BAIXO (0.2-0.35): mudança drástica de enquadramento (wide shot → extreme close-up, overhead → ground level). O modelo precisa de mais liberdade criativa para compor o novo ângulo. (4) Use null se endVisualDescription for null. EXEMPLOS: Wide shot mesma sala + torches dimming → 0.8. Medium shot → close-up mesmo objeto → 0.55. Wide shot sala → extreme close-up de selo na mesa → 0.3.
 - 🎨 AMBIENTE DA CENA (sceneEnvironment — OBRIGATÓRIO): Cada cena DEVE ter um campo "sceneEnvironment" com um identificador curto em snake_case (inglês) do ambiente/locação. Exemplos: "bishop_study", "canal_dawn", "courtroom_trento", "ocean_surface". REGRAS: (1) Cenas consecutivas que ocorrem no MESMO local devem ter o MESMO sceneEnvironment. (2) Quando a narrativa muda de local, o sceneEnvironment DEVE mudar. (3) Isso é usado automaticamente pelo pipeline para injetar continuidade visual entre cenas — NÃO inclua prefixos de estilo no visualDescription, eles serão adicionados pelo sistema.
 - 🎨 COERÊNCIA CROMÁTICA (CRÍTICO): As cores descritas no visualDescription de cada cena DEVEM ser compatíveis com a paleta base do estilo visual definido. Se o estilo é amber/noir, não descreva céus violeta ou vegetação verde vibrante — use tons compatíveis (amber-grey sky, muted dark tones). As cores naturais do ambiente devem ALINHAR-SE com a paleta do estilo, não competir com ela.
 - PERSONAGENS: Quando houver personagens recorrentes na narrativa, use SEMPRE os nomes (ou um descritor consistente, ex.: "the detective", "Maria") no visualDescription em todas as cenas em que aparecem. Isso reduz variação entre cenas e ajuda a manter coerência visual (ex.: "John standing by the window" em vez de "a man by the window").
 - CONSISTÊNCIA VISUAL DE PERSONAGENS: Quando o dossiê fornecer visualDescription para personagens-chave, incorpore EXATAMENTE esses descritores visuais no visualDescription de cada cena onde o personagem aparece. Isso garante que o modelo de imagem mantenha a mesma aparência entre cenas.
 - MULTIMODALIDADE: Se imagens forem fornecidas, analise-as para garantir consistência visual.
 - 🚫 ANATOMIA SEGURA (CRÍTICO): Modelos de imagem geram anomalias em mãos (dedos extras, fundidos, faltando) e rostos detalhados. Para EVITAR isso nas visualDescriptions: (1) NUNCA descreva close-ups de mãos, dedos ou pés — prefira silhuetas, sombras projetadas, objetos em foco com mãos desfocadas ou cortadas pelo enquadramento; (2) Para rostos, prefira: perfil parcial, contraluz/silhueta, rosto em sombra com apenas maxilar ou olhos iluminados, planos médios/abertos onde o rosto não é o foco; (3) Quando mãos/rostos forem inevitáveis, use distância (medium/wide shot) em vez de close-up; (4) Alternativas visuais potentes: sombra de uma mão sobre documento, luvas, mãos escondidas em mangas, objetos segurados em primeiro plano com mãos desfocadas atrás.
-- CENAS DE ENCERRAMENTO (CTA — OBRIGATÓRIO): As últimas cenas DEVEM: (1) Encerrar com frase-tese poderosa e compartilhável OU assinatura "The Gap Files" em silêncio (hook-only); (2) A história narrativa deve estar COMPLETAMENTE encerrada antes do CTA; (3) Para shorts/teasers: prefira compulsão ("A verdade está nos arquivos.") a pedido ("Inscreva-se!"); (4) Para vídeos longos: convite orgânico + branding.
+- CENAS DE ENCERRAMENTO (CTA — OBRIGATÓRIO): As últimas cenas DEVEM: (1) Encerrar com frase-tese poderosa e compartilhável; (2) A história narrativa deve estar COMPLETAMENTE encerrada antes do CTA; (3) Para shorts/teasers: prefira compulsão ("A verdade está nos arquivos.") a pedido ("Inscreva-se!"); (4) Para vídeos longos: convite orgânico + branding.
+  - Exceção: HOOK-ONLY não tem CTA/branding. É corte seco no pico + loop infinito.
+
+🎙️ AUDIO TAGS (SSML STANDARD — ELEVENLABS):
+Use tags de controle de áudio para dar vida à narração. A IA lê rápido demais se você não pausar.
+- Pausa Curta (Respiro/Vírgula): <break time="0.3s" />
+- Pausa Média (Ponto final): <break time="0.75s" />
+- Pausa Dramática (Tensão): <break time="1.5s" />
+- Silêncio Absoluto (Fim): <break time="2.5s" />
+- Ritmo Rápido (Urgência): <prosody rate="115%">...</prosody>
+- Ritmo Lento (Solenidade): <prosody rate="85%">...</prosody>
+- USE EXPLICITAMENTE essas tags no campo "narration". Não use reticências (...) para pausas longas.
+
+🛡️ BRAND SAFETY & GORE (FILTRO FINAL):
+- PROIBIDO: Palavras como "Assassinato", "Estupro", "Pedofilia", "Mutilado", "Tripas", "Poça de Sangue".
+- SUBSTITUA POR: "Fim Trágico", "Ato Imperdoável", "Crimes contra Inocentes", "Cena Marcada", "Fragmentado".
+- VISUAL: Nunca descreva corpos mutilados ou sangue. Foque na ATMOSFERA (sombras, documentos, objetos pessoais deixados para trás).
+
 ${musicInstructions}
 
 ---
@@ -420,7 +458,7 @@ RUPTURA EM 2 SEGUNDOS: A primeira cena DEVE causar ruptura cognitiva — o scrol
 1 CONCEITO CENTRAL: Todo o roteiro gira em torno de UMA ideia resumível em 1 frase. Se exige conectar 3+ entidades para entender, está denso demais.
 
 ANTI-FILLER (DENSIDADE): Em hook-only, cada cena é cara. PROIBIDO gastar 1 cena com poesia/atmosfera vazia.
-- Cada cena (exceto a última de CTA) deve conter pelo menos 1 elemento informacional CONCRETO:
+- Cada cena deve conter pelo menos 1 elemento informacional CONCRETO:
   • AGENTE/função ("o bispo", "o tribunal", "o impressor")
   • ARTEFATO ("selo", "decreto", "livro", "registro", "xilogravura")
   • AÇÃO de mecanismo ("assinou", "autorizou", "confiscou", "financiou", "publicou")
@@ -428,10 +466,9 @@ ANTI-FILLER (DENSIDADE): Em hook-only, cada cena é cara. PROIBIDO gastar 1 cena
 - ❌ Errado (filler): "Um selo dourado pisca, como um sussurro na escuridão."
 - ✅ Certo (respiro com conteúdo): "O selo autorizou o confisco. E ninguém assinou por engano."
 
-CURVA EMOCIONAL COM PICO FINAL: Em **3 cenas de conteúdo + 1 CTA**, use alternância (high → pause → peak). O cérebro reage a MUDANÇAS, não a intensidade constante.
-- ✅ CERTO (conteúdo): 9 → 6 → 10 (alternância com pico na ÚLTIMA cena de conteúdo)
-- ❌ ERRADO: 9 → 9 → 9 (platô) ou 9 → 10 → 10 (saturação)
-- A última cena é CTA/branding + silêncio (não conta como “conteúdo”).
+CURVA EMOCIONAL COM PICO FINAL: Em **4 cenas (sem CTA)**, use alternância (high → pause → high → peak). O cérebro reage a MUDANÇAS, não a intensidade constante.
+- ✅ CERTO (conteúdo): 9 → 6 → 9 → 10 (alternância com pico na ÚLTIMA cena)
+- ❌ ERRADO: 9 → 9 → 9 → 9 (platô) ou 9 → 10 → 10 → 10 (saturação)
 
 NOMES UNIVERSAIS: Use funções ("o bispo", "o juiz", "o médico"), não nomes históricos obscuros (Hinderbach, Tiberino). Se o público não reconhece o nome em 1 segundo, use a função.
 
@@ -443,15 +480,14 @@ RESOLUÇÃO ZERO — PURA PROVOCAÇÃO:
 - ❌ "alimentando ódio milenar sem fim" (conclusão moral = resolução)
 - ❌ "a verdade é que..." / "na realidade..." (explicação)
 
-CTA INVISÍVEL: A narração da ÚLTIMA CENA deve ser EXATAMENTE: "The Gap Files." — NADA MAIS.
-- Sem taglines: ❌ "The Gap Files. O silêncio revela..."
-- Sem teses: ❌ "The Gap Files. A verdade está nos arquivos."
-- Sem convites: ❌ "Siga The Gap Files para revelar..."
-- APENAS: ✅ "The Gap Files." (4 palavras, ponto final, silêncio depois)
+CTA/BRANDING (PROIBIDO):
+- NÃO inclua "The Gap Files." em nenhuma cena.
+- NÃO inclua convite ("siga", "inscreva-se", "curta", "comente", "compartilhe").
+- O “mecanismo de retenção” é o Loop Infinito, não CTA.
 
 REPLAY BAIT: Pelo menos 1 cena com detalhe visual/narrativo rápido demais para absorver. Força re-assistir.
 
-DURAÇÃO: **3 cenas de conteúdo + 1 CTA** (**16-22 segundos**). Cada cena é um soco cognitivo. Máximo absoluto: **5 cenas**.`
+DURAÇÃO: **4 cenas** (**16-22 segundos**). Cada cena é um soco cognitivo. Máximo absoluto: **5 cenas**.`
     }
 
     baseInstruction += `\n\n${roleInstructions[request.narrativeRole] || ''}`
@@ -522,7 +558,10 @@ Antes de retornar o JSON, faça esta auditoria interna:
 2. CONTE as cenas de reflexão/lição (após o corpo factual) — deve ser ≤${maxReflectionCeiling} cenas.
 3. PROCURE repetições temáticas — se encontrar, ELIMINE e COMPACTE.
 4. A última cena de conteúdo deve terminar com frase completa.
-5. As últimas 1-2 cenas devem ser conclusão + CTA (seguir canal + The Gap Files).`
+5. As últimas 1-2 cenas devem ser conclusão + CTA (seguir canal + The Gap Files).
+6. 🔗 SINCRONIZAÇÃO NARRAÇÃO ↔ VISUAL (CHECAR CENA POR CENA): Para CADA cena, a narração fala de X — o visualDescription MOSTRA X visualmente? Se a narração fala de "bispo assinou", o visual mostra assinatura/documento/selo? Se NÃO → REESCREVA o visualDescription.
+7. 🔗 START ↔ END COERÊNCIA: Para CADA cena, o endVisualDescription é a PROGRESSÃO do MESMO cenário do visualDescription (mesmo lugar, mesmos objetos, apenas progressão sutil)? Ou é uma cena completamente diferente? Se diferente → REESCREVA.
+8. 🔗 MOTION ↔ KEYFRAMES: O motionDescription descreve um movimento que CONECTA o enquadramento START ao enquadramento END? Se START é wide e END é close-up, o motion diz "dolly forward"? Se incompatível → REESCREVA.`
 }
 
 // =============================================================================
@@ -540,6 +579,8 @@ export function parseScriptResponse(
     order: scene.order ?? index + 1,
     narration: scene.narration,
     visualDescription: scene.visualDescription,
+    endVisualDescription: scene.endVisualDescription ?? undefined,
+    endImageReferenceWeight: scene.endImageReferenceWeight ?? undefined,
     sceneEnvironment: scene.sceneEnvironment ?? undefined,
     motionDescription: scene.motionDescription ?? undefined,
     audioDescription: scene.audioDescription ?? undefined,

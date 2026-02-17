@@ -88,24 +88,66 @@ export async function validateScript(
     return { approved: true }
   }
 
-  // 0. Check determinístico: CTA final em HOOK-ONLY deve ser exatamente "The Gap Files."
-  // (evita gastar tokens com validação LLM em algo que é regra hard)
-  if (context.itemType === 'teaser' && context.narrativeRole === 'hook-only' && scenes.length > 0) {
-    const last = scenes[scenes.length - 1]
-    const lastNarration = (last?.narration || '').trim().replace(/\s+/g, ' ')
-    if (lastNarration !== 'The Gap Files.') {
+  // 0. Checks determinísticos (baratos) para HOOK-ONLY
+  // Objetivo: garantir "zero CTA/branding" + formato fixo (4 cenas) sem gastar tokens.
+  if (context.itemType === 'teaser' && context.narrativeRole === 'hook-only') {
+    if (scenes.length !== 4) {
       return {
         approved: false,
-        violations: [
-          `CTA inválido em hook-only: a última cena deve ser EXATAMENTE "The Gap Files." (recebido: "${lastNarration || '[vazio]'}")`
-        ],
+        violations: [`Hook-only deve ter EXATAMENTE 4 cenas (recebido: ${scenes.length}).`],
         corrections:
-          'Reescreva a ÚLTIMA cena para ter a narração EXATAMENTE: "The Gap Files." (sem texto adicional antes/depois).',
+          'Reescreva o roteiro em 4 cenas: Cena 1 (Loop-B/Parte B) → Cena 2 (Respiro) → Cena 3 (Replay bait/impacto) → Cena 4 (Loop-A/Parte A incompleta).',
         overResolution: false
       }
     }
 
-    // 0b. Check determinístico: conclusão moral em hook-only (resolução zero)
+    const ctaBrandingPatterns: RegExp[] = [
+      /\bthe\s+gap\s+files\b/i,
+      /\binscrev(a|e)(-se)?\b/i,
+      /\binscri(c|ç)(a|ã)o\b/i,
+      /\bsiga(m)?\b/i,
+      /\bsegue(m)?\b/i,
+      /\bcurta(m)?\b/i,
+      /\blike(s)?\b/i,
+      /\bcompartilh(e|a)(m)?\b/i,
+      /\bcoment(e|a)(m)?\b/i,
+      /\bno\s+canal\b/i,
+      /\bseu\s+canal\b/i,
+      /\bativ(e|a)\s+o\s+sino\b/i
+    ]
+
+    for (let i = 0; i < scenes.length; i++) {
+      const narration = String(scenes[i]?.narration || '')
+      for (const pat of ctaBrandingPatterns) {
+        if (pat.test(narration)) {
+          return {
+            approved: false,
+            violations: [
+              `Cena ${i} contém CTA/branding (proibido em hook-only): "${narration.slice(0, 120)}..."`
+            ],
+            corrections:
+              'Remova QUALQUER CTA/branding. Hook-only é zero CTA: sem "The Gap Files.", sem convite, sem "siga/inscreva-se/curta/comente".',
+            overResolution: false
+          }
+        }
+      }
+    }
+
+    // Hook-only: última cena (Loop-A) deve ser SUSPENSA/INCOMPLETA — evitar ponto final/conclusão.
+    const lastNarration = String(scenes[scenes.length - 1]?.narration || '').trim()
+    if (/[.!?]["”']?$/.test(lastNarration)) {
+      return {
+        approved: false,
+        violations: [
+          `Final fechado em hook-only: a última cena deve terminar SUSPENSA/INCOMPLETA (recebido termina com pontuação final): "${lastNarration.slice(-80)}"`
+        ],
+        corrections:
+          'Reescreva a última cena para terminar com frase incompleta (Loop-A/Parte A) que se conecta ao início (Cena 1/Parte B).',
+        overResolution: true
+      }
+    }
+
+    // Check determinístico: conclusão moral em hook-only (resolução zero)
     const moralConclusionPatterns = [
       /aliment[aáou].*ódio/i, // alimentou, alimentam, alimentando, alimenta, alimentar
       /discursos?\s+de\s+ódio/i, // discursos de ódio, discurso de ódio
@@ -116,14 +158,17 @@ export async function validateScript(
       /isso\s+mostra\s+que/i,
       /isso\s+nos\s+faz\s+pensar/i
     ]
-    for (let i = 0; i < scenes.length - 1; i++) {
-      const n = (scenes[i]?.narration || '').toLowerCase()
+    for (let i = 0; i < scenes.length; i++) {
+      const n = String(scenes[i]?.narration || '').toLowerCase()
       for (const pat of moralConclusionPatterns) {
         if (pat.test(n)) {
           return {
             approved: false,
-            violations: [`Cena ${i} contém conclusão moral/resolução: "${scenes[i]?.narration?.slice(0, 80)}..." — hook-only exige resolução ZERO.`],
-            corrections: 'Remova conclusões morais, explicações e frases que fecham a narrativa. Mantenha apenas provocação e fatos sobre o sistema.',
+            violations: [
+              `Cena ${i} contém conclusão moral/resolução: "${String(scenes[i]?.narration || '').slice(0, 80)}..." — hook-only exige resolução ZERO.`
+            ],
+            corrections:
+              'Remova conclusões morais, explicações e frases que fecham a narrativa. Mantenha apenas provocação e fatos sobre o sistema.',
             overResolution: true
           }
         }

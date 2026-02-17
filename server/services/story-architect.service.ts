@@ -454,9 +454,12 @@ function buildSystemPrompt(request: StoryArchitectRequest): string {
   }
 
   const architectSkill = loadSkill(skillName)
+  const brandSafetySkill = loadSkill('brand-safety')
 
   const expectedScenes = request.targetSceneCount ?? Math.ceil(request.targetDuration / 5)
   return `${architectSkill}
+
+${brandSafetySkill}
 
 ---
 PARÂMETROS TÉCNICOS:
@@ -495,11 +498,11 @@ function buildUserPrompt(request: StoryArchitectRequest): string {
         prompt += `  → RUPTURA EM 2 SEGUNDOS: O primeiro beat DEVE causar ruptura cognitiva. Nada de construção antes do choque. Se o público pensa antes de sentir, ele desliza.\n`
         prompt += `  → MICRO-REGRA (TIMING): A primeira frase deve ser pronunciável em ~1,5s (3-5 palavras; máx. 6). Sem vírgula na primeira pancada.\n`
         prompt += `  → 1 CONCEITO CENTRAL: O outline INTEIRO gira em torno de UMA ideia resumível em 1 frase mental. Se exige conectar 3+ entidades para entender, está denso demais.\n`
-        prompt += `  → ALTERNÂNCIA DINÂMICA (NÃO ESCALAÇÃO LINEAR): A intensidade deve VARIAR com contrastes — após beat intenso, inserir respiro para amplificar o próximo pico. O ÚLTIMO beat de conteúdo (antes do CTA) é o pico absoluto. NÃO faça escalação linear pura (8→9→9→10 = saturação → REPROVADO). FAÇA alternância (8→6→9→10 = cada pico amplificado pelo contraste → APROVADO).\n`
+        prompt += `  → ALTERNÂNCIA DINÂMICA (NÃO ESCALAÇÃO LINEAR): A intensidade deve VARIAR com contrastes — após beat intenso, inserir respiro para amplificar o próximo pico. O ÚLTIMO beat (corte seco — sem CTA) é o pico absoluto. NÃO faça escalação linear pura (8→9→9→10 = saturação → REPROVADO). FAÇA alternância (8→6→9→10 = cada pico amplificado pelo contraste → APROVADO).\n`
         prompt += `  → MECANISMO > SINTOMA (CRÍTICO): Foque no SISTEMA (quem autorizou, quem lucrou, qual documento), NÃO na violência. ❌ "A corda estala" (sintoma → repulsa). ✅ "O bispo assinou a sentença" (mecanismo → indignação).\n`
         prompt += `  → NOMES UNIVERSAIS: Nomes obscuros quebram fluxo cognitivo. Use função ("o bispo", "o juiz"), não nomes históricos (Hinderbach, Tiberino). Exceção: nomes universalmente conhecidos.\n`
         prompt += `  → RESOLUÇÃO ZERO: Pura provocação. Nenhuma explicação, recap, conclusão moral ou reflexão filosófica. TODOS os loops ficam abertos.\n`
-        prompt += `  → CTA INVISÍVEL: O público NÃO pode perceber que acabou. Corte seco + "The Gap Files." + silêncio. Sem "assista", "siga", "inscreva-se".\n`
+        prompt += `  → ZERO CTA/BRANDING: O público NÃO pode perceber que acabou. Corte seco no pico. Sem "The Gap Files.", sem "assista", "siga", "inscreva-se".\n`
         prompt += `  → REPLAY BAIT: Pelo menos 1 beat com detalhe visual/narrativo rápido demais para absorver totalmente. Força re-assistir.\n`
         prompt += `  → Para risingBeats: o campo "questionAnswered" DEVE ser "Não respondida" — hook-only NÃO responde perguntas.\n`
         prompt += `  → HOOKVARIANTS = RUPTURA CONCEITUAL, NÃO CONSTRUÇÃO:\n`
@@ -695,14 +698,21 @@ export function formatOutlineForPrompt(outline: StoryOutline & { _monetizationMe
 - RUPTURA EM 2 SEGUNDOS: A primeira frase DEVE causar ruptura cognitiva. Sem construção.
 - MICRO-REGRA (TIMING): a primeira frase deve ser pronunciável em ~1,5s (3-5 palavras; máx. 6). Sem vírgula na primeira pancada.
 - 1 CONCEITO CENTRAL: Todo o roteiro gira em torno de UMA ideia. Sem colagem de fatos.
-- ALTERNÂNCIA DINÂMICA: A intensidade deve VARIAR com contrastes (intenso → respiro → pico). O PICO ABSOLUTO é a última cena/beat de conteúdo (antes do CTA/branding). NÃO escale linearmente (8→9→10 = saturação). FAÇA ondas (8→6→10 = contraste amplifica impacto).
+- ALTERNÂNCIA DINÂMICA: A intensidade deve VARIAR com contrastes (intenso → respiro → pico). O PICO ABSOLUTO é a última cena (corte seco — sem CTA/branding). NÃO escale linearmente (8→9→10 = saturação). FAÇA ondas (8→6→10 = contraste amplifica impacto).
 - MECANISMO > SINTOMA: Foque no SISTEMA (quem autorizou, quem lucrou), NÃO na violência. ❌ "A corda estala" (repulsa). ✅ "O bispo assinou" (indignação).
 - NOMES UNIVERSAIS: Use funções ("o bispo", "o juiz"), não nomes obscuros. Se o público não conhece, use a função.
 - ZERO RESOLUÇÃO: Nenhuma explicação, recap, conclusão moral ou reflexão. TODOS os loops abertos.
-- CTA INVISÍVEL: Última cena = "The Gap Files." + silêncio. Sem "assista", "siga", "inscreva-se".
+- ZERO CTA/BRANDING: Sem "The Gap Files.", sem convite, sem "assista", "siga", "inscreva-se".
 - REPLAY BAIT: Pelo menos 1 cena com detalhe que passa rápido demais → força re-assistir.
 - Ignore a seção CONTEXT/SETUP como “setup explicativo”.  
   ✅ Permitido: micro-anchor implícito dentro da ruptura/rising (local, função, época sem aula).
+
+FORMATO (HOOK-ONLY):
+- 4 cenas EXATAS
+- Cena 1 = LOOP-B (Parte B: completa a frase do final)
+- Cena 2 = RESPIRO com mecanismo (denso)
+- Cena 3 = REPLAY BAIT / impacto (rápido demais para absorver)
+- Cena 4 = LOOP-A (Parte A: frase incompleta, suspensa)
 `
   } else if (role === 'gateway') {
     narrativeRoleBlock = `

@@ -70,6 +70,13 @@ O Deep-Dive aprofunda UM aspecto — mas **NÃO fecha o caso**.
 - ❌ "A corda estala" / "Puxando vítimas" (sintoma)
 - ✅ "O tribunal pagou por dia" / "O bispo confiscou" (mecanismo)
 
+### 11.5. BRAND SAFETY & GORE (CRÍTICO)
+- REPROVADO se usar termos: "Assassinato", "Estupro", "Pedofilia", "Mutilado", "Tripas", "Poça de Sangue".
+- REPROVADO se descrever anatomia visceral (vísceras, feridas abertas, abuso sexual).
+- APROVADO se usar substituição semântica: "Fim Trágico", "Ato Imperdoável", "Crimes contra Inocentes", "Cena Marcada".
+- APROVADO se descrever a SOMBRA ou o OBJETO, não o ferimento.
+- Postura exigida: "Neutral Documentarian". Clínico e solene, nunca sádico.
+
 ### 12. Palavras Conclusivas
 - Sinalizar se o roteiro usa palavras que entregam julgamento implícito: "falsamente", "injustamente", "a verdade é que", "na realidade". Essas palavras reduzem a necessidade de ver o Full Video.
 

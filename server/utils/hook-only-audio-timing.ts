@@ -8,16 +8,21 @@ export function resolveHookOnlyTotalDurationSeconds(duration: number | null | un
 
 /**
  * Budgets por cena (4 cenas) escalados a partir de um perfil base de 20s:
- * [4.5, 5.0, 5.0, 5.5] = 20s
+ * [4.5, 5.5, 5.5, 4.5] = 20s
+ * - Cena 1 (Loop-B): curta/rápida
+ * - Cena 2 (Respiro): densa
+ * - Cena 3 (Replay bait): densa/rápida demais para absorver
+ * - Cena 4 (Loop-A): curta/suspensa (incompleta)
  */
 export function computeHookOnlySceneBudgetsSeconds(totalSeconds: number): [number, number, number, number] {
   const safeTotal = Number.isFinite(totalSeconds) ? Math.max(16, Math.min(22, totalSeconds)) : 20
   const scale = safeTotal / 20
 
+  // Perfil: Cena 1 (Loop-B) ~4.5s, Cena 2 (Respiro) ~5.5s, Cena 3 (Replay bait) ~5.5s, Cena 4 (Loop-A) ~4.5s
   const b1 = 4.5 * scale
-  const b2 = 5.0 * scale
-  const b3 = 5.0 * scale
-  const b4 = 5.5 * scale
+  const b2 = 5.5 * scale
+  const b3 = 5.5 * scale
+  const b4 = 4.5 * scale
 
   return [b1, b2, b3, b4]
 }

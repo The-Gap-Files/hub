@@ -85,6 +85,21 @@ export class ReplicateImageProvider implements IImageGenerator {
           : this.buildFluxInput(enhancedPrompt, request)
       }
 
+      // === IMAGE REFERENCE (Photon Flash) ===
+      // Se um imageReference Buffer foi fornecido, faz upload temporário
+      // via Replicate Files API e injeta como image_ref no input.
+      if (request.imageReference && this.isPhotonFlash()) {
+        try {
+          const refUrl = await this.uploadImageReferenceBuffer(request.imageReference)
+          const weight = request.imageReferenceWeight ?? 0.5
+          input.image_ref = [{ url: refUrl, weight }]
+          console.log(`[ReplicateImageProvider] Image reference uploaded. URL: ${refUrl.substring(0, 60)}... | weight: ${weight}`)
+        } catch (refError: any) {
+          console.warn(`[ReplicateImageProvider] Failed to upload image reference, generating without it: ${refError.message}`)
+          // Gerar sem referência - melhor que falhar
+        }
+      }
+
       let predictTime: number | undefined
       const output: any = await this.client.run(this.model as any, { input }, (prediction: any) => {
         if (prediction.metrics?.predict_time) {
@@ -138,7 +153,8 @@ export class ReplicateImageProvider implements IImageGenerator {
   }
 
   /**
-   * Inputs para Luma Photon Flash — aceita apenas prompt + aspect_ratio.
+   * Inputs para Luma Photon Flash — aceita prompt + aspect_ratio.
+   * image_ref é injetado separadamente no método generate() após upload.
    */
   private buildPhotonFlashInput(prompt: string, request: ImageGenerationRequest): Record<string, any> {
     const aspectRatio = request.aspectRatio === 'custom'
@@ -146,6 +162,33 @@ export class ReplicateImageProvider implements IImageGenerator {
       : this.mapToPhotonAspectRatio(request.aspectRatio || '1:1')
 
     return { prompt, aspect_ratio: aspectRatio }
+  }
+
+  /**
+   * Faz upload de um buffer de imagem para o Replicate Files API.
+   * Retorna a URL temporária que pode ser usada como image_ref.
+   * 
+   * @see https://replicate.com/docs/topics/predictions/create-a-prediction#files
+   */
+  private async uploadImageReferenceBuffer(buffer: Buffer): Promise<string> {
+    // Replicate Files API: cria um arquivo temporário e retorna URL pública
+    const blob = new Blob([buffer as any], { type: 'image/png' })
+    const file = new File([blob], 'image-reference.png', { type: 'image/png' })
+
+    // Usar a API do Replicate para upload
+    // O client.files.create retorna um objeto com .urls.get
+    const uploaded = await (this.client as any).files.create(file, {
+      content_type: 'image/png',
+      filename: 'image-reference.png'
+    })
+
+    // O Replicate Files API retorna a URL no campo urls.get
+    const url = uploaded?.urls?.get || uploaded?.url
+    if (!url) {
+      throw new Error('Replicate Files API did not return a valid URL')
+    }
+
+    return url
   }
 
   /**

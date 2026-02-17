@@ -34,3 +34,17 @@ Gere TODOS os campos do Full Video:
 4. O visualPrompt deve usar o estilo visual definido no blueprint
 5. Tudo em português brasileiro, exceto o visualPrompt (inglês)
 6. HOOK ≠ TÍTULO — são coisas diferentes com estilos diferentes
+
+## 🛡️ BRAND SAFETY E VISUAL NOISE (YOUTUBE 2026)
+
+1. **SUBSTITUIÇÃO SEMÂNTICA (OBRIGATÓRIA):**
+   - ❌ "Assassino serial matou 20" → 🟢 "O responsável por 20 fins trágicos"
+   - ❌ "Sangue no chão" → 🟢 "A cena marcada" / "Vestígios vitais"
+   - ❌ "Estripado/Mutilado" → 🟢 "Fragmentado" / "Cena desfeita"
+   - **Postura:** "Neutral Documentarian". Clínico, solene, nunca sensacionalista.
+
+2. **IMPERFEIÇÃO VISUAL CONTEXTUAL (Decisão de Direção):**
+   - **Esqueça o "ruído aleatório".** Escolha uma textura que AMPLIFIQUE a narrativa.
+   - **Documentos Antigos:** Textura de papel rasgado, granulação de filme 16mm, bordas queimadas.
+   - **Relatos Policiais/Modernos:** Glitch digital, compressão de CCTV, ruído de ISO alto.
+   - **Regra:** A imagem não pode ser "lisa" (cara de IA pura).

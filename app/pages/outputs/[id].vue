@@ -567,27 +567,85 @@
                   </h4>
                   
                   <!-- Image Preview -->
-                  <div v-if="getSelectedImage(scene)">
-                    <div class="aspect-video bg-black rounded-xl overflow-hidden border border-white/10 transition-all relative">
-                      <img 
-                        :src="`/api/scene-images/${getSelectedImage(scene).id}?t=${imageVersions[scene.id] || 0}`" 
-                        class="w-full h-full object-cover"
-                        loading="lazy"
-                        alt="Scene Image"
-                      />
-                      <!-- Zoom button (canto superior direito) -->
-                      <button 
-                        @click.stop="openImage(getSelectedImage(scene).id)"
-                        class="absolute top-2 right-2 p-2 bg-black/60 backdrop-blur rounded-lg text-white/70 hover:text-white hover:bg-black/80 transition-all z-10"
-                        title="Ampliar imagem"
-                      >
-                        <Eye :size="16" />
-                      </button>
+                  <!-- Has selected image -->
+                  <div v-if="scene.images.find((i: any) => i.role === 'start' && i.isSelected) || scene.images.find((i: any) => i.isSelected && !i.role)">
+                    <div class="flex flex-col gap-4">
+                      <!-- Start Frame -->
+                      <div>
+                        <div class="flex justify-between items-center mb-1.5 px-0.5">
+                          <span class="text-[10px] uppercase tracking-wider font-black text-blue-400/60 flex items-center gap-1.5">
+                            <Play :size="10" /> Frame Inicial (Start)
+                          </span>
+                          <button 
+                            @click.stop="regenerateSceneImages(scene, 'start')"
+                            :disabled="!!regeneratingSceneId"
+                            class="text-[9px] uppercase tracking-tighter font-bold text-blue-400/40 hover:text-blue-400 transition-colors flex items-center gap-1 cursor-pointer"
+                          >
+                            <RotateCw :size="8" :class="{ 'animate-spin': regeneratingSceneId === scene.id + '-start' }" />
+                            Regenerar Start
+                          </button>
+                        </div>
+                        <div class="aspect-video bg-black rounded-xl overflow-hidden border border-white/10 transition-all relative group" :class="{ 'ring-1 ring-blue-500/30': regeneratingSceneId === scene.id + '-start' }">
+                          <img 
+                            :src="`/api/scene-images/${(scene.images.find((i: any) => i.role === 'start' && i.isSelected) || scene.images.find((i: any) => i.isSelected))?.id}?t=${imageVersions[scene.id] || 0}`" 
+                            class="w-full h-full object-cover"
+                            :class="{ 'opacity-30 grayscale': regeneratingSceneId === scene.id + '-start' }"
+                            loading="lazy"
+                            alt="Start Frame"
+                          />
+                          <div v-if="regeneratingSceneId === scene.id + '-start'" class="absolute inset-0 flex items-center justify-center">
+                            <span class="animate-spin w-4 h-4 border-2 border-blue-400/30 border-t-blue-400 rounded-full"></span>
+                          </div>
+                          <button 
+                            @click.stop="openImage((scene.images.find((i: any) => i.role === 'start' && i.isSelected) || scene.images.find((i: any) => i.isSelected))?.id)"
+                            class="absolute top-2 right-2 p-2 bg-black/60 backdrop-blur rounded-lg text-white/70 hover:text-white hover:bg-black/80 transition-all opacity-0 group-hover:opacity-100"
+                            title="Ampliar imagem"
+                          >
+                            <Eye :size="16" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <!-- End Frame (Optional) -->
+                      <div v-if="scene.images.find((i: any) => i.role === 'end' && i.isSelected)">
+                        <div class="flex justify-between items-center mb-1.5 px-0.5">
+                          <span class="text-[10px] uppercase tracking-wider font-black text-emerald-400/60 flex items-center gap-1.5">
+                            <Square :size="10" /> Frame Final (End)
+                          </span>
+                          <button 
+                            @click.stop="regenerateSceneImages(scene, 'end')"
+                            :disabled="!!regeneratingSceneId"
+                            class="text-[9px] uppercase tracking-tighter font-bold text-emerald-400/40 hover:text-emerald-400 transition-colors flex items-center gap-1 cursor-pointer"
+                          >
+                            <RotateCw :size="8" :class="{ 'animate-spin': regeneratingSceneId === scene.id + '-end' }" />
+                            Regenerar End
+                          </button>
+                        </div>
+                        <div class="aspect-video bg-black rounded-xl overflow-hidden border border-emerald-500/10 transition-all relative group" :class="{ 'ring-1 ring-emerald-500/30': regeneratingSceneId === scene.id + '-end' }">
+                          <img 
+                            :src="`/api/scene-images/${scene.images.find((i: any) => i.role === 'end' && i.isSelected)?.id}?t=${imageVersions[scene.id] || 0}`" 
+                            class="w-full h-full object-cover"
+                            :class="{ 'opacity-30 grayscale': regeneratingSceneId === scene.id + '-end' }"
+                            loading="lazy"
+                            alt="End Frame"
+                          />
+                          <div v-if="regeneratingSceneId === scene.id + '-end'" class="absolute inset-0 flex items-center justify-center">
+                            <span class="animate-spin w-4 h-4 border-2 border-emerald-400/30 border-t-emerald-400 rounded-full"></span>
+                          </div>
+                          <button 
+                            @click.stop="openImage(scene.images.find((i: any) => i.role === 'end' && i.isSelected)?.id)"
+                            class="absolute top-2 right-2 p-2 bg-black/60 backdrop-blur rounded-lg text-white/70 hover:text-white hover:bg-black/80 transition-all opacity-0 group-hover:opacity-100"
+                            title="Ampliar imagem"
+                          >
+                            <Eye :size="16" />
+                          </button>
+                        </div>
+                      </div>
                     </div>
                     
                     <!-- Regenerate Image Button -->
                     <button 
-                      @click.stop="regenerateImageCorrection(scene)"
+                      @click.stop="regenerateSceneImages(scene)"
                       :disabled="!!regeneratingSceneId"
                       class="mt-3 w-full px-4 py-3 bg-purple-500/10 border border-purple-500/30 text-purple-300 hover:bg-purple-500/20 hover:text-purple-200 rounded-xl transition-all flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider disabled:opacity-50 disabled:pointer-events-none"
                     >
@@ -741,13 +799,34 @@
                         </button>
                       </div>
                     </div>
-                    <textarea 
-                      v-if="editingPromptSceneId === scene.id"
-                      v-model="editingPromptText"
-                      class="w-full bg-black/40 border border-primary/20 rounded-lg p-2.5 text-xs text-white/80 leading-relaxed focus:border-primary/50 focus:outline-none resize-y min-h-[60px]"
-                      rows="3"
-                    ></textarea>
-                    <p v-else class="text-xs text-zinc-300/80 leading-relaxed">{{ scene.visualDescription }}</p>
+                    <div v-if="editingPromptSceneId === scene.id" class="space-y-3">
+                      <div>
+                        <span class="text-[9px] font-black uppercase tracking-widest text-blue-400/40 mb-1 block">Start Prompt</span>
+                        <textarea 
+                          v-model="editingPromptText"
+                          class="w-full bg-black/40 border border-primary/20 rounded-lg p-2.5 text-xs text-white/80 leading-relaxed focus:border-primary/50 focus:outline-none resize-y min-h-[60px]"
+                          rows="3"
+                        ></textarea>
+                      </div>
+                      <div v-if="scene.endVisualDescription !== null">
+                        <span class="text-[9px] font-black uppercase tracking-widest text-emerald-400/40 mb-1 block">End Prompt (Keyframe)</span>
+                        <textarea 
+                          v-model="editingEndPromptText"
+                          class="w-full bg-black/40 border border-emerald-500/20 rounded-lg p-2.5 text-xs text-white/80 leading-relaxed focus:border-emerald-500/50 focus:outline-none resize-y min-h-[60px]"
+                          rows="3"
+                        ></textarea>
+                      </div>
+                    </div>
+                    <div v-else class="space-y-3">
+                      <div>
+                        <span class="text-[9px] font-black uppercase tracking-widest text-blue-400/40 mb-0.5 block">Start Prompt</span>
+                        <p class="text-xs text-zinc-300/80 leading-relaxed">{{ scene.visualDescription }}</p>
+                      </div>
+                      <div v-if="scene.endVisualDescription">
+                        <span class="text-[9px] font-black uppercase tracking-widest text-emerald-400/40 mb-0.5 block">End Prompt</span>
+                        <p class="text-xs text-zinc-300/80 leading-relaxed">{{ scene.endVisualDescription }}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -1932,18 +2011,18 @@
                  </div>
 
                 <div class="grid md:grid-cols-2 gap-6">
-                   <!-- Narration -->
+                   <!-- TTS Text (texto enviado ao ElevenLabs) -->
                    <div class="bg-black/20 p-4 rounded-xl border border-white/5">
                       <div class="flex justify-between items-center mb-2">
                         <h4 class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-500">
-                          <Mic :size="10" /> Narration ({{ output.narrationLanguage || 'PT-BR' }})
+                          <Mic :size="10" /> TTS Text → ElevenLabs ({{ output.narrationLanguage || 'PT-BR' }})
                         </h4>
                         <!-- Audio Status Badge -->
                         <span v-if="output.status === 'PROCESSING' && !output.audioTracks?.some((a: any) => a.type === 'narration')" class="text-xs text-orange-400 animate-pulse">Gerando Áudio...</span>
                       </div>
                       
                       <p class="text-lg font-serif text-white/90 leading-relaxed mb-4">
-                        "{{ scene.narration }}"
+                        "{{ ttsTextForScene(scene.narration) }}"
                       </p>
 
                       <!-- Mini Player (Áudio da Cena) -->
@@ -1982,75 +2061,100 @@
                            <span v-if="scene.imageStatus === 'restricted'" class="px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-red-500/20 text-red-400">Restrita</span>
                          </h4>
 
-                         <!-- Modo visualização -->
-                         <p v-if="editingPromptSceneId !== scene.id" class="text-sm text-white/80 leading-relaxed font-light">
-                           {{ scene.visualDescription }}
-                         </p>
+                          <!-- START: Modo visualização -->
+                          <div v-if="editingPromptSceneId !== scene.id" class="space-y-4">
+                            <div>
+                              <span class="text-[10px] font-black uppercase tracking-widest text-blue-400/40 mb-1 block">Start Prompt</span>
+                              <p class="text-sm text-white/80 leading-relaxed font-light">
+                                {{ scene.visualDescription }}
+                              </p>
+                            </div>
+                            <div v-if="scene.endVisualDescription">
+                              <span class="text-[10px] font-black uppercase tracking-widest text-emerald-400/40 mb-1 block">End Prompt (Keyframe)</span>
+                              <p class="text-sm text-white/80 leading-relaxed font-light">
+                                {{ scene.endVisualDescription }}
+                              </p>
+                            </div>
+                          </div>
 
-                         <!-- Modo edição -->
-                         <div v-else class="space-y-3">
-                           <!-- Seletor IA de nível (para cenas restritas) -->
-                           <div v-if="scene.imageStatus === 'restricted'" class="bg-white/[0.02] p-3 rounded-lg border border-white/5">
-                             <h5 class="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-white/40 mb-2">
-                               <Sparkles :size="9" /> Reescrever com IA
-                             </h5>
-                             <div class="grid grid-cols-3 gap-1.5">
-                               <button
-                                 @click.stop="sanitizeAndFillEdit(scene, 'intense')"
-                                 :disabled="sanitizingSceneId === scene.id"
-                                 class="px-2 py-2 bg-red-500/8 border border-red-500/20 text-red-300/80 hover:bg-red-500/15 hover:border-red-500/40 rounded-lg transition-all flex flex-col items-center gap-0.5 text-center disabled:opacity-50 cursor-pointer"
-                               >
-                                 <span class="text-sm">🔴</span>
-                                 <span class="text-[9px] font-bold uppercase tracking-wider">Intenso</span>
-                               </button>
-                               <button
-                                 @click.stop="sanitizeAndFillEdit(scene, 'moderate')"
-                                 :disabled="sanitizingSceneId === scene.id"
-                                 class="px-2 py-2 bg-amber-500/8 border border-amber-500/20 text-amber-300/80 hover:bg-amber-500/15 hover:border-amber-500/40 rounded-lg transition-all flex flex-col items-center gap-0.5 text-center disabled:opacity-50 cursor-pointer"
-                               >
-                                 <span v-if="sanitizingSceneId === scene.id && sanitizingLevel === 'moderate'" class="animate-spin w-3.5 h-3.5 border-2 border-amber-300/30 border-t-amber-300 rounded-full"></span>
-                                 <span v-else class="text-sm">🟡</span>
-                                 <span class="text-[9px] font-bold uppercase tracking-wider">Moderado</span>
-                               </button>
-                               <button
-                                 @click.stop="sanitizeAndFillEdit(scene, 'safe')"
-                                 :disabled="sanitizingSceneId === scene.id"
-                                 class="px-2 py-2 bg-emerald-500/8 border border-emerald-500/20 text-emerald-300/80 hover:bg-emerald-500/15 hover:border-emerald-500/40 rounded-lg transition-all flex flex-col items-center gap-0.5 text-center disabled:opacity-50 cursor-pointer"
-                               >
-                                 <span v-if="sanitizingSceneId === scene.id && sanitizingLevel === 'safe'" class="animate-spin w-3.5 h-3.5 border-2 border-emerald-300/30 border-t-emerald-300 rounded-full"></span>
-                                 <span v-else class="text-sm">🟢</span>
-                                 <span class="text-[9px] font-bold uppercase tracking-wider">Seguro</span>
-                               </button>
-                             </div>
-                           </div>
+                          <!-- Modo edição -->
+                          <div v-else class="space-y-4">
+                            <!-- Seletor IA de nível (para cenas restritas) -->
+                            <div v-if="scene.imageStatus === 'restricted'" class="bg-white/[0.02] p-3 rounded-lg border border-white/5">
+                              <h5 class="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-white/40 mb-2">
+                                <Sparkles :size="9" /> Reescrever com IA
+                              </h5>
+                              <div class="grid grid-cols-3 gap-1.5">
+                                <button
+                                  @click.stop="sanitizeAndFillEdit(scene, 'intense')"
+                                  :disabled="sanitizingSceneId === scene.id"
+                                  class="px-2 py-2 bg-red-500/8 border border-red-500/20 text-red-300/80 hover:bg-red-500/15 hover:border-red-500/40 rounded-lg transition-all flex flex-col items-center gap-0.5 text-center disabled:opacity-50 cursor-pointer"
+                                >
+                                  <span class="text-sm">🔴</span>
+                                  <span class="text-[9px] font-bold uppercase tracking-wider">Intenso</span>
+                                </button>
+                                <button
+                                  @click.stop="sanitizeAndFillEdit(scene, 'moderate')"
+                                  :disabled="sanitizingSceneId === scene.id"
+                                  class="px-2 py-2 bg-amber-500/8 border border-amber-500/20 text-amber-300/80 hover:bg-amber-500/15 hover:border-amber-500/40 rounded-lg transition-all flex flex-col items-center gap-0.5 text-center disabled:opacity-50 cursor-pointer"
+                                >
+                                  <span v-if="sanitizingSceneId === scene.id && sanitizingLevel === 'moderate'" class="animate-spin w-3.5 h-3.5 border-2 border-amber-300/30 border-t-amber-300 rounded-full"></span>
+                                  <span v-else class="text-sm">🟡</span>
+                                  <span class="text-[9px] font-bold uppercase tracking-wider">Moderado</span>
+                                </button>
+                                <button
+                                  @click.stop="sanitizeAndFillEdit(scene, 'safe')"
+                                  :disabled="sanitizingSceneId === scene.id"
+                                  class="px-2 py-2 bg-emerald-500/8 border border-emerald-500/20 text-emerald-300/80 hover:bg-emerald-500/15 hover:border-emerald-500/40 rounded-lg transition-all flex flex-col items-center gap-0.5 text-center disabled:opacity-50 cursor-pointer"
+                                >
+                                  <span v-if="sanitizingSceneId === scene.id && sanitizingLevel === 'safe'" class="animate-spin w-3.5 h-3.5 border-2 border-emerald-300/30 border-t-emerald-300 rounded-full"></span>
+                                  <span v-else class="text-sm">🟢</span>
+                                  <span class="text-[9px] font-bold uppercase tracking-wider">Seguro</span>
+                                </button>
+                              </div>
+                            </div>
 
-                           <!-- Textarea de edição -->
-                           <textarea
-                             v-model="editingPromptText"
-                             class="w-full bg-black/40 border border-primary/20 rounded-lg p-3 text-sm text-white/90 leading-relaxed focus:border-primary/50 focus:outline-none resize-y min-h-[80px]"
-                             rows="4"
-                           ></textarea>
+                            <!-- Textareas de edição -->
+                            <div class="space-y-3">
+                              <div>
+                                <span class="text-[10px] font-black uppercase tracking-widest text-blue-400/40 mb-1.5 block">Start Prompt</span>
+                                <textarea
+                                  v-model="editingPromptText"
+                                  class="w-full bg-black/40 border border-primary/20 rounded-lg p-3 text-sm text-white/90 leading-relaxed focus:border-primary/50 focus:outline-none resize-y min-h-[80px]"
+                                  rows="3"
+                                ></textarea>
+                              </div>
+                              <div v-if="scene.endVisualDescription !== null">
+                                <span class="text-[10px] font-black uppercase tracking-widest text-emerald-400/40 mb-1.5 block">End Prompt (Keyframe)</span>
+                                <textarea
+                                  v-model="editingEndPromptText"
+                                  class="w-full bg-black/40 border border-emerald-500/20 rounded-lg p-3 text-sm text-white/90 leading-relaxed focus:border-emerald-500/50 focus:outline-none resize-y min-h-[80px]"
+                                  rows="3"
+                                  placeholder="Descrição do keyframe final..."
+                                ></textarea>
+                              </div>
+                            </div>
 
-                           <!-- Botões Salvar / Cancelar / Regenerar -->
-                           <div class="flex gap-2">
-                             <button
-                               @click="saveEditPrompt(scene)"
-                               class="flex-1 px-3 py-2 bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 rounded-lg transition-all flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider cursor-pointer"
-                             >
-                               <Check :size="12" /> Salvar
-                             </button>
-                             <button
-                               v-if="editingPromptText !== scene.visualDescription"
-                               @click="saveAndRegenerateImage(scene)"
-                               :disabled="!!regeneratingSceneId"
-                               class="flex-1 px-3 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20 rounded-lg transition-all flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider disabled:opacity-50 cursor-pointer"
-                             >
-                               <span v-if="regeneratingSceneId === scene.id" class="animate-spin w-3 h-3 border-2 border-emerald-300/30 border-t-emerald-300 rounded-full"></span>
-                               <Sparkles v-else :size="12" />
-                               Salvar & Gerar
-                             </button>
-                           </div>
-                         </div>
+                            <!-- Botões Salvar / Cancelar / Regenerar -->
+                            <div class="flex gap-2">
+                              <button
+                                @click="saveEditPrompt(scene)"
+                                class="flex-1 px-3 py-2 bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 rounded-lg transition-all flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider cursor-pointer"
+                              >
+                                <Check :size="12" /> Salvar
+                              </button>
+                              <button
+                                v-if="editingPromptText !== scene.visualDescription || editingEndPromptText !== (scene.endVisualDescription || '')"
+                                @click="saveAndRegenerateImage(scene)"
+                                :disabled="!!regeneratingSceneId"
+                                class="flex-1 px-3 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20 rounded-lg transition-all flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider disabled:opacity-50 cursor-pointer"
+                              >
+                                <span v-if="regeneratingSceneId === scene.id" class="animate-spin w-3 h-3 border-2 border-emerald-300/30 border-t-emerald-300 rounded-full"></span>
+                                <Sparkles v-else :size="12" />
+                                Salvar & Gerar
+                              </button>
+                            </div>
+                          </div>
                        </div>
 
                       <div v-if="scene.audioDescription" class="bg-purple-500/5 p-3 rounded-xl border border-purple-500/10">
@@ -2115,40 +2219,70 @@
                       </button>
                     </div>
                 </div>
-                
-                <!-- Image Generation Preview (Future Expansion) -->
-                <div v-if="output.imagesApproved || output.scriptApproved" class="mt-6 pt-6 border-t border-white/5">
-                   <div v-if="scene.images?.length > 0" class="flex gap-4 overflow-x-auto pb-2">
-                      <div 
-                        v-for="img in scene.images" 
-                        :key="img.id" 
-                        class="w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden relative group/img cursor-pointer border border-white/10 hover:border-primary/50 transition-all"
-                        @click="openImage(img.id)"
-                      >
-                        <img 
-                          :src="`/api/scene-images/${img.id}`" 
-                          class="w-full h-full object-cover transition-transform duration-700 group-hover/img:scale-110"
-                          loading="lazy"
-                          alt="Generated Scene Image"
-                        />
-                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-opacity">
-                           <Eye :size="16" class="text-white drop-shadow-lg" />
+                               <!-- 🖼️ Image Keyframes Preview -->
+                <div v-if="(output.imagesApproved || output.scriptApproved) && scene.images?.length > 0" class="mt-6 pt-6 border-t border-white/5">
+                   <div class="flex flex-col gap-6">
+                      <!-- Start Image Block -->
+                      <div v-if="scene.images.some((i: any) => i.role === 'start' || !i.role)">
+                        <h5 class="text-[10px] font-black uppercase tracking-widest text-blue-400/50 mb-2 flex items-center gap-1.5">
+                          <Play :size="10" /> Frame Inicial (Start)
+                        </h5>
+                        <div class="flex gap-3 overflow-x-auto pb-1">
+                          <div 
+                            v-for="img in scene.images.filter((i: any) => (i.role === 'start' || !i.role) && i.isSelected)" 
+                            :key="img.id" 
+                            class="w-40 aspect-video flex-shrink-0 rounded-lg overflow-hidden relative group/img cursor-pointer border border-white/10 hover:border-primary/50 transition-all"
+                            @click="openImage(img.id)"
+                          >
+                            <img :src="`/api/scene-images/${img.id}`" class="w-full h-full object-cover transition-transform duration-700 group-hover/img:scale-110" loading="lazy" />
+                            <div class="absolute inset-0 bg-black/50 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-opacity">
+                               <Eye :size="16" class="text-white drop-shadow-lg" />
+                            </div>
+                            <div class="absolute bottom-2 left-2 px-1.5 py-0.5 bg-blue-500/80 backdrop-blur rounded text-[8px] font-black text-white uppercase tracking-tighter">START</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Transition Arrow (Visual Cue) -->
+                      <div v-if="scene.images.some((i: any) => i.role === 'end')" class="flex justify-center -my-2 opacity-20">
+                        <ArrowDown :size="16" class="text-white" />
+                      </div>
+
+                      <!-- End Image Block -->
+                      <div v-if="scene.images.some((i: any) => i.role === 'end')">
+                        <h5 class="text-[10px] font-black uppercase tracking-widest text-emerald-400/50 mb-2 flex items-center gap-1.5">
+                          <Square :size="10" /> Frame Final (End Keyframe)
+                        </h5>
+                        <div class="flex gap-3 overflow-x-auto pb-1">
+                          <div 
+                            v-for="img in scene.images.filter((i: any) => i.role === 'end' && i.isSelected)" 
+                            :key="img.id" 
+                            class="w-40 aspect-video flex-shrink-0 rounded-lg overflow-hidden relative group/img cursor-pointer border border-emerald-500/10 hover:border-emerald-500/50 transition-all"
+                            @click="openImage(img.id)"
+                          >
+                            <img :src="`/api/scene-images/${img.id}`" class="w-full h-full object-cover transition-transform duration-700 group-hover/img:scale-110" loading="lazy" />
+                            <div class="absolute inset-0 bg-black/50 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-opacity">
+                               <Eye :size="16" class="text-white drop-shadow-lg" />
+                            </div>
+                            <div class="absolute bottom-2 left-2 px-1.5 py-0.5 bg-emerald-500/80 backdrop-blur rounded text-[8px] font-black text-white uppercase tracking-tighter">END KEYFRAME</div>
+                          </div>
                         </div>
                       </div>
                    </div>
-                   <!-- Cena restrita pelo filtro de conteúdo -->
-                   <div v-else-if="scene.imageStatus === 'restricted'" class="h-16 bg-red-500/5 rounded-lg flex items-center justify-center gap-3 text-xs border border-dashed border-red-500/20">
+                </div>
+
+                <!-- Fallback: Pendente / Erro -->
+                <div v-else-if="output.imagesApproved || output.scriptApproved" class="mt-6 pt-6 border-t border-white/5">
+                   <div v-if="scene.imageStatus === 'restricted'" class="h-16 bg-red-500/5 rounded-lg flex items-center justify-center gap-3 text-xs border border-dashed border-red-500/20">
                      <ShieldAlert :size="16" class="text-red-400/60" />
                      <span class="text-red-300/70">Imagem bloqueada pelo filtro de conteúdo</span>
-                     <span class="px-2 py-0.5 text-xs font-bold uppercase tracking-wider rounded-full bg-red-500/20 text-red-400">Restrita</span>
                    </div>
-                   <!-- Cena com erro genérico -->
                    <div v-else-if="scene.imageStatus === 'error'" class="h-16 bg-orange-500/5 rounded-lg flex items-center justify-center gap-3 text-xs border border-dashed border-orange-500/20">
                      <AlertTriangle :size="16" class="text-orange-400/60" />
                      <span class="text-orange-300/70">Erro ao gerar imagem</span>
                    </div>
                    <div v-else class="h-12 bg-white/5 rounded-lg flex items-center justify-center text-xs text-zinc-500 uppercase tracking-widest border border-dashed border-white/5">
-                      {{ output.scriptApproved ? 'Aguardando Geração Image...' : 'Imagens Pendentes' }}
+                      {{ output.scriptApproved ? 'Aguardando Geração das Imagens...' : 'Imagens Pendentes' }}
                    </div>
                 </div>
 
@@ -2745,25 +2879,34 @@ const motionVersions = ref<Record<string, number>>({})
 // Edição de Visual Prompt
 const editingPromptSceneId = ref<string | null>(null)
 const editingPromptText = ref('')
+const editingEndPromptText = ref('')
 
 function startEditPrompt(scene: any) {
   editingPromptSceneId.value = scene.id
   editingPromptText.value = scene.visualDescription
+  editingEndPromptText.value = scene.endVisualDescription || ''
 }
 
 function cancelEditPrompt(scene: any) {
   editingPromptSceneId.value = null
   editingPromptText.value = ''
+  editingEndPromptText.value = ''
 }
 
 async function saveEditPrompt(scene: any) {
   if (!editingPromptText.value.trim()) return
   try {
+    const payload: any = { 
+      visualDescription: editingPromptText.value.trim(),
+      endVisualDescription: editingEndPromptText.value.trim() || null
+    }
+    
     await $fetch(`/api/scenes/${scene.id}/update`, {
       method: 'PATCH',
-      body: { visualDescription: editingPromptText.value.trim() }
+      body: payload
     })
-    scene.visualDescription = editingPromptText.value.trim()
+    scene.visualDescription = payload.visualDescription
+    scene.endVisualDescription = payload.endVisualDescription
   } catch (error: any) {
     console.error('Erro ao salvar prompt:', error)
     alert('Erro ao salvar o prompt visual.')
@@ -2886,14 +3029,22 @@ async function exitCorrectionMode() {
   })
 }
 
-async function regenerateImageCorrection(scene: any) {
+async function regenerateSceneImages(scene: any, role?: 'start' | 'end') {
   if (regeneratingSceneId.value) return
-  regeneratingSceneId.value = scene.id
+  
+  // Usar um ID composto para o estado de loading se houver role
+  regeneratingSceneId.value = role ? `${scene.id}-${role}` : scene.id
 
   try {
+    const body: any = {}
+    if (role) body.role = role
+    
+    // Se for 'start', opcionalmente podemos mandar o prompt atual da ref (mas o script usa o da scene objeto)
+    // Para simplificar, o backend já lê da scene no DB (que foi salva no saveEditPrompt)
+    
     await $fetch(`/api/scenes/${scene.id}/regenerate-image`, {
       method: 'POST',
-      body: { prompt: scene.visualDescription }
+      body
     })
 
     // Marcar cena como corrigida
@@ -4214,6 +4365,16 @@ function getSelectedImage(scene: any) {
 function getSelectedVideo(scene: any) {
   if (!scene.videos?.length) return null
   return scene.videos.find((v: any) => v.isSelected) || scene.videos[0]
+}
+
+/**
+ * Aplica o mesmo processamento do backend pipeline antes de enviar ao ElevenLabs:
+ * - Remove tags SSML <break> (o TTS usa apenas tags inline v3 como [pause], [breathes])
+ * Isso garante que a UI exibe exatamente o que o modelo recebe.
+ */
+function ttsTextForScene(narration: string | null | undefined): string {
+  if (!narration) return ''
+  return String(narration).replace(/<break\b[^>]*\/?>/gi, '').trim()
 }
 </script>
 

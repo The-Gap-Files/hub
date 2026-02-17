@@ -67,6 +67,13 @@ Não é um resumo. Não é um mini-documentário. Não é uma aula.
 - ✅ "O bispo assinou a sentença" / "Confiscou bens para financiar" (mecanismo — indignação)
 - O espectador que vê tortura sente REPULSA e passa. O que vê o SISTEMA sente INDIGNAÇÃO e compartilha.
 
+### 5.5. BRAND SAFETY & GORE (CRÍTICO)
+- REPROVADO se usar termos: "Assassinato", "Estupro", "Pedofilia", "Mutilado", "Tripas", "Poça de Sangue".
+- REPROVADO se descrever anatomia visceral (vísceras, feridas abertas, abuso sexual).
+- APROVADO se usar substituição semântica: "Fim Trágico", "Ato Imperdoável", "Crimes contra Inocentes", "Cena Marcada".
+- APROVADO se descrever a SOMBRA ou o OBJETO, não o ferimento.
+- Postura exigida: "Neutral Documentarian". Clínico e solene, nunca sádico.
+
 ### 6. Foco no Ângulo (ZERO CONTAMINAÇÃO TEMPORAL)
 - O choque deve vir do Ângulo (ex: a contradição evidencial, ou o horror emocional).
 - **REGRA CRÍTICA**: Se o ângulo é sobre um evento em 1475, TODOS os beats devem ser de 1475.
@@ -106,20 +113,22 @@ O Hook-Only é pura provocação. **ZERO resolução.**
 
 🚨 Se explica QUALQUER COISA, deixou de ser hook-only e virou gateway disfarçado. REPROVE sem hesitar.
 
-### 10. CTA Invisível (Não Pode Parecer CTA)
-- O público detecta CTA em milissegundos e sai ANTES do fim.
-- Se o CTA contém convite explícito ("Assista ao vídeo completo", "Siga para saber mais", "Inscreva-se") → REPROVADO.
-- Se o CTA fecha um loop narrativo → REPROVADO.
-- CTA aprovado = **corte seco + branding**: "The Gap Files." — e silêncio.
-- A curiosidade não resolvida É o CTA. Não precisa de mais nada.
-- ❌ "Siga The Gap Files para revelar o próximo segredo oculto."
-- ❌ "Quer saber como isso terminou? Assista ao vídeo completo."
-- ✅ "The Gap Files." (corte seco, logo, silêncio)
+### 10. BRANDING / CTA (ZERO CTA)
+- OBRIGATÓRIO: **ZERO CTA**. Sem "The Gap Files.", sem logo final, sem pedido de like/follow.
+- A retenção deve vir EXCLUSIVAMENTE do Loop Infinito.
+- Se o outline prevê qualquer cena de branding → REPROVADO.
+- Se o outline prevê qualquer convite → REPROVADO.
 
 ### 11. Replay Bait (Otimização Algorítmica)
 - O outline deve prever pelo menos 1 beat com detalhe visual ou narrativo que passe RÁPIDO demais para ser totalmente absorvido.
 - Isso incentiva replay ("pera, o que foi isso?"), que é sinal forte para o algoritmo.
 - Se todos os beats são igualmente lentos e digeríveis → sinalizar.
+
+### 11.5. Loop Infinito (Mecânico A → B)
+- OBRIGATÓRIO: `loopSentence` deve estar preenchido e quebrada corretamente.
+- `partA` (Final) deve ser INCOMPLETA e clamar por continuação.
+- `partB` (Início) deve completar `partA`.
+- Se o outline não prevê isso explicitamente na estrutura, REPROVE.
 
 ### 12. Título Viral
 - Se o outline inclui título, verificar:
@@ -157,19 +166,26 @@ Beat 1: "A corda estala no ar, forçando a confissão"
 → VIOLAÇÃO: Violência explícita (corda/tortura). Deveria ser: "O bispo assinou. A comunidade desapareceu."
 ```
 
+❌ **REPROVADO** (GORE / Brand Safety):
+```
+Beat 1: "O assassino estripou a vítima e deixou uma poça de sangue."
+→ VIOLAÇÃO: Termos proibidos ("assassino", "estripou", "sangue").
+→ CORREÇÃO: "O perpetrador deixou uma cena marcada. Fragmentou a evidência."
+```
+
 ❌ **REPROVADO** (Conclusão Moral):
 ```
 Beat 5: "Da imprensa à internet, a mesma mentira viraliza, alimentando ódio milenar."
 → VIOLAÇÃO: Isso é RESOLUÇÃO. O espectador "já entendeu" a tese.
 ```
 
-✅ **APROVADO** (Hook-Only Viral v2):
+✅ **APROVADO** (Hook-Only Loop):
 ```
-Beat 1: [RUPTURA 8/10] "Um bispo assinou. Uma comunidade inteira desapareceu."
-Beat 2: [RESPIRO 6/10] "O tribunal pagava os torturadores por dia."
-Beat 3: [PICO 10/10] "A confissão? Era um produto sob encomenda."
-Beat 4: [CTA] "The Gap Files." — silêncio
-→ OK: 1 conceito (fabricação de culpa), alternância com pico, MECANISMO > SINTOMA, zero resolução, CTA invisível.
+Beat 1: [LOOP-B 9/10] "...autorizou o confisco de uma comunidade inteira."
+Beat 2: [RESPIRO 6/10] "O tribunal usou a morte como pretexto para encher os cofres."
+Beat 3: [REPLAY 9/10] "O selo está no registro. O dinheiro também."
+Beat 4: [LOOP-A 10/10] "E a assinatura naquele documento secreto"
+→ OK: Loop semântico perfeito ("E a assinatura... autorizou..."), 4 cenas, zero CTA.
 ```
 
 ## FORMATO DA RESPOSTA

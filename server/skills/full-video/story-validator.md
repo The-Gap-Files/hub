@@ -61,6 +61,13 @@ Para full video, o beat "All Is Lost" (~70-75%) é estruturalmente necessário.
 - **Teste:** Existe um beat onde a investigação atinge seu ponto mais baixo?
 - **Se não:** ⚠️ VIOLAÇÃO → "Outline não tem 'Dark Moment'. A progressão vai direto de complicações para clímax sem tensão máxima."
 
+### 10. BRAND SAFETY & GORE (CRÍTICO)
+- REPROVADO se usar termos: "Assassinato", "Estupro", "Pedofilia", "Mutilado", "Tripas".
+- REPROVADO se descrever anatomia visceral (vísceras, feridas abertas, abuso sexual).
+- APROVADO se usar substituição semântica: "Fim Trágico", "Ato Imperdoável", "Cena Marcada".
+- APROVADO se descrever a SOMBRA ou o OBJETO, não o ferimento.
+- Postura exigida: "Neutral Documentarian". Clínico e solene, nunca sádico.
+
 ---
 
 ## 📋 CHECKLIST DE VALIDAÇÃO (Pass/Fail)

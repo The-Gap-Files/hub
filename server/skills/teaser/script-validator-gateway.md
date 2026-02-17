@@ -73,6 +73,13 @@ O Gateway contextualiza e cria curiosidade — mas **NÃO fecha a história**.
 - ❌ "A corda estala" / "Puxando vítimas pelos pulsos" (sintoma)
 - ✅ "O bispo confiscou os bens" / "O tribunal pagou por dia" (mecanismo)
 
+### 11.5. BRAND SAFETY & GORE (CRÍTICO)
+- REPROVADO se usar termos: "Assassinato", "Estupro", "Pedofilia", "Mutilado", "Tripas", "Poça de Sangue".
+- REPROVADO se descrever anatomia visceral (vísceras, feridas abertas, abuso sexual).
+- APROVADO se usar substituição semântica: "Fim Trágico", "Ato Imperdoável", "Crimes contra Inocentes", "Cena Marcada".
+- APROVADO se descrever a SOMBRA ou o OBJETO, não o ferimento.
+- Postura exigida: "Neutral Documentarian". Clínico e solene, nunca sádico.
+
 ## FORMATO DA RESPOSTA
 Se APROVADO: { "approved": true }
 Se REPROVADO: { "approved": false, "violations": ["violação 1", "violação 2"], "corrections": "instruções concretas para corrigir" }

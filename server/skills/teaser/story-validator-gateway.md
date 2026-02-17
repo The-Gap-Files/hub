@@ -53,6 +53,13 @@ O Gateway contextualiza e cria curiosidade — mas **NÃO resolve a história**.
 - ❌ "A corda estala" / "Puxando vítimas" (sintoma → repulsa)
 - ✅ "O bispo confiscou os bens" / "O tribunal pagou por dia" (mecanismo → indignação)
 
+### 7.5. BRAND SAFETY & GORE (CRÍTICO)
+- REPROVADO se usar termos: "Assassinato", "Estupro", "Pedofilia", "Mutilado", "Tripas".
+- REPROVADO se descrever anatomia visceral (vísceras, feridas abertas, abuso sexual).
+- APROVADO se usar substituição semântica: "Fim Trágico", "Ato Imperdoável", "Cena Marcada".
+- APROVADO se descrever a SOMBRA ou o OBJETO, não o ferimento.
+- Postura exigida: "Neutral Documentarian". Clínico e solene, nunca sádico.
+
 ### 8. CTA por Compulsão
 - O CTA deve gerar compulsão, não ser um pedido explícito.
 - ❌ "Inscreva-se para descobrir!" / "Siga e nunca perca" (pedido → o espectador percebe que acabou)

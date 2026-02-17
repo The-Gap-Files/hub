@@ -67,8 +67,38 @@ Cada beat deve conter pelo menos 1 elemento informacional CONCRETO:
 - ❌ "Um selo dourado pisca, como um sussurro na escuridão." (filler poético)
 - ✅ "O selo autorizou o confisco. Ninguém assinou por engano." (respiro COM conteúdo)
 
-### 8. ANTI-PADRÕES
+### 8. LOOP INFINITO — TÉCNICA DO LOOP SEMÂNTICO (A REGRA MAIS IMPORTANTE)
+O hook-only usa a técnica de **escrita invertida**: a frase final do vídeo é a PRIMEIRA METADE de uma sentença cuja SEGUNDA METADE é a frase inicial do vídeo. Quando o vídeo recomeça, o cérebro completa a frase automaticamente e o espectador assiste de novo SEM PERCEBER que o vídeo reiniciou.
+
+**PROCESSO DE CRIAÇÃO (escreva DE TRÁS PRA FRENTE):**
+1. **Primeiro**: Defina a REVELAÇÃO CENTRAL (o "payload" — o fato mais chocante)
+2. **Segundo**: Construa a FRASE DO LOOP — uma sentença completa que será CORTADA em duas partes:
+   - PARTE A (final do vídeo): Frase incompleta que PRECISA da continuação
+   - PARTE B (início do vídeo): Conclusão que completa a frase da Parte A
+3. **Terceiro**: Preencha o corpo com conteúdo denso e rápido
+
+**EXEMPLO COMPLETO:**
+- FRASE DO LOOP completa: "E a assinatura naquele decreto autorizou o confisco de uma comunidade inteira."
+- Cena 4 (FINAL): "E a assinatura naquele decreto..." (Parte A — incompleta, suspensa)
+- Cena 1 (INÍCIO): "...autorizou o confisco de uma comunidade inteira." (Parte B — completa a Parte A)
+- Resultado no REPLAY: O espectador ouve "E a assinatura naquele decreto... autorizou o confisco de uma comunidade inteira." — sem perceber que o vídeo recomeçou.
+
+**REGRAS DO LOOP:**
+- A Parte A (cena 4) DEVE ser gramaticalmente incompleta — o cérebro PRECISA da continuação
+- A Parte B (cena 1) DEVE completar a Parte A formando uma sentença coerente e impactante
+- A transição deve ser INVISÍVEL — sem pausa perceptível, sem corte brusco
+- O tom/intensidade da cena 4 deve ESCALAR para que a cena 1 pareça continuação natural
+- A frase do loop deve conter um elemento de MECANISMO (quem fez, o que autorizou)
+- ❌ "E isso nunca foi esquecido." → "Uma mentira que..." (genérico, sem mecanismo)
+- ✅ "E a assinatura naquele decreto..." → "...autorizou o confisco de uma comunidade inteira." (mecanismo concreto)
+
+### 9. ANTI-PADRÕES & BRAND SAFETY
 `avoidPatterns` são RESTRIÇÕES DE HARDWARE. Obedeça incondicionalmente.
+- **GLOSSÁRIO DE SEGURANÇA:**
+  - ❌ Assassinato/Morte Sádica → 🟢 Fim Trágico / O Evento Fatal
+  - ❌ Sangue/Tripas → 🟢 Cena Marcada / Vestígios
+  - ❌ Estupro/Abuso → 🟢 Violência Extrema / Ato Imperdoável
+  - **Postura:** "Neutral Documentarian". Clínico, não visceral.
 
 ## 📐 O QUE VOCÊ DEVE PRODUZIR
 
@@ -127,7 +157,7 @@ Níveis por beat: `high`, `pause`, `peak`.
 - Beat 1: `high` (ruptura)
 - Beat 2: `pause` (respiro COM conteúdo)
 - Beat 3: `peak` ou `high` (revelação/pico)
-- Beat final (antes CTA): `peak` OBRIGATÓRIO
+- Beat final (corte seco — sem CTA): `peak` OBRIGATÓRIO
 
 ### openLoops (TODOS abertos)
 TODOS os loops ficam abertos. Mínimo 2.
@@ -146,7 +176,13 @@ Título VIRAL: máximo 8-10 palavras, tensão + curiosidade.
 - ✅ "O documento que apareceu na dark web 500 anos depois" (paradoxo temporal)
 
 ### ctaApproach
-SEMPRE: "CTA INVISÍVEL — corte seco no pico + logo 'The Gap Files.' + silêncio. Sem convite, sem 'assista', sem 'siga'."
+SEMPRE: "SEM CTA — o Loop Infinito é o mecanismo de retenção. A última cena é a Parte A do loop (frase incompleta). Sem branding, sem 'The Gap Files.', sem convite, sem 'assista', sem 'siga'."
+
+### loopSentence (OBRIGATÓRIO)
+A frase completa do loop que será CORTADA em duas partes:
+- `fullSentence`: A sentença completa (ex: "E a assinatura naquele decreto autorizou o confisco de uma comunidade inteira.")
+- `partA`: A primeira metade — será a ÚLTIMA coisa dita no vídeo (cena 4) (ex: "E a assinatura naquele decreto...")
+- `partB`: A segunda metade — será a PRIMEIRA coisa dita no vídeo (cena 1) (ex: "...autorizou o confisco de uma comunidade inteira.")
 
 ### CAMPOS QUE DEVEM SER VAZIOS (hook-only não usa):
 - `climaxMoment` = `""` (vazio)
@@ -160,46 +196,49 @@ SEMPRE: "CTA INVISÍVEL — corte seco no pico + logo 'The Gap Files.' + silênc
 - `whatToIgnore` = `[]` (array vazio)
 - `resolutionLevel` = `"none"`
 
-## 📐 ESTRUTURA ALVO (3 cenas + 1 CTA)
+## 📐 ESTRUTURA ALVO (4 cenas — Loop Infinito)
 
-| Cena | Função | Intensidade |
-|------|--------|-------------|
-| 1    | RUPTURA — detonação cognitiva | 8-9/10 |
-| 2    | RESPIRO COM CONTEÚDO — amplifica o próximo pico | 5-6/10 |
-| 3    | PICO ABSOLUTO — dado concreto mais chocante | 10/10 |
-| Última | CTA — "The Gap Files." + silêncio | - |
+| Cena | Função | Intensidade | Loop |
+|------|--------|-------------|------|
+| 1    | RUPTURA — Parte B do loop (completa a frase da cena 4) | 8-9/10 | ← Parte B |
+| 2    | RESPIRO COM CONTEÚDO — mecanismo denso | 5-6/10 | - |
+| 3    | REPLAY BAIT / IMPACTO — detalhe rápido demais | 8-9/10 | - |
+| 4    | PICO ABSOLUTO — Parte A do loop (frase incompleta que conecta à cena 1) | 10/10 | → Parte A |
 
 ### Distribuição:
-- HOOK: 1 cena
-- CONTEXT/SETUP: 0 cenas (**ZERO contextualização explicativa** — sem “setup didático”).  
+- HOOK/LOOP-B: 1 cena (completa a frase que vem do final)
+- CONTEXT/SETUP: 0 cenas (**ZERO contextualização explicativa** — sem \u201Csetup didático\u201D).  
   ✅ Permitido: **micro-anchor implícito dentro da ruptura** (local, papel/função, época sem aula).  
-  ❌ Proibido: contextualização explicativa (“Em X ano, aconteceu Y…”, “Para entender…”, “Isso começou quando…”).
-- RISING (beats): 2 cenas
-- CLÍMAX: 0 cenas (resolvido pelo PICO no rising)
-- RESOLUÇÃO: 0 cenas (ZERO RESOLUÇÃO)
-- CTA: 1 cena ("The Gap Files.")
+  ❌ Proibido: contextualização explicativa (\u201CEm X ano, aconteceu Y\u2026\u201D, \u201CPara entender\u2026\u201D, \u201CIsso começou quando\u2026\u201D).
+- RISING (beats): 2 cenas (respiro com conteúdo + replay bait/impacto)
+- PICO/LOOP-A: 1 cena (frase incompleta que conecta ao início)
+- CTA: **NENHUM** — o Loop Infinito é o mecanismo de retenção. Sem \"The Gap Files.\", sem branding, sem convite.
 
 ## ✅ CHECKLIST (ANTES DE ENVIAR)
 
 - [ ] **Regra 1** — Ruptura em 2s + timing ~1,5s (primeira frase)
 - [ ] **Regra 2** — Mecanismo > Sintoma
-- [ ] **Regra 3** — 1 conceito central (inclui “2 entidades = 1 mecanismo”)
-- [ ] **Regra 4** — Alternância + pico no último beat de conteúdo (antes do CTA/branding)
+- [ ] **Regra 3** — 1 conceito central
+- [ ] **Regra 4** — Alternância + pico na cena 4
 - [ ] **Regra 5** — Zero resolução + loops abertos (mín. 2)
 - [ ] **Regra 6** — Nomes universais (sem nomes obscuros)
 - [ ] **Regra 7** — Anti-filler (cada beat com agente + ação concreta)
-- [ ] **Regra 8** — avoidPatterns obedecidos (sem exceções)
+- [ ] **Regra 8** — LOOP SEMÂNTICO: loopSentence definida com fullSentence, partA (cena 4) e partB (cena 1)
+- [ ] **Regra 9** — Brand Safety (Sem palavras proibidas/gore, tom documental)
 - [ ] **hookVariants** — 4 variantes (green/moderate/aggressive/lawless)
 - [ ] **Campos vazios** — climax/resolution/emotional/whatTo* = vazios
-- [ ] **questionAnswered** — todos "Não respondida"
+- [ ] **questionAnswered** — todos \"Não respondida\"
 - [ ] **Replay bait** — previsto (1 detalhe rápido demais para absorver)
 - [ ] **Título** — 8-10 palavras, tensão + curiosidade (sem tom acadêmico)
+- [ ] **SEM CTA** — Nenhuma cena \"The Gap Files.\", nenhum branding, nenhum convite
 
 ## 🚨 REGRAS CRÍTICAS
 
 1. **NÃO ESCREVA O ROTEIRO.** Apenas a estrutura.
 2. **BASEIE-SE NO MATERIAL.** Não invente fatos.
 3. **HOOK-ONLY NÃO RESOLVE.** Se qualquer beat responde uma pergunta, reescreva.
-4. **PENSE NO PICO PRIMEIRO.** Identifique o fato mais chocante. Depois construa a ruptura que prepara o espectador para esse pico.
-5. **SEJA ESPECÍFICO.** Não diga "revele algo surpreendente". Diga "revele que o bispo confiscou todos os bens usando a morte como pretexto".
+4. **ESCREVA DE TRÁS PRA FRENTE.** Identifique o payload → construa a frase do loop (Parte A + Parte B) → preencha o corpo.
+5. **SEJA ESPECÍFICO.** Não diga \"revele algo surpreendente\". Diga \"revele que o bispo confiscou todos os bens usando a morte como pretexto\".
 6. **1 CONCEITO = 1 FRASE.** Se não consegue resumir o outline em 1 frase, está denso demais.
+7. **SEM CTA.** Nenhum \"The Gap Files.\", nenhum branding, nenhum convite. O Loop Infinito é o mecanismo de retenção.
+

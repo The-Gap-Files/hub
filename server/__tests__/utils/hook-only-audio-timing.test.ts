@@ -24,6 +24,7 @@ describe('hook-only-audio-timing', () => {
 
   it('computeHookOnlySceneBudgetsSeconds: soma ~total', () => {
     const b20 = computeHookOnlySceneBudgetsSeconds(20)
+    expect(b20).toHaveLength(4)
     expect(b20.reduce((a, b) => a + b, 0)).toBeCloseTo(20, 6)
 
     const b16 = computeHookOnlySceneBudgetsSeconds(16)
@@ -49,8 +50,8 @@ describe('hook-only-audio-timing', () => {
   })
 
   it('appendPauseTagsForV3 adiciona [pause] ao final', () => {
-    expect(appendPauseTagsForV3('The Gap Files.', 0)).toBe('The Gap Files.')
-    expect(appendPauseTagsForV3('The Gap Files.', 2)).toBe('The Gap Files. [pause] [pause]')
+    expect(appendPauseTagsForV3('Fim.', 0)).toBe('Fim.')
+    expect(appendPauseTagsForV3('Fim.', 2)).toBe('Fim. [pause] [pause]')
   })
 })
 

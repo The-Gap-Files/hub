@@ -78,7 +78,7 @@ Cada teaser deve ter um hook ÚNICO e diferente de todos os outros.
 - ✅ "Uma criança morta. Uma confissão forjada." (ruptura)
 
 **Para HOOK-ONLY: CTA e título:**
-- CTA deve ser INVISÍVEL: apenas "The Gap Files." + corte seco. Sem "assista", "siga", "inscreva-se"
+- CTA/branding é PROIBIDO em hook-only: corte seco no pico. Sem "The Gap Files.", sem "assista", "siga", "inscreva-se"
 - Título deve ter máximo 8-10 palavras. Tensão + curiosidade + clareza. Sem subtítulos com dois-pontos.
 - ❌ "O mito sangrento que atravessou séculos: de Trento a Poway" (denso demais)
 - ✅ "A mesma mentira. 500 anos depois." (6 palavras, viral)

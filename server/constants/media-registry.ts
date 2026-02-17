@@ -43,6 +43,8 @@ export interface MediaModelInputSchema {
   outputMode?: 'url_array' | 'file_output' | 'url_string' | 'base64' | 'buffer'
   /** Campo de imagem input (para motion: image-to-video) */
   imageField?: string
+  /** Campo de imagem final (para motion com transição: end-frame) */
+  endImageField?: string
   /** Formato do image input: 'buffer' | 'base64' | 'url' */
   imageInputMode?: 'buffer' | 'base64' | 'url'
 }
@@ -264,6 +266,7 @@ export const MEDIA_PROVIDERS: Record<MediaProviderId, MediaProvider> = {
           minFrames: 81,
           maxFrames: 161,
           imageField: 'image_base64',
+          endImageField: undefined, // Campo para imagem final (ex: 'last_image')
           imageInputMode: 'base64',
           defaults: {
             negative_prompt: 'blurry, low quality, distorted, watermark',

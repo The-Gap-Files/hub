@@ -55,6 +55,7 @@ export class ReplicateMotionProvider implements IMotionProvider {
         // Dynamic: build from schema
         const result = buildMotionInput(this.inputSchema, {
           imageBuffer: request.imageBuffer || await fs.readFile(request.imagePath!),
+          endImageBuffer: request.endImageBuffer,
           prompt: request.prompt,
           duration: request.duration,
           aspectRatio: request.aspectRatio,
@@ -72,12 +73,10 @@ export class ReplicateMotionProvider implements IMotionProvider {
         input = {
           image: imageBuffer,
           prompt: request.prompt || 'Natural, smooth camera movement. Cinematic lighting.',
-          num_frames: numFrames,
-          resolution: '480p' as const,
-          frames_per_second: 16,
           go_fast: true,
           sample_shift: 12,
-          disable_safety_checker: false
+          disable_safety_checker: false,
+          last_image: request.endImageBuffer
         }
       }
 

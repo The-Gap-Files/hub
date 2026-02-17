@@ -27,6 +27,31 @@ function stripCodeFences(input: string): string {
 }
 
 /**
+ * Se o JSON foi truncado no meio de uma string, tenta "fechar" a string
+ * removendo escapes pendentes e adicionando uma aspas final.
+ *
+ * Observação: isso é um fallback heurístico — só usar quando JSON.parse falhar.
+ */
+function closeTruncatedStringIfNeeded(out: string[], inString: boolean, escaped: boolean): void {
+  if (!inString) return
+
+  // Se terminou com um escape pendente, remover a barra para não invalidar JSON.
+  if (escaped && out.length > 0 && out[out.length - 1] === '\\') {
+    out.pop()
+  }
+
+  // Se terminou no meio de um unicode escape \uXXXX, remover o escape incompleto.
+  // Ex.: "... \u12" → remove "\u12"
+  const tail = out.slice(Math.max(0, out.length - 6)).join('')
+  const m = tail.match(/\\u[0-9a-fA-F]{0,3}$/)
+  if (m && m[0]) {
+    for (let i = 0; i < m[0].length; i++) out.pop()
+  }
+
+  out.push('"')
+}
+
+/**
  * Tenta reparar JSON "quase válido" (ex: chaves/colchetes sobrando entre itens),
  * e extrai o primeiro JSON balanceado possível.
  *
@@ -98,6 +123,9 @@ function repairAndExtractBalancedJson(input: string): string {
 
     out.push(ch)
   }
+
+  // Se truncou no meio de uma string, fechar aspas (heurística)
+  closeTruncatedStringIfNeeded(out, inString, escaped)
 
   // Se truncou (faltaram closers), fechar o que ficou pendente
   for (let i = stack.length - 1; i >= 0; i--) {
@@ -186,6 +214,93 @@ function extractBalancedJsonRoots(input: string): string[] {
 }
 
 /**
+ * Extrai objetos JSON balanceados que aparecem dentro de um array de um campo específico,
+ * mesmo quando o root JSON está truncado.
+ *
+ * Ex.: {"teasers":[{...},{...}, ...TRUNCADO
+ * → retorna itens completos já fechados dentro do array.
+ */
+function extractBalancedObjectsFromNamedArray(input: string, arrayFieldName: string): string[] {
+  const cleaned = stripCodeFences(input)
+  const fieldIdx = cleaned.indexOf(`"${arrayFieldName}"`)
+  if (fieldIdx < 0) return []
+
+  const arrayStart = cleaned.indexOf('[', fieldIdx)
+  if (arrayStart < 0) return []
+
+  const items: string[] = []
+  let idx = arrayStart + 1
+
+  while (idx < cleaned.length) {
+    const nextObj = cleaned.indexOf('{', idx)
+    if (nextObj < 0) break
+
+    const out: string[] = []
+    const stack: Array<'{' | '['> = []
+    let inString = false
+    let escaped = false
+    let endAt = -1
+
+    for (let i = nextObj; i < cleaned.length; i++) {
+      const ch = cleaned[i]!
+      if (inString) {
+        out.push(ch)
+        if (escaped) {
+          escaped = false
+          continue
+        }
+        if (ch === '\\') {
+          escaped = true
+          continue
+        }
+        if (ch === '"') inString = false
+        continue
+      }
+
+      if (ch === '"') {
+        inString = true
+        out.push(ch)
+        continue
+      }
+
+      if (ch === '{' || ch === '[') {
+        stack.push(ch)
+        out.push(ch)
+        continue
+      }
+
+      if (ch === '}' || ch === ']') {
+        const top = stack[stack.length - 1]
+        const matches = (ch === '}' && top === '{') || (ch === ']' && top === '[')
+        if (matches) {
+          stack.pop()
+          out.push(ch)
+          if (stack.length === 0) {
+            endAt = i
+            break
+          }
+        }
+        continue
+      }
+
+      out.push(ch)
+    }
+
+    // Item completo
+    if (out.length > 0 && endAt >= nextObj) {
+      items.push(out.join('').trim())
+      idx = endAt + 1
+      continue
+    }
+
+    // Se não fechou (truncou), não dá pra extrair mais itens seguintes com segurança.
+    break
+  }
+
+  return items
+}
+
+/**
  * Trata erros json_validate_failed do Groq extraindo failed_generation.
  * 
  * @param error - O erro capturado do catch
@@ -267,7 +382,29 @@ export function handleGroqJsonValidateError<T>(
         } else {
           // 2) Fallback para reparo do primeiro root balanceado
           const repaired = repairAndExtractBalancedJson(cleaned)
-          partial = JSON.parse(repaired)
+          try {
+            partial = JSON.parse(repaired)
+          } catch {
+            // 3) Último recurso: extrair itens completos do array "teasers"
+            const teaserItems = extractBalancedObjectsFromNamedArray(cleaned, 'teasers')
+            if (teaserItems.length > 0) {
+              const teasersParsed: any[] = []
+              for (const item of teaserItems) {
+                try {
+                  teasersParsed.push(JSON.parse(item))
+                } catch {
+                  // ignora
+                }
+              }
+              if (teasersParsed.length > 0) {
+                partial = { teasers: teasersParsed }
+              } else {
+                throw new Error('failed_generation: não foi possível parsear itens de teasers')
+              }
+            } else {
+              throw new Error('failed_generation: reparo falhou e não há itens completos em teasers')
+            }
+          }
         }
       }
     } else {
@@ -283,6 +420,13 @@ export function handleGroqJsonValidateError<T>(
         requestMessages
       }).catch(() => { })
       return { success: false, shouldRethrow: true }
+    }
+
+    // Se veio via fallback "teasers", mas trouxe itens schema, filtrar.
+    if (Array.isArray(partial?.teasers)) {
+      partial.teasers = partial.teasers.filter(
+        (t: any) => !(t?.$schema || (t?.properties && t?.type === 'object'))
+      )
     }
 
     // Validação customizada (se fornecida)
