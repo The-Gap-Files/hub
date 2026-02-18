@@ -83,6 +83,17 @@
                 <Film :size="16" :class="rendering ? 'animate-spin' : ''" />
                 <span>{{ rendering ? 'RENDERIZANDO...' : 'RENDERIZAR NOVAMENTE' }}</span>
               </button>
+
+             <!-- BOTAO RESETAR OUTPUT (limpa pipeline e mantém vínculo com monetização) -->
+             <button
+                v-if="!correctionMode"
+                @click="revertToStage('STORY_OUTLINE')"
+                :disabled="reverting || approving"
+                class="btn-secondary flex items-center gap-2 text-xs border-red-500/40 text-red-400 hover:bg-red-500/10"
+              >
+                <Undo2 :size="16" />
+                Resetar output
+             </button>
           </div>
         </header>
 
@@ -350,16 +361,16 @@
                 </div>
 
                 <!-- SEO Tags -->
-                <div v-if="output.socialKit?.seoTags?.length" class="bg-black/20 rounded-xl p-3 border border-white/5">
+                <div v-if="seoTagsNormalized.length" class="bg-black/20 rounded-xl p-3 border border-white/5">
                   <div class="flex items-center justify-between mb-1.5">
                     <span class="text-xs text-zinc-500 uppercase tracking-wider font-bold">SEO Tags</span>
-                    <button @click="copySocialField(output.socialKit.seoTags.join(', '))" class="text-xs text-zinc-600 hover:text-violet-400 transition-colors cursor-pointer">
+                    <button @click="copySocialField(seoTagsForYoutubeCopy)" class="text-xs text-zinc-600 hover:text-violet-400 transition-colors cursor-pointer">
                       Copiar
                     </button>
                   </div>
                   <div class="flex flex-wrap gap-1.5">
                     <span
-                      v-for="tag in output.socialKit.seoTags"
+                      v-for="tag in seoTagsNormalized"
                       :key="tag"
                       class="px-2 py-0.5 bg-zinc-800 border border-white/5 rounded text-xs text-zinc-400"
                     >
@@ -606,41 +617,6 @@
                         </div>
                       </div>
 
-                      <!-- End Frame (Optional) -->
-                      <div v-if="scene.images.find((i: any) => i.role === 'end' && i.isSelected)">
-                        <div class="flex justify-between items-center mb-1.5 px-0.5">
-                          <span class="text-[10px] uppercase tracking-wider font-black text-emerald-400/60 flex items-center gap-1.5">
-                            <Square :size="10" /> Frame Final (End)
-                          </span>
-                          <button 
-                            @click.stop="regenerateSceneImages(scene, 'end')"
-                            :disabled="!!regeneratingSceneId"
-                            class="text-[9px] uppercase tracking-tighter font-bold text-emerald-400/40 hover:text-emerald-400 transition-colors flex items-center gap-1 cursor-pointer"
-                          >
-                            <RotateCw :size="8" :class="{ 'animate-spin': regeneratingSceneId === scene.id + '-end' }" />
-                            Regenerar End
-                          </button>
-                        </div>
-                        <div class="aspect-video bg-black rounded-xl overflow-hidden border border-emerald-500/10 transition-all relative group" :class="{ 'ring-1 ring-emerald-500/30': regeneratingSceneId === scene.id + '-end' }">
-                          <img 
-                            :src="`/api/scene-images/${scene.images.find((i: any) => i.role === 'end' && i.isSelected)?.id}?t=${imageVersions[scene.id] || 0}`" 
-                            class="w-full h-full object-cover"
-                            :class="{ 'opacity-30 grayscale': regeneratingSceneId === scene.id + '-end' }"
-                            loading="lazy"
-                            alt="End Frame"
-                          />
-                          <div v-if="regeneratingSceneId === scene.id + '-end'" class="absolute inset-0 flex items-center justify-center">
-                            <span class="animate-spin w-4 h-4 border-2 border-emerald-400/30 border-t-emerald-400 rounded-full"></span>
-                          </div>
-                          <button 
-                            @click.stop="openImage(scene.images.find((i: any) => i.role === 'end' && i.isSelected)?.id)"
-                            class="absolute top-2 right-2 p-2 bg-black/60 backdrop-blur rounded-lg text-white/70 hover:text-white hover:bg-black/80 transition-all opacity-0 group-hover:opacity-100"
-                            title="Ampliar imagem"
-                          >
-                            <Eye :size="16" />
-                          </button>
-                        </div>
-                      </div>
                     </div>
                     
                     <!-- Regenerate Image Button -->
@@ -808,23 +784,11 @@
                           rows="3"
                         ></textarea>
                       </div>
-                      <div v-if="scene.endVisualDescription !== null">
-                        <span class="text-[9px] font-black uppercase tracking-widest text-emerald-400/40 mb-1 block">End Prompt (Keyframe)</span>
-                        <textarea 
-                          v-model="editingEndPromptText"
-                          class="w-full bg-black/40 border border-emerald-500/20 rounded-lg p-2.5 text-xs text-white/80 leading-relaxed focus:border-emerald-500/50 focus:outline-none resize-y min-h-[60px]"
-                          rows="3"
-                        ></textarea>
-                      </div>
                     </div>
                     <div v-else class="space-y-3">
                       <div>
-                        <span class="text-[9px] font-black uppercase tracking-widest text-blue-400/40 mb-0.5 block">Start Prompt</span>
+                        <span class="text-[9px] font-black uppercase tracking-widest text-blue-400/40 mb-0.5 block">Visual Prompt</span>
                         <p class="text-xs text-zinc-300/80 leading-relaxed">{{ scene.visualDescription }}</p>
-                      </div>
-                      <div v-if="scene.endVisualDescription">
-                        <span class="text-[9px] font-black uppercase tracking-widest text-emerald-400/40 mb-0.5 block">End Prompt</span>
-                        <p class="text-xs text-zinc-300/80 leading-relaxed">{{ scene.endVisualDescription }}</p>
                       </div>
                     </div>
                   </div>
@@ -2069,12 +2033,6 @@
                                 {{ scene.visualDescription }}
                               </p>
                             </div>
-                            <div v-if="scene.endVisualDescription">
-                              <span class="text-[10px] font-black uppercase tracking-widest text-emerald-400/40 mb-1 block">End Prompt (Keyframe)</span>
-                              <p class="text-sm text-white/80 leading-relaxed font-light">
-                                {{ scene.endVisualDescription }}
-                              </p>
-                            </div>
                           </div>
 
                           <!-- Modo edição -->
@@ -2117,20 +2075,11 @@
                             <!-- Textareas de edição -->
                             <div class="space-y-3">
                               <div>
-                                <span class="text-[10px] font-black uppercase tracking-widest text-blue-400/40 mb-1.5 block">Start Prompt</span>
+                                <span class="text-[10px] font-black uppercase tracking-widest text-blue-400/40 mb-1.5 block">Visual Prompt</span>
                                 <textarea
                                   v-model="editingPromptText"
                                   class="w-full bg-black/40 border border-primary/20 rounded-lg p-3 text-sm text-white/90 leading-relaxed focus:border-primary/50 focus:outline-none resize-y min-h-[80px]"
                                   rows="3"
-                                ></textarea>
-                              </div>
-                              <div v-if="scene.endVisualDescription !== null">
-                                <span class="text-[10px] font-black uppercase tracking-widest text-emerald-400/40 mb-1.5 block">End Prompt (Keyframe)</span>
-                                <textarea
-                                  v-model="editingEndPromptText"
-                                  class="w-full bg-black/40 border border-emerald-500/20 rounded-lg p-3 text-sm text-white/90 leading-relaxed focus:border-emerald-500/50 focus:outline-none resize-y min-h-[80px]"
-                                  rows="3"
-                                  placeholder="Descrição do keyframe final..."
                                 ></textarea>
                               </div>
                             </div>
@@ -2144,7 +2093,7 @@
                                 <Check :size="12" /> Salvar
                               </button>
                               <button
-                                v-if="editingPromptText !== scene.visualDescription || editingEndPromptText !== (scene.endVisualDescription || '')"
+                                v-if="editingPromptText !== scene.visualDescription"
                                 @click="saveAndRegenerateImage(scene)"
                                 :disabled="!!regeneratingSceneId"
                                 class="flex-1 px-3 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20 rounded-lg transition-all flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider disabled:opacity-50 cursor-pointer"
@@ -2439,24 +2388,40 @@
 
         <div class="md:col-span-2">
           <label class="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Seed</label>
-          <div class="flex flex-col md:flex-row gap-3">
-            <label class="flex items-center gap-2 px-4 py-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer">
-              <input type="radio" value="fixed" v-model="cfgSeedMode" class="w-4 h-4" />
-              <span class="text-sm text-white">Fixa</span>
-            </label>
-            <label class="flex items-center gap-2 px-4 py-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer">
-              <input type="radio" value="auto" v-model="cfgSeedMode" class="w-4 h-4" />
-              <span class="text-sm text-white">Automática</span>
-            </label>
-            <input
-              v-model.number="cfgSeedValue"
-              :disabled="cfgSeedMode !== 'fixed'"
-              type="number"
-              class="flex-1 bg-black/30 border border-white/10 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-primary/40 disabled:opacity-50"
-              placeholder="ex: 123456"
-            />
+          <div v-if="isSeedLocked" class="space-y-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-3">
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-white font-mono">
+                {{ output?.seedValue ?? '—' }}
+              </span>
+              <span class="text-[10px] uppercase tracking-wider text-emerald-300">
+                Travada pelo monetizador
+              </span>
+            </div>
+            <p class="text-xs text-emerald-200/80">
+              Essa seed veio do plano de monetização (Full/Teaser) e é usada pra manter consistência visual entre todos os vídeos do pacote.
+            </p>
           </div>
-          <p class="text-xs text-zinc-500 mt-2">Seed atual: <span class="font-mono text-zinc-300">{{ output?.seedValue ?? '—' }}</span></p>
+          <div v-else class="space-y-2">
+            <select
+              v-model="cfgSeedChoice"
+              class="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-primary/40"
+            >
+              <option value="auto">
+                Automática – deixar o sistema escolher a seed
+              </option>
+              <option
+                v-for="s in seedOptions"
+                :key="s.id"
+                :value="String(s.value)"
+              >
+                🧬 {{ s.value }}
+              </option>
+            </select>
+          </div>
+          <p class="text-xs text-zinc-500 mt-2">
+            Seed atual:
+            <span class="font-mono text-zinc-300">{{ output?.seedValue ?? '—' }}</span>
+          </p>
         </div>
 
         <div class="md:col-span-2">
@@ -2747,10 +2712,21 @@ const cfgEditorialObjectiveId = ref<string>('')
 const cfgObjective = ref<string>('')
 const cfgLanguage = ref<string>('pt-BR')
 const cfgNarrationLanguage = ref<string>('pt-BR')
-const cfgSeedMode = ref<'fixed' | 'auto'>('fixed')
-const cfgSeedValue = ref<number | null>(null)
+const seedOptions = ref<Array<{ id: string; value: number }>>([])
+const cfgSeedChoice = ref<string>('auto')
 const cfgMustInclude = ref<string>('')
 const cfgMustExclude = ref<string>('')
+
+const isSeedLocked = computed(() => {
+  const o = output.value as any
+  if (!o || !o.seedId) return false
+  const ctx = o.monetizationContext as any
+  if (!ctx || typeof ctx !== 'object') return false
+  const itemType = ctx.itemType
+  if (itemType !== 'teaser' && itemType !== 'fullVideo') return false
+  // Só trava seeds para outputs gerados pelo pacote de monetização (full-youtube / teaser-youtube-shorts)
+  return o.format === 'teaser-youtube-shorts' || o.format === 'full-youtube'
+})
 
 // ═══════════════════════════════════════════════════════════
 // PIPELINE STAGE — separação total Plano vs Roteiro
@@ -2778,7 +2754,13 @@ const newVoiceId = ref<string | null>(null)
 const changingVoice = ref(false)
 
 async function ensureOutputConfigOptionsLoaded() {
-  if (scriptStylesOptions.value.length && visualStylesOptions.value.length && editorialObjectivesOptions.value.length) return
+  if (
+    scriptStylesOptions.value.length &&
+    visualStylesOptions.value.length &&
+    editorialObjectivesOptions.value.length &&
+    seedOptions.value.length
+  ) return
+
   const [scriptRes, visualRes, objRes] = await Promise.all([
     $fetch('/api/script-styles'),
     $fetch('/api/visual-styles'),
@@ -2791,6 +2773,16 @@ async function ensureOutputConfigOptionsLoaded() {
   scriptStylesOptions.value = (scriptRes as any)?.data || []
   visualStylesOptions.value = (visualRes as any)?.data || []
   editorialObjectivesOptions.value = (objRes as any)?.data || []
+
+  try {
+    const seedsRes = await $fetch('/api/seeds') as any
+    seedOptions.value = ((seedsRes?.data as any[]) || []).map((s: any) => ({
+      id: s.id,
+      value: s.value
+    }))
+  } catch (e) {
+    console.warn('[OutputConfig] Erro ao carregar seeds:', e)
+  }
 }
 
 function applyObjectivePreset() {
@@ -2816,11 +2808,9 @@ async function openOutputConfigModal() {
   cfgMustExclude.value = o.mustExclude || ''
 
   if (typeof o.seedValue === 'number') {
-    cfgSeedMode.value = 'fixed'
-    cfgSeedValue.value = o.seedValue
+    cfgSeedChoice.value = String(o.seedValue)
   } else {
-    cfgSeedMode.value = 'auto'
-    cfgSeedValue.value = null
+    cfgSeedChoice.value = 'auto'
   }
 
   showOutputConfigModal.value = true
@@ -2831,19 +2821,30 @@ async function saveOutputConfig() {
   savingOutputConfig.value = true
   outputConfigError.value = null
   try {
+    const body: any = {
+      scriptStyleId: cfgScriptStyleId.value || null,
+      visualStyleId: cfgVisualStyleId.value || null,
+      editorialObjectiveId: cfgEditorialObjectiveId.value || null,
+      objective: cfgObjective.value?.trim() ? cfgObjective.value.trim() : null,
+      mustInclude: cfgMustInclude.value?.trim() ? cfgMustInclude.value.trim() : null,
+      mustExclude: cfgMustExclude.value?.trim() ? cfgMustExclude.value.trim() : null,
+      language: cfgLanguage.value?.trim() ? cfgLanguage.value.trim() : null,
+      narrationLanguage: cfgNarrationLanguage.value?.trim() ? cfgNarrationLanguage.value.trim() : null
+    }
+
+    // Só permite alterar a seed se ela não estiver travada pelo plano de monetização
+    if (!isSeedLocked.value) {
+      if (cfgSeedChoice.value === 'auto') {
+        body.seedValue = null
+      } else {
+        const parsed = Number(cfgSeedChoice.value)
+        body.seedValue = Number.isFinite(parsed) ? parsed : null
+      }
+    }
+
     await $fetch(`/api/outputs/${outputId}/metadata`, {
       method: 'PATCH',
-      body: {
-        scriptStyleId: cfgScriptStyleId.value || null,
-        visualStyleId: cfgVisualStyleId.value || null,
-        editorialObjectiveId: cfgEditorialObjectiveId.value || null,
-        objective: cfgObjective.value?.trim() ? cfgObjective.value.trim() : null,
-        mustInclude: cfgMustInclude.value?.trim() ? cfgMustInclude.value.trim() : null,
-        mustExclude: cfgMustExclude.value?.trim() ? cfgMustExclude.value.trim() : null,
-        language: cfgLanguage.value?.trim() ? cfgLanguage.value.trim() : null,
-        narrationLanguage: cfgNarrationLanguage.value?.trim() ? cfgNarrationLanguage.value.trim() : null,
-        seedValue: cfgSeedMode.value === 'auto' ? null : (typeof cfgSeedValue.value === 'number' ? cfgSeedValue.value : null)
-      }
+      body
     })
     await loadOutput()
     showOutputConfigModal.value = false
@@ -2879,26 +2880,22 @@ const motionVersions = ref<Record<string, number>>({})
 // Edição de Visual Prompt
 const editingPromptSceneId = ref<string | null>(null)
 const editingPromptText = ref('')
-const editingEndPromptText = ref('')
 
 function startEditPrompt(scene: any) {
   editingPromptSceneId.value = scene.id
   editingPromptText.value = scene.visualDescription
-  editingEndPromptText.value = scene.endVisualDescription || ''
 }
 
 function cancelEditPrompt(scene: any) {
   editingPromptSceneId.value = null
   editingPromptText.value = ''
-  editingEndPromptText.value = ''
 }
 
 async function saveEditPrompt(scene: any) {
   if (!editingPromptText.value.trim()) return
   try {
     const payload: any = { 
-      visualDescription: editingPromptText.value.trim(),
-      endVisualDescription: editingEndPromptText.value.trim() || null
+      visualDescription: editingPromptText.value.trim()
     }
     
     await $fetch(`/api/scenes/${scene.id}/update`, {
@@ -2906,7 +2903,6 @@ async function saveEditPrompt(scene: any) {
       body: payload
     })
     scene.visualDescription = payload.visualDescription
-    scene.endVisualDescription = payload.endVisualDescription
   } catch (error: any) {
     console.error('Erro ao salvar prompt:', error)
     alert('Erro ao salvar o prompt visual.')
@@ -3140,6 +3136,48 @@ const activeSocialContent = computed(() => {
   if (!kit) return null
   return kit[activeSocialTab.value] || null
 })
+
+function normalizeSeoTags(seoTags: unknown): string[] {
+  const rawItems = Array.isArray(seoTags) ? seoTags : (seoTags ? [seoTags] : [])
+  const tags: string[] = []
+
+  for (const item of rawItems) {
+    if (typeof item !== 'string') continue
+    const text = item.trim()
+    if (!text) continue
+
+    if (text.includes(',')) {
+      tags.push(...text.split(','))
+      continue
+    }
+
+    if (text.includes('\n')) {
+      tags.push(...text.split(/\r?\n/))
+      continue
+    }
+
+    // Heurística: LLM às vezes devolve UM string com várias tags separadas por espaço.
+    // Só splitamos quando parece uma LISTA (muitos tokens) para evitar quebrar uma tag multi-palavra.
+    const tokens = text.split(/\s+/).filter(Boolean)
+    if (rawItems.length === 1 && tokens.length >= 5) {
+      tags.push(...tokens)
+      continue
+    }
+
+    tags.push(text)
+  }
+
+  return tags
+    .map((t) => t.trim().replace(/^#+/, '').trim())
+    .filter(Boolean)
+}
+
+const seoTagsNormalized = computed(() => {
+  const kit = output.value?.socialKit as any
+  return normalizeSeoTags(kit?.seoTags)
+})
+
+const seoTagsForYoutubeCopy = computed(() => seoTagsNormalized.value.join(', '))
 
 async function generateSocialKit() {
   if (generatingSocialKit.value) return
@@ -3649,7 +3687,11 @@ async function revertToStage(targetStage: string) {
 
   // Regra especial: ao voltar para PLANO, resetar pipeline inteiro para estado inicial.
   if (targetStage === 'STORY_OUTLINE') {
-    if (!confirm(`Voltar para a etapa "${targetLabel}"?\n\nIsso vai limpar o pipeline como no início do output (plano, roteiro, visual, narração, música, motion e render).\nConfigurações base como narrador, velocidade, idioma e estilos serão mantidas.`)) return
+    if (!confirm(
+      'Resetar este output para o início do pipeline?\n\n' +
+      'Isso vai limpar todo o pipeline como no início do output (plano, roteiro, visual, narração, música, motion e render).\n' +
+      'Configurações base como narrador, velocidade, idioma, estilos e o vínculo com o plano de monetização serão mantidos.'
+    )) return
 
     reverting.value = true
     try {

@@ -6,7 +6,7 @@ import { getVisualStyleById } from '../../../constants/visual-styles'
 type PackageCreateResponse = {
   success: true
   planId: string
-  fullOutputId: string
+  fullOutputIds: string[]
   teaserOutputIds: string[]
   relationCount: number
 }
@@ -15,9 +15,10 @@ type PackageCreateResponse = {
  * POST /api/dossiers/[id]/create-youtube-package
  *
  * Cria um pacote YouTube-first no banco:
- * - 1 Output VIDEO_FULL (YouTube, 16:9, 900s)
+ * - 3 Outputs VIDEO_FULL (EP1–EP3, YouTube, 16:9, 900s)
  * - 12 Outputs VIDEO_TEASER (YouTube Shorts, 9:16, duração do plano)
- * - Relations teaser_to_full e full_to_teaser
+ * - Relations teaser_to_full e full_to_teaser (apontando para EP1)
+ * - Relations episode_next (EP1 → EP2, EP2 → EP3)
  *
  * NÃO executa Story Architect nem pipeline. Execução é manual, output por output.
  */
@@ -55,15 +56,15 @@ export default defineEventHandler(async (event): Promise<PackageCreateResponse> 
   }
 
   const planData = plan.planData as any
-  const full = planData?.fullVideo
+  const fullVideos: any[] = Array.isArray(planData?.fullVideos) ? planData.fullVideos : []
   const teasers: any[] = Array.isArray(planData?.teasers) ? planData.teasers : []
-  const existingPackage = planData?._youtubePackage as undefined | { fullOutputId?: string; teaserOutputIds?: string[] }
-  const fullTitle = typeof full?.title === 'string' ? full.title.trim() : ''
+  const existingPackage = planData?._youtubePackage as undefined | { fullOutputId?: string; fullOutputIds?: string[]; teaserOutputIds?: string[] }
+  const fullTitles = fullVideos.map(v => (typeof v?.title === 'string' ? v.title.trim() : '')).filter(Boolean)
 
-  if (!full) {
+  if (fullVideos.length !== 3) {
     throw createError({
       statusCode: 400,
-      message: 'Plano de monetização inválido: campo fullVideo ausente'
+      message: `Plano de monetização inválido: esperado fullVideos[3], encontrado ${fullVideos.length}`
     })
   }
 
@@ -85,7 +86,7 @@ export default defineEventHandler(async (event): Promise<PackageCreateResponse> 
   const resolvedPlanVisualStyleId = (() => {
     const candidates = [
       planData?.visualStyleId,
-      full.visualStyleId,
+      fullVideos?.[0]?.visualStyleId,
       dossier.preferredVisualStyleId,
       dossier.channel?.defaultVisualStyleId,
       'noir-cinematic'
@@ -125,63 +126,62 @@ export default defineEventHandler(async (event): Promise<PackageCreateResponse> 
   }
 
   // Backfill: pacote criado anteriormente (antes de persistir _youtubePackage no planData)
-  // Heurística segura: procurar o FULL do pacote pelo título + formato + duração, depois coletar relations full_to_teaser.
-  if (!existingPackage?.fullOutputId && fullTitle) {
-    const maybeFull = await prisma.output.findFirst({
+  if (!existingPackage && fullTitles.length > 0) {
+    const outputs = await prisma.output.findMany({
       where: {
         dossierId,
-        outputType: 'VIDEO_FULL',
-        format: 'full-youtube',
-        duration: 900,
-        title: fullTitle,
-        createdAt: { gte: plan.createdAt }
+        monetizationContext: { path: ['planId'], equals: plan.id }
       },
-      orderBy: { createdAt: 'desc' }
+      select: { id: true, outputType: true, format: true, duration: true, createdAt: true, monetizationContext: true }
     })
 
-    if (maybeFull) {
-      const rels = await prisma.outputRelation.findMany({
-        where: { mainOutputId: maybeFull.id, relationType: 'full_to_teaser' },
-        select: { relatedOutputId: true }
+    const fulls = outputs
+      .filter(o => o.outputType === 'VIDEO_FULL' && o.format === 'full-youtube' && o.duration === 900)
+      .sort((a, b) => +new Date(a.createdAt) - +new Date(b.createdAt))
+    const teaserOutputs = outputs
+      .filter(o => o.outputType === 'VIDEO_TEASER' && o.format === 'teaser-youtube-shorts')
+      .sort((a, b) => {
+        const ai = Number((a.monetizationContext as any)?.teaserIndex ?? 0)
+        const bi = Number((b.monetizationContext as any)?.teaserIndex ?? 0)
+        return ai - bi
       })
-      const teaserIds = rels.map(r => r.relatedOutputId)
-      if (teaserIds.length === 12) {
-        const found = await prisma.output.findMany({
-          where: { id: { in: [maybeFull.id, ...teaserIds] } },
-          select: { id: true }
-        })
-        const foundIds = new Set(found.map(o => o.id))
-        const allExist = [maybeFull.id, ...teaserIds].every(id => foundIds.has(id))
-        if (allExist) {
-          const safePlanData = (planData && typeof planData === 'object') ? planData : {}
-          await prisma.monetizationPlan.update({
-            where: { id: plan.id },
-            data: {
-              planData: {
-                ...(safePlanData as any),
-                _youtubePackage: {
-                  fullOutputId: maybeFull.id,
-                  teaserOutputIds: teaserIds,
-                  createdAt: new Date().toISOString()
-                }
-              } as any
+
+    if (fulls.length >= 1 && teaserOutputs.length === 12) {
+      const safePlanData = (planData && typeof planData === 'object') ? planData : {}
+      const fullOutputIds = fulls.slice(0, 3).map(o => o.id)
+      const teaserOutputIds = teaserOutputs.map(o => o.id)
+
+      await prisma.monetizationPlan.update({
+        where: { id: plan.id },
+        data: {
+          planData: {
+            ...(safePlanData as any),
+            _youtubePackage: {
+              fullOutputIds,
+              teaserOutputIds,
+              createdAt: new Date().toISOString()
             }
-          })
-          return {
-            success: true,
-            planId: plan.id,
-            fullOutputId: maybeFull.id,
-            teaserOutputIds: teaserIds,
-            relationCount: teaserIds.length * 2
-          }
+          } as any
         }
+      })
+
+      return {
+        success: true,
+        planId: plan.id,
+        fullOutputIds,
+        teaserOutputIds,
+        relationCount: teaserOutputIds.length * 2
       }
     }
   }
 
   // Idempotência: se o pacote já foi criado para este plano, retornar (sem recriar outputs)
-  if (existingPackage?.fullOutputId && Array.isArray(existingPackage.teaserOutputIds) && existingPackage.teaserOutputIds.length > 0) {
-    const ids = [existingPackage.fullOutputId, ...existingPackage.teaserOutputIds].filter(Boolean)
+  const existingFullIds = Array.isArray(existingPackage?.fullOutputIds)
+    ? existingPackage?.fullOutputIds
+    : (existingPackage?.fullOutputId ? [existingPackage.fullOutputId] : [])
+
+  if (existingFullIds.length > 0 && Array.isArray(existingPackage?.teaserOutputIds) && existingPackage.teaserOutputIds.length > 0) {
+    const ids = [...existingFullIds, ...existingPackage.teaserOutputIds].filter(Boolean)
     const found = await prisma.output.findMany({
       where: { id: { in: ids } },
       select: { id: true }
@@ -192,7 +192,7 @@ export default defineEventHandler(async (event): Promise<PackageCreateResponse> 
       return {
         success: true,
         planId: plan.id,
-        fullOutputId: existingPackage.fullOutputId,
+        fullOutputIds: existingFullIds,
         teaserOutputIds: existingPackage.teaserOutputIds,
         relationCount: existingPackage.teaserOutputIds.length * 2
       }
@@ -202,45 +202,56 @@ export default defineEventHandler(async (event): Promise<PackageCreateResponse> 
   const result = await prisma.$transaction(async (tx) => {
     const seedId = await resolveSeedId(tx, resolvedPlanVisualStyleId)
 
-    // ── FULL OUTPUT ───────────────────────────────────────────────
-    const fullScriptStyleId = resolveScriptStyleId(full?.scriptStyleId)
-    const fullScriptStyle = getScriptStyleById(fullScriptStyleId)
-    const fullEditorialObjectiveId = (full?.editorialObjectiveId && getEditorialObjectiveById(full.editorialObjectiveId)) ? full.editorialObjectiveId : 'hidden-truth'
-    const fullEditorialObjective = getEditorialObjectiveById(fullEditorialObjectiveId)
-    const fullVisualStyleId = resolvedPlanVisualStyleId || fullScriptStyle?.defaultVisualStyleId || 'noir-cinematic'
+    // ── FULL OUTPUTS (EP1–EP3) ─────────────────────────────────────
+    const fullOutputs: any[] = []
+    for (let i = 0; i < fullVideos.length; i++) {
+      const ep = fullVideos[i]
+      const episodeNumber = Number(ep?.episodeNumber || (i + 1))
+      const angleCategory = typeof ep?.angleCategory === 'string' ? ep.angleCategory : `episode-${i + 1}`
 
-    const fullOutput = await tx.output.create({
-      data: {
-        dossierId,
-        outputType: 'VIDEO_FULL',
-        format: 'full-youtube',
-        platform: 'YouTube',
-        aspectRatio: '16:9',
-        duration: 900,
-        title: fullTitle || undefined,
-        language: 'pt-BR',
-        narrationLanguage: 'pt-BR',
-        objective: fullEditorialObjective?.instruction || 'Foque no que NÃO está sendo dito. Desmonte a narrativa oficial ponto a ponto, revelando as camadas ocultas.',
-        scriptStyleId: fullScriptStyleId,
-        visualStyleId: fullVisualStyleId,
-        seedId,
-        status: 'PENDING',
-        monetizationContext: {
-          itemType: 'fullVideo',
-          planId: plan.id,
-          sceneCount: Number(full?.sceneCount) || 150,
-          title: full.title,
-          hook: full.hook,
-          angle: full.angle,
-          angleCategory: 'full-video',
-          strategicNotes: planData?.strategicNotes,
-          scriptStyleId: fullScriptStyleId,
-          scriptStyleName: fullScriptStyle?.name || full?.scriptStyleName,
-          editorialObjectiveId: fullEditorialObjectiveId,
-          editorialObjectiveName: fullEditorialObjective?.name || full?.editorialObjectiveName,
-        } as any
-      }
-    })
+      const scriptStyleId = resolveScriptStyleId(ep?.scriptStyleId)
+      const scriptStyle = getScriptStyleById(scriptStyleId)
+      const editorialObjectiveId = (ep?.editorialObjectiveId && getEditorialObjectiveById(ep.editorialObjectiveId)) ? ep.editorialObjectiveId : 'hidden-truth'
+      const editorialObjective = getEditorialObjectiveById(editorialObjectiveId)
+      const visualStyleId = resolvedPlanVisualStyleId || scriptStyle?.defaultVisualStyleId || 'noir-cinematic'
+
+      const title = typeof ep?.title === 'string' ? ep.title.trim() : ''
+
+      const created = await tx.output.create({
+        data: {
+          dossierId,
+          outputType: 'VIDEO_FULL',
+          format: 'full-youtube',
+          platform: 'YouTube',
+          aspectRatio: '16:9',
+          duration: 900,
+          title: title || undefined,
+          language: 'pt-BR',
+          narrationLanguage: 'pt-BR',
+          objective: editorialObjective?.instruction || 'Foque no que NÃO está sendo dito. Desmonte a narrativa oficial ponto a ponto, revelando as camadas ocultas.',
+          scriptStyleId,
+          visualStyleId,
+          seedId,
+          status: 'PENDING',
+          monetizationContext: {
+            itemType: 'fullVideo',
+            planId: plan.id,
+            episodeNumber,
+            sceneCount: Number(ep?.sceneCount) || 150,
+            title: ep?.title,
+            hook: ep?.hook,
+            angle: ep?.angle,
+            angleCategory,
+            strategicNotes: planData?.strategicNotes,
+            scriptStyleId: scriptStyleId,
+            scriptStyleName: scriptStyle?.name || ep?.scriptStyleName,
+            editorialObjectiveId,
+            editorialObjectiveName: editorialObjective?.name || ep?.editorialObjectiveName,
+          } as any
+        }
+      })
+      fullOutputs.push(created)
+    }
 
     // ── TEASERS (SHORTS) ──────────────────────────────────────────
     const teaserOutputs = []
@@ -274,6 +285,7 @@ export default defineEventHandler(async (event): Promise<PackageCreateResponse> 
             itemType: 'teaser',
             planId: plan.id,
             teaserIndex: i,
+            episodeNumber: t.targetEpisode || 1,
             sceneCount: Number(t?.sceneCount) || (t?.narrativeRole === 'gateway' ? 5 : t?.narrativeRole === 'hook-only' ? 4 : 6),
             title: t.title,
             hook: t.hook,
@@ -297,18 +309,46 @@ export default defineEventHandler(async (event): Promise<PackageCreateResponse> 
     }
 
     // ── RELAÇÕES ──────────────────────────────────────────────────
-    const relationsData = teaserOutputs.flatMap((teaser: any) => ([
-      {
-        mainOutputId: teaser.id,
-        relatedOutputId: fullOutput.id,
-        relationType: 'teaser_to_full'
-      },
-      {
-        mainOutputId: fullOutput.id,
-        relatedOutputId: teaser.id,
-        relationType: 'full_to_teaser'
-      }
-    ]))
+    const episode1Output = fullOutputs[0]
+    if (!episode1Output) {
+      throw new Error('Pacote inválido: EP1 não foi criado (fullOutputs[0] ausente)')
+    }
+    // Routing dinâmico: cada teaser aponta pro EP definido em targetEpisode
+    const relationsData = teaserOutputs.flatMap((teaser: any, idx: number) => {
+      const targetEp = teasers[idx]?.targetEpisode || 1
+      const targetOutput = fullOutputs[targetEp - 1] || fullOutputs[0]
+      return [
+        {
+          mainOutputId: teaser.id,
+          relatedOutputId: targetOutput.id,
+          relationType: 'teaser_to_full'
+        },
+        {
+          mainOutputId: targetOutput.id,
+          relatedOutputId: teaser.id,
+          relationType: 'full_to_teaser'
+        }
+      ]
+    })
+
+    // EP1 -> EP2, EP2 -> EP3
+    const episode2Output = fullOutputs[1]
+    const episode3Output = fullOutputs[2]
+
+    if (episode2Output) {
+      relationsData.push({
+        mainOutputId: episode1Output.id,
+        relatedOutputId: episode2Output.id,
+        relationType: 'episode_next'
+      } as any)
+    }
+    if (episode2Output && episode3Output) {
+      relationsData.push({
+        mainOutputId: episode2Output.id,
+        relatedOutputId: episode3Output.id,
+        relationType: 'episode_next'
+      } as any)
+    }
 
     await tx.outputRelation.createMany({ data: relationsData as any })
 
@@ -320,7 +360,7 @@ export default defineEventHandler(async (event): Promise<PackageCreateResponse> 
         planData: {
           ...(safePlanData as any),
           _youtubePackage: {
-            fullOutputId: fullOutput.id,
+            fullOutputIds: fullOutputs.map((o: any) => o.id),
             teaserOutputIds: teaserOutputs.map((o: any) => o.id),
             createdAt: new Date().toISOString()
           }
@@ -329,7 +369,7 @@ export default defineEventHandler(async (event): Promise<PackageCreateResponse> 
     })
 
     return {
-      fullOutputId: fullOutput.id,
+      fullOutputIds: fullOutputs.map((o: any) => o.id),
       teaserOutputIds: teaserOutputs.map((o: any) => o.id),
       relationCount: relationsData.length
     }
@@ -338,7 +378,7 @@ export default defineEventHandler(async (event): Promise<PackageCreateResponse> 
   return {
     success: true,
     planId: plan.id,
-    fullOutputId: result.fullOutputId,
+    fullOutputIds: result.fullOutputIds,
     teaserOutputIds: result.teaserOutputIds,
     relationCount: result.relationCount
   }

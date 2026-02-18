@@ -68,7 +68,7 @@ function createBlueprintSchema(teaserCount: number) {
     planTitle: z.string().describe('Título criativo do plano de monetização'),
     visualStyleId: z.string().describe('ID do estilo visual ÚNICO para todo o plano'),
     visualStyleName: z.string().describe('Nome do estilo visual'),
-    fullVideo: BlueprintFullVideoSlotSchema.describe('Slot do Full Video'),
+    fullVideos: z.array(BlueprintFullVideoSlotSchema).length(3).describe('3 slots de Full Video (EP1, EP2, EP3)'),
     teaserSlots: z.array(BlueprintTeaserSlotSchema).min(min).max(max).describe(`${teaserCount} slots de teasers com ângulos, roles e formatos`),
     estimatedTotalRevenue: z.string().describe('Estimativa de receita total'),
     strategicNotes: z.string().describe('Notas estratégicas')
@@ -91,7 +91,7 @@ const FullVideoSchema = z.object({
   editorialObjectiveId: z.string(),
   editorialObjectiveName: z.string(),
   visualPrompt: z.string().describe('Prompt de imagem em inglês'),
-  sceneCount: z.number().int().optional().describe('Quantidade alvo de cenas para o vídeo longo (definida pelo sistema)')
+  sceneCount: z.number().int().nullable().optional().describe('Quantidade alvo de cenas para o vídeo longo (definida pelo sistema)')
 })
 
 // ── Etapa 3-5: Teasers (por categoria) ──────────────────────────────────────
@@ -118,7 +118,8 @@ const TeaserSchema = z.object({
   editorialObjectiveName: z.string(),
   avoidPatterns: z.array(z.string()).min(1).max(4),
   visualPrompt: z.string().describe('Prompt de imagem em inglês'),
-  sceneCount: z.number().int().optional().describe('Quantidade alvo de cenas do teaser (definida pelo sistema)')
+  sceneCount: z.number().int().nullable().optional().describe('Quantidade alvo de cenas do teaser (definida pelo sistema)'),
+  targetEpisode: z.union([z.literal(1), z.literal(2), z.literal(3)]).describe('Episódio alvo deste teaser (1, 2 ou 3). Gateway=sempre 1. Deep-dive/Hook-only=alinhado ao ângulo do episódio.')
 })
 
 // ── Etapa 6: Schedule ──────────────────────────────────────────────────────────
@@ -161,7 +162,7 @@ export interface MonetizationPlannerV2Result {
     planTitle: string
     visualStyleId: string
     visualStyleName: string
-    fullVideo: z.infer<typeof FullVideoSchema>
+    fullVideos: Array<z.infer<typeof FullVideoSchema> & { episodeNumber: 1 | 2 | 3; angleCategory: 'episode-1' | 'episode-2' | 'episode-3'; sceneCount: number }>
     teasers: z.infer<typeof TeaserSchema>[]
     publicationSchedule: z.infer<typeof ScheduleItemSchema>[]
     estimatedTotalRevenue: string
@@ -193,6 +194,19 @@ interface BlueprintValidation {
 function validateBlueprint(blueprint: any, expectedTeaserCount: number): BlueprintValidation {
   const violations: string[] = []
   const slots = blueprint.teaserSlots || []
+
+  // 0. Full Videos (EP1–EP3)
+  const fullVideos = blueprint.fullVideos
+  if (!Array.isArray(fullVideos)) {
+    violations.push('Full Videos: esperado array "fullVideos"')
+  } else if (fullVideos.length !== 3) {
+    violations.push(`Full Videos: esperado 3 episódios, encontrado ${fullVideos.length}`)
+  } else {
+    const episodeAngles = fullVideos.map((fv: any) => fv?.angle).filter(Boolean)
+    if (episodeAngles.length !== 3) violations.push('Full Videos: episódios sem "angle" válido')
+    const uniqueEpisodeAngles = new Set(episodeAngles)
+    if (uniqueEpisodeAngles.size !== episodeAngles.length) violations.push('Full Videos: ângulos duplicados entre episódios')
+  }
 
   // 1. Contagem de roles
   const gateways = slots.filter((s: any) => s.narrativeRole === 'gateway')
@@ -299,7 +313,11 @@ function autoFixBlueprint(blueprint: any): { fixed: boolean; changes: string[] }
 // HELPER FUNCTIONS
 // =============================================================================
 
-function createStructuredOutput(model: any, schema: any, provider: string) {
+/**
+ * Structured output method: Gemini → jsonMode; Groq llama-4 → jsonMode;
+ * Groq gpt-oss → jsonSchema (strict mode, avoids json_validate_failed).
+ */
+function createStructuredOutput(model: any, schema: any, provider: string, modelId?: string) {
   const isGemini = provider.toLowerCase().includes('gemini') || provider.toLowerCase().includes('google')
   const isReplicate = provider.toLowerCase().includes('replicate')
   const isGroq = provider.toLowerCase().includes('groq')
@@ -309,8 +327,9 @@ function createStructuredOutput(model: any, schema: any, provider: string) {
   let method: string | undefined
   if (isGemini) method = 'jsonMode' // Gemini tem limitações em response_schema (const, default)
   else if (isGroq) {
-    const modelName = (model as any).model || (model as any).modelName || ''
-    if (modelName.includes('llama-4')) method = 'jsonMode'
+    const modelName = modelId ?? (model as any).model ?? (model as any).modelName ?? ''
+    if (modelName.includes('gpt-oss')) method = 'jsonSchema' // Groq strict mode (evita json_validate_failed)
+    else if (modelName.includes('llama-4')) method = 'jsonMode'
   }
   return (model as any).withStructuredOutput(schema, {
     includeRaw: true,
@@ -326,8 +345,8 @@ async function invokeStage(
   dossierBlock: string,
   assignment: { provider: string; model: string }
 ): Promise<{ parsed: any; usage: { inputTokens: number; outputTokens: number; totalTokens: number }; elapsed: number }> {
-  const model = await createLlmForTask('monetization', { maxTokens: 16384 })
-  const structuredLlm = createStructuredOutput(model, schema, assignment.provider)
+  const model = await createLlmForTask('monetization', { maxTokens: 16384, temperature: 0.5 })
+  const structuredLlm = createStructuredOutput(model, schema, assignment.provider, assignment.model)
 
   const isAnthropicProvider = assignment.provider.toLowerCase().includes('anthropic')
   const cacheResult = buildCacheableMessages({
@@ -403,22 +422,42 @@ function fallbackParseFromRaw(rawMessage: any, logPrefix: string): any | null {
     }
   }
 
-  // Tentativa 2: content text
+  // Tentativa 2: content text (strip code fences e tentar parse)
+  const stripFences = (s: string) =>
+    s.replace(/```[\w]*\n?/g, '').replace(/```\n?/g, '').trim()
+  const tryParse = (raw: string): any | null => {
+    const cleaned = stripFences(raw)
+    try {
+      return JSON.parse(cleaned)
+    } catch {
+      const firstBrace = cleaned.search(/\{|\[/)
+      if (firstBrace >= 0) {
+        try {
+          return JSON.parse(cleaned.slice(firstBrace))
+        } catch {
+          // ignora
+        }
+      }
+    }
+    return null
+  }
   const candidates = rawMessage?.lc_kwargs?.content || rawMessage?.content
   try {
     if (typeof candidates === 'string') {
-      const cleaned = candidates.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-      const parsed = JSON.parse(cleaned)
-      console.log(`${logPrefix} ✅ Fallback via content string`)
-      return parsed
+      const parsed = tryParse(candidates)
+      if (parsed != null) {
+        console.log(`${logPrefix} ✅ Fallback via content string`)
+        return parsed
+      }
     }
     if (Array.isArray(candidates)) {
       for (const part of candidates) {
         if (part?.type === 'text' && part?.text) {
-          const cleaned = part.text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-          const parsed = JSON.parse(cleaned)
-          console.log(`${logPrefix} ✅ Fallback via array content`)
-          return parsed
+          const parsed = tryParse(part.text)
+          if (parsed != null) {
+            console.log(`${logPrefix} ✅ Fallback via array content`)
+            return parsed
+          }
         }
       }
     }
@@ -426,6 +465,102 @@ function fallbackParseFromRaw(rawMessage: any, logPrefix: string): any | null {
     console.warn(`${logPrefix} ⚠️ Fallback falhou: ${e.message}`)
   }
   return null
+}
+
+// =============================================================================
+// TEASER UNWRAP HELPER
+// =============================================================================
+
+/**
+ * Safely unwraps a single teaser from an invokeStage result.
+ * Handles cases where Groq's failed_generation fallback returns:
+ *   - { teasers: [{ ... }] }  (expected shape)
+ *   - { title, hook, ... }    (teaser at root, no wrapper)
+ *   - [{ ... }]               (bare array)
+ */
+function unwrapSingleTeaser(parsed: any, stageName: string): any {
+  // Case 1: expected shape
+  if (Array.isArray(parsed?.teasers) && parsed.teasers.length > 0) {
+    return parsed.teasers[0]
+  }
+  // Case 2: bare array
+  if (Array.isArray(parsed) && parsed.length > 0) {
+    console.warn(`${LOG} ⚠️ ${stageName}: parsed é array sem wrapper — usando parsed[0]`)
+    return parsed[0]
+  }
+  // Case 3: teaser at root (has typical teaser fields)
+  if (parsed && typeof parsed === 'object' && (parsed.title || parsed.hook || parsed.narrativeRole)) {
+    console.warn(`${LOG} ⚠️ ${stageName}: parsed é teaser na raiz (sem wrapper "teasers") — usando diretamente`)
+    return parsed
+  }
+  throw new Error(`${stageName}: resposta não contém teasers válidos (parsed.teasers=${JSON.stringify(parsed?.teasers)})`)
+}
+
+/**
+ * Safely unwraps an array of teasers from an invokeStage result.
+ * Handles the same fallback shapes as unwrapSingleTeaser.
+ */
+function unwrapTeaserArray(parsed: any, stageName: string): any[] {
+  if (Array.isArray(parsed?.teasers) && parsed.teasers.length > 0) {
+    return parsed.teasers
+  }
+  if (Array.isArray(parsed) && parsed.length > 0) {
+    console.warn(`${LOG} ⚠️ ${stageName}: parsed é array sem wrapper — usando diretamente`)
+    return parsed
+  }
+  if (parsed && typeof parsed === 'object' && (parsed.title || parsed.hook || parsed.narrativeRole)) {
+    console.warn(`${LOG} ⚠️ ${stageName}: parsed é teaser na raiz (sem wrapper "teasers") — wrapping em array`)
+    return [parsed]
+  }
+  console.warn(`${LOG} ⚠️ ${stageName}: sem teasers encontrados no parsed — retornando []`)
+  return []
+}
+
+/**
+ * Fills missing fields on a teaser that came from a Groq failed_generation fallback.
+ * Uses the blueprint slot data as defaults so the teaser is always complete.
+ */
+function hydrateTeaserDefaults(teaser: any, slot: any, stageName: string): any {
+  if (!teaser || typeof teaser !== 'object') return teaser
+
+  const missing: string[] = []
+  const defaults: Record<string, any> = {
+    narrativeRole: slot?.narrativeRole,
+    angleCategory: slot?.angleCategory,
+    angle: slot?.angleName || slot?.angleCategory,
+    shortFormatType: slot?.shortFormatType,
+    platform: 'YouTube Shorts',
+    format: 'teaser-youtube-shorts',
+    scriptStyleId: slot?.scriptStyleId || 'mystery',
+    scriptStyleName: slot?.scriptStyleName || slot?.scriptStyleId || 'mystery',
+    editorialObjectiveId: slot?.editorialObjectiveId || 'viral-hook',
+    editorialObjectiveName: slot?.editorialObjectiveName || slot?.editorialObjectiveId || 'viral-hook',
+    estimatedViews: 50000,
+    scriptOutline: teaser.hook ? `Hook: ${teaser.hook}` : 'Script outline não gerado',
+    visualSuggestion: 'Atmosfera documental com textura de arquivo',
+    avoidPatterns: ['contextualização excessiva', 'nomes obscuros', 'CTA visível'],
+    visualPrompt: 'Dark documentary atmosphere with archival textures, cinematic lighting, no faces',
+    cta: teaser.narrativeRole === 'hook-only' ? null : (teaser.cta ?? null),
+    targetEpisode: 1,
+  }
+
+  for (const [key, defaultValue] of Object.entries(defaults)) {
+    if (teaser[key] === undefined || teaser[key] === null || teaser[key] === '') {
+      // Don't overwrite narrativeRole/angleCategory if already set
+      if (key === 'cta' && teaser.narrativeRole === 'hook-only') {
+        teaser[key] = null
+        continue
+      }
+      teaser[key] = defaultValue
+      missing.push(key)
+    }
+  }
+
+  if (missing.length > 0) {
+    console.warn(`${LOG} 🩹 ${stageName}: hydrated ${missing.length} missing fields: ${missing.join(', ')}`)
+  }
+
+  return teaser
 }
 
 // =============================================================================
@@ -484,7 +619,7 @@ export async function generateMonetizationPlanV2(
   if (request.creativeDirection) {
     const cd = request.creativeDirection
     creativeDirectionBlock = `\n## 🎨 DIREÇÃO CRIATIVA PRÉ-APROVADA\n\n` +
-      `**Full Video:** roteiro=\`${cd.fullVideo.scriptStyle.id}\`, visual=\`${cd.fullVideo.visualStyle.id}\`, editorial=\`${cd.fullVideo.editorialObjective.id}\`\n` +
+      `**Full Videos (EP1–EP3):** roteiro=\`${cd.fullVideo.scriptStyle.id}\`, visual=\`${cd.fullVideo.visualStyle.id}\`, editorial=\`${cd.fullVideo.editorialObjective.id}\`\n` +
       `**Teasers:**\n${cd.teaserRecommendations.map((t, i) => `${i + 1}. Ângulo "${t.suggestedAngle}": roteiro=\`${t.scriptStyle.id}\`, editorial=\`${t.editorialObjective.id}\``).join('\n')}\n`
   }
 
@@ -563,26 +698,101 @@ export async function generateMonetizationPlanV2(
   // =====================================================================
   // ETAPA 2: FULL VIDEO
   // =====================================================================
-  console.log(`${LOG} ── ETAPA 2/6: Full Video ──`)
+  console.log(`${LOG} ── ETAPA 2/6: Full Videos (EP1–EP3) ──`)
 
   const fullVideoSkill = loadSkill('monetization/full-video')
   const teaserAnglesBlock = `\n## ÂNGULOS DOS TEASERS (para NÃO sobrepor)\n${slots.map((s: any, i: number) => `${i + 1}. ${s.angleCategory}: ${s.angleName}`).join('\n')}\n`
 
-  const fullVideoResult = await invokeStage(
-    'full-video', FullVideoSchema,
-    `${fullVideoSkill}\n\n${brandSafetySkill}${creativeDirectionBlock}${configBlock}${teaserAnglesBlock}\n\nEstilo visual do plano: ${blueprint.visualStyleId} (${blueprint.visualStyleName})`,
-    `Gere a sugestão completa do Full Video.\n\nÂngulo principal definido no blueprint: "${blueprint.fullVideo.angle}"\nscriptStyleId: "${blueprint.fullVideo.scriptStyleId}"\neditorialObjectiveId: "${blueprint.fullVideo.editorialObjectiveId}"`,
-    fullDossierBlock, assignment
-  )
-  stageTimings['full-video'] = fullVideoResult.elapsed
-  totalUsage.inputTokens += fullVideoResult.usage.inputTokens
-  totalUsage.outputTokens += fullVideoResult.usage.outputTokens
-  totalUsage.totalTokens += fullVideoResult.usage.totalTokens
+  const fullVideosBase: Array<z.infer<typeof FullVideoSchema>> = []
+  let fullVideosElapsedTotal = 0
 
-  const fullVideo = {
-    ...fullVideoResult.parsed,
-    sceneCount: sceneConfig.fullVideo
+  for (let i = 0; i < 3; i++) {
+    const epNumber = (i + 1) as 1 | 2 | 3
+    const angleCategory = (`episode-${epNumber}`) as 'episode-1' | 'episode-2' | 'episode-3'
+    const slot = blueprint.fullVideos?.[i]
+    if (!slot) throw new Error(`Blueprint inválido: fullVideos[${i}] ausente`)
+
+    const previousEpisodesBlock = fullVideosBase.length > 0
+      ? `\n## EPISÓDIOS JÁ DEFINIDOS (NÃO REPETIR)\n${fullVideosBase.map((v, idx) => {
+        const n = idx + 1
+        const safeTitle = (v as any)?.title || '(sem título)'
+        const safeHook = (v as any)?.hook || '(sem hook)'
+        const safeAngle = (v as any)?.angle || '(sem ângulo)'
+        return `${n}. title="${safeTitle}" | angle="${safeAngle}" | hook="${safeHook}"`
+      }).join('\n')}\n`
+      : ''
+
+    const coveredTerritoriesBlock = fullVideosBase.length > 0
+      ? (() => {
+        const items: string[] = []
+        for (const v of fullVideosBase as any[]) {
+          if (v?.angle) items.push(`angle: ${v.angle}`)
+          if (Array.isArray(v?.keyPoints)) {
+            for (const kp of v.keyPoints) {
+              if (kp) items.push(`keyPoint: ${kp}`)
+            }
+          }
+          if (v?.hook) items.push(`hook: ${v.hook}`)
+        }
+        const unique = Array.from(new Set(items)).slice(0, 24)
+        return unique.length > 0
+          ? `\n## TERRITÓRIOS JÁ COBERTOS (PROIBIDO REPETIR, MESMO COM SINÔNIMOS)\n- ${unique.join('\n- ')}\n`
+          : ''
+      })()
+      : ''
+
+    const r = await invokeStage(
+      `full-video-ep${epNumber}`,
+      FullVideoSchema,
+      `${fullVideoSkill}\n\n${brandSafetySkill}${creativeDirectionBlock}${configBlock}${teaserAnglesBlock}${previousEpisodesBlock}${coveredTerritoriesBlock}\n\nEstilo visual do plano: ${blueprint.visualStyleId} (${blueprint.visualStyleName})`,
+      `Gere a sugestão completa do Full Video (EP${epNumber}).\n\n` +
+      `## FUNÇÃO NARRATIVA DESTE EPISÓDIO (EP${epNumber}):\n` +
+      (epNumber === 1
+        ? `- CONTEXTUALIZAÇÃO + ASCENSÃO: Mostre a origem, método e formação do conflito.\n` +
+        `- Termine com TENSÃO CRESCENTE — o conflito se forma, mas NÃO se resolve.\n` +
+        `- ⛔ PROIBIDO: revelar desfechos (mortes, prisões, libertações), traições, ou transformações pós-história.\n`
+        : epNumber === 2
+          ? `- GRANDE VIRADA: Entregue a traição, o ponto de inflexão, as consequências imediatas.\n` +
+          `- Termine com o IMPACTO da virada — a situação mudou irreversivelmente.\n` +
+          `- ⛔ PROIBIDO: revelar o legado final, o que aconteceu décadas depois, ou transformações do local.\n`
+          : `- DESFECHO + LEGADO: Resolva todos os arcos, revele o destino final, conecte com o presente.\n` +
+          `- EP3 pode referenciar eventos de EP1/EP2 para fechar a narrativa.\n`) +
+      `\nRegras adicionais:\n` +
+      `- Este episódio deve ser consistente com a série e NÃO repetir hooks/keyPoints já usados.\n` +
+      `- O episódio deve ter começo-meio-fim (macro-loop fechado), mas manter ponte orgânica para o próximo episódio.\n` +
+      `- TESTE DE SPOILER: Se o espectador assistir apenas este EP, ele saberia o desfecho final? Se SIM → remova o spoiler.\n\n` +
+      `Slot definido no blueprint:\n` +
+      `- angleCategory: "${angleCategory}"\n` +
+      `- angle: "${slot.angle}"\n` +
+      `- scriptStyleId: "${slot.scriptStyleId}"\n` +
+      `- editorialObjectiveId: "${slot.editorialObjectiveId}"`,
+      fullDossierBlock,
+      assignment
+    )
+
+    fullVideosElapsedTotal += r.elapsed
+    totalUsage.inputTokens += r.usage.inputTokens
+    totalUsage.outputTokens += r.usage.outputTokens
+    totalUsage.totalTokens += r.usage.totalTokens
+
+    fullVideosBase.push(r.parsed)
   }
+
+  stageTimings['full-video'] = fullVideosElapsedTotal
+
+  const fullVideos = fullVideosBase.map((v, idx) => {
+    const epNumber = (idx + 1) as 1 | 2 | 3
+    const angleCategory = (`episode-${epNumber}`) as 'episode-1' | 'episode-2' | 'episode-3'
+    return {
+      ...v,
+      episodeNumber: epNumber,
+      angleCategory,
+      sceneCount: sceneConfig.fullVideo
+    }
+  })
+
+  // Bloco de contexto dos 3 episódios para targeting de teasers
+  const episodeContextBlock = `\n## 🎬 EPISÓDIOS DO DOSSIÊ (para targetEpisode)\nCada teaser DEVE ter targetEpisode (1, 2 ou 3) indicando para qual episódio ele funila.\n${fullVideos.map(v => `- EP${v.episodeNumber}: "${v.title}" — ângulo: ${v.angle}`).join('\n')}\n\nRegras de distribuição:\n- Gateway: targetEpisode=1 (SEMPRE — é a porta de entrada do dossiê)\n- Deep-dive: distribua equilibradamente entre EP1, EP2, EP3 (~2 por EP), alinhando pelo ângulo mais próximo\n- Hook-only: distribua priorizando EP2 e EP3 (que têm menos exposição orgânica)\n`
 
   // =====================================================================
   // ETAPA 3: GATEWAY (1 teaser)
@@ -595,8 +805,8 @@ export async function generateMonetizationPlanV2(
   const gatewayResult = await invokeStage(
     'gateway',
     z.object({ teasers: z.array(TeaserSchema).length(1) }),
-    `${gatewaySkill}\n\n${brandSafetySkill}${configBlock}\n\nEstilo visual do plano: ${blueprint.visualStyleId} (${blueprint.visualStyleName})\n\nHook do Full Video (NÃO repetir): "${fullVideo.hook}"`,
-    `Gere o teaser GATEWAY para o dossiê.\n\nSlot definido no blueprint:\n- angleCategory: "${gwSlot.angleCategory}"\n- angleName: "${gwSlot.angleName}"\n- shortFormatType: "${gwSlot.shortFormatType}"\n- platform: "${gwSlot.platform}"\n- scriptStyleId: "${gwSlot.scriptStyleId}"\n- editorialObjectiveId: "${gwSlot.editorialObjectiveId}"\n\nRetorne um JSON com campo "teasers" contendo exatamente 1 teaser.`,
+    `${gatewaySkill}\n\n${brandSafetySkill}${configBlock}${episodeContextBlock}\n\nEstilo visual do plano: ${blueprint.visualStyleId} (${blueprint.visualStyleName})\n\nHooks dos Full Videos (NÃO repetir):\n${fullVideos.map((v, i) => `${i + 1}. "${v.hook}"`).join('\n')}`,
+    `Gere o teaser GATEWAY para o dossiê.\nGateway DEVE ter targetEpisode=1.\n\nSlot definido no blueprint:\n- angleCategory: "${gwSlot.angleCategory}"\n- angleName: "${gwSlot.angleName}"\n- shortFormatType: "${gwSlot.shortFormatType}"\n- platform: "${gwSlot.platform}"\n- scriptStyleId: "${gwSlot.scriptStyleId}"\n- editorialObjectiveId: "${gwSlot.editorialObjectiveId}"\n\nRetorne um JSON com campo "teasers" contendo exatamente 1 teaser.`,
     teaserDossierBlock, assignment
   )
   stageTimings['gateway'] = gatewayResult.elapsed
@@ -604,9 +814,9 @@ export async function generateMonetizationPlanV2(
   totalUsage.outputTokens += gatewayResult.usage.outputTokens
   totalUsage.totalTokens += gatewayResult.usage.totalTokens
 
-  const gatewayTeaser = gatewayResult.parsed.teasers[0]
+  const gatewayTeaser = hydrateTeaserDefaults(unwrapSingleTeaser(gatewayResult.parsed, 'gateway'), gwSlot, 'gateway')
   const allTeasers = [gatewayTeaser]
-  const usedHooks = [fullVideo.hook, gatewayTeaser.hook]
+  const usedHooks = [...fullVideos.map(v => v.hook), gatewayTeaser.hook]
 
   // =====================================================================
   // ETAPA 4: DEEP-DIVES (N teasers)
@@ -629,7 +839,7 @@ export async function generateMonetizationPlanV2(
           .join('\n')
 
         const singleSystemPrompt =
-          `${deepDiveSkill}\n\n${brandSafetySkill}${configBlock}\n\n` +
+          `${deepDiveSkill}\n\n${brandSafetySkill}${configBlock}${episodeContextBlock}\n\n` +
           `Estilo visual: ${blueprint.visualStyleId} (${blueprint.visualStyleName})\n\n` +
           `## HOOKS JÁ USADOS (NÃO REPETIR)\n${usedHooks.map((h, hi) => `${hi + 1}. "${h}"`).join('\n')}\n\n` +
           `## GATEWAY JÁ GERADO (NÃO repetir informações)\n` +
@@ -647,7 +857,10 @@ export async function generateMonetizationPlanV2(
           `- platform: "${s.platform}"\n` +
           `- scriptStyleId: "${s.scriptStyleId}"\n` +
           `- editorialObjectiveId: "${s.editorialObjectiveId}"\n\n` +
-          `Retorne um JSON com campo "teasers" contendo exatamente 1 teaser.`
+          `OBRIGATÓRIO: Atribua targetEpisode (1, 2 ou 3) alinhado ao episódio cujo ângulo mais se aproxima do angleCategory deste teaser. Distribua equilibradamente entre EP1, EP2 e EP3.\n\n` +
+          `Retorne um JSON com campo "teasers" contendo exatamente 1 teaser.\n` +
+          `CRÍTICO: A API rejeita a resposta se "teasers" tiver mais de um item. Retorne exatamente um objeto em "teasers".\n` +
+          `CRÍTICO: Todos os campos (scriptOutline, visualSuggestion, cta, platform, format, estimatedViews, scriptStyleId, scriptStyleName, editorialObjectiveId, editorialObjectiveName, avoidPatterns, visualPrompt, sceneCount, targetEpisode) devem estar DENTRO do único objeto em "teasers", não na raiz do JSON.`
 
         const r = await invokeStage(
           `deep-dive-${i + 1}`,
@@ -663,10 +876,12 @@ export async function generateMonetizationPlanV2(
         totalUsage.outputTokens += r.usage.outputTokens
         totalUsage.totalTokens += r.usage.totalTokens
 
-        const teaser = r.parsed?.teasers?.[0]
-        if (teaser) {
+        try {
+          const teaser = hydrateTeaserDefaults(unwrapSingleTeaser(r.parsed, `deep-dive-${i + 1}`), s, `deep-dive-${i + 1}`)
           allTeasers.push(teaser)
           usedHooks.push(teaser.hook)
+        } catch (e: any) {
+          console.warn(`${LOG} ⚠️ deep-dive-${i + 1}: ${e.message} — pulando teaser`)
         }
       }
 
@@ -679,8 +894,8 @@ export async function generateMonetizationPlanV2(
       const deepDiveResult = await invokeStage(
         'deep-dives',
         z.object({ teasers: z.array(TeaserSchema).min(deepDiveSlots.length).max(deepDiveSlots.length + 1) }),
-        `${deepDiveSkill}\n\n${brandSafetySkill}${configBlock}\n\nEstilo visual: ${blueprint.visualStyleId} (${blueprint.visualStyleName})\n\n## HOOKS JÁ USADOS (NÃO REPETIR)\n${usedHooks.map((h, i) => `${i + 1}. "${h}"`).join('\n')}\n\n## GATEWAY JÁ GERADO (NÃO repetir informações)\nHook: "${gatewayTeaser.hook}"\nÂngulo: ${gatewayTeaser.angleCategory}\nOutline: ${gatewayTeaser.scriptOutline}`,
-        `Gere ${deepDiveSlots.length} teasers DEEP-DIVE para o dossiê.\n\nSlots definidos no blueprint:\n${slotsBlock}\n\nRetorne um JSON com campo "teasers" contendo exatamente ${deepDiveSlots.length} teasers.`,
+        `${deepDiveSkill}\n\n${brandSafetySkill}${configBlock}${episodeContextBlock}\n\nEstilo visual: ${blueprint.visualStyleId} (${blueprint.visualStyleName})\n\n## HOOKS JÁ USADOS (NÃO REPETIR)\n${usedHooks.map((h, i) => `${i + 1}. "${h}"`).join('\n')}\n\n## GATEWAY JÁ GERADO (NÃO repetir informações)\nHook: "${gatewayTeaser.hook}"\nÂngulo: ${gatewayTeaser.angleCategory}\nOutline: ${gatewayTeaser.scriptOutline}`,
+        `Gere ${deepDiveSlots.length} teasers DEEP-DIVE para o dossiê.\n\nSlots definidos no blueprint:\n${slotsBlock}\n\nOBRIGATÓRIO: Cada teaser deve ter targetEpisode (1, 2 ou 3) alinhado ao episódio cujo ângulo mais se aproxima. Distribua equilibradamente (~2 por EP).\n\nRetorne um JSON com campo "teasers" contendo exatamente ${deepDiveSlots.length} teasers.`,
         teaserDossierBlock, assignment
       )
       stageTimings['deep-dives'] = deepDiveResult.elapsed
@@ -688,7 +903,8 @@ export async function generateMonetizationPlanV2(
       totalUsage.outputTokens += deepDiveResult.usage.outputTokens
       totalUsage.totalTokens += deepDiveResult.usage.totalTokens
 
-      const ddTeasers = deepDiveResult.parsed.teasers || []
+      const ddTeasers = unwrapTeaserArray(deepDiveResult.parsed, 'deep-dives')
+        .map((t: any, idx: number) => hydrateTeaserDefaults(t, deepDiveSlots[idx], `deep-dives-batch-${idx + 1}`))
       allTeasers.push(...ddTeasers)
       usedHooks.push(...ddTeasers.map((t: any) => t.hook))
     }
@@ -709,10 +925,10 @@ export async function generateMonetizationPlanV2(
         const s = hookOnlySlots[i]
 
         const singleSystemPrompt =
-          `${hookOnlySkill}\n\n${brandSafetySkill}${configBlock}\n\n` +
+          `${hookOnlySkill}\n\n${brandSafetySkill}${configBlock}${episodeContextBlock}\n\n` +
           `Estilo visual: ${blueprint.visualStyleId} (${blueprint.visualStyleName})\n\n` +
           `## HOOKS JÁ USADOS (NÃO REPETIR)\n${usedHooks.map((h, hi) => `${hi + 1}. "${h}"`).join('\n')}\n\n` +
-          `## TEASERS JÁ GERADOS (NÃO repetir territórios)\n${allTeasers.map((t: any, ti: number) => `${ti + 1}. [${t.narrativeRole}] ${t.angleCategory}: "${t.hook}"`).join('\n')}`
+          `## TEASERS JÁ GERADOS (NÃO repetir territórios)\n${allTeasers.map((t: any, ti: number) => `${ti + 1}. [${t.narrativeRole}] ${t.angleCategory} → EP${(t as any).targetEpisode || '?'}: "${t.hook}"`).join('\n')}`
 
         const singleUserPrompt =
           `Gere 1 teaser HOOK-ONLY para o dossiê.\n\n` +
@@ -723,7 +939,10 @@ export async function generateMonetizationPlanV2(
           `- platform: "${s.platform}"\n` +
           `- scriptStyleId: "${s.scriptStyleId}"\n` +
           `- editorialObjectiveId: "${s.editorialObjectiveId}"\n\n` +
-          `Retorne um JSON com campo "teasers" contendo exatamente 1 teaser.`
+          `OBRIGATÓRIO: Atribua targetEpisode (1, 2 ou 3). Hook-only deve priorizar EP2 e EP3 (menos exposição orgânica). Alinhe ao ângulo do episódio mais próximo.\n\n` +
+          `Retorne um JSON com campo "teasers" contendo exatamente 1 teaser.\n` +
+          `CRÍTICO: A API rejeita a resposta se "teasers" tiver mais de um item. Retorne exatamente um objeto em "teasers".\n` +
+          `CRÍTICO: Todos os campos (scriptOutline, visualSuggestion, cta, platform, format, estimatedViews, scriptStyleId, scriptStyleName, editorialObjectiveId, editorialObjectiveName, avoidPatterns, visualPrompt, sceneCount, targetEpisode) devem estar DENTRO do único objeto em "teasers", não na raiz do JSON.`
 
         const r = await invokeStage(
           `hook-only-${i + 1}`,
@@ -739,10 +958,12 @@ export async function generateMonetizationPlanV2(
         totalUsage.outputTokens += r.usage.outputTokens
         totalUsage.totalTokens += r.usage.totalTokens
 
-        const teaser = r.parsed?.teasers?.[0]
-        if (teaser) {
+        try {
+          const teaser = hydrateTeaserDefaults(unwrapSingleTeaser(r.parsed, `hook-only-${i + 1}`), s, `hook-only-${i + 1}`)
           allTeasers.push(teaser)
           usedHooks.push(teaser.hook)
+        } catch (e: any) {
+          console.warn(`${LOG} ⚠️ hook-only-${i + 1}: ${e.message} — pulando teaser`)
         }
       }
 
@@ -755,8 +976,8 @@ export async function generateMonetizationPlanV2(
       const hookOnlyResult = await invokeStage(
         'hook-only',
         z.object({ teasers: z.array(TeaserSchema).min(hookOnlySlots.length).max(hookOnlySlots.length + 1) }),
-        `${hookOnlySkill}\n\n${brandSafetySkill}${configBlock}\n\nEstilo visual: ${blueprint.visualStyleId} (${blueprint.visualStyleName})\n\n## HOOKS JÁ USADOS (NÃO REPETIR)\n${usedHooks.map((h, i) => `${i + 1}. "${h}"`).join('\n')}\n\n## TEASERS JÁ GERADOS (NÃO repetir territórios)\n${allTeasers.map((t, i) => `${i + 1}. [${t.narrativeRole}] ${t.angleCategory}: "${t.hook}"`).join('\n')}`,
-        `Gere ${hookOnlySlots.length} teasers HOOK-ONLY para o dossiê.\n\nSlots definidos no blueprint:\n${slotsBlock}\n\nRetorne um JSON com campo "teasers" contendo exatamente ${hookOnlySlots.length} teasers.`,
+        `${hookOnlySkill}\n\n${brandSafetySkill}${configBlock}${episodeContextBlock}\n\nEstilo visual: ${blueprint.visualStyleId} (${blueprint.visualStyleName})\n\n## HOOKS JÁ USADOS (NÃO REPETIR)\n${usedHooks.map((h, i) => `${i + 1}. "${h}"`).join('\n')}\n\n## TEASERS JÁ GERADOS (NÃO repetir territórios)\n${allTeasers.map((t, i) => `${i + 1}. [${t.narrativeRole}] ${t.angleCategory} → EP${(t as any).targetEpisode || '?'}: "${t.hook}"`).join('\n')}`,
+        `Gere ${hookOnlySlots.length} teasers HOOK-ONLY para o dossiê.\n\nSlots definidos no blueprint:\n${slotsBlock}\n\nOBRIGATÓRIO: Cada teaser deve ter targetEpisode (1, 2 ou 3). Hook-only prioriza EP2 e EP3. Distribua equilibradamente.\n\nRetorne um JSON com campo "teasers" contendo exatamente ${hookOnlySlots.length} teasers.`,
         teaserDossierBlock, assignment
       )
       stageTimings['hook-only'] = hookOnlyResult.elapsed
@@ -764,7 +985,8 @@ export async function generateMonetizationPlanV2(
       totalUsage.outputTokens += hookOnlyResult.usage.outputTokens
       totalUsage.totalTokens += hookOnlyResult.usage.totalTokens
 
-      const hoTeasers = hookOnlyResult.parsed.teasers || []
+      const hoTeasers = unwrapTeaserArray(hookOnlyResult.parsed, 'hook-only')
+        .map((t: any, idx: number) => hydrateTeaserDefaults(t, hookOnlySlots[idx], `hook-only-batch-${idx + 1}`))
       allTeasers.push(...hoTeasers)
     }
   }
@@ -776,7 +998,7 @@ export async function generateMonetizationPlanV2(
 
   const scheduleSkill = loadSkill('monetization/schedule')
   const itemsSummary = [
-    `Full Video: "${fullVideo.title}" (YouTube)`,
+    ...fullVideos.map(v => `Full Video EP${v.episodeNumber}: "${v.title}" (YouTube)`),
     ...allTeasers.map((t: any, i: number) => `Teaser ${i + 1} [${t.narrativeRole}]: "${t.title}" (${t.platform})`)
   ].join('\n')
 
@@ -823,7 +1045,7 @@ export async function generateMonetizationPlanV2(
       planTitle: blueprint.planTitle,
       visualStyleId: blueprint.visualStyleId,
       visualStyleName: blueprint.visualStyleName,
-      fullVideo,
+      fullVideos,
       teasers: teasersWithSceneCount,
       publicationSchedule: schedule,
       estimatedTotalRevenue: blueprint.estimatedTotalRevenue,

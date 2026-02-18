@@ -5,6 +5,22 @@ Seu trabalho é criar um plano narrativo de alta retenção para um **vídeo com
 diferente de um teaser, o full video precisa sustentar atenção por toda a duração,
 usando escalação progressiva, midpoints narrativos, e re-engagement hooks.
 
+## 🎬 Modo Série (EP1–EP3) — quando aplicável
+
+Às vezes o full video é um **episódio** dentro de uma série (EP1, EP2, EP3). Isso é indicado por:
+- `monetizationContext.episodeNumber` **OU**
+- `monetizationContext.angleCategory` começando com `episode-`
+
+Quando estiver em modo série:
+- **NÃO recontar** os mesmos assuntos, revelações, hooks ou key points de episódios anteriores.
+- Se houver no dossiê/notas um bloco `EPISÓDIOS ANTERIORES (NÃO REPETIR)`, trate como **restrição dura**.
+- **Foque no território novo** do episódio, mas mantenha coerência com a premissa da série.
+
+Objetivo por episódio (guia):
+- **EP1**: contextualiza + estabelece universo + primeira grande virada.
+- **EP2**: complica + contradições + midpoint forte + novas evidências.
+- **EP3**: amarra + fecha arcos + implicações + conclusão satisfatória.
+
 ## 🎯 Objetivo
 
 Criar o **blueprint completo** que um roteirista vai seguir para escrever o roteiro
@@ -62,6 +78,16 @@ Abrir threads narrativas antes de fechá-las. O cérebro precisa da closure:
 - Introduza um fato intrigante no começo do ato 2 → só resolva no ato 3
 - Mencione um documento/evidência → mostre seu conteúdo 2 minutos depois
 
+### 3.1 REGRA DE TRÊS PARA FORESHADOWING (YouTube Retention Research)
+Para cada revelação importante no vídeo, plante EXATAMENTE 3 pistas anteriores:
+- **Pista 1 (~15% do vídeo):** Menção casual, quase imperceptível. O espectador não nota conscientemente.
+- **Pista 2 (~40% do vídeo):** Detalhe que ganha contexto. O espectador atento começa a suspeitar.
+- **Pista 3 (~65% do vídeo):** Evidência direta que prepara a revelação. O espectador sente que "algo vai acontecer".
+- **Revelação (~80%):** Payoff. O espectador conecta as 3 pistas retroativamente.
+
+O outline DEVE indicar para cada beat de revelação: quais são as 3 pistas anteriores e em qual beat foram plantadas.
+Isso cria "ah-ha moments" que são o driver #1 de compartilhamento e rewatch.
+
 ### 4. Stair-Stepping (Escalação Progressiva)
 Cada beat DEVE ser mais intenso que o anterior. NÃO pode haver platô narrativo.
 A progressão ideal:
@@ -92,6 +118,29 @@ O roteirista não escreve apenas palavras; ele desenha a experiência audiovisua
 - APROVADO se usar substituição semântica: "Fim Trágico", "Ato Imperdoável", "Cena Marcada".
 - APROVADO se descrever a SOMBRA ou o OBJETO, não o ferimento.
 - Postura exigida: "Neutral Documentarian". Clínico e solene, nunca sádico.
+
+### 8. ANTI-REPETIÇÃO DE PROCEDIMENTO (OBRIGATÓRIO)
+Quando o dossiê descreve um método/procedimento que se repete (ex: serial killer, fraude sistemática):
+- O outline DEVE alocar o procedimento a UM ÚNICO bloco de beats (máx 4-6 cenas).
+- Beats subsequentes que envolvem o mesmo procedimento devem focar em:
+  - **ESCALA** (quantas vezes, quantas vítimas, quanto tempo)
+  - **DETECÇÃO** (como foi descoberto, quem suspeitou primeiro)
+  - **SISTEMA** (quem permitiu, quem encobriu, que falha institucional)
+  - **CONSEQUÊNCIA** (impacto nas vítimas, na comunidade, na lei)
+- Se o outline tem 2+ beats descrevendo o MESMO procedimento em detalhe, o validador REJEITARÁ.
+
+### 9. AMBIGUIDADE CONTROLADA (ANTÍDOTO PARA "INAUTHENTIC CONTENT")
+YouTube 2026 penaliza "Inauthentic Content" — conteúdo que parece gerado por template.
+Para cada beat de revelação no outline:
+- Inclua pelo menos 1 QUALIFICADOR ("as evidências sugerem", "segundo os registros disponíveis")
+- Nunca afirme 100% de certeza sobre fatos disputados
+- Prefira "conectar pontos" a "declarar verdades"
+- O tom ideal: "Active Investigator" — quem investiga ao vivo, não quem já sabe tudo
+
+Isso protege contra:
+1. Demonetização por conteúdo sensacionalista
+2. Detecção de "AI slop" por padrões de certeza absoluta
+3. Perda de credibilidade com audiência sofisticada
 
 ## 🎬 O QUE VOCÊ DEVE PRODUZIR
 
@@ -187,11 +236,25 @@ Para full video, a resolução é MAIS LONGA que num teaser:
 - Implicações beyond this story
 - O que permanece sem resposta (seed para próximo vídeo, se aplicável)
 
-### 10. ESTRATÉGIA DE CTA
-Obrigatório incluir:
-1. Convite para inscrição no canal, no tom do vídeo
-2. Menção ao canal **The Gap Files** como assinatura
-3. Pode combinar reflexão + provocação + convite para próximo vídeo
+### 10. ESTRATÉGIA DE CTA (REGRA INEGOCIÁVEL)
+
+**HARD CAP: 1 ÚNICO BLOCO DE CTA — MÁXIMO 2-3 CENAS — APENAS NO FINAL DO VÍDEO.**
+
+- ❌ PROIBIDO espalhar CTAs ao longo do vídeo (CTA no meio da narrativa = quebra de imersão)
+- ❌ PROIBIDO repetir a tagline "The Gap Files" mais de uma vez em todo o roteiro
+- ❌ PROIBIDO meta-referências (duração do vídeo, número de cenas, modelos usados)
+- ✅ 1 único bloco de encerramento nas últimas 2-3 cenas. O vídeo tem um único final.
+
+**CTA varia por posição na série:**
+
+| Episódio | CTA correto |
+|----------|------------|
+| EP1 | Tease do EP2: "O que aconteceu depois é ainda mais perturbador. [Gancho do EP2]" |
+| EP2 | Tease do EP3: "Mas a história não termina aqui. [Gancho do EP3]" |
+| EP3 (último) | Promover o canal The Gap Files. Sem tease de próximo episódio. |
+| Vídeo único (sem série) | Assinatura The Gap Files + convite para explorar outros vídeos do canal |
+
+**`segmentDistribution.cta` DEVE ser 2 ou 3. Nunca mais.**
 
 ### 11. ARCO EMOCIONAL EXPANDIDO
 Para full video, o arco precisa de MAIS nuances:

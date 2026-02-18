@@ -13,6 +13,7 @@ import { serializeConstantsCatalog, serializeRoleDistribution, SHORT_FORMAT_TYPE
 import { createLlmForTask, getAssignment } from './llm/llm-factory'
 import type { CreativeDirection } from './creative-direction-advisor.service'
 import { buildDossierBlock } from '../utils/dossier-prompt-block'
+import { getNarrativeRoleById } from '../constants/narrative-roles'
 import { buildCacheableMessages, logCacheMetrics } from './llm/anthropic-cache-helper'
 
 const LOG = '[MonetizationPlanner]'
@@ -830,6 +831,10 @@ export interface RegenerateItemRequest {
   teaserDuration: 35 | 55 | 115
   fullVideoDuration: 300 | 600 | 900
   userSuggestion?: string
+  /** Papel narrativo desejado pelo usuário (gateway, deep-dive, hook-only, etc.) */
+  narrativeRole?: string
+  /** Episódio alvo do teaser (1, 2 ou 3) */
+  targetEpisode?: 1 | 2 | 3
 }
 
 export interface RegenerateItemResult {
@@ -1056,6 +1061,52 @@ Se a sugestão não fizer sentido para o conteúdo, ignore-a e siga o melhor cam
 > "${request.userSuggestion}"`
     : ''
 
+  // Bloco de papel narrativo solicitado (se houver)
+  const requestedRole = request.narrativeRole ? getNarrativeRoleById(request.narrativeRole) : undefined
+
+  // Coletar teasers existentes do mesmo role (excluindo o que está sendo regenerado)
+  let siblingBlock = ''
+  if (requestedRole && isTeaser && request.index != null) {
+    const siblings = (request.currentPlan.teasers || [])
+      .filter((t: any, i: number) => i !== request.index && t.narrativeRole === requestedRole.id)
+    if (siblings.length > 0) {
+      const siblingList = siblings
+        .map((t: any, i: number) => `  ${i + 1}. "${t.title}" — ângulo: ${t.angleCategory} | hook: "${t.hook}"`)
+        .join('\n')
+      siblingBlock = `
+
+### Teasers já existentes como ${requestedRole.name} (${siblings.length}):
+${siblingList}
+
+⚠️ NÃO repita ângulos, hooks ou estruturas desses teasers. Traga uma perspectiva COMPLETAMENTE DIFERENTE.`
+    }
+  }
+
+  const roleBlock = requestedRole
+    ? `
+
+## PAPEL NARRATIVO OBRIGATÓRIO:
+O usuário escolheu regenerar este teaser como **${requestedRole.name}** (${requestedRole.id}).
+O campo "narrativeRole" no JSON de saída DEVE ser "${requestedRole.id}".
+
+${requestedRole.scriptInstruction}${siblingBlock}`
+    : ''
+
+  // Bloco de episódio alvo (se houver)
+  let episodeTargetBlock = ''
+  if (isTeaser && request.targetEpisode) {
+    const fullVideos = (request.currentPlan as any).fullVideos || []
+    const targetFv = fullVideos.find((v: any) => v.episodeNumber === request.targetEpisode)
+    if (targetFv) {
+      episodeTargetBlock = `
+
+## EPISÓDIO ALVO: EP${request.targetEpisode}
+Título: "${targetFv.title}" | Ângulo: ${targetFv.angle || targetFv.angleCategory}
+Este teaser é funil de entrada do EP${request.targetEpisode}. Alinhe o ângulo narrativo ao tema deste episódio.
+O campo "targetEpisode" no JSON de saída DEVE ser ${request.targetEpisode}.`
+    }
+  }
+
   // Catálogo de constants para regeneração
   const catalog = serializeConstantsCatalog()
 
@@ -1076,7 +1127,8 @@ ${catalog}
 4. O hook DEVE ser original e diferente
 5. Atribua scriptStyleId, visualStyleId e editorialObjectiveId usando os IDs do catálogo acima
 6. Retorne em JSON estruturado
-7. Se o usuário deixou uma sugestão, use-a como DIREÇÃO CRIATIVA — não como ordem. Avalie se faz sentido e adapte ao conteúdo`
+7. Se o usuário deixou uma sugestão, use-a como DIREÇÃO CRIATIVA — não como ordem. Avalie se faz sentido e adapte ao conteúdo
+${requestedRole ? `8. O campo "narrativeRole" DEVE ser "${requestedRole.id}" — o usuário escolheu este papel narrativo explicitamente` : ''}`
 
   const userMsg = `## Dossiê
 Título: ${request.dossierContext.title}
@@ -1087,7 +1139,7 @@ ${JSON.stringify(currentItem, null, 2)}
 
 ## Ângulos já existentes no plano:
 ${existingAngles.join(', ')}
-${suggestionBlock}
+${roleBlock}${episodeTargetBlock}${suggestionBlock}
 
 Gere um ${isTeaser ? `teaser de ${request.teaserDuration}s` : `Full Video de ${request.fullVideoDuration / 60} minutos`} com ângulo COMPLETAMENTE DIFERENTE.`
 

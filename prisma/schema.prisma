@@ -40,6 +40,12 @@ model Dossier {
   briefBundleV1Hash      String?            @db.VarChar(64)
   /// Última atualização do brief persistido
   briefBundleV1UpdatedAt DateTime?
+  /// Brief persistido para uso em EPISÓDIOS COMPLETOS (EP1/EP2/EP3)
+  episodeBriefBundleV1          Json?
+  /// Hash determinístico do dossiê canônico (invalida brief quando dossier muda)
+  episodeBriefBundleV1Hash      String?            @db.VarChar(64)
+  /// Última atualização do episode brief persistido
+  episodeBriefBundleV1UpdatedAt DateTime?
   tags                   String[]
   isProcessed            Boolean            @default(false)
   visualIdentityContext  String?            @db.VarChar(500) // Contexto visual do dossier

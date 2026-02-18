@@ -429,6 +429,42 @@ export function handleGroqJsonValidateError<T>(
       )
     }
 
+    // Quando o erro foi "maximum 1 items required, but found N", normalizar para 1 item (deep-dive/hook-only single slot).
+    const validationMsg = (errorBody?.message || errorMessage || '') as string
+    if (
+      Array.isArray(partial?.teasers) &&
+      partial.teasers.length > 1 &&
+      /maximum\s+1\s+items?\s+required|maxItems.*1.*found\s+\d+/i.test(validationMsg)
+    ) {
+      partial.teasers = [partial.teasers[0]]
+    }
+
+    // Quando o erro foi "missing properties" e o modelo colocou campos na raiz em vez de dentro de teasers[0], mesclar raiz → teasers[0].
+    const TEASER_ROOT_FIELDS = [
+      'scriptOutline', 'visualSuggestion', 'cta', 'platform', 'format', 'estimatedViews',
+      'scriptStyleId', 'scriptStyleName', 'editorialObjectiveId', 'editorialObjectiveName',
+      'avoidPatterns', 'visualPrompt', 'sceneCount', 'targetEpisode', 'loopSentence'
+    ]
+    if (
+      /missing\s+properties/i.test(validationMsg) &&
+      Array.isArray(partial?.teasers) &&
+      partial.teasers.length > 0
+    ) {
+      const root = partial as Record<string, unknown>
+      const first = partial.teasers[0] as Record<string, unknown>
+      let merged = false
+      for (const key of TEASER_ROOT_FIELDS) {
+        if (root[key] !== undefined && first[key] === undefined) {
+          first[key] = root[key]
+          delete root[key]
+          merged = true
+        }
+      }
+      if (merged) {
+        partial.teasers[0] = first
+      }
+    }
+
     // Validação customizada (se fornecida)
     if (validator && !validator(partial)) {
       console.warn(`${logPrefix} ⚠️ failed_generation não passou na validação customizada`)

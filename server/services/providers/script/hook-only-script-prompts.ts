@@ -151,7 +151,7 @@ Cena 4 (10/10): "E a assinatura naquele documento secreto" (Parte A — incomple
 ---
 DIRETRIZES TÉCNICAS:
 - SINCRONIA: Cada cena deve durar ~4.5 a 5.5 segundos (4 cenas ≈ 18-22s). O loop deve ser perfeito.
-- 🌐 IDIOMA: "narration" no IDIOMA DO VÍDEO. "visualDescription", "endVisualDescription", "motionDescription", "audioDescription" SEMPRE em inglês.
+- 🌐 IDIOMA: "narration" no IDIOMA DO VÍDEO. "visualDescription", "motionDescription", "audioDescription" SEMPRE em inglês.
 - DENSIDADE (micro-variação permitida; respeite o HARD LIMIT):
   - Cena 1 (ruptura): ${Math.max(6, wordsPerScene - 3)} a ${maxWordsHard - 2} palavras (mais curta e agressiva)
   - Cena 2 (respiro com conteúdo): ${wordsPerScene - 1} a ${maxWordsHard} palavras (normal)
@@ -171,7 +171,7 @@ DIRETRIZES TÉCNICAS:
 ---
 🔗 SINCRONIZAÇÃO NARRATIVA — VISUAL — MOTION (REGRA MAIS IMPORTANTE DO PIPELINE)
 
-O pipeline gera: (1) imagem START a partir do visualDescription, (2) imagem END a partir do endVisualDescription, (3) vídeo animado (motion) interpolando entre as duas imagens usando motionDescription. Os 3 campos + a narração DEVEM ser UM ÚNICO MOMENTO NARRATIVO COERENTE.
+O pipeline gera: (1) imagem a partir do visualDescription, (2) vídeo animado (motion) a partir dessa imagem usando motionDescription. Os 2 campos + a narração DEVEM ser UM ÚNICO MOMENTO NARRATIVO COERENTE.
 
 🚨 REGRA #1 — NARRAÇÃO GOVERNA O VISUAL:
 O visualDescription DEVE representar visualmente O QUE A NARRAÇÃO ESTÁ DIZENDO naquela cena.
@@ -183,42 +183,20 @@ O visualDescription DEVE representar visualmente O QUE A NARRAÇÃO ESTÁ DIZEND
 
 PERGUNTA-TESTE: "Se alguém VÊ esta imagem e OUVE esta narração juntos, faz sentido imediato?" Se NÃO → reescreva o visualDescription.
 
-🚨 REGRA #2 — endVisualDescription É A PROGRESSÃO DO MESMO ENQUADRAMENTO:
-A imagem END é o ESTADO FINAL da mesma cena após 5 segundos. NÃO é outra cena. NÃO é outro objeto.
-- MESMO cenário, MESMOS objetos principais, apenas com PROGRESSÃO: mudança de enquadramento (dolly/pan), mudança de iluminação, ou mudança de estado (selo intacto → selo quebrado).
-- ❌ PROIBIDO: visualDescription "document on desk" → endVisualDescription "smoke behind a candle" (OBJETOS DIFERENTES = CENAS DIFERENTES)
-- ❌ PROIBIDO: visualDescription "wide shot of study" → endVisualDescription "flying book in clouds" (CENÁRIO COMPLETAMENTE DIFERENTE)
-- ✅ CORRETO: visualDescription "Wide shot of a dark study, sealed document on desk" → endVisualDescription "Close-up of the same desk surface, the document now unrolled, warm candlelight illuminating the text, shadows from bookcases framing the edges"
-- ✅ CORRETO: visualDescription "Official decree with wax seal, coins at edge" → endVisualDescription "Same decree, wax seal now broken and crumbling, the coins slightly displaced, deeper shadows consuming the margins"
-
-PERGUNTA-TESTE: "Se eu comparar START e END lado a lado, consigo ver que são o MESMO lugar/momento com variação leve?" Se NÃO → reescreva o endVisualDescription.
-
-🚨 REGRA #3 — motionDescription É A TRANSIÇÃO ENTRE START E END:
-O motionDescription descreve COMO a câmera e os elementos se movem do estado START ao estado END. Deve ser coerente com ambos.
-- Se START é "wide shot" e END é "close-up of desk", o motion DEVE ser "slow dolly forward toward desk".
-- Se START e END são o mesmo enquadramento com mudança de luz, o motion DEVE ser "static shot, candlelight dimming, shadows slowly expanding".
-- ❌ PROIBIDO: START "wide shot of study" + END "close-up of desk" + motion "pan left across the room" (PAN NÃO LEVA A CLOSE-UP)
-- ❌ PROIBIDO: START "document on desk" + END "same document" + motion "book flying across the room" (MOVIMENTO DESCONEXO DOS KEYFRAMES)
-- ✅ CORRETO: START "Wide shot of dark study" → MOTION "Slow dolly forward toward desk, candle flames gently swaying, dust particles in light beam" → END "Close-up of desk surface, candlelight on scattered documents"
-- ✅ CORRETO: START "Close-up of decree with wax seal" → MOTION "Subtle push-in on the seal, smoke wisps rising, candlelight flickering" → END "Extreme close-up of the seal cracking, wax fragments catching light"
+🚨 REGRA #2 — motionDescription É A ANIMAÇÃO DA IMAGEM:
+O motionDescription descreve COMO a câmera e os elementos se movem na cena. Deve ser coerente com o visualDescription.
+- ❌ PROIBIDO: visualDescription "document on desk" + motion "book flying across the room" (MOVIMENTO DESCONEXO)
+- ✅ CORRETO: visualDescription "Wide shot of dark study" → motion "Slow dolly forward toward desk, candle flames gently swaying, dust particles in light beam"
+- ✅ CORRETO: visualDescription "Close-up of decree with wax seal" → motion "Subtle push-in on the seal, smoke wisps rising, candlelight flickering"
 - Mantenha entre 15-40 palavras. Combine 1 movimento de câmera + 1-2 elementos animados (chamas, fumaça, poeira).
 - Use verbos de ação: flickering, drifting, swaying, rippling, shifting, crawling, floating.
 
-🚨 REGRA #4 — endImageReferenceWeight CALIBRADO:
-O peso (0.0 a 1.0) controla QUANTO a imagem START influencia a geração da imagem END:
-- ALTO (0.7-0.85): câmera quase parada, mesmo objeto em foco, apenas mudança sutil de luz/atmosfera.
-- MÉDIO (0.4-0.6): transição moderada de câmera (dolly forward, slow pan). Cenário igual, enquadramento diferente.
-- BAIXO (0.2-0.35): mudança drástica de enquadramento (wide → extreme close-up).
-- Use null se endVisualDescription for null.
-
-EXEMPLO COMPLETO (TRIO COERENTE alinhado à narração):
+EXEMPLO COMPLETO (DUPLA COERENTE alinhada à narração):
 | Campo | Conteúdo |
 |-------|----------|
 | narration | "O bispo assinou. Uma comunidade inteira desapareceu." |
 | visualDescription | "Wide shot of a dark medieval study, candlelight illuminating a heavy wooden desk, an ornate document with episcopal wax seal, quill pen resting in ink pot, dramatic chiaroscuro lighting, dusty air" |
-| endVisualDescription | "Close-up of the same desk surface, the document now bearing a fresh signature in dark ink, the wax seal pressed and still warm, candlelight casting deep amber shadows across the parchment" |
 | motionDescription | "Slow dolly forward toward the desk surface, candle flames gently swaying, dust motes drifting through the warm light beam" |
-| endImageReferenceWeight | 0.5 |
 
 ---
 - AMBIENTE: sceneEnvironment em snake_case (archive_room, bishop_study, modern_monitor_room).
@@ -346,7 +324,6 @@ ${guidelines}
 8. VISUAL SAFE: Sem close-ups de rostos/mãos. Sem arma/atirador/execução. Choque moderno = monitor/manifesto/recorte.
 9. Se houver ponte temporal (ex: "500 anos depois"), ela NÃO vira tese/conclusão: mostre um ARTEFATO reaparecendo e pare.
 10. 🔗 SINCRONIZAÇÃO NARRAÇÃO ↔ VISUAL (CHECAR CENA POR CENA): Para CADA cena, a narração fala de X — o visualDescription MOSTRA X visualmente? Se a narração fala de "bispo assinou", o visual mostra assinatura/documento/selo? Se NÃO → REESCREVA o visualDescription para representar a narração.
-11. 🔗 START ↔ END COERÊNCIA: Para CADA cena, o endVisualDescription é a PROGRESSÃO do MESMO cenário do visualDescription (mesmo lugar, mesmos objetos, apenas progressão sutil)? Ou é uma cena completamente diferente? Se diferente → REESCREVA.
-12. 🔗 MOTION ↔ KEYFRAMES: O motionDescription descreve um movimento que CONECTA o enquadramento START ao enquadramento END? Se START é wide e END é close-up, o motion diz "dolly forward"? Se incompatível → REESCREVA.
+11. 🔗 MOTION ↔ VISUAL: O motionDescription descreve um movimento coerente com o visualDescription? O motion anima elementos que existem na imagem? Se incompatível → REESCREVA.
 Se QUALQUER resposta for NÃO — corrija ANTES de retornar o JSON.`
 }

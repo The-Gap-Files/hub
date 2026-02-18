@@ -177,16 +177,18 @@ Responda APENAS no formato JSON definido.
 
     console.log(`${LOG} Usando ${assignment.provider} (${assignment.model}) para validação`)
 
-    // Determinar method de structured output baseado no provider
+    // Determinar method de structured output baseado no provider/model
     const isGemini = assignment.provider.toLowerCase().includes('gemini') || assignment.provider.toLowerCase().includes('google')
-    const isGroqLlama4 = assignment.provider.toLowerCase().includes('groq') && assignment.model.includes('llama-4')
+    const isGroq = assignment.provider.toLowerCase().includes('groq')
+    const isGroqLlama4 = isGroq && assignment.model.includes('llama-4')
+    const isGroqGptOss = isGroq && assignment.model.includes('gpt-oss')
 
     const m = model as any
     let structuredLlm: any
     if (assignment.provider === 'replicate' && typeof m.withStructuredOutputReplicate === 'function') {
       structuredLlm = m.withStructuredOutputReplicate(ValidationResultSchema, { includeRaw: true })
     } else {
-      const method = isGemini ? 'jsonMode' : isGroqLlama4 ? 'jsonMode' : undefined
+      const method = isGemini ? 'jsonMode' : isGroqLlama4 ? 'jsonMode' : isGroqGptOss ? 'jsonSchema' : undefined
       structuredLlm = m.withStructuredOutput(ValidationResultSchema, {
         includeRaw: true,
         ...(method ? { method } : {})

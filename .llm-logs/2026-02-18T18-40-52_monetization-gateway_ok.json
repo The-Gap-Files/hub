@@ -1,0 +1,130 @@
+{
+  "timestamp": "2026-02-18T18:40:52.604Z",
+  "taskId": "monetization-gateway",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Monetization — Gateway Teaser Generator\n\nVocê é um estrategista de conteúdo. Nesta etapa, você vai gerar o teaser GATEWAY — a porta de entrada para o universo do dossiê.\n\n## 🎯 O Que É o Gateway\n\nO Gateway é o ÚNICO teaser que apresenta o tema COMPLETO. Ele é um standalone — funciona para quem nunca ouviu falar do assunto. O espectador sai sabendo DO QUE se trata, mas sem saber COMO termina.\n\n## 📐 O QUE PRODUZIR\n\nGere TODOS os campos:\n- **title**: Título curto e impactante para a plataforma\n- **hook**: Frase de abertura (até 15 palavras). DEVE contextualizar o tema.\n- **angle**: O ângulo narrativo ÚNICO deste teaser (já definido no blueprint)\n- **angleCategory**: A categoria do ângulo (já definida no blueprint)\n- **narrativeRole**: \"gateway\"\n- **shortFormatType**: O formato (já definido no blueprint)\n- **scriptOutline**: Estrutura resumida — Hook 3s → Setup quem/quando/onde 15-20s → Revelação 20-25s → CTA 5s\n- **visualSuggestion**: Descrição curta do visual\n- **cta**: Call-to-action que direciona para o Full Video\n- **platform**: \"YouTube Shorts\"\n- **format**: \"teaser-youtube-shorts\"\n- **estimatedViews**: Estimativa de views\n- **scriptStyleId** e **scriptStyleName**\n- **editorialObjectiveId** e **editorialObjectiveName**\n- **avoidPatterns**: 2-4 anti-padrões ESPECÍFICOS ao conteúdo do dossiê\n- **visualPrompt**: Prompt de imagem em INGLÊS (1 parágrafo, 50-120 palavras)\n- **microBriefV1**: Micro-brief ESTRUTURADO para ESTE teaser (isolado por item). Deve conter:\\n  - version: \\\"teaserMicroBriefV1\\\"\\n  - narrativeRole: \\\"gateway\\\"\\n  - angleCategory e angle (iguais aos campos do teaser)\\n  - facts: 5-12 fatos selecionados APENAS do brief/dossiê recebido (cada um com text e, se possível, sourceRef)\\n  - forbiddenElements: 6-12 itens (reforçar anti-arma/gore/close-up)\\n  - allowedArtifacts: 6-12 itens (documento/selo/monitor/headline/etc.)\\n  - notes: 2-6 bullets curtos (ex.: \\\"use mecanismo, não violência\\\")\n\n## 🚨 REGRAS DO GATEWAY\n\n1. **Contexto COMPLETO** — quem, quando, onde, por quê. Funciona como standalone\n2. **Resolução PARCIAL** — contextualiza mas NÃO fecha a história\n3. **NÃO entregue** a explicação científica/forense completa\n4. **NÃO revele** a motivação final dos envolvidos\n5. **DEIXE** pelo menos 1-2 perguntas sem resposta\n6. **avoidPatterns** devem focar em evitar contar DEMAIS (não em falta de contexto)\n7. **Hook DIFERENTE** do Full Video\n8. **microBriefV1 é a fonte da verdade** para o Story Architect deste teaser: selecione fatos que sustentem o ângulo e NÃO inclua nada que pertença a outros teasers.\n\n## 💡 EXEMPLO DE avoidPatterns PARA GATEWAY\n\n- \"NÃO resolva o caso — apresente mas deixe em aberto\"\n- \"NÃO use tom enciclopédico — mantenha urgência\"\n- \"NÃO cubra TODOS os aspectos — foque no gancho principal e deixe ângulos para os outros teasers\"\n\n## 🛡️ BRAND SAFETY E VISUAL NOISE (YOUTUBE 2026)\n\n1. **SUBSTITUIÇÃO SEMÂNTICA (OBRIGATÓRIA):**\n   - ❌ \"Assassino serial matou 20\" → 🟢 \"O responsável por 20 fins trágicos\"\n   - ❌ \"Sangue no chão\" → 🟢 \"A cena marcada\" / \"Vestígios vitais\"\n   - ❌ \"Estripado/Mutilado\" → 🟢 \"Fragmentado\" / \"Cena desfeita\"\n   - **Postura:** \"Neutral Documentarian\". Clínico, solene, nunca sensacionalista.\n\n2. **IMPERFEIÇÃO VISUAL CONTEXTUAL (Decisão de Direção):**\n   - **Esqueça o \"ruído aleatório\".** Escolha uma textura que AMPLIFIQUE a narrativa.\n   - **Documentos Antigos:** Textura de papel rasgado, granulação de filme 16mm, bordas queimadas.\n   - **Relatos Policiais/Modernos:** Glitch digital, compressão de CCTV, ruído de ISO alto.\n   - **Regra:** A imagem não pode ser \"lisa\" (cara de IA pura).\n   - **Loop Visual:** O frame final deve ter iluminação/composição similar ao inicial.\n\n# 🛡️ PROTOCOLO DE BRAND SAFETY E IMUNIZAÇÃO ALGORMÍTMICA (YOUTUBE 2026)\r\n\r\nEste protocolo define as regras OBRIGATÓRIAS para evitar supressão algorítmica, desmonetização (\"Yellow Icon\") e restrições de idade, mantendo a integridade narrativa do gênero \"Mystery/Dark\".\r\n\r\n## 1. POSTURA DO NARRADOR: \"NEUTRAL DOCUMENTARIAN\"\r\nO narrador nunca deve expressar prazer, condenação moral excessiva ou choque visceral.\r\n- **ERRADO (Sensacionalista):** \"O assassino SÁDICO estripou a vítima e riu!\"\r\n- **CORRETO (Documental):** \"O agressor cometeu atos de extrema brutalidade antes de deixar a cena.\"\r\n- **REGRA:** Adote um tom clínico, investigativo e solene. A emoção vem dos fatos, não dos adjetivos.\r\n\r\n## 2. GLOSSÁRIO DE SUBSTITUIÇÃO SEMÂNTICA (OBRIGATÓRIO)\r\nA IA deve substituir AUTOMATICAMENTE termos de \"Gore/Violence\" por equivalentes semânticos seguros (\"Safe-Words\") que mantenham o impacto psicológico sem acionar os filtros de metadados.\r\n\r\n| TERMO PROIBIDO (\"Trigger\") | SUBSTITUIÇÃO SEGURA (\"Safe-Word\") |\r\n| :--- | :--- |\r\n| Assassinato / Assassino | O Fim Trágico / O Perpetrador / O Responsável |\r\n| Estupro / Abuso Sexual | Violência Íntima / O Ato Imperdoável / Viio Absoluto |\r\n| Sangue / Poça de Sangue | A Cena Vermelha / Vestígios Vitais / A Marca do Crime |\r\n| Suicídio / Se Matou | Tirou a Própria Vida / O Gesto Final / A Partida Escolhida |\r\n| Esquartejado / Mutilado | Fragmentado / A Cena Desfeita / Danos Extremos |\r\n| Pedofilia / Abuso Infantil | Crimes Contra Inocentes / A Sombra na Infância |\r\n| Tortura | Interrogatório Extremo / Métodos Desumanos / Sofrimento Prolongado |\r\n| Canibalismo | O Ato Final de Consumo / A Transgressão Antropofágica |\r\n| Massacre / Chacina | O Evento Fatal / A Perda Coletiva / A Noite Silenciosa |\r\n| Drogas / Heroína / Cocaína | Substâncias Ilícitas / O Vício Químico / O Pó Branco |\r\n\r\n## 3. A REGRA \"NO GORE, JUST IMPLICATION\"\r\nO YouTube 2026 pune a representação visual ou textual visceral de fluidos corporais e órgãos internos.\r\n- **Regra:** Nunca descreva a *anatomia* da violência. Descreva o *cenário*, o *som*, a *consequência* ou o *objeto*.\r\n- **Técnica de Desvio:** Em vez de focar na ferida, foque na \"ferramenta caída no chão\" ou na \"mancha na parede\".\r\n- **Exemplo:** \"A sala estava pintada de vermelho\" (Aprovado) vs \"Havia tripas no chão\" (Banido).\r\n\r\n## 4. CONTEXTO EDSA (Educational, Documentary, Scientific, Artistic)\r\nTodo conteúdo \"Borderline\" (conspiração, crimes reais) deve ser enquadrado explicitamente como EDUCACIONAL ou DOCUMENTAL.\r\n- Use frases de ancoragem: \"Registros históricos indicam...\", \"O relatório policial descreve...\", \"Teóricos sugerem...\".\r\n- Nunca afirme teorias da conspiração como fatos absolutos. Use: \"Uma narrativa persistente afirma que...\".\r\n\r\n## 5. PROTEÇÃO CONTRA \"INAUTHENTIC CONTENT\" (ANTI-AI)\r\nPara evitar que o roteiro seja marcado como \"Lixo Gerado por IA\" (spammy content):\r\n- **Adicione Nuance e Dúvida:** A IA tende a ser assertiva. Adicione: \"Talvez...\", \"É possível que...\", \"Ainda resta a dúvida...\".\r\n- **Ironia Dramática:** O narrador sabe algo que o espectador (ou a vítima histórica) ainda não sabe.\r\n- **Imperfeição Humana:** Evite estruturas perfeitamente simétricas. Use pausas, perguntas retóricas e mudanças de ritmo.\r\n\r\n## 6. SEGURANÇA INFANTIL (HARD LINE)\r\nQualquer menção a violência contra crianças deve ser **extremamente sanitizada** e indireta. Se o dossiê envolver crimes contra menores, foque inteiramente na investigação e na busca por justiça, nunca no ato em si.\r\n\r\n---\r\n**INSTRUÇÃO FINAL:** Ao gerar qualquer texto (hook, roteiro, post), passe um \"scan\" mental usando este protocolo. Se encontrar um termo da coluna da esquerda, substitua imediatamente. Se descrever vísceras, apague e descreva a sombra.\n## ⚙️ CONFIGURAÇÃO (CENAS FIXAS)\n- Full Video: 150 cenas\n- Gateway: 5 cenas\n- Deep-Dive: 6 cenas\n- Hook-Only: 4 cenas\n- Quantidade de teasers: 12\n\n## 🎬 EPISÓDIOS DO DOSSIÊ (para targetEpisode)\nCada teaser DEVE ter targetEpisode (1, 2 ou 3) indicando para qual episódio ele funila.\n- EP1: \"A Máquina de Matar que Transformou o Crime em Linha de Montagem | Gêmeos Gemini\" — ângulo: revisionista\n- EP2: \"Traição mortal que destruiu a Máquina de Matar | Gêmeos Gemini\" — ângulo: propagandistico\n- EP3: \"O Fim Silencioso dos Gemini | Legado da Máquina de Matar\" — ... [truncated 817 chars]"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "📋 TEMA: A frieza mecânica da dupla de assassinos mais letal de Nova York + o fim silencioso de uma era de brutalidade mafiosa\n📋 TÍTULO: Os Gêmeos Gemini: A Morte de Joey Testa e o Terror da Murder Machine\n🧾 BRIEF (TEASERS) — versão: briefBundleV1\n\n🛡️ REGRAS HARD (GLOBAL SAFETY)\n- ❌ gore\n- ❌ violência explícita\n- ❌ arma de fogo\n- ❌ close-up humano\n- ❌ símbolos extremistas\n- ❌ armas de fogo, rifles, pistolas, munição, gatilho\n- ❌ atirador, execução, assassinato explícito, violência gráfica\n- ❌ sangue, gore, corpos mutilados, tortura explícita\n- ❌ close-up de mãos humanas, close-up de rostos humanos (evitar macro/anatomia)\n- ❌ cenas em sinagogas/templos com ameaça explícita (substituir por artefatos: manifesto, tela, manchete)\n- ❌ símbolos/extremismo contemporâneo em destaque (substituir por “texto recortado/blur”)\n\n🧰 ARTEFATOS VISUAIS PERMITIDOS\n- ✅ documento\n- ✅ registro\n- ✅ relatório\n- ✅ arquivo\n- ✅ log\n- ✅ arquivo digital\n- ✅ documento, decreto, registro, arquivo, dossiê, carimbo, selo de cera\n- ✅ moedas, cofre, livro-caixa, inventário, recibo, contrato\n- ✅ monitor, tela, manifesto (sem arma), headline, recorte de jornal, thread desfocada\n- ✅ mapa, corredor de arquivo, sala de leitura, prateleiras, luz de vela, sombras\n- ✅ silhuetas não-identificáveis sem rosto/mãos em close\n\n🔫 MUNIÇÃO NARRATIVA (FATOS SAFE)\n1. Joseph Testa e Anthony Senter nasceram em 1955 e cresceram no bairro de Canarsie, Brooklyn. [fonte: [1]]\n2. Na adolescência, ambos se envolveram em roubos de automóveis, acumulando diversas detenções juvenis. [fonte: [1]]\n3. Em 1974 foram recrutados por Roy DeMeo para integrar a equipe DeMeo, que operava a partir do Gemini Lounge. [fonte: [1]]\n4. A dupla ajudou a desenvolver o \"Método Gemini\", um protocolo de sete etapas para eliminar vítimas e impedir a coleta de evidências forenses. [fonte: [1]]\n5. O método incluía atração da vítima ao apartamento, contenção, interrupção cardíaca, drenagem de sangue, desmembramento e descarte em caixas plásticas enviadas ao aterro de Fountain Avenue. [fonte: [1]]\n6. Testemunhas cooperantes descrevem o \"Método Gemini\" como \"sem corpo, sem crime\". [fonte: [1]]\n7. O primeiro assassinato documentado da dupla foi o de Andrei Katz, em junho de 1975, usando o método de desmembramento. [fonte: [1]]\n8. Em 1979 a execução equivocada de Dominick Ragucci levou a equipe a se esconder temporariamente na Califórnia. [fonte: [1]]\n9. Em janeiro de 1983, após acordo com a família Gambino, Testa e Senter participaram da eliminação de Roy DeMeo. [fonte: [1]]\n10. Após a morte de DeMeo, a dupla foi transferida para a família Lucchese sob a tutela de Anthony Casso. [fonte: [1]]\n11. Em junho de 1986 Joseph Testa executou Vladimir Reznikov em Brighton Beach, reforçando a proteção da família Lucchese. [fonte: [1]]\n12. Em 1989 foram condenados sob a Lei RICO por extorsão e 10 homicídios, recebendo prisão perpétua mais 20 anos. [fonte: [1]]\n13. O julgamento destacou a estratégia de \"sem corpo, sem crime\" e a dificuldade de recuperação de restos nos aterros de Fountain Avenue. [fonte: [1]]\n14. Por terem sido condenados por crimes anteriores a 1987, foram elegíveis para liberdade condicional segundo a legislação federal. [fonte: [3]]\n15. Anthony Senter recebeu liberdade condicional em junho de 2022; Joseph Testa em fevereiro de 2024. [fonte: [3]]\n16. Joseph Testa faleceu em 26 de janeiro de 2026 em Henderson, Nevada, por causas naturais. [fonte: [2]]\n17. O Gemini Lounge foi convertido em igreja Purpose Life Church, mantendo o local histórico como espaço de culto. [fonte: [4]]\n18. O descarte no aterro de Fountain Avenue era escolhido pela alta rotatividade de lixo, dificultando a recuperação forense dos restos. [fonte: [1]]\n19. O desmembramento era realizado com facas de açougueiro e serras, consideradas parte de um \"kit de ferramentas\" operacionais. [fonte: [1]]\n20. A promotoria rotulou a equipe como a \"máquina de matar\" devido à sistematização dos homicídios. [fonte: [4]]\n\n🎭 DIRETRIZES POR PAPEL\n- gateway: contextLevel=medium, facts=10-22\n- deep-dive: contextLevel=low, facts=8-16\n- hook-only: contextLevel=minimal, facts=3-6\n\nGere o teaser GATEWAY para o dossiê.\nGateway DEVE ter targetEpisode=1.\n\nSlot definido no blueprint:\n- angleCategory: \"cronologico\"\n- angleName: \"Linha do Tempo da Ascensão dos Gemini\"\n- shortFormatType: \"plot-twist\"\n- platform: \"YouTube Shorts\"\n- scriptStyleId: \"documentary\"\n- editorialObjectiveId: \"full-reveal\"\n\nRetorne um JSON com campo \"teasers\" contendo exatamente 1 teaser."
+      }
+    ]
+  },
+  "parsed": {
+    "teasers": [
+      {
+        "title": "Os Gêmeos Gemini: Ascensão e Queda",
+        "hook": "Do subúrbio de Brooklyn à lenda da \"máquina de matar\" que mudou a máfia.",
+        "angle": "Linha do Tempo da Ascensão dos Gemini",
+        "angleCategory": "cronologico",
+        "narrativeRole": "gateway",
+        "shortFormatType": "plot-twist",
+        "microBriefV1": {
+          "version": "teaserMicroBriefV1",
+          "narrativeRole": "gateway",
+          "angleCategory": "cronologico",
+          "angle": "Linha do Tempo da Ascensão dos Gemini",
+          "facts": [
+            {
+              "text": "Joseph Testa e Anthony Senter nasceram em 1955 no bairro de Canarsie, Brooklyn.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "Na adolescência, envolveram‑se em roubos de automóveis, acumulando detenções juvenis.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "Em 1974 foram recrutados por Roy DeMeo para integrar a equipe DeMeo, operando a partir do Gemini Lounge.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "Desenvolveram o “Método Gemini”, um protocolo de sete etapas para eliminar vítimas e impedir a coleta de evidências.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "O método incluía atração da vítima ao apartamento, contenção, interrupção cardíaca, drenagem de sangue, desmembramento e descarte em caixas plásticas no aterro de Fountain Avenue.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "Testemunhas descrevem o método como “sem corpo, sem crime”.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "Em junho de 1986 Joseph Testa executou Vladimir Reznikov em Brighton Beach, reforçando a proteção da família Lucchese.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "Em 1989 foram condenados sob a Lei RICO por extorsão e 10 homicídios, recebendo prisão perpétua mais 20 anos.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "Joseph Testa faleceu em 26 de janeiro de 2026 em Henderson, Nevada, por causas naturais.",
+              "sourceRef": "[2]"
+            },
+            {
+              "text": "O Gemini Lounge foi convertido em igreja Purpose Life Church, mantendo o local histórico como espaço de culto.",
+              "sourceRef": "[4]"
+            }
+          ],
+          "forbiddenElements": [
+            "gore",
+            "violência explícita",
+            "armas de fogo",
+            "close-up de mãos humanas",
+            "close-up de rostos humanos",
+            "representação de sangue",
+            "cenas de tortura",
+            "símbolos extremistas",
+            "imagens de armas",
+            "violência gráfica"
+          ],
+          "allowedArtifacts": [
+            "documento",
+            "registro",
+            "relatório",
+            "arquivo",
+            "log",
+            "monitor",
+            "headline",
+            "recorte de jornal",
+            "mapa",
+            "prateleiras de arquivo"
+          ],
+          "notes": [
+            "use tom neutro e documental",
+            "foco na linha do tempo, não nos detalhes sangrentos",
+            "deixe perguntas sobre o destino final da dupla",
+            "evite revelar motivação final dos envolvidos"
+          ]
+        },
+        "scriptOutline": "Hook 3s → Setup quem/quando/onde 15-20s → Revelação 20-25s → CTA 5s",
+        "visualSuggestion": "Corredor noir‑cinematográfico de arquivos, lâmpada trêmula, pastas envelhecidas e um dossiê rachado sobre uma mesa de madeira.",
+        "cta": "Assista ao vídeo completo para descobrir todo o percurso dos Gemini.",
+        "platform": "YouTube Shorts",
+        "format": "teaser-youtube-shorts",
+        "estimatedViews": 150000,
+        "scriptStyleId": "documentary",
+        "scriptStyleName": "Documentary",
+        "editorialObjectiveId": "full-reveal",
+        "editorialObjectiveName": "Full Reveal",
+        "avoidPatterns": [
+          "NÃO resolva o caso — apresente mas deixe em aberto",
+          "NÃO use tom enciclopédico — mantenha urgência",
+          "NÃO cubra TODOS os aspectos — foque no gancho principal e deixe ângulos para os outros teasers"
+        ],
+        "visualPrompt": "A dimly lit archival hallway in noir-cinematic style, grainy 16mm texture, flickering overhead lamp casting long shadows. On a wooden desk lies an aged dossier with a wax seal, a cracked police report, and a vintage newspaper headline about the Gemini Lounge. In the background, a wall of metal filing cabinets with faded labels, a cracked monitor displaying a scanned map of Fountain Avenue, and a single candle providing soft amber light. The scene loops with the same lighting at start and end.",
+        "sceneCount": 5,
+        "targetEpisode": 1
+      }
+    ]
+  },
+  "rawContent": "{\n  \"teasers\": [\n    {\n      \"title\": \"Os Gêmeos Gemini: Ascensão e Queda\",\n      \"hook\": \"Do subúrbio de Brooklyn à lenda da \\\"máquina de matar\\\" que mudou a máfia.\",\n      \"angle\": \"Linha do Tempo da Ascensão dos Gemini\",\n      \"angleCategory\": \"cronologico\",\n      \"narrativeRole\": \"gateway\",\n      \"shortFormatType\": \"plot-twist\",\n      \"scriptOutline\": \"Hook 3s → Setup quem/quando/onde 15-20s → Revelação 20-25s → CTA 5s\",\n      \"visualSuggestion\": \"Corredor noir‑cinematográfico de arquivos, lâmpada trêmula, pastas envelhecidas e um dossiê rachado sobre uma mesa de madeira.\",\n      \"cta\": \"Assista ao vídeo completo para descobrir todo o percurso dos Gemini.\",\n      \"platform\": \"YouTube Shorts\",\n      \"format\": \"teaser-youtube-shorts\",\n      \"estimatedViews\": 150000,\n      \"scriptStyleId\": \"documentary\",\n      \"scriptStyleName\": \"Documentary\",\n      \"editorialObjectiveId\": \"full-reveal\",\n      \"editorialObjectiveName\": \"Full Reveal\",\n      \"avoidPatterns\": [\n        \"NÃO resolva o caso — apresente mas deixe em aberto\",\n        \"NÃO use tom enciclopédico — mantenha urgência\",\n        \"NÃO cubra TODOS os aspectos — foque no gancho principal e deixe ângulos para os outros teasers\"\n      ],\n      \"visualPrompt\": \"A dimly lit archival hallway in noir-cinematic style, grainy 16mm texture, flickering overhead lamp casting long shadows. On a wooden desk lies an aged dossier with a wax seal, a cracked police report, and a vintage newspaper headline about the Gemini Lounge. In the background, a wall of metal filing cabinets with faded labels, a cracked monitor displaying a scanned map of Fountain Avenue, and a single candle providing soft amber light. The scene loops with the same lighting at start and end.\",\n      \"sceneCount\": 5,\n      \"targetEpisode\": 1,\n      \"microBriefV1\": {\n        \"version\": \"teaserMicroBriefV1\",\n        \"narrativeRole\": \"gateway\",\n        \"angleCategory\": \"cronologico\",\n        \"angle\": \"Linha do Tempo da Ascensão dos Gemini\",\n        \"facts\": [\n          {\n            \"text\": \"Joseph Testa e Anthony Senter nasceram em 1955 no bairro de Canarsie, Brooklyn.\",\n            \"sourceRef\": \"[1]\"\n          },\n          {\n            \"text\": \"Na adolescência, envolveram‑se em roubos de automóveis, acumulando detenções juvenis.\",\n            \"sourceRef\": \"[1]\"\n          },\n          {\n            \"text\": \"Em 1974 foram recrutados por Roy DeMeo para integrar a equipe DeMeo, operando a partir do Gemini Lounge.\",\n            \"sourceRef\": \"[1]\"\n          },\n          {\n            \"text\": \"Desenvolveram o “Método Gemini”, um protocolo de sete etapas para eliminar vítimas e impedir a coleta de evidências.\",\n            \"sourceRef\": \"[1]\"\n          },\n          {\n            \"text\": \"O método incluía atração da vítima ao apartamento, contenção, interrupção cardíaca, drenagem de sangue, desmembramento e descarte em caixas plásticas no aterro de Fountain Avenue.\",\n            \"sourceRef\": \"[1]\"\n          },\n          {\n            \"text\": \"Testemunhas descrevem o método como “sem corpo, sem crime”.\",\n            \"sourceRef\": \"[1]\"\n          },\n          {\n            \"text\": \"Em junho de 1986 Joseph Testa executou Vladimir Reznikov em Brighton Beach, reforçando a proteção da família Lucchese.\",\n            \"sourceRef\": \"[1]\"\n          },\n          {\n            \"text\": \"Em 1989 foram condenados sob a Lei RICO por extorsão e 10 homicídios, recebendo prisão perpétua mais 20 anos.\",\n            \"sourceRef\": \"[1]\"\n          },\n          {\n            \"text\": \"Joseph Testa faleceu em 26 de janeiro de 2026 em Henderson, Nevada, por causas naturais.\",\n            \"sourceRef\": \"[2]\"\n          },\n          {\n            \"text\": \"O Gemini Lounge foi convertido em igreja Purpose Life Church, mantendo o local histórico como espaço de culto.\",\n            \"sourceRef\": \"[4]\"\n          }\n        ],\n        \"forbiddenElements\": [\n          \"gore\",\n          \"violência explícita\",\n          \"armas de fogo\",\n          \"close-up de mãos humanas\",\n          \"close-up de rostos humanos\",\n          \"representação de sangue\",\n          \"cenas de tortura\",\n          \"símbolos extremistas\",\n          \"imagens de armas\",\n          \"violência gráfica\"\n        ],\n        \"allowedArtifacts\": [\n          \"documento\",\n          \"registro\",\n          \"relatório\",\n          \"arquivo\",\n          \"log\",\n          \"monitor\",\n          \"headline\",\n          \"recorte de jornal\",\n          \"mapa\",\n          \"prateleiras de arquivo\"\n        ],\n        \"notes\": [\n          \"use tom neutro e documental\",\n          \"foco na linha do tempo, não nos detalhes sangrentos\",\n          \"deixe perguntas sobre o destino final da dupla\",\n          \"evite revelar motivação final dos envolvidos\"\n        ]\n      }\n    }\n  ]\n}"
+}

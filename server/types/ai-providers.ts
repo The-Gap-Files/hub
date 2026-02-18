@@ -101,6 +101,10 @@ export interface ScriptGenerationRequest {
   strategicNotes?: string // Notas estratégicas do plano de monetização
   avoidPatterns?: string[] // Anti-padrões do monetizador ("O que NÃO fazer")
 
+  // Série de episódios — governa transições e teasers entre EPs
+  episodeNumber?: 1 | 2 | 3
+  totalEpisodes?: number
+
   /** Brief persistido do Dossier (para reduzir contexto em TEASERS) */
   briefBundleV1?: any
 }
@@ -109,8 +113,6 @@ export interface ScriptScene {
   order: number
   narration: string
   visualDescription: string
-  endVisualDescription?: string // Descrição visual do FINAL da cena (keyframe final para motion i2v)
-  endImageReferenceWeight?: number // Peso da imagem START como referência para gerar a END image (0.0-1.0). Decidido pelo roteirista.
   sceneEnvironment?: string // Identificador do ambiente (ex: "bishop_study", "canal_dawn") para continuidade visual
   motionDescription?: string // Instruções de movimento para i2v (câmera, sujeito, atmosfera dinâmica)
   audioDescription?: string // Descrição de SFX ou atmosfera sonora
@@ -279,8 +281,6 @@ export interface IImageGenerator {
 export interface MotionGenerationRequest {
   imagePath?: string // Caminho local ou URL da imagem de origem (deprecated)
   imageBuffer?: Buffer // Buffer da imagem (preferido)
-  endImageBuffer?: Buffer // Buffer da imagem final (keyframe end para last_image)
-  endImagePath?: string // Caminho local ou URL da imagem final (para transição)
   duration?: number // Duração desejada (2-4s geralmente)
   motionBucketId?: number // Intensidade do movimento (1-255, default 127)
   noiseAugStrength?: number // Fidelidade à imagem (0-1, default 0.1)

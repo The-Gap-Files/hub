@@ -10,6 +10,7 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "db:init": "tsx scripts/init-db.ts",
+    "db:migrate:plans:episodes": "tsx scripts/migrate-monetization-fullvideo-to-episodes.ts",
     "db:migrate": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev",
     "db:reset": "prisma migrate reset",

@@ -46,7 +46,7 @@ const SegmentDistributionSchema = z.object({
   rising: z.number().describe('Número de cenas para RISING ACTION (todos os beats)'),
   climax: z.number().describe('Número de cenas para CLIMAX'),
   resolution: z.number().describe('Número de cenas para RESOLUTION'),
-  cta: z.number().describe('Número de cenas para CTA')
+  cta: z.number().max(3).describe('Número de cenas para CTA — MÁXIMO 3 (ideal: 2). Nunca mais que 3. Para full video de série: exatamente 2 ou 3.')
 })
 
 const StoryOutlineSchema = z.object({
@@ -71,7 +71,7 @@ const StoryOutlineSchema = z.object({
   resolutionAngle: z.string().describe('A implicação maior — o que fica com o espectador. Para hook-only, pode ser vazio.'),
 
   // CTA (opcional para hook-only — pode ser minimalista)
-  ctaApproach: z.string().describe('Estratégia de fechamento: deve incluir (1) convite para o espectador seguir/inscrever-se no canal, no tom do vídeo, e (2) menção ao canal The Gap Files como assinatura. Para hook-only, pode ser apenas assinatura minimalista ("The Gap Files").'),
+  ctaApproach: z.string().describe('Estratégia de fechamento (1 único bloco, máx 2-3 cenas, APENAS no final). Para série de episódios: EP1 → tease do EP2, EP2 → tease do EP3, EP3 → assinatura The Gap Files. Para vídeo único: convite para canal The Gap Files. Para hook-only: assinatura minimalista ou ausente. PROIBIDO: repetir tagline, espalhar CTAs ao longo do vídeo, meta-referências.'),
 
   // Direção emocional (opcional para hook-only)
   emotionalArc: z.string().describe('Progressão emocional do início ao fim (ex: Curiosidade → Indignação → Compreensão). Para hook-only, pode ser vazio.'),
@@ -149,6 +149,9 @@ export interface StoryArchitectRequest {
     hook: string
     angle: string
     angleCategory: string
+    // Série de episódios (opcional)
+    planId?: string
+    episodeNumber?: 1 | 2 | 3
     narrativeRole?: string // 'gateway' | 'deep-dive' | 'hook-only'
     shortFormatType?: string // 'hook-brutal' | 'pergunta-incomoda' | 'plot-twist' | etc.
     scriptOutline?: string
@@ -182,15 +185,16 @@ export async function generateStoryOutline(
   // Gemini: jsonMode evita limitações de response_schema (const, default)
   const isGemini = assignment.provider.toLowerCase().includes('gemini') || assignment.provider.toLowerCase().includes('google')
   const isReplicate = assignment.provider.toLowerCase().includes('replicate')
-  // Groq Llama 4: forçar jsonMode. GPT-OSS: SDK autodetecta jsonSchema → sem override.
-  const isGroqLlama4 = assignment.provider.toLowerCase().includes('groq') && assignment.model.includes('llama-4')
+  const isGroq = assignment.provider.toLowerCase().includes('groq')
+  const isGroqLlama4 = isGroq && assignment.model.includes('llama-4')
+  const isGroqGptOss = isGroq && assignment.model.includes('gpt-oss')
 
   let structuredLlm: any
   if (isReplicate && typeof (model as any).withStructuredOutputReplicate === 'function') {
     console.log('[StoryArchitect] 🔧 Structured output: replicate (invoke + parse)')
     structuredLlm = (model as any).withStructuredOutputReplicate(StoryOutlineSchema, { includeRaw: true })
   } else {
-    const method = isGemini ? 'jsonMode' : isGroqLlama4 ? 'jsonMode' : undefined
+    const method = isGemini ? 'jsonMode' : isGroqLlama4 ? 'jsonMode' : isGroqGptOss ? 'jsonSchema' : undefined
     structuredLlm = (model as any).withStructuredOutput(StoryOutlineSchema, {
       includeRaw: true,
       ...(method ? { method } : {})
@@ -485,6 +489,36 @@ function buildUserPrompt(request: StoryArchitectRequest): string {
     prompt += `- **Hook sugerido:** "${mc.hook}"\n`
     prompt += `  → 🚨 REGRA OBRIGATÓRIA: As 4 variantes em hookVariants DEVEM SEGUIR este gancho. Cada variante (green, moderate, aggressive, lawless) calibra o MESMO conceito em níveis tonais diferentes — NÃO invente um gancho novo. O hook do plano de monetização é a fonte da verdade.\n`
     prompt += `- **Ângulo narrativo:** ${mc.angle} (categoria: ${mc.angleCategory})\n`
+
+    // Série (episódios): instruções adicionais para evitar sobreposição entre EPs
+    if (mc.episodeNumber || mc.angleCategory?.startsWith('episode-')) {
+      const epLabel = mc.episodeNumber ? `EP${mc.episodeNumber}` : mc.angleCategory
+      if (mc.itemType === 'fullVideo') {
+        prompt += `- **Série (episódios):** Este full video é um episódio (${epLabel}).\n`
+        prompt += `  → REGRA: Mantenha o foco 100% no ângulo do episódio e trate qualquer bloco "EPISÓDIOS ANTERIORES (NÃO REPETIR)" presente em userNotes como RESTRIÇÃO DURA.\n`
+        prompt += `  → Objetivo: explorar TERRITÓRIO NOVO e complementar, sem recontar as mesmas revelações.\n`
+
+        // CTA específico por número de episódio
+        if (mc.episodeNumber) {
+          const nextEp = mc.episodeNumber < 3 ? mc.episodeNumber + 1 : null
+          prompt += `- **REGRA CTA DO EP${mc.episodeNumber} (INEGOCIÁVEL):**\n`
+          prompt += `  → segmentDistribution.cta = 2 (máximo 3). NUNCA mais que 3 cenas de CTA.\n`
+          prompt += `  → O CTA é 1 único bloco no final. O vídeo tem UM único encerramento.\n`
+          if (nextEp) {
+            prompt += `  → ctaApproach: convidar para EP${nextEp} com gancho narrativo. NÃO mencionar "The Gap Files" como assinatura — apenas o tease do próximo episódio.\n`
+            prompt += `  → Tom: "O que aconteceu depois é ainda mais perturbador. [Gancho do EP${nextEp}]"\n`
+          } else {
+            prompt += `  → ctaApproach: promover o canal The Gap Files como assinatura final. Sem tease de próximo episódio.\n`
+            prompt += `  → Tom: finalizar com assinatura + convite para explorar outros vídeos do canal.\n`
+          }
+          prompt += `  → PROIBIDO: mais de 1 bloco de CTA, tagline "The Gap Files" repetida, meta-referências (duração, contagem de cenas).\n`
+        }
+      } else if (mc.itemType === 'teaser') {
+        prompt += `- **Funil de episódio:** Este teaser é funil de entrada do ${epLabel}.\n`
+        prompt += `  → REGRA: Alinhe o ângulo narrativo e o hook ao TEMA do ${epLabel}. O CTA (se houver) deve direcionar para este episódio específico.\n`
+        prompt += `  → O teaser NÃO deve revelar conteúdo de outros episódios — mantenha o foco no território do ${epLabel}.\n`
+      }
+    }
     if (mc.narrativeRole) {
       prompt += `- **Papel narrativo:** ${mc.narrativeRole}\n`
       if (mc.narrativeRole === 'gateway') {

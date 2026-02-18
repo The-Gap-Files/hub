@@ -50,7 +50,7 @@ import {
   stripInlineAudioTags,
   stripSsmlBreakTags
 } from '../../utils/hook-only-audio-timing'
-import { filmmakerDirector } from '../filmmaker-director.service'
+import { filmmakerDirector, type ProductionContext } from '../filmmaker-director.service'
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path)
 import os from 'node:os'
@@ -243,6 +243,13 @@ export class OutputPipelineService {
       promptContext.shortFormatType = meta.shortFormatType || undefined
       promptContext.strategicNotes = meta.strategicNotes || undefined
 
+      // Episódio da série (governa transições e teasers entre EPs)
+      if (meta.episodeNumber) {
+        promptContext.episodeNumber = meta.episodeNumber
+        promptContext.totalEpisodes = 3 // série fixa de 3 episódios
+        scriptLog.info(`📺 Série: EP${meta.episodeNumber}/3`)
+      }
+
       // Sobrescrever estilo de roteiro se o monetizador sugeriu um específico para este teaser
       if (meta.scriptStyleId) {
         const monetizationStyle = getScriptStyleById(meta.scriptStyleId)
@@ -390,7 +397,9 @@ export class OutputPipelineService {
 
     // ─── AGENTE CINEASTA (FILMMAKER DIRECTOR) — PÓS-PROCESSAMENTO ───
     // Entra aqui para polir a "Visão" do roteiro.
-    // Transforma descrições genéricas em prompts técnicos de cinema (Kodak Vision3, Gerúndios, Movimentos).
+    // Transforma descrições genéricas em prompts técnicos de cinema.
+    // Recebe Production Awareness (Style Anchor + Visual Identity) para evitar redundância
+    // e manter continuidade visual semântica entre cenas do mesmo ambiente.
     if (scriptResponse.scenes && scriptResponse.scenes.length > 0) {
       try {
         scriptLog.info('🎬 Acionando o Agente Cineasta para direção de fotografia e movimento...')
@@ -399,15 +408,33 @@ export class OutputPipelineService {
         const baseStyleForDirector = promptContext.visualBaseStyle ||
           "Cinematic 35mm photography, hyperrealistic dark mystery style"
 
+        // Montar Production Context para o filmmaker ter consciência do pipeline
+        const vs = output.visualStyle
+        const anchorParts: string[] = []
+        if (vs) {
+          if (vs.baseStyle) anchorParts.push(vs.baseStyle)
+          if (vs.lightingTags) anchorParts.push(vs.lightingTags)
+          if (vs.atmosphereTags) anchorParts.push(vs.atmosphereTags)
+          if (vs.compositionTags) anchorParts.push(vs.compositionTags)
+          if (vs.tags) anchorParts.push(vs.tags)
+        }
+
+        const productionCtx: ProductionContext = {
+          styleAnchorTags: anchorParts.length > 0 ? anchorParts.join(', ') : undefined,
+          visualIdentity: output.dossier?.visualIdentityContext || undefined
+        }
+
         const refinedScenes = await filmmakerDirector.refineScript(
           scriptResponse.scenes.map(s => ({
-            order: 0, // A ordem relativa é mantida pelo índice do map
+            order: 0,
             narration: s.narration,
             currentVisual: s.visualDescription,
             currentEnvironment: s.sceneEnvironment,
             estimatedDuration: s.estimatedDuration || 5
           })),
-          baseStyleForDirector
+          baseStyleForDirector,
+          undefined,
+          productionCtx
         )
 
         // Mesclar refinamentos de volta nas cenas originais
@@ -419,8 +446,7 @@ export class OutputPipelineService {
             return {
               ...original,
               visualDescription: refined.visualDescription || original.visualDescription,
-              motionDescription: refined.motionDescription || original.motionDescription, // Novo campo crucial
-              endVisualDescription: refined.endVisualDescription || original.endVisualDescription,
+              motionDescription: refined.motionDescription || original.motionDescription,
               sceneEnvironment: refined.sceneEnvironment || original.sceneEnvironment
             }
           })
@@ -464,8 +490,6 @@ export class OutputPipelineService {
           order: index,
           narration: scene.narration?.trim(),
           visualDescription: scene.visualDescription?.trim(),
-          endVisualDescription: scene.endVisualDescription?.trim() || null,
-          endImageReferenceWeight: scene.endImageReferenceWeight ?? null,
           sceneEnvironment: scene.sceneEnvironment?.trim() || null,
           motionDescription: scene.motionDescription?.trim() || null,
           audioDescription: scene.audioDescription?.trim() || null,
@@ -523,41 +547,27 @@ export class OutputPipelineService {
       let errorCount = 0
 
       // =====================================================================
-      // 🎨 VISUAL CONTINUITY ENGINE
-      // Injeta [VISUAL STYLE ANCHOR] e [VISUAL CONTINUITY] nos prompts
-      // baseado no sceneEnvironment de cada cena.
-      //
-      // Mesmo ambiente (sceneEnvironment igual ao anterior) →
-      //   Anchor + Continuity (objetos e atmosfera da cena anterior persistem)
-      // Novo ambiente (sceneEnvironment diferente ou primeira cena) →
-      //   Só Anchor (transição limpa, sem contaminação)
+      // 🎨 VISUAL STYLE ANCHOR (safety net para o modelo de imagem)
+      // O filmmaker agora tem Production Awareness e cuida da continuidade
+      // visual semântica entre cenas. Aqui mantemos apenas o Style Anchor
+      // como prefixo leve para estabilizar o modelo de geração de imagem.
       // =====================================================================
 
-      // Montar Style Anchor a partir dos campos de estilo visual
-      const vs = output.visualStyle
-      let styleAnchorParts: string[] = []
-      if (vs) {
-        if (vs.baseStyle) styleAnchorParts.push(vs.baseStyle)
-        if (vs.lightingTags) styleAnchorParts.push(vs.lightingTags)
-        if (vs.atmosphereTags) styleAnchorParts.push(vs.atmosphereTags)
-        if (vs.compositionTags) styleAnchorParts.push(vs.compositionTags)
-        if (vs.tags) styleAnchorParts.push(vs.tags)
+      const imgVs = output.visualStyle
+      const imgAnchorParts: string[] = []
+      if (imgVs) {
+        if (imgVs.baseStyle) imgAnchorParts.push(imgVs.baseStyle)
+        if (imgVs.lightingTags) imgAnchorParts.push(imgVs.lightingTags)
+        if (imgVs.atmosphereTags) imgAnchorParts.push(imgVs.atmosphereTags)
+        if (imgVs.compositionTags) imgAnchorParts.push(imgVs.compositionTags)
+        if (imgVs.tags) imgAnchorParts.push(imgVs.tags)
       }
-      const styleAnchor = styleAnchorParts.length > 0
-        ? `[VISUAL STYLE ANCHOR — ${styleAnchorParts.join(', ')}]`
+      const styleAnchor = imgAnchorParts.length > 0
+        ? `[VISUAL STYLE ANCHOR — ${imgAnchorParts.join(', ')}]`
         : ''
 
       if (styleAnchor) {
         log.info(`🎨 Style Anchor: ${styleAnchor.slice(0, 100)}...`)
-      }
-
-      // Montar Visual Identity do dossiê (diretrizes específicas do universo)
-      const visualIdentity = output.dossier?.visualIdentityContext
-        ? `[VISUAL IDENTITY — ${output.dossier.visualIdentityContext}]`
-        : ''
-
-      if (visualIdentity) {
-        log.info(`🆔 Visual Identity: ${visualIdentity.slice(0, 100)}...`)
       }
 
       for (const chunk of sceneChunks) {
@@ -569,44 +579,20 @@ export class OutputPipelineService {
           const width = isPortrait ? 768 : 1344
           const height = isPortrait ? 1344 : 768
 
-          // Montar prompt visual com Style Anchor + Visual Identity + Visual Continuity
+          // Montar prompt visual: Style Anchor (safety net) + visualDescription do filmmaker
+          // Continuidade visual e identidade já foram incorporadas pelo filmmaker via Production Awareness
           let visualPrompt = scene.visualDescription
 
-          // Determinar se é mesmo ambiente da cena anterior
-          const prevScene = absoluteIndex > 0 ? scenes[absoluteIndex - 1] : null
-          const isSameEnvironment = prevScene
-            && scene.sceneEnvironment
-            && prevScene.sceneEnvironment
-            && scene.sceneEnvironment === prevScene.sceneEnvironment
-
-          // Montar prefixo: Anchor → Identity → Continuity (se aplicável)
-          const prefixParts: string[] = []
-          if (styleAnchor) prefixParts.push(styleAnchor)
-          if (visualIdentity) prefixParts.push(visualIdentity)
-
-          if (isSameEnvironment && prevScene) {
-            // Mesmo ambiente → Anchor + Identity + Continuity
-            const continuityContext = prevScene.visualDescription.slice(0, 300)
-            prefixParts.push(`[VISUAL CONTINUITY — same environment "${scene.sceneEnvironment}": ${continuityContext}]`)
-            log.step(`Cena ${absoluteIndex + 1}`, `🔗 Continuity + Anchor + Identity (env: ${scene.sceneEnvironment})`)
-          } else if (prefixParts.length > 0) {
-            log.step(`Cena ${absoluteIndex + 1}`, `🎨 Anchor + Identity${scene.sceneEnvironment ? ` (new env: ${scene.sceneEnvironment})` : ''}`)
-          }
-
-          if (prefixParts.length > 0) {
-            visualPrompt = `${prefixParts.join('\n')}\n\n${visualPrompt}`
+          if (styleAnchor) {
+            visualPrompt = `${styleAnchor}\n\n${visualPrompt}`
+            log.step(`Cena ${absoluteIndex + 1}`, `🎨 Anchor applied${scene.sceneEnvironment ? ` (env: ${scene.sceneEnvironment})` : ''}`)
           }
 
 
-          // ── GERAÇÃO DE IMAGENS (DUAL: Start + End com Image Reference) ──
-          // Se houver endVisualDescription, gera START primeiro, depois END usando
-          // a imagem START como referência visual (image_reference) para manter
-          // consistência de objetos, ambiente e iluminação entre os dois keyframes.
+          // ── GERAÇÃO DE IMAGEM DA CENA ──
+          log.step(`Cena ${absoluteIndex + 1}/${scenes.length}`, `prompt: ${visualPrompt.slice(0, 80)}...`)
 
-          // 1. Sempre gerar START image
-          log.step(`Cena ${absoluteIndex + 1}/${scenes.length} [START]`, `prompt: ${visualPrompt.slice(0, 80)}...`)
-
-          const startRequest: ImageGenerationRequest = {
+          const imageRequest: ImageGenerationRequest = {
             prompt: visualPrompt,
             width,
             height,
@@ -615,21 +601,21 @@ export class OutputPipelineService {
             numVariants: 1
           }
 
-          const startResponse = await imageProvider.generate(startRequest)
-          const startImage = startResponse.images[0]
+          const imageResponse = await imageProvider.generate(imageRequest)
+          const generatedImage = imageResponse.images[0]
 
-          if (startImage) {
+          if (generatedImage) {
             await prisma.sceneImage.create({
               data: {
                 sceneId: scene.id,
                 role: 'start',
                 provider: imageProvider.getName() as any,
                 promptUsed: scene.visualDescription,
-                fileData: Buffer.from(startImage.buffer) as any,
+                fileData: Buffer.from(generatedImage.buffer) as any,
                 mimeType: 'image/png',
-                originalSize: startImage.buffer.length,
-                width: startImage.width,
-                height: startImage.height,
+                originalSize: generatedImage.buffer.length,
+                width: generatedImage.width,
+                height: generatedImage.height,
                 isSelected: true,
                 variantIndex: 0
               }
@@ -639,66 +625,12 @@ export class OutputPipelineService {
               outputId,
               resource: 'image',
               action: 'create',
-              provider: startResponse.costInfo.provider,
-              model: startResponse.costInfo.model,
-              cost: startResponse.costInfo.cost,
-              metadata: startResponse.costInfo.metadata,
-              detail: `Scene ${absoluteIndex + 1} (start) - image generation`
+              provider: imageResponse.costInfo.provider,
+              model: imageResponse.costInfo.model,
+              cost: imageResponse.costInfo.cost,
+              metadata: imageResponse.costInfo.metadata,
+              detail: `Scene ${absoluteIndex + 1} - image generation`
             }).catch(() => { })
-          }
-
-          // 2. Se houver endVisualDescription, gerar END image com START como referência
-          if (scene.endVisualDescription && startImage) {
-            let endPrompt = scene.endVisualDescription
-            if (prefixParts.length > 0) {
-              endPrompt = `${prefixParts.join('\n')}\n\n${endPrompt}`
-            }
-
-            const refWeight = scene.endImageReferenceWeight ?? 0.5
-            log.step(`Cena ${absoluteIndex + 1}/${scenes.length} [END]`, `prompt: ${endPrompt.slice(0, 80)}... | imageRef weight: ${refWeight}`)
-
-            const endRequest: ImageGenerationRequest = {
-              prompt: endPrompt,
-              width,
-              height,
-              aspectRatio: output.aspectRatio || '16:9',
-              seed: output.seed?.value,
-              numVariants: 1,
-              imageReference: Buffer.from(startImage.buffer),
-              imageReferenceWeight: refWeight
-            }
-
-            const endResponse = await imageProvider.generate(endRequest)
-            const endImage = endResponse.images[0]
-
-            if (endImage) {
-              await prisma.sceneImage.create({
-                data: {
-                  sceneId: scene.id,
-                  role: 'end',
-                  provider: imageProvider.getName() as any,
-                  promptUsed: scene.endVisualDescription,
-                  fileData: Buffer.from(endImage.buffer) as any,
-                  mimeType: 'image/png',
-                  originalSize: endImage.buffer.length,
-                  width: endImage.width,
-                  height: endImage.height,
-                  isSelected: true,
-                  variantIndex: 0
-                }
-              })
-
-              costLogService.log({
-                outputId,
-                resource: 'image',
-                action: 'create',
-                provider: endResponse.costInfo.provider,
-                model: endResponse.costInfo.model,
-                cost: endResponse.costInfo.cost,
-                metadata: { ...endResponse.costInfo.metadata, imageReferenceWeight: refWeight },
-                detail: `Scene ${absoluteIndex + 1} (end) - image generation with START reference (weight: ${refWeight})`
-              }).catch(() => { })
-            }
           }
         }))
 
@@ -1011,6 +943,12 @@ export class OutputPipelineService {
           ? computeSpeedForBudget(wc, targetBudgetSeconds)
           : safeSpeedFromWPM
 
+        // Hook-only: não desacelerar apenas para "preencher" o budget.
+        // Se a cena ficar curta, aceitamos encerrar mais cedo (opção A).
+        if (isHookOnly) {
+          speed = Math.max(speed, safeSpeedFromWPM)
+        }
+
         // Hook-Only: sem injeção artificial de [pause] — a duração natural do áudio é respeitada.
         const pauseCount = 0
 
@@ -1073,6 +1011,11 @@ export class OutputPipelineService {
           const diff = realDuration - targetBudgetSeconds
 
           if (Math.abs(diff) <= toleranceSeconds || attempt === maxAttempts) {
+            break
+          }
+
+          // Se ficou curto, não tentar esticar desacelerando (opção A).
+          if (diff < 0) {
             break
           }
 
@@ -1350,10 +1293,8 @@ export class OutputPipelineService {
 
     for (const chunk of sceneChunks) {
       await Promise.all(chunk.map(async (scene) => {
-        // Buscar startImage (role='start' ou fallback sem role) e endImage (role='end')
-        // Como o include traz todas isSelected=true, filtramos aqui.
+        // Buscar startImage (role='start' ou fallback sem role)
         const startImage = scene.images.find(img => img.role === 'start') || scene.images[0]
-        const endImage = scene.images.find(img => img.role === 'end')
 
         if (!startImage?.fileData) return
 
@@ -1364,7 +1305,6 @@ export class OutputPipelineService {
         const durationSeconds = scene.audioTracks[0]?.duration ?? scene.estimatedDuration ?? 5
         const request: MotionGenerationRequest = {
           imageBuffer: Buffer.from(startImage.fileData!) as any,
-          endImageBuffer: endImage ? Buffer.from(endImage.fileData!) as any : undefined,
           prompt: motionPrompt,
           duration: durationSeconds,
           aspectRatio: output.aspectRatio || '16:9'
@@ -1432,9 +1372,8 @@ export class OutputPipelineService {
 
     const output = scene.output
 
-    // Identificar start e end images selecionadas
+    // Identificar start image selecionada
     const startImage = scene.images.find(img => img.role === 'start') || scene.images[0]
-    const endImage = scene.images.find(img => img.role === 'end')
 
     if (!startImage) throw new Error('Imagem inicial não encontrada')
 
@@ -1457,7 +1396,6 @@ export class OutputPipelineService {
     const durationSeconds = scene.audioTracks[0]?.duration ?? scene.estimatedDuration ?? 5
     const request: MotionGenerationRequest = {
       imageBuffer: Buffer.from(startImage.fileData!) as any,
-      endImageBuffer: endImage ? Buffer.from(endImage.fileData!) as any : undefined,
       prompt: motionPrompt,
       duration: durationSeconds,
       aspectRatio: output.aspectRatio || '16:9'

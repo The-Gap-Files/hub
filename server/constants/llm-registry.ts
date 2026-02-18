@@ -23,6 +23,7 @@ export type LlmTaskId =
   | 'story-validator'     // Validação de outline (checa aderência a regras narrativas)
   | 'script-validator'    // Validação de roteiro final (checa resolução, open loops, duração)
   | 'briefing-teasers'    // Geração de brief enxuto para teasers (gateway/deep-dive/hook-only)
+  | 'briefing-episodes'   // Geração de brief distribuído para episódios completos (EP1/EP2/EP3)
   | 'monetization'        // Plano de monetização
   | 'monetization-validator' // Validação do plano de monetização (diversidade, coerência, funil)
   | 'intelligence-query'  // Consulta manual ao dossiê
@@ -201,6 +202,16 @@ export const LLM_TASKS: Record<LlmTaskId, LlmTask> = {
     label: 'Brief (Teasers)',
     description: 'Gera um brief enxuto e seguro para teasers (gateway/deep-dive/hook-only), reduzindo ruído do dossiê bruto.',
     iconKey: 'file-text',
+    requiresStructuredOutput: true,
+    requiresLargeContext: true,
+    defaultProvider: 'anthropic',
+    defaultModel: 'claude-sonnet-4-20250514'
+  },
+  'briefing-episodes': {
+    id: 'briefing-episodes',
+    label: 'Brief (Episódios)',
+    description: 'Gera brief distribuído para episódios completos (EP1/EP2/EP3), definindo fatos exclusivos, holdbacks e open loops por episódio.',
+    iconKey: 'film',
     requiresStructuredOutput: true,
     requiresLargeContext: true,
     defaultProvider: 'anthropic',

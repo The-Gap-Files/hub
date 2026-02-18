@@ -1,7 +1,7 @@
 /**
  * POST /api/dossiers/[id]/regenerate-monetization-item
  * 
- * Regenera um teaser ou fullVideo individual com ângulo diferente.
+ * Regenera um teaser ou um episódio (fullVideo) individual com ângulo diferente.
  * Atualiza o plano salvo no banco com o item substituído.
  */
 
@@ -18,10 +18,12 @@ export default defineEventHandler(async (event) => {
   }
 
   const body = await readBody(event)
-  const { type, index, userSuggestion } = body as {
+  const { type, index, userSuggestion, episodeNumber, narrativeRole } = body as {
     type: 'teaser' | 'fullVideo'
     index?: number
     userSuggestion?: string
+    episodeNumber?: 1 | 2 | 3
+    narrativeRole?: string
   }
 
   if (!type || !['teaser', 'fullVideo'].includes(type)) {
@@ -30,6 +32,10 @@ export default defineEventHandler(async (event) => {
 
   if (type === 'teaser' && (index == null || index < 0)) {
     throw createError({ statusCode: 400, message: 'index é obrigatório para teasers' })
+  }
+
+  if (type === 'fullVideo' && episodeNumber != null && ![1, 2, 3].includes(Number(episodeNumber))) {
+    throw createError({ statusCode: 400, message: 'episodeNumber deve ser 1, 2 ou 3' })
   }
 
   // Buscar plano ativo
@@ -48,6 +54,12 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Índice de teaser fora do range' })
   }
 
+  const episodeIndex = (type === 'fullVideo' ? (Number(episodeNumber ?? 1) - 1) : 0)
+  const selectedEpisode = Array.isArray(planData?.fullVideos) ? planData.fullVideos[episodeIndex] : null
+  if (type === 'fullVideo' && !selectedEpisode) {
+    throw createError({ statusCode: 400, message: `Plano inválido: fullVideos[${episodeIndex}] ausente` })
+  }
+
   // Buscar dossiê para contexto
   const dossier = await prisma.dossier.findUnique({
     where: { id: dossierId },
@@ -62,11 +74,17 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
+    const currentPlanForRegeneration = {
+      ...planData,
+      // Compatibilidade: service legado espera currentPlan.fullVideo
+      fullVideo: (type === 'fullVideo' ? selectedEpisode : (planData?.fullVideos?.[0] ?? selectedEpisode))
+    }
+
     const result = await regenerateMonetizationItem(
       {
         type,
         index,
-        currentPlan: planData,
+        currentPlan: currentPlanForRegeneration,
         dossierContext: {
           theme: dossier.theme,
           title: dossier.title,
@@ -84,7 +102,12 @@ export default defineEventHandler(async (event) => {
         teaserDuration: (activePlan.teaserDuration ?? 35) as 35 | 55 | 115,
         // Monetização travada: Full sempre no formato longo padrão.
         fullVideoDuration: 900 as 300 | 600 | 900,
-        userSuggestion: userSuggestion?.trim() || undefined
+        userSuggestion: userSuggestion?.trim() || undefined,
+        narrativeRole: narrativeRole?.trim() || undefined,
+        // Manter o targetEpisode atual do teaser ao regenerar
+        targetEpisode: type === 'teaser' && index != null
+          ? (planData.teasers?.[index]?.targetEpisode as 1 | 2 | 3 | undefined)
+          : undefined
       }
     )
 
@@ -96,8 +119,19 @@ export default defineEventHandler(async (event) => {
       const sceneCount = role === 'gateway' ? 5 : role === 'hook-only' ? 4 : 6
       updatedPlan.teasers[index!] = { ...result.item, sceneCount }
     } else {
-      updatedPlan.fullVideo = { ...result.item, sceneCount: 150 }
+      if (!Array.isArray(updatedPlan.fullVideos)) updatedPlan.fullVideos = []
+      const n = (episodeIndex + 1) as 1 | 2 | 3
+      updatedPlan.fullVideos[episodeIndex] = {
+        ...result.item,
+        episodeNumber: n,
+        angleCategory: `episode-${n}`,
+        sceneCount: 150
+      }
+      updatedPlan.needsReview = true
     }
+
+    // Hard migration: garantir que "fullVideo" não volte a existir no JSON do plano
+    if ('fullVideo' in updatedPlan) delete updatedPlan.fullVideo
 
     // Atualizar cronograma se a IA gerou um novo
     if (result.updatedSchedule && result.updatedSchedule.length > 0) {

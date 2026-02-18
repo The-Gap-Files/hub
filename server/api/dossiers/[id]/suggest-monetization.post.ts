@@ -2,7 +2,7 @@
  * POST /api/dossiers/[id]/suggest-monetization
  * 
  * Analisa o dossiê via IA e gera um plano de monetização Document-First:
- * 1 Full Video (YouTube) + N Teasers (TikTok/Shorts/Reels)
+ * 3 Full Videos (EP1–EP3, YouTube) + N Teasers (TikTok/Shorts/Reels)
  * 
  * V2: Pipeline por etapas (Blueprint → Full Video → Gateway → Deep-Dives → Hook-Only → Schedule)
  * Cada etapa é focada, com validação programática no blueprint.
@@ -200,15 +200,21 @@ export default defineEventHandler(async (event) => {
 
     // Validação LLM do plano completo (diversidade, coerência, funil)
     // TEMPORÁRIO: validadores e loops de repair desativados globalmente.
+    const primaryEpisode = result.plan.fullVideos?.[0]
+    if (!primaryEpisode) {
+      throw new Error('Plano inválido: fullVideos[0] ausente')
+    }
+
     const validationResult = validatorsEnabled()
       ? await validateMonetizationPlan({
+        // Validador atual é 1× Full Video. Usamos EP1 como referência do funil.
         fullVideo: {
-          title: result.plan.fullVideo.title,
-          hook: result.plan.fullVideo.hook,
-          angle: result.plan.fullVideo.angle,
-          scriptStyleId: result.plan.fullVideo.scriptStyleId,
-          keyPoints: result.plan.fullVideo.keyPoints,
-          emotionalArc: result.plan.fullVideo.emotionalArc
+          title: primaryEpisode.title,
+          hook: primaryEpisode.hook,
+          angle: primaryEpisode.angle,
+          scriptStyleId: primaryEpisode.scriptStyleId,
+          keyPoints: primaryEpisode.keyPoints,
+          emotionalArc: primaryEpisode.emotionalArc
         },
         teasers: result.plan.teasers.map((t: any) => ({
           title: t.title,

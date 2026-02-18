@@ -36,7 +36,7 @@
             <p class="text-sm text-white font-semibold">Análise de monetização inteligente</p>
             <p class="text-xs text-zinc-400 leading-relaxed">
               A IA analisará o dossiê e sugerirá um pacote completo:
-              <strong class="text-white">1 vídeo completo</strong> (YouTube) +
+              <strong class="text-white">3 episódios longos</strong> (YouTube) +
               <strong class="text-white">N shorts</strong> (YouTube Shorts),
               cada um com ângulo narrativo e papel narrativo diferentes para maximizar alcance e conversão.
             </p>
@@ -166,7 +166,7 @@
                 <h3 class="text-lg font-black uppercase tracking-widest text-white">{{ plan.planTitle || 'Plano Gerado' }}</h3>
                 <div class="flex items-center gap-2 mt-1 flex-wrap">
                   <span class="text-xs text-zinc-500 font-mono uppercase tracking-wider">
-                    1 Full Video + {{ plan.teasers.length }} Teasers · Receita estimada: {{ plan.estimatedTotalRevenue }}
+                    {{ plan.fullVideos?.length || 0 }} Episódios + {{ plan.teasers.length }} Teasers · Receita estimada: {{ plan.estimatedTotalRevenue }}
                     <span v-if="planCreatedAt" class="ml-2 text-zinc-600">· {{ formatPlanDate(planCreatedAt) }}</span>
                   </span>
                   <span v-if="plan.visualStyleId" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-pink-500/10 border border-pink-500/15 text-[10px] font-bold text-pink-300" title="Estilo Visual do Plano">
@@ -192,7 +192,7 @@
                 @click="createYoutubePackage"
                 :disabled="creatingPackage || hasExistingPackage || !canCreateYoutubePackage"
                 class="px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/15 border border-emerald-500/20 text-emerald-300 hover:text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
-                :title="hasExistingPackage ? 'Pacote já foi criado para este plano.' : (canCreateYoutubePackage ? 'Cria 1 Full (150 cenas) + 12 Shorts no banco (sem rodar Arquiteto).' : 'Requer um plano salvo com 12 Shorts.')"
+                :title="hasExistingPackage ? 'Pacote já foi criado para este plano.' : (canCreateYoutubePackage ? 'Cria 3 Full (150 cenas cada) + 12 Shorts no banco (sem rodar Arquiteto).' : 'Requer um plano salvo com 12 Shorts e 3 episódios.')"
               >
                 <Loader2 v-if="creatingPackage" :size="12" class="animate-spin" />
                 <Send v-else :size="12" />
@@ -293,7 +293,7 @@
               <h4 class="text-xs font-black uppercase tracking-widest text-white">Pacote YouTube (apenas criação)</h4>
             </div>
             <span class="mono-label text-[10px] text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded-md">
-              1 Full + 12 Shorts
+              3 Full + 12 Shorts
             </span>
           </div>
 
@@ -309,232 +309,105 @@
         </div>
       </section>
 
-      <!-- ════════════ FULL VIDEO ════════════ -->
-      <section class="glass-card p-1 overflow-hidden border-blue-500/10" :class="{ 'opacity-60 pointer-events-none': regeneratingFullVideo }">
-        <div class="p-6 pb-4 flex items-center justify-between border-b border-white/5">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400">
-              <Film :size="18" />
-            </div>
-            <h4 class="text-xs font-black uppercase tracking-widest text-white">Full Video · YouTube</h4>
-            <span class="mono-label text-xs text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md">
-              {{ SCENE_CONFIG.fullVideo }} cenas
-            </span>
+      <!-- ════════════ FULL VIDEOS (EP1–EP3) ════════════ -->
+      <div class="space-y-4">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400">
+            <Film :size="18" />
           </div>
-          <div class="flex items-center gap-2">
-            <NuxtLink
-              v-if="packageResult?.fullOutputId"
-              :to="`/outputs/${packageResult.fullOutputId}`"
-              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/20 text-blue-300 hover:text-white transition-all text-xs font-black uppercase tracking-wider"
-              title="Abrir este Full Video na tela de execução"
-            >
-              <Film :size="13" />
-              <span class="hidden sm:inline">Abrir</span>
-            </NuxtLink>
-            <button
-              @click="showFullVideoRegenForm = !showFullVideoRegenForm"
-              :disabled="regeneratingFullVideo"
-              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/8 border border-blue-500/15 text-blue-400 hover:bg-blue-500/15 hover:border-blue-500/30 transition-all text-xs font-bold uppercase tracking-wider disabled:opacity-50 disabled:cursor-wait"
-              title="Gerar alternativa diferente"
-            >
-              <Loader2 v-if="regeneratingFullVideo" :size="13" class="animate-spin" />
-              <RotateCcw v-else :size="13" />
-              <span class="hidden sm:inline">{{ regeneratingFullVideo ? 'Gerando...' : 'Outro ângulo' }}</span>
-            </button>
-          </div>
+          <h4 class="text-xs font-black uppercase tracking-widest text-white">
+            Full Videos · {{ plan.fullVideos?.length || 0 }} episódios
+          </h4>
+          <span class="mono-label text-xs text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md">
+            {{ SCENE_CONFIG.fullVideo }} cenas cada
+          </span>
         </div>
 
-        <!-- Formulário de regeneração -->
-        <Transition name="slide-down">
-          <div v-if="showFullVideoRegenForm && !regeneratingFullVideo" class="px-6 py-5 border-b border-white/5 bg-blue-500/[0.03] space-y-4 animate-in slide-in-from-top-2 duration-300">
-            <div class="flex items-center justify-between">
-              <p class="text-xs font-bold text-blue-400 uppercase tracking-wider">Configurar novo ângulo</p>
-              <button @click="showFullVideoRegenForm = false" class="text-zinc-600 hover:text-white transition-colors">
-                <X :size="14" />
-              </button>
-            </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          <div
+            v-for="(ep, idx) in plan.fullVideos"
+            :key="ep.episodeNumber || idx"
+            class="glass-card p-1 overflow-hidden group hover:border-blue-500/30 transition-all duration-500"
+          >
+            <div class="p-6 space-y-5">
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <span class="mono-label text-[10px] text-blue-300 bg-blue-500/10 px-2 py-0.5 rounded-md">
+                  EP{{ ep.episodeNumber || (Number(idx) + 1) }}
+                </span>
+                <div class="flex items-center gap-2 flex-wrap justify-end">
+                  <NuxtLink
+                    v-if="packageResult?.fullOutputIds?.[Number(idx)]"
+                    :to="`/outputs/${packageResult.fullOutputIds[Number(idx)]}`"
+                    class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all"
+                    title="Abrir este episódio na tela de execução"
+                  >
+                    Abrir
+                  </NuxtLink>
 
-            <div class="p-3 rounded-lg border border-blue-500/20 bg-blue-500/5 text-xs text-blue-200/80">
-              Full Video fixo em <strong>{{ SCENE_CONFIG.fullVideo }} cenas</strong>.
-            </div>
-
-            <!-- Campo de sugestão -->
-            <div class="space-y-2">
-              <label class="text-xs text-zinc-500 font-medium">
-                Sugestão para a IA
-                <span class="text-zinc-600 font-normal ml-1">(opcional — a IA decide se segue ou não)</span>
-              </label>
-              <textarea
-                v-model="regenFullVideoSuggestion"
-                rows="2"
-                placeholder="Ex: Focar mais no aspecto conspirativo, usar tom mais sombrio, explorar a timeline de eventos..."
-                class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:border-blue-500/40 outline-none transition-all resize-none"
-              ></textarea>
-            </div>
-
-            <!-- Botão de confirmar -->
-            <button
-              @click="confirmRegenerateFullVideo"
-              class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/20 hover:border-blue-500/30 text-blue-400 text-xs font-black uppercase tracking-wider rounded-xl transition-all"
-            >
-              <Send :size="14" />
-              Gerar novo Full Video
-            </button>
-          </div>
-        </Transition>
-
-        <div class="p-6 space-y-5">
-          <div>
-            <label class="mono-label text-xs text-zinc-600 mb-1 block">Título</label>
-            <p class="text-lg font-bold text-white leading-tight">{{ plan.fullVideo.title }}</p>
-          </div>
-
-          <!-- ── Creative Direction Badges ── -->
-          <div v-if="plan.fullVideo.scriptStyleId" class="flex flex-wrap gap-2">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-violet-500/10 border border-violet-500/15 text-xs font-medium text-violet-300" title="Estilo de Roteiro">
-              <BookOpen :size="12" class="text-violet-400" />
-              {{ plan.fullVideo.scriptStyleName || plan.fullVideo.scriptStyleId }}
-            </span>
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/15 text-xs font-medium text-amber-300" title="Objetivo Editorial">
-              <Target :size="12" class="text-amber-400" />
-              {{ plan.fullVideo.editorialObjectiveName || plan.fullVideo.editorialObjectiveId }}
-            </span>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div>
-              <label class="mono-label text-xs text-zinc-600 mb-1 block">Hook de Abertura</label>
-              <p class="text-sm text-emerald-300 italic leading-relaxed">"{{ plan.fullVideo.hook }}"</p>
-            </div>
-            <div>
-              <label class="mono-label text-xs text-zinc-600 mb-1 block">Ângulo Narrativo</label>
-              <p class="text-sm text-zinc-300">{{ plan.fullVideo.angle }}</p>
-            </div>
-          </div>
-
-          <div>
-            <label class="mono-label text-xs text-zinc-600 mb-1 block">Arco Emocional</label>
-            <p class="text-sm text-zinc-400">{{ plan.fullVideo.emotionalArc }}</p>
-          </div>
-
-          <div>
-            <label class="mono-label text-xs text-zinc-600 mb-2 block">Pontos-Chave</label>
-            <div class="flex flex-wrap gap-2">
-              <span
-                v-for="(point, i) in plan.fullVideo.keyPoints"
-                :key="i"
-                class="px-3 py-1.5 bg-blue-500/10 border border-blue-500/15 text-blue-300 text-xs font-medium rounded-lg"
-              >
-                {{ point }}
-              </span>
-            </div>
-          </div>
-
-          <div>
-            <label class="mono-label text-xs text-zinc-600 mb-1 block">Estrutura Narrativa</label>
-            <p class="text-xs text-zinc-500 leading-relaxed">{{ plan.fullVideo.structure }}</p>
-          </div>
-
-          <div class="pt-3 border-t border-white/5 flex items-center justify-between">
-            <span class="mono-label text-xs text-zinc-600">Views estimadas</span>
-            <span class="text-sm font-bold text-blue-400">{{ plan.fullVideo.estimatedViews?.toLocaleString() }}</span>
-          </div>
-
-          <!-- ── Style Preview (Gerar Mundo) ── -->
-          <div v-if="plan.fullVideo.visualPrompt" class="pt-4 border-t border-white/5 space-y-4">
-            <!-- Preview Image (if already generated) -->
-            <div v-if="plan.fullVideo.stylePreview?.base64" class="space-y-3">
-              <label class="mono-label text-xs text-zinc-600 mb-1 block">Prévia do Mundo Visual</label>
-              <div class="relative rounded-xl overflow-hidden border border-white/10 group/preview">
-                <img
-                  :src="'data:' + (plan.fullVideo.stylePreview.mimeType || 'image/png') + ';base64,' + plan.fullVideo.stylePreview.base64"
-                  alt="Style preview"
-                  class="w-full h-auto object-cover"
-                />
-                <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent px-4 py-3">
-                  <div class="flex items-center justify-between">
-                    <span class="text-xs font-mono text-zinc-400">
-                      Seed: {{ plan.fullVideo.stylePreview.seedValue }}
-                    </span>
-                    <!-- Confirmado -->
-                    <span v-if="plan.fullVideo.stylePreview.confirmed" class="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono rounded-lg">
-                      🧬 Registrada
-                    </span>
-                    <!-- Pendente -->
-                    <span v-else class="px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-mono rounded-lg animate-pulse">
-                      ⏳ Pendente
-                    </span>
-                  </div>
+                  <span class="mono-label text-[10px] text-zinc-500 bg-white/5 px-2 py-0.5 rounded-md">
+                    {{ ep.sceneCount || SCENE_CONFIG.fullVideo }} cenas
+                  </span>
                 </div>
               </div>
 
-              <!-- Botões de ação para preview pendente -->
-              <div v-if="!plan.fullVideo.stylePreview.confirmed" class="space-y-2">
-                <!-- Seed Selector inline -->
-                <div class="flex items-center gap-2">
-                  <select
-                    v-model="selectedSeedMode"
-                    class="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-zinc-300 focus:border-blue-500/40 outline-none flex-1"
-                  >
-                    <option value="random">🎲 Seed Aleatória</option>
-                    <option :value="'current-' + plan.fullVideo.stylePreview.seedValue">
-                      🔒 Manter Seed {{ plan.fullVideo.stylePreview.seedValue }}
-                    </option>
-                    <option v-for="s in availableSeeds" :key="s.id" :value="s.id">
-                      🧬 {{ s.value }}
-                    </option>
-                  </select>
-                </div>
-                <div class="flex items-center gap-2">
-                  <button
-                    @click="confirmStylePreview('fullVideo')"
-                    :disabled="confirmingPreviewFor !== null"
-                    class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/25 hover:border-emerald-500/40 text-emerald-300 text-xs font-bold uppercase tracking-wider rounded-xl transition-all disabled:opacity-50"
-                  >
-                    <Loader2 v-if="confirmingPreviewFor === 'fullVideo'" :size="14" class="animate-spin" />
-                    <Check v-else :size="14" />
-                    {{ confirmingPreviewFor === 'fullVideo' ? 'Confirmando...' : '✓ Confirmar Mundo' }}
-                  </button>
-                  <button
-                    @click="generateStylePreview('fullVideo')"
-                    :disabled="generatingPreviewFor !== null"
-                    class="flex items-center gap-2 px-4 py-2.5 bg-zinc-500/10 hover:bg-zinc-500/20 border border-white/10 hover:border-white/20 text-zinc-400 text-xs font-bold uppercase tracking-wider rounded-xl transition-all disabled:opacity-50 disabled:cursor-wait"
-                  >
-                    <Loader2 v-if="generatingPreviewFor === 'fullVideo'" :size="14" class="animate-spin" />
-                    <RefreshCw v-else :size="14" />
-                    {{ generatingPreviewFor === 'fullVideo' ? 'Gerando...' : 'Regenerar' }}
-                  </button>
-                </div>
+              <div>
+                <label class="mono-label text-xs text-zinc-600 mb-1 block">Título</label>
+                <p class="text-base font-bold text-white leading-snug">{{ ep.title }}</p>
               </div>
-            </div>
 
-            <!-- Generate Button (primeira geração ou após confirmação) -->
-            <div v-if="!plan.fullVideo.stylePreview?.base64 || plan.fullVideo.stylePreview?.confirmed" class="flex items-center gap-3">
-              <!-- Seed Selector -->
-              <div class="flex-1 flex items-center gap-2">
-                <select
-                  v-model="selectedSeedMode"
-                  class="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-zinc-300 focus:border-blue-500/40 outline-none flex-1"
-                >
-                  <option value="random">🎲 Seed Aleatória</option>
-                  <option v-for="s in availableSeeds" :key="s.id" :value="s.id">
-                    🧬 {{ s.value }}
-                  </option>
-                </select>
+              <div v-if="ep.scriptStyleId" class="flex flex-wrap gap-2">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-violet-500/10 border border-violet-500/15 text-xs font-medium text-violet-300" title="Estilo de Roteiro">
+                  <BookOpen :size="12" class="text-violet-400" />
+                  {{ ep.scriptStyleName || ep.scriptStyleId }}
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/15 text-xs font-medium text-amber-300" title="Objetivo Editorial">
+                  <Target :size="12" class="text-amber-400" />
+                  {{ ep.editorialObjectiveName || ep.editorialObjectiveId }}
+                </span>
               </div>
-              <button
-                @click="generateStylePreview('fullVideo')"
-                :disabled="generatingPreviewFor !== null"
-                class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-600/80 to-violet-600/80 hover:from-pink-500 hover:to-violet-500 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all shadow-[0_0_15px_rgba(168,85,247,0.15)] hover:shadow-[0_0_25px_rgba(168,85,247,0.3)] disabled:opacity-50 disabled:cursor-wait"
-              >
-                <Loader2 v-if="generatingPreviewFor === 'fullVideo'" :size="14" class="animate-spin" />
-                <Globe v-else :size="14" />
-                {{ generatingPreviewFor === 'fullVideo' ? 'Gerando...' : (plan.fullVideo.stylePreview?.confirmed ? 'Novo Mundo' : 'Gerar Mundo') }}
-              </button>
+
+              <div class="grid grid-cols-1 gap-4">
+                <div>
+                  <label class="mono-label text-xs text-zinc-600 mb-1 block">Hook de Abertura</label>
+                  <p class="text-sm text-emerald-300 italic leading-relaxed">"{{ ep.hook }}"</p>
+                </div>
+                <div>
+                  <label class="mono-label text-xs text-zinc-600 mb-1 block">Ângulo Narrativo</label>
+                  <p class="text-sm text-zinc-300">{{ ep.angle }}</p>
+                </div>
+              </div>
+
+              <div>
+                <label class="mono-label text-xs text-zinc-600 mb-1 block">Arco Emocional</label>
+                <p class="text-sm text-zinc-400">{{ ep.emotionalArc }}</p>
+              </div>
+
+              <div v-if="ep.keyPoints?.length">
+                <label class="mono-label text-xs text-zinc-600 mb-2 block">Pontos-Chave</label>
+                <div class="flex flex-wrap gap-2">
+                  <span
+                    v-for="(point, i) in ep.keyPoints"
+                    :key="i"
+                    class="px-3 py-1.5 bg-blue-500/10 border border-blue-500/15 text-blue-300 text-xs font-medium rounded-lg"
+                  >
+                    {{ point }}
+                  </span>
+                </div>
+              </div>
+
+              <div v-if="ep.structure">
+                <label class="mono-label text-xs text-zinc-600 mb-1 block">Estrutura Narrativa</label>
+                <p class="text-xs text-zinc-500 leading-relaxed">{{ ep.structure }}</p>
+              </div>
+
+              <div class="pt-3 border-t border-white/5 flex items-center justify-between">
+                <span class="mono-label text-xs text-zinc-600">Views estimadas</span>
+                <span class="text-sm font-bold text-blue-400">{{ ep.estimatedViews?.toLocaleString() }}</span>
+              </div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
       <!-- ════════════ TEASERS ════════════ -->
       <div class="space-y-4">
@@ -574,6 +447,11 @@
                 >
                   Abrir
                 </NuxtLink>
+
+                <span v-if="teaser.targetEpisode"
+                  class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-blue-500/10 text-blue-300 border border-blue-500/20">
+                  EP{{ teaser.targetEpisode }}
+                </span>
                 <span :class="[
                   'px-2 py-0.5 rounded-md text-xs font-black uppercase tracking-wider',
                   angleCategoryColor(teaser.angleCategory)
@@ -586,15 +464,39 @@
                 ]" :title="narrativeRoleTooltip(teaser.narrativeRole)">
                   {{ narrativeRoleIcon(teaser.narrativeRole) }} {{ teaser.narrativeRole }}
                 </span>
-                <button
-                  @click="regenerateTeaser(Number(index))"
-                  :disabled="regeneratingTeaserIndex !== null"
-                  class="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-500 hover:text-purple-400 hover:bg-purple-500/10 border border-transparent hover:border-purple-500/20 transition-all opacity-0 group-hover:opacity-100 disabled:opacity-30 disabled:cursor-not-allowed"
-                  title="Regenerar este teaser com ângulo diferente"
-                >
-                  <Loader2 v-if="regeneratingTeaserIndex === Number(index)" :size="13" class="animate-spin text-purple-400" />
-                  <RotateCcw v-else :size="13" />
-                </button>
+                <!-- Regenerate Teaser (Role Picker) -->
+                <div class="relative">
+                  <button
+                    @click="openRolePicker(Number(index))"
+                    :disabled="regeneratingTeaserIndex !== null"
+                    class="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-500 hover:text-purple-400 hover:bg-purple-500/10 border border-transparent hover:border-purple-500/20 transition-all opacity-0 group-hover:opacity-100 disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="Regenerar este teaser"
+                  >
+                    <Loader2 v-if="regeneratingTeaserIndex === Number(index)" :size="13" class="animate-spin text-purple-400" />
+                    <RotateCcw v-else :size="13" />
+                  </button>
+
+                  <!-- Role Picker Dropdown -->
+                  <div v-if="rolePickerTeaserIndex === Number(index)" class="fixed inset-0 z-40" @click="closeRolePicker"></div>
+                  <div
+                    v-if="rolePickerTeaserIndex === Number(index)"
+                    class="absolute right-0 top-full mt-1 z-50 w-56 py-1 rounded-xl border border-white/10 bg-zinc-900/95 backdrop-blur-xl shadow-2xl"
+                  >
+                    <p class="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-zinc-500">Regenerar como</p>
+                    <button
+                      v-for="role in narrativeRoleOptions"
+                      :key="role.id"
+                      @click="selectRoleAndRegenerate(Number(index), role.id)"
+                      class="w-full px-3 py-2 text-left flex items-start gap-2 hover:bg-white/5 transition-colors"
+                    >
+                      <span class="text-sm mt-0.5">{{ narrativeRoleIcon(role.id) }}</span>
+                      <div class="min-w-0">
+                        <span class="text-xs font-bold text-white block">{{ role.name }}</span>
+                        <span class="text-[10px] text-zinc-500 leading-tight block">{{ role.description }}</span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -818,7 +720,7 @@ import {
   TrendingUp, Sparkles, Film, Check, ArrowRight,
   RefreshCw, Scissors, Calendar, Lightbulb, AlertTriangle,
   Loader2, RotateCcw, X, Send, BookOpen, Palette, Target,
-  Globe
+  Globe, ShieldAlert
 } from 'lucide-vue-next'
 
 const props = defineProps<{
@@ -842,10 +744,11 @@ const savedPlanId = ref<string | null>(null)
 
 // ───── YouTube Package State ─────
 const creatingPackage = ref(false)
+
 const packageError = ref('')
-const packageResult = ref<{ fullOutputId: string; teaserOutputIds: string[] } | null>(null)
+const packageResult = ref<{ fullOutputIds: string[]; teaserOutputIds: string[] } | null>(null)
 const hasExistingPackage = computed(() => {
-  return !!packageResult.value?.fullOutputId && (packageResult.value?.teaserOutputIds?.length || 0) > 0
+  return (packageResult.value?.fullOutputIds?.length || 0) > 0 && (packageResult.value?.teaserOutputIds?.length || 0) > 0
 })
 
 // ───── Regeneration State ─────
@@ -853,6 +756,10 @@ const regeneratingFullVideo = ref(false)
 const regeneratingTeaserIndex = ref<number | null>(null)
 const showFullVideoRegenForm = ref(false)
 const regenFullVideoSuggestion = ref('')
+
+// ───── Role Picker State ─────
+const rolePickerTeaserIndex = ref<number | null>(null)
+const narrativeRoleOptions = ref<Array<{ id: string; name: string; description: string; icon: string }>>([])
 
 // ───── Style Preview State ─────
 const generatingPreviewFor = ref<string | null>(null)
@@ -880,9 +787,12 @@ async function loadExistingPlan() {
       savedPlanId.value = saved.id || null
       plan.value = saved.planData
       const pkg = saved?.planData?._youtubePackage
-      if (pkg?.fullOutputId && Array.isArray(pkg?.teaserOutputIds)) {
+      const fullOutputIds = Array.isArray(pkg?.fullOutputIds)
+        ? pkg.fullOutputIds
+        : (pkg?.fullOutputId ? [pkg.fullOutputId] : [])
+      if (fullOutputIds.length > 0 && Array.isArray(pkg?.teaserOutputIds)) {
         packageResult.value = {
-          fullOutputId: pkg.fullOutputId,
+          fullOutputIds,
           teaserOutputIds: pkg.teaserOutputIds
         }
       }
@@ -965,7 +875,8 @@ async function confirmRegenerateMonetization() {
 }
 
 const canCreateYoutubePackage = computed(() => {
-  return !!plan.value && planSavedInDb.value && plan.value?.teasers?.length === 12
+  const hasEpisodes = Array.isArray((plan.value as any)?.fullVideos) && (plan.value as any).fullVideos.length === 3
+  return !!plan.value && planSavedInDb.value && plan.value?.teasers?.length === 12 && hasEpisodes
 })
 
 async function createYoutubePackage() {
@@ -982,13 +893,13 @@ async function createYoutubePackage() {
 
     if (data?.success) {
       packageResult.value = {
-        fullOutputId: data.fullOutputId,
+        fullOutputIds: Array.isArray(data.fullOutputIds) ? data.fullOutputIds : [],
         teaserOutputIds: Array.isArray(data.teaserOutputIds) ? data.teaserOutputIds : []
       }
       // manter também dentro do objeto do plano atual (melhora UX ao navegar sem reload)
       if (plan.value && typeof plan.value === 'object') {
         plan.value._youtubePackage = {
-          fullOutputId: packageResult.value.fullOutputId,
+          fullOutputIds: packageResult.value.fullOutputIds,
           teaserOutputIds: packageResult.value.teaserOutputIds,
           createdAt: new Date().toISOString()
         }
@@ -1000,6 +911,8 @@ async function createYoutubePackage() {
     creatingPackage.value = false
   }
 }
+
+
 
 function resetPlan() {
   showMonetizationRegenerationWarning.value = false
@@ -1013,18 +926,21 @@ function resetPlan() {
   planCost.value = 0
   savedPlanId.value = null
   creatingPackage.value = false
+
   packageError.value = ''
   packageResult.value = null
 }
 
 // ───── Regenerate Individual Item ─────
-async function regenerateTeaser(index: number) {
+async function regenerateTeaser(index: number, narrativeRole?: string) {
   if (regeneratingTeaserIndex.value !== null || !plan.value) return
   regeneratingTeaserIndex.value = index
   try {
+    const body: Record<string, unknown> = { type: 'teaser', index }
+    if (narrativeRole) body.narrativeRole = narrativeRole
     const data = await $fetch(`/api/dossiers/${props.dossierId}/regenerate-monetization-item`, {
       method: 'POST',
-      body: { type: 'teaser', index }
+      body
     }) as any
     if (data.success && data.item) {
       plan.value.teasers[index] = data.item
@@ -1062,7 +978,15 @@ async function regenerateFullVideo() {
       body
     }) as any
     if (data.success && data.item) {
-      plan.value.fullVideo = data.item
+      if (!Array.isArray((plan.value as any).fullVideos) || (plan.value as any).fullVideos.length < 1) {
+        ;(plan.value as any).fullVideos = []
+      }
+      ;(plan.value as any).fullVideos[0] = {
+        ...data.item,
+        episodeNumber: 1,
+        angleCategory: 'episode-1',
+        sceneCount: SCENE_CONFIG.fullVideo
+      }
       if (data.cost) planCost.value += data.cost
       // Limpar sugestão após sucesso
       regenFullVideoSuggestion.value = ''
@@ -1145,7 +1069,8 @@ async function generateStylePreview(itemType: 'fullVideo' | 'teaser', teaserInde
       }
 
       if (itemType === 'fullVideo') {
-        plan.value.fullVideo.stylePreview = stylePreview
+        const ep1 = (plan.value as any)?.fullVideos?.[0]
+        if (ep1) ep1.stylePreview = stylePreview
       } else if (teaserIndex !== undefined) {
         plan.value.teasers[teaserIndex].stylePreview = stylePreview
       }
@@ -1178,8 +1103,11 @@ async function confirmStylePreview(itemType: 'fullVideo' | 'teaser', teaserIndex
     if (data.success) {
       // Marcar como confirmado no state reactivo
       if (itemType === 'fullVideo') {
-        plan.value.fullVideo.stylePreview.confirmed = true
-        plan.value.fullVideo.stylePreview.seedId = data.seedId
+        const ep1 = (plan.value as any)?.fullVideos?.[0]
+        if (ep1?.stylePreview) {
+          ep1.stylePreview.confirmed = true
+          ep1.stylePreview.seedId = data.seedId
+        }
       } else if (teaserIndex !== undefined) {
         plan.value.teasers[teaserIndex].stylePreview.confirmed = true
         plan.value.teasers[teaserIndex].stylePreview.seedId = data.seedId
@@ -1266,9 +1194,34 @@ function formatCost(cost: number): string {
   return `$${cost.toFixed(2)}`
 }
 
+// ───── Load Narrative Roles (from constants via API) ─────
+async function loadNarrativeRoles() {
+  try {
+    type NarrativeRoleOption = { id: string; name: string; description: string; icon: string }
+    const data = await $fetch<NarrativeRoleOption[]>('/api/constants/narrative-roles' as string)
+    narrativeRoleOptions.value = data
+  } catch (err) {
+    console.warn('[DossierMonetization] Erro ao carregar narrative roles:', err)
+  }
+}
+
+function openRolePicker(index: number) {
+  rolePickerTeaserIndex.value = rolePickerTeaserIndex.value === index ? null : index
+}
+
+function closeRolePicker() {
+  rolePickerTeaserIndex.value = null
+}
+
+function selectRoleAndRegenerate(index: number, roleId: string) {
+  closeRolePicker()
+  regenerateTeaser(index, roleId)
+}
+
 // ───── Lifecycle ─────
 onMounted(() => {
   loadExistingPlan()
   loadSeeds()
+  loadNarrativeRoles()
 })
 </script>

@@ -15,6 +15,8 @@ import { calculateLLMCost } from '../../../constants/pricing'
 import { getScriptStyleById } from '../../../constants/script-styles'
 import { mapPersonsFromPrisma, mapNeuralInsightsFromNotes } from '../../../utils/format-intelligence-context'
 import { TeaserMicroBriefV1Schema, formatTeaserMicroBriefV1ForPrompt } from '../../../types/briefing.types'
+import { getOrCreateEpisodeBriefBundleV1ForDossier } from '../../../services/briefing/episode-briefing.service'
+import { formatEpisodeBriefForPrompt } from '../../../types/episode-briefing.types'
 
 export default defineEventHandler(async (event) => {
   const outputId = getRouterParam(event, 'id')
@@ -28,6 +30,9 @@ export default defineEventHandler(async (event) => {
     hook: string
     angle: string
     angleCategory: string
+    // Série de episódios (opcional; usado para enriquecer contexto do Story Architect)
+    planId?: string
+    episodeNumber?: 1 | 2 | 3
     narrativeRole?: string
     shortFormatType?: string
     scriptOutline?: string
@@ -89,39 +94,110 @@ export default defineEventHandler(async (event) => {
   const userNotes: string[] = []
   if (feedback) userNotes.push(`⚠️ FEEDBACK DO USUÁRIO PARA O PLANO NARRATIVO: ${feedback}`)
 
+  // Se este output é um EP2/EP3 vinculado a um MonetizationPlan, enriquecer o contexto com
+  // os territórios já cobertos para reduzir repetição entre episódios (sem depender de validadores).
+  const effectiveEpisodeNumber = (effectiveMonetizationContext as any)?.episodeNumber as 1 | 2 | 3 | undefined
+  const effectivePlanId = (effectiveMonetizationContext as any)?.planId as string | undefined
+  if (
+    effectiveMonetizationContext?.itemType === 'fullVideo' &&
+    effectivePlanId &&
+    effectiveEpisodeNumber &&
+    effectiveEpisodeNumber > 1
+  ) {
+    try {
+      const plan = await prisma.monetizationPlan.findUnique({
+        where: { id: effectivePlanId },
+        select: { planData: true }
+      })
+
+      const planData = plan?.planData as any
+      const episodes = Array.isArray(planData?.fullVideos) ? planData.fullVideos : []
+      const previous = episodes.slice(0, effectiveEpisodeNumber - 1)
+
+      if (previous.length > 0) {
+        const previousEpisodesBlock = [
+          `⛔ EPISÓDIOS ANTERIORES (NÃO REPETIR ASSUNTOS / HOOKS / KEY POINTS)`,
+          ...previous.map((ep: any, idx: number) => {
+            const n = idx + 1
+            const title = ep?.title || '(sem título)'
+            const hook = ep?.hook || '(sem hook)'
+            const angle = ep?.angle || '(sem ângulo)'
+            const keyPoints = Array.isArray(ep?.keyPoints) ? ep.keyPoints.filter(Boolean) : []
+            const keyPointsLine = keyPoints.length > 0 ? ` keyPoints=[${keyPoints.join(' | ')}]` : ''
+            return `${n}. title="${title}" | angle="${angle}" | hook="${hook}"${keyPointsLine}`
+          })
+        ].join('\n')
+
+        userNotes.push(previousEpisodesBlock)
+        userNotes.push(
+          `✅ REGRA: Este outline (EP${effectiveEpisodeNumber}) deve explorar um TERRITÓRIO NOVO e complementar, mantendo coerência com o arco da série.`
+        )
+      }
+    } catch {
+      // Best-effort: não falhar geração de outline por não conseguir carregar o plano
+    }
+  }
+
   // Fonte da verdade: quantidade de cenas. Quando sceneCount existe, prevalece sobre targetDuration.
   const sceneCount = effectiveMonetizationContext?.sceneCount
   const targetDuration = sceneCount ? sceneCount * 5 : (output.duration || 300)
   const targetSceneCount = sceneCount ? sceneCount : undefined
 
   try {
+    const isFullVideo = effectiveMonetizationContext?.itemType === 'fullVideo'
+    const episodeNumber = (effectiveMonetizationContext as any)?.episodeNumber as 1 | 2 | 3 | undefined
+
     const microBriefParsed = effectiveMonetizationContext?.itemType === 'teaser'
       ? TeaserMicroBriefV1Schema.safeParse((effectiveMonetizationContext as any)?.microBriefV1)
       : { success: false as const }
 
-    const sources = microBriefParsed.success
-      ? [{
-        title: 'Micro-brief do teaser (fonte da verdade)',
-        content: formatTeaserMicroBriefV1ForPrompt(microBriefParsed.data),
-        type: 'brief',
-        weight: 2.0
-      }]
-      : (dossier.sources?.map((s: any) => ({
-        title: s.title,
-        content: s.content,
-        type: s.sourceType,
-        weight: s.weight ?? 1.0
-      })) || [])
+    // Para fullVideo com episodeNumber definido: usa o EpisodeBriefBundle como fonte da verdade.
+    // Isso substitui o dossier bruto, prevenindo alucinação e choque de assuntos entre episódios.
+    let episodeBriefSource: { title: string; content: string; type: string; weight: number } | null = null
+    if (isFullVideo && episodeNumber) {
+      try {
+        const episodeBriefResult = await getOrCreateEpisodeBriefBundleV1ForDossier(dossier.id)
+        const briefContent = formatEpisodeBriefForPrompt(episodeBriefResult.bundle, episodeNumber)
+        episodeBriefSource = {
+          title: `Brief EP${episodeNumber} (fonte da verdade — episodeBriefBundleV1)`,
+          content: briefContent,
+          type: 'brief',
+          weight: 2.0,
+        }
+        console.log(`[API] ✅ Usando EpisodeBriefBundle EP${episodeNumber} para output ${outputId}`)
+      } catch (err) {
+        // Best-effort: se o brief falhar, cai no fallback do dossier bruto com aviso
+        console.warn(`[API] ⚠️ EpisodeBriefBundle indisponível para EP${episodeNumber} — usando dossier bruto. Erro: ${err}`)
+      }
+    }
 
+    const sources = episodeBriefSource
+      ? [episodeBriefSource]
+      : microBriefParsed.success
+        ? [{
+          title: 'Micro-brief do teaser (fonte da verdade)',
+          content: formatTeaserMicroBriefV1ForPrompt(microBriefParsed.data),
+          type: 'brief',
+          weight: 2.0
+        }]
+        : (dossier.sources?.map((s: any) => ({
+          title: s.title,
+          content: s.content,
+          type: s.sourceType,
+          weight: s.weight ?? 1.0
+        })) || [])
+
+    // Quando o episode brief está ativo, limpa o contexto bruto para evitar contaminação
+    const useEpisodeBrief = !!episodeBriefSource
     const result = await generateStoryOutline({
       theme: dossier.theme,
       visualIdentityContext: dossier.visualIdentityContext || undefined,
       sources,
       userNotes,
-      persons: microBriefParsed.success ? [] : mapPersonsFromPrisma(dossier.persons),
-      neuralInsights: microBriefParsed.success ? [] : mapNeuralInsightsFromNotes(dossier.notes),
-      imageDescriptions: microBriefParsed.success ? [] : (dossier.images?.map((i: any) => i.description).filter(Boolean) || []),
-      researchData: microBriefParsed.success ? undefined : (dossier.researchData || undefined),
+      persons: (useEpisodeBrief || microBriefParsed.success) ? [] : mapPersonsFromPrisma(dossier.persons),
+      neuralInsights: (useEpisodeBrief || microBriefParsed.success) ? [] : mapNeuralInsightsFromNotes(dossier.notes),
+      imageDescriptions: (useEpisodeBrief || microBriefParsed.success) ? [] : (dossier.images?.map((i: any) => i.description).filter(Boolean) || []),
+      researchData: (useEpisodeBrief || microBriefParsed.success) ? undefined : (dossier.researchData || undefined),
       editorialObjective: output.objective || undefined,
       scriptStyleId: output.scriptStyleId || undefined,
       dossierCategory: output.classificationId || undefined,
@@ -150,7 +226,9 @@ export default defineEventHandler(async (event) => {
           scriptStyleName: effectiveMonetizationContext.scriptStyleName,
           editorialObjectiveId: effectiveMonetizationContext.editorialObjectiveId,
           editorialObjectiveName: effectiveMonetizationContext.editorialObjectiveName,
-          avoidPatterns: effectiveMonetizationContext.avoidPatterns
+          avoidPatterns: effectiveMonetizationContext.avoidPatterns,
+          episodeNumber: effectiveMonetizationContext.episodeNumber,
+          planId: effectiveMonetizationContext.planId
         }
       }
       : result.outline

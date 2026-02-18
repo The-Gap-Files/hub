@@ -102,16 +102,9 @@ export default defineEventHandler(async (event) => {
     && scene.sceneEnvironment === prevScene.sceneEnvironment
 
   // Construir lista de gerações necessárias
-  const requestedRole = body.role as 'start' | 'end' | undefined
   const generationsNeeded: Array<{ prompt: string; role: 'start' | 'end' }> = []
 
-  if (!requestedRole || requestedRole === 'start') {
-    generationsNeeded.push({ prompt: body.prompt ?? scene.visualDescription, role: 'start' })
-  }
-
-  if ((!requestedRole || requestedRole === 'end') && scene.endVisualDescription) {
-    generationsNeeded.push({ prompt: body.endPrompt ?? scene.endVisualDescription, role: 'end' })
-  }
+  generationsNeeded.push({ prompt: body.prompt ?? scene.visualDescription, role: 'start' })
 
   // 4. Executar Gerações
   const results: any[] = []
@@ -140,21 +133,6 @@ export default defineEventHandler(async (event) => {
       aspectRatio: output.aspectRatio || '16:9',
       seed: body.seed || undefined,
       numVariants: 1
-    }
-
-    // === IMAGE REFERENCE para END images ===
-    // Se estamos gerando a END image, buscar a START image existente como referência
-    if (gen.role === 'end') {
-      const startImage = await prisma.sceneImage.findFirst({
-        where: { sceneId, role: 'start', isSelected: true },
-        select: { fileData: true }
-      })
-
-      if (startImage?.fileData) {
-        request.imageReference = Buffer.from(startImage.fileData as any)
-        request.imageReferenceWeight = scene.endImageReferenceWeight ?? 0.5
-        console.log(`[API] 🔗 Using START image as reference for END (weight: ${request.imageReferenceWeight})`)
-      }
     }
 
     console.log(`[API] 🖼️ Regenerando ${gen.role} para Scene ${sceneId}`)

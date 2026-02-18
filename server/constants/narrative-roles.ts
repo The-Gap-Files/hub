@@ -20,6 +20,8 @@ export interface NarrativeRole {
   scriptInstruction: string
   /** Ícone Lucide para UI */
   icon: string
+  /** Episódio padrão. Fixo (1/2/3) ou 'auto' = IA decide baseada no ângulo */
+  defaultTargetEpisode: 1 | 2 | 3 | 'auto'
 }
 
 export type NarrativeRoleId = 'gateway' | 'deep-dive' | 'hook-only'
@@ -44,7 +46,8 @@ RESOLUÇÃO PARCIAL — O teaser contextualiza mas NÃO fecha a história:
 - NÃO dê conclusão moral fechada
 - DEIXE pelo menos 1-2 perguntas sem resposta
 - O espectador deve saber DO QUE se trata, mas NÃO como termina`,
-    icon: 'DoorOpen'
+    icon: 'DoorOpen',
+    defaultTargetEpisode: 1
   },
   {
     id: 'deep-dive',
@@ -64,7 +67,8 @@ RESOLUÇÃO MÍNIMA — Revela um aspecto mas NÃO fecha o caso:
 - NÃO entregue a conclusão final do caso inteiro
 - DEIXE pelo menos 1-2 perguntas sem resposta
 - O espectador sai sabendo mais sobre UM detalhe mas MAIS CURIOSO sobre o todo`,
-    icon: 'ArrowDownToLine'
+    icon: 'ArrowDownToLine',
+    defaultTargetEpisode: 'auto'
   },
   {
     id: 'hook-only',
@@ -86,7 +90,8 @@ RESOLUÇÃO ZERO — Pura provocação, nenhuma explicação:
 - TODOS os loops narrativos devem ficar ABERTOS
 - Termine com corte seco após frase de impacto — sem qualquer fechamento
 - Se o espectador sente que "já entendeu", FALHOU como funil`,
-    icon: 'Zap'
+    icon: 'Zap',
+    defaultTargetEpisode: 'auto'
   }
 ]
 

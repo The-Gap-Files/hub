@@ -37,15 +37,16 @@ export const EPICTOK_STYLE: VisualStyle = {
 export const NOIR_CINEMATIC_STYLE: VisualStyle = {
   id: 'noir-cinematic',
   name: 'Noir Cinematográfico',
-  description: 'Pintura digital cinematográfica dark: concept art com chiaroscuro pesado, texturas pictóricas sutis e composição de cinema noir. Entre fotorrealismo e ilustração.',
-  baseStyle: 'Dark cinematic digital painting, concept art style, heavy chiaroscuro lighting, painterly textures with cinematic composition, moody and atmospheric',
-  lightingTags: 'dramatic chiaroscuro, single directional light source, cold blue-teal ambient tones, warm accent from fire or candles, volumetric fog and haze, low-key lighting, light cutting through darkness',
-  atmosphereTags: 'somber, ominous, foreboding, investigative noir, oppressive silence, tension, morally ambiguous, fatalistic',
-  compositionTags: 'cinematic wide establishing shots, low angle for unease, dramatic camera angles, shallow depth of field, 16:9 cinematic framing, figures emerging from shadow',
-  tags: 'subtle painterly brushstrokes, matte painting quality, dark desaturated palette, high contrast, cold teal and steel blue tones, warm fire accents, mist and fog, gritty texture, no photograph, no DSLR, no clean AI render, no anime, no cartoon, no comic book, semi-realistic stylized art, concept art aesthetic',
+  description: 'Estética noir cinematográfica realista, com iluminação contrastada, ambientes urbanos densos e atmosfera investigativa. Foco em luz prática, textura física e composição de cinema clássico.',
+  baseStyle: 'Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain',
+  lightingTags: 'dramatic chiaroscuro, single practical light source, sodium vapor streetlights, harsh tungsten bulb lighting, cold ambient blue tones, low-key lighting, volumetric haze with retained detail',
+  atmosphereTags: 'somber, investigative tension, oppressive silence, moral ambiguity, restrained intensity, historical weight',
+  compositionTags: 'cinematic wide establishing shots, low angle for unease, strong foreground-midground-background separation, controlled shallow depth of field, 16:9 cinematic framing, silhouettes emerging from shadow',
+  tags: 'dark desaturated palette, high contrast, cold steel blue tones, warm tungsten accents, wet asphalt reflections, textured brick walls, damp concrete surfaces, realistic material detail, no fantasy, no anime, no cartoon, no comic book',
   order: 2,
   isActive: true
 }
+
 
 /** Noir Clássico: ilustração noir pura inspirada em Sin City, Batman Dark Deco e graphic novels sombrias. Preto absoluto, ink wash, acentos seletivos de cor. */
 export const NOIR_CLASSIC_STYLE: VisualStyle = {

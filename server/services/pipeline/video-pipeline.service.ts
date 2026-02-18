@@ -62,6 +62,11 @@ export class VideoPipelineService {
       if (!output) throw new Error('Output não encontrado')
       if (!output.scenes || output.scenes.length === 0) throw new Error('Nenhuma cena encontrada para renderizar')
 
+      const narrativeRole = (output.monetizationContext && typeof output.monetizationContext === 'object')
+        ? (output.monetizationContext as any).narrativeRole
+        : undefined
+      const isHookOnly = narrativeRole === 'hook-only'
+
       const isVertical = output.aspectRatio === '9:16'
       const width = isVertical ? 1080 : 1920
       const height = isVertical ? 1920 : 1080
@@ -127,7 +132,7 @@ export class VideoPipelineService {
         }
 
         // Descobrir o tempo do áudio de maneira simples e direta (ffprobe no arquivo real)
-        const realDuration = await new Promise<number>((resolve) => {
+        const probedDuration = await new Promise<number>((resolve) => {
           ffmpeg.ffprobe(finalAudioPath, (err, metadata) => {
             if (err) {
               log.warn(`ffprobe duração da cena ${index + 1} falhou; usando DB.`, { err: err.message })
@@ -136,6 +141,26 @@ export class VideoPipelineService {
             resolve(metadata?.format?.duration || audioAsset.duration || 5)
           })
         })
+
+        // Hook-only (especialmente a última cena): ElevenLabs pode adicionar silêncio residual ao final do MP3.
+        // Para não "sobrar cena" depois da fala, usamos o fim da última palavra (alignment) + micro tail.
+        let realDuration = probedDuration
+        const isLastScene = index === output.scenes.length - 1
+        if (isHookOnly && isLastScene) {
+          const alignment = (audioAsset as any).alignment
+          const lastEndTime = Array.isArray(alignment) && alignment.length > 0
+            ? (alignment[alignment.length - 1] as any)?.endTime
+            : null
+
+          const HOOK_ONLY_AUDIO_TAIL_SECONDS = 0.08
+          if (typeof lastEndTime === 'number' && Number.isFinite(lastEndTime) && lastEndTime > 0) {
+            realDuration = Math.min(probedDuration, lastEndTime + HOOK_ONLY_AUDIO_TAIL_SECONDS)
+            log.step(
+              `Cena ${index + 1}`,
+              `hook-only last-scene duration override: probed=${probedDuration.toFixed(3)}s -> spoken=${realDuration.toFixed(3)}s`
+            )
+          }
+        }
 
         log.step(`Cena ${index + 1}`, `duração ${realDuration.toFixed(3)}s (visual + áudio sincronizados)`)
 

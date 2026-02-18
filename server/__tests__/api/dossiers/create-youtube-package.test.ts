@@ -94,23 +94,65 @@ describe('POST /api/dossiers/[id]/create-youtube-package', () => {
           strategicNotes: 'Notas',
           estimatedTotalRevenue: '0',
           publicationSchedule: [],
-          fullVideo: {
-            title: 'Full Title',
-            hook: 'Full hook',
-            angle: 'Full angle',
-            structure: 'Estrutura',
-            keyPoints: ['a', 'b', 'c'],
-            emotionalArc: 'Arc',
-            estimatedViews: 999,
-            platform: 'YouTube',
-            format: 'full-youtube',
-            scriptStyleId: 'documentary',
-            scriptStyleName: 'Documentary',
-            editorialObjectiveId: 'hidden-truth',
-            editorialObjectiveName: 'Hidden Truth',
-            visualPrompt: 'Noir documentary',
-            sceneCount: 150
-          },
+          fullVideos: [
+            {
+              title: 'Full Title — EP1',
+              hook: 'Full hook 1',
+              angle: 'Full angle 1',
+              angleCategory: 'episode-1',
+              episodeNumber: 1,
+              structure: 'Estrutura',
+              keyPoints: ['a', 'b', 'c'],
+              emotionalArc: 'Arc',
+              estimatedViews: 999,
+              platform: 'YouTube',
+              format: 'full-youtube',
+              scriptStyleId: 'documentary',
+              scriptStyleName: 'Documentary',
+              editorialObjectiveId: 'hidden-truth',
+              editorialObjectiveName: 'Hidden Truth',
+              visualPrompt: 'Noir documentary',
+              sceneCount: 150
+            },
+            {
+              title: 'Full Title — EP2',
+              hook: 'Full hook 2',
+              angle: 'Full angle 2',
+              angleCategory: 'episode-2',
+              episodeNumber: 2,
+              structure: 'Estrutura',
+              keyPoints: ['d', 'e', 'f'],
+              emotionalArc: 'Arc',
+              estimatedViews: 999,
+              platform: 'YouTube',
+              format: 'full-youtube',
+              scriptStyleId: 'documentary',
+              scriptStyleName: 'Documentary',
+              editorialObjectiveId: 'hidden-truth',
+              editorialObjectiveName: 'Hidden Truth',
+              visualPrompt: 'Noir documentary',
+              sceneCount: 150
+            },
+            {
+              title: 'Full Title — EP3',
+              hook: 'Full hook 3',
+              angle: 'Full angle 3',
+              angleCategory: 'episode-3',
+              episodeNumber: 3,
+              structure: 'Estrutura',
+              keyPoints: ['g', 'h', 'i'],
+              emotionalArc: 'Arc',
+              estimatedViews: 999,
+              platform: 'YouTube',
+              format: 'full-youtube',
+              scriptStyleId: 'documentary',
+              scriptStyleName: 'Documentary',
+              editorialObjectiveId: 'hidden-truth',
+              editorialObjectiveName: 'Hidden Truth',
+              visualPrompt: 'Noir documentary',
+              sceneCount: 150
+            }
+          ],
           teasers
         } as any
       }
@@ -123,7 +165,8 @@ describe('POST /api/dossiers/[id]/create-youtube-package', () => {
     })
 
     expect(res.success).toBe(true)
-    expect(res.fullOutputId).toBeTruthy()
+    expect(Array.isArray(res.fullOutputIds)).toBe(true)
+    expect(res.fullOutputIds).toHaveLength(3)
     expect(Array.isArray(res.teaserOutputIds)).toBe(true)
     expect(res.teaserOutputIds).toHaveLength(12)
 

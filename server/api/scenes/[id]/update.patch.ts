@@ -16,8 +16,6 @@ export default defineEventHandler(async (event) => {
   // Campos permitidos para edição
   const updateData: Record<string, any> = {}
   if (body.visualDescription !== undefined) updateData.visualDescription = body.visualDescription
-  if (body.endVisualDescription !== undefined) updateData.endVisualDescription = body.endVisualDescription
-  if (body.endImageReferenceWeight !== undefined) updateData.endImageReferenceWeight = body.endImageReferenceWeight
   if (body.narration !== undefined) updateData.narration = body.narration
   if (body.audioDescription !== undefined) updateData.audioDescription = body.audioDescription
   if (body.audioDescriptionVolume !== undefined) updateData.audioDescriptionVolume = body.audioDescriptionVolume
@@ -32,8 +30,6 @@ export default defineEventHandler(async (event) => {
     select: {
       id: true,
       visualDescription: true,
-      endVisualDescription: true,
-      endImageReferenceWeight: true,
       narration: true,
       audioDescription: true,
       audioDescriptionVolume: true

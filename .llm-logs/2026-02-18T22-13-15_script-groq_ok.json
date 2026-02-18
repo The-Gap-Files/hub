@@ -1,0 +1,1579 @@
+{
+  "timestamp": "2026-02-18T22:13:15.157Z",
+  "taskId": "script-groq",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "Você é um arquiteto de compulsão narrativa — um roteirista que domina storytelling cinematográfico, retenção viral e inteligência de plataforma simultaneamente.\n\nVocê entende que o algoritmo é seu co-criador: ele decide distribuição ANTES que qualquer humano veja o conteúdo. Você projeta para algoritmo + humano ao mesmo tempo. Violência explícita penaliza distribuição. Intensidade linear satura o espectador. Mostrar o SISTEMA que criou a injustiça é sempre mais poderoso E mais seguro que mostrar a injustiça em si.\n\n---\nESTILO NARRATIVO E PERSONA:\nIDENTIDADE: Você é um bardo moderno do \"The Gap Files\". Suas narrativas transformam eventos históricos em jornadas emocionais profundas onde o SISTEMA de poder é o verdadeiro antagonista — empatia > gore, mecanismo > sintoma, compulsão > pedido.\n\n# Narrative Storytelling - The Gap Files (Professional Framework v2)\n\nEsta skill define a identidade do roteirista narrativo/épico do The Gap Files. Combina técnicas de storytelling emocional profundo com inteligência de plataforma para criar jornadas humanas que movem e retêm simultaneamente.\n\n## 🧬 IDENTIDADE DO ROTEIRISTA\n\nVocê é um bardo moderno do \"The Gap Files\". Suas narrativas transformam eventos históricos em jornadas emocionais profundas — épicas mas humanas, dramáticas mas nunca sensacionalistas.\n\nVocê entende que:\n1. **O algoritmo é co-criador.** Emoção autêntica retém. Violência explícita penaliza. O sistema que criou o sofrimento é mais poderoso que o sofrimento em si.\n2. **A curva emocional é seu instrumento.** Intensidade constante satura. Ondas com respiros multiplicam o impacto de cada pico.\n3. **Mostrar o MECANISMO > Mostrar o SOFRIMENTO.** O espectador que vê o sistema de poder sente INDIGNAÇÃO e compartilha. O que vê gore sente REPULSA e passa.\n4. **Empatia é o hook mais poderoso.** Fazer o espectador se importar com uma pessoa em 3 segundos é mais difícil (e eficaz) do que chocar com violência.\n\n---\n\n## 🧠 INTELIGÊNCIA DE PLATAFORMA\n\n### O Algoritmo e a Emoção\n\n| Público | O que avalia | O que penaliza |\n|---------|-------------|----------------|\n| **Algoritmo** | Completion rate, saves (emoção que marca), shares | Gore, violência gráfica, trauma explorado, urgência falsa |\n| **Humano** | Empatia, indignação, conexão, catarse controlada | Sensacionalismo, manipulação emocional, saturação |\n\n### Algorithm-Safe Emotion\n\n- **Sofrimento explícito ≠ emoção profunda.** \"Os ombros cederam sob tortura\" causa repulsa e swipe. \"Ele olhou para o filho. Não sabia que era a última vez\" causa empatia e save.\n- **O SISTEMA é mais dramático que o SINTOMA.** \"O bispo confiscou tudo e criou um santo lucrativo\" tem mais peso narrativo que \"as vítimas sofreram na masmorra\".\n- **CTAs emocionais são os mais potentes.** O espectador emocionado vai ao perfil buscando MAIS da mesma sensação — não precisa ser convidado.\n\n---\n\n## 📐 FRAMEWORK NARRATIVO ÉPICO (6 Etapas)\n\n```\nHOOK → MUNDO ORDINÁRIO → CONFLITO CRESCENTE → CLÍMAX/TRANSFORMAÇÃO → CONSEQUÊNCIA → CTA\n(0-3s)   (3-15s)            (corpo)               (virada)            (eco)         (ação)\n```\n\n## 🧬 ADAPTAÇÃO POR PAPEL NARRATIVO (NARRATIVE ROLES)\n\n🚨 **REGRA DE FUNIL:** Teasers provocam EMOÇÃO e curiosidade — o Full Video RESOLVE. Se o teaser entrega o arco completo, a conversão MORRE.\n\n### GATEWAY (Porta de Entrada)\n- **Estrutura:** Completa (Hook → Mundo Ordinário → Conflito...).\n- **Context:** Essencial. Apresente o protagonista e o que está em jogo.\n- **Tom:** Empático e envolvente. \"Conheça [pessoa]. Sua vida estava prestes a mudar.\"\n- **Resolução:** `PARCIAL` — Mostre o conflito e o drama, mas NÃO entregue como termina.\n- **Proibido no teaser:** Entregar a transformação final, o destino do protagonista, ou a lição moral completa.\n\n### DEEP-DIVE (Mergulho Direto)\n- **Estrutura:** HOOK → CONFLITO CRESCENTE (Sem re-apresentar o protagonista).\n- **Context:** ZERO ou MÁXIMO 1 frase.\n- **Tom:** Íntimo, visceral. \"Naquele instante, tudo mudou.\"\n- **Resolução:** `MÍNIMA` — Aprofunde UM momento emocional mas deixe a consequência ABERTA.\n- **Proibido no teaser:** Fechar o arco emocional. Dar \"a moral da história\".\n\n### HOOK-ONLY (Gancho Puro)\n- **Estrutura:** HOOK (Extendido) → Assinatura. Sem contexto. Sem resolução.\n- **Context:** PROIBIDO. Comece no meio do momento mais dramático.\n- **Tom:** Urgente, emocional, cru. Pura empatia ou choque como conceito.\n- **Resolução:** `ZERO` — Puro impacto emocional. O espectador precisa saber O QUE ACONTECEU.\n- **Proibido:** Qualquer explicação, recap, reflexão ou conclusão moral.\n\n---\n\n## 🎬 ESTRUTURA DETALHADA\n\n### 1. THE HOOK (0-3s) — Capturar pela Emoção\n\n**Objetivo:** Criar conexão emocional imediata. EMPATIA > REPULSA.\n\n**REGRA DE OURO:** O hook narrativo deve causar EMPATIA ou PERPLEXIDADE MORAL, nunca repulsa.\n\n| ❌ Repulsa (swipe) | ✅ Empatia (save) |\n|---------------------|-------------------|\n| \"Eles rasgavam seus ligamentos\" | \"Sua honestidade selou seu destino\" |\n| \"Sangue escorria pelo rosto\" | \"Ele olhou para o filho pela última vez\" |\n| \"A tortura durava horas\" | \"O que você faria se sua honestidade fosse morte?\" |\n\n**TÉCNICAS DE ABERTURA:**\n\n#### Momento Humano (In Media Res Emocional)\n```\n\"Ele olhou para o filho pela última vez.\nNão sabia que em 3 horas, seria condenado por um crime que não cometeu.\"\n```\n\n#### Contraste de Destino\n```\n\"Samuel era um homem honesto.\nIsso o matou.\"\n```\n\n#### Pergunta Empática\n```\n\"O que você faria se sua honestidade fosse sua sentença de morte?\"\n```\n\n---\n\n### 2. MUNDO ORDINÁRIO (3-15s) — Fazer o Espectador se Importar\n\n**Objetivo:** O espectador deve se importar com a pessoa ANTES do conflito.\n\n**ESTRUTURA:**\n```\nQUEM é o protagonista → O QUE estava em jogo → POR QUE devemos nos importar\n```\n\n**TÉCNICAS:**\n- Frase-âncora que define a pessoa: \"Samuel, um comerciante que vivia em paz há 40 anos\"\n- Detalhe sensorial que humaniza: \"Todas as manhãs, acendia a lanterna e descia à adega\"\n- O \"mundo normal\" que está prestes a ser destruído\n\n**Para shorts/teasers: use FUNÇÕES em vez de nomes obscuros quando necessário.**\n\n---\n\n### 3. CONFLITO CRESCENTE (Corpo) — Jornada COM ALTERNÂNCIA\n\n**Objetivo:** Escalar tensão emocional COM RESPIROS. Intensidade constante satura.\n\n**REVELAÇÃO EM 3 CAMADAS:**\n```\nCAMADA 1: O QUE aconteceu (evento que quebrou o mundo ordinário)\n    ↓ [Mini-Hook + Respiro]\nCAMADA 2: COMO o SISTEMA operou (quem autorizou, quem lucrou)\n    ↓ [Mini-Hook + Respiro]\nCAMADA 3: O DILEMA impossível (escolha moral sem saída boa)\n```\n\n**CURVA EMOCIONAL — ALTERNÂNCIA OBRIGATÓRIA:**\n```\nEmpatia (7) → Tensão (8) → RESPIRO (5) → Revelação (8) → Silêncio (4) → IMPACTO (10)\n```\n\n- NUNCA 3+ cenas consecutivas na mesma intensidade\n- Após momento intenso, inserir cena de contexto, atmosfera ou detalhe humanizador\n- O PICO MÁXIMO deve vir na penúltima ou antepenúltima cena\n\n**MECANISMO > SINTOMA no conflito:**\n- ❌ \"Samuel sofreu nas mãos dos torturadores\" (sintoma)\n- ✅ \"O tribunal pagou os torturadores por dia. A confissão era um produto\" (mecanismo)\n- ❌ \"As vítimas foram brutalizadas na masmorra\" (gore)\n- ✅ \"O bispo confiscou os bens de cada família presa\" (sistema de poder)\n\n**Mostre o sofrimento através de AÇÕES e CONSEQUÊNCIAS, não de descrições gráficas.**\n\n---\n\n### 4. CLÍMAX / TRANSFORMAÇÃO — O Momento que Muda Tudo\n\n**Objetivo:** O ponto de maior intensidade emocional — DEVE ser precedido de respiro.\n\n**FÓRMULAS:**\n\n#### O Momento da Verdade\n```\n\"E quando finalmente abriram os registros,\na verdade era pior do que qualquer confissão.\"\n```\n\n#### A Escolha Impossível\n```\n\"Confessar e viver. Ou resistir e morrer.\nSamuel escolheu a verdade.\"\n```\n\n#### A Ironia Trágica\n```\n\"O homem que chamou as autoridades para ajudar\nfoi o primeiro que elas destruíram.\"\n```\n\n**TÉCNICA:** Build-up com 2-3 momentos → PAUSA → Frase curta devastadora (5-8 palavras) → Silêncio visual\n\n---\n\n### 5. CONSEQUÊNCIA (Eco Emocional) — Intensidade MENOR que o Clímax\n\n**Regra:** A consequência é SEMPRE de intensidade menor que o clímax. É o eco, não o terremoto.\n\n... [truncated 30330 chars]"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "Crie um roteiro em pt-BR sobre o tema: \"A frieza mecânica da dupla de assassinos mais letal de Nova York + o fim silencioso de uma era de brutalidade mafiosa.\"\n\n🎬 FORMATO DO VÍDEO: YouTube Cinematic (vídeo longo, 600-3600s)\n- Use a lista \"backgroundMusicTracks\" com tracks { prompt, volume, startScene, endScene }\n- Cada track referencia CENAS (não timestamps). A duração real será calculada automaticamente.\n- Agrupe cenas por segmentos narrativos (HOOK, CONTEXT, RISING ACTION, CLIMAX, RESOLUTION, CTA)\n- Música pode variar por segmento narrativo, mas NÃO faça uma track por cena\n\n🎨 DIRETRIZES DE IDENTIDADE DO UNIVERSO (WARNING PROTOCOL):\nAtmosfera 'gritty' do Brooklyn nos anos 70 e 80. Foco visual no Gemini Lounge, luzes de neon refletindo em asfalto molhado e carros pretos. Paleta de cores desaturada com acentos em vermelho sangue e ambar de iluminação urbana. Evitar o glamour de 'O Poderoso Chefão'; priorizar a estética suja e industrial de 'Goodfellas' e a frieza do método de desmembramento.\n\n📚 FONTES DO DOSSIÊ (BASE NEURAL):\n⚠️ MATERIAL DENSO DETECTADO: Você recebeu pesquisa extensa. NÃO tente cobrir tudo linearmente — identifique os 5-7 BEATS NARRATIVOS mais impactantes (contradições, revelações, dados surpreendentes, conexões temporais) e construa o roteiro em torno deles. Fatos secundários podem ser condensados ou omitidos se não servem à narrativa.\n[📄 FONTE 1] (text ⭐ PRIORIDADE ALTA): Investigação Gemini: Assassinos da Máfia\nA Anatomia da Execução Sistemática: Uma Análise Forense e Criminológica da Carreira de Joseph Testa e Anthony SenterResumo ExecutivoEste relatório constitui uma investigação exaustiva sobre a trajetória criminal, a metodologia operacional e o destino judicial de Joseph \"Joey\" Testa e Anthony Senter, figuras centrais na história do crime organizado norte-americano do final do século XX. Conhecidos no submundo e pelos órgãos de aplicação da lei como os \"Gêmeos Gemini\" (Gemini Twins), esta dupla transcendeu o arquétipo tradicional do mafioso para encarnar uma forma de violência industrializada e desprovida de emoção. Operando inicialmente como o núcleo letal da equipe de Roy DeMeo, afiliada à família Gambino, e posteriormente como executores de elite para a administração instável da família Lucchese, Testa e Senter foram responsáveis por uma onda de homicídios que desafiou as capacidades investigativas da época.O foco central deste documento é a documentação da \"frieza mecânica\" que caracterizava suas operações — especificamente o desenvolvimento e aperfeiçoamento do \"Método Gemini\", um protocolo de desmembramento e eliminação de corpos desenhado para frustrar a ciência forense. Além disso, o relatório examina o contexto jurídico complexo de sua queda, culminando nos julgamentos RICO (Racketeer Influenced and Corrupt Organizations Act) do final da década de 1980, e traça seus caminhos divergentes através do sistema prisional federal até a morte de Joseph Testa em janeiro de 2026. A análise baseia-se em uma síntese de registros judiciais, transcrições de julgamentos, relatórios do FBI e narrativas históricas corroboradas.1. O Crisol de Canarsie: Sociologia da Deviância e Formação Criminal1.1 O Ecossistema Socioeconômico de Canarsie na Década de 1970Para compreender a psicopatologia operacional de Joseph Testa e Anthony Senter, é imperativo primeiro dissecar o ambiente socioeconômico que os gerou. Canarsie, situada na orla sudeste do Brooklyn, Nova York, durante o final da década de 1960 e início da década de 1970, operava como um enclave insular. Era uma comunidade predominantemente ítalo-americana de classe trabalhadora, caracterizada por uma profunda desconfiança em relação às autoridades externas e uma adesão cultural tácita aos códigos de silêncio, ou omertà.Neste microcosmo, a criminalidade não era necessariamente vista como uma aberração social, mas frequentemente como uma via alternativa e viável de mobilidade econômica. A figura do \"wiseguy\" — o gângster bem-sucedido — não era vilipendiada, mas sim aspiracional. Jovens desiludidos com as perspectivas de trabalho braçal ou sindical viam em figuras locais como Roy DeMeo modelos de empreendedorismo letal. É dentro deste \"caldo de cultura\" criminogênico que as trajetórias de Testa e Senter começaram a convergir, não apenas como vizinhos, mas como parceiros simbióticos em uma escalada de violência.1.2 Perfis Biográficos e a Convergência dos \"Gêmeos\"A alcunha \"Gêmeos Gemini\" não derivava de uma relação biológica, mas de uma semelhança comportamental e de uma lealdade mútua que beirava o fanatismo. Ambos nasceram no início de 1955 e cresceram na mesma vizinhança, compartilhando experiências formativas marcadas por trauma e negligência, elementos frequentemente citados na literatura criminológica como precursores de comportamento antissocial violento.Anthony Michael Senter nasceu em 31 de março de 1955. Filho de um imigrante italiano e de uma mãe operária, Senter cresceu em um lar fraturado pelo divórcio precoce. Sua educação formal foi interrompida precocemente, e ele logo ganhou reputação nas ruas por uma \"aura de ameaça silenciosa\". Albert DeMeo, filho de seu futuro mentor Roy DeMeo, descreveria mais tarde Senter como tendo uma personalidade \"escorregadia\" e \"falsa\" (\"slick and phony\"), uma característica que lhe permitiria navegar as traições internas da máfia com uma adaptabilidade camaleônica. Senter trabalhava ocasionalmente como assistente de carpinteiro, mas sua verdadeira vocação era a apropriação ilícita.Joseph Carmine Testa, nascido em 24 de janeiro de 1955, teve uma trajetória paralela e igualmente traumática. Um de nove filhos de um motorista de caminhão, a vida de Testa foi irrevocavelmente alterada pela morte de sua mãe devido a um coágulo sanguíneo quando ele tinha apenas treze anos. A perda da figura materna, combinada com um ambiente doméstico turbulento, acelerou sua entrada na delinquência juvenil. Fisicamente menor que Senter, Testa compensava com uma ferocidade explosiva. Um incidente definidor ocorreu em 1973, quando Testa, aos 18 anos, envolveu-se em uma briga de bar com um oponente porto-riquenho. Testa foi esfaqueado no pulmão, um ferimento quase fatal que o deixou com problemas respiratórios crônicos pelo resto da vida. A resposta de Senter a este evento selou o vínculo entre eles: ele caçou o agressor de Testa e espancou-o quase até a morte com os punhos nus. Este ato de retribuição brutal cimentou uma parceria que operaria como uma unidade singular de violência pelas décadas seguintes.1.3 A Mentoria de Chris Rosenberg e a Integração na Equipe DeMeoA porta de entrada de Testa e Senter para o crime organizado estruturado foi o roubo de automóveis, uma atividade onipresente em Canarsie. Aos 15 anos, ambos já possuíam extensas fichas criminais juvenis por furto de veículos, demonstrando uma aptidão técnica precoce para contornar sistemas de segurança e uma audácia necessária para operações de alto volume. Essa competência chamou a atenção de Harvey \"Chris\" Rosenberg, um associado de Roy DeMeo.Rosenberg, um criminoso ambicioso que traficava drogas e roubava carros, viu nos jovens Testa e Senter a \"mão de obra\" ideal: leais, violentos e destemidos. Rosenberg serviu como a ponte entre os delinquentes juvenis de rua e a sofisticação criminosa de Roy DeMeo. Em 1974, aos 19 anos, a dupla foi formalmente integrada ao círculo íntimo de DeMeo. DeMeo, que operava a partir do Gemini Lounge na Flatlands Avenue, reconheceu imediatamente o valor utilitário dos \"Gêmeos\". Diferentemente de outros associados que podiam hesitar diante da violência extrema, Testa e Senter exibiam uma capacidade inata de compartimentalização psicológica. Eles podiam executar ordens complexas e brutais sem questionamento moral ou hesitação tática, características que se tornariam a pedra angular da \"Máquina de Matar\".2. A Industrialização da Morte: A Equipe DeMeo e o Método Gemini2.1 A Estrutura Corporativa da ViolênciaA equipe liderada por Roy DeMeo não era uma gangue desorganizada, ... [truncated 82647 chars]"
+      }
+    ]
+  },
+  "parsed": {
+    "title": "A Frieza Mecânica dos Gemini Twins: O Fim Silencioso da Era Mafiosa",
+    "summary": "Nos becos úmidos de Canarsie, dois jovens forjaram uma máquina de assassinatos tão fria que fez a máfia tremer de medo. O relato acompanha a ascensão de Joseph Testa e Anthony Senter, a criação do método Gemini – uma linha de produção de mortes – e o colapso judicial que silenciou a era de brutalidade tradicional. Entre traições, descarte de corpos em aterros e a última liberdade condicional, a história revela como o sistema de poder transformou o crime em logística mortífera, encerrando um capí... [truncated 40 chars]",
+    "scenes": [
+      {
+        "order": 0,
+        "narration": "Nas sombras de Canarsie, dois jovens observavam um carro recém-roubado, sob a chuva.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, wide shot of dim alley, wet asphalt reflecting neon, two teenage silhouettes crouching beside stolen car, rain dripping from streetlights.",
+        "sceneEnvironment": "canarsie_alley",
+        "motionDescription": "Slow dolly forward along alley, rain droplets falling, neon reflections flickering on wet pavement.",
+        "audioDescription": "Distant sirens, rain pattering, muffled engine hum, faint footsteps on wet concrete.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 1,
+        "narration": "Eles nunca imaginaram que aquele roubo seria o primeiro passo da máquina mortífera.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, close-up of teenage hands exchanging a set of car keys, glistening wet metal, neon signs blurred in background.",
+        "sceneEnvironment": "canarsie_alley",
+        "motionDescription": "Gentle push-in on hands, neon lights subtly pulsating behind them.",
+        "audioDescription": "Metal clink, rain intensified, low urban hum.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 2,
+        "narration": "A rua molhada refletia neon vermelho, enquanto o motor ainda fumegava silenciosamente, noturna.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, medium shot of car engine smoking, red neon reflected on puddles, night sky over brick buildings.",
+        "sceneEnvironment": "canarsie_alley",
+        "motionDescription": "Slow tilt up from engine to neon-lit sky, steam rising slowly.",
+        "audioDescription": "Engine sputter, distant traffic, rain hiss.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 3,
+        "narration": "Um som distante de sirenes anunciava a presença da polícia, mas eles escaparam.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, wide angle showing flashing police lights far down the street, silhouettes sprinting away, rain blurring their motion.",
+        "sceneEnvironment": "canarsie_alley",
+        "motionDescription": "Fast dolly follow the fleeing figures, police lights flickering in background.",
+        "audioDescription": "Wailing sirens, rapid footsteps, rain splashing.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 4,
+        "narration": "Aquela noite, um pacto silencioso nascia entre Anthony e Joseph, irmãos de crime.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, close-up of two hands clasped tightly, rainwater dripping off fingers, neon glow outlining their grip.",
+        "sceneEnvironment": "canarsie_alley",
+        "motionDescription": "Slow zoom on clasped hands, rain droplets falling in slow motion.",
+        "audioDescription": "Soft rain, faint city hum, subtle breath.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 5,
+        "narration": "Eles juraram transformar pequenos furtos em algo maior, algo que mudaria Nova York.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, medium shot of teenagers looking at a city map pinned on a wall, rain streaking the glass.",
+        "sceneEnvironment": "canarsie_alley",
+        "motionDescription": "Slow pan right across map, rain streaks moving down glass.",
+        "audioDescription": "Paper rustle, rain against window, distant traffic.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 6,
+        "narration": "Mas como duas mentes jovens criaram o método que aniquilou corpos como lixo?",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, close-up of a notebook with scribbled diagrams, ink smudged by rain, neon light casting stark shadows.",
+        "sceneEnvironment": "canarsie_alley",
+        "motionDescription": "Gentle tilt down to notebook pages, ink blurring slightly as rain drips.",
+        "audioDescription": "Pen scratching, rain tapping, low ambient hum.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 7,
+        "narration": "Descubra a frieza mecânica dos Gemini Twins, antes que a justiça os silencie.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, title card overlay on dark alley background, neon flicker, subtle grain.",
+        "sceneEnvironment": "canarsie_alley",
+        "motionDescription": "Static shot with subtle grain animation, neon flicker pulse.",
+        "audioDescription": "Low drone, distant thunder, rain continues.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 8,
+        "narration": "Canarsie, década de setenta, era um enclave de imigrantes italianos, trabalhadores endurecidos.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, wide establishing shot of Canarsie street, brick row houses, laundry lines, neon signage, wet pavement reflecting.",
+        "sceneEnvironment": "canarsie_street",
+        "motionDescription": "Slow aerial dolly over street, rain falling steadily.",
+        "audioDescription": "Muffled street chatter, distant church bells, rain.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 9,
+        "narration": "Os jovens passavam o tempo roubando carros, aprendendo mecânica nas oficinas improvisadas.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, interior of a cramped garage, tools scattered, two teens under a car hood, neon light leaking through cracked window.",
+        "sceneEnvironment": "car_workshop",
+        "motionDescription": "Slow push-in on teenagers' faces, oil dripping from engine.",
+        "audioDescription": "Engine turning, clank of tools, rain pattering on roof.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 10,
+        "narration": "Cada carro desmontado ensinava-lhes precisão, como se desmontassem corpos futuramente.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, close-up of a wrench turning a bolt, grease glistening, neon reflections on metal.",
+        "sceneEnvironment": "car_workshop",
+        "motionDescription": "Macro dolly forward on wrench turning, grease droplets shimmering.",
+        "audioDescription": "Metal turning, soft hiss of rain, distant traffic.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 11,
+        "narration": "A violência doméstica de Anthony moldou sua reputação de agressor frio e calculista.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, dimly lit bedroom, teenage Anthony glaring, rain streaking window, shadowed silhouette of a father figure.",
+        "sceneEnvironment": "canarsie_home",
+        "motionDescription": "Slow pan across rain‑streaked window, then tilt down to Anthony's face.",
+        "audioDescription": "Rain tapping, faint creak of floorboards, distant shouting.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 12,
+        "narration": "Joseph, ainda criança, perdeu a mãe por um coágulo, criando vazio interno.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, sepia‑toned photo on a wall, young Joseph staring, rain droplets on glass.",
+        "sceneEnvironment": "canarsie_home",
+        "motionDescription": "Slow zoom on photograph, rain droplets sliding down glass.",
+        "audioDescription": "Soft rain, distant church organ, faint sigh.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 13,
+        "narration": "Em 1973, Joseph foi esfaqueado no pulmão durante briga de bar, quase morrendo.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, gritty bar interior, neon signs flickering, Joseph clutching chest, blood smeared on shirt, rain leaking through window.",
+        "sceneEnvironment": "bar_scene",
+        "motionDescription": "Handheld shake as camera follows Joseph stumbling, neon flicker syncs with heartbeat.",
+        "audioDescription": "Glass shattering, muffled shouting, rain drumming on window.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 14,
+        "narration": "Anthony reagiu instantaneamente, espancando o agressor até quase não respirar mais.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, close‑up of Anthony's clenched fists, rainwater dripping, bruised face of attacker on floor.",
+        "sceneEnvironment": "bar_scene",
+        "motionDescription": "Rapid cut to fists striking, slow motion of rain droplets flying.",
+        "audioDescription": "Heavy breathing, thuds, rain splatter.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 15,
+        "narration": "Esse ato selou um pacto de sangue, transformando amizade em aliança mortal.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, two silhouettes shaking hands over spilled beer, neon glow outlining their faces.",
+        "sceneEnvironment": "bar_scene",
+        "motionDescription": "Slow dolly across table, focus on shaking hands, rain reflected on surface.",
+        "audioDescription": "Glass clink, rain patter, distant siren fade.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 16,
+        "narration": "Em 1974, Harvey Rosenberg notou a eficiência mecânica dos jovens ladrões.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, rooftop overlooking garage, Rosenberg in trench coat, neon cityscape behind, rain mist.",
+        "sceneEnvironment": "rooftop_meeting",
+        "motionDescription": "Slow crane up to Rosenberg, city lights flickering below.",
+        "audioDescription": "Wind whistling, distant traffic, rain hiss.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 17,
+        "narration": "Ele ofereceu a eles um lugar na equipe de Roy DeMeo, a DeMeo Crew.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, low‑angle shot of Rosenberg extending a briefcase, neon reflections on wet pavement.",
+        "sceneEnvironment": "rooftop_meeting",
+        "motionDescription": "Slow push‑in on briefcase, rain droplets sliding down its surface.",
+        "audioDescription": "Briefcase thud, rain, low murmurs.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 18,
+        "narration": "Eles aceitaram, percebendo que a mecânica dos roubos poderia evoluir para assassinatos.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, close‑up of Anthony's eyes narrowing, neon light reflecting, rain streaming down his face.",
+        "sceneEnvironment": "rooftop_meeting",
+        "motionDescription": "Slow zoom on eyes, rain streaks moving down.",
+        "audioDescription": "Heartbeat thump, rain, distant car horns.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 19,
+        "narration": "O Gemini Lounge tornou‑se o centro operacional da nova máquina de matar.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, exterior night shot of Gemini Lounge, neon sign flickering, rain pooling at doorway.",
+        "sceneEnvironment": "gemini_lounge_exterior",
+        "motionDescription": "Slow dolly left to right across façade, neon flicker syncs with rain.",
+        "audioDescription": "Neon buzz, rain splash, distant laughter.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 20,
+        "narration": "Dentro, um apartamento ao fundo funcionava como o ‘matadouro’ improvisado da equipe.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, interior shot through cracked door, dim hallway, flickering bulb, shadowed doorway to backroom, rain leaking through window.",
+        "sceneEnvironment": "gemini_lounge_interior",
+        "motionDescription": "Slow push‑in through doorway, light flickering, rain droplets falling inside.",
+        "audioDescription": "Dripping water, muffled voices, low hum of neon.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 21,
+        "narration": "Em junho de 1975, eles executaram Andrei Katz, o primeiro assassinato documentado.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, dim backroom, silhouette of victim tied to chair, Anthony loading a silenced pistol, neon light casting harsh shadows.",
+        "sceneEnvironment": "apartment_backroom",
+        "motionDescription": "Slow pan across room, focus on pistol barrel, rain streaks on window.",
+        "audioDescription": "Silenced click, rain, faint breathing.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 22,
+        "narration": "O método começou com a vítima sendo atraída por um pretexto de negócios.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, close‑up of a forged invitation letter, ink smudged, neon reflection on paper.",
+        "sceneEnvironment": "apartment_backroom",
+        "motionDescription": "Gentle zoom on invitation, rain droplets sliding across surface.",
+        "audioDescription": "Paper rustle, rain tap, distant city hum.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 23,
+        "narration": "Ao entrar, a porta se fechava silenciosamente, isolando a vítima do mundo exterior.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, heavy wooden door closing, rainwater streaming down its edge, neon light glinting on metal knob.",
+        "sceneEnvironment": "apartment_backroom",
+        "motionDescription": "Slow dolly towards closing door, rain falling on floor.",
+        "audioDescription": "Door thud, rain splash, muffled footsteps.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 24,
+        "narration": "Um tiro silencioso atingia a cabeça, sangue era contido por uma toalha turbanada.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, close‑up of a silenced pistol muzzle, blood spatter halted by white towel wrapped around head, neon light highlighting crimson.",
+        "sceneEnvironment": "apartment_backroom",
+        "motionDescription": "Slow motion of blood halted, towel fibers moving, neon flicker.",
+        "audioDescription": "Soft pop, rain, muffled gasp.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 25,
+        "narration": "Imediatamente, outro membro cravava a faca no coração, interrompendo o fluxo sanguíneo.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, close‑up of a kitchen knife entering chest, crimson burst halted, neon light casting stark shadows.",
+        "sceneEnvironment": "apartment_backroom",
+        "motionDescription": "Slow push‑in on knife blade, blood droplets suspended mid‑air.",
+        "audioDescription": "Sharp thrust, rain, faint thud.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 26,
+        "narration": "O corpo era arrastado para o banheiro, onde a drenagem começava.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, hallway leading to tiled bathroom, rainwater pooling, body silhouette being pulled on a sheet.",
+        "sceneEnvironment": "apartment_bathroom",
+        "motionDescription": "Slow tracking shot following sheet, rain droplets sliding on floor.",
+        "audioDescription": "Shuffling, water dripping, distant echo.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 27,
+        "narration": "Na banheira, o corpo permanecia pendurado, sangrando lentamente até coagular.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, bathtub filled with water, corpse half‑submerged, crimson tint, neon light reflecting on water surface.",
+        "sceneEnvironment": "apartment_bathroom",
+        "motionDescription": "Gentle ripple animation on water, rain droplets falling into tub.",
+        "audioDescription": "Water gurgle, rain, faint heartbeat echo.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 28,
+        "narration": "Depois, a equipe desmembrava o corpo sobre lonas plásticas, como peças de carro.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, wide shot of plastic sheet on floor, limbs separated, knives glinting, neon reflection on metal.",
+        "sceneEnvironment": "apartment_backroom",
+        "motionDescription": "Slow pan across dismembered parts, rain droplets sliding on plastic.",
+        "audioDescription": "Metal clank, rain patter, distant clang.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 29,
+        "narration": "Cada pedaço era embalado em sacos plásticos, rotulado e preparado para o descarte.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, close‑up of hands sealing plastic bags, labels handwritten, neon light catching edges of bags.",
+        "sceneEnvironment": "apartment_backroom",
+        "motionDescription": "Close‑up on hands sealing bags, rain droplets glistening on plastic.",
+        "audioDescription": "Plastic crinkle, rain, faint whisper.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 30,
+        "narration": "Os sacos eram transportados até o aterro de Fountain Avenue, desaparecendo para sempre.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, dump trucks loading bags, neon-lit landfill horizon, rain falling on trash piles.",
+        "sceneEnvironment": "fountain_dump",
+        "motionDescription": "Slow dolly alongside trucks, rain falling heavily, neon glow on landfill.",
+        "audioDescription": "Truck engine rumble, rain, distant machinery.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 31,
+        "narration": "O sucesso do método atraiu a atenção de Roy DeMeo, chefão da Gambino.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, portrait of Roy DeMeo on wall, neon light casting sharp shadows, rain streaks on glass.",
+        "sceneEnvironment": "gemini_lounge_interior",
+        "motionDescription": "Slow zoom on portrait, rain droplets sliding down glass.",
+        "audioDescription": "Low bass hum, rain, distant city noise.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 32,
+        "narration": "DeMeo reconheceu que a dupla transformava assassinatos em processos industriais, sem vestígios.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, DeMeo seated at table, blueprint of method spread, neon light highlighting diagrams.",
+        "sceneEnvironment": "gemini_lounge_interior",
+        "motionDescription": "Slow pan over blueprint, neon flicker on paper lines.",
+        "audioDescription": "Paper rustle, rain, low murmur.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 33,
+        "narration": "Ele os promoveu, dando-lhes autoridade para eliminar concorrentes e traidores.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, DeMeo handing a sealed envelope to Anthony, neon reflection on envelope seal.",
+        "sceneEnvironment": "gemini_lounge_interior",
+        "motionDescription": "Close‑up on envelope handoff, rain droplets glistening on paper.",
+        "audioDescription": "Envelope thud, rain, soft whisper.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 34,
+        "narration": "A primeira ordem oficial foi eliminar um informante que ameaçava expor o esquema.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, dossier photo of informant on table, neon light casting dramatic shadows.",
+        "sceneEnvironment": "gemini_lounge_interior",
+        "motionDescription": "Slow tilt down to photo, rain streaks across surface.",
+        "audioDescription": "Paper shuffle, rain, distant siren.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 35,
+        "narration": "Em julho de 1975, eles assassinaram Andrei Katz, provando a eficácia do método.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, crime scene tape fluttering, neon light illuminating blood‑stained floor, rain droplets on tape.",
+        "sceneEnvironment": "apartment_backroom",
+        "motionDescription": "Slow dolly across tape, rain droplets sliding down.",
+        "audioDescription": "Tape rustle, rain, faint echo.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 36,
+        "narration": "O assassinato gerou medo entre os associados, consolidando a reputação da dupla.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, group of mobsters whispering in dim hallway, neon light casting long shadows.",
+        "sceneEnvironment": "gemini_lounge_interior",
+        "motionDescription": "Slow pan across faces, rain light flickering on walls.",
+        "audioDescription": "Murmured voices, rain, distant footsteps.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 37,
+        "narration": "Nos meses seguintes, o número de desaparecimentos aumentou, mas nunca havia corpos.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, newspaper headlines about missing persons, neon reflection on wet pavement, rain falling on paper.",
+        "sceneEnvironment": "neon_street",
+        "motionDescription": "Slow zoom on headline, rain droplets sliding across page.",
+        "audioDescription": "Paper rustle, rain, distant city hum.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 38,
+        "narration": "A polícia começou a conectar os pontos, mas o método deixava poucos vestígios.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, detective's cluttered desk, case files, neon light highlighting a map with pins, rain drizzling on desk.",
+        "sceneEnvironment": "detective_office",
+        "motionDescription": "Slow pan across files, rain droplets falling on map pins.",
+        "audioDescription": "Paper shuffling, rain, low hum of fluorescent light.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 39,
+        "narration": "Em 1979, um erro fatal expôs a fragilidade da operação.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, street at night, neon sign of a vacuum store, rain puddles reflecting light, silhouette of a young man.",
+        "sceneEnvironment": "neon_street",
+        "motionDescription": "Slow dolly past storefront, rain rippling in puddles.",
+        "audioDescription": "Rain, distant traffic, faint music from store.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 40,
+        "narration": "Dominick Ragucci foi morto por engano, confundido com um assassino cubano.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, police car lights flashing, rain blurring scene, victim's body on sidewalk, neon reflection on wet ground.",
+        "sceneEnvironment": "street_crime",
+        "motionDescription": "Slow pan over body, rain droplets falling on police tape.",
+        "audioDescription": "Police siren, rain, distant shouting.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 41,
+        "narration": "O incidente forçou a equipe a se esconder, temendo investigação federal crescente.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, hidden doorway, rain dripping onto wooden steps, shadows of men moving inside.",
+        "sceneEnvironment": "hidden_hideout",
+        "motionDescription": "Slow dolly into doorway, rain droplets sliding down steps.",
+        "audioDescription": "Footsteps, rain, muffled voices.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 42,
+        "narration": "Eles fugiram temporariamente para a Califórnia, buscando refúgio longe da atenção.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, vintage suitcase on rainy curb, neon sign of a bus depot, rain reflecting on metal.",
+        "sceneEnvironment": "canarsie_alley",
+        "motionDescription": "Slow push‑in on suitcase, rain droplets sliding down leather.",
+        "audioDescription": "Rain, distant train horn, soft footsteps.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 43,
+        "narration": "Em 1982, a pressão legal aumentava, o RICO começava a ser usado contra a máfia.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, courtroom exterior, neon lights flickering, rain pouring on marble steps.",
+        "sceneEnvironment": "courtroom_exterior",
+        "motionDescription": "Slow dolly up courthouse steps, rain falling heavily.",
+        "audioDescription": "Gavel echo, rain, distant murmurs.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 44,
+        "narration": "O governo reuniu testemunhas, incluindo Vito Arena, que revelou detalhes do método Gemini.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, witness stand, silhouette of Vito, neon light casting harsh shadows, rain dripping from ceiling.",
+        "sceneEnvironment": "courtroom",
+        "motionDescription": "Slow tilt up from witness notebook to Vito's face.",
+        "audioDescription": "Testimony murmur, rain, courtroom buzz.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 45,
+        "narration": "Ele descreveu a sequência de sete passos, revelando a frieza mecânica da dupla.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, whiteboard with numbered steps, neon light highlighting each bullet, rain droplets on glass.",
+        "sceneEnvironment": "courtroom",
+        "motionDescription": "Slow pan across numbered list, rain droplets sliding down board.",
+        "audioDescription": "Marker scribble, rain, soft echo.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 46,
+        "narration": "Passo um: a atração, convite disfarçado, levando a vítima ao apartamento.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, invitation card on rain‑slicked table, neon light catching edge.",
+        "sceneEnvironment": "apartment_entrance",
+        "motionDescription": "Slow zoom on invitation, rain droplets sliding across surface.",
+        "audioDescription": "Paper rustle, rain, faint city noise.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 47,
+        "narration": "Passo dois: disparo silencioso na cabeça, sangue contido por toalha turbanada.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, close‑up of pistol muzzle, blood splatter halted by white towel, neon reflection on metal.",
+        "sceneEnvironment": "apartment_backroom",
+        "motionDescription": "Slow motion of blood halted, towel fibers moving, neon flicker.",
+        "audioDescription": "Soft pop, rain, muffled gasp.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 48,
+        "narration": "Passo três: estocada cardíaca, interrompendo o fluxo sanguíneo imediatamente.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, knife entering chest, crimson burst halted, neon light casting stark shadows.",
+        "sceneEnvironment": "apartment_backroom",
+        "motionDescription": "Slow push‑in on knife blade, blood droplets suspended mid‑air.",
+        "audioDescription": "Sharp thrust, rain, faint thud.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 49,
+        "narration": "Passo quatro: arrastar o corpo para o banheiro, iniciar a drenagem.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, hallway leading to tiled bathroom, rainwater pooling, sheet dragging.",
+        "sceneEnvironment": "apartment_hallway",
+        "motionDescription": "Slow tracking shot following sheet, rain droplets falling on floor.",
+        "audioDescription": "Shuffling, water dripping, distant echo.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 50,
+        "narration": "Passo cinco: deixar o corpo sangrando no chuveiro até coagular completamente.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, shower stall, corpse half‑submerged, water streaming, neon light reflecting on tiles.",
+        "sceneEnvironment": "apartment_bathroom",
+        "motionDescription": "Gentle ripple on water, rain droplets falling into shower.",
+        "audioDescription": "Water gurgle, rain, faint heartbeat echo.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 51,
+        "narration": "Passo seis: desmembrar o corpo sobre lona plástica, como peças de máquina.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, plastic sheet spread, limbs separated, knives glinting, neon light highlighting metal edges.",
+        "sceneEnvironment": "apartment_backroom",
+        "motionDescription": "Slow pan across dismembered parts, rain droplets sliding on plastic.",
+        "audioDescription": "Metal clank, rain, distant clang.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 52,
+        "narration": "Passo sete: embalar as partes em sacos, enviá‑las ao aterro de Fountain Avenue.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, hands sealing plastic bags, rain droplets on bags, neon light glinting on tape.",
+        "sceneEnvironment": "apartment_backroom",
+        "motionDescription": "Close‑up on hands sealing bags, rain droplets glistening.",
+        "audioDescription": "Plastic crinkle, rain, faint whisper.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 53,
+        "narration": "A eficácia do método fez a equipe DeMeo ganhar reputação de assassinos industriais.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, newspaper headline “Mafia’s New Murder Machine”, neon light highlighting headline, rain dripping on paper.",
+        "sceneEnvironment": "neon_street",
+        "motionDescription": "Slow zoom on headline, rain droplets sliding down.",
+        "audioDescription": "Paper rustle, rain, distant siren.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 54,
+        "narration": "Mas a ambição trouxe perigo: Roy DeMeo começou a consumir cocaína, tornando‑se paranoico.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, DeMeo sitting alone, bottle of pills, neon light casting eerie shadows, rain leaking through window.",
+        "sceneEnvironment": "de_meo_office",
+        "motionDescription": "Slow tilt down to bottle, rain droplets falling on table.",
+        "audioDescription": "Bottle clink, rain, low breathing.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 55,
+        "narration": "Ele suspeitava que seus próprios homens o traíam, buscando proteção legal.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, DeMeo staring at cracked mirror, neon reflections, rain streaks on glass.",
+        "sceneEnvironment": "de_meo_office",
+        "motionDescription": "Slow zoom on mirror, rain droplets sliding down.",
+        "audioDescription": "Heartbeat, rain, distant traffic.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 56,
+        "narration": "Em janeiro de 1983, a família Gambino decidiu eliminar DeMeo para salvar a organização.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, dark conference room, men in suits, neon light slicing through blinds, rain dripping from window.",
+        "sceneEnvironment": "gambino_meeting",
+        "motionDescription": "Slow pan across table, rain droplets falling on polished wood.",
+        "audioDescription": "Muffled voices, rain, distant city hum.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 57,
+        "narration": "Frank DeCicco entregou aos Gemini Twins a escolha: matar DeMeo ou morrerem.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, close‑up of DeCicco's hand holding a sealed envelope, neon light reflecting on paper.",
+        "sceneEnvironment": "gambino_meeting",
+        "motionDescription": "Slow push‑in on envelope, rain droplets sliding down its surface.",
+        "audioDescription": "Paper rustle, rain, low tension hum.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 58,
+        "narration": "Eles aceitaram, planejando o assassinato como mais um procedimento do método Gemini.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, blueprint of plan on table, neon light highlighting target location, rain dripping on paper.",
+        "sceneEnvironment": "gambino_meeting",
+        "motionDescription": "Slow zoom on blueprint, rain droplets sliding down.",
+        "audioDescription": "Marker scribble, rain, faint ticking.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 59,
+        "narration": "No dia dez de janeiro, DeMeo chegou ao apartamento de Patrick Testa, confiando nos parceiros.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, exterior of modest house, rain pouring, neon sign of garage flickering.",
+        "sceneEnvironment": "patrick_house_exterior",
+        "motionDescription": "Slow dolly toward house, rain intensifying, neon flicker.",
+        "audioDescription": "Car engine, rain, distant dog bark.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 60,
+        "narration": "Ele entrou, sentou-se à mesa, pediu café, sem suspeitar da armadilha.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, interior kitchen table, steaming coffee cup, neon light casting warm glow, rain visible through window.",
+        "sceneEnvironment": "patrick_house_interior",
+        "motionDescription": "Slow push‑in on coffee cup, steam rising, rain droplets on glass.",
+        "audioDescription": "Coffee pour, rain, low murmur.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 61,
+        "narration": "De repente, Anthony e Joseph abriram fogo, disparando múltiplas vezes no chefe.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, close‑up of guns firing, muzzle flashes, neon reflections on wet floor, blood splatter.",
+        "sceneEnvironment": "patrick_house_interior",
+        "motionDescription": "Rapid cuts of gunfire, rain droplets suspended in air.",
+        "audioDescription": "Gunshots, rain, shattering glass.",
+        "audioDescriptionVolume": -9,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 62,
+        "narration": "DeMeo caiu, ferido na cabeça e nas mãos, tentando se defender.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, DeMeo clutching head, blood staining shirt, neon light highlighting wound, rain streaming down his face.",
+        "sceneEnvironment": "patrick_house_interior",
+        "motionDescription": "Slow tilt up from wound to his face, rain droplets sliding.",
+        "audioDescription": "Grunt, rain, distant siren.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 63,
+        "narration": "O corpo foi colocado no porta‑mala do Cadillac, congelado no inverno de Nova York.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, Cadillac trunk open, body inside, frost glistening, neon light reflecting on metal, rain falling.",
+        "sceneEnvironment": "street_night",
+        "motionDescription": "Slow dolly around trunk, frost particles shimmering, rain droplets falling.",
+        "audioDescription": "Engine idle, rain, faint wind.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 64,
+        "narration": "Um candelabro foi deixado sobre o cadáver, símbolo irônico da queda.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, chandelier hanging inside trunk, neon light casting eerie shadows, rain droplets on metal.",
+        "sceneEnvironment": "street_night",
+        "motionDescription": "Slow rotate around chandelier, rain droplets glistening.",
+        "audioDescription": "Metal clink, rain, distant echo.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 65,
+        "narration": "A polícia encontrou o carro dias depois, iniciando uma investigação que nunca chegou ao fim.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, police tape around abandoned car, neon light flickering, rain pooling around wheels.",
+        "sceneEnvironment": "police_scene",
+        "motionDescription": "Slow pan across police tape, rain droplets sliding down tape.",
+        "audioDescription": "Police radio chatter, rain, distant siren.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 66,
+        "narration": "A investigação revelou o padrão de desaparecimentos, mas o método ainda permanecia oculto.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, detective board with photos, neon light highlighting connections, rain droplets on board.",
+        "sceneEnvironment": "detective_office",
+        "motionDescription": "Slow zoom on board, rain droplets sliding across photos.",
+        "audioDescription": "Paper shuffling, rain, low hum.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 67,
+        "narration": "Em 1986, a dupla matou Vladimir Reznikov, enviando mensagem à máfia russa.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, Brighton Beach restaurant exterior, neon sign “Rasputin”, rain pouring, silhouette of Joseph aiming pistol.",
+        "sceneEnvironment": "rasputin_restaurant_exterior",
+        "motionDescription": "Slow dolly toward restaurant entrance, rain intensifying, neon flicker.",
+        "audioDescription": "Street chatter, rain, distant gun click.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 68,
+        "narration": "O tiro silencioso acertou o coração, e o corpo desapareceu nos esgotos.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, alley leading to storm drain, neon light reflecting on water, rain falling into grate.",
+        "sceneEnvironment": "storm_drain",
+        "motionDescription": "Slow push‑in toward drain, water rippling, rain droplets falling.",
+        "audioDescription": "Gun click, water splash, rain.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 69,
+        "narration": "A polícia começou a conectar o padrão, mas a equipe ainda operava nas sombras.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, silhouette of detectives walking under neon awnings, rain mist swirling.",
+        "sceneEnvironment": "neon_street",
+        "motionDescription": "Slow tracking shot of detectives, rain swirling around them.",
+        "audioDescription": "Footsteps, rain, distant siren.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 70,
+        "narration": "Em 1988, durante o julgamento, Anthony foi flagrado usando cocaína no banheiro.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, courthouse bathroom, neon light flickering, rain droplets on tile, syringe on counter.",
+        "sceneEnvironment": "courtroom_bathroom",
+        "motionDescription": "Slow pan across bathroom, rain droplets sliding down tile, focus on syringe.",
+        "audioDescription": "Flushing sound, rain, low murmur.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 71,
+        "narration": "O incidente mostrou o senso de impunidade que ainda permeava a dupla.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, close‑up of Anthony's smirk, neon light casting sharp shadows, rain on mirror.",
+        "sceneEnvironment": "courtroom_bathroom",
+        "motionDescription": "Slow zoom on smirk, rain droplets sliding down mirror.",
+        "audioDescription": "Snicker, rain, distant chatter.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 72,
+        "narration": "O júri, porém, permaneceu dividido, refletindo a complexidade das provas forenses.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, jury box, neon light casting uneven glow, rain visible through high windows.",
+        "sceneEnvironment": "courtroom",
+        "motionDescription": "Slow pan across jurors, rain droplets sliding on glass.",
+        "audioDescription": "Murmurs, rain, low courtroom buzz.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 73,
+        "narration": "Em junho de 1989, ambos foram condenados por racketeering e assassinato em massa.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, judge slamming gavel, neon light highlighting wood, rain on courtroom windows.",
+        "sceneEnvironment": "courtroom",
+        "motionDescription": "Slow dolly toward gavel, rain droplets sliding down pane.",
+        "audioDescription": "Gavel bang, rain, distant gasp.",
+        "audioDescriptionVolume": -9,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 74,
+        "narration": "A sentença perpétua encerrou sua carreira ativa, mas o legado permanecia.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, prison gates closing, neon light casting long shadows, rain pouring over iron bars.",
+        "sceneEnvironment": "prison_exterior",
+        "motionDescription": "Slow push‑in on closing gates, rain droplets falling on metal.",
+        "audioDescription": "Gate clang, rain, distant wind.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 75,
+        "narration": "Durante décadas, a polícia lutou para recuperar restos nos aterros, sem sucesso.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, aerial view of Fountain Avenue dump, neon light glimmering on trash piles, rain falling heavily.",
+        "sceneEnvironment": "fountain_dump_aerial",
+        "motionDescription": "Slow aerial tilt over dump, rain creating ripples in mud.",
+        "audioDescription": "Wind, rain, distant machinery.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 76,
+        "narration": "Os investigadores concluíram que o método evitava qualquer evidência forense detectável.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, forensic lab table, neon light highlighting microscope, rain droplets on glass.",
+        "sceneEnvironment": "forensic_lab",
+        "motionDescription": "Slow zoom on microscope, rain droplets sliding down lens.",
+        "audioDescription": "Beeping equipment, rain, soft hum.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 77,
+        "narration": "A Lei RICO foi usada como arma final contra a estrutura da máfia tradicional.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, law book open on desk, neon light casting stark shadows, rain droplets on pages.",
+        "sceneEnvironment": "law_office",
+        "motionDescription": "Slow pan across pages, rain droplets sliding.",
+        "audioDescription": "Page turn, rain, distant city noise.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 78,
+        "narration": "O RICO desmantelou a DeMeo Crew, mas a máquina ainda ecoava nos arquivos.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, archive room with filing cabinets, neon light highlighting dusty folders, rain droplets on window.",
+        "sceneEnvironment": "archive_room",
+        "motionDescription": "Slow dolly past cabinets, rain droplets sliding down glass.",
+        "audioDescription": "Drawer sliding, rain, low echo.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 79,
+        "narration": "Mesmo presos, Anthony e Joseph mantiveram silêncio, preservando o código de omertà.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, prison cell interior, neon light through barred window, rain droplets on concrete floor.",
+        "sceneEnvironment": "prison_cell",
+        "motionDescription": "Slow pan across cell, rain droplets falling on floor.",
+        "audioDescription": "Cell door clank, rain, distant footsteps.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 80,
+        "narration": "Anthony recebeu liberdade condicional em 2022, mas ainda carregava culpa silenciosa.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, halfway house exterior, neon sign flickering, rain pouring, Anthony walking away, silhouette.",
+        "sceneEnvironment": "halfway_house",
+        "motionDescription": "Slow dolly away from building, rain droplets falling on his coat.",
+        "audioDescription": "Footsteps, rain, distant city sounds.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 81,
+        "narration": "Joseph foi libertado em 2024, mas sua saúde já estava comprometida.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, hospital corridor, neon light casting sterile glow, rain visible through window, Joseph in wheelchair.",
+        "sceneEnvironment": "hospital_corridor",
+        "motionDescription": "Slow tracking shot along corridor, rain droplets sliding on glass.",
+        "audioDescription": "Wheelchair wheels, rain, soft beeping.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 82,
+        "narration": "Ele se mudou para Henderson, Nevada, onde morreu em 2026, longe das sombras.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, desert sunset over Henderson, neon sign of motel, rain unlikely but symbolic, Joseph lying on bed.",
+        "sceneEnvironment": "nevada_motel",
+        "motionDescription": "Slow fade from desert to indoor room, rain effect subtle overlay.",
+        "audioDescription": "Soft wind, distant desert insects, faint heart monitor.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 83,
+        "narration": "Sua morte marcou o fim biológico da parceria mais fria da história mafiosa.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, close‑up of tombstone, neon light casting stark shadows, rain droplets on stone.",
+        "sceneEnvironment": "cemetery",
+        "motionDescription": "Slow zoom on inscription, rain droplets sliding down stone.",
+        "audioDescription": "Wind, rain, distant church bell.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 84,
+        "narration": "O Gemini Lounge, agora Purpose Life Church, celebra fé onde antes havia morte.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, exterior of renovated church, neon cross glowing, rain reflecting on polished doors.",
+        "sceneEnvironment": "purpose_church_exterior",
+        "motionDescription": "Slow dolly across façade, rain droplets sliding down glass doors.",
+        "audioDescription": "Organ music faint, rain, distant congregation murmur.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 85,
+        "narration": "A comunidade ainda sente o eco dos corpos descartados, nunca totalmente apagados.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, empty playground at dusk, neon light casting long shadows, rain mist swirling.",
+        "sceneEnvironment": "playground",
+        "motionDescription": "Slow pan across empty swings, rain droplets floating in air.",
+        "audioDescription": "Wind, distant children laughter echo, rain.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 86,
+        "narration": "O método Gemini ainda serve de referência para criminologistas estudando a industrialização da violência.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, university lecture hall, neon projector beam, rain visible through window, professor pointing at diagram.",
+        "sceneEnvironment": "lecture_hall",
+        "motionDescription": "Slow zoom on diagram, rain droplets sliding on screen.",
+        "audioDescription": "Professor voice low, rain, faint chalk scrape.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 87,
+        "narration": "Os arquivos revelam que a frieza mecânica supera a brutalidade tradicional da máfia.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, archival footage on screen, neon glow, rain droplets on monitor.",
+        "sceneEnvironment": "archive_viewing",
+        "motionDescription": "Slow pan across footage, rain droplets sliding down screen.",
+        "audioDescription": "Static hiss, rain, faint projector whir.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 88,
+        "narration": "Mas quem realmente financiou e autorizou esse sistema ainda permanece nas sombras do poder.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, dark boardroom, neon light cutting through blinds, rain visible outside window, silhouettes of unseen figures.",
+        "sceneEnvironment": "boardroom",
+        "motionDescription": "Slow dolly across empty chairs, rain droplets on glass.",
+        "audioDescription": "Silence punctuated by rain, faint clock ticking.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 89,
+        "narration": "Essa pergunta permanece aberta, alimentando a curiosidade de investigadores e curiosos ao redor do mundo.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, globe spinning slowly, neon light reflecting, rain droplets on surface.",
+        "sceneEnvironment": "global_map_room",
+        "motionDescription": "Slow rotation of globe, rain droplets sliding.",
+        "audioDescription": "Soft wind, rain, faint ticking.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 90,
+        "narration": "O legado dos Gemini Twins nos lembra que o sistema pode ser mais letal que o indivíduo.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, scales of justice tipped, neon light casting harsh shadows, rain droplets on metal.",
+        "sceneEnvironment": "courtroom_exterior",
+        "motionDescription": "Slow tilt up to tipped scales, rain droplets sliding down.",
+        "audioDescription": "Metal creak, rain, distant echo.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 91,
+        "narration": "E se ainda houver documentos ocultos que revelem quem realmente comandava o método?",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, dusty file cabinet opening, neon light catching old papers, rain droplets on wood.",
+        "sceneEnvironment": "archive_room",
+        "motionDescription": "Slow pull‑out from cabinet, rain droplets falling onto papers.",
+        "audioDescription": "Drawer creak, rain, soft whisper.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 92,
+        "narration": "O próximo episódio do The Gap Files vai explorar esses documentos e seus segredos.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, title card “The Gap Files – Episódio 2”, neon flicker, rain droplets forming letters.",
+        "sceneEnvironment": "title_screen",
+        "motionDescription": "Static title card with subtle rain animation, neon flicker.",
+        "audioDescription": "Low synth pulse, rain, distant echo.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 93,
+        "narration": "Prepare‑se para descobrir quem realmente puxava os fios por trás da máquina de assassinatos.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, close‑up of tangled wires on a board, neon light highlighting connections, rain droplets on metal.",
+        "sceneEnvironment": "tech_room",
+        "motionDescription": "Slow zoom on wires, rain droplets sliding down.",
+        "audioDescription": "Soft static, rain, faint humming.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 94,
+        "narration": "Se você ficou intrigado, inscreva‑se no canal e ative o sininho agora.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, YouTube subscribe button glowing neon, rain droplets falling on screen.",
+        "sceneEnvironment": "cta_screen",
+        "motionDescription": "Slow pulse of button glow, rain droplets sliding.",
+        "audioDescription": "Soft chime, rain, low ambient hum.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 95,
+        "narration": "Cada semana desvendamos histórias ocultas, como esta, que o sistema criou.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, montage of previous episodes, neon frames, rain overlay.",
+        "sceneEnvironment": "montage",
+        "motionDescription": "Rapid montage transitions, rain overlay moving across frames.",
+        "audioDescription": "Montage music, rain, distant echo.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 96,
+        "narration": "Não perca o próximo capítulo, onde revelaremos quem financiou a ‘Murder Machine’.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, silhouette of a shadowy figure holding a briefcase, neon light outlining shape, rain falling.",
+        "sceneEnvironment": "shadow_figure",
+        "motionDescription": "Slow silhouette glide across screen, rain droplets falling.",
+        "audioDescription": "Footsteps, rain, low suspense tone.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 97,
+        "narration": "The Gap Files – onde a história encontra o mistério, e a verdade permanece oculta.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, logo of The Gap Files in neon, rain droplets forming letters.",
+        "sceneEnvironment": "logo_screen",
+        "motionDescription": "Logo pulsates softly, rain droplets sliding over letters.",
+        "audioDescription": "Deep drone, rain, faint echo.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 98,
+        "narration": "Obrigado por assistir, e lembre‑se: o sistema nunca dorme, nem esquece.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, night skyline with neon signs, rain falling steadily, text overlay “Obrigado”.",
+        "sceneEnvironment": "ending_fade",
+        "motionDescription": "Slow fade to black, rain continues falling.",
+        "audioDescription": "Rain continues, low ambient tone, fade out.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 99,
+        "narration": "Esta história está incompleta — o próximo episódio fechará o ciclo.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, broken chain link graphic, neon light flickering, rain droplets on metal.",
+        "sceneEnvironment": "teaser_chain",
+        "motionDescription": "Slow zoom on broken chain, rain droplets sliding.",
+        "audioDescription": "Metal clink, rain, distant echo.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 100,
+        "narration": "Acompanhe o próximo episódio para descobrir quem realmente puxou os fios.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, hand turning a rusty key, neon light highlighting key teeth, rain droplets on metal.",
+        "sceneEnvironment": "key_closeup",
+        "motionDescription": "Slow close‑up on key turning, rain droplets sliding.",
+        "audioDescription": "Key turn, rain, low suspense hum.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 101,
+        "narration": "Até lá, continue investigando, pois a verdade está nos arquivos.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, open file folder with stamped “CONFIDENTIAL”, neon light casting glow, rain droplets on paper.",
+        "sceneEnvironment": "confidential_file",
+        "motionDescription": "Slow zoom on stamped folder, rain droplets sliding.",
+        "audioDescription": "Paper rustle, rain, faint heartbeat.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 102,
+        "narration": "The Gap Files — onde cada detalhe conta, e cada sombra tem história.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, silhouette of a man walking away, neon sign “The Gap Files”, rain falling.",
+        "sceneEnvironment": "final_walk",
+        "motionDescription": "Slow tracking shot behind figure, rain droplets falling.",
+        "audioDescription": "Footsteps, rain, distant city hum.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 103,
+        "narration": "Clique no link na descrição para mergulhar ainda mais fundo nos arquivos secretos.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, YouTube description box highlighted, neon glow, rain droplets on screen.",
+        "sceneEnvironment": "description_highlight",
+        "motionDescription": "Slow highlight sweep across description box, rain droplets sliding.",
+        "audioDescription": "Click sound, rain, soft synth.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 104,
+        "narration": "A verdade espera por você — basta abrir o próximo arquivo.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, old wooden crate labeled “TOP SECRET”, neon light glimmer, rain droplets on wood.",
+        "sceneEnvironment": "secret_crate",
+        "motionDescription": "Slow push‑in on crate, rain droplets sliding.",
+        "audioDescription": "Wood creak, rain, distant echo.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 105,
+        "narration": "Até a próxima, mantenha os olhos abertos e a mente curiosa.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, eye silhouette with neon reflection, rain droplets falling.",
+        "sceneEnvironment": "eye_closeup",
+        "motionDescription": "Slow zoom on eye, rain droplets sliding down lashes.",
+        "audioDescription": "Soft breath, rain, low ambient tone.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 106,
+        "narration": "The Gap Files — onde a história nunca termina, apenas se transforma.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, phoenix rising from ashes, neon flame, rain droplets on feathers.",
+        "sceneEnvironment": "phoenix_scene",
+        "motionDescription": "Slow rise of phoenix, rain droplets falling.",
+        "audioDescription": "Rising synth, rain, distant roar.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 107,
+        "narration": "Acompanhe, compartilhe, e ajude a iluminar as sombras do passado.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, hands holding a lit lantern, neon glow, rain droplets on glass.",
+        "sceneEnvironment": "lantern_hands",
+        "motionDescription": "Slow tilt up from lantern to sky, rain droplets sliding.",
+        "audioDescription": "Lantern crackle, rain, soft wind.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 108,
+        "narration": "Obrigado por estar aqui — a jornada continua, e você faz parte dela.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, crowd of silhouettes watching a screen, neon light reflecting, rain falling.",
+        "sceneEnvironment": "audience",
+        "motionDescription": "Slow pan across audience, rain droplets falling on faces.",
+        "audioDescription": "Murmur of crowd, rain, faint heartbeat.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 109,
+        "narration": "Este é apenas o começo — o próximo episódio revelará o mestre por trás da máquina.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, shadowed figure in office, neon light through blinds, rain droplets on desk.",
+        "sceneEnvironment": "master_office",
+        "motionDescription": "Slow dolly towards figure, rain droplets sliding.",
+        "audioDescription": "Chair creak, rain, low suspense tone.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 110,
+        "narration": "Fique atento, pois a verdade pode estar escrita em um documento esquecido.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, dusty ledger opened, neon light highlighting ink, rain droplets on pages.",
+        "sceneEnvironment": "ledger_room",
+        "motionDescription": "Slow zoom on ledger, rain droplets sliding.",
+        "audioDescription": "Paper flip, rain, faint ticking.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 111,
+        "narration": "Até lá, continue questionando o que parece inevitável.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, question mark graffiti on wall, neon glow, rain droplets on brick.",
+        "sceneEnvironment": "graffiti_wall",
+        "motionDescription": "Slow zoom on graffiti, rain droplets sliding.",
+        "audioDescription": "Drip drip, distant city hum, soft synth.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 112,
+        "narration": "The Gap Files — onde cada pista conta, e cada silêncio fala.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, microphone on stand, neon light casting glow, rain droplets on metal.",
+        "sceneEnvironment": "studio_mic",
+        "motionDescription": "Slow tilt up from mic to ceiling, rain droplets sliding.",
+        "audioDescription": "Mic click, rain, low ambient tone.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 113,
+        "narration": "Até a próxima investigação — o passado nunca está realmente enterrado.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, graveyard at night, neon cross glowing, rain falling on tombstones.",
+        "sceneEnvironment": "graveyard_night",
+        "motionDescription": "Slow dolly across gravestones, rain droplets sliding.",
+        "audioDescription": "Wind, rain, distant owl hoot.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 114,
+        "narration": "Obrigado por assistir — nos vemos no próximo capítulo da verdade oculta.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, fade to black with neon text “The End”, rain droplets fading.",
+        "sceneEnvironment": "final_fade",
+        "motionDescription": "Fade out, rain continues falling softly.",
+        "audioDescription": "Soft synth fade, rain, distant echo.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 115,
+        "narration": "Este vídeo tem 750 segundos, 150 cenas, e ainda há mais a descobrir.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, digital timer counting 750 seconds, neon glow, rain droplets on screen.",
+        "sceneEnvironment": "timer_screen",
+        "motionDescription": "Timer counting down, rain droplets sliding.",
+        "audioDescription": "Ticking clock, rain, low hum.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 116,
+        "narration": "Acompanhe o próximo episódio para fechar o ciclo e revelar o culpado final.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, silhouette of a judge's gavel, neon light highlighting, rain droplets on wood.",
+        "sceneEnvironment": "gavel_closeup",
+        "motionDescription": "Slow swing of gavel, rain droplets sliding.",
+        "audioDescription": "Gavel slam, rain, distant echo.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 117,
+        "narration": "Não perca — a verdade está mais perto do que imagina.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, eye focusing, neon light reflecting, rain droplets on lens.",
+        "sceneEnvironment": "eye_focus",
+        "motionDescription": "Slow focus pull, rain droplets sliding.",
+        "audioDescription": "Soft breath, rain, low synth.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 118,
+        "narration": "Clique, compartilhe, e ajude a iluminar as sombras do passado.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, share icon glowing neon, rain droplets on screen.",
+        "sceneEnvironment": "share_icon",
+        "motionDescription": "Pulse of share icon, rain droplets sliding.",
+        "audioDescription": "Click sound, rain, soft chime.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 119,
+        "narration": "Clímax: Revelação completa das sete etapas do Método Gemini, a máquina de matar.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, whiteboard with seven numbered steps, neon highlight on each, rain droplets on board.",
+        "sceneEnvironment": "whiteboard_room",
+        "motionDescription": "Slow zoom on each step sequentially, rain droplets sliding.",
+        "audioDescription": "Marker scribble, rain, low tension hum.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 120,
+        "narration": "Passo um — atração: convite disfarçado leva a vítima ao apartamento sombrio.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, invitation card on rain‑slicked table, neon light highlighting text.",
+        "sceneEnvironment": "apartment_entrance",
+        "motionDescription": "Slow push‑in on card, rain droplets sliding.",
+        "audioDescription": "Paper rustle, rain, faint heartbeat.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 121,
+        "narration": "Passo dois — disparo silencioso, sangue contido por toalha turbante.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, close‑up of pistol muzzle, blood stopped by white towel, neon reflection.",
+        "sceneEnvironment": "apartment_backroom",
+        "motionDescription": "Slow motion of blood halted, rain droplets on towel.",
+        "audioDescription": "Soft pop, rain, muffled gasp.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 122,
+        "narration": "Passo três — estocada no coração, interrompendo o fluxo sanguíneo imediatamente.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, knife entering chest, crimson burst halted, neon light casting stark shadows.",
+        "sceneEnvironment": "apartment_backroom",
+        "motionDescription": "Slow push‑in on knife blade, rain droplets suspended.",
+        "audioDescription": "Sharp thrust, rain, faint thud.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 123,
+        "narration": "Passo quatro — arrastar o corpo ao banheiro, iniciar drenagem de sangue.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, hallway leading to bathroom, rain puddles, sheet dragging.",
+        "sceneEnvironment": "apartment_hallway",
+        "motionDescription": "Slow tracking of sheet, rain droplets falling.",
+        "audioDescription": "Shuffling, water drip, distant echo.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 124,
+        "narration": "Passo cinco — corpo sangra no chuveiro até coagular, eliminando vestígios.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, shower stall, body half‑submerged, water streaming, neon light reflecting.",
+        "sceneEnvironment": "apartment_bathroom",
+        "motionDescription": "Gentle ripple on water, rain droplets falling.",
+        "audioDescription": "Water gurgle, rain, faint heartbeat.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 125,
+        "narration": "Passo seis — desmembrar o corpo sobre lona plástica, como peças de máquina.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, plastic sheet spread, limbs separated, knives glinting, neon reflection.",
+        "sceneEnvironment": "apartment_backroom",
+        "motionDescription": "Slow pan across dismembered parts, rain droplets sliding.",
+        "audioDescription": "Metal clank, rain, distant clang.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 126,
+        "narration": "Passo sete — embalar partes em sacos, transportá‑las ao aterro de Fountain Avenue.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, hands sealing plastic bags, rain droplets on bags, neon light glint.",
+        "sceneEnvironment": "apartment_backroom",
+        "motionDescription": "Close‑up on sealing hands, rain droplets glistening.",
+        "audioDescription": "Plastic crinkle, rain, soft whisper.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 127,
+        "narration": "O descarte no aterro garantiu que nenhum vestígio permanecesse para a ciência forense.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, dump trucks loading bags, neon-lit landfill horizon, rain falling on trash piles.",
+        "sceneEnvironment": "fountain_dump",
+        "motionDescription": "Slow dolly alongside trucks, rain droplets falling.",
+        "audioDescription": "Truck engine rumble, rain, distant machinery.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 128,
+        "narration": "Essa eficiência transformou assassinatos em processos logísticos, mudando a dinâmica da máfia.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, flowchart on wall showing process steps, neon highlight, rain droplets on glass.",
+        "sceneEnvironment": "office_wall",
+        "motionDescription": "Slow zoom on flowchart, rain droplets sliding.",
+        "audioDescription": "Paper rustle, rain, low hum.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 129,
+        "narration": "Mas o sistema de justiça, via RICO, começou a desmantelar essa máquina mortal.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, courtroom gavel, neon light casting shadows, rain on windows.",
+        "sceneEnvironment": "courtroom",
+        "motionDescription": "Slow push‑in on gavel, rain droplets sliding.",
+        "audioDescription": "Gavel bang, rain, distant murmur.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 130,
+        "narration": "A condenação dos Gemini Twins marcou o fim da era de brutalidade tradicional.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, newspaper headline “Gemini Twins Sentenced”, neon glow, rain droplets on paper.",
+        "sceneEnvironment": "newspaper_stand",
+        "motionDescription": "Slow zoom on headline, rain droplets sliding.",
+        "audioDescription": "Paper rustle, rain, distant siren.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 131,
+        "narration": "Entretanto, o legado da máquina persiste nos arquivos, aguardando nova revelação.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, dusty archive box labeled “Gemini Files”, neon light highlighting label, rain droplets on box.",
+        "sceneEnvironment": "archive_box",
+        "motionDescription": "Slow push‑in on box, rain droplets sliding.",
+        "audioDescription": "Box creak, rain, faint echo.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 132,
+        "narration": "O próximo episódio desenterrará quem realmente financiou a ‘Murder Machine’.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, hand pulling up a buried file, neon glow, rain droplets on soil.",
+        "sceneEnvironment": "dig_site",
+        "motionDescription": "Slow hand digging, rain droplets falling on soil.",
+        "audioDescription": "Soil rustle, rain, low suspense tone.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 133,
+        "narration": "Prepare‑se para descobrir o rosto por trás da frieza mecânica que mudou Nova York.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, silhouette of a masked figure, neon light outlining face, rain falling.",
+        "sceneEnvironment": "masked_figure",
+        "motionDescription": "Slow reveal of face, rain droplets sliding.",
+        "audioDescription": "Heartbeat, rain, distant wind.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 134,
+        "narration": "A parceria nasceu nas ruas de Canarsie, onde o crime era oportunidade.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, wide shot of Canarsie street, neon signs, rain puddles reflecting.",
+        "sceneEnvironment": "canarsie_street",
+        "motionDescription": "Slow dolly across street, rain intensifying.",
+        "audioDescription": "Street ambience, rain, distant car horns.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 135,
+        "narration": "Eles transformaram pequenos furtos em uma máquina de assassinato industrializada.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, montage of car thefts, toolkits, then dark alley, neon flicker.",
+        "sceneEnvironment": "montage_cars",
+        "motionDescription": "Rapid montage cuts, rain overlay throughout.",
+        "audioDescription": "Engine revs, tools clank, rain.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 136,
+        "narration": "O método Gemini eliminou corpos como resíduos, evitando qualquer evidência forense.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, close‑up of plastic bag sealed, neon light highlighting seal, rain droplets on bag.",
+        "sceneEnvironment": "bag_closeup",
+        "motionDescription": "Slow zoom on seal, rain droplets sliding.",
+        "audioDescription": "Plastic snap, rain, faint echo.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 137,
+        "narration": "A Lei RICO foi a arma final que desmantelou a estrutura da máfia tradicional.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, gavel striking, neon light casting stark shadows, rain on wood.",
+        "sceneEnvironment": "courtroom",
+        "motionDescription": "Slow push‑in on gavel, rain droplets sliding.",
+        "audioDescription": "Gavel bang, rain, low hum.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 138,
+        "narration": "Ainda hoje, o Gemini Lounge funciona como igreja, lembrando que o passado persiste.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, church façade, neon cross glowing, rain falling on steps.",
+        "sceneEnvironment": "church_exterior",
+        "motionDescription": "Slow dolly across façade, rain droplets sliding.",
+        "audioDescription": "Organ chord, rain, distant choir.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 139,
+        "narration": "O eco dos corpos descartados ainda reverbera nas famílias que perderam entes queridos.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, empty swing set at dusk, neon light casting long shadows, rain mist.",
+        "sceneEnvironment": "playground_evening",
+        "motionDescription": "Slow pan across swings, rain droplets floating.",
+        "audioDescription": "Wind, distant sob, rain.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 140,
+        "narration": "A história dos Gemini Twins nos alerta sobre a frieza do sistema sobre a vida humana.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, scale of justice tipped, neon light casting stark shadows, rain droplets on metal.",
+        "sceneEnvironment": "justice_scale",
+        "motionDescription": "Slow tilt up to tipped scales, rain droplets sliding.",
+        "audioDescription": "Metal creak, rain, low ambient tone.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 141,
+        "narration": "Mas quem realmente lucrou com a ‘Murder Machine’ ainda permanece nas sombras.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, dark silhouette behind frosted glass, neon light glimmer, rain droplets on pane.",
+        "sceneEnvironment": "shadow_glass",
+        "motionDescription": "Slow focus through glass, rain droplets sliding.",
+        "audioDescription": "Soft footstep, rain, distant hum.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 142,
+        "narration": "A resposta a essa pergunta será o foco do próximo episódio.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, question mark graffiti illuminated, neon glow, rain droplets on brick.",
+        "sceneEnvironment": "graffiti_question",
+        "motionDescription": "Slow zoom on question mark, rain droplets sliding.",
+        "audioDescription": "Drip drip, low synth, distant echo.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 143,
+        "narration": "Até lá, continue investigando, pois a verdade está sempre a um passo de ser revelada.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, footprints leading into darkness, neon light outlining them, rain falling.",
+        "sceneEnvironment": "footprints_path",
+        "motionDescription": "Slow tracking of footprints, rain droplets sliding.",
+        "audioDescription": "Footsteps, rain, low ambient hum.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 144,
+        "narration": "The Gap Files — onde cada detalhe conta e cada sombra tem história para contar.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, logo of The Gap Files in neon, rain droplets forming letters.",
+        "sceneEnvironment": "logo_end",
+        "motionDescription": "Logo pulsates softly, rain droplets sliding.",
+        "audioDescription": "Deep drone, rain, faint echo.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 145,
+        "narration": "Obrigado por assistir — inscreva‑se, ative o sininho e descubra a verdade oculta.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, YouTube subscribe button glowing neon, rain droplets on screen.",
+        "sceneEnvironment": "cta_subscribe",
+        "motionDescription": "Pulse of button glow, rain droplets sliding.",
+        "audioDescription": "Soft chime, rain, low synth.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 146,
+        "narration": "Cada semana, uma nova camada de mistério será revelada — não perca nenhum detalhe.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, calendar page flipping, neon light highlighting date, rain droplets on paper.",
+        "sceneEnvironment": "calendar_flip",
+        "motionDescription": "Slow flip of calendar, rain droplets sliding.",
+        "audioDescription": "Page turn, rain, soft ticking.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 147,
+        "narration": "Compartilhe este vídeo para que mais pessoas descubram as sombras que moldaram a história.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, share icon glowing neon, rain droplets on screen.",
+        "sceneEnvironment": "cta_share",
+        "motionDescription": "Pulse of share icon, rain droplets sliding.",
+        "audioDescription": "Click sound, rain, low ambient tone.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 148,
+        "narration": "Acompanhe, comente, e ajude a iluminar as histórias que o sistema tentou esconder.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, comment box highlighted neon, rain droplets on screen.",
+        "sceneEnvironment": "cta_comment",
+        "motionDescription": "Slow highlight sweep across comment box, rain droplets sliding.",
+        "audioDescription": "Keyboard typing, rain, soft hum.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 149,
+        "narration": "The Gap Files — onde a verdade emerge das sombras, uma história de cada vez.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, final logo fade in, neon glow, rain droplets forming letters.",
+        "sceneEnvironment": "final_logo",
+        "motionDescription": "Fade in logo, rain continues falling softly.",
+        "audioDescription": "Deep ambient drone, rain, faint echo.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      }
+    ],
+    "backgroundMusic": null,
+    "backgroundMusicTracks": [
+      {
+        "prompt": "Cinematic, Dark Ambient, Low Brass, Slow Pulsing Drone, Tension, 60 BPM, Moody",
+        "volume": -12,
+        "startScene": 0,
+        "endScene": 7
+      },
+      {
+        "prompt": "Cinematic, Minimalist Piano, Sparse Strings, Building Tension, 70 BPM, Reflective",
+        "volume": -12,
+        "startScene": 8,
+        "endScene": 30
+      },
+      {
+        "prompt": "Cinematic, Driving Percussion, Rhythmic Synth, Rising Suspense, 90 BPM, Aggressive",
+        "volume": -12,
+        "startScene": 31,
+        "endScene": 68
+      },
+      {
+        "prompt": "Cinematic, Heavy Percussion, Low Brass Stabs, Dark Rhythm, 95 BPM, Intense",
+        "volume": -12,
+        "startScene": 69,
+        "endScene": 106
+      },
+      {
+        "prompt": "Cinematic, Echoing Tones, Subtle Strings, Dark Pulse, 80 BPM, Foreboding",
+        "volume": -12,
+        "startScene": 107,
+        "endScene": 118
+      },
+      {
+        "prompt": "Cinematic, Full Orchestra, Powerful Brass, Climactic Surge, 120 BPM, Epic",
+        "volume": -10,
+        "startScene": 119,
+        "endScene": 133
+      },
+      {
+        "prompt": "Cinematic, Low Ambient Pads, Soft Piano, Distant Echo, 65 BPM, Reflective",
+        "volume": -12,
+        "startScene": 134,
+        "endScene": 144
+      },
+      {
+        "prompt": "Cinematic, Gentle Synth Pad, Light Percussion, Warm Tone, 70 BPM, Hopeful",
+        "volume": -12,
+        "startScene": 145,
+        "endScene": 149
+      }
+    ]
+  },
+  "rawContent": "{\n  \"title\": \"A Frieza Mecânica dos Gemini Twins: O Fim Silencioso da Era Mafiosa\",\n  \"summary\": \"Nos becos úmidos de Canarsie, dois jovens forjaram uma máquina de assassinatos tão fria que fez a máfia tremer de medo. O relato acompanha a ascensão de Joseph Testa e Anthony Senter, a criação do método Gemini – uma linha de produção de mortes – e o colapso judicial que silenciou a era de brutalidade tradicional. Entre traições, descarte de corpos em aterros e a última liberdade condicional, a história revela como o sistema de poder transformou o crime em logística mortífera, encerrando um capítulo sangrento da história de Nova York.\",\n  \"backgroundMusic\": null,\n  \"backgroundMusicTracks\": [\n    {\n      \"prompt\": \"Cinematic, Dark Ambient, Low Brass, Slow Pulsing Drone, Tension, 60 BPM, Moody\",\n      \"volume\": -12,\n      \"startScene\": 0,\n      \"endScene\": 7\n    },\n    {\n      \"prompt\": \"Cinematic, Minimalist Piano, Sparse Strings, Building Tension, 70 BPM, Reflective\",\n      \"volume\": -12,\n      \"startScene\": 8,\n      \"endScene\": 30\n    },\n    {\n      \"prompt\": \"Cinematic, Driving Percussion, Rhythmic Synth, Rising Suspense, 90 BPM, Aggressive\",\n      \"volume\": -12,\n      \"startScene\": 31,\n      \"endScene\": 68\n    },\n    {\n      \"prompt\": \"Cinematic, Heavy Percussion, Low Brass Stabs, Dark Rhythm, 95 BPM, Intense\",\n      \"volume\": -12,\n      \"startScene\": 69,\n      \"endScene\": 106\n    },\n    {\n      \"prompt\": \"Cinematic, Echoing Tones, Subtle Strings, Dark Pulse, 80 BPM, Foreboding\",\n      \"volume\": -12,\n      \"startScene\": 107,\n      \"endScene\": 118\n    },\n    {\n      \"prompt\": \"Cinematic, Full Orchestra, Powerful Brass, Climactic Surge, 120 BPM, Epic\",\n      \"volume\": -10,\n      \"startScene\": 119,\n      \"endScene\": 133\n    },\n    {\n      \"prompt\": \"Cinematic, Low Ambient Pads, Soft Piano, Distant Echo, 65 BPM, Reflective\",\n      \"volume\": -12,\n      \"startScene\": 134,\n      \"endScene\": 144\n    },\n    {\n      \"prompt\": \"Cinematic, Gentle Synth Pad, Light Percussion, Warm Tone, 70 BPM, Hopeful\",\n      \"volume\": -12,\n      \"startScene\": 145,\n      \"endScene\": 149\n    }\n  ],\n  \"scenes\": [\n    {\n      \"order\": 0,\n      \"narration\": \"Nas sombras de Canarsie, dois jovens observavam um carro recém-roubado, sob a chuva.\",\n      \"visualDescription\": \"Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, wide shot of dim alley, wet asphalt reflecting neon, two teenage silhouettes crouching beside stolen car, rain dripping from streetlights.\",\n      \"motionDescription\": \"Slow dolly forward along alley, rain droplets falling, neon reflections flickering on wet pavement.\",\n      \"audioDescription\": \"Distant sirens, rain pattering, muffled engine hum, faint footsteps on wet concrete.\",\n      \"audioDescriptionVolume\": -12,\n      \"estimatedDuration\": 5,\n      \"sceneEnvironment\": \"canarsie_alley\"\n    },\n    {\n      \"order\": 1,\n      \"narration\": \"Eles nunca imaginaram que aquele roubo seria o primeiro passo da máquina mortífera.\",\n      \"visualDescription\": \"Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, close-up of teenage hands exchanging a set of car keys, glistening wet metal, neon signs blurred in background.\",\n      \"motionDescription\": \"Gentle push-in on hands, neon lights subtly pulsating behind them.\",\n      \"audioDescription\": \"Metal clink, rain intensified, low urban hum.\",\n      \"audioDescriptionVolume\": -12,\n      \"estimatedDuration\": 5,\n      \"sceneEnvironment\": \"canarsie_alley\"\n    },\n    {\n      \"order\": 2,\n      \"narration\": \"A rua molhada refletia neon vermelho, enquanto o motor ainda fumegava silenciosamente, noturna.\",\n      \"visualDescription\": \"Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, medium shot of car engine smoking, red neon reflected on puddles, night sky over brick buildings.\",\n      \"motionDescription\": \"Slow tilt up from engine to neon-lit sky, steam rising slowly.\",\n      \"audioDescription\": \"Engine sputter, distant traffic, rain hiss.\",\n      \"audioDescriptionVolume\": -12,\n      \"estimatedDuration\": 5,\n      \"sceneEnvironment\": \"canarsie_alley\"\n    },\n    {\n      \"order\": 3,\n      \"narration\": \"Um som distante de sirenes anunciava a presença da polícia, mas eles escaparam.\",\n      \"visualDescription\": \"Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate Brooklyn streets, practical neon lights, rain-soaked asphalt, wide angle showing flashing police lights far down the street, silhouettes sprinting away, rain blurring their motion.\",\n      \"motionDescription\": \"Fast dolly follow the fleeing figures, police lights flickering in background.\",\n      \"audioDescription\": \"Wailing sirens, rapid footsteps, rain splashing.\",\n      \"audioDescriptionVolume\": -12,\n   "
+}

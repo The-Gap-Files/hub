@@ -48,20 +48,12 @@ export class RunPodMotionProvider implements IMotionProvider {
 
       const imageBase64 = imageBuffer.toString('base64')
 
-      let endImageBase64: string | undefined
-      if (request.endImagePath) {
-        const endImageBuffer = await fs.readFile(request.endImagePath)
-        endImageBase64 = endImageBuffer.toString('base64')
-      }
-
-      // Nosso worker suporta 'end_image_base64' para transições.
       const url = `https://api.runpod.ai/v2/${this.endpointId}/runsync`
 
       // Mapeamento de Payload para o Worker wlsdml1114/generate_video
       const payload = {
         input: {
           image_base64: imageBase64,
-          end_image_base64: endImageBase64, // O nosso worker suporta end_image!
 
           prompt: request.prompt,
           negative_prompt: request.negativePrompt || 'blurry, low quality, distorted, watermark',
