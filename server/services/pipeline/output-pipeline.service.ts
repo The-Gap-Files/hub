@@ -421,7 +421,8 @@ export class OutputPipelineService {
 
         const productionCtx: ProductionContext = {
           styleAnchorTags: anchorParts.length > 0 ? anchorParts.join(', ') : undefined,
-          visualIdentity: output.dossier?.visualIdentityContext || undefined
+          visualIdentity: output.dossier?.visualIdentityContext || undefined,
+          storyOutline: outlineData
         }
 
         const refinedScenes = await filmmakerDirector.refineScript(

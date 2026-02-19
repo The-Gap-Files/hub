@@ -1,0 +1,148 @@
+{
+  "timestamp": "2026-02-18T23:00:04.149Z",
+  "taskId": "story-architect",
+  "status": "ok",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Story Architect — Full Video (Plano Narrativo para Vídeo Completo)\n\nVocê é um arquiteto narrativo especializado em vídeos longos investigativos (8-15 minutos).\nSeu trabalho é criar um plano narrativo de alta retenção para um **vídeo completo** —\ndiferente de um teaser, o full video precisa sustentar atenção por toda a duração,\nusando escalação progressiva, midpoints narrativos, e re-engagement hooks.\n\n## 🎬 Modo Série (EP1–EP3) — quando aplicável\n\nÀs vezes o full video é um **episódio** dentro de uma série (EP1, EP2, EP3). Isso é indicado por:\n- `monetizationContext.episodeNumber` **OU**\n- `monetizationContext.angleCategory` começando com `episode-`\n\nQuando estiver em modo série:\n- **NÃO recontar** os mesmos assuntos, revelações, hooks ou key points de episódios anteriores.\n- Se houver no dossiê/notas um bloco `EPISÓDIOS ANTERIORES (NÃO REPETIR)`, trate como **restrição dura**.\n- **Foque no território novo** do episódio, mas mantenha coerência com a premissa da série.\n\nObjetivo por episódio (guia):\n- **EP1**: contextualiza + estabelece universo + primeira grande virada.\n- **EP2**: complica + contradições + midpoint forte + novas evidências.\n- **EP3**: amarra + fecha arcos + implicações + conclusão satisfatória.\n\n## 🎯 Objetivo\n\nCriar o **blueprint completo** que um roteirista vai seguir para escrever o roteiro\ncena-a-cena de um vídeo investigativo/documental longo. Você NÃO escreve o roteiro —\nvocê projeta a ESTRUTURA que maximiza retenção.\n\n## 📐 ESTRUTURA OBRIGATÓRIA: A Jornada Imersiva de 6 Passos (YouTube Dark 2026)\n\nEm vez de uma estrutura genérica, o vídeo completo DEVE seguir rigorosamente a **Jornada Imersiva** detalhada na pesquisa de retenção, mapeada para a estrutura de 3 atos:\n\n1.  **A Missão (0:00 - 1:00) | O Gancho Visceral**\n    *   **Objetivo:** Estabelecer o mistério central e a \"Aposta\" (O que está em jogo?).\n    *   **Técnica:** Ruptura imediata (0s) + Pergunta \"impossível\".\n    *   **Mid-Hook (30s):** Reafirmação da promessa para evitar abandono precoce.\n\n2.  **O Contexto (1:00 - 3:00) | Conexão Emocional**\n    *   **Objetivo:** Conectar o mistério a uma emoção universal ou fato histórico. \"Por que se importar *agora*?\"\n    *   **Atenção:** Evite \"Wikipedia dump\". Contexto deve ser tensão, não aula.\n\n3.  **O Plano / A Investigação (Inicio do Ato 2)**\n    *   **Objetivo:** Detalhar os passos que serão tomados. Cria expectativa de progresso.\n    *   **Dinâmica:** \"Vamos analisar as evidências X, Y e Z.\"\n\n4.  **A Progressão \"Roller Coaster\" (O Corpo Principal)**\n    *   **Objetivo:** Série de sucessos e fracassos. Cada pista leva a uma NOVA pergunta (Cliffhanger em Cadeia).\n    *   **Midpoint (50%):** A \"Virada\". Uma evidência muda tudo.\n    *   **Dark Moment (75%):** O beco sem saída. Parece que não haverá resposta.\n\n5.  **O Clímax (A Revelação)**\n    *   **Objetivo:** A teoria mais forte ou a revelação final.\n    *   **Audiovisual:** Máximo impacto. Use a \"Pilha Sonora\" completa aqui.\n\n6.  **A Reflexão (Conclusão)**\n    *   **Objetivo:** Conectar de volta ao espectador. O que isso diz sobre a natureza humana?\n    *   **CTA Orgânico:** Convite para a próxima jornada (Loop de Sessão).\n\n## 🧠 RETENÇÃO — Técnicas Obrigatórias (baseado em dados reais de YouTube Analytics)\n\n### 1. Pattern Interrupts (~a cada 30 segundos / 6 cenas)\nO espectador decide cada ~30 segundos se continua assistindo. Garanta que o outline\nprevê uma **mudança de estímulo** a cada bloco de 6 cenas:\n- Mudança de localização visual (exterior → interior → close-up de documento)\n- Shift narrativo (fato → pergunta → revelação → dado numérico)\n- Mudança tonal (factual → tenso → reflexivo)\n\n### 2. Re-engagement Hooks (~a cada 3 minutos / 36 cenas)\nCada bloco de ~3 minutos deve terminar com um mini-cliffhanger que puxa o espectador\npara o próximo bloco:\n- \"Mas o que ninguém sabia era que...\"\n- \"E então surgiu um detalhe que mudou tudo.\"\n- Perguntas retóricas que o espectador quer ver respondidas\n\n### 3. Subconscious Loops (Técnica MrBeast)\nAbrir threads narrativas antes de fechá-las. O cérebro precisa da closure:\n- Introduza um fato intrigante no começo do ato 2 → só resolva no ato 3\n- Mencione um documento/evidência → mostre seu conteúdo 2 minutos depois\n\n### 3.1 REGRA DE TRÊS PARA FORESHADOWING (YouTube Retention Research)\nPara cada revelação importante no vídeo, plante EXATAMENTE 3 pistas anteriores:\n- **Pista 1 (~15% do vídeo):** Menção casual, quase imperceptível. O espectador não nota conscientemente.\n- **Pista 2 (~40% do vídeo):** Detalhe que ganha contexto. O espectador atento começa a suspeitar.\n- **Pista 3 (~65% do vídeo):** Evidência direta que prepara a revelação. O espectador sente que \"algo vai acontecer\".\n- **Revelação (~80%):** Payoff. O espectador conecta as 3 pistas retroativamente.\n\nO outline DEVE indicar para cada beat de revelação: quais são as 3 pistas anteriores e em qual beat foram plantadas.\nIsso cria \"ah-ha moments\" que são o driver #1 de compartilhamento e rewatch.\n\n### 4. Stair-Stepping (Escalação Progressiva)\nCada beat DEVE ser mais intenso que o anterior. NÃO pode haver platô narrativo.\nA progressão ideal:\n```\nCurioso → Intrigado → Perplexo → Perturbado → Chocado → Resolvido (ou: Perturbado permanente)\n```\n\n### 5. Value Loop (Técnica Veritasium) — Para cada beat principal:\n1. **Contexto** — O que é (o fato)\n2. **Aplicação** — Como funciona (a mecânica)\n3. **Framing** — Por que importa (a implicação)\n\n### 6. MONTAGEM E ÁUDIO (INTENCIONALIDADE CINEMATOGRÁFICA)\nO roteirista não escreve apenas palavras; ele desenha a experiência audiovisual.\n- **ÁUDIO DISSOCIADO (J-Cut / L-Cut):** Instrua explicitamente quando o áudio de uma cena começa antes (J) ou continua depois (L).\n- **TAGS DE ÁUDIO SSML:** Use `<break time=\"1.5s\" />` e `<prosody rate=\"115%\">` conforme definido no skill `audio-direction-tags.md`.\n- **ENGENHARIA SONORA (Pilha de 5 Camadas):** Instrua o uso de:\n    1. **Sub-Bass (20-80Hz):** Pavor físico, \"Presença\".\n    2. **Média (80-500Hz):** Corpo, ambiente real.\n    3. **Alta (2kHz+):** Textura, metais, sussurros (arrepio).\n    4. **Sweetener:** Assinatura sonora única (ex: som invertido).\n    5. **Espacialidade:** Reverb para coesão.\n- **SILÊNCIO ESTRATÉGICO:** O \"vácuo de som\" antes de revelações visuais é OBRIGATÓRIO. Defina onde ocorre.\n\n### 7. BRAND SAFETY & GORE (CRÍTICO)\n- REPROVADO se usar termos: \"Assassinato\", \"Estupro\", \"Pedofilia\", \"Mutilado\", \"Tripas\".\n- REPROVADO se descrever anatomia visceral (vísceras, feridas abertas, abuso sexual).\n- APROVADO se usar substituição semântica: \"Fim Trágico\", \"Ato Imperdoável\", \"Cena Marcada\".\n- APROVADO se descrever a SOMBRA ou o OBJETO, não o ferimento.\n- Postura exigida: \"Neutral Documentarian\". Clínico e solene, nunca sádico.\n\n### 8. ANTI-REPETIÇÃO DE PROCEDIMENTO (OBRIGATÓRIO)\nQuando o dossiê descreve um método/procedimento que se repete (ex: serial killer, fraude sistemática):\n- O outline DEVE alocar o procedimento a UM ÚNICO bloco de beats (máx 4-6 cenas).\n- Beats subsequentes que envolvem o mesmo procedimento devem focar em:\n  - **ESCALA** (quantas vezes, quantas vítimas, quanto tempo)\n  - **DETECÇÃO** (como foi descoberto, quem suspeitou primeiro)\n  - **SISTEMA** (quem permitiu, quem encobriu, que falha institucional)\n  - **CONSEQUÊNCIA** (impacto nas vítimas, na comunidade, na lei)\n- Se o outline tem 2+ beats descrevendo o MESMO procedimento em detalhe, o validador REJEITARÁ.\n\n### 9. AMBIGUIDADE CONTROLADA (ANTÍDOTO PARA \"INAUTHENTIC CONTENT\")\nYouTube 2026 penaliza \"Inauthentic Content\" — conteúdo que parece gerado por template.\nPara cada beat de revelação no outline:\n- Inclua pelo menos 1 QUALIFICADOR (\"as evidências sugerem\", \"segundo os registros disponíveis\")\n- Nunca afirme 100% de certeza sobre fatos disputados\n- Prefira \"conectar pontos\" a \"declarar verdades\"\n- O tom ideal: \"Active Investigator\" — quem investiga ao vivo, não quem já sabe tudo\n\nIsso protege contra:\n1. Demonetização por conteúdo sensacionalista\n2. Detecção de \"AI slop\" por padrões de certeza absoluta\n3. Perd... [truncated 12142 chars]"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "📋 TEMA: A frieza mecânica da dupla de assassinos mais letal de Nova York + o fim silencioso de uma era de brutalidade mafiosa.\n\n🎨 DIRETRIZES DE IDENTIDADE DO UNIVERSO (WARNING PROTOCOL):\nAtmosfera 'gritty' do Brooklyn nos anos 70 e 80. Foco visual no Gemini Lounge, luzes de neon refletindo em asfalto molhado e carros pretos. Paleta de cores desaturada com acentos em vermelho sangue e ambar de iluminação urbana. Evitar o glamour de 'O Poderoso Chefão'; priorizar a estética suja e industrial de 'Goodfellas' e a frieza do método de desmembramento.\n\n📚 FONTES DO DOSSIÊ (ordenadas por peso/relevância):\n[1] (brief) Brief EP1 (fonte da verdade — episodeBriefBundleV1) [peso: 2]\n📋 TEMA: A frieza mecânica da dupla de assassinos mais letal de Nova York e o fim silencioso de uma era de brutalidade mafiosa\n📋 TÍTULO DO DOSSIER: Os Gêmeos Gemini: A Morte de Joey Testa e o Terror da Murder Machine\n🎬 EPISODE BRIEF — EP1 (versão: episodeBriefBundleV1)\n🎭 Função narrativa: Origem e ascensão da dupla Gemini, mostrando como se tornaram a força letal da DeMeo Crew\n💫 Arco emocional: Tensão crescente ao revelar a formação de uma parceria fria e metódica\n📊 Nível de resolução: none\n\n🌐 FATOS DE BACKGROUND (todos os EPs podem usar)\n1. Canarsie, Brooklyn, era um enclave ítalo‑americano de classe trabalhadora nos anos 1970, onde a máfia recrutava jovens. [fonte: [1]]\n2. O Gemini Lounge, localizado na Flatlands Avenue, funcionava como bar e ponto de encontro da equipe de Roy DeMeo. [fonte: [1]]\n3. Joseph Carmine Testa (nascido 24/01/1955) e Anthony Michael Senter (nascido 31/03/1955) cresceram na mesma rua e formaram uma parceria conhecida como ‘Gêmeos Gemini’. [fonte: [3]]\n4. Ambos iniciaram no crime com furtos de automóveis na adolescência, acumulando registros policiais juvenis. [fonte: [3]]\n5. A família Gambino controlava a equipe DeMeo, que operava sob a fachada de negócios de roubo de carros e extorsão. [fonte: [1]]\n6. O ‘Método Gemini’ consistia em sete etapas logísticas para eliminar corpos e impedir evidências forenses. [fonte: [1]]\n7. A Lei RICO permitiu ao governo federal processar organizações criminosas como a DeMeo Crew nos anos 1980. [fonte: [3]]\n\n🔑 FATOS EXCLUSIVOS DO EP1 (somente estes podem ser revelados aqui)\n1. Em 1973, Testa foi esfaqueado no pulmão durante uma briga de bar; Senter retaliou violentamente, consolidando seu vínculo. [fonte: [3]]\n2. Aos 15 anos, Testa e Senter já tinham múltiplas detenções por roubo de veículos, desenvolvendo habilidades mecânicas. [fonte: [3]]\n3. Em 1974, foram recrutados por Harvey ‘Chris’ Rosenberg para integrar a equipe de Roy DeMeo. [fonte: [1]]\n4. Roy DeMeo reconheceu nos gêmeos a capacidade de executar ordens sem hesitação, designando‑os como executores principais. [fonte: [1]]\n5. O primeiro assassinato documentado da dupla foi o de Andrei Katz em 13/06/1975, usando o procedimento de desmembramento. [fonte: [5]]\n6. Durante os primeiros anos, a equipe utilizava o apartamento ao lado do Gemini Lounge como ‘matadouro’ para aplicar o método. [fonte: [1]]\n7. O método incluía atrair a vítima ao local sob pretexto de negócios, seguida de um disparo rápido na cabeça. [fonte: [1]]\n8. Em seguida, a vítima era envolvida em toalha para conter fluido e recebia estocada no coração para interromper a circulação. [fonte: [1]]\n9. O corpo era arrastado ao banheiro, deixado para drenagem, depois desmembrado sobre lona plástica e embalado em caixas. [fonte: [1]]\n10. Os restos eram descartados no aterro de Fountain Avenue, aproveitando o volume diário de lixo para ocultar evidências. [fonte: [1]]\n\n🔒 FATOS BLOQUEADOS — guardar para episódios futuros (NÃO REVELAR NESTE EP)\n1. ❌ Em 10 de janeiro de 1983, Testa e Senter traíram Roy DeMeo, executando‑o por ordem da família Gambino. [fonte: [1]]\n2. ❌ Após a morte de DeMeo, a dupla foi transferida para a família Lucchese sob Anthony Casso. [fonte: [1]]\n3. ❌ Nos anos finais da década, foram julgados e condenados por 10 homicídios e extorsão sob a Lei RICO. [fonte: [3]]\n\n⛔ RESOLUÇÕES PROIBIDAS NESTE EPISÓDIO\n- ❌ Não revelar quem executou a traição contra Roy DeMeo.\n- ❌ Não revelar o destino final dos Gêmeos após o julgamento.\n\n🪝 GANCHOS ABERTOS SUGERIDOS (perguntas que este EP levanta mas NÃO fecha)\n1. Quem mais dentro da organização sabia dos detalhes do ‘Método Gemini’?\n2. Por que a família Gambino decidiu eliminar seu próprio mentor?\n\n🛡️ REGRAS VISUAIS GLOBAIS\n- ❌ Armas de fogo\n- ❌ Violência gráfica\n- ❌ Sangue\n- ❌ Tortura\n- ❌ armas de fogo, rifles, pistolas, munição, gatilho\n- ❌ atirador, execução, assassinato explícito, violência gráfica\n- ❌ sangue, gore, corpos mutilados, tortura explícita\n- ❌ close-up de mãos humanas, close-up de rostos humanos (evitar macro/anatomia)\n- ❌ cenas em sinagogas/templos com ameaça explícita (substituir por artefatos: manifesto, tela, manchete)\n- ❌ símbolos/extremismo contemporâneo em destaque (substituir por “texto recortado/blur”)\n\n🧰 ARTEFATOS VISUAIS PERMITIDOS\n- ✅ documento\n- ✅ registro\n- ✅ arquivo\n- ✅ manifesto\n- ✅ documento, decreto, registro, arquivo, dossiê, carimbo, selo de cera\n- ✅ moedas, cofre, livro-caixa, inventário, recibo, contrato\n- ✅ monitor, tela, manifesto (sem arma), headline, recorte de jornal, thread desfocada\n- ✅ mapa, corredor de arquivo, sala de leitura, prateleiras, luz de vela, sombras\n- ✅ silhuetas não-identificáveis sem rosto/mãos em close\n---\n\n\n🧠 INSIGHTS E NOTAS DO DOSSIÊ:\n- ⚠️ FEEDBACK DO USUÁRIO PARA O PLANO NARRATIVO: quero somente um CTA\n\n\nAnalise o seguinte dossiê e crie o plano narrativo estruturado:\n\n📋 TEMA: A frieza mecânica da dupla de assassinos mais letal de Nova York + o fim silencioso de uma era de brutalidade mafiosa.\n\n🎯 CONTEXTO DE MONETIZAÇÃO — ESTE OUTLINE É BASEADO EM UM ITEM DO PLANO\n\nEste outline deve seguir a direção de um **full video** planejado:\n- **Título planejado:** A Máquina de Matar que Transformou o Crime em Linha de Montagem | Gêmeos Gemini\n- **Hook sugerido:** \"Nos becos molhados de Canarsie, dois jovens transformaram o roubo de carros em uma máquina fria de assassinatos que mudou a cara da máfia.\"\n  → 🚨 REGRA OBRIGATÓRIA: As 4 variantes em hookVariants DEVEM SEGUIR este gancho. Cada variante (green, moderate, aggressive, lawless) calibra o MESMO conceito em níveis tonais diferentes — NÃO invente um gancho novo. O hook do plano de monetização é a fonte da verdade.\n- **Ângulo narrativo:** revisionista (categoria: episode-1)\n- **Série (episódios):** Este full video é um episódio (EP1).\n  → REGRA: Mantenha o foco 100% no ângulo do episódio e trate qualquer bloco \"EPISÓDIOS ANTERIORES (NÃO REPETIR)\" presente em userNotes como RESTRIÇÃO DURA.\n  → Objetivo: explorar TERRITÓRIO NOVO e complementar, sem recontar as mesmas revelações.\n- **REGRA CTA DO EP1 (INEGOCIÁVEL):**\n  → segmentDistribution.cta = 2 (máximo 3). NUNCA mais que 3 cenas de CTA.\n  → O CTA é 1 único bloco no final. O vídeo tem UM único encerramento.\n  → ctaApproach: convidar para EP2 com gancho narrativo. NÃO mencionar \"The Gap Files\" como assinatura — apenas o tease do próximo episódio.\n  → Tom: \"O que aconteceu depois é ainda mais perturbador. [Gancho do EP2]\"\n  → PROIBIDO: mais de 1 bloco de CTA, tagline \"The Gap Files\" repetida, meta-referências (duração, contagem de cenas).\n\n💡 **NOTAS ESTRATÉGICAS DO PLANO DE MONETIZAÇÃO:**\nEstrutura de funil clara: gateway introdutório, deep-dives que aprofundam diferentes facetas (econômico, ideológico, etc.) e hook‑only virais para maximizar CTR. Episódios seguem a progressão narrativa (origem, virada, legado) sem sobrepor ângulos dos teasers, garantindo cobertura total do dossiê.\nUse essas notas para guiar o tom, a intensidade e os pontos de ênfase do plano narrativo.\n\n⚠️ INSTRUÇÃO CRÍTICA: SIGA o hook sugerido (as hookVariants devem derivar dele), o ângulo e o papel narrativo acima. O plano narrativo deve ser coerente com essas diretrizes. Não invente um ângulo nem um gancho diferente.\n\n🎬 **INSTRUÇÕES PARA FULL VIDEO (CRÍTICA):**\nEste é um VÍDEO COMPLETO, não um teaser. A estrutura dev... [truncated 6076 chars]"
+      }
+    ]
+  },
+  "parsed": {
+    "hookStrategy": "Cold open com flash‑forward: começamos com a imagem de um carro preto desaparecendo na névoa de Canarsie, enquanto a narração lança a pergunta impossível que define o mistério. Essa ruptura visual captura atenção imediata e o contraste entre a rua úmida e a frieza mecânica cria curiosidade instantânea.",
+    "hookVariants": [
+      {
+        "level": "green",
+        "hook": "Nos becos molhados de Canarsie, dois jovens transformaram o roubo de carros em uma máquina fria de assassinatos que mudou a cara da máfia.",
+        "rationale": "Apela à curiosidade intelectual sem confrontar, garantindo monetização segura."
+      },
+      {
+        "level": "moderate",
+        "hook": "Nos becos escuros de Canarsie, dois jovens convertiam furtos de carros numa máquina fria de assassinatos, reescrevendo as regras da máfia.",
+        "rationale": "Eleva a tensão ao sugerir violência implícita, mantendo a narrativa dentro dos limites de segurança."
+      },
+      {
+        "level": "aggressive",
+        "hook": "Nos becos encharcados de Canarsie, dois jovens transformaram o roubo de carros numa máquina de assassinatos tão fria que redefiniu a própria essência da máfia.",
+        "rationale": "Usa linguagem provocativa e paradoxal para maximizar CTR, ainda sem violar diretrizes de conteúdo."
+      },
+      {
+        "level": "lawless",
+        "hook": "Nos becos úmidos de Canarsie, dois jovens converteram o crime de carros numa máquina fria de assassinatos que despedaçou a tradição da máfia.",
+        "rationale": "Empurra o limite de provocação para calibrar o tom mais extremo, sem mencionar sangue ou armas."
+      }
+    ],
+    "promiseSetup": "Nos próximos 12 minutos, vamos revelar como a dupla Gemini criou um método de assassinato em linha de montagem, como esse processo mudou a estrutura da DeMeo Crew e por que essa frieza marcou o fim de uma era de brutalidade mafiosa.",
+    "risingBeats": [
+      {
+        "order": 1,
+        "revelation": "Testa e Senter cresceram na mesma rua de Canarsie, formando laços de infância que mais tarde se transformariam em parceria criminosa.",
+        "questionAnswered": "Como a dupla se conheceu?",
+        "newQuestion": "Como esses laços de infância evoluíram para uma parceria letal?",
+        "sourceReference": "[3]"
+      },
+      {
+        "order": 2,
+        "revelation": "Aos 15 anos, já acumulavam múltiplas detenções por roubo de veículos, desenvolvendo habilidades mecânicas que seriam cruciais mais tarde.",
+        "questionAnswered": "Qual era o histórico criminal precoce da dupla?",
+        "newQuestion": "De que forma essas habilidades mecânicas foram adaptadas ao ‘Método Gemini’?",
+        "sourceReference": "[3]"
+      },
+      {
+        "order": 3,
+        "revelation": "Em 1973, Testa foi esfaqueado no pulmão durante uma briga de bar; Senter retaliou violentamente, consolidando seu vínculo.",
+        "questionAnswered": "Qual evento solidificou a parceria entre eles?",
+        "newQuestion": "Qual foi o próximo passo da dupla após esse incidente?",
+        "sourceReference": "[3]"
+      },
+      {
+        "order": 4,
+        "revelation": "Em 1974, foram recrutados por Harvey ‘Chris’ Rosenberg para integrar a equipe de Roy DeMeo.",
+        "questionAnswered": "Como entraram na DeMeo Crew?",
+        "newQuestion": "Qual papel lhes foi atribuído dentro da organização?",
+        "sourceReference": "[1]"
+      },
+      {
+        "order": 5,
+        "revelation": "Roy DeMeo reconheceu nos gêmeos a capacidade de executar ordens sem hesitação, designando‑os como executores principais.",
+        "questionAnswered": "Por que DeMeo confiou plenamente nos Gemini?",
+        "newQuestion": "Como o ‘Método Gemini’ foi operacionalizado na prática?",
+        "sourceReference": "[1]"
+      },
+      {
+        "order": 6,
+        "revelation": "O primeiro assassinato documentado da dupla foi o de Andrei Katz em 13/06/1975, usando o procedimento de desmembramento de sete etapas.",
+        "questionAnswered": "Qual foi o primeiro assassinato da dupla?",
+        "newQuestion": "Como esse método evoluiu e impactou a dinâmica da máfia?",
+        "sourceReference": "[5]"
+      }
+    ],
+    "climaxMoment": "Descobrimos que o ‘Método Gemini’ funcionava como uma linha de montagem: atração da vítima, disparo rápido, estocada no coração, drenagem, desmembramento e descarte no aterro de Fountain Avenue – uma eficiência que acabou com a era de violência caótica da máfia.",
+    "climaxFormula": "Connection Shock",
+    "resolutionPoints": [],
+    "resolutionAngle": "",
+    "ctaApproach": "O que aconteceu depois é ainda mais perturbador. No próximo episódio, revelaremos como a traição contra Roy DeMeo mudou o destino da máfia.",
+    "emotionalArc": "Curiosidade → Intriga → Perturbação → Indignação → Suspense → Desejo de saber mais",
+    "toneProgression": "Factual → Tenso → Investigativo → Revelador → Reflexivo",
+    "whatToReveal": [
+      "Testa e Senter cresceram na mesma rua de Canarsie",
+      "Detenções por roubo de veículos aos 15 anos",
+      "Esfaqueamento de Testa em 1973 e retaliação de Senter",
+      "Recrutamento por Harvey ‘Chris’ Rosenberg em 1974",
+      "Designação como executores principais por Roy DeMeo",
+      "Primeiro assassinato de Andrei Katz em 1975 usando sete etapas",
+      "Uso do apartamento ao lado do Gemini Lounge como ‘matadouro’",
+      "Descarte dos restos no aterro de Fountain Avenue"
+    ],
+    "whatToHold": [
+      "Traição contra Roy DeMeo em 1983",
+      "Transferência para a família Lucchese",
+      "Julgamento e condenação sob a Lei RICO"
+    ],
+    "whatToIgnore": [
+      "Em 10 de janeiro de 1983, Testa e Senter traíram Roy DeMeo",
+      "Após a morte de DeMeo, a dupla foi transferida para a família Lucchese",
+      "Nos anos finais da década, foram julgados e condenados por 10 homicídios e extorsão"
+    ],
+    "segmentDistribution": {
+      "hook": 8,
+      "context": 22,
+      "rising": 92,
+      "climax": 15,
+      "resolution": 11,
+      "cta": 2
+    },
+    "tensionCurve": [
+      "low",
+      "medium",
+      "high",
+      "pause",
+      "peak",
+      "high"
+    ],
+    "openLoops": [
+      {
+        "question": "Quem mais dentro da organização sabia dos detalhes do ‘Método Gemini’?",
+        "openedAtBeat": 2,
+        "closedAtBeat": null
+      },
+      {
+        "question": "Por que a família Gambino decidiu eliminar seu próprio mentor?",
+        "openedAtBeat": 5,
+        "closedAtBeat": null
+      }
+    ],
+    "resolutionLevel": "none"
+  },
+  "rawContent": "{\n  \"hookStrategy\": \"Cold open com flash‑forward: começamos com a imagem de um carro preto desaparecendo na névoa de Canarsie, enquanto a narração lança a pergunta impossível que define o mistério. Essa ruptura visual captura atenção imediata e o contraste entre a rua úmida e a frieza mecânica cria curiosidade instantânea.\",\n  \"hookVariants\": [\n    {\n      \"level\": \"green\",\n      \"hook\": \"Nos becos molhados de Canarsie, dois jovens transformaram o roubo de carros em uma máquina fria de assassinatos que mudou a cara da máfia.\",\n      \"rationale\": \"Apela à curiosidade intelectual sem confrontar, garantindo monetização segura.\"\n    },\n    {\n      \"level\": \"moderate\",\n      \"hook\": \"Nos becos escuros de Canarsie, dois jovens convertiam furtos de carros numa máquina fria de assassinatos, reescrevendo as regras da máfia.\",\n      \"rationale\": \"Eleva a tensão ao sugerir violência implícita, mantendo a narrativa dentro dos limites de segurança.\"\n    },\n    {\n      \"level\": \"aggressive\",\n      \"hook\": \"Nos becos encharcados de Canarsie, dois jovens transformaram o roubo de carros numa máquina de assassinatos tão fria que redefiniu a própria essência da máfia.\",\n      \"rationale\": \"Usa linguagem provocativa e paradoxal para maximizar CTR, ainda sem violar diretrizes de conteúdo.\"\n    },\n    {\n      \"level\": \"lawless\",\n      \"hook\": \"Nos becos úmidos de Canarsie, dois jovens converteram o crime de carros numa máquina fria de assassinatos que despedaçou a tradição da máfia.\",\n      \"rationale\": \"Empurra o limite de provocação para calibrar o tom mais extremo, sem mencionar sangue ou armas.\"\n    }\n  ],\n  \"promiseSetup\": \"Nos próximos 12 minutos, vamos revelar como a dupla Gemini criou um método de assassinato em linha de montagem, como esse processo mudou a estrutura da DeMeo Crew e por que essa frieza marcou o fim de uma era de brutalidade mafiosa.\",\n  \"risingBeats\": [\n    {\n      \"order\": 1,\n      \"revelation\": \"Testa e Senter cresceram na mesma rua de Canarsie, formando laços de infância que mais tarde se transformariam em parceria criminosa.\",\n      \"questionAnswered\": \"Como a dupla se conheceu?\",\n      \"newQuestion\": \"Como esses laços de infância evoluíram para uma parceria letal?\",\n      \"sourceReference\": \"[3]\"\n    },\n    {\n      \"order\": 2,\n      \"revelation\": \"Aos 15 anos, já acumulavam múltiplas detenções por roubo de veículos, desenvolvendo habilidades mecânicas que seriam cruciais mais tarde.\",\n      \"questionAnswered\": \"Qual era o histórico criminal precoce da dupla?\",\n      \"newQuestion\": \"De que forma essas habilidades mecânicas foram adaptadas ao ‘Método Gemini’?\",\n      \"sourceReference\": \"[3]\"\n    },\n    {\n      \"order\": 3,\n      \"revelation\": \"Em 1973, Testa foi esfaqueado no pulmão durante uma briga de bar; Senter retaliou violentamente, consolidando seu vínculo.\",\n      \"questionAnswered\": \"Qual evento solidificou a parceria entre eles?\",\n      \"newQuestion\": \"Qual foi o próximo passo da dupla após esse incidente?\",\n      \"sourceReference\": \"[3]\"\n    },\n    {\n      \"order\": 4,\n      \"revelation\": \"Em 1974, foram recrutados por Harvey ‘Chris’ Rosenberg para integrar a equipe de Roy DeMeo.\",\n      \"questionAnswered\": \"Como entraram na DeMeo Crew?\",\n      \"newQuestion\": \"Qual papel lhes foi atribuído dentro da organização?\",\n      \"sourceReference\": \"[1]\"\n    },\n    {\n      \"order\": 5,\n      \"revelation\": \"Roy DeMeo reconheceu nos gêmeos a capacidade de executar ordens sem hesitação, designando‑os como executores principais.\",\n      \"questionAnswered\": \"Por que DeMeo confiou plenamente nos Gemini?\",\n      \"newQuestion\": \"Como o ‘Método Gemini’ foi operacionalizado na prática?\",\n      \"sourceReference\": \"[1]\"\n    },\n    {\n      \"order\": 6,\n      \"revelation\": \"O primeiro assassinato documentado da dupla foi o de Andrei Katz em 13/06/1975, usando o procedimento de desmembramento de sete etapas.\",\n      \"questionAnswered\": \"Qual foi o primeiro assassinato da dupla?\",\n      \"newQuestion\": \"Como esse método evoluiu e impactou a dinâmica da máfia?\",\n      \"sourceReference\": \"[5]\"\n    }\n  ],\n  \"climaxFormula\": \"Connection Shock\",\n  \"climaxMoment\": \"Descobrimos que o ‘Método Gemini’ funcionava como uma linha de montagem: atração da vítima, disparo rápido, estocada no coração, drenagem, desmembramento e descarte no aterro de Fountain Avenue – uma eficiência que acabou com a era de violência caótica da máfia.\",\n  \"resolutionPoints\": [],\n  \"resolutionAngle\": \"\",\n  \"ctaApproach\": \"O que aconteceu depois é ainda mais perturbador. No próximo episódio, revelaremos como a traição contra Roy DeMeo mudou o destino da máfia.\",\n  \"emotionalArc\": \"Curiosidade → Intriga → Perturbação → Indignação → Suspense → Desejo de saber mais\",\n  \"toneProgression\": \"Factual → Tenso → Investigativo → Revelador → Reflexivo\",\n  \"whatToReveal\": [\n    \"Testa e Senter cresceram na mesma rua de Canarsie\",\n    \"Detenções por roubo de veículos aos 15 anos\",\n    \"Esfaqueamento de Testa em 1973 e retaliação de Senter\",\n    \"Recrutamento por Harvey "
+}

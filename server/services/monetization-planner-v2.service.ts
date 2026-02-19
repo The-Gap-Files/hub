@@ -314,8 +314,10 @@ function autoFixBlueprint(blueprint: any): { fixed: boolean; changes: string[] }
 // =============================================================================
 
 /**
- * Structured output method: Gemini → jsonMode; Groq llama-4 → jsonMode;
+ * Structured output method: Gemini → functionCalling; Groq llama-4 → jsonMode;
  * Groq gpt-oss → jsonSchema (strict mode, avoids json_validate_failed).
+ * Nota: jsonMode foi removido de @langchain/google-genai v2.x — apenas jsonSchema e functionCalling são suportados.
+ * functionCalling evita as limitações de response_schema (const, default) da API Gemini.
  */
 function createStructuredOutput(model: any, schema: any, provider: string, modelId?: string) {
   const isGemini = provider.toLowerCase().includes('gemini') || provider.toLowerCase().includes('google')
@@ -325,7 +327,7 @@ function createStructuredOutput(model: any, schema: any, provider: string, model
     return (model as any).withStructuredOutputReplicate(schema, { includeRaw: true })
   }
   let method: string | undefined
-  if (isGemini) method = 'jsonMode' // Gemini tem limitações em response_schema (const, default)
+  if (isGemini) method = 'functionCalling' // Usa functionCalling para evitar limitações de response_schema
   else if (isGroq) {
     const modelName = modelId ?? (model as any).model ?? (model as any).modelName ?? ''
     if (modelName.includes('gpt-oss')) method = 'jsonSchema' // Groq strict mode (evita json_validate_failed)

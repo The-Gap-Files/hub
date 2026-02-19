@@ -1,0 +1,102 @@
+{
+  "timestamp": "2026-02-18T23:55:33.123Z",
+  "taskId": "storyarchitect",
+  "status": "partial",
+  "provider": "groq",
+  "model": "unknown",
+  "errorMessage": "400 {\"error\":{\"message\":\"Generated JSON does not match the expected schema. Please adjust your prompt. See 'failed_generation' for more details. Error: jsonschema: '' does not validate with /required: missing properties: 'climaxMoment', 'climaxFormula', 'resolutionPoints', 'resolutionAngle', 'ctaApproach', 'emotionalArc', 'toneProgression', 'whatToReveal', 'whatToHold', 'whatToIgnore', 'segmentDistribution', 'tensionCurve', 'openLoops', 'resolutionLevel'\",\"type\":\"invalid_request_error\",\"code\":\"j",
+  "errorCode": "json_validate_failed",
+  "errorType": "invalid_request_error",
+  "validationError": "Generated JSON does not match the expected schema. Please adjust your prompt. See 'failed_generation' for more details. Error: jsonschema: '' does not validate with /required: missing properties: 'climaxMoment', 'climaxFormula', 'resolutionPoints', 'resolutionAngle', 'ctaApproach', 'emotionalArc', 'toneProgression', 'whatToReveal', 'whatToHold', 'whatToIgnore', 'segmentDistribution', 'tensionCurve', 'openLoops', 'resolutionLevel'",
+  "failedGeneration": {
+    "hookStrategy": "Abrimos in medias res com neon refletindo no asfalto molhado de Canarsie enquanto a narração lança a pergunta impossível sobre como dois jovens ladrões se tornaram uma máquina de execuções; a ruptura visual imediata e a promessa de revelar o método mantêm a curiosidade instantânea.",
+    "hookVariants": [
+      {
+        "level": "green",
+        "hook": "Nos becos molhados de Canarsie, dois jovens transformaram o roubo de carros em uma máquina fria de execuções que mudou a cara da máfia.",
+        "rationale": "Apela à curiosidade intelectual sem provocar choque, garantindo monetização segura."
+      },
+      {
+        "level": "moderate",
+        "hook": "Nos becos escuros de Canarsie, dois adolescentes converteram furtos de carros numa linha de mortes impiedosa que redefiniu o crime organizado.",
+        "rationale": "Eleva a tensão emocional ao sugerir violência sistemática, mantendo-se dentro dos limites de diretrizes."
+      },
+      {
+        "level": "aggressive",
+        "hook": "Nos becos encharcados de Canarsie, dois rapazes criaram uma máquina de matar tão fria que a própria máfia nunca mais foi a mesma.",
+        "rationale": "Confronta o espectador com a magnitude do horror, aumentando CTR e retenção ao limite permitido."
+      },
+      {
+        "level": "lawless",
+        "hook": "Nos becos sombrios de Canarsie, dois jovens forjaram um método de eliminação tão impiedoso que ainda ecoa nas sombras da máfia.",
+        "rationale": "Calibra a provocação ao extremo conceitual, servindo como referência para ajustes tonais sem violar termos proibidos."
+      }
+    ],
+    "promiseSetup": "Nos próximos 12 minutos, vamos desvendar como a parceria de Testa e Senter evoluiu de furtos de carros a uma \"Murder Machine\" que transformou a violência da máfia, revelando cada etapa do seu método letal.",
+    "risingBeats": [
+      {
+        "order": 1,
+        "revelation": "Testa e Senter cresceram na mesma rua de Canarsie, formando um vínculo nas primeiras brigas de bar.",
+        "questionAnswered": "Como surgiu a parceria?",
+        "newQuestion": "O que os levou a entrar no crime organizado?",
+        "sourceReference": "[3]"
+      },
+      {
+        "order": 2,
+        "revelation": "Aos 15 anos, já acumulavam detenções por furtos de veículos, aprimorando habilidades mecânicas.",
+        "questionAnswered": "Como ganharam expertise?",
+        "newQuestion": "Quem os recrutou e por quê?",
+        "sourceReference": "[3]"
+      },
+      {
+        "order": 3,
+        "revelation": "Em 1974, foram recrutados por Harvey ‘Chris’ Rosenberg para a equipe de Roy DeMeo.",
+        "questionAnswered": "Como entraram na máfia?",
+        "newQuestion": "Qual seria o próximo passo dentro da organização?",
+        "sourceReference": "[1]"
+      },
+      {
+        "order": 4,
+        "revelation": "DeMeo designou-os como executores principais, confiando na sua frieza para aplicar o ‘Método Gemini’, um processo de sete etapas para eliminar corpos sem deixar vestígios.",
+        "questionAnswered": "Qual era o método?",
+        "newQuestion": "Como esse método foi implementado na prática?",
+        "sourceReference": "[1]"
+      },
+      {
+        "order": 5,
+        "revelation": "O primeiro assassinato registrado foi o de Andrei Katz em 1975, usando o método completo no apartamento ao lado do Gemini Lounge.",
+        "questionAnswered": "Qual foi a primeira aplicação?",
+        "newQuestion": "Como escalaram esse processo?",
+        "sourceReference": "[5]"
+      },
+      {
+        "order": 6,
+        "revelation": "Ao tentar ampliar a operação, a equipe enfrentou falhas logísticas que quase expuseram o esquema, colocando a dupla em risco de ser descoberta pelas autoridades.",
+        "questionAnswered": "Qual foi o grande obstáculo?",
+        "newQuestion": "Como conseguiram contornar a ameaça?",
+        "sourceReference": "[1]"
+      },
+      {
+        "order": 7,
+        "revelation": "Um ledger recém‑descoberto detalha passo a passo a cadeia de descarte nos aterros de Fountain Avenue, provando a eficiência industrial do método.",
+        "questionAnswered": "Qual evidência comprova a mecanização?",
+        "newQuestion": "Qual será o impacto desse nível de organização?",
+        "sourceReference": "[1]"
+      }
+    ]
+  },
+  "errorStructure": {
+    "hasError": true,
+    "hasErrorError": true,
+    "hasResponseBody": false,
+    "errorKeys": [
+      "error"
+    ],
+    "errorErrorKeys": [
+      "message",
+      "type",
+      "code",
+      "failed_generation"
+    ]
+  }
+}

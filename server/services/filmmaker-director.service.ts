@@ -13,6 +13,7 @@
 import { createLlmForTask } from './llm/llm-factory'
 import { HumanMessage, SystemMessage } from '@langchain/core/messages'
 import { createPipelineLogger } from '../utils/pipeline-logger'
+import type { StoryOutline } from './story-architect.service'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
@@ -41,6 +42,8 @@ export interface ProductionContext {
   styleAnchorTags?: string
   /** Identidade visual do dossiê (ex: "1970s urban realism, period-accurate interiors") */
   visualIdentity?: string
+  /** StoryOutline do Arquiteto — permite ao cineasta calibrar intensidade por segmento narrativo */
+  storyOutline?: StoryOutline
 }
 
 export class FilmmakerDirectorService {
@@ -80,12 +83,134 @@ export class FilmmakerDirectorService {
 → Não copie literalmente; traduza em parâmetros técnicos de cinematografia.`)
     }
 
-    if (sections.length === 0) return ''
+    const narrativeBlock = production.storyOutline
+      ? this.buildNarrativeAwareness(production.storyOutline)
+      : ''
+
+    if (sections.length === 0 && !narrativeBlock) return ''
 
     return `\n───────────────────────────────────────────
 PRODUCTION AWARENESS (contexto do pipeline):
 ${sections.join('\n\n')}
-───────────────────────────────────────────`
+───────────────────────────────────────────${narrativeBlock}`
+  }
+
+  /**
+   * Cria um mapa por-cena de segmento narrativo, nível de tensão e nota de beat.
+   * Baseia-se no segmentDistribution do StoryOutline para saber quais cenas
+   * pertencem a HOOK, CONTEXT, RISING, CLIMAX, RESOLUTION e CTA.
+   */
+  private buildSceneNarrativeAnnotations(
+    outline: StoryOutline,
+    totalScenes: number
+  ): Array<{ segment: string; tensionLevel: string; note: string }> {
+    const dist = outline.segmentDistribution
+    if (!dist) return []
+
+    const segments = [
+      { name: 'HOOK',       count: dist.hook,      defaultTension: 'high' },
+      { name: 'CONTEXT',    count: dist.context,   defaultTension: 'low' },
+      { name: 'RISING',     count: dist.rising,    defaultTension: 'medium' },
+      { name: 'CLIMAX',     count: dist.climax,    defaultTension: 'peak' },
+      { name: 'RESOLUTION', count: dist.resolution, defaultTension: 'medium' },
+      { name: 'CTA',        count: dist.cta,       defaultTension: 'low' }
+    ]
+
+    const annotations: Array<{ segment: string; tensionLevel: string; note: string }> = []
+    const tensionCurve = outline.tensionCurve || []
+    const risingBeats = outline.risingBeats || []
+    const risingCount = dist.rising
+
+    for (const seg of segments) {
+      for (let i = 0; i < seg.count; i++) {
+        if (annotations.length >= totalScenes) break
+
+        let tension = seg.defaultTension
+        let note = seg.name
+
+        if (seg.name === 'HOOK') {
+          note = `HOOK — ${(outline.hookStrategy || 'Opening impact').slice(0, 80)}`
+        } else if (seg.name === 'RISING' && risingCount > 0) {
+          const beatIdx = tensionCurve.length > 0
+            ? Math.min(Math.floor((i / risingCount) * tensionCurve.length), tensionCurve.length - 1)
+            : -1
+          if (beatIdx >= 0 && tensionCurve[beatIdx]) {
+            tension = tensionCurve[beatIdx]
+          }
+          const beat = risingBeats[Math.min(beatIdx >= 0 ? beatIdx : 0, risingBeats.length - 1)]
+          note = beat
+            ? `RISING beat ${beat.order}: "${beat.revelation.slice(0, 70)}"`
+            : `RISING — scene ${i + 1}/${risingCount}`
+        } else if (seg.name === 'CLIMAX') {
+          note = `CLIMAX (${outline.climaxFormula || 'peak'}) — ${(outline.climaxMoment || 'Central revelation').slice(0, 80)}`
+        } else if (seg.name === 'RESOLUTION') {
+          const rl = outline.resolutionLevel
+          note = `RESOLUTION — ${rl === 'none' ? 'ZERO resolution, visual tension remains' : rl === 'partial' ? 'Partial resolution, open questions persist' : 'Full resolution, emotional landing'}`
+        } else if (seg.name === 'CTA') {
+          note = `CTA — ${(outline.ctaApproach || 'Closing').slice(0, 60)}`
+        }
+
+        annotations.push({ segment: seg.name, tensionLevel: tension, note })
+      }
+    }
+
+    // Scenes beyond the planned distribution (screenwriter may add up to +4 extra)
+    while (annotations.length < totalScenes) {
+      annotations.push({ segment: 'EXTRA', tensionLevel: 'low', note: 'Overflow scene — treat as CTA/closing' })
+    }
+
+    return annotations
+  }
+
+  /**
+   * Bloco de consciência narrativa para o system prompt.
+   * Resume o arco emocional, progressão de tom, curva de tensão e o momento de clímax.
+   */
+  private buildNarrativeAwareness(outline: StoryOutline): string {
+    const lines: string[] = [
+      ``,
+      `───────────────────────────────────────────`,
+      `NARRATIVE AWARENESS (blueprint do Story Architect — governa a progressão cinematográfica):`,
+      ``,
+      `[ARCO EMOCIONAL]    : ${outline.emotionalArc || 'Não definido'}`,
+      `[PROGRESSÃO DE TOM] : ${outline.toneProgression || 'Não definido'}`,
+      `[FÓRMULA DO CLÍMAX] : ${outline.climaxFormula || 'Não definido'}`,
+      `[MOMENTO DE CLÍMAX] : ${(outline.climaxMoment || 'Revelação central').slice(0, 100)}`,
+      `[RESOLUÇÃO]         : ${outline.resolutionLevel || 'full'}`,
+      ``,
+      `Guia de Intensidade Visual por Segmento (calibra o Modo Visual e o Movimento):`,
+      `  HOOK       → Alta intensidade. Ruptura visual imediata. Primeiro quadro já impacta.`,
+      `  CONTEXT    → Baixa-média. Planos abertos, luz natural. Estabelece o universo.`,
+      `  RISING     → Progressão. Siga a Tension Curve cena a cena (veja abaixo).`,
+      `  CLIMAX     → PICO ABSOLUTO de todo o vídeo. Expressionist ou Noir no máximo contraste.`,
+      `  RESOLUTION → Redução gradual. Aterramento emocional. Não dramatize.`,
+      `  CTA        → Mínima. Limpa. Não distrai da mensagem final.`,
+    ]
+
+    if (outline.tensionCurve && outline.tensionCurve.length > 0) {
+      lines.push(``)
+      lines.push(`Tension Curve (seção RISING — intensidade por beat, em ordem):`)
+      lines.push(outline.tensionCurve.map((level, i) => `  Beat ${i + 1}: ${level.toUpperCase()}`).join('\n'))
+      lines.push(`  → PAUSE = Static locked-off ou Pull-back lento (o vazio é o statement)`)
+      lines.push(`  → PEAK  = Expressionist ou Noir com máximo contraste, movimento preciso`)
+    }
+
+    const openUnclosed = (outline.openLoops || []).filter(l => l.closedAtBeat === null)
+    if (openUnclosed.length > 0) {
+      lines.push(``)
+      lines.push(`Open Loops (threads intencionalmente não-resolvidos — manter tensão latente):`)
+      openUnclosed.forEach(loop => lines.push(`  • "${loop.question}"`))
+      lines.push(`  → Cenas RESOLUTION sobre esses loops: sem closure visual completo.`)
+      lines.push(`  → Evite luz quente e planos abertos nessas cenas.`)
+    }
+
+    lines.push(`───────────────────────────────────────────`)
+    lines.push(`INSTRUÇÃO: Cada cena abaixo tem narrativeSegment, tensionLevel e narrativeNote.`)
+    lines.push(`USE esses campos para classificar o Beat Dramático (seção 1.5) antes de escrever.`)
+    lines.push(`CLIMAX + tensionLevel=PEAK → seu visual e movimento mais dramáticos do vídeo.`)
+    lines.push(`CONTEXT + tensionLevel=LOW → Documentary/Verite. Nunca Noir aqui.`)
+
+    return lines.join('\n')
   }
 
   /**
@@ -253,15 +378,28 @@ ${context ? `\nCONTEXTO ADICIONAL:\n${context}` : ''}`
     // 3. Preparar o User Message (cenas + contexto de continuidade)
     const continuityContext = this.buildContinuityContext(scenes)
 
+    // Anotações narrativas por cena (segmento, tensão, contexto do beat)
+    const narrativeAnnotations = production?.storyOutline
+      ? this.buildSceneNarrativeAnnotations(production.storyOutline, scenes.length)
+      : null
+
     const userPrompt = `CENAS DO ROTEIRO PARA REFINAR:
 
 ${JSON.stringify(
-      scenes.map((s, i) => ({
-        order: i,
-        narration: s.narration,
-        environment: s.currentEnvironment || null,
-        durationSeconds: s.estimatedDuration
-      })),
+      scenes.map((s, i) => {
+        const ann = narrativeAnnotations?.[i]
+        return {
+          order: i,
+          ...(ann ? {
+            narrativeSegment: ann.segment,
+            tensionLevel: ann.tensionLevel,
+            narrativeNote: ann.note
+          } : {}),
+          narration: s.narration,
+          environment: s.currentEnvironment || null,
+          durationSeconds: s.estimatedDuration
+        }
+      }),
       null,
       2
     )}
@@ -269,6 +407,10 @@ ${continuityContext}
 
 TAREFA:
 Para CADA cena acima, reescreva os campos visuais e de movimento aplicando suas regras de direção cinematográfica.
+
+🚨 REGRA DE DENSIDADE (INEGOCIÁVEL, APLICA A TODAS AS CENAS SEM EXCEÇÃO):
+- visualDescription: MÍNIMO 35 palavras, MÁXIMO 70 palavras. Se a cena for simples, adicione: ângulo exato, temperatura de cor, textura de superfície, profundidade de campo, tag de realismo.
+- Cenas finais (CTA, resolução) NÃO são exceção — mantêm o mesmo padrão de densidade das cenas iniciais.
 
 NÃO utilize nenhuma descrição visual ou de movimento pré-existente de outros agentes. Baseie TODAS as decisões visuais e de movimento APENAS na narração da cena, no estilo visual base informado e no contexto adicional fornecido.
 
@@ -278,8 +420,8 @@ IMPORTANTE SOBRE QUALIDADE VISUAL E MOVIMENTO:
 - Use gerúndios apenas para elementos dinâmicos de ambiente (poeira, fumaça, chuva, cortinas, chamas, neblina, etc.), nunca para mudanças bruscas de posição de objetos sólidos.
 
 Campos a gerar por cena:
-- visualDescription: prompt completo para gerar a imagem da cena (em inglês, com estilo visual aplicado). NÃO repita tags do Style Anchor — elas já serão prefixadas automaticamente pelo pipeline.
-- motionDescription: descrição técnica do movimento de câmera/sujeito para o modelo de vídeo, explicando claramente como a câmera se move e quais elementos animados existem na cena.
+- visualDescription: prompt completo para gerar a imagem da cena (em inglês, com estilo visual aplicado). 🚨 MÍNIMO ABSOLUTO: 35 palavras. MÁXIMO: 70 palavras. Toda visualDescription DEVE incluir: lente + focal length, DOF explícito, fonte física de luz, texturas concretas, tag de realismo. NÃO repita tags do Style Anchor — elas já serão prefixadas automaticamente pelo pipeline. Prompts com menos de 35 palavras são REJEITADOS — o modelo de imagem precisa de densidade para gerar qualidade.
+- motionDescription: descrição técnica do movimento de câmera/sujeito para o modelo de vídeo, explicando claramente como a câmera se move e quais elementos animados existem na cena. PROIBIDO: zoom, handheld, wobble, shake, tremor, truck, fast, quick, rapid, swift.
 
 Retorne APENAS um JSON válido (sem markdown, sem explicações):
 {

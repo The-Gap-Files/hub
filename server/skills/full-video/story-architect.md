@@ -238,12 +238,12 @@ Para full video, a resolução é MAIS LONGA que num teaser:
 
 ### 10. ESTRATÉGIA DE CTA (REGRA INEGOCIÁVEL)
 
-**HARD CAP: 1 ÚNICO BLOCO DE CTA — MÁXIMO 2-3 CENAS — APENAS NO FINAL DO VÍDEO.**
+**HARD CAP: 1 ÚNICO BLOCO DE CTA — MÁXIMO 1 CENA — APENAS NO FINAL DO VÍDEO.**
 
 - ❌ PROIBIDO espalhar CTAs ao longo do vídeo (CTA no meio da narrativa = quebra de imersão)
 - ❌ PROIBIDO repetir a tagline "The Gap Files" mais de uma vez em todo o roteiro
 - ❌ PROIBIDO meta-referências (duração do vídeo, número de cenas, modelos usados)
-- ✅ 1 único bloco de encerramento nas últimas 2-3 cenas. O vídeo tem um único final.
+- ✅ 1 única cena de encerramento, a última do vídeo. Nada mais.
 
 **CTA varia por posição na série:**
 
@@ -254,7 +254,7 @@ Para full video, a resolução é MAIS LONGA que num teaser:
 | EP3 (último) | Promover o canal The Gap Files. Sem tease de próximo episódio. |
 | Vídeo único (sem série) | Assinatura The Gap Files + convite para explorar outros vídeos do canal |
 
-**`segmentDistribution.cta` DEVE ser 2 ou 3. Nunca mais.**
+**`segmentDistribution.cta` DEVE ser 1. Nunca mais.**
 
 ### 11. ARCO EMOCIONAL EXPANDIDO
 Para full video, o arco precisa de MAIS nuances:
@@ -281,7 +281,7 @@ Para full video, a distribuição muda vs. teaser:
 | COMPLICATIONS | 10% | — | 12 cenas |
 | CLIMAX | 10% | 3 cenas | 12 cenas |
 | RESOLUTION | 7% | 2 cenas | 8 cenas |
-| CTA | 3% | 1 cena | 4 cenas |
+| CTA | 3% | 1 cena | 1 cena |
 
 Sugira cenas por segmento para a duração total, respeitando: cada cena = 5 segundos.
 

@@ -1,0 +1,171 @@
+{
+  "timestamp": "2026-02-18T23:11:43.519Z",
+  "taskId": "storyarchitect",
+  "status": "partial",
+  "provider": "groq",
+  "model": "unknown",
+  "errorMessage": "400 {\"error\":{\"message\":\"Generated JSON does not match the expected schema. Please adjust your prompt. See 'failed_generation' for more details. Error: jsonschema: '' does not validate with /additionalProperties: additionalProperties 'darkMoment', 'midpoint' not allowed\",\"type\":\"invalid_request_error\",\"code\":\"json_validate_failed\",\"failed_generation\":\"{\\\"climaxFormula\\\":\\\"Document Drop\\\",\\\"climaxMoment\\\":\\\"Um arquivo selado do FBI, datado de 1976, revela fotos e notas detalhadas que comprovam o ",
+  "errorCode": "json_validate_failed",
+  "errorType": "invalid_request_error",
+  "validationError": "Generated JSON does not match the expected schema. Please adjust your prompt. See 'failed_generation' for more details. Error: jsonschema: '' does not validate with /additionalProperties: additionalProperties 'darkMoment', 'midpoint' not allowed",
+  "failedGeneration": {
+    "climaxFormula": "Document Drop",
+    "climaxMoment": "Um arquivo selado do FBI, datado de 1976, revela fotos e notas detalhadas que comprovam o uso sistemático do Gemini Lounge como “matadouro” industrial, recontextualizando os assassinatos como um modelo de produção em massa de morte.",
+    "ctaApproach": "O que aconteceu depois é ainda mais perturbador. No próximo episódio, descubra como a traição contra Roy DeMeo mudou tudo.",
+    "darkMoment": {
+      "description": "A investigação federal se intensifica com a Lei RICO, ameaçando expor toda a operação; parece que a “máquina” será desmantelada.",
+      "order": 6,
+      "type": "allIsLost"
+    },
+    "emotionalArc": "Curiosidade → Intriga → Tensão → Perturbação → Choque → Desejo de saber mais",
+    "hookStrategy": "Abertura in medias res nos becos molhados de Canarsie, usando a frase‑chave do hook para mergulhar o espectador direto na atmosfera gritty e lançar a pergunta impossível: como dois adolescentes transformaram furtos de carros numa máquina fria de assassinatos que mudou a cara da máfia. A técnica combina contraste visual (neon contra asfalto escuro) e ritmo acelerado nos primeiros 30 segundos para garantir a atenção imediata.",
+    "hookVariants": [
+      {
+        "hook": "Nos becos molhados de Canarsie, dois jovens transformaram o roubo de carros em uma máquina fria de assassinatos que mudou a cara da máfia.",
+        "level": "green",
+        "rationale": "Apela à curiosidade histórica sem provocar choque, garantindo monetização segura."
+      },
+      {
+        "hook": "Nos becos úmidos de Canarsie, dois adolescentes transformaram pequenos furtos em uma linha de montagem mortal que redefiniu o crime organizado em Nova York.",
+        "level": "moderate",
+        "rationale": "Intensifica o conflito ao sugerir uma revolução violenta, mantendo o conteúdo dentro dos limites de diretrizes."
+      },
+      {
+        "hook": "Nos becos escuros de Canarsie, dois jovens criaram uma máquina de matar tão metódica que virou a nova lei da violência mafiosa em Nova York.",
+        "level": "aggressive",
+        "rationale": "Desafia o espectador com a ideia de uma nova ordem brutal, maximizando retenção sem ultrapassar limites de violência explícita."
+      },
+      {
+        "hook": "Nos becos encharcados de Canarsie, dois rapazes forjaram uma máquina de assassinato tão fria que transformou a máfia em uma indústria de morte silenciosa.",
+        "level": "lawless",
+        "rationale": "Eleva a provocação ao extremo conceitual, servindo como calibrador para o tom mais agressivo sem usar linguagem gráfica."
+      }
+    ],
+    "midpoint": {
+      "description": "A revelação do primeiro assassinato (Andrei Katz) parece confirmar que os Gemini já dominavam a técnica, mas ainda não se sabe quem controla o conhecimento interno da crew.",
+      "order": 4,
+      "type": "falseVictory"
+    },
+    "openLoops": [
+      {
+        "closedAtBeat": null,
+        "openedAtBeat": 2,
+        "question": "Quem mais dentro da organização sabia dos detalhes do ‘Método Gemini’?"
+      },
+      {
+        "closedAtBeat": null,
+        "openedAtBeat": 5,
+        "question": "Por que a família Gambino decidiu eliminar seu próprio mentor?"
+      }
+    ],
+    "promiseSetup": "Nos próximos 10 minutos, vamos revelar como esses dois jovens transformaram pequenos furtos em uma máquina fria de assassinatos que redefiniu a máfia, mostrando passo a passo a ascensão dos Gêmeos Gemini e o método que mudou o crime organizado.",
+    "resolutionAngle": "O caso mostra como o crime organizado evoluiu de violência visceral para uma operação quase industrial, antecipando técnicas modernas de ocultação e gestão de risco que ainda influenciam organizações ilícitas hoje.",
+    "resolutionLevel": "none",
+    "resolutionPoints": [
+      "Os Gêmeos Gemini transformaram assassinatos em um processo de linha de montagem, eliminando rastros com precisão mecânica.",
+      "Sua eficiência manteve a DeMeo Crew intocada durante boa parte da década, mudando a dinâmica da violência mafiosa.",
+      "A ascensão da “Murder Machine” marcou o fim da brutalidade tradicional da máfia, inaugurando uma era de crime corporativo e frio.",
+      ""
+    ],
+    "risingBeats": [
+      {
+        "newQuestion": "De que maneira esses jovens desenvolveram habilidades mecânicas que depois usariam nos assassinatos?",
+        "order": 1,
+        "questionAnswered": "Como surgiu a parceria entre Testa e Senter?",
+        "revelation": "Em 1973, Testa foi esfaqueado no pulmão durante uma briga de bar; Senter retaliou violentamente, selando um vínculo de lealdade sangrenta.",
+        "sourceReference": "[3]"
+      },
+      {
+        "newQuestion": "Como foram recrutados para a organização de Roy DeMeo?",
+        "order": 2,
+        "questionAnswered": "Como adquiriram a expertise mecânica?",
+        "revelation": "Aos 15 anos, ambos já acumulavam múltiplas detenções por furtos de veículos, aprendendo a desmontar e modificar carros rapidamente.",
+        "sourceReference": "[3]"
+      },
+      {
+        "newQuestion": "Qual foi o papel que receberam dentro da crew?",
+        "order": 3,
+        "questionAnswered": "Como ingressaram na máfia de DeMeo?",
+        "revelation": "Em 1974, Harvey ‘Chris’ Rosenberg os trouxe para a equipe de Roy DeMeo, inserindo‑os na estrutura da DeMeo Crew.",
+        "sourceReference": "[1]"
+      },
+      {
+        "newQuestion": "Como funcionava o método Gemini em detalhes?",
+        "order": 4,
+        "questionAnswered": "Qual foi a primeira prova da “máquina” em ação?",
+        "revelation": "DeMeo reconheceu nos gêmeos a capacidade de executar ordens sem hesitação, designando‑os como executores principais; o primeiro assassinato foi o de Andrei Katz em 13/06/1975 usando o método de desmembramento.",
+        "sourceReference": "[5]"
+      },
+      {
+        "newQuestion": "Quem mais dentro da organização sabia desses detalhes?",
+        "order": 5,
+        "questionAnswered": "Quais eram as etapas que tornavam os assassinatos tão eficientes?",
+        "revelation": "O ‘Método Gemini’ continha sete etapas logísticas: atração da vítima, disparo na cabeça, estocada no coração, drenagem, desmembramento sobre lona, embalagem em caixas e descarte no aterro de Fountain Avenue.",
+        "sourceReference": "[1]"
+      },
+      {
+        "newQuestion": "O que aconteceria quando o governo começasse a fechar o cerco?",
+        "order": 6,
+        "questionAnswered": "Qual foi o ponto de ruptura que colocou a operação em risco?",
+        "revelation": "À medida que o número de corpos aumentava, a polícia começou a investigar a ligação entre o Gemini Lounge e desaparecimentos; a Lei RICO emergia como ameaça ao império de DeMeo.",
+        "sourceReference": "[3]"
+      },
+      {
+        "newQuestion": "Quem mais dentro da organização conhecia o método e por quê?",
+        "order": 7,
+        "questionAnswered": "Como conseguiram evitar a detecção por tanto tempo?",
+        "revelation": "Os restos eram descarregados diariamente no aterro de Fountain Avenue, usando o volume de lixo da cidade para ocultar evidências, permitindo que a crew operasse impune por anos.",
+        "sourceReference": "[1]"
+      }
+    ],
+    "segmentDistribution": {
+      "climax": 15,
+      "context": 24,
+      "cta": 2,
+      "hook": 8,
+      "resolution": 11,
+      "rising": 90
+    },
+    "tensionCurve": [
+      "low",
+      "medium",
+      "high",
+      "pause",
+      "high",
+      "peak",
+      "pause"
+    ],
+    "toneProgression": "Factual → Investigativo → Tenso → Revelador → Reflexivo",
+    "whatToHold": [
+      "Quem mais dentro da crew conhecia o método?",
+      "Motivações da família Gambino para eliminar DeMeo"
+    ],
+    "whatToIgnore": [
+      "Traição a Roy DeMeo em 1983",
+      "Transferência para a família Lucchese",
+      "Condenação por 10 homicídios"
+    ],
+    "whatToReveal": [
+      "Bar fight 1973 que selou a aliança",
+      "Detenções juvenis e habilidades mecânicas",
+      "Recrutamento por Harvey Rosenberg",
+      "Primeiro assassinato de Andrei Katz",
+      "Detalhes das sete etapas do Método Gemini",
+      "Uso do aterro de Fountain Avenue para descarte"
+    ]
+  },
+  "errorStructure": {
+    "hasError": true,
+    "hasErrorError": true,
+    "hasResponseBody": false,
+    "errorKeys": [
+      "error"
+    ],
+    "errorErrorKeys": [
+      "message",
+      "type",
+      "code",
+      "failed_generation"
+    ]
+  }
+}

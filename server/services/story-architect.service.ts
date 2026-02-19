@@ -46,7 +46,7 @@ const SegmentDistributionSchema = z.object({
   rising: z.number().describe('Número de cenas para RISING ACTION (todos os beats)'),
   climax: z.number().describe('Número de cenas para CLIMAX'),
   resolution: z.number().describe('Número de cenas para RESOLUTION'),
-  cta: z.number().max(3).describe('Número de cenas para CTA — MÁXIMO 3 (ideal: 2). Nunca mais que 3. Para full video de série: exatamente 2 ou 3.')
+  cta: z.number().max(1).describe('Número de cenas para CTA — MÁXIMO 1. Sempre 1. Nunca mais que 1.')
 })
 
 const StoryOutlineSchema = z.object({
@@ -67,11 +67,11 @@ const StoryOutlineSchema = z.object({
   climaxFormula: z.string().describe('Qual fórmula de clímax (Pattern Recognition, Document Drop, Connection Shock, Data Inflection, Problem-Solution). Para hook-only, pode ser vazio.'),
 
   // Resolução (opcional para hook-only — pode ser vazio quando resolutionLevel=none)
-  resolutionPoints: z.array(z.string()).max(4).describe('2-3 pontos-chave do recap. Para hook-only (resolutionLevel=none), pode ser array vazio [].'),
-  resolutionAngle: z.string().describe('A implicação maior — o que fica com o espectador. Para hook-only, pode ser vazio.'),
+  resolutionPoints: z.array(z.string()).min(0).max(5).describe('Para full video: OBRIGATÓRIO 3-5 pontos específicos de recap — NUNCA array vazio. Para hook-only (resolutionLevel=none): array vazio [].'),
+  resolutionAngle: z.string().describe('A implicação maior — o que fica com o espectador. Para full video: OBRIGATÓRIO, nunca vazio. Para hook-only, pode ser vazio.'),
 
   // CTA (opcional para hook-only — pode ser minimalista)
-  ctaApproach: z.string().describe('Estratégia de fechamento (1 único bloco, máx 2-3 cenas, APENAS no final). Para série de episódios: EP1 → tease do EP2, EP2 → tease do EP3, EP3 → assinatura The Gap Files. Para vídeo único: convite para canal The Gap Files. Para hook-only: assinatura minimalista ou ausente. PROIBIDO: repetir tagline, espalhar CTAs ao longo do vídeo, meta-referências.'),
+  ctaApproach: z.string().describe('Estratégia de fechamento (1 único bloco, MÁXIMO 1 cena, APENAS no final). Para série de episódios: EP1 → tease do EP2, EP2 → tease do EP3, EP3 → assinatura The Gap Files. Para vídeo único: convite para canal The Gap Files. Para hook-only: assinatura minimalista ou ausente. PROIBIDO: repetir tagline, espalhar CTAs ao longo do vídeo, meta-referências.'),
 
   // Direção emocional (opcional para hook-only)
   emotionalArc: z.string().describe('Progressão emocional do início ao fim (ex: Curiosidade → Indignação → Compreensão). Para hook-only, pode ser vazio.'),
@@ -182,7 +182,8 @@ export async function generateStoryOutline(
   const assignment = await getAssignment('story-architect')
   const model = await createLlmForTask('story-architect')
 
-  // Gemini: jsonMode evita limitações de response_schema (const, default)
+  // Gemini: usa functionCalling para evitar limitações de response_schema (const, default).
+  // jsonMode foi removido da API @langchain/google-genai v2.x — apenas jsonSchema e functionCalling são suportados.
   const isGemini = assignment.provider.toLowerCase().includes('gemini') || assignment.provider.toLowerCase().includes('google')
   const isReplicate = assignment.provider.toLowerCase().includes('replicate')
   const isGroq = assignment.provider.toLowerCase().includes('groq')
@@ -194,7 +195,7 @@ export async function generateStoryOutline(
     console.log('[StoryArchitect] 🔧 Structured output: replicate (invoke + parse)')
     structuredLlm = (model as any).withStructuredOutputReplicate(StoryOutlineSchema, { includeRaw: true })
   } else {
-    const method = isGemini ? 'jsonMode' : isGroqLlama4 ? 'jsonMode' : isGroqGptOss ? 'jsonSchema' : undefined
+    const method = isGemini ? 'functionCalling' : isGroqLlama4 ? 'jsonMode' : isGroqGptOss ? 'jsonSchema' : undefined
     structuredLlm = (model as any).withStructuredOutput(StoryOutlineSchema, {
       includeRaw: true,
       ...(method ? { method } : {})
@@ -502,7 +503,7 @@ function buildUserPrompt(request: StoryArchitectRequest): string {
         if (mc.episodeNumber) {
           const nextEp = mc.episodeNumber < 3 ? mc.episodeNumber + 1 : null
           prompt += `- **REGRA CTA DO EP${mc.episodeNumber} (INEGOCIÁVEL):**\n`
-          prompt += `  → segmentDistribution.cta = 2 (máximo 3). NUNCA mais que 3 cenas de CTA.\n`
+          prompt += `  → segmentDistribution.cta = 1. SEMPRE 1. Nunca mais que 1 cena de CTA.\n`
           prompt += `  → O CTA é 1 único bloco no final. O vídeo tem UM único encerramento.\n`
           if (nextEp) {
             prompt += `  → ctaApproach: convidar para EP${nextEp} com gancho narrativo. NÃO mencionar "The Gap Files" como assinatura — apenas o tease do próximo episódio.\n`
@@ -606,6 +607,7 @@ function buildUserPrompt(request: StoryArchitectRequest): string {
       prompt += `- Preveja RE-ENGAGEMENT HOOKS a cada ~3 minutos (36 cenas).\n`
       prompt += `- A escalação de intensidade entre beats é LEI — nenhum beat pode ter menos intensidade que o anterior.\n`
       prompt += `- O ângulo definido ("${mc.angle}") deve guiar TODOS os beats, mas o full video pode explorar mais facetas dentro desse mesmo ângulo.\n`
+      prompt += `- resolutionPoints DEVE ter 3-5 itens ESPECÍFICOS (nunca array vazio). resolutionAngle NUNCA pode ser vazio.\n`
     }
 
     prompt += `\n`

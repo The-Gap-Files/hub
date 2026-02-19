@@ -43,11 +43,11 @@ export class GeminiScriptProvider implements IScriptGenerator {
     const LOG = '[Gemini Script]'
     console.log(`${LOG} 🎬 Iniciando geração de roteiro via LangChain (${this.modelName})...`)
 
-    // Gemini tem limitações em response_schema (const, default). jsonMode evita enviar
-    // schema à API; parseamos com Zod no client.
+    // Gemini: usa functionCalling para evitar limitações de response_schema (const, default).
+    // jsonMode foi removido de @langchain/google-genai v2.x — apenas jsonSchema e functionCalling são suportados.
     const structuredLlm = this.model.withStructuredOutput(ScriptResponseSchema, {
       includeRaw: true,
-      method: 'jsonMode'
+      method: 'functionCalling'
     })
 
     const systemPrompt = buildSystemPrompt(request)

@@ -117,11 +117,11 @@ export async function getOrCreateBriefBundleV1ForDossier(
   const assignment = await getAssignment('briefing-teasers')
   const model = await createLlmForTask('briefing-teasers', { temperature: 0.3, maxTokens: 8192 })
 
-  // Structured output — Gemini tem limitações em response_schema (const, default, etc).
-  // jsonMode evita enviar schema à API; parseamos com Zod no client.
+  // Structured output — Gemini usa functionCalling para evitar limitações de response_schema (const, default, etc).
+  // jsonMode foi removido de @langchain/google-genai v2.x — apenas jsonSchema e functionCalling são suportados.
   const isGemini = assignment.provider.toLowerCase().includes('gemini') || assignment.provider.toLowerCase().includes('google')
   const isGroqLlama4 = assignment.provider.toLowerCase().includes('groq') && assignment.model.includes('llama-4')
-  const method = isGemini ? 'jsonMode' : isGroqLlama4 ? 'jsonMode' : undefined
+  const method = isGemini ? 'functionCalling' : isGroqLlama4 ? 'jsonMode' : undefined
 
   const structuredLlm = (model as any).withStructuredOutput(BriefBundleV1Schema, {
     includeRaw: true,

@@ -151,7 +151,7 @@ Cena 4 (10/10): "E a assinatura naquele documento secreto" (Parte A — incomple
 ---
 DIRETRIZES TÉCNICAS:
 - SINCRONIA: Cada cena deve durar ~4.5 a 5.5 segundos (4 cenas ≈ 18-22s). O loop deve ser perfeito.
-- 🌐 IDIOMA: "narration" no IDIOMA DO VÍDEO. "visualDescription", "motionDescription", "audioDescription" SEMPRE em inglês.
+- 🌐 IDIOMA (ABSOLUTO): "narration" OBRIGATÓRIO em ${request.language || 'pt-BR'} — 🚨 PROIBIDO em inglês, mesmo que o dossiê esteja em inglês. "visualDescription", "motionDescription", "audioDescription" SEMPRE em inglês.
 - DENSIDADE (micro-variação permitida; respeite o HARD LIMIT):
   - Cena 1 (ruptura): ${Math.max(6, wordsPerScene - 3)} a ${maxWordsHard - 2} palavras (mais curta e agressiva)
   - Cena 2 (respiro com conteúdo): ${wordsPerScene - 1} a ${maxWordsHard} palavras (normal)
@@ -235,7 +235,8 @@ export function buildHookOnlyUserPrompt(request: ScriptGenerationRequest): strin
   const maxWords = wordsPerScene + 2
   const maxWordsHard = wordsPerScene + 2
 
-  let baseInstruction = `Crie um SCRIPT HOOK-ONLY (curto) em ${request.language} sobre o tema: "${request.theme}"`
+  const langLabel = request.language === 'pt-BR' || request.language === 'pt' ? 'Português do Brasil (pt-BR)' : (request.language || 'Português do Brasil (pt-BR)')
+  let baseInstruction = `Crie um SCRIPT HOOK-ONLY (curto) em ${langLabel} sobre o tema: "${request.theme}". 🚨 TODAS as narrações (campo "narration") OBRIGATÓRIAS em ${langLabel} — absolutamente proibido em inglês.`
 
   // Hook-Only é sensível a ruído: NÃO injetar o dossiê bruto no prompt do roteirista.
   // A “munição” (beats) já vem do Story Architect via request.storyOutline.

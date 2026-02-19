@@ -26,7 +26,7 @@ import { formatPersonsForPrompt, formatNeuralInsightsForPrompt } from '../../../
 
 export const ScriptSceneSchema = z.object({
   order: z.number().describe('A ordem sequencial da cena'),
-  narration: z.string().describe('O texto que será narrado pelo locutor (DEVE ser no IDIOMA DO VÍDEO especificado na request, NUNCA em inglês — apenas visualDescription, motionDescription e audioDescription são em inglês)'),
+  narration: z.string().describe('O texto narrado — OBRIGATÓRIO em Português (pt-BR). ABSOLUTAMENTE PROIBIDO em inglês. Mesmo que o dossiê esteja em inglês, a narração SEMPRE em Português. Apenas visualDescription, motionDescription e audioDescription são em inglês.'),
   visualDescription: z.string().describe('Descrição técnica e sensorial para o modelo de geração de imagem (SEMPRE EM INGLÊS). DEVE representar visualmente o que a narração diz. Se a narração fala de "bispo assinou sentença", o visual DEVE mostrar documento/selo/assinatura — NUNCA uma vela ou paisagem desconectada.'),
   sceneEnvironment: z.string().describe('Identificador curto do ambiente/locação da cena em snake_case em inglês (ex: "bishop_study", "canal_dawn", "courtroom", "ocean_surface"). Cenas consecutivas no MESMO ambiente devem ter o MESMO valor.'),
   motionDescription: z.string().nullable().describe('Instruções de MOVIMENTO para o modelo image-to-video (SEMPRE EM INGLÊS). Descreva movimentos de câmera (dolly, pan, tilt) e elementos animados (chamas, água, vento, poeira) que devem animar a imagem. NÃO repita o que já está na imagem — foque no que se MOVE. 15-40 palavras.'),
@@ -271,7 +271,7 @@ Quando a narrativa envolve violência, injustiça ou material sensível:
 ---
 DIRETRIZES TÉCNICAS (CRÍTICO):
 - SINCRONIA: Cada cena DEVE durar EXATAMENTE 5 segundos de narração.
-- 🌐 IDIOMA: O campo \\"narration\\" DEVE ser escrito no IDIOMA DO VÍDEO (definido na request). Os campos \\"visualDescription\\", \\"motionDescription\\" e \\"audioDescription\\" DEVEM ser SEMPRE em inglês. NUNCA misture — narração no idioma do vídeo, campos técnicos em inglês.
+- 🌐 IDIOMA (REGRA ABSOLUTA): O campo \\"narration\\" DEVE ser escrito em ${request.language || 'pt-BR'}. 🚨 PROIBIDO ABSOLUTAMENTE escrever narração em inglês — mesmo que o tema seja estrangeiro, mesmo que o dossiê esteja em inglês. APENAS a narração importa aqui e ela DEVE estar em ${request.language || 'pt-BR'}. Os campos \\"visualDescription\\", \\"motionDescription\\" e \\"audioDescription\\" DEVEM ser SEMPRE em inglês (são prompts para modelos de IA). NUNCA confunda: narração = ${request.language || 'pt-BR'}, campos visuais/técnicos = inglês.
 - DENSIDADE OBRIGATÓRIA: Com base na velocidade de fala (${targetWPM} WPM), cada cena DEVE conter entre ${wordsPerScene - 1} e ${maxWordsHard} palavras. A conta é: ${targetWPM} WPM ÷ 60 × 5s = ${wordsPerScene} palavras ideais.
 - 🚨 HARD LIMIT: NUNCA exceda ${maxWordsHard} palavras por cena. Cenas com mais de ${maxWordsHard} palavras ultrapassam 5 segundos e quebram a sincronia do vídeo.
 - PROIBIDO FRASES CURTAS: Cenas com menos de ${wordsPerScene - 1} palavras geram "buracos" no áudio. Expanda com adjetivos, detalhes sensoriais ou contexto.
@@ -361,7 +361,8 @@ export function buildUserPrompt(request: ScriptGenerationRequest, providerHint?:
 - Música pode variar por segmento narrativo, mas NÃO faça uma track por cena`
   }
 
-  let baseInstruction = `Crie um roteiro em ${request.language} sobre o tema: "${request.theme}"${formatContext}`
+  const langLabel = request.language === 'pt-BR' || request.language === 'pt' ? 'Português do Brasil (pt-BR)' : (request.language || 'Português do Brasil (pt-BR)')
+  let baseInstruction = `Crie um roteiro em ${langLabel} sobre o tema: "${request.theme}". 🚨 TODAS as narrações (campo "narration") DEVEM estar em ${langLabel} — absolutamente proibido em inglês.${formatContext}`
 
   // Diretrizes de identidade visual do universo do dossiê (Warning Protocol)
   if (request.visualIdentityContext) {

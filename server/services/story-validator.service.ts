@@ -188,7 +188,7 @@ Responda APENAS no formato JSON definido.
     if (assignment.provider === 'replicate' && typeof m.withStructuredOutputReplicate === 'function') {
       structuredLlm = m.withStructuredOutputReplicate(ValidationResultSchema, { includeRaw: true })
     } else {
-      const method = isGemini ? 'jsonMode' : isGroqLlama4 ? 'jsonMode' : isGroqGptOss ? 'jsonSchema' : undefined
+      const method = isGemini ? 'functionCalling' : isGroqLlama4 ? 'jsonMode' : isGroqGptOss ? 'jsonSchema' : undefined
       structuredLlm = m.withStructuredOutput(ValidationResultSchema, {
         includeRaw: true,
         ...(method ? { method } : {})

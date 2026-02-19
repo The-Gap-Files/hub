@@ -110,13 +110,14 @@ export async function getOrCreateEpisodeBriefBundleV1ForDossier(
   const assignment = await getAssignment('briefing-episodes')
   const model = await createLlmForTask('briefing-episodes', { temperature: 0.3, maxTokens: 16000 })
 
-  // Compatibilidade de provider: Gemini e Groq Llama-4 exigem jsonMode
+  // Gemini: functionCalling evita limitações de response_schema (const, default).
+  // jsonMode foi removido de @langchain/google-genai v2.x — apenas jsonSchema e functionCalling são suportados.
   const isGemini =
     assignment.provider.toLowerCase().includes('gemini') ||
     assignment.provider.toLowerCase().includes('google')
   const isGroqLlama4 =
     assignment.provider.toLowerCase().includes('groq') && assignment.model.includes('llama-4')
-  const method = isGemini || isGroqLlama4 ? 'jsonMode' : undefined
+  const method = isGemini ? 'functionCalling' : isGroqLlama4 ? 'jsonMode' : undefined
 
   const structuredLlm = (model as any).withStructuredOutput(EpisodeBriefBundleV1Schema, {
     includeRaw: true,
