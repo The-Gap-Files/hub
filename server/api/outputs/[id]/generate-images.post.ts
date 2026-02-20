@@ -1,6 +1,6 @@
 import { outputPipelineService } from '../../../services/pipeline/output-pipeline.service'
 import { providerManager } from '../../../services/providers'
-import { validateReplicatePricing, PricingNotConfiguredError } from '../../../constants/pricing'
+import { validateMediaPricing, PricingNotConfiguredError } from '../../../constants/pricing'
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
@@ -10,7 +10,8 @@ export default defineEventHandler(async (event) => {
   try {
     const imageProvider = providerManager.getImageProvider()
     const imageModel = (imageProvider as any).model || 'luma/photon-flash'
-    validateReplicatePricing(imageModel)
+    const providerName = imageProvider.getName()
+    validateMediaPricing(imageModel, providerName)
   } catch (err: any) {
     if (err instanceof PricingNotConfiguredError) {
       throw createError({

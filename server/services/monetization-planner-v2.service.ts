@@ -30,6 +30,8 @@ import { calculateRoleDistribution } from '../constants/narrative-roles'
 import { invokeWithLogging } from '../utils/llm-invoke-wrapper'
 import { handleGroqJsonValidateError } from '../utils/groq-error-handler'
 import { BriefBundleV1Schema, formatBriefBundleV1AsDossierBlock, TeaserMicroBriefV1Schema } from '../types/briefing.types'
+import { sanitizeSchemaForGemini } from '../utils/gemini-schema-sanitizer'
+import { toJsonSchema } from '@langchain/core/utils/json_schema'
 
 const LOG = '[MonetizationV2]'
 
@@ -46,7 +48,7 @@ const BlueprintTeaserSlotSchema = z.object({
     'hook-brutal', 'pergunta-incomoda', 'plot-twist',
     'teaser-cinematografico', 'mini-documento', 'lista-rapida', 'frase-memoravel'
   ]).describe('Formato do short'),
-  platform: z.enum(['YouTube Shorts']).describe('Plataforma alvo (obrigatória)'),
+  platform: z.string().describe('Plataforma alvo obrigatória: sempre "YouTube Shorts"'),
   scriptStyleId: z.string().describe('ID do estilo de roteiro'),
   scriptStyleName: z.string().describe('Nome do estilo de roteiro'),
   editorialObjectiveId: z.string().describe('ID do objetivo editorial'),
@@ -84,8 +86,8 @@ const FullVideoSchema = z.object({
   keyPoints: z.array(z.string()).min(3).max(5).describe('Pontos-chave do roteiro'),
   emotionalArc: z.string().describe('Progressão emocional'),
   estimatedViews: z.number().describe('Estimativa de views'),
-  platform: z.enum(['YouTube']).describe('YouTube'),
-  format: z.enum(['full-youtube']).describe('full-youtube'),
+  platform: z.string().describe('Plataforma obrigatória: sempre "YouTube"'),
+  format: z.string().describe('Formato obrigatório: sempre "full-youtube"'),
   scriptStyleId: z.string(),
   scriptStyleName: z.string(),
   editorialObjectiveId: z.string(),
@@ -109,8 +111,8 @@ const TeaserSchema = z.object({
   scriptOutline: z.string().describe('Estrutura resumida do script'),
   visualSuggestion: z.string().describe('Descrição curta do visual'),
   cta: z.string().nullable().optional().describe('Call-to-action para o Full Video (hook-only: null/empty)'),
-  platform: z.enum(['YouTube Shorts']).describe('YouTube Shorts (obrigatório)'),
-  format: z.enum(['teaser-youtube-shorts']).describe('Formato obrigatório: teaser-youtube-shorts'),
+  platform: z.string().describe('Plataforma obrigatória: sempre "YouTube Shorts"'),
+  format: z.string().describe('Formato obrigatório: sempre "teaser-youtube-shorts"'),
   estimatedViews: z.number(),
   scriptStyleId: z.string(),
   scriptStyleName: z.string(),
@@ -119,7 +121,7 @@ const TeaserSchema = z.object({
   avoidPatterns: z.array(z.string()).min(1).max(4),
   visualPrompt: z.string().describe('Prompt de imagem em inglês'),
   sceneCount: z.number().int().nullable().optional().describe('Quantidade alvo de cenas do teaser (definida pelo sistema)'),
-  targetEpisode: z.union([z.literal(1), z.literal(2), z.literal(3)]).describe('Episódio alvo deste teaser (1, 2 ou 3). Gateway=sempre 1. Deep-dive/Hook-only=alinhado ao ângulo do episódio.')
+  targetEpisode: z.number().int().describe('Episódio alvo deste teaser: 1, 2 ou 3. Gateway=sempre 1. Deep-dive/Hook-only=alinhado ao ângulo do episódio.')
 })
 
 // ── Etapa 6: Schedule ──────────────────────────────────────────────────────────
@@ -318,6 +320,9 @@ function autoFixBlueprint(blueprint: any): { fixed: boolean; changes: string[] }
  * Groq gpt-oss → jsonSchema (strict mode, avoids json_validate_failed).
  * Nota: jsonMode foi removido de @langchain/google-genai v2.x — apenas jsonSchema e functionCalling são suportados.
  * functionCalling evita as limitações de response_schema (const, default) da API Gemini.
+ *
+ * Gemini: Converte Zod → JSON Schema → sanitiza (remove campos incompatíveis como
+ * const, default, minItems, maxItems, etc.) → passa JSON Schema puro + zodSchema para parse.
  */
 function createStructuredOutput(model: any, schema: any, provider: string, modelId?: string) {
   const isGemini = provider.toLowerCase().includes('gemini') || provider.toLowerCase().includes('google')
@@ -326,11 +331,21 @@ function createStructuredOutput(model: any, schema: any, provider: string, model
   if (isReplicate && typeof (model as any).withStructuredOutputReplicate === 'function') {
     return (model as any).withStructuredOutputReplicate(schema, { includeRaw: true })
   }
+
+  // Gemini: sanitizar schema para remover campos que a API rejeita
+  if (isGemini) {
+    const jsonSchema = sanitizeSchemaForGemini(toJsonSchema(schema))
+    return (model as any).withStructuredOutput(jsonSchema, {
+      includeRaw: true,
+      method: 'functionCalling',
+      zodSchema: schema // Usado para parsing/validação da resposta
+    })
+  }
+
   let method: string | undefined
-  if (isGemini) method = 'functionCalling' // Usa functionCalling para evitar limitações de response_schema
-  else if (isGroq) {
+  if (isGroq) {
     const modelName = modelId ?? (model as any).model ?? (model as any).modelName ?? ''
-    if (modelName.includes('gpt-oss')) method = 'jsonSchema' // Groq strict mode (evita json_validate_failed)
+    if (modelName.includes('gpt-oss')) method = 'jsonSchema'
     else if (modelName.includes('llama-4')) method = 'jsonMode'
   }
   return (model as any).withStructuredOutput(schema, {

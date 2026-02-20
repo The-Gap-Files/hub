@@ -1,6 +1,6 @@
 import { outputPipelineService } from '../../../services/pipeline/output-pipeline.service'
 import { providerManager } from '../../../services/providers'
-import { validateReplicatePricing, PricingNotConfiguredError } from '../../../constants/pricing'
+import { validateMediaPricing, PricingNotConfiguredError } from '../../../constants/pricing'
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
@@ -10,7 +10,8 @@ export default defineEventHandler(async (event) => {
   try {
     const motionProvider = providerManager.getMotionProvider()
     const motionModel = (motionProvider as any).model || 'wan-video/wan-2.2-i2v-fast'
-    validateReplicatePricing(motionModel)
+    const providerName = motionProvider.getName()
+    validateMediaPricing(motionModel, providerName)
   } catch (err: any) {
     if (err instanceof PricingNotConfiguredError) {
       throw createError({

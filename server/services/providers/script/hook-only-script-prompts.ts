@@ -206,7 +206,6 @@ EXEMPLO COMPLETO (DUPLA COERENTE alinhada à narração):
   - Cena 1 e 2 = E1 (mesmo valor).
   - Cena 3 e 4 = E2 (contraste/pico). NÃO invente "branding" como 3º ambiente.
 - 🎨 COERÊNCIA CROMÁTICA: Cores no visualDescription compatíveis com a paleta do estilo visual.
-- 🚫 ANATOMIA SEGURA: Sem close-ups de rostos e mãos humanas. Close-up de documentos/selos/artefatos é permitido e RECOMENDADO.
 - 🚫 ANTI-ARMA / ANTI-ATIRADOR (Shorts-safe): PROIBIDO mostrar armas (gun, rifle, AR-15), atirador, execução ou violência explícita no visualDescription. Se precisar do choque moderno, use ARTEFATOS do mecanismo (manifesto/print/post/monitor/recorte) sem arma.
 - 🚫 ANTI-SINTOMA VISUAL: PROIBIDO mostrar "guardas escorting children", "crianças sendo levadas", "captura de pessoas". Use artefatos: documento, selo, registro, cofre, tribunal vazio.
 
@@ -244,6 +243,12 @@ export function buildHookOnlyUserPrompt(request: ScriptGenerationRequest): strin
   baseInstruction += `\n- NÃO use fontes do dossiê, notas, persons, neuralInsights ou researchData nesta etapa (isso gera ruído e erro).`
   baseInstruction += `\n- REGRA: Qualquer dado concreto (nome, lugar, ano, evento específico) só pode aparecer se estiver explicitamente na seção "MUNIÇÃO NARRATIVA" do outline.`
   baseInstruction += `\n- Se NÃO estiver no outline, generalize com função/artefato (\"o bispo\", \"o decreto\", \"o manifesto\", \"a cidade\").`
+  baseInstruction += `\n\n🚨 DIRETIVAS DO ARQUITETO (OBRIGATÓRIAS — NÃO IGNORE):`
+  baseInstruction += `\n- O PLANO NARRATIVO abaixo contém DIRETIVAS do Story Architect que você DEVE seguir:`
+  baseInstruction += `\n  1. **HOOK STRATEGY**: A estratégia e técnica de abertura. SIGA o conceito — reescreva apenas para maior perplexidade.`
+  baseInstruction += `\n  2. **LOOP SEMÂNTICO**: Se houver partA/partB definidos, USE-OS como base para Cena 4 (partA) e Cena 1 (partB). Ajuste fluência, mantenha estrutura.`
+  baseInstruction += `\n  3. **TÍTULO**: Se houver título definido, USE-O (ajuste apenas se violar brand safety).`
+  baseInstruction += `\n- Estas diretivas TÊM PRIORIDADE sobre suas regras genéricas de criação. Se o Arquiteto definiu o loop, NÃO invente outro.`
 
   // Identidade visual do dossiê
   if (request.visualIdentityContext) {
@@ -302,6 +307,7 @@ export function buildHookOnlyUserPrompt(request: ScriptGenerationRequest): strin
    - A CENA 1 pode ter 2 frases. A PRIMEIRA frase (até o primeiro ponto) tem 3-5 palavras; a cena inteira ainda deve respeitar o range da Cena 1.
    - Se usar AUDIO TAGS inline: elas NÃO contam como palavras. Permitido APENAS [pause] e [breathes]. PROIBIDO <break>.
 3. LOOP SEMÂNTICO: A Cena 4 DEVE terminar com frase incompleta (Parte A) que se conecta sintaticamente ao início da Cena 1 (Parte B). SEM "The Gap Files.".
+   🚨 Se o PLANO NARRATIVO acima contém uma seção "LOOP SEMÂNTICO (DIRETIVA OBRIGATÓRIA DO ARQUITETO)" com partA e partB definidos, SIGA essa estrutura. Você pode ajustar palavras para fluência, mas o CONCEITO e a ESTRUTURA (partA suspensa → partB completa) são INEGOCIÁVEIS.
 4. RESOLUÇÃO ZERO: Se QUALQUER cena contém explicação, conclusão moral, tese fechada ou reflexão — REESCREVA.
 5. CONCEITO ÚNICO: Se o roteiro precisa de 3+ entidades para fazer sentido — SIMPLIFIQUE.
 6. MECANISMO > SINTOMA: Se QUALQUER cena descreve violência ao invés do sistema — REESCREVA.
@@ -314,7 +320,7 @@ ${guidelines}
 
 🛡️ VALIDAÇÃO FINAL OBRIGATÓRIA (RELEIA ANTES DE RETORNAR):
 1. A PRIMEIRA cena causa PERPLEXIDADE (não é tese, não é construção)? A primeira frase é pronunciável em ~1,5s (3-5 palavras; máx. 6)?
-2. LOOP SEMÂNTICO: A Cena 4 termina com frase suspensa (ex: "E por isso...") que a Cena 1 completa? NÃO há CTA ou branding?
+2. LOOP SEMÂNTICO: A Cena 4 termina com frase suspensa que a Cena 1 completa? Se o Arquiteto definiu partA/partB no outline, a Cena 4 usa a partA e a Cena 1 usa a partB? NÃO há CTA ou branding?
 3. NENHUMA cena explica, conclui, resume ou responde perguntas?
 4. A curva emocional TEM alternância (cena 2 é respiro com conteúdo) e o PICO é a cena 4 (última cena)?
 5. Todas as cenas focam no MECANISMO (quem autorizou, quem lucrou), não no sintoma (violência)?
@@ -322,7 +328,7 @@ ${guidelines}
 5b. NENHUMA cena é abstrata ("cintila", "desaparecendo num piscar") — todas têm agente + ação + consequência concreta?
 6. O roteiro gira em torno de 1 CONCEITO CENTRAL (não é colagem de fatos)?
 7. AMBIENTES: Use EXATAMENTE 2 ambientes. Cena 1-2 = E1, cena 3-4 = E2.
-8. VISUAL SAFE: Sem close-ups de rostos/mãos. Sem arma/atirador/execução. Choque moderno = monitor/manifesto/recorte.
+8. VISUAL SAFE: Sem arma/atirador/execução. Choque moderno = monitor/manifesto/recorte.
 9. Se houver ponte temporal (ex: "500 anos depois"), ela NÃO vira tese/conclusão: mostre um ARTEFATO reaparecendo e pare.
 10. 🔗 SINCRONIZAÇÃO NARRAÇÃO ↔ VISUAL (CHECAR CENA POR CENA): Para CADA cena, a narração fala de X — o visualDescription MOSTRA X visualmente? Se a narração fala de "bispo assinou", o visual mostra assinatura/documento/selo? Se NÃO → REESCREVA o visualDescription para representar a narração.
 11. 🔗 MOTION ↔ VISUAL: O motionDescription descreve um movimento coerente com o visualDescription? O motion anima elementos que existem na imagem? Se incompatível → REESCREVA.

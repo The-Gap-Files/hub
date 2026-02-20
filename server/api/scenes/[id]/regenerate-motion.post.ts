@@ -1,6 +1,6 @@
 import { prisma } from '../../../utils/prisma'
 import { outputPipelineService } from '../../../services/pipeline/output-pipeline.service'
-import { validateReplicatePricing, PricingNotConfiguredError } from '../../../constants/pricing'
+import { PricingNotConfiguredError } from '../../../constants/pricing'
 
 export default defineEventHandler(async (event) => {
   const sceneId = getRouterParam(event, 'id')

@@ -253,7 +253,6 @@ ${envList}
     const warnings: string[] = []
 
     const forbiddenMotion = ['zoom', 'handheld', 'wobble', 'shake', 'tremor', 'truck', 'fast', 'quick', 'rapid', 'swift']
-    const weakWords = ['moody', 'atmospheric', 'gritty', 'eerie', 'dramatic', 'concept art']
 
     let pushInCount = 0
     let consecutiveSameMovement = 1
@@ -269,13 +268,6 @@ ${envList}
       for (const word of forbiddenMotion) {
         if (motion.includes(word)) {
           warnings.push(`Cena ${scene.order}: motionDescription contém termo proibido "${word}"`)
-        }
-      }
-
-      // Palavras fracas em visual
-      for (const word of weakWords) {
-        if (visual.includes(word)) {
-          warnings.push(`Cena ${scene.order}: visualDescription contém palavra fraca "${word}"`)
         }
       }
 
@@ -302,14 +294,6 @@ ${envList}
         motionSet.add(normalizedMotion)
       }
 
-      // Word count do visual
-      const wordCount = (scene.visualDescription || '').split(/\s+/).filter(Boolean).length
-      if (wordCount < 35) {
-        warnings.push(`Cena ${scene.order}: visualDescription muito curta (${wordCount} palavras, min 35)`)
-      }
-      if (wordCount > 70) {
-        warnings.push(`Cena ${scene.order}: visualDescription muito longa (${wordCount} palavras, max 70)`)
-      }
     }
 
     // Push-in percentage
@@ -408,9 +392,15 @@ ${continuityContext}
 TAREFA:
 Para CADA cena acima, reescreva os campos visuais e de movimento aplicando suas regras de direção cinematográfica.
 
-🚨 REGRA DE DENSIDADE (INEGOCIÁVEL, APLICA A TODAS AS CENAS SEM EXCEÇÃO):
-- visualDescription: MÍNIMO 35 palavras, MÁXIMO 70 palavras. Se a cena for simples, adicione: ângulo exato, temperatura de cor, textura de superfície, profundidade de campo, tag de realismo.
-- Cenas finais (CTA, resolução) NÃO são exceção — mantêm o mesmo padrão de densidade das cenas iniciais.
+🎯 ORIENTAÇÃO DE DENSIDADE:
+- visualDescription: priorize QUALIDADE e RIQUEZA descritiva. Um bom prompt tem entre 50-120 palavras — inclua: lente/focal length, DOF, origem FÍSICA de luz, texturas concretas, materiais, referência de filme/stock se adequado.
+- Se a cena for simples, enriqueça com: ângulo exato, temperatura de cor, textura de superfície, profundidade de campo, tag de realismo.
+- Cenas finais (CTA, resolução) mantêm o mesmo padrão de riqueza das cenas iniciais.
+
+📝 VOCABULÁRIO — PREFIRA TERMOS TÉCNICOS CONCRETOS:
+Palavras como "gritty", "moody", "atmospheric", "eerie", "dramatic" são permitidas quando ACOMPANHADAS de parâmetros técnicos que as traduzam.
+→ ❌ "gritty Brooklyn street" (vago sozinho)
+→ ✅ "gritty Brooklyn street, wet asphalt reflecting sodium vapor streetlights, cracked concrete curb in foreground, 24mm lens, deep focus" (concreto + técnico)
 
 NÃO utilize nenhuma descrição visual ou de movimento pré-existente de outros agentes. Baseie TODAS as decisões visuais e de movimento APENAS na narração da cena, no estilo visual base informado e no contexto adicional fornecido.
 
@@ -420,7 +410,7 @@ IMPORTANTE SOBRE QUALIDADE VISUAL E MOVIMENTO:
 - Use gerúndios apenas para elementos dinâmicos de ambiente (poeira, fumaça, chuva, cortinas, chamas, neblina, etc.), nunca para mudanças bruscas de posição de objetos sólidos.
 
 Campos a gerar por cena:
-- visualDescription: prompt completo para gerar a imagem da cena (em inglês, com estilo visual aplicado). 🚨 MÍNIMO ABSOLUTO: 35 palavras. MÁXIMO: 70 palavras. Toda visualDescription DEVE incluir: lente + focal length, DOF explícito, fonte física de luz, texturas concretas, tag de realismo. NÃO repita tags do Style Anchor — elas já serão prefixadas automaticamente pelo pipeline. Prompts com menos de 35 palavras são REJEITADOS — o modelo de imagem precisa de densidade para gerar qualidade.
+- visualDescription: prompt completo para gerar a imagem da cena (em inglês, com estilo visual aplicado). Priorize RIQUEZA descritiva (50-120 palavras). Toda visualDescription DEVE incluir: lente + focal length, DOF explícito, fonte física de luz, texturas concretas, tag de realismo. NÃO repita tags do Style Anchor — elas já serão prefixadas automaticamente pelo pipeline. Prompts com poucos detalhes geram imagens genéricas — invista em densidade e especificidade.
 - motionDescription: descrição técnica do movimento de câmera/sujeito para o modelo de vídeo, explicando claramente como a câmera se move e quais elementos animados existem na cena. PROIBIDO: zoom, handheld, wobble, shake, tremor, truck, fast, quick, rapid, swift.
 
 Retorne APENAS um JSON válido (sem markdown, sem explicações):

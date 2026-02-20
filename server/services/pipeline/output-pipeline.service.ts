@@ -28,7 +28,7 @@ import { formatOutlineForPrompt } from '../story-architect.service'
 import type { StoryOutline } from '../story-architect.service'
 import { validateScript } from '../script-validator.service'
 import { getClassificationById } from '../../constants/intelligence-classifications'
-import { validateReplicatePricing } from '../../constants/pricing'
+import { validateMediaPricing } from '../../constants/pricing'
 import { mapPersonsFromPrisma, mapNeuralInsightsFromNotes } from '../../utils/format-intelligence-context'
 import fs from 'node:fs/promises'
 import path from 'node:path'
@@ -287,6 +287,16 @@ export class OutputPipelineService {
       scriptLog.info('🧼 Teaser: contexto do dossiê removido (roteiro depende do outline aprovado)')
     }
 
+    // ── Full Video (episódios): roteirista recebe apenas o brief curado ────────
+    // O Arquiteto leu o brief e gerou o StoryOutline com whatToReveal/whatToHold.
+    // Passar o dossiê bruto ao Roteirista faz ele ignorar os holdbacks do Arquiteto.
+    // Solução: filtrar fontes para só o brief do episódio (sourceType === 'brief').
+    if (outlineData._monetizationMeta?.itemType === 'fullVideo') {
+      const allSources = promptContext.sources || []
+      promptContext.sources = allSources.filter((s: any) => s.type === 'brief')
+      scriptLog.info(`📺 Full Video: fontes filtradas para brief only (${promptContext.sources.length}/${allSources.length}) — dossiê bruto removido do contexto do Roteirista`)
+    }
+
     // ── Resolver Script Provider (ROTEAMENTO SOLID) ────────
     // Hook-only usa provider dedicado com prompts cirúrgicos (~130 linhas, sem ruído).
     // Outros roles usam o provider genérico (~270 linhas, regras completas).
@@ -528,7 +538,7 @@ export class OutputPipelineService {
 
       // Validar pricing antes de gastar dinheiro
       const imageModel = (imageProvider as any).model || 'luma/photon-flash'
-      validateReplicatePricing(imageModel)
+      validateMediaPricing(imageModel, imageProvider.getName())
 
       const scenes = await prisma.scene.findMany({
         where: { outputId },
@@ -646,8 +656,9 @@ export class OutputPipelineService {
           } else if (result.status === 'rejected') {
             const error = (result as PromiseRejectedResult).reason
             const { ContentRestrictedError } = await import('../providers/image/replicate-image.provider')
+            const { GeminiContentFilteredError } = await import('../providers/image/gemini-image.provider')
 
-            if (error instanceof ContentRestrictedError) {
+            if (error instanceof ContentRestrictedError || error instanceof GeminiContentFilteredError) {
               restrictedCount++
               log.warn(`Cena ${absoluteIndex + 1} RESTRITA pelo filtro de conteúdo: ${error.message.slice(0, 100)}`)
 
@@ -737,7 +748,7 @@ export class OutputPipelineService {
 
     // Validar pricing antes de gastar dinheiro
     const musicModel = (musicProvider as any).model || 'stability-ai/stable-audio-2.5'
-    validateReplicatePricing(musicModel)
+    validateMediaPricing(musicModel, musicProvider.getName())
 
     // Calcular duração REAL a partir das narrações geradas (não estimada)
     const narrationTracks = await prisma.audioTrack.findMany({
@@ -1276,7 +1287,7 @@ export class OutputPipelineService {
     const motionProvider = providerManager.getMotionProvider()
 
     const motionModel = (motionProvider as any).model || 'wan-video/wan-2.2-i2v-fast'
-    validateReplicatePricing(motionModel)
+    validateMediaPricing(motionModel, motionProvider.getName())
     const scenes = await prisma.scene.findMany({
       where: { outputId },
       include: {
@@ -1383,7 +1394,7 @@ export class OutputPipelineService {
 
     // Validar pricing
     const motionModel = (motionProvider as any).model || 'wan-video/wan-2.2-i2v-fast'
-    validateReplicatePricing(motionModel)
+    validateMediaPricing(motionModel, motionProvider.getName())
 
     // 3. Desmarcar vídeos anteriores desta cena
     await prisma.sceneVideo.updateMany({

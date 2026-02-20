@@ -13,6 +13,8 @@ import { buildCacheableMessages } from '../llm/anthropic-cache-helper'
 import { invokeWithLogging } from '../../utils/llm-invoke-wrapper'
 import { costLogService } from '../cost-log.service'
 import { calculateLLMCost } from '../../constants/pricing'
+import { sanitizeSchemaForGemini } from '../../utils/gemini-schema-sanitizer'
+import { toJsonSchema } from '@langchain/core/utils/json_schema'
 
 const LOG = '[EpisodeBriefing]'
 
@@ -119,10 +121,16 @@ export async function getOrCreateEpisodeBriefBundleV1ForDossier(
     assignment.provider.toLowerCase().includes('groq') && assignment.model.includes('llama-4')
   const method = isGemini ? 'functionCalling' : isGroqLlama4 ? 'jsonMode' : undefined
 
-  const structuredLlm = (model as any).withStructuredOutput(EpisodeBriefBundleV1Schema, {
-    includeRaw: true,
-    ...(method ? { method } : {}),
-  })
+  const structuredLlm = isGemini
+    ? (model as any).withStructuredOutput(sanitizeSchemaForGemini(toJsonSchema(EpisodeBriefBundleV1Schema)), {
+      includeRaw: true,
+      method: 'functionCalling',
+      zodSchema: EpisodeBriefBundleV1Schema
+    })
+    : (model as any).withStructuredOutput(EpisodeBriefBundleV1Schema, {
+      includeRaw: true,
+      ...(method ? { method } : {}),
+    })
 
   const skill = loadSkill('steps/briefing/bundle-episodes')
   const systemPrompt = skill

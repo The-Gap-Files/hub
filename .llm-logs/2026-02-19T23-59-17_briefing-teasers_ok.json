@@ -1,0 +1,165 @@
+{
+  "timestamp": "2026-02-19T23:59:17.979Z",
+  "taskId": "briefing-teasers",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "gemini-3-flash-preview",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Briefing Step — Bundle de Briefs para TEASERS (V1)\n\nVocê é um **Briefing Generator**. Sua função é transformar um dossiê bruto (fontes longas, notas, persons) em um **brief enxuto e seguro** para alimentar as etapas de TEASERS:\n- Monetization (gateway/deep-dive/hook-only)\n- Story Architect (teasers)\n- Script (teasers)\n\n## Objetivo\n\nGerar um JSON no formato **BriefBundleV1** com:\n- fatos reutilizáveis (“munição narrativa”) sem ruído\n- regras hard de segurança (visual e linguagem) para não contaminar o funil\n- diretrizes por papel narrativo (gateway / deep-dive / hook-only)\n\nO brief deve ser **curto**, **estruturado**, **não-didático** e **sem elementos proibidos**.\n\n## Regras Hard (INVIOLÁVEIS)\n\n0. **ANTI-TERMOS-SENSÍVEIS (plataforma + viral):** NUNCA use \"tortura infantil\", \"sangue infantil\", \"violência infantil\" nos fatos. Se o dossiê mencionar, REFORMULE para consequência: \"O tribunal obteve confissões que autorizaram o confisco\" em vez de \"Sob tortura, confessaram\". Use: decreto, confisco, autorizou, usou como pretexto, registro.\n   **MECANISMO > SINTOMA:** NÃO descreva captura/recolhimento de pessoas (\"guardas recolhiam crianças\", \"levaram para o tribunal\"). Descreva o SISTEMA: \"O tesouro financiou o tribunal\", \"O decreto autorizou o confisco\".\n\n1. **PROIBIDO** gerar ou sugerir:\n   - armas de fogo, rifles, pistolas, munição\n   - atirador, execução, “tiro” como ação visual\n   - gore/violência gráfica/tortura explícita\n   - close-up de mãos humanas e close-up de rostos humanos (macro/anatomia)\n   - símbolos extremistas contemporâneos em destaque\n2. Se o dossiê mencionar ataques/armas/sangue, **transforme em artefatos**:\n   - manifesto (texto), headline, recorte, tela/monitor, documento, registro\n3. **Fatos devem ser safe**:\n   - Foque em **mecanismo/sistema** (quem autorizou, qual documento, qual incentivo)\n   - Evite descrever violência; descreva “decisão”, “ordem”, “confisco”, “propaganda”, “registro”\n\n## Como escolher fatos (facts[])\n\n- Produza entre **12 e 40** fatos.\n- Cada fato:\n  - 1–2 linhas\n  - linguagem objetiva (sem tese/conclusão moral)\n  - se possível, inclua `sourceRef` curto (título/índice da fonte)\n- Se houver dados concretos (ano, cidade), inclua **somente se estiver explícito no dossiê**.\n\n## Diretrizes por papel (roleBriefs)\n\n- **gateway**: precisa de contexto suficiente para standalone (mas sem enciclopédia).\n- **deep-dive**: foco em 1 ângulo; mínimo contexto; “1 frase de setup no máximo”.\n- **hook-only**: mínimo absoluto; 1 conceito central; 1–3 fatos mais chocantes (mecanismo), zero explicação. Fatos SEM \"tortura infantil\", \"sangue infantil\", \"violência infantil\" — só mecanismo (decreto, confisco, tribunal).\n\n## Output\n\nRetorne **APENAS** um JSON válido (sem markdown, sem ```json, sem explicações), no schema `BriefBundleV1`."
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "📋 TEMA: A frieza mecânica da dupla de assassinos mais letal de Nova York + o fim silencioso de uma era de brutalidade mafiosa.\n\n📋 TÍTULO: Os Gêmeos Gemini: A Morte de Joey Testa e o Terror da Murder Machine\n\n🎨 DIRETRIZES DE IDENTIDADE DO UNIVERSO (WARNING PROTOCOL):\nAtmosfera 'gritty' do Brooklyn nos anos 70 e 80. Foco visual no Gemini Lounge, luzes de neon refletindo em asfalto molhado e carros pretos. Paleta de cores desaturada com acentos em vermelho sangue e ambar de iluminação urbana. Evitar o glamour de 'O Poderoso Chefão'; priorizar a estética suja e industrial de 'Goodfellas' e a frieza do método de desmembramento.\n\n📚 FONTES DO DOSSIÊ (ordenadas por peso/relevância):\n[1] (text) Investigação Gemini: Assassinos da Máfia [peso: 3]\nA Anatomia da Execução Sistemática: Uma Análise Forense e Criminológica da Carreira de Joseph Testa e Anthony SenterResumo ExecutivoEste relatório constitui uma investigação exaustiva sobre a trajetória criminal, a metodologia operacional e o destino judicial de Joseph \"Joey\" Testa e Anthony Senter, figuras centrais na história do crime organizado norte-americano do final do século XX. Conhecidos no submundo e pelos órgãos de aplicação da lei como os \"Gêmeos Gemini\" (Gemini Twins), esta dupla transcendeu o arquétipo tradicional do mafioso para encarnar uma forma de violência industrializada e desprovida de emoção. Operando inicialmente como o núcleo letal da equipe de Roy DeMeo, afiliada à família Gambino, e posteriormente como executores de elite para a administração instável da família Lucchese, Testa e Senter foram responsáveis por uma onda de homicídios que desafiou as capacidades investigativas da época.O foco central deste documento é a documentação da \"frieza mecânica\" que caracterizava suas operações — especificamente o desenvolvimento e aperfeiçoamento do \"Método Gemini\", um protocolo de desmembramento e eliminação de corpos desenhado para frustrar a ciência forense. Além disso, o relatório examina o contexto jurídico complexo de sua queda, culminando nos julgamentos RICO (Racketeer Influenced and Corrupt Organizations Act) do final da década de 1980, e traça seus caminhos divergentes através do sistema prisional federal até a morte de Joseph Testa em janeiro de 2026. A análise baseia-se em uma síntese de registros judiciais, transcrições de julgamentos, relatórios do FBI e narrativas históricas corroboradas.1. O Crisol de Canarsie: Sociologia da Deviância e Formação Criminal1.1 O Ecossistema Socioeconômico de Canarsie na Década de 1970Para compreender a psicopatologia operacional de Joseph Testa e Anthony Senter, é imperativo primeiro dissecar o ambiente socioeconômico que os gerou. Canarsie, situada na orla sudeste do Brooklyn, Nova York, durante o final da década de 1960 e início da década de 1970, operava como um enclave insular. Era uma comunidade predominantemente ítalo-americana de classe trabalhadora, caracterizada por uma profunda desconfiança em relação às autoridades externas e uma adesão cultural tácita aos códigos de silêncio, ou omertà.Neste microcosmo, a criminalidade não era necessariamente vista como uma aberração social, mas frequentemente como uma via alternativa e viável de mobilidade econômica. A figura do \"wiseguy\" — o gângster bem-sucedido — não era vilipendiada, mas sim aspiracional. Jovens desiludidos com as perspectivas de trabalho braçal ou sindical viam em figuras locais como Roy DeMeo modelos de empreendedorismo letal. É dentro deste \"caldo de cultura\" criminogênico que as trajetórias de Testa e Senter começaram a convergir, não apenas como vizinhos, mas como parceiros simbióticos em uma escalada de violência.1.2 Perfis Biográficos e a Convergência dos \"Gêmeos\"A alcunha \"Gêmeos Gemini\" não derivava de uma relação biológica, mas de uma semelhança comportamental e de uma lealdade mútua que beirava o fanatismo. Ambos nasceram no início de 1955 e cresceram na mesma vizinhança, compartilhando experiências formativas marcadas por trauma e negligência, elementos frequentemente citados na literatura criminológica como precursores de comportamento antissocial violento.Anthony Michael Senter nasceu em 31 de março de 1955. Filho de um imigrante italiano e de uma mãe operária, Senter cresceu em um lar fraturado pelo divórcio precoce. Sua educação formal foi interrompida precocemente, e ele logo ganhou reputação nas ruas por uma \"aura de ameaça silenciosa\". Albert DeMeo, filho de seu futuro mentor Roy DeMeo, descreveria mais tarde Senter como tendo uma personalidade \"escorregadia\" e \"falsa\" (\"slick and phony\"), uma característica que lhe permitiria navegar as traições internas da máfia com uma adaptabilidade camaleônica. Senter trabalhava ocasionalmente como assistente de carpinteiro, mas sua verdadeira vocação era a apropriação ilícita.Joseph Carmine Testa, nascido em 24 de janeiro de 1955, teve uma trajetória paralela e igualmente traumática. Um de nove filhos de um motorista de caminhão, a vida de Testa foi irrevocavelmente alterada pela morte de sua mãe devido a um coágulo sanguíneo quando ele tinha apenas treze anos. A perda da figura materna, combinada com um ambiente doméstico turbulento, acelerou sua entrada na delinquência juvenil. Fisicamente menor que Senter, Testa compensava com uma ferocidade explosiva. Um incidente definidor ocorreu em 1973, quando Testa, aos 18 anos, envolveu-se em uma briga de bar com um oponente porto-riquenho. Testa foi esfaqueado no pulmão, um ferimento quase fatal que o deixou com problemas respiratórios crônicos pelo resto da vida. A resposta de Senter a este evento selou o vínculo entre eles: ele caçou o agressor de Testa e espancou-o quase até a morte com os punhos nus. Este ato de retribuição brutal cimentou uma parceria que operaria como uma unidade singular de violência pelas décadas seguintes.1.3 A Mentoria de Chris Rosenberg e a Integração na Equipe DeMeoA porta de entrada de Testa e Senter para o crime organizado estruturado foi o roubo de automóveis, uma atividade onipresente em Canarsie. Aos 15 anos, ambos já possuíam extensas fichas criminais juvenis por furto de veículos, demonstrando uma aptidão técnica precoce para contornar sistemas de segurança e uma audácia necessária para operações de alto volume. Essa competência chamou a atenção de Harvey \"Chris\" Rosenberg, um associado de Roy DeMeo.Rosenberg, um criminoso ambicioso que traficava drogas e roubava carros, viu nos jovens Testa e Senter a \"mão de obra\" ideal: leais, violentos e destemidos. Rosenberg serviu como a ponte entre os delinquentes juvenis de rua e a sofisticação criminosa de Roy DeMeo. Em 1974, aos 19 anos, a dupla foi formalmente integrada ao círculo íntimo de DeMeo. DeMeo, que operava a partir do Gemini Lounge na Flatlands Avenue, reconheceu imediatamente o valor utilitário dos \"Gêmeos\". Diferentemente de outros associados que podiam hesitar diante da violência extrema, Testa e Senter exibiam uma capacidade inata de compartimentalização psicológica. Eles podiam executar ordens complexas e brutais sem questionamento moral ou hesitação tática, características que se tornariam a pedra angular da \"Máquina de Matar\".2. A Industrialização da Morte: A Equipe DeMeo e o Método Gemini2.1 A Estrutura Corporativa da ViolênciaA equipe liderada por Roy DeMeo não era uma gangue desorganizada, mas uma empresa criminosa diversificada e hierárquica operando sob a égide da família Gambino. Enquanto o roubo de automóveis internacional (enviando carros de luxo para o Kuwait) e a agiotagem forneciam o fluxo de caixa regular, o assassinato tornou-se sua especialidade de mercado. O Gemini Lounge servia como o centro nevrálgico dessa operação. A frente do bar funcionava como um espaço social e ponto de encontro para negócios, enquanto os fundos e um apartamento adjacente foram convertidos em instalações dedicadas ao extermínio humano.Para Testa e Senter, o Gemini Lounge era tanto um clube social quanto um local de trabalho. A dicotomia espacial do local refletia a própria psicologia da equipe: a c... [truncated 68412 chars]"
+      }
+    ]
+  },
+  "parsed": {
+    "roleBriefs": {
+      "gateway": {
+        "notes": [
+          "Apresentar a 'Murder Machine' como o auge da violência industrializada da máfia.",
+          "Contextualizar a parceria simbiótica entre Testa e Senter.",
+          "Finalizar com o paradoxo da morte de Testa em liberdade em 2026."
+        ],
+        "suggestedFactsMin": 10,
+        "contextLevel": "medium",
+        "suggestedFactsMax": 15
+      },
+      "hook-only": {
+        "contextLevel": "minimal",
+        "suggestedFactsMax": 5,
+        "suggestedFactsMin": 3,
+        "notes": [
+          "Usar o conceito de 'Morte em Liberdade' para um dos maiores assassinos da história.",
+          "Focar no mecanismo: 'Sem corpo, sem crime'.",
+          "O fato da igreja funcionando onde era o matadouro."
+        ]
+      },
+      "deep-dive": {
+        "suggestedFactsMin": 8,
+        "notes": [
+          "Focar exclusivamente no 'Método Gemini' como uma inovação forense reversa.",
+          "Explorar a transição de lealdade como uma manobra corporativa de sobrevivência.",
+          "Detalhar o contraste entre o 'matadouro' e a atual igreja no local."
+        ],
+        "contextLevel": "low",
+        "suggestedFactsMax": 12
+      }
+    },
+    "globalSafety": {
+      "forbiddenElements": [
+        "Armas de fogo disparando ou em close-up",
+        "Representação visual de desmembramento ou sangue explícito",
+        "Close-up de rostos humanos (focar em silhuetas ou detalhes de objetos)",
+        "Cenas de tortura ou agonia física direta",
+        "Símbolos extremistas contemporâneos"
+      ],
+      "forbiddenNarrationTerms": [
+        "tortura infantil",
+        "sangue infantil",
+        "violência infantil",
+        "esfaqueamento gráfico",
+        "tiro na cabeça",
+        "cortar o corpo"
+      ],
+      "allowedArtifacts": [
+        "Neon de bar refletido em asfalto molhado",
+        "Plantas baixas do Gemini Lounge e do apartamento adjacente",
+        "Documentos judiciais e transcrições da Lei RICO",
+        "Caixas de papelão genéricas e fitas de isolamento policial",
+        "Mapas do Aterro de Fountain Avenue",
+        "Recortes de jornal da era 1970/80 com estética desaturada",
+        "Relatórios do FBI e fotos de vigilância granuladas"
+      ],
+      "notes": [
+        "Transformar atos de violência em 'protocolos logísticos' ou 'mecanismos de eliminação'",
+        "Focar na atmosfera industrial e fria da 'Murder Machine' em vez do sadismo individual",
+        "Utilizar a estética 'gritty' do Brooklyn para sugerir o perigo sem mostrá-lo explicitamente"
+      ]
+    },
+    "title": "Briefing: Os Gêmeos Gemini e o Fim da Era DeMeo",
+    "facts": [
+      {
+        "sourceRef": "Investigação Gemini [1]",
+        "text": "Joseph Testa e Anthony Senter eram conhecidos como os 'Gêmeos Gemini', operando como o núcleo letal da 'Murder Machine' no Brooklyn."
+      },
+      {
+        "text": "A dupla desenvolveu o 'Método Gemini', um protocolo de sete etapas desenhado para transformar o extermínio em um processo industrial de gestão de resíduos.",
+        "sourceRef": "Investigação Gemini [1]"
+      },
+      {
+        "sourceRef": "Investigação Gemini [1]",
+        "text": "O objetivo central do método era a neutralização forense total, operando sob a máxima 'sem corpo, sem crime'."
+      },
+      {
+        "sourceRef": "Investigação Gemini [1]",
+        "text": "O Gemini Lounge, na Flatlands Avenue, servia como centro nevrálgico, com um apartamento adjacente configurado especificamente para o processamento de alvos."
+      },
+      {
+        "text": "O protocolo incluía uma 'estocada cardíaca' técnica para interromper o bombeamento sanguíneo e facilitar o desmonte anatômico subsequente.",
+        "sourceRef": "Investigação Gemini [1]"
+      },
+      {
+        "sourceRef": "Investigação Profunda [2]",
+        "text": "Testa e Senter utilizavam forros de piscina de plástico e kits de ferramentas de açougueiro para reduzir restos a dimensões logísticas de descarte."
+      },
+      {
+        "text": "O Aterro de Fountain Avenue era o destino final, onde o volume massivo de lixo e tratores garantia o desaparecimento permanente dos registros biológicos.",
+        "sourceRef": "Investigação Gemini [1]"
+      },
+      {
+        "sourceRef": "Investigação Gemini [1]",
+        "text": "Em 1983, a dupla executou o próprio mentor, Roy DeMeo, em uma transação pragmática para garantir a sobrevivência e um 'passe' da alta cúpula."
+      },
+      {
+        "sourceRef": "Investigação Gemini [1]",
+        "text": "Após o 'patricídio criminal', os Gêmeos foram transferidos da família Gambino para a Lucchese, servindo como guarda pretoriana de Anthony Casso."
+      },
+      {
+        "sourceRef": "Investigação Profunda [2]",
+        "text": "Em 1986, Testa executou Vladimir Reznikov em Brighton Beach para proteger esquemas de fraude fiscal de gasolina da Máfia Russa."
+      },
+      {
+        "sourceRef": "Investigação Gemini [1]",
+        "text": "Durante o julgamento RICO em 1988, a dupla foi detida por utilizar substâncias ilícitas no banheiro do tribunal de Foley Square."
+      },
+      {
+        "text": "Embora condenados por 10 homicídios em 1989, investigadores ligam a dupla a pelo menos 20 mortes diretas e até 200 desaparecimentos da equipe DeMeo.",
+        "sourceRef": "Investigação Gemini [1]"
+      },
+      {
+        "sourceRef": "Investigação Profunda [2]",
+        "text": "Joseph Testa manteve o código de silêncio (omertà) por 35 anos, mesmo após o assassinato de seu irmão, Patrick Testa, por ordem de seu próprio chefe."
+      },
+      {
+        "text": "Devido a uma brecha na 'Antiga Lei' federal (Old Law), ambos tornaram-se elegíveis para liberdade condicional apesar das sentenças perpétuas.",
+        "sourceRef": "Investigação Gemini [1]"
+      },
+      {
+        "sourceRef": "Investigação Gemini [1]",
+        "text": "Joseph Testa faleceu de causas naturais em 26 de janeiro de 2026, em Henderson, Nevada, vivendo seus últimos dias em liberdade."
+      },
+      {
+        "sourceRef": "Investigação Profunda [2]",
+        "text": "O antigo Gemini Lounge foi convertido na Purpose Life Church, onde escritórios ocupam o local das antigas operações de extermínio."
+      },
+      {
+        "sourceRef": "Investigação Profunda [2]",
+        "text": "A parceria era baseada em simbiose: Senter era a força protetora e Testa o estrategista calculista com problemas respiratórios crônicos."
+      },
+      {
+        "text": "A competência técnica da dupla em roubo de automóveis na juventude foi a base mecânica para a precisão no desmonte de alvos humanos.",
+        "sourceRef": "Investigação Gemini [1]"
+      }
+    ],
+    "version": "briefBundleV1",
+    "language": "pt-BR",
+    "theme": "A Frieza Mecânica dos Gêmeos Gemini e a Murder Machine"
+  },
+  "rawContent": ""
+}

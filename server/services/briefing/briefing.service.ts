@@ -14,6 +14,8 @@ import { buildCacheableMessages } from '../llm/anthropic-cache-helper'
 import { invokeWithLogging } from '../../utils/llm-invoke-wrapper'
 import { costLogService } from '../cost-log.service'
 import { calculateLLMCost } from '../../constants/pricing'
+import { sanitizeSchemaForGemini } from '../../utils/gemini-schema-sanitizer'
+import { toJsonSchema } from '@langchain/core/utils/json_schema'
 
 const LOG = '[Briefing]'
 
@@ -117,16 +119,21 @@ export async function getOrCreateBriefBundleV1ForDossier(
   const assignment = await getAssignment('briefing-teasers')
   const model = await createLlmForTask('briefing-teasers', { temperature: 0.3, maxTokens: 8192 })
 
-  // Structured output — Gemini usa functionCalling para evitar limitações de response_schema (const, default, etc).
-  // jsonMode foi removido de @langchain/google-genai v2.x — apenas jsonSchema e functionCalling são suportados.
+  // Structured output — Gemini: sanitiza JSON Schema para remover campos incompatíveis (const, default, minItems, etc.)
   const isGemini = assignment.provider.toLowerCase().includes('gemini') || assignment.provider.toLowerCase().includes('google')
   const isGroqLlama4 = assignment.provider.toLowerCase().includes('groq') && assignment.model.includes('llama-4')
   const method = isGemini ? 'functionCalling' : isGroqLlama4 ? 'jsonMode' : undefined
 
-  const structuredLlm = (model as any).withStructuredOutput(BriefBundleV1Schema, {
-    includeRaw: true,
-    ...(method ? { method } : {})
-  })
+  const structuredLlm = isGemini
+    ? (model as any).withStructuredOutput(sanitizeSchemaForGemini(toJsonSchema(BriefBundleV1Schema)), {
+      includeRaw: true,
+      method: 'functionCalling',
+      zodSchema: BriefBundleV1Schema
+    })
+    : (model as any).withStructuredOutput(BriefBundleV1Schema, {
+      includeRaw: true,
+      ...(method ? { method } : {})
+    })
 
   const skill = loadSkill('steps/briefing/bundle-teasers')
   const systemPrompt = skill

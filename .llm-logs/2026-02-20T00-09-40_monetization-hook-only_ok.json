@@ -1,0 +1,286 @@
+{
+  "timestamp": "2026-02-20T00:09:40.091Z",
+  "taskId": "monetization-hook-only",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "gemini-3.1-pro-preview",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Monetization — Hook-Only Teasers Generator\n\nVocê é um estrategista de conteúdo viral. Nesta etapa, você vai gerar os teasers HOOK-ONLY — arma de alcance viral, detonação cognitiva que para o scroll, gera replay e converte.\n\n## 🎯 O Que São Hook-Only\n\nHook-Only é uma **arma viral de 16-22 segundos**. Não é um resumo. Não é um mini-documentário. Não é uma aula.\n\n### DNA do Hook-Only:\n- **Visceral** — O público SENTE antes de PENSAR. Se pensou antes de sentir, deslizou.\n- **Simples** — 1 conceito central resumível em 1 frase mental. Sem colagem de fatos.\n- **Dinâmico** — Alternância emocional: Cena 1 (Ruptura/Loop-B) → Cena 2 (Respiro) → Cena 3 (Replay bait/impacto) → Cena 4 (Pico/Loop-A).\n- **Sistêmico** — Mostra o MECANISMO (quem autorizou, quem lucrou), não o sintoma (violência). Indignação > repulsa.\n- **Incompleto** — ZERO resolução, ZERO explicação, TODOS os loops abertos.\n- **Replay-friendly** — Detalhes rápidos que forçam \"pera, o que foi isso?\"\n- **Loop Infinito (Loop-A/Loop-B)** — Escreva de trás pra frente. A frase final (Cena 4) é incompleta e só faz sentido quando o vídeo reinicia na Cena 1.\n- **Safe** — Postura \"Neutral Documentarian\". Gore explícito = desmonetização. Use substituição semântica.\n\n## 📐 CONTEXTO RECEBIDO\n\nVocê recebe:\n- O dossiê completo\n- O teaser Gateway já gerado\n- Os teasers Deep-Dive já gerados\n- TODOS os hooks já usados (para NÃO repetir)\n- A lista de ângulos e formatos definidos no blueprint para cada hook-only\n\n## 📐 O QUE PRODUZIR\n\nPara CADA hook-only definido no blueprint, gere:\n- **title**: Máximo 8-10 palavras. Tensão + curiosidade + clareza. Sem nomes obscuros, sem subtítulos com dois-pontos.\n  - ❌ \"O mito sangrento que atravessou séculos: de Trento a Poway\" (14 palavras, denso)\n  - ✅ \"A mesma mentira. 500 anos depois.\" (6 palavras, pura tensão)\n  - ✅ \"Um menino morto e uma mentira eterna.\" (7 palavras, impacto)\n- **hook**: Frase que causa RUPTURA COGNITIVA em 2 segundos (até 15 palavras). Sem construção, sem contextualização. O espectador SENTE antes de pensar. DIFERENTE de tudo anterior.\n- **angle**: Descrição do ângulo (já definido no blueprint)\n- **angleCategory**: A categoria (já definida no blueprint)\n- **narrativeRole**: \"hook-only\"\n- **shortFormatType**: O formato (já definido no blueprint)\n- **scriptOutline**: Loop-B (final da frase do loop) → Respiro (contexto sistêmico) → Replay bait/impacto → Loop-A (começo da frase do loop, SUSPENSA).\n- **visualSuggestion**: Descrição curta do visual\n- **loopSentence**: Objeto com `fullSentence`, `partA` e `partB` definindo a mecânica do loop.\n- **cta**: **NENHUM**. Campo deve ser vazio ou null. O loop é a retenção.\n- **platform**: \"YouTube Shorts\"\n- **format**: \"teaser-youtube-shorts\"\n- **estimatedViews**: Estimativa de views\n- **scriptStyleId** e **scriptStyleName**\n- **editorialObjectiveId** e **editorialObjectiveName**\n- **avoidPatterns**: 2-4 anti-padrões específicos (veja regras abaixo)\n- **visualPrompt**: Prompt de imagem em INGLÊS (1 parágrafo)\n- **microBriefV1**: Micro-brief ESTRUTURADO para ESTE teaser (isolado por item). Deve conter:\\n  - version: \\\"teaserMicroBriefV1\\\"\\n  - narrativeRole: \\\"hook-only\\\"\\n  - angleCategory e angle (iguais aos campos do teaser)\\n  - facts: 5-12 fatos selecionados APENAS do brief/dossiê recebido (cada um com text e, se possível, sourceRef)\\n  - forbiddenElements: 6-12 itens (reforçar anti-arma/gore/close-up)\\n  - allowedArtifacts: 6-12 itens (documento/selo/monitor/headline/etc.)\\n  - notes: 2-6 bullets curtos (ex.: \\\"mecanismo > sintoma\\\", \\\"zero resolução\\\")\\n\\n🚨 IMPORTANTE: este microBriefV1 será o ÚNICO contexto que o Story Architect verá para este hook-only. Então selecione fatos que permitam um outline forte sem precisar de outros dados.\n\n## 🚨 REGRAS DOS HOOK-ONLY\n\n1. **RUPTURA EM 2 SEGUNDOS** — A primeira frase DEVE causar ruptura cognitiva. Nada de construção antes do choque. Se o público pensa antes de sentir, ele desliza.\n   - **MICRO-REGRA (TIMING)**: a primeira frase (até o primeiro ponto/pausa forte) deve ser pronunciável em **~1,5s**.\n     - Heurística: **3-5 palavras (ideal)**, **máx. 6**. Sem vírgula na primeira pancada.\n2. **1 CONCEITO CENTRAL** — O teaser INTEIRO gira em torno de UMA ideia resumível em 1 frase mental. Se exige conectar 3+ entidades/épocas/nomes para entender, está denso demais para consumo rápido.\n3. **ALTERNÂNCIA DINÂMICA (NÃO ESCALAÇÃO LINEAR)** — A intensidade deve VARIAR com contrastes: após beat intenso, inserir respiro para amplificar o próximo pico. O ÚLTIMO beat (corte seco — sem CTA) é o pico absoluto. ❌ 8→9→9→10 (saturação). ✅ 8→6→9→10 (alternância).\n3.5. **MECANISMO > SINTOMA (CRÍTICO)** — Foque no SISTEMA (quem autorizou, quem lucrou), NÃO na violência. ❌ \"A corda estala\" (repulsa → swipe). ✅ \"O bispo assinou a sentença\" (mecanismo → indignação → compartilha).\n   - **ANTI-TERMOS-SENSÍVEIS:** NUNCA use \"tortura infantil\", \"sangue infantil\", \"violência infantil\" em title, hook ou microBriefV1.facts. Se o brief tiver, REFORMULE para mecanismo (decreto, confisco, tribunal assinou, usou como pretexto). Títulos: ❌ \"O Decreto que Selou Sangue Infantil\". ✅ \"O Decreto que Autorizou o Confisco\".\n4. **NOMES UNIVERSAIS** — Nomes históricos obscuros quebram fluxo cognitivo. Use função (\"o bispo\", \"o juiz\", \"o atirador\"), não nomes próprios (Hinderbach, Tiberino). Exceção: nomes universalmente conhecidos (Hitler, Einstein, Napoleão).\n5. **RESOLUÇÃO ZERO** — Nenhuma explicação, recap, conclusão moral ou reflexão filosófica. TODOS os loops ficam abertos.\n6. **ZERO CTA** — O público NÃO pode perceber que acabou. Corte seco no meio da frase (Loop-A). Sem branding, sem \"The Gap Files.\".\n7. **REPLAY BAIT** — Pelo menos 1 beat com detalhe visual/narrativo rápido demais para absorver. Força re-assistir. Replay é sinal forte para o algoritmo.\n8. **Cada hook DEVE ser TOTALMENTE DIFERENTE** dos outros — formato E conteúdo\n9. **avoidPatterns** devem focar em eliminar contexto, explicação, nomes obscuros e CTA visível\n10. **microBriefV1 é a fonte da verdade** para o Story Architect deste hook-only: NÃO inclua fatos que pertencem a outros hook-onlys/deep-dives/gateway. Selecione apenas os fatos necessários para este ângulo e mantenha-os simples.\n11. **microBriefV1.facts:** Se um fato do brief contiver \"tortura infantil\", \"sangue infantil\", \"violência infantil\", REFORMULE antes de incluir: use consequência (confisco, decreto, autorizou) em vez do método (tortura, sangue).\n12. **microBriefV1.facts — MECANISMO > SINTOMA:** NÃO inclua fatos que descrevam captura/recolhimento de pessoas (\"guardas recolhiam crianças\", \"levaram para o tribunal\"). Inclua fatos do SISTEMA: \"O tesouro financiou o tribunal\", \"O decreto autorizou o confisco\", \"O bispo assinou a sentença\".\n\n## 🛡️ BRAND SAFETY E VISUAL NOISE (YOUTUBE 2026)\n\n1. **SUBSTITUIÇÃO SEMÂNTICA (OBRIGATÓRIA):**\n   - ❌ \"Assassino serial matou 20\" → 🟢 \"O responsável por 20 fins trágicos\"\n   - ❌ \"Sangue no chão\" → 🟢 \"A cena marcada\" / \"Vestígios vitais\"\n   - ❌ \"Estripado/Mutilado\" → 🟢 \"Fragmentado\" / \"Cena desfeita\"\n   - **Postura:** \"Neutral Documentarian\". Clínico, solene, nunca sensacionalista.\n\n2. **IMPERFEIÇÃO VISUAL CONTEXTUAL (Decisão de Direção):**\n   - **Esqueça o \"ruído aleatório\".** Escolha uma textura que AMPLIFIQUE a narrativa.\n   - **Documentos Antigos:** Textura de papel rasgado, granulação de filme 16mm, bordas queimadas.\n   - **Relatos Policiais/Modernos:** Glitch digital, compressão de CCTV, ruído de ISO alto (câmera noturna).\n   - **Memórias/Relatos:** Desfoque nas bordas (tilt-shift), aberração cromática leve.\n   - **Regra:** A imagem não pode ser \"lisa\" (cara de IA pura). Ela deve parecer um registro físico ou digital real.\n   - **Loop Visual:** O frame final deve ter iluminação/composição similar ao inicial para loop invisível.\n\n## 💡 EXEMPLOS DE HOOKS PODEROSOS (RUPTURA COGNITIVA)\n\n- \"A Igreja declarou ele santo… e depois RETIROU a santidade.\"\n- \"3 famílias lucraram com a morte dele. Ninguém foi preso.\"\n- \"O DNA não bate. A confissã... [truncated 8336 chars]"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "📋 TEMA: A frieza mecânica da dupla de assassinos mais letal de Nova York + o fim silencioso de uma era de brutalidade mafiosa.\n📋 TÍTULO: Os Gêmeos Gemini: A Morte de Joey Testa e o Terror da Murder Machine\n🧾 BRIEF (TEASERS) — versão: briefBundleV1\n\n🛡️ REGRAS HARD (GLOBAL SAFETY)\n- ❌ armas de fogo\n- ❌ facas/serras ensanguentadas\n- ❌ descrições de desmembramento explícito\n- ❌ poças de sangue\n- ❌ close-up de rostos\n- ❌ close-up de mãos\n- ❌ tiros\n- ❌ execuções gráficas\n- ❌ armas de fogo, rifles, pistolas, munição, gatilho\n- ❌ atirador, execução, assassinato explícito, violência gráfica\n- ❌ sangue, gore, corpos mutilados, tortura explícita\n- ❌ close-up de mãos humanas, close-up de rostos humanos (evitar macro/anatomia)\n- ❌ cenas em sinagogas/templos com ameaça explícita (substituir por artefatos: manifesto, tela, manchete)\n- ❌ símbolos/extremismo contemporâneo em destaque (substituir por “texto recortado/blur”)\n\n🧰 ARTEFATOS VISUAIS PERMITIDOS\n- ✅ documentos judiciais\n- ✅ manchetes de jornal\n- ✅ plantas baixas do Gemini Lounge\n- ✅ caixas de papelão genéricas\n- ✅ registros de aterro sanitário\n- ✅ fichas criminais\n- ✅ fitas de vigilância\n- ✅ documento, decreto, registro, arquivo, dossiê, carimbo, selo de cera\n- ✅ moedas, cofre, livro-caixa, inventário, recibo, contrato\n- ✅ monitor, tela, manifesto (sem arma), headline, recorte de jornal, thread desfocada\n- ✅ mapa, corredor de arquivo, sala de leitura, prateleiras, luz de vela, sombras\n- ✅ silhuetas não-identificáveis sem rosto/mãos em close\n\n🔫 MUNIÇÃO NARRATIVA (FATOS SAFE)\n1. A dupla conhecida como Gêmeos Gemini operava a partir de um bar no Brooklyn, utilizando um anexo para aplicar um rigoroso protocolo de eliminação de evidências. [fonte: [1] Investigação Gemini]\n2. O chamado 'Método Gemini' foi desenhado como um procedimento forense reverso, focado em anular qualquer detecção policial através da máxima 'sem corpo, sem crime'. [fonte: [1] Investigação Gemini]\n3. O protocolo envolvia etapas logísticas rígidas, culminando no empacotamento dos alvos em caixas de papelão genéricas. [fonte: [1] Investigação Gemini]\n4. As caixas eram despachadas para o Aterro de Fountain Avenue, onde o volume massivo de lixo diário impossibilitava a recuperação pelas autoridades. [fonte: [1] Investigação Gemini]\n5. A eficiência do método transformou a neutralização de rivais em uma linha de montagem industrial, tratada como mera gestão de resíduos. [fonte: [2] Investigação Profunda]\n6. A lealdade da dupla era estritamente pragmática, evidenciada quando aceitaram uma ordem para eliminar seu próprio mentor em troca de sobrevivência institucional. [fonte: [1] Investigação Gemini]\n7. O mentor da dupla foi encontrado no porta-malas de um Cadillac, com um candelabro deixado sobre ele como um registro irônico de sua queda. [fonte: [1] Investigação Gemini]\n8. Após a eliminação do mentor, os Gêmeos foram transferidos para uma nova organização criminosa, provando que a competência técnica superava a lealdade pessoal. [fonte: [2] Investigação Profunda]\n9. Durante o próprio julgamento em 1988, a dupla demonstrou um senso de impunidade absoluto ao ser flagrada consumindo substâncias ilícitas nas dependências do tribunal. [fonte: [1] Investigação Gemini]\n10. A condenação final em 1989 baseou-se na Lei RICO, focando na existência de uma empresa criminosa contínua e na obstrução de testemunhas federais. [fonte: [1] Investigação Gemini]\n11. O colapso da operação ocorreu quando associados decidiram cooperar com as autoridades, fornecendo o mapa detalhado da logística do grupo. [fonte: [1] Investigação Gemini]\n12. Uma peculiaridade burocrática permitiu a libertação da dupla décadas depois: seus atos ocorreram antes da abolição da liberdade condicional federal em 1987. [fonte: [1] Investigação Gemini]\n13. Enquanto cumpria prisão perpétua, um dos membros quase obteve uma aposentadoria sindical mensal devido a contribuições fraudulentas feitas por sua família. [fonte: [3] Wikipedia]\n14. O fim biológico da parceria ocorreu de forma silenciosa em 2026, quando um dos membros faleceu de causas naturais em Nevada, já em liberdade. [fonte: [2] Investigação Profunda]\n15. O antigo local de operações da dupla, outrora o centro nevrálgico de suas atividades logísticas, foi posteriormente convertido em um espaço de culto religioso. [fonte: [4] The Death of a Mafia Hit Man]\n16. A precisão técnica da dupla teve origem em suas atividades juvenis com desmanche de veículos, habilidade logística que foi transposta para a ocultação de evidências. [fonte: [2] Investigação Profunda]\n\n🎭 DIRETRIZES POR PAPEL\n- gateway: contextLevel=medium, facts=4-6\n- deep-dive: contextLevel=low, facts=3-5\n- hook-only: contextLevel=minimal, facts=1-3\n\nGere 4 teasers HOOK-ONLY para o dossiê.\n\nSlots definidos no blueprint:\n1. angleCategory=\"conexao-temporal\", angleName=\"O Fim Silencioso em 2026\", shortFormatType=\"hook-brutal\", platform=\"YouTube Shorts\", scriptStyleId=\"mystery\", editorialObjectiveId=\"viral-hook\"\n2. angleCategory=\"conspirativo\", angleName=\"O Mapa Logístico Vazado\", shortFormatType=\"frase-memoravel\", platform=\"YouTube Shorts\", scriptStyleId=\"mystery\", editorialObjectiveId=\"cliffhanger\"\n3. angleCategory=\"propagandistico\", angleName=\"O Mantra: Sem Corpo, Sem Crime\", shortFormatType=\"pergunta-incomoda\", platform=\"YouTube Shorts\", scriptStyleId=\"educational\", editorialObjectiveId=\"controversy\"\n4. angleCategory=\"humano\", angleName=\"Vidas Reduzidas a Caixas de Papelão\", shortFormatType=\"hook-brutal\", platform=\"YouTube Shorts\", scriptStyleId=\"narrative\", editorialObjectiveId=\"viral-hook\"\n\nOBRIGATÓRIO: Cada teaser deve ter targetEpisode (1, 2 ou 3). Hook-only prioriza EP2 e EP3. Distribua equilibradamente.\n\nRetorne um JSON com campo \"teasers\" contendo exatamente 4 teasers."
+      }
+    ]
+  },
+  "parsed": {
+    "teasers": [
+      {
+        "cta": null,
+        "targetEpisode": 3,
+        "microBriefV1": {
+          "narrativeRole": "hook-only",
+          "forbiddenElements": [
+            "armas de fogo",
+            "sangue",
+            "rosto em close",
+            "execução",
+            "violência gráfica",
+            "cemitério explícito",
+            "algemas",
+            "tiroteio"
+          ],
+          "facts": [
+            {
+              "sourceRef": "[2] Investigação Profunda",
+              "text": "O fim biológico da parceria ocorreu de forma silenciosa em 2026, quando um dos membros faleceu de causas naturais em Nevada, já em liberdade."
+            },
+            {
+              "text": "Uma peculiaridade burocrática permitiu a libertação da dupla décadas depois: seus atos ocorreram antes da abolição da liberdade condicional federal em 1987.",
+              "sourceRef": "[1] Investigação Gemini"
+            }
+          ],
+          "allowedArtifacts": [
+            "certidão de óbito",
+            "carimbo do estado de Nevada",
+            "foto de arquivo policial antiga",
+            "selo de cera",
+            "calendário de 1987",
+            "silhueta desfocada em uma cadeira"
+          ],
+          "notes": [
+            "Foco no paradoxo da velhice e impunidade",
+            "Zero resolução ou explicação moral",
+            "O corte final deve ser abrupto para forçar o loop"
+          ],
+          "angleCategory": "conexao-temporal",
+          "angle": "O Fim Silencioso em 2026",
+          "version": "teaserMicroBriefV1"
+        },
+        "format": "teaser-youtube-shorts",
+        "estimatedViews": 850000,
+        "hook": "Ele não caiu a tiros.",
+        "scriptStyleId": "mystery",
+        "visualSuggestion": "Câmera lenta sobre um documento de óbito de Nevada (2026) desfocado, contrastando com uma foto antiga de arquivo policial.",
+        "scriptOutline": "Loop-B: \"...morreu de velhice, livre, no deserto de Nevada.\" -> Respiro: \"O responsável por dezenas de fins trágicos em Nova York sobreviveu à própria lenda.\" -> Replay bait: \"Um detalhe burocrático esquecido de 1987 abriu as portas da prisão.\" -> Loop-A: \"O homem mais letal do Brooklyn...\"",
+        "visualPrompt": "Cinematic macro shot of a blurred death certificate from Nevada dated 2026, resting on a dark wooden desk. A harsh, cold light illuminates the stamped seal, while the background features a heavily out-of-focus vintage mugshot. High contrast, 16mm film grain, neo-noir aesthetic.",
+        "platform": "YouTube Shorts",
+        "editorialObjectiveName": "viral-hook",
+        "title": "O Fim Silencioso no Deserto.",
+        "shortFormatType": "hook-brutal",
+        "angleCategory": "conexao-temporal",
+        "scriptStyleName": "mystery",
+        "narrativeRole": "hook-only",
+        "sceneCount": 4,
+        "editorialObjectiveId": "viral-hook",
+        "avoidPatterns": [
+          "NÃO explique o que é a peculiaridade burocrática",
+          "NÃO mostre o rosto do homem",
+          "NÃO use a palavra assassino ou máfia",
+          "NÃO conclua a frase final, deixe o loop suspenso"
+        ],
+        "angle": "O Fim Silencioso em 2026"
+      },
+      {
+        "avoidPatterns": [
+          "NÃO cite nomes de informantes",
+          "NÃO explique o que acontecia dentro do anexo",
+          "NÃO use estrutura de documentário tradicional",
+          "NÃO feche o loop narrativo"
+        ],
+        "angle": "O Mapa Logístico Vazado",
+        "sceneCount": 4,
+        "editorialObjectiveId": "cliffhanger",
+        "scriptStyleName": "mystery",
+        "narrativeRole": "hook-only",
+        "shortFormatType": "frase-memoravel",
+        "angleCategory": "conspirativo",
+        "title": "O Mapa Que Quebrou o Sistema.",
+        "editorialObjectiveName": "cliffhanger",
+        "platform": "YouTube Shorts",
+        "visualSuggestion": "Planta baixa de um bar sendo rabiscada com caneta vermelha, sob luz de interrogatório balançando.",
+        "scriptOutline": "Loop-B: \"...por um simples pedaço de papel.\" -> Respiro: \"A linha de montagem invisível de Nova York operou sem falhas por anos.\" -> Replay bait: \"Até que um associado entregou a planta baixa exata do anexo logístico.\" -> Loop-A: \"O império do desaparecimento não caiu pela polícia, caiu...\"",
+        "visualPrompt": "Top-down cinematic view of a blueprint of a Brooklyn bar being aggressively marked with a red pen. The scene is lit by a single swinging interrogation lamp, casting deep, moving shadows. Gritty texture, high ISO noise, dark investigative mood.",
+        "hook": "O sistema perfeito foi traído.",
+        "scriptStyleId": "mystery",
+        "estimatedViews": 920000,
+        "format": "teaser-youtube-shorts",
+        "cta": null,
+        "targetEpisode": 2,
+        "microBriefV1": {
+          "version": "teaserMicroBriefV1",
+          "notes": [
+            "Mecanismo da traição burocrática: um papel destruiu o império",
+            "A tensão vem do vazamento da informação, não da violência",
+            "Corte seco no loop para gerar frustração e replay"
+          ],
+          "angle": "O Mapa Logístico Vazado",
+          "angleCategory": "conspirativo",
+          "narrativeRole": "hook-only",
+          "allowedArtifacts": [
+            "planta baixa arquitetônica",
+            "caneta vermelha marcando um X",
+            "mesa de interrogatório de metal",
+            "gravador de fita cassete",
+            "pasta de arquivo parda",
+            "luz pendente balançando"
+          ],
+          "forbiddenElements": [
+            "rostos de informantes",
+            "armas de fogo",
+            "sangue",
+            "violência física",
+            "interrogatório agressivo",
+            "dinheiro sujo",
+            "algemas"
+          ],
+          "facts": [
+            {
+              "text": "O colapso da operação ocorreu quando associados decidiram cooperar com as autoridades, fornecendo o mapa detalhado da logística do grupo.",
+              "sourceRef": "[1] Investigação Gemini"
+            },
+            {
+              "sourceRef": "[1] Investigação Gemini",
+              "text": "A dupla operava a partir de um bar no Brooklyn, utilizando um anexo para aplicar um rigoroso protocolo de eliminação de evidências."
+            }
+          ]
+        }
+      },
+      {
+        "format": "teaser-youtube-shorts",
+        "estimatedViews": 780000,
+        "cta": null,
+        "targetEpisode": 1,
+        "microBriefV1": {
+          "version": "teaserMicroBriefV1",
+          "angle": "O Mantra: Sem Corpo, Sem Crime",
+          "angleCategory": "propagandistico",
+          "notes": [
+            "Foco na regra forense reversa e na frieza técnica",
+            "A repetição do mantra cria o efeito hipnótico",
+            "Nenhuma explicação extra sobre quem eram os alvos"
+          ],
+          "narrativeRole": "hook-only",
+          "allowedArtifacts": [
+            "fita VHS de segurança com glitch",
+            "caixas de papelão genéricas empilhadas",
+            "furgão escuro sem placa",
+            "manifesto de carga assinado",
+            "luz de rua amarelada",
+            "relógio digital marcando madrugada"
+          ],
+          "facts": [
+            {
+              "text": "O chamado 'Método Gemini' foi desenhado como um procedimento forense reverso, focado em anular qualquer detecção policial através da máxima 'sem corpo, sem crime'.",
+              "sourceRef": "[1] Investigação Gemini"
+            },
+            {
+              "text": "O protocolo envolvia etapas logísticas rígidas, culminando no empacotamento dos alvos em caixas de papelão genéricas.",
+              "sourceRef": "[1] Investigação Gemini"
+            }
+          ],
+          "forbiddenElements": [
+            "corpos humanos",
+            "sangue",
+            "armas de fogo",
+            "interior das caixas",
+            "vítimas",
+            "violência física",
+            "facas",
+            "poças vermelhas"
+          ]
+        },
+        "platform": "YouTube Shorts",
+        "hook": "Sem corpo, não existe crime.",
+        "scriptStyleId": "educational",
+        "visualSuggestion": "Fita de vigilância granulada mostrando caixas de papelão sendo empilhadas em um furgão escuro.",
+        "scriptOutline": "Loop-B: \"...essa era a única lei que importava.\" -> Respiro: \"Eles desenharam um protocolo forense reverso para anular qualquer detecção.\" -> Replay bait: \"O alvo entrava no anexo, mas apenas caixas genéricas saíam.\" -> Loop-A: \"Para a dupla mais letal de Nova York...\"",
+        "visualPrompt": "Distorted CCTV footage showing generic cardboard boxes being loaded into the back of a dark van parked in a shadowy alleyway. Heavy VHS tracking glitches, timestamp in the corner, monochromatic green-tinted night vision aesthetic.",
+        "title": "A Regra de Ouro do Submundo.",
+        "shortFormatType": "pergunta-incomoda",
+        "angleCategory": "propagandistico",
+        "editorialObjectiveName": "controversy",
+        "sceneCount": 4,
+        "editorialObjectiveId": "controversy",
+        "avoidPatterns": [
+          "NÃO mostre o que havia dentro das caixas",
+          "NÃO use a palavra assassinato, morte ou matar",
+          "NÃO faça perguntas diretas no final"
+        ],
+        "angle": "O Mantra: Sem Corpo, Sem Crime",
+        "scriptStyleName": "educational",
+        "narrativeRole": "hook-only"
+      },
+      {
+        "scriptStyleName": "narrative",
+        "narrativeRole": "hook-only",
+        "avoidPatterns": [
+          "NÃO mostre restos mortais ou lixo orgânico explícito",
+          "NÃO use tom de choro ou melodrama",
+          "NÃO explique quem eram as vítimas"
+        ],
+        "angle": "Vidas Reduzidas a Caixas de Papelão",
+        "sceneCount": 4,
+        "editorialObjectiveId": "viral-hook",
+        "editorialObjectiveName": "viral-hook",
+        "angleCategory": "humano",
+        "shortFormatType": "hook-brutal",
+        "title": "O Destino Final no Aterro.",
+        "visualSuggestion": "Registros de pesagem de um aterro sanitário carimbados repetidamente em sucessão rápida, com um trator ao fundo.",
+        "visualPrompt": "Cinematic close-up of a landfill weigh station ticket being aggressively stamped with 'TONNAGE APPROVED'. In the blurred background, a massive bulldozer moves through a foggy, desolate landscape. Desaturated colors, industrial cold aesthetic.",
+        "scriptOutline": "Loop-B: \"...despachados junto com o lixo diário.\" -> Respiro: \"A neutralização de rivais deixou de ser um acerto de contas.\" -> Replay bait: \"Tornou-se uma linha de montagem industrial com destino ao Aterro de Fountain Avenue.\" -> Loop-A: \"Dezenas de pessoas desapareceram porque...\"",
+        "hook": "Eles viraram gestão de resíduos.",
+        "scriptStyleId": "narrative",
+        "platform": "YouTube Shorts",
+        "cta": null,
+        "targetEpisode": 3,
+        "microBriefV1": {
+          "version": "teaserMicroBriefV1",
+          "angle": "Vidas Reduzidas a Caixas de Papelão",
+          "angleCategory": "humano",
+          "notes": [
+            "A banalidade do mal: vidas tratadas como peso em uma balança",
+            "Contraste absoluto entre a gravidade do ato e a burocracia do lixo",
+            "Tom clínico e documental"
+          ],
+          "allowedArtifacts": [
+            "ticket de pesagem de caminhão",
+            "trator de aterro sanitário ao longe",
+            "gaivotas voando sobre neblina",
+            "prancheta com registros numéricos",
+            "carimbo de tonelagem diária",
+            "poeira suspensa no ar"
+          ],
+          "facts": [
+            {
+              "text": "A eficiência do método transformou a neutralização de rivais em uma linha de montagem industrial, tratada como mera gestão de resíduos.",
+              "sourceRef": "[2] Investigação Profunda"
+            },
+            {
+              "text": "As caixas eram despachadas para o Aterro de Fountain Avenue, onde o volume massivo de lixo diário impossibilitava a recuperação pelas autoridades.",
+              "sourceRef": "[1] Investigação Gemini"
+            }
+          ],
+          "forbiddenElements": [
+            "restos mortais",
+            "lixo orgânico explícito",
+            "sangue",
+            "armas",
+            "desmembramento",
+            "choro",
+            "rostos de vítimas"
+          ],
+          "narrativeRole": "hook-only"
+        },
+        "estimatedViews": 890000,
+        "format": "teaser-youtube-shorts"
+      }
+    ]
+  },
+  "rawContent": ""
+}

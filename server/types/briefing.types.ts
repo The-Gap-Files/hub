@@ -12,7 +12,7 @@ export const BriefFactSchema = z.object({
   /** Frase factual curta (1-2 linhas) */
   text: z.string().min(8).max(280),
   /** Referência opcional (título da fonte / índice / url) */
-  sourceRef: z.string().min(3).max(300).optional()
+  sourceRef: z.string().max(300).optional().transform(v => v && v.length >= 3 ? v : undefined)
 })
 
 export type BriefFact = z.infer<typeof BriefFactSchema>
@@ -54,7 +54,7 @@ export const BriefGlobalSafetySchema = z.object({
 export type BriefGlobalSafety = z.infer<typeof BriefGlobalSafetySchema>
 
 export const BriefBundleV1Schema = z.object({
-  version: z.enum(['briefBundleV1']),
+  version: z.string().describe('Versão obrigatória: sempre "briefBundleV1"'),
   language: z.string().default('pt-BR'),
   theme: z.string().min(5),
   title: z.string().optional(),
@@ -85,7 +85,7 @@ export type BriefBundleV1 = z.infer<typeof BriefBundleV1Schema>
  * Este é o ÚNICO contexto factual que o Story Architect deve ver para aquele teaser.
  */
 export const TeaserMicroBriefV1Schema = z.object({
-  version: z.enum(['teaserMicroBriefV1']),
+  version: z.string().describe('Versão obrigatória: sempre "teaserMicroBriefV1"'),
   narrativeRole: BriefRoleIdSchema,
   angleCategory: z.string().min(2).max(80),
   angle: z.string().min(5).max(220),

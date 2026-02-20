@@ -2,10 +2,11 @@ import { prisma } from '../../../utils/prisma'
 import { providerManager } from '../../../services/providers'
 import { createImageProvider } from '../../../services/providers'
 import { costLogService } from '../../../services/cost-log.service'
-import { validateReplicatePricing, PricingNotConfiguredError, calculateReplicateOutputCost } from '../../../constants/pricing'
+import { validateMediaPricing, PricingNotConfiguredError, calculateReplicateOutputCost } from '../../../constants/pricing'
 import { getVisualStyleById } from '../../../constants/visual-styles'
 import type { ImageGenerationRequest } from '../../../types/ai-providers'
 import { ContentRestrictedError } from '../../../services/providers/image/replicate-image.provider'
+import { GeminiContentFilteredError } from '../../../services/providers/image/gemini-image.provider'
 import { getMediaProviderForTask } from '../../../services/media/media-factory'
 
 export default defineEventHandler(async (event) => {
@@ -49,7 +50,7 @@ export default defineEventHandler(async (event) => {
   // 2.1 Validar pricing antes de gastar dinheiro
   const imageModel = (imageProvider as any).model || 'luma/photon-flash'
   try {
-    validateReplicatePricing(imageModel)
+    validateMediaPricing(imageModel, imageProvider.getName())
   } catch (err: any) {
     if (err instanceof PricingNotConfiguredError) {
       throw createError({
@@ -193,7 +194,7 @@ export default defineEventHandler(async (event) => {
       }).catch(() => { })
 
     } catch (err: any) {
-      if (err instanceof ContentRestrictedError) {
+      if (err instanceof ContentRestrictedError || err instanceof GeminiContentFilteredError) {
         await prisma.scene.update({
           where: { id: sceneId },
           data: { imageStatus: 'restricted', imageRestrictionReason: err.message }

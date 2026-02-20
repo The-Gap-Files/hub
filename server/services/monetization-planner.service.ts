@@ -15,13 +15,16 @@ import type { CreativeDirection } from './creative-direction-advisor.service'
 import { buildDossierBlock } from '../utils/dossier-prompt-block'
 import { getNarrativeRoleById } from '../constants/narrative-roles'
 import { buildCacheableMessages, logCacheMetrics } from './llm/anthropic-cache-helper'
+import { sanitizeSchemaForGemini } from '../utils/gemini-schema-sanitizer'
+import { toJsonSchema } from '@langchain/core/utils/json_schema'
 
 const LOG = '[MonetizationPlanner]'
 
 // ── Helper: Gemini-safe structured output ────────────────────────
-// Gemini API pode rejeitar schemas Zod v4 complexos mesmo com 'jsonSchema'.
-// Estratégia: para Gemini, usar método 'jsonSchema' que força responseMimeType=application/json.
-// Se falhar, fallback para parsing manual do raw response.
+// Gemini API aceita apenas um subconjunto do JSON Schema (type, properties, required,
+// description, enum, items). Campos como const, default, minItems, maxItems, etc.
+// causam 400 "Invalid argument". Para Gemini, convertemos Zod → JSON Schema → sanitizamos
+// → passamos JSON Schema puro com zodSchema para parsing.
 function createStructuredOutput(model: any, schema: any, provider: string) {
   const isGemini = provider.toLowerCase().includes('gemini') || provider.toLowerCase().includes('google')
   const isReplicate = provider.toLowerCase().includes('replicate')
@@ -30,15 +33,22 @@ function createStructuredOutput(model: any, schema: any, provider: string) {
     console.log(`${LOG} 🔧 Structured output: replicate (invoke + parse)`)
     return (model as any).withStructuredOutputReplicate(schema, { includeRaw: true })
   }
-  // Groq GPT-OSS: SDK detecta prefixo 'openai/gpt-oss' e usa jsonSchema nativamente → sem override.
-  // Groq Llama 4: SDK não suporta jsonSchema → forçar jsonMode para evitar tool_use_failed.
-  // Groq outros (Llama 3.3, etc.): functionCalling funciona bem → sem override.
+
+  // Gemini: sanitizar schema para remover campos incompatíveis com function_declarations
+  if (isGemini) {
+    const jsonSchema = sanitizeSchemaForGemini(toJsonSchema(schema))
+    console.log(`${LOG} 🔧 Structured output method: functionCalling + sanitized schema (provider: ${provider})`)
+    return (model as any).withStructuredOutput(jsonSchema, {
+      includeRaw: true,
+      method: 'functionCalling',
+      zodSchema: schema
+    })
+  }
+
   let method: string | undefined
-  if (isGemini) method = 'jsonSchema'
-  else if (isGroq) {
+  if (isGroq) {
     const modelName = (model as any).model || (model as any).modelName || ''
     if (modelName.includes('llama-4')) method = 'jsonMode'
-    // GPT-OSS: SDK autodetecta → undefined (deixa o SDK escolher)
   }
   console.log(`${LOG} 🔧 Structured output method: ${method || 'default (SDK auto)'} (provider: ${provider})`)
   return (model as any).withStructuredOutput(schema, {
@@ -697,8 +707,8 @@ const FullVideoSuggestionSchema = z.object({
   keyPoints: z.array(z.string()).min(3).max(5).describe('Pontos-chave que devem aparecer no roteiro'),
   emotionalArc: z.string().describe('Progressão emocional do início ao fim'),
   estimatedViews: z.number().describe('Estimativa conservadora de views'),
-  platform: z.enum(['YouTube']).describe('Plataforma obrigatória: YouTube'),
-  format: z.enum(['full-youtube']).describe('Formato obrigatório: full-youtube'),
+  platform: z.string().describe('Plataforma obrigatória: sempre "YouTube"'),
+  format: z.string().describe('Formato obrigatório: sempre "full-youtube"'),
   // ── Creative Direction (ATENÇÃO: roteiro ≠ visual) ─────────────
   scriptStyleId: z.string().describe(
     'ID do ESTILO DE ROTEIRO (como o narrador conta a história). ' +
@@ -745,8 +755,8 @@ const TeaserSuggestionSchema = z.object({
   scriptOutline: z.string().describe('Estrutura resumida do script (Hook → Setup → Revelação → CTA)'),
   visualSuggestion: z.string().describe('Descrição curta do visual sugerido'),
   cta: z.string().describe('Call-to-action para o Full Video'),
-  platform: z.enum(['YouTube Shorts']).describe('Plataforma obrigatória: YouTube Shorts'),
-  format: z.enum(['teaser-youtube-shorts']).describe('Formato obrigatório: teaser-youtube-shorts'),
+  platform: z.string().describe('Plataforma obrigatória: sempre "YouTube Shorts"'),
+  format: z.string().describe('Formato obrigatório: sempre "teaser-youtube-shorts"'),
   estimatedViews: z.number().describe('Estimativa de views na plataforma'),
   // ── Creative Direction (ATENÇÃO: roteiro ≠ visual) ─────────────
   scriptStyleId: z.string().describe(

@@ -31,7 +31,7 @@ export const ScriptSceneSchema = z.object({
   sceneEnvironment: z.string().describe('Identificador curto do ambiente/locação da cena em snake_case em inglês (ex: "bishop_study", "canal_dawn", "courtroom", "ocean_surface"). Cenas consecutivas no MESMO ambiente devem ter o MESMO valor.'),
   motionDescription: z.string().nullable().describe('Instruções de MOVIMENTO para o modelo image-to-video (SEMPRE EM INGLÊS). Descreva movimentos de câmera (dolly, pan, tilt) e elementos animados (chamas, água, vento, poeira) que devem animar a imagem. NÃO repita o que já está na imagem — foque no que se MOVE. 15-40 palavras.'),
   audioDescription: z.string().nullable().describe('Atmosfera sonora e SFX em inglês técnico. Descreva sons de ambiente (rain, wind, crowd murmur), impactos (door slam, thunder crack), e atmosfera (eerie drone, tension strings). Seja ESPECÍFICO: "distant church bells with reverb" é melhor que "bells".'),
-  audioDescriptionVolume: z.number().min(-24).max(-6).default(-12).describe('Volume do SFX em dB para mixagem com a narração. Range: -24 (quase inaudível) a -6 (proeminente). Default: -12 (equilíbrio). Sons de ambiente: -18 a -15. Impactos dramáticos: -9 a -6.'),
+  audioDescriptionVolume: z.number().min(-24).max(-12).default(-18).describe('Volume do SFX em dB para mixagem com a narração. Range: -24 (quase inaudível) a -12 (máximo permitido). Default: -18 (equilíbrio). Sons de ambiente: -24 a -20. Impactos dramáticos: -15 a -12.'),
   estimatedDuration: z.number().default(5).describe('Duração estimada em segundos (entre 5 e 6 segundos)')
 })
 
@@ -346,6 +346,12 @@ export function buildUserPrompt(request: ScriptGenerationRequest, providerHint?:
   const isShortFormat = videoFormat.includes('tiktok') || videoFormat.includes('reels') || videoFormat.includes('teaser') || videoFormat.includes('shorts')
   const isYouTubeCinematic = videoFormat.includes('youtube') || videoFormat.includes('full')
 
+  // Caminho B: para full video, o Roteirista decide quantas cenas o conteúdo sustenta.
+  // O idealSceneCount é o TETO (plano do Arquiteto). O mínimo garante que não vire um teaser.
+  const minSceneCount = isShortFormat
+    ? idealSceneCount // formatos curtos mantêm contagem fixa
+    : Math.max(40, Math.round(idealSceneCount * 0.45)) // full video: mínimo 40 ou 45% do plano
+
   let formatContext = ''
   if (isShortFormat) {
     formatContext = `\n\n📱 FORMATO DO VÍDEO: YouTube Shorts (vídeo curto, 15-180s)
@@ -571,11 +577,11 @@ Máximo de 38 cenas por track (limite do modelo). Defina "backgroundMusic" como 
 
 ---
 ⚠️ REQUISITOS OBRIGATÓRIOS PARA APROVAÇÃO:
-1. DURAÇÃO MÍNIMA: O vídeo deve ter pelo menos ${request.targetDuration} segundos (${idealSceneCount} cenas). Você PODE gerar até ${maxSceneCount} cenas (no máximo ${maxExtraScenes} cenas extras) para concluir a história e o CTA sem cortar frases.
-2. QUANTIDADE DE CENAS: Gere entre ${idealSceneCount} e ${maxSceneCount} cenas. Use as cenas extras APENAS para: (a) terminar a última ideia/frase da história sem cortar no meio; (b) incluir o CTA completo (convite para seguir o canal + menção The Gap Files). Não extrapole além de ${maxSceneCount} cenas.
+1. QUANTIDADE DE CENAS: Gere entre ${minSceneCount} e ${maxSceneCount} cenas. O número exato deve refletir o que o CONTEÚDO DISPONÍVEL sustenta com qualidade — nem mais (padding vazio), nem menos (conteúdo cortado). O Arquiteto planejou ${idealSceneCount} cenas como teto de referência, mas você pode (e deve) gerar menos se o material não justificar mais sem repetição. Mínimo absoluto: ${minSceneCount} cenas.
+2. ANTI-PADDING: Não force cenas para atingir um número. Se a história está contada com qualidade em ${Math.round(minSceneCount * 1.3)} cenas, pare aí. Cenas extras sem conteúdo novo pioram a retenção.
 3. DURAÇÃO DA CENA: Cada cena tem slots fixos de 5 segundos.
 4. CONTAGEM DE PALAVRAS: Cada narração DEVE ter entre ${minWords} e ${maxWords} palavras (${targetWPM} WPM ÷ 60 × 5s = ${wordsPerScene} palavras ideais). 🚨 NUNCA exceda ${maxWords} palavras - isso faz o áudio ultrapassar 5 segundos e quebra a sincronia. NUNCA faça cenas com menos de ${minWords} palavras - isso gera silêncio.
-5. MÚSICA DE FUNDO: ${isShortFormat ? 'Use "backgroundMusic" { prompt, volume } para UMA música para TODO o vídeo. O prompt deve ser compatível com Stable Audio 2.5.' : 'Use "backgroundMusicTracks" com tracks { prompt, volume, startTime, endTime }. O prompt de cada track deve ser compatível com Stable Audio 2.5.'}
+5. MÚSICA DE FUNDO: ${isShortFormat ? 'Use "backgroundMusic" { prompt, volume } para UMA música para TODO o vídeo. O prompt deve ser compatível com Stable Audio 2.5.' : 'Use "backgroundMusicTracks" com tracks { prompt, volume, startScene, endScene }. Calibre startScene/endScene com base no número REAL de cenas que você gerou — não no número planejado. A última track DEVE ter endScene: null.'}
 6. Se houver imagens anexas, use-as como referência visual primária.
 7. 📐 PROPORÇÃO NARRATIVA: A seção de REFLEXÃO/LIÇÃO (após o corpo factual + ponte temporal) deve ter no MÁXIMO ${maxReflectionScenes} cenas (15% ideal, ${maxReflectionCeiling} cenas = teto absoluto de 20%). Invista as cenas no CORPO FACTUAL, não na reflexão.
 8. 🚫 ANTI-REPETIÇÃO: Antes de finalizar, releia TODAS as cenas de reflexão. Se duas cenas expressam a mesma ideia com palavras diferentes, ELIMINE uma e redistribua o conteúdo para o corpo factual. Cada cena de reflexão deve trazer um ARGUMENTO ÚNICO e INÉDITO.${providerSpecificItems}
@@ -583,7 +589,7 @@ ${guidelines}${musicWarning}
 
 🛡️ VALIDAÇÃO FINAL OBRIGATÓRIA:
 Antes de retornar o JSON, faça esta auditoria interna:
-1. CONTE as cenas totais — deve estar entre ${idealSceneCount} e ${maxSceneCount}.
+1. CONTE as cenas totais — deve estar entre ${minSceneCount} e ${maxSceneCount}. Pergunte: "Cada cena adiciona informação nova ou é padding?" Se padding → elimine.
 2. CONTE as cenas de reflexão/lição (após o corpo factual) — deve ser ≤${maxReflectionCeiling} cenas.
 3. PROCURE repetições temáticas — se encontrar, ELIMINE e COMPACTE.
 4. A última cena de conteúdo deve terminar com frase completa.
@@ -618,6 +624,25 @@ export function parseScriptResponse(
   const wordCount = fullText.split(/\s+/).length
   const estimatedDuration = scenes.reduce((acc, s) => acc + s.estimatedDuration, 0)
 
+  // Clamp backgroundMusicTracks ao número real de cenas geradas.
+  // O LLM pode calcular tracks para 150 cenas mas gerar apenas 64 (Caminho B).
+  // Tracks com startScene além do último índice são removidas.
+  // endScene é clampeado ao último índice. Última track recebe endScene: null.
+  const lastSceneIndex = scenes.length - 1
+  let sanitizedTracks = content.backgroundMusicTracks ?? undefined
+  if (sanitizedTracks && sanitizedTracks.length > 0) {
+    sanitizedTracks = sanitizedTracks
+      .filter(t => t.startScene <= lastSceneIndex)
+      .map(t => ({
+        ...t,
+        endScene: t.endScene === null ? null : Math.min(t.endScene, lastSceneIndex)
+      }))
+    // Garante que a última track cobre até o fim do vídeo
+    if (sanitizedTracks.length > 0) {
+      sanitizedTracks[sanitizedTracks.length - 1]!.endScene = null
+    }
+  }
+
   const usage = tokenUsage ?? { inputTokens: 0, outputTokens: 0, totalTokens: 0 }
   return {
     title: content.title,
@@ -625,7 +650,7 @@ export function parseScriptResponse(
     fullText,
     scenes,
     backgroundMusic: content.backgroundMusic ?? undefined,
-    backgroundMusicTracks: content.backgroundMusicTracks ?? undefined,
+    backgroundMusicTracks: sanitizedTracks,
     wordCount,
     estimatedDuration,
     provider: providerName,

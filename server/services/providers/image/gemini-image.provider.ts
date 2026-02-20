@@ -7,29 +7,36 @@ import type {
   ProviderCostInfo
 } from '../../../types/ai-providers'
 
+/** Erro lançado quando o safety filter do Gemini bloqueia a geração */
+export class GeminiContentFilteredError extends Error {
+  public readonly reasons: string[]
+  constructor(reasons: string[]) {
+    super(`Gemini Image: bloqueado pelo safety filter. ${reasons.join('; ')}`)
+    this.name = 'GeminiContentFilteredError'
+    this.reasons = reasons
+  }
+}
+
 /**
  * Gemini Image Provider
- * 
- * Implementação para o modelo Imagen 3 via API "Google Generative AI"
- * Documentação: https://ai.google.dev/api/imagen
- * Endpoints:
- *   - models/imagen-3.0-generate-001:predict
- *   - models/imagen-3.0-fast-generate-001:predict
- * 
- * A API AI Studio é ligeiramente diferente da Vertex AI.
- * Para simplificar, usamos fetch direto no endpoint REST com a API Key.
+ *
+ * Suporta dois backends:
+ *   1. AI Studio (default): generativelanguage.googleapis.com — usa GEMINI_API_KEY
+ *   2. Vertex AI Express: aiplatform.googleapis.com — usa VERTEX_API_KEY
+ *
+ * Vertex AI oferece parâmetros extras: enhancePrompt, negativePrompt, seed, imageSize 2K.
+ * Se VERTEX_API_KEY estiver no .env, usa Vertex automaticamente.
  */
 export class GeminiImageProvider implements IImageGenerator {
   private apiKey: string
   private model: string
-  private baseUrl: string = 'https://generativelanguage.googleapis.com/v1beta/models'
+  private useVertex: boolean
+  private vertexApiKey: string | undefined
 
   constructor(config: { apiKey: string; model?: string }) {
     this.apiKey = config.apiKey
 
     // Normalização de IDs de modelo (Safety net)
-    // Se o usuário configurar "Gemini 1.5 Pro" ou nomes incorretos para imagem,
-    // ou se tentar usar o antigo Imagen 3 (não disponível), redirecionamos para o Imagen 4.
     const rawModel = config.model ?? 'imagen-4.0-generate-001'
 
     if (rawModel.includes('gemini') || rawModel.includes('preview') || rawModel.includes('3.0')) {
@@ -37,6 +44,14 @@ export class GeminiImageProvider implements IImageGenerator {
       this.model = 'imagen-4.0-generate-001'
     } else {
       this.model = rawModel
+    }
+
+    // Detectar Vertex AI Express — se tiver VERTEX_API_KEY, usa Vertex
+    this.vertexApiKey = process.env.VERTEX_API_KEY
+    this.useVertex = !!this.vertexApiKey
+
+    if (this.useVertex) {
+      console.log(`[Gemini Image] 🔷 Usando Vertex AI Express (parâmetros extras disponíveis)`)
     }
   }
 
@@ -48,10 +63,8 @@ export class GeminiImageProvider implements IImageGenerator {
     const startTime = Date.now()
 
     // 1. Mapear Aspect Ratio para string aceita pelo Imagen
-    // Aceita: "1:1", "3:4", "4:3", "9:16", "16:9"
     let aspectRatio = request.aspectRatio || '16:9'
 
-    // Fallback se vier "1024x1024" ou algo assim do request
     if (aspectRatio.includes('x')) {
       const [w, h] = aspectRatio.split('x').map(Number)
       if (w && h) {
@@ -61,92 +74,116 @@ export class GeminiImageProvider implements IImageGenerator {
         else if (Math.abs(ratio - 9 / 16) < 0.1) aspectRatio = '9:16'
         else if (Math.abs(ratio - 4 / 3) < 0.1) aspectRatio = '4:3'
         else if (Math.abs(ratio - 3 / 4) < 0.1) aspectRatio = '3:4'
-        else aspectRatio = '1:1' // Default seguro
+        else aspectRatio = '1:1'
       } else {
-        aspectRatio = '16:9' // Default fallback se split falhar
+        aspectRatio = '16:9'
       }
     }
 
-    // 2. Construir payload
-    // Documentação de AI Studio para Imagen 3 (beta)
-    // POST https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=API_KEY
-    const url = `${this.baseUrl}/${this.model}:predict?key=${this.apiKey}`
+    // 2. Construir URL e payload conforme o backend
+    const url = this.useVertex
+      ? `https://aiplatform.googleapis.com/v1/publishers/google/models/${this.model}:predict?key=${this.vertexApiKey}`
+      : `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:predict?key=${this.apiKey}`
 
-    // Prompt includes style if present
     const fullPrompt = request.style
       ? `${request.style}. ${request.prompt}`
       : request.prompt
 
-    const payload = {
-      instances: [
-        {
-          prompt: fullPrompt
-        }
-      ],
-      parameters: {
-        sampleCount: request.numVariants || 1,
-        aspectRatio: aspectRatio,
-        // Opcionais comuns
-        safetyFilterLevel: 'block_only_high',
-        personGeneration: 'allow_adult'
-      }
+    // Parâmetros base (ambos backends)
+    const parameters: Record<string, any> = {
+      sampleCount: request.numVariants || 1,
+      aspectRatio: aspectRatio,
+      safetyFilterLevel: 'block_only_high',
+      personGeneration: 'allow_adult',
+      includeRaiReason: true
     }
 
-    console.log(`[Gemini Image] 🎨 Gerando imagem com modelo ${this.model}...`)
+    // Parâmetros extras do Vertex AI
+    if (this.useVertex) {
+      parameters.enhancePrompt = false
+    }
+
+    const payload = {
+      instances: [{ prompt: fullPrompt }],
+      parameters
+    }
+
+    const backend = this.useVertex ? 'Vertex' : 'AI Studio'
+    console.log(`[Gemini Image] 🎨 ${backend} | modelo ${this.model}`)
     console.log(`[Gemini Image] Prompt: "${fullPrompt.substring(0, 50)}..."`)
     console.log(`[Gemini Image] Aspect Ratio: ${aspectRatio}`)
 
     try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      })
+      // Fetch com retry para 429 (rate limit)
+      const MAX_RETRIES = 3
+      let data: any
+      for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
 
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`Gemini Image API Error (${response.status}): ${errorText}`)
+        if (response.status === 429 && attempt < MAX_RETRIES) {
+          const wait = (attempt + 1) * 5000 // 5s, 10s, 15s
+          console.warn(`[Gemini Image] ⏳ Rate limit (429). Retry ${attempt + 1}/${MAX_RETRIES} em ${wait / 1000}s...`)
+          await new Promise(r => setTimeout(r, wait))
+          continue
+        }
+
+        if (!response.ok) {
+          const errorText = await response.text()
+          throw new Error(`Gemini Image API Error (${response.status}): ${errorText}`)
+        }
+
+        data = await response.json()
+        break
       }
-
-      const data = await response.json()
 
       // 3. Processar resposta
-      // Estrutura esperada:
-      // {
-      //   "predictions": [
-      //     {
-      //       "bytesBase64Encoded": "...",
-      //       "mimeType": "image/png"
-      //     }
-      //   ]
-      // }
-
-      if (!data.predictions || !Array.isArray(data.predictions) || data.predictions.length === 0) {
-        throw new Error('Gemini Image API retornou lista de predictions vazia.')
+      const predictions = data.predictions
+      if (!predictions || !Array.isArray(predictions) || predictions.length === 0) {
+        throw new Error('Gemini Image API retornou lista de predictions vazia. Provável bloqueio de safety filter (prompt sensível).')
       }
 
-      const images: GeneratedImage[] = data.predictions.map((pred: any) => {
-        if (!pred.bytesBase64Encoded) {
-          throw new Error('Prediction sem bytesBase64Encoded.')
+      // Separar predictions válidas de filtradas
+      const validPredictions: any[] = []
+      const filteredReasons: string[] = []
+
+      for (const pred of predictions) {
+        if (pred.raiFilteredReason) {
+          filteredReasons.push(pred.raiFilteredReason)
+          console.warn(`[Gemini Image] ⚠️ Prediction filtrada: ${pred.raiFilteredReason}`)
+        } else if (pred.bytesBase64Encoded) {
+          validPredictions.push(pred)
+        } else {
+          console.warn('[Gemini Image] ⚠️ Prediction sem bytesBase64Encoded e sem raiFilteredReason')
         }
+      }
+
+      if (validPredictions.length === 0) {
+        throw new GeminiContentFilteredError(
+          filteredReasons.length > 0 ? filteredReasons : ['Sem motivo retornado pelo API']
+        )
+      }
+
+      if (filteredReasons.length > 0) {
+        console.warn(`[Gemini Image] ⚠️ ${filteredReasons.length} de ${predictions.length} predictions filtradas. Continuando com ${validPredictions.length} válida(s).`)
+      }
+
+      const images: GeneratedImage[] = validPredictions.map((pred: any) => {
         return {
           buffer: Buffer.from(pred.bytesBase64Encoded, 'base64'),
-          // Imagen 3 gera 1024x1024 (1:1), 1792x1024 (16:9) etc.
-          // Não retorna dimensões exatas na response, assumimos com base no aspect ratio pedido
           width: aspectRatio === '16:9' ? 1792 : (aspectRatio === '9:16' ? 1024 : 1024),
           height: aspectRatio === '16:9' ? 1024 : (aspectRatio === '9:16' ? 1792 : 1024),
-          revisedPrompt: fullPrompt // Imagen não devolve revised prompt ainda
+          revisedPrompt: pred.prompt || fullPrompt
         }
       })
 
       const elapsed = (Date.now() - startTime) / 1000
 
-      console.log(`[Gemini Image] ✅ Sucesso: ${images.length} imagem(ns) gerada(s) em ${elapsed.toFixed(2)}s`)
+      console.log(`[Gemini Image] ✅ Sucesso: ${images.length} imagem(ns) gerada(s) em ${elapsed.toFixed(2)}s (${backend})`)
 
-      // Custo estimado (Imagen 3 custa ~$0.04 por imagem no Vertex, AI Studio pode ser free tier ou paid)
-      // Vamos assumir $0.04 para consistência com o tier do media-registry
       const costPerImage = this.model.includes('fast') ? 0.02 : 0.04
       const totalCost = images.length * costPerImage
 
@@ -156,7 +193,8 @@ export class GeminiImageProvider implements IImageGenerator {
         cost: totalCost,
         metadata: {
           predict_time: elapsed,
-          sampleCount: images.length
+          sampleCount: images.length,
+          backend
         }
       }
 

@@ -126,10 +126,10 @@ export const LLM_PROVIDERS: Record<LlmProviderId, LlmProvider> = {
     envKey: 'GOOGLE_API_KEY',
     iconKey: 'brain',
     models: [
+      { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview', contextWindow: 1000000, costTier: 2, supportsStructuredOutput: true, supportsVision: true },
+      { id: 'gemini-3.1-pro-preview', name: 'Gemini 3.1 Pro Preview', contextWindow: 1000000, costTier: 3, supportsStructuredOutput: true, supportsVision: true },
       { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', contextWindow: 1000000, costTier: 1, supportsStructuredOutput: true, supportsVision: true },
-      { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', contextWindow: 1000000, costTier: 1, supportsStructuredOutput: true, supportsVision: true },
-      { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', contextWindow: 2000000, costTier: 3, supportsStructuredOutput: true, supportsVision: true },
-      { id: 'gemini-1.5-flash-8b', name: 'Gemini 1.5 Flash 8B', contextWindow: 1000000, costTier: 1, supportsStructuredOutput: true, supportsVision: true }
+      { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', contextWindow: 1000000, costTier: 1, supportsStructuredOutput: true, supportsVision: true }
     ]
   },
   replicate: {

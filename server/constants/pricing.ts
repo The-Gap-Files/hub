@@ -199,9 +199,9 @@ export const LLM_PRICING: Record<string, LLMPricing> = {
   },
 
   // === Google (Gemini) ===
-  'gemini-1.5-pro': {
-    costPerInputToken: 0.0000035,   // $3.50/1M input tokens (<= 128k context)
-    costPerOutputToken: 0.0000105   // $10.50/1M output tokens (<= 128k context)
+  'gemini-3-flash-preview': {
+    costPerInputToken: 0.0000001,   // ~$0.10/1M input (preview pricing — atualizar quando GA)
+    costPerOutputToken: 0.0000004   // ~$0.40/1M output
   },
   'gemini-1.5-flash': {
     costPerInputToken: 0.000000075, // $0.075/1M input tokens (<= 128k context)
@@ -270,6 +270,25 @@ export function validateReplicatePricing(model: string): ModelPricing {
     throw new PricingNotConfiguredError(model, 'REPLICATE')
   }
   return pricing
+}
+
+/** Providers que calculam custo internamente (não precisam de mapa de preços) */
+const SELF_PRICING_PROVIDERS = new Set(['GEMINI', 'gemini'])
+
+/**
+ * Valida pricing de um media provider.
+ * Replicate: exige modelo no mapa REPLICATE_MODEL_PRICING.
+ * Gemini/outros com custo interno: sempre passa (custo é calculado no provider).
+ * Lança PricingNotConfiguredError apenas se Replicate e modelo não mapeado.
+ */
+export function validateMediaPricing(model: string, providerName: string): void {
+  if (SELF_PRICING_PROVIDERS.has(providerName)) return
+  if (providerName.toLowerCase() === 'replicate') {
+    validateReplicatePricing(model)
+    return
+  }
+  // Providers desconhecidos: warn mas não bloqueia
+  console.warn(`[Pricing] ⚠️ Provider "${providerName}" não tem validação de pricing. Modelo: ${model}`)
 }
 
 /**

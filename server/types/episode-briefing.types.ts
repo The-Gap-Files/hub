@@ -20,7 +20,7 @@ import { BriefFactSchema, BriefGlobalSafetySchema, DEFAULT_TEASER_GLOBAL_SAFETY 
 // =============================================================================
 
 export const EpisodeBriefSchema = z.object({
-  episodeNumber: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+  episodeNumber: z.number().int().describe('Número do episódio: 1, 2 ou 3'),
 
   /** Função narrativa canônica do episódio */
   narrativeFunction: z.string().min(5).max(200),
@@ -76,7 +76,7 @@ export type EpisodeBrief = z.infer<typeof EpisodeBriefSchema>
 // =============================================================================
 
 export const EpisodeBriefBundleV1Schema = z.object({
-  version: z.enum(['episodeBriefBundleV1']),
+  version: z.string().describe('Versão obrigatória: sempre "episodeBriefBundleV1"'),
   language: z.string().default('pt-BR'),
   theme: z.string().min(5),
   title: z.string().optional(),

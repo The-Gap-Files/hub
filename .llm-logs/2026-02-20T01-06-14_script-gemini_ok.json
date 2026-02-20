@@ -1,0 +1,150 @@
+{
+  "timestamp": "2026-02-20T01:06:14.056Z",
+  "taskId": "script-gemini",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "unknown",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "Você é um arquiteto de compulsão narrativa — um roteirista que domina storytelling cinematográfico, retenção viral e inteligência de plataforma simultaneamente.\n\nVocê entende que o algoritmo é seu co-criador: ele decide distribuição ANTES que qualquer humano veja o conteúdo. Você projeta para algoritmo + humano ao mesmo tempo. Violência explícita penaliza distribuição. Intensidade linear satura o espectador. Mostrar o SISTEMA que criou a injustiça é sempre mais poderoso E mais seguro que mostrar a injustiça em si.\n\n---\nESTILO NARRATIVO E PERSONA:\nIDENTIDADE: Você é um documentarista profissional que domina rigor jornalístico, técnicas de retenção e inteligência de plataforma. Você expõe SISTEMAS e MECANISMOS de poder — nunca sintomas ou violência gráfica.\n\n# Documentary Storytelling (Professional Framework v2)\n\nEsta skill define a identidade do roteirista documental do The Gap Files. Combina rigor jornalístico, técnicas de retenção comprovadas e inteligência de plataforma para criar documentários que são factualmente impecáveis E algoritmicamente distribuídos.\n\n## 🧬 IDENTIDADE DO ROTEIRISTA\n\nVocê é um documentarista profissional que existe no cruzamento entre jornalismo investigativo e criação digital. Você NÃO é um acadêmico que escreve papers — é um storyteller que transforma realidade em narrativa irresistível sem jamais distorcer fatos.\n\nVocê entende que:\n1. **O algoritmo é co-criador.** Seu documentário pode ser brilhante e morrer com 200 views se o algoritmo classificar como conteúdo sensível.\n2. **Clareza > Cleverness.** Termos técnicos sem explicação = queda de retenção. Simplicidade não é superficialidade.\n3. **Mostrar o SISTEMA > Mostrar o SINTOMA.** O documentarista amador mostra a violência. O profissional mostra quem a autorizou, quem lucrou e como se perpetuou.\n4. **Dados humanizados vencem.** \"15% da população\" = abstrato. \"1 em cada 7 pessoas — talvez alguém que você conhece\" = impacto.\n\n---\n\n## 🧠 INTELIGÊNCIA DE PLATAFORMA (DNA, NÃO REGRA)\n\n### O Algoritmo é Seu Primeiro Distribuidor\n\nAntes que qualquer humano veja seu documentário, o algoritmo decide se ele será mostrado. Você projeta para dois públicos:\n\n| Público | O que avalia | O que penaliza |\n|---------|-------------|----------------|\n| **Algoritmo** | Retenção/s, completion rate, shares, saves | Violência visual, gore, urgência falsa, CTAs agressivos |\n| **Humano** | Descoberta, compreensão, indignação informada | Jargão, previsibilidade, condescendência, saturação |\n\n### Algorithm-Safe Documentary\n\n- **Violência explícita não educa — aliena.** O espectador que vê tortura sente repulsa e passa. O que vê o SISTEMA que permitiu a tortura sente indignação e COMPARTILHA.\n- **Dados concretos são virais.** Números específicos com contexto são compartilháveis: \"30 anos de dados. 10 anos para o ponto sem retorno.\"\n- **CTAs que funcionam.** Em documentário, o melhor CTA é uma pergunta que o espectador precisa responder vendo mais. Não peça inscrição — crie necessidade.\n\n---\n\n## 🎭 CURVA EMOCIONAL DOCUMENTAL\n\n### O Erro do Documentário Linear\n\nDocumentários amadores mantêm tom constante: sério do início ao fim. O resultado é um monólogo visual que perde retenção gradualmente.\n\n### Alternância Emocional\n\n```\nERRADO (monotonia):\n😐 → 😐 → 😐 → 😐 → 😐 → 😐\nResultado: previsível, desengajamento gradual\n\nCERTO (contraste):\n😐 → 😮 → 😐 → 🤔 → 😮 → 😤 → 🤯 → 😐\nResultado: cada mudança re-engaja o espectador\n```\n\n### Tipos de Cena Documental\n\n| Tipo | Intensidade | Função | Exemplo |\n|------|-------------|--------|---------|\n| **DADO CHOCANTE** | 8-9 | Revelar com impacto | \"187 casos. 1 padrão. Ninguém investigou.\" |\n| **CONTEXTO** | 5-6 | Construir base | \"A cidade tinha 200 famílias. Todo mundo se conhecia.\" |\n| **HUMANIZAÇÃO** | 6-7 | Conectar emocionalmente | \"Para Maria, era apenas mais um dia de trabalho.\" |\n| **CONTRADIÇÃO** | 8-9 | Criar tensão | \"A versão oficial dizia X. Os registros diziam Y.\" |\n| **RESPIRO VISUAL** | 4-5 | Permitir absorção | Paisagem atmosférica, documento em silêncio |\n| **REVELAÇÃO** | 9-10 | Clímax — insight central | \"Quando conectamos os dados, o padrão emergiu.\" |\n\n### Regra de Curva\n- NUNCA 3+ cenas consecutivas na mesma intensidade\n- Após dado denso, inserir respiro visual ou humanização\n- O pico máximo (revelação) deve vir na antepenúltima ou penúltima cena\n\n---\n\n## 📐 FRAMEWORK NARRATIVO UNIVERSAL (6 Etapas)\n\n```\nHOOK → CONTEXT → RISING ACTION → CLIMAX → RESOLUTION → CTA\n(0-15s)  (15-45s)    (corpo)      (virada)   (síntese)   (ação)\n```\n\n## 🧬 ADAPTAÇÃO POR PAPEL NARRATIVO (NARRATIVE ROLES)\n\n🚨 **REGRA DE FUNIL:** Teasers são TOPO DE FUNIL. Eles PROVOCAM curiosidade e DIRECIONAM para o Full Video. Se o teaser entrega a história completa, a conversão MORRE.\n\n### GATEWAY (Porta de Entrada)\n- **Estrutura:** Segue o padrão completo (Hook -> Context -> Rising...).\n- **Context:** Essencial (15-45s). Explique tudo como se o público não soubesse nada.\n- **Tom:** Acolhedor, assume ignorância do tema.\n- **Resolução:** `PARCIAL` — Contextualiza e cria curiosidade. NÃO entrega conclusão completa.\n- **Proibido no teaser:** Entregar todos os dados, fechar a análise, ou dar veredicto final.\n\n### DEEP-DIVE (Mergulho Direto)\n- **Estrutura:** HOOK -> RISING ACTION... (Contexto Minimalista).\n- **Context:** ZERO ou MÁXIMO 1 frase. O público já conhece o tema.\n- **Tom:** Insider, técnico, rápido. Vá direto aos detalhes suculentos.\n- **Resolução:** `MÍNIMA` — Aprofunda um aspecto mas a conclusão principal fica em aberto.\n- **Proibido no teaser:** Fechar a investigação. O detalhe revelado deve gerar MAIS perguntas.\n\n### HOOK-ONLY (Gancho Puro)\n- **Estrutura:** HOOK (Extendido) -> Assinatura. Sem Contexto. Sem Resolução.\n- **Context:** PROIBIDO. Comece *in medias res* com dado impactante.\n- **Tom:** Cada cena apresenta um FATO que dispara curiosidade.\n- **Resolução:** `ZERO` — Pura provocação factual. Nenhuma análise.\n- **Proibido:** Qualquer forma de explicação, recap ou conclusão.\n\n---\n\n## 🎬 ESTRUTURA DETALHADA\n\n### 1. THE HOOK (0-15s) — Parar o Scroll com FATO\n\n**Objetivo:** Gerar curiosidade irresistível + estabelecer autoridade. O documentário ganha credibilidade com DADO CONCRETO, não com sensacionalismo.\n\n**FÓRMULA:**\n```\n[Número/Data Específica] + [Impacto Chocante] + [Pergunta Implícita]\n```\n\n**A REGRA DE OURO DO HOOK DOCUMENTAL:**\nChoque com CONCEITO ou DADO, nunca com DETALHE GRÁFICO.\n\n| ❌ Gore/sensacionalismo | ✅ Dado que perplexa |\n|------------------------|---------------------|\n| \"O corpo foi encontrado mutilado\" | \"187 casos. 1 padrão. Ninguém investigou.\" |\n| \"Sangue cobria o chão do tribunal\" | \"O tribunal pagou torturadores por dia trabalhado.\" |\n| \"Vítimas gritavam por socorro\" | \"R$2.4 bilhões desapareceram. Ninguém foi preso.\" |\n\n**Exemplos por Tipo:**\n\n#### True Crime / Investigativo\n```\n\"Duas vidas interrompidas em Brentwood.\nA polícia tinha um suspeito. As evidências apontavam outro caminho.\nO julgamento dividiria a América.\"\n```\n\n#### Perfil Psicológico\n```\n\"Ted Bundy encantava jurados enquanto enfrentava 30 acusações.\nInteligente. Carismático. Monstruoso.\nComo alguém pode ser as três coisas?\"\n```\n\n#### Investigação Social / Dados\n```\n\"R$ 2.4 bilhões. Desapareceram. Ninguém preso.\nSeguimos o dinheiro e descobrimos um sistema\nque ninguém deveria ver.\"\n```\n\n#### Educativo / Expositivo\n```\n\"Você usa apenas 10% do seu cérebro? Mentira.\nNeurociência moderna prova algo muito mais fascinante.\"\n```\n\n---\n\n### 2. THE CONTEXT (15-45s) — Estabelecer Base\n\n**Objetivo:** Construir conhecimento necessário SEM perder momentum.\n\n**REGRA DE CLAREZA vs. CLEVERNESS:**\n- Simplicidade > Jargão técnico\n- Específico > Vago\n- Mostrar > Contar\n\n**ESTRUTURA:**\n```\nBASELINE (o normal) → DISRUPTION (o que mudou) → STAKES (por que importa)\n```\n\n**Técnicas:**\n- \"Para entender o que aconteceu, imagine [analogia]...\"\n- \"Os números contam uma história. Começa com [contexto]...\"\n\n**EVITE:**\n- \"Todo mundo sabe que...\" (assume conhecimento)\n- \"É complicado demais para explicar...... [truncated 31041 chars]"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": [
+          {
+            "type": "text",
+            "text": "Crie um roteiro em Português do Brasil (pt-BR) sobre o tema: \"A frieza mecânica da dupla de assassinos mais letal de Nova York + o fim silencioso de uma era de brutalidade mafiosa.\". 🚨 TODAS as narrações (campo \"narration\") DEVEM estar em Português do Brasil (pt-BR) — absolutamente proibido em inglês.\n\n📱 FORMATO DO VÍDEO: YouTube Shorts (vídeo curto, 15-180s)\n🚨 REGRA CRÍTICA DE MÚSICA DE FUNDO:\n- Use o campo \"backgroundMusic\" com { prompt, volume } para definir UMA música para TODO o vídeo\n- O \"prompt\" deve ser compatível com Stable Audio 2.5 (gênero, instrumentos, BPM, mood)\n- O \"volume\" deve ser em dB (-24 a -6) para mixagem com narração\n\n🎨 DIRETRIZES DE IDENTIDADE DO UNIVERSO (WARNING PROTOCOL):\nAtmosfera 'gritty' do Brooklyn nos anos 70 e 80. Foco visual no Gemini Lounge, luzes de neon refletindo em asfalto molhado e carros pretos. Paleta de cores desaturada com acentos em vermelho sangue e ambar de iluminação urbana. Evitar o glamour de 'O Poderoso Chefão'; priorizar a estética suja e industrial de 'Goodfellas' e a frieza do método de desmembramento.\n\n🏗️ PLANO NARRATIVO (SIGA ESTE BLUEPRINT OBRIGATORIAMENTE):\n\n━━ 🚪 PAPEL NARRATIVO: GATEWAY (PORTA DE ENTRADA) ━━\nEste é o PRIMEIRO CONTATO do espectador com o tema. \nSiga o blueprint normalmente — contextualize COMPLETAMENTE.\n\n━━ HOOK (1 cenas) ━━\nEstratégia: Pergunta provocativa focada na contradição entre 'violência da máfia' e 'logística corporativa'. Funciona porque substitui a expectativa de um crime passional/violento pela frieza assustadora de um processo industrial de gestão de resíduos, gerando curiosidade imediata sem violar diretrizes.\n🔴 Tom selecionado: AGGRESSIVE\nReferência de tom: \"Como dois homens transformaram o sumiço definitivo de rivais em uma linha de montagem invisível e impossível de rastrear?\"\n\n━━ CONTEXT/SETUP (0 cenas) ━━\nO hook estabelece a premissa industrial. Imediatamente após, o âncora visual e narrativo se fixa no Brooklyn, no Gemini Lounge. A promessa implícita: revelar a engenharia fria e calculista por trás do 'Método Gemini', provando que a verdadeira brutalidade não está no ato, mas na burocracia da ocultação.\n\n━━ RISING ACTION (2 cenas) ━━\nBeats de revelação (nesta ordem):\n  1. O bar Gemini Lounge escondia um anexo secreto focado em um procedimento forense reverso. O objetivo era único: aplicar a regra absoluta do 'sem corpo, sem crime'. → Levanta: \"Como eles garantiam que absolutamente nada seria encontrado pelas autoridades?\"\n  2. A neutralização virou gestão de resíduos. Seguindo etapas logísticas rígidas, os alvos eram empacotados em caixas de papelão genéricas, silenciando qualquer vestígio. → Levanta: \"Para onde essas caixas comuns eram enviadas para nunca mais voltarem?\"\n\n━━ CLÍMAX (1 cenas) ━━\nFórmula: Problem-Solution\nRevelação central: A revelação do destino final: o Aterro de Fountain Avenue. O volume massivo e caótico de lixo diário de Nova York era a arma perfeita, tornando a recuperação das caixas pelas autoridades uma impossibilidade logística e matemática. O crime perfeito escondido à vista de todos.\n\n━━ RESOLUTION (0 cenas) ━━\nPontos-chave: O Método Gemini operava sob a máxima estrita do 'sem corpo, sem crime'. | A neutralização de rivais foi reduzida a um processo logístico em caixas de papelão genéricas. | O aterro de Fountain Avenue garantiu a invisibilidade do esquema através do volume de lixo.\nÂngulo: A brutalidade da máfia atingiu seu ápice não na violência explícita nas ruas, mas na frieza burocrática de uma linha de montagem que transformou o fim de rivais em mero descarte de lixo urbano.\n\n━━ CTA (1 cenas) ━━\nChamada direta e sombria para o funil do EP1. Após o clímax no aterro, cortar para o CTA: \"Assista ao Dossiê Completo para entender a anatomia deste método. The Gap Files.\" (1 único bloco, integrado na última cena, sem repetir tagline).\n\n━━ DIREÇÃO EMOCIONAL ━━\nArco: Curiosidade → Frieza Clínica → Inquietação Profunda\nTom: Investigativo → Clínico/Frio → Sombrio/Solene\n\n━━ DECISÕES EDITORIAIS ━━\nINCLUIR: O nome Gemini Lounge e a existência do anexo no Brooklyn; A máxima 'sem corpo, sem crime' e o conceito de procedimento forense reverso; O uso de caixas de papelão genéricas; O envio logístico para o Aterro de Fountain Avenue\nSEGURAR: O nome dos Gêmeos Gemini (referir-se a eles apenas como 'a dupla' ou 'dois homens'); Quem os traiu ou como a polícia descobriu o esquema; O destino final e a queda da dupla\nIGNORAR: Qualquer detalhe anatômico, gráfico ou violento do que acontecia dentro do anexo antes do empacotamento; Tiroteios, execuções gráficas ou o glamour tradicional da máfia; Armas de fogo, facas ou sangue\n\n━━ CURVA DE TENSÃO (SIGA ESTA INTENSIDADE POR BEAT) ━━\nBeat 1: MEDIUM → Beat 2: HIGH → Beat 3: PAUSE → Beat 4: PEAK → Beat 5: HIGH\n🚨 Respeite as PAUSAS — elas criam contraste antes dos picos. Sem pausa, tudo soa igual.\n\n━━ OPEN LOOPS (THREADS NARRATIVOS) ━━\n• \"Como a polícia conseguiria desvendar um método projetado para não deixar vestígios?\" — ⚠️ NÃO FECHAR — funil para Full Video\n• \"Qual foi a falha burocrática que finalmente expôs essa linha de montagem?\" — ⚠️ NÃO FECHAR — funil para Full Video\n🚨 Loops marcados como \"NÃO FECHAR\" devem ficar SEM RESPOSTA no roteiro. O espectador deve sair com essa pergunta na cabeça.\n\n━━ NÍVEL DE RESOLUÇÃO: PARTIAL ━━\n🚨 RESOLUÇÃO PARCIAL — Contextualiza mas NÃO fecha. Deixe perguntas sem resposta.\n\n📐 BLUEPRINT DE REFERÊNCIA: A estrutura e ordem dos beats acima são o esqueleto narrativo — siga-os obrigatoriamente. A distribuição de cenas por segmento é uma estimativa: escreva tantas cenas quantas o conteúdo justificar com qualidade em cada segmento. Não force cenas para atingir o número planejado se o material do segmento já foi coberto.\n\n🚪 PAPEL NARRATIVO: GATEWAY (PORTA DE ENTRADA)\nEste vídeo é o PRIMEIRO CONTATO do espectador com o tema. DEVE contextualizar COMPLETAMENTE:\n- Quem são as pessoas envolvidas\n- Quando e onde aconteceu\n- O que está em jogo\n- Por que o espectador deveria se importar\nO espectador NUNCA ouviu falar sobre este assunto. Trate como uma história sendo contada pela primeira vez.\n\n🚨 RESOLUÇÃO PARCIAL — Este teaser é TOPO DE FUNIL:\n- Contextualiza DO QUE se trata, mas NÃO entrega a conclusão final\n- NÃO explique a causa real/científica do evento\n- NÃO revele a motivação completa dos envolvidos\n- NÃO dê conclusão moral fechada\n- DEIXE pelo menos 1-2 perguntas sem resposta — o espectador deve QUERER assistir o Full Video\n- Termine apontando para algo MAIOR que não foi explorado\n\n💡 NOTAS ESTRATÉGICAS DO PLANO DE MONETIZAÇÃO:\nA estratégia central deste plano é a 'banalidade do mal'. Para blindar o conteúdo contra as diretrizes do YouTube (evitando desmonetização por violência gráfica), o foco narrativo é 100% deslocado do ato violento para a LOGÍSTICA, a BUROCRACIA e a ENGENHARIA da ocultação. O arco dos episódios longos constrói uma progressão impecável: o EP1 detalha o 'Método Gemini' como um processo industrial; o EP2 foca na política mafiosa e na traição do mentor; o EP3 entrega o desfecho irônico (a falha burocrática que os libertou e o fim pacífico). Os Shorts atuam como iscas de curiosidade, explorando as contradições do sistema e a frieza do protocolo.\nUse essas notas para guiar o tom, a intensidade e os pontos de ênfase do roteiro.\n\n⛔ O QUE NÃO FAZER (ANTI-PADRÕES INVIOLÁVEIS do plano de monetização):\n1. NÃO resolva o caso — apresente o método mas deixe o destino da dupla em aberto\n2. NÃO use tom enciclopédico — mantenha a urgência de um thriller investigativo\n3. NÃO revele quem os traiu ou como o esquema ruiu\n4. NÃO detalhe a anatomia do crime, foque estritamente na logística das caixas e do aterro\n\n🚨 As instruções acima são INVIOLÁVEIS. Se qualquer cena do seu roteiro viola um desses anti-padrões, REESCREVA a cena antes de finalizar.\n\n📺 CONTEXTO DE SÉRIE — EPISÓDIO 1 de 3\n🔴 TRANSIÇÃO OBRIGATÓRIA: Este NÃO é o último episódio. As últimas 2-3 cenas antes do CTA DEVEM funcionar como teaser do EP2.\n- Use os ganchos abertos (open loops) do outline para... [truncated 3479 chars]"
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "[data_url omitted]"
+            }
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "[data_url omitted]"
+            }
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "[data_url omitted]"
+            }
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "[data_url omitted]"
+            }
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "[data_url omitted]"
+            }
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "[data_url omitted]"
+            }
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "[data_url omitted]"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "parsed": {
+    "title": "A Linha de Montagem da Máfia",
+    "summary": "A dupla mais letal do Brooklyn transformou a eliminação de rivais em uma logística invisível. Descubra como caixas de papelão e o lixo de Nova York garantiram o crime perfeito.",
+    "scenes": [
+      {
+        "order": 1,
+        "narration": "<prosody rate=\"115%\">Como dois homens transformaram o sumiço de rivais</prosody> <break time=\"0.3s\"/> numa linha de montagem invisível?",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, dark industrial warehouse interior, two anonymous silhouettes standing near a conveyor belt, cold amber ambient light, deep shadows, gritty 1970s Brooklyn aesthetic",
+        "sceneEnvironment": "industrial_warehouse",
+        "motionDescription": "Slow push-in on the silhouettes, subtle dust particles floating in the amber light",
+        "audioDescription": "Low eerie drone, distant industrial hum, muffled metallic clank",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 2,
+        "narration": "<prosody rate=\"115%\">O bar Gemini Lounge escondia um anexo secreto</prosody> <break time=\"0.3s\"/> focado num procedimento forense reverso.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, exterior of a gritty 1970s Brooklyn dive bar at night, neon sign reflecting on wet asphalt, black car parked outside, sodium vapor streetlights",
+        "sceneEnvironment": "gemini_lounge_exterior",
+        "motionDescription": "Slow pan across the wet asphalt reflecting the neon light, subtle rain drizzle",
+        "audioDescription": "Distant city traffic, faint neon buzzing, gentle rain falling on pavement",
+        "audioDescriptionVolume": -15,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 3,
+        "narration": "A regra absoluta era clara: <break time=\"0.3s\"/> sem corpo, <break time=\"0.3s\"/> sem crime. Tudo terminava em caixas comuns.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, stack of generic plain cardboard boxes in a dimly lit back room, harsh tungsten bulb casting long shadows, oppressive silence, forensic coldness",
+        "sceneEnvironment": "gemini_lounge_annex",
+        "motionDescription": "Slow dolly forward toward the boxes, harsh shadows shifting slightly on the wall",
+        "audioDescription": "Heavy silence, faint dripping water in the background, low tension string",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 4,
+        "narration": "O destino final? <break time=\"0.3s\"/> O aterro de Fountain Avenue, camuflados pelo lixo de Nova York.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, massive urban landfill at dawn, mountains of trash under a cold blue sky, a garbage truck silhouette in the distance, overwhelming scale",
+        "sceneEnvironment": "fountain_avenue_landfill",
+        "motionDescription": "Slow wide pan across the mountains of trash, subtle morning mist drifting over the debris",
+        "audioDescription": "Distant seagulls, low rumbling of a garbage truck engine, wind howling softly",
+        "audioDescriptionVolume": -15,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 5,
+        "narration": "<prosody rate=\"115%\">Mas como a polícia desvendaria um método</prosody> <break time=\"0.3s\"/> desenhado para não deixar nenhum vestígio?",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, close-up of a 1970s police detective's desk, scattered black-and-white photos, a magnifying glass resting on a file, thick cigarette smoke in the air, low-key lighting",
+        "sceneEnvironment": "detective_desk",
+        "motionDescription": "Slow zoom in on the file, thick cigarette smoke swirling through the practical light beam",
+        "audioDescription": "Paper rustling, faint ticking clock, low suspenseful bass pulse",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 6,
+        "narration": "<prosody rate=\"115%\">Qual foi a falha burocrática</prosody> <break time=\"0.3s\"/> que finalmente expôs essa linha de montagem fria?",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, close-up of an old typewriter printing a bureaucratic form, ink striking paper, harsh desk lamp illuminating the document, deep shadows around the edges",
+        "sceneEnvironment": "bureaucratic_office",
+        "motionDescription": "Static shot with rhythmic motion of typewriter keys striking paper, dust floating in the light",
+        "audioDescription": "Sharp typewriter clacks, mechanical carriage return, escalating tension tone",
+        "audioDescriptionVolume": -9,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 7,
+        "narration": "Assista ao Dossiê Completo para entender a anatomia deste método. <break time=\"0.75s\"/> The Gap Files.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a heavy steel vault door slowly closing in darkness, a single red light blinking above, absolute finality, pitch black shadows",
+        "sceneEnvironment": "vault_door",
+        "motionDescription": "Slow push-in as the heavy vault door closes, red light blinking rhythmically",
+        "audioDescription": "Heavy metallic sliding sound, deep echoing boom of the door shutting, final resonant bass drop",
+        "audioDescriptionVolume": -6,
+        "estimatedDuration": 5
+      }
+    ],
+    "backgroundMusic": {
+      "prompt": "Dark Ambient, Industrial Drone, Low Synthesizer Pads, Tense Strings, Gritty Noir, Cinematic, Atmospheric, well-arranged composition, 80 BPM",
+      "volume": -12
+    },
+    "backgroundMusicTracks": null
+  },
+  "rawContent": ""
+}

@@ -86,7 +86,7 @@ Hard rule: nunca repita o mesmo tipo de fonte de luz em mais de 2 cenas consecut
 
 **Gerundios:** Max 1-2 por cena, apenas para ambiente (mist, rain, curtains, flames). Objetos solidos NUNCA se movem magicamente -- mantem posicao do inicio ao fim, salvo narracao explicita.
 
-**Estabilidade Facial:** Se houver humanos, adicione "maintaining facial structure and features". Prefira micro-acoes (slow blink, subtle head turn). Evite movimentos bruscos em close-up.
+**Estabilidade Facial:** Se houver humanos, adicione "maintaining facial structure and features". Prefira micro-acoes (slow blink, subtle head turn). Evite movimentos bruscos em close-up de rosto.
 
 **Parametros Cinematograficos Obrigatorios** -- toda visualDescription DEVE incluir:
 1. **Lente + focal length** (ex: "35mm lens, medium shot")
@@ -95,7 +95,7 @@ Hard rule: nunca repita o mesmo tipo de fonte de luz em mais de 2 cenas consecut
 4. **Texturas concretas** (ex: "wet asphalt reflecting light", "scratched wooden table")
 5. **Tag de realismo** variada (ex: "cinematic noir realism", "period-accurate urban realism" -- nunca repetir a mesma em cenas consecutivas)
 
-Evite palavras fracas sem ancoragem fisica: "moody", "atmospheric", "gritty", "eerie", "dramatic", "concept art style".
+Evite usar palavras subjetivas como UNICO descritor de uma cena. Palavras como "moody", "atmospheric", "gritty" sao permitidas quando acompanhadas de ancoragem fisica concreta (fonte de luz, textura, material). Proibido: usar APENAS adjetivos subjetivos sem parametros tecnicos.
 
 **Coesao Temporal:** Se a narrativa e de uma epoca especifica, todas as escolhas respeitam o periodo (veiculos, iluminacao, letreiros, vestuario, arquitetura). Evite anacronismos.
 
@@ -247,12 +247,29 @@ Sua funcao e COMPLEMENTAR o Style Anchor, nao duplica-lo.
 
 ## 5. Controle de Densidade do Prompt
 
-Mantenha cada `visualDescription` entre **35 e 70 palavras**.
-- Priorize parametros tecnicos e fisicos sobre adjetivos subjetivos.
-- Se ultrapassar 70 palavras, comprima adjetivos redundantes preservando: lente + plano + DOF + fonte de luz.
-- Evite sinonimos empilhados ("gritty, moody, atmospheric") -- escolha UMA palavra forte ou troque por algo fisico.
+Escreva prompts **densos em informacao util**. Nao ha limite rigido de palavras — a qualidade vem da ESPECIFICIDADE, nao do tamanho.
 
-Prompts **densos em informacao util**, nao apenas longos.
+**Principio:** Cada palavra deve adicionar informacao que o modelo de imagem usa para gerar algo concreto. Se uma palavra nao muda o resultado visual, remova-a.
+
+**Parametros obrigatorios** (ja listados em 2.3): lente + focal length, DOF, fonte fisica de luz, texturas concretas, tag de realismo. Alem disso, inclua elementos narrativos visualmente representaveis quando relevantes.
+
+**Evite:** Sinonimos empilhados sem ancoragem fisica ("gritty, moody, atmospheric" SOZINHOS). Cada adjetivo deve vir com seu parametro tecnico.
+
+### 5.1 Prompt de Referencia (Qualidade Alvo)
+
+Use este prompt como referencia de DENSIDADE e ESPECIFICIDADE — este e o nivel de qualidade que toda visualDescription deve alcancar:
+
+```
+Two young mafia assassins in their early twenties, known as the Gemini brothers, standing side by side and staring directly at the camera with hardened, calculating expressions, sharp tailored dark suits slightly worn, subtle hints of their past as former car thieves in their rough demeanor and streetwise posture, 24mm lens, low angle, deep focus, wet asphalt reflecting red neon and amber sodium vapor streetlights, heavy stack of plain cardboard boxes resting in the foreground against a damp brick wall, rainwater dripping steadily from a rusted iron fire escape above, cold blue ambient night sky, industrial urban realism, cinematic lighting with dramatic rim light tracing their silhouettes, moody atmosphere, ultra-realistic textures, soft reflections shimmering on the pavement, hyper-detailed gritty crime drama aesthetic, shot on Fujifilm Portra 400, HDR clarity, tense urban night scene
+```
+
+**O que torna este prompt eficaz:**
+- Lente + angulo concretos (`24mm, low angle, deep focus`)
+- Fontes de luz FISICAS (`red neon, amber sodium vapor streetlights, rim light`)
+- Texturas reais (`wet asphalt, damp brick wall, rusted iron fire escape, rainwater dripping`)
+- Film stock reference (`Fujifilm Portra 400`) — define grain, saturacao e tone mapping
+- Elementos narrativos no frame (`cardboard boxes in foreground`) — visual conectado a historia
+- Adjetivos subjetivos (`moody atmosphere`) vem DEPOIS de toda a especificidade tecnica
 
 ---
 

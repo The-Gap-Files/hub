@@ -105,6 +105,22 @@ const StoryOutlineSchema = z.object({
     'none = pura provocação (hook-only). ' +
     'partial = contextualiza mas não fecha (gateway/deep-dive). ' +
     'full = história completa (APENAS para full video, NUNCA para teasers).'
+  ),
+
+  // ── Hook-Only: Loop Semântico e Título ──────────────────────────
+  loopSentence: z.object({
+    fullSentence: z.string().describe('A sentença completa do loop (ex: "E a assinatura naquele decreto autorizou o confisco de uma comunidade inteira.")'),
+    partA: z.string().describe('Primeira metade — será a ÚLTIMA coisa dita no vídeo, cena 4 (ex: "E a assinatura naquele decreto...")'),
+    partB: z.string().describe('Segunda metade — será a PRIMEIRA coisa dita no vídeo, cena 1 (ex: "...autorizou o confisco de uma comunidade inteira.")')
+  }).optional().describe(
+    'Frase do Loop Infinito Semântico (OBRIGATÓRIO para hook-only, opcional para outros). ' +
+    'A frase é CORTADA em duas partes: partA (final do vídeo, incompleta) e partB (início do vídeo, completa a frase). ' +
+    'Quando o vídeo reinicia, o cérebro completa a frase automaticamente.'
+  ),
+
+  title: z.string().optional().describe(
+    'Título VIRAL do vídeo: máximo 8-10 palavras, tensão + curiosidade. ' +
+    'Obrigatório para hook-only. Opcional para outros roles.'
   )
 })
 
@@ -777,15 +793,39 @@ Não usar. Pular direto para RISING ACTION.`
   // HOOK-ONLY: outline enxuto — sem seções irrelevantes que confundem o modelo
   // ══════════════════════════════════════════════════════════════════
   if (role === 'hook-only') {
+    // Bloco do Loop Semântico (loopSentence) — DIRETIVA do Arquiteto
+    const loopBlock = outline.loopSentence
+      ? `
+━━ 🔄 LOOP SEMÂNTICO (DIRETIVA OBRIGATÓRIA DO ARQUITETO) ━━
+🚨 O Arquiteto projetou a frase do Loop Infinito. SIGA esta estrutura:
+Frase completa: "${outline.loopSentence.fullSentence}"
+→ CENA 4 (final, frase INCOMPLETA — Parte A): "${outline.loopSentence.partA}"
+→ CENA 1 (início, COMPLETA a frase — Parte B): "${outline.loopSentence.partB}"
+⚠️ Você PODE ajustar palavras para fluência, mas a ESTRUTURA (partA suspensa → partB completa) e o CONCEITO CENTRAL da frase são INEGOCIÁVEIS.
+⚠️ A Cena 4 DEVE terminar com a Parte A (incompleta). A Cena 1 DEVE começar com a Parte B (completando).`
+      : `
+━━ 🔄 LOOP SEMÂNTICO (SEM DIRETIVA — CRIE O LOOP) ━━
+⚠️ O Arquiteto não definiu loopSentence. Crie a frase do loop seguindo as regras:
+- Escreva DE TRÁS PRA FRENTE: identifique o payload → construa a frase do loop
+- Cena 4 = Parte A (incompleta, suspensa)
+- Cena 1 = Parte B (completa a frase da Parte A)`
+
+    // Título do Arquiteto (se disponível)
+    const titleBlock = outline.title
+      ? `\n━━ 🏷️ TÍTULO (DIRETIVA DO ARQUITETO) ━━\n"${outline.title}"\n⚠️ SIGA este título. Ajuste apenas se violar brand safety.`
+      : ''
+
     return `🏗️ PLANO NARRATIVO (HOOK-ONLY — OUTLINE ENXUTO):
 ${narrativeRoleBlock}
 
-━━ 🎯 HOOK (INSPIRAÇÃO — NÃO copie literalmente) ━━
-Estratégia: ${outline.hookStrategy}
+━━ 🎯 HOOK (SIGA ESTA ESTRATÉGIA) ━━
+🚨 Estratégia definida pelo Arquiteto (OBRIGATÓRIA): ${outline.hookStrategy}
 ${levelEmoji} Tom selecionado: ${hookLevel.toUpperCase()}
-💡 Referência de tom (use como INSPIRAÇÃO, reescreva com perplexidade): "${hookText}"
-⚠️ NÃO use esta frase literalmente se ela for uma tese acadêmica/título de artigo.
-Se a frase conecta 3+ entidades ou soa como resumo, REFORMULE como ruptura cognitiva curta.
+🎯 Hook de referência: "${hookText}"
+→ SIGA o conceito e a técnica deste hook. Você PODE reescrever para maior perplexidade, mas o CONCEITO CENTRAL e a TÉCNICA devem ser mantidos.
+→ Se a frase soa acadêmica, REFORMULE como ruptura cognitiva curta — mantendo o mesmo conceito.
+${loopBlock}
+${titleBlock}
 
 ━━ 🔫 MUNIÇÃO NARRATIVA (escolha 1-3 fatos mais chocantes) ━━
 ${beats}
@@ -805,7 +845,7 @@ ${outline.openLoops.filter(l => l.closedAtBeat === null).map(loop => `• "${loo
 ━━ NÍVEL DE RESOLUÇÃO: ZERO ━━
 🚨 RESOLUÇÃO ZERO — Pura provocação. NENHUMA explicação, recap ou conclusão. Corte seco.
 
-🚨 Este outline é MUNIÇÃO, não uma ordem literal. O provider de hook-only tem suas próprias regras — use os fatos acima como matéria-prima.`
+🚨 Este outline é MUNIÇÃO + DIRETIVAS. O hookStrategy, loopSentence e título do Arquiteto são OBRIGATÓRIOS. Os beats são matéria-prima para selecionar.`
   }
 
   // ══════════════════════════════════════════════════════════════════
@@ -855,6 +895,6 @@ ${outline.resolutionLevel ? `
 ━━ NÍVEL DE RESOLUÇÃO: ${outline.resolutionLevel.toUpperCase()} ━━
 ${outline.resolutionLevel === 'none' ? '🚨 RESOLUÇÃO ZERO — Pura provocação. NENHUMA explicação, recap ou conclusão. Corte seco.' : ''}${outline.resolutionLevel === 'partial' ? '🚨 RESOLUÇÃO PARCIAL — Contextualiza mas NÃO fecha. Deixe perguntas sem resposta.' : ''}${outline.resolutionLevel === 'full' ? 'Resolução completa — história fechada com todas as respostas.' : ''}` : ''}
 
-🚨 SIGA ESTE PLANO. A estrutura, ordem dos beats e distribuição de cenas já foram pensadas. Seu trabalho agora é ESCREVER cada cena seguindo este blueprint.`
+📐 BLUEPRINT DE REFERÊNCIA: A estrutura e ordem dos beats acima são o esqueleto narrativo — siga-os obrigatoriamente. A distribuição de cenas por segmento é uma estimativa: escreva tantas cenas quantas o conteúdo justificar com qualidade em cada segmento. Não force cenas para atingir o número planejado se o material do segmento já foi coberto.`
 }
 

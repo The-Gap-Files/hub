@@ -14,7 +14,7 @@
 import { prisma } from '../../../utils/prisma'
 import { getThumbnailDimensions } from '../../../utils/thumbnail-prompt-builder'
 import { loadSkill } from '../../../utils/skill-loader'
-import { validateReplicatePricing, PricingNotConfiguredError, calculateReplicateOutputCost, calculateLLMCost } from '../../../constants/pricing'
+import { validateMediaPricing, PricingNotConfiguredError, calculateReplicateOutputCost, calculateLLMCost } from '../../../constants/pricing'
 import { costLogService } from '../../../services/cost-log.service'
 import { SystemMessage, HumanMessage } from '@langchain/core/messages'
 import Replicate from 'replicate'
@@ -60,7 +60,7 @@ export default defineEventHandler(async (event) => {
 
   // Validar pricing
   try {
-    validateReplicatePricing(THUMBNAIL_IMAGE_MODEL)
+    validateMediaPricing(THUMBNAIL_IMAGE_MODEL, 'replicate')
   } catch (err: any) {
     if (err instanceof PricingNotConfiguredError) {
       throw createError({

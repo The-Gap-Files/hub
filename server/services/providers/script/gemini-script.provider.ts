@@ -25,7 +25,7 @@ export class GeminiScriptProvider implements IScriptGenerator {
   private modelName: string
 
   constructor(config: { apiKey: string; model?: string; temperature?: number }) {
-    this.modelName = config.model ?? 'gemini-1.5-flash'
+    this.modelName = config.model ?? 'gemini-3-flash-preview'
     this.model = new ChatGoogleGenerativeAI({
       apiKey: config.apiKey,
       model: this.modelName,

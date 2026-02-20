@@ -1,6 +1,6 @@
 import { outputPipelineService } from '../../../services/pipeline/output-pipeline.service'
 import { providerManager } from '../../../services/providers'
-import { validateReplicatePricing, PricingNotConfiguredError } from '../../../constants/pricing'
+import { validateMediaPricing, PricingNotConfiguredError } from '../../../constants/pricing'
 import { prisma } from '../../../utils/prisma'
 
 export default defineEventHandler(async (event) => {
@@ -23,7 +23,8 @@ export default defineEventHandler(async (event) => {
   try {
     const musicProvider = providerManager.getMusicProvider()
     const musicModel = (musicProvider as any).model || 'stability-ai/stable-audio-2.5'
-    validateReplicatePricing(musicModel)
+    const providerName = musicProvider.getName()
+    validateMediaPricing(musicModel, providerName)
   } catch (err: any) {
     if (err instanceof PricingNotConfiguredError) {
       throw createError({
