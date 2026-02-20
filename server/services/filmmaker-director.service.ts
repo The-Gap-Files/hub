@@ -44,6 +44,8 @@ export interface ProductionContext {
   visualIdentity?: string
   /** StoryOutline do Arquiteto — permite ao cineasta calibrar intensidade por segmento narrativo */
   storyOutline?: StoryOutline
+  /** Referências visuais do criador para cenas personalizadas — guia o visualDescription */
+  customSceneReferences?: Array<{ sceneOrder: number; description: string; mimeType: string; imagePrompt?: string | null }>
 }
 
 export class FilmmakerDirectorService {
@@ -403,6 +405,16 @@ Palavras como "gritty", "moody", "atmospheric", "eerie", "dramatic" são permiti
 → ✅ "gritty Brooklyn street, wet asphalt reflecting sodium vapor streetlights, cracked concrete curb in foreground, 24mm lens, deep focus" (concreto + técnico)
 
 NÃO utilize nenhuma descrição visual ou de movimento pré-existente de outros agentes. Baseie TODAS as decisões visuais e de movimento APENAS na narração da cena, no estilo visual base informado e no contexto adicional fornecido.
+${production?.customSceneReferences && production.customSceneReferences.length > 0
+  ? `\n🎬 IMAGENS DE REFERÊNCIA (CENAS PERSONALIZADAS DO CRIADOR):
+O criador forneceu imagens de referência para as seguintes cenas. Use estas descrições como GUIA VISUAL para manter coerência:
+${production.customSceneReferences.map(ref => {
+  const promptNote = ref.imagePrompt ? ` | Prompt original do criador: "${ref.imagePrompt}"` : ''
+  return `- Cena ${ref.sceneOrder}: "${ref.description}"${promptNote} → Seu visualDescription para esta cena DEVE incorporar elementos visuais desta referência, mantendo o estilo cinematográfico do projeto.`
+}).join('\n')}
+⚠️ A imagem de referência será usada como base pelo gerador de imagem (image-to-image). Seu visualDescription deve COMPLEMENTAR a referência, não contradizê-la.
+${production.customSceneReferences.some(ref => ref.imagePrompt) ? '💡 Quando o criador forneceu o prompt original da imagem, use-o como guia adicional para vocabulário visual e atmosfera.' : ''}`
+  : ''}
 
 IMPORTANTE SOBRE QUALIDADE VISUAL E MOVIMENTO:
 - Todas as cenas têm duração máxima de 7.5 segundos e devem ser tratadas como UM ÚNICO PLANO CONTÍNUO (um shot).
@@ -422,7 +434,7 @@ Retorne APENAS um JSON válido (sem markdown, sem explicações):
 
     // 4. Chamar o LLM via Factory
     log.info(`Chamando LLM para refinar ${scenes.length} cenas...`)
-    const llm = await createLlmForTask('filmmaker-director', { temperature: 0.6, maxTokens: 16384 })
+    const llm = await createLlmForTask('filmmaker-director', { temperature: 0.6, maxTokens: 32768 })
 
     const response = await llm.invoke([
       new SystemMessage(systemPrompt),

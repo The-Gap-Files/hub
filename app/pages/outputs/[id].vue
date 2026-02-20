@@ -1184,6 +1184,115 @@
                   </div>
                 </div>
 
+                <!-- Cenas Personalizadas do Criador -->
+                <div
+                  v-if="!output.storyOutlineApproved || customScenes.length > 0"
+                  class="md:col-span-2 bg-teal-500/5 p-5 rounded-2xl border border-teal-500/10"
+                >
+                  <div class="flex items-center justify-between mb-4">
+                    <h4 class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-teal-400/80">
+                      <Clapperboard :size="12" /> Cenas Personalizadas
+                      <span v-if="customScenes.length > 0" class="ml-1 px-1.5 py-0.5 bg-teal-500/20 rounded text-[10px] font-mono">
+                        {{ customScenes.length }}/{{ maxCustomScenes }}
+                      </span>
+                    </h4>
+                    <button
+                      v-if="!output.storyOutlineApproved && customScenes.length < maxCustomScenes"
+                      @click="addCustomScene"
+                      class="flex items-center gap-1.5 px-3 py-1.5 bg-teal-500/10 border border-teal-500/20 text-teal-300 hover:bg-teal-500/20 rounded-lg transition-colors text-xs font-bold uppercase tracking-wider cursor-pointer"
+                    >
+                      <Plus :size="12" /> Adicionar Cena
+                    </button>
+                  </div>
+
+                  <!-- Info helper -->
+                  <p v-if="customScenes.length === 0 && !output.storyOutlineApproved" class="text-xs text-teal-300/40 mb-3">
+                    Defina cenas de introdução com narração e imagem de referência. O roteirista seguirá estas cenas e depois conectará com o plano do Arquiteto.
+                  </p>
+
+                  <!-- Lista de cenas -->
+                  <div class="space-y-4">
+                    <div
+                      v-for="(scene, idx) in customScenes"
+                      :key="idx"
+                      class="relative bg-black/30 rounded-xl border border-teal-500/10 p-4 group"
+                    >
+                      <!-- Header da cena -->
+                      <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                          <span class="w-6 h-6 rounded-full bg-teal-500/20 flex items-center justify-center text-xs font-mono font-bold text-teal-300">
+                            {{ idx + 1 }}
+                          </span>
+                          <span class="text-[10px] font-black uppercase tracking-widest text-teal-400/60">Cena {{ idx + 1 }}</span>
+                        </div>
+                        <button
+                          v-if="!output.storyOutlineApproved"
+                          @click="removeCustomScene(idx)"
+                          class="p-1 text-zinc-600 hover:text-red-400 transition-colors cursor-pointer opacity-0 group-hover:opacity-100"
+                        >
+                          <Trash2 :size="14" />
+                        </button>
+                      </div>
+
+                      <div class="grid grid-cols-1 sm:grid-cols-[1fr_140px] gap-3">
+                        <!-- Narração + Prompt da imagem -->
+                        <div class="space-y-2">
+                          <textarea
+                            v-if="!output.storyOutlineApproved"
+                            v-model="scene.narration"
+                            rows="3"
+                            :placeholder="`Narração da cena ${idx + 1}... Ex: 'Um documento esquecido revela quem autorizou tudo.'`"
+                            class="w-full bg-black/40 border border-teal-500/15 rounded-lg px-3 py-2 text-sm text-white/90 placeholder-zinc-600 focus:border-teal-500/40 outline-none transition-all resize-none"
+                          ></textarea>
+                          <p v-else class="text-sm text-white/80 italic font-serif leading-relaxed">
+                            "{{ scene.narration }}"
+                          </p>
+                          <!-- Prompt que gerou a imagem (opcional) -->
+                          <input
+                            v-if="!output.storyOutlineApproved"
+                            v-model="scene.imagePrompt"
+                            type="text"
+                            :placeholder="`Prompt da imagem (opcional) — ex: 'cinematic shot of a dusty abandoned factory'`"
+                            class="w-full bg-black/30 border border-teal-500/10 rounded-lg px-3 py-1.5 text-xs text-white/70 placeholder-zinc-700 focus:border-teal-500/30 outline-none transition-all"
+                          />
+                          <p v-else-if="scene.imagePrompt" class="text-[11px] text-teal-300/40 font-mono truncate">
+                            prompt: {{ scene.imagePrompt }}
+                          </p>
+                        </div>
+
+                        <!-- Upload de imagem de referência -->
+                        <div class="flex flex-col items-center justify-center">
+                          <div
+                            v-if="scene.referenceImagePreview"
+                            class="relative w-full aspect-video rounded-lg overflow-hidden border border-teal-500/20"
+                          >
+                            <img :src="scene.referenceImagePreview" class="w-full h-full object-cover" alt="Referência visual" />
+                            <button
+                              v-if="!output.storyOutlineApproved"
+                              @click="removeSceneImage(idx)"
+                              class="absolute top-1 right-1 p-1 bg-black/70 rounded-full text-zinc-400 hover:text-red-400 transition-colors cursor-pointer"
+                            >
+                              <X :size="12" />
+                            </button>
+                          </div>
+                          <label
+                            v-else-if="!output.storyOutlineApproved"
+                            class="w-full aspect-video rounded-lg border-2 border-dashed border-teal-500/15 hover:border-teal-500/30 flex flex-col items-center justify-center gap-1 transition-colors cursor-pointer"
+                          >
+                            <Upload v-if="uploadingSceneImage !== idx" :size="16" class="text-teal-500/30" />
+                            <span v-if="uploadingSceneImage !== idx" class="text-[10px] text-teal-400/30 font-bold uppercase tracking-wider">Ref. Visual</span>
+                            <span v-else class="text-[10px] text-teal-300 animate-pulse">Enviando...</span>
+                            <input type="file" accept="image/*" class="hidden" @change="uploadSceneReferenceImage(idx, $event)" :disabled="uploadingSceneImage !== null" />
+                          </label>
+                          <div v-else class="w-full aspect-video rounded-lg border border-zinc-800 flex items-center justify-center">
+                            <span class="text-[10px] text-zinc-600">Sem referência</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div class="bg-primary/5 p-5 rounded-2xl border border-primary/10">
                   <h4 class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-primary/80 mb-3">
                     <Target :size="12" /> Setup / Promise
@@ -2678,10 +2787,10 @@
 
 <script setup lang="ts">
 import { 
-  ArrowLeft, Download, RotateCw, ScrollText, ImageIcon, Mic, Film, CheckCircle2, 
+  ArrowLeft, Download, RotateCw, ScrollText, ImageIcon, Mic, Film, CheckCircle2,
   AlertTriangle, Edit, Eye, Music, X, Zap, Clapperboard, Subtitles, Radio, DollarSign, RefreshCw, Wrench,
   Map, ChevronUp, ChevronDown, Target, TrendingUp, Star, Heart, Volume2, BarChart3, ShieldAlert,
-  Undo2, AudioWaveform
+  Undo2, AudioWaveform, Plus, Trash2, Upload, Info
 } from 'lucide-vue-next'
 import VoiceSelector from '~/components/dossier/VoiceSelector.vue'
 
@@ -3443,6 +3552,15 @@ async function loadOutput() {
     if ((data as any).storyOutline?._customHook) {
       customHookText.value = (data as any).storyOutline._customHook
     }
+    // Restaurar cenas personalizadas
+    if ((data as any).storyOutline?._customScenes) {
+      customScenes.value = ((data as any).storyOutline._customScenes as any[]).map((s: any) => ({
+        narration: s.narration || '',
+        referenceImageId: s.referenceImageId || null,
+        referenceImagePreview: s.referenceImageId ? `/api/dossiers/images/${s.referenceImageId}` : null,
+        imagePrompt: s.imagePrompt || ''
+      }))
+    }
   } catch (error) {
     console.error('Erro ao carregar output:', error)
   } finally {
@@ -3530,6 +3648,17 @@ const regeneratingOutline = ref(false)
 const selectedHookLevel = ref('moderate') // Nível tonal do hook selecionado pelo usuário
 const customHookText = ref('') // Texto do hook personalizado escrito pelo usuário
 
+// Cenas personalizadas do criador (narração + imagem de referência)
+interface CustomSceneEntry {
+  narration: string
+  referenceImageId: string | null
+  referenceImagePreview: string | null
+  imagePrompt: string
+}
+const customScenes = ref<CustomSceneEntry[]>([])
+const uploadingSceneImage = ref<number | null>(null)
+const maxCustomScenes = 5
+
 async function confirmRegenerateOutline() {
   if (needsSpeechConfig.value) {
     openChangeVoiceModal()
@@ -3551,6 +3680,7 @@ async function confirmRegenerateOutline() {
     outlineExpanded.value = true
     selectedHookLevel.value = 'moderate' // Reset ao regenerar
     customHookText.value = '' // Reset hook custom
+    customScenes.value = [] // Reset cenas personalizadas
 
     await loadOutput()
   } catch (error: any) {
@@ -3942,7 +4072,20 @@ async function approveStoryOutline() {
         stage: 'STORY_OUTLINE',
         approved: true,
         selectedHookLevel: selectedHookLevel.value,
-        ...(selectedHookLevel.value === 'custom' && customHookText.value ? { customHook: customHookText.value } : {})
+        ...(selectedHookLevel.value === 'custom' && customHookText.value ? { customHook: customHookText.value } : {}),
+        // Cenas personalizadas do criador
+        ...(customScenes.value.length > 0
+          ? {
+              customScenes: customScenes.value
+                .filter(s => s.narration.trim())
+                .map((s, i) => ({
+                  order: i + 1,
+                  narration: s.narration.trim(),
+                  referenceImageId: s.referenceImageId || null,
+                  imagePrompt: s.imagePrompt?.trim() || null
+                }))
+            }
+          : {})
       }
     })
     output.value.storyOutlineApproved = true
@@ -3953,6 +4096,60 @@ async function approveStoryOutline() {
   } finally {
     approving.value = false
   }
+}
+
+// ─── Cenas Personalizadas: helpers ───
+function addCustomScene() {
+  if (customScenes.value.length >= maxCustomScenes) return
+  customScenes.value.push({ narration: '', referenceImageId: null, referenceImagePreview: null, imagePrompt: '' })
+}
+
+function removeCustomScene(index: number) {
+  customScenes.value.splice(index, 1)
+}
+
+async function uploadSceneReferenceImage(index: number, event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file || !output.value?.dossierId) return
+
+  uploadingSceneImage.value = index
+  try {
+    const reader = new FileReader()
+    const base64Promise = new Promise<string>((resolve) => {
+      reader.onload = () => resolve(reader.result?.toString().split(',')[1] || '')
+      reader.readAsDataURL(file)
+    })
+    const base64Data = await base64Promise
+
+    const response = await $fetch(`/api/dossiers/${output.value.dossierId}/images`, {
+      method: 'POST',
+      body: {
+        description: `Referência visual - Cena personalizada ${index + 1}`,
+        tags: `custom-scene,output-${outputId},scene-${index + 1}`,
+        imageData: base64Data,
+        mimeType: file.type
+      }
+    }) as any
+
+    const sceneToUpdate = customScenes.value[index]
+    if (!sceneToUpdate) return
+    sceneToUpdate.referenceImageId = response.id
+    sceneToUpdate.referenceImagePreview = `/api/dossiers/images/${response.id}`
+  } catch (error: any) {
+    console.error('Erro no upload:', error)
+    alert(error.data?.message || 'Erro ao fazer upload da imagem de referência.')
+  } finally {
+    uploadingSceneImage.value = null
+    input.value = '' // Reset file input
+  }
+}
+
+function removeSceneImage(index: number) {
+  const scene = customScenes.value[index]
+  if (!scene) return
+  scene.referenceImageId = null
+  scene.referenceImagePreview = null
 }
 
 async function startGenerateScript() {

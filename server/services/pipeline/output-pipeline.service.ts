@@ -231,10 +231,51 @@ export class OutputPipelineService {
       )
     }
 
-    const outlineData = output.storyOutline as StoryOutline & { _monetizationMeta?: any }
+    const outlineData = output.storyOutline as StoryOutline & { _monetizationMeta?: any, _customScenes?: Array<{ order: number; narration: string; referenceImageId?: string | null }> }
     promptContext.storyOutline = formatOutlineForPrompt(outlineData)
     const scriptLog = createPipelineLogger({ stage: 'Outline', outputId })
     scriptLog.info(`Plano narrativo aprovado: ${outlineData.risingBeats?.length || 0} beats.`)
+
+    // ─── Custom Scenes: carregar imagens de referência do criador ───
+    const customScenesDef = (outlineData as any)._customScenes as Array<{ order: number; narration: string; referenceImageId?: string | null; imagePrompt?: string | null }> | undefined
+    let customSceneImageMap = new Map<number, Buffer>() // sceneOrder (1-based) → imageBuffer
+    let customSceneRefDescriptions: Array<{ sceneOrder: number; description: string; mimeType: string; imagePrompt?: string | null }> = []
+
+    if (customScenesDef && customScenesDef.length > 0) {
+      scriptLog.info(`🎬 ${customScenesDef.length} cena(s) personalizada(s) do criador detectada(s).`)
+
+      const imageIds = customScenesDef
+        .filter(s => s.referenceImageId)
+        .map(s => ({ sceneOrder: s.order, imageId: s.referenceImageId! }))
+
+      if (imageIds.length > 0) {
+        const refImages = await prisma.dossierImage.findMany({
+          where: { id: { in: imageIds.map(i => i.imageId) } },
+          select: { id: true, imageData: true, mimeType: true, description: true }
+        })
+
+        for (const { sceneOrder, imageId } of imageIds) {
+          const img = refImages.find(i => i.id === imageId)
+          const sceneDef = customScenesDef.find(s => s.order === sceneOrder)
+          if (img?.imageData) {
+            const buf = Buffer.from(img.imageData)
+            const mime = img.mimeType || 'image/jpeg'
+            const desc = img.description || 'Referência visual do criador'
+
+            customSceneImageMap.set(sceneOrder, buf)
+            customSceneRefDescriptions.push({ sceneOrder, description: desc, mimeType: mime, imagePrompt: sceneDef?.imagePrompt })
+
+            // Add to scriptwriter's multimodal images
+            promptContext.images = [
+              ...(promptContext.images || []),
+              { data: buf, mimeType: mime, title: `[CENA PERSONALIZADA ${sceneOrder}] ${desc}` }
+            ]
+          }
+        }
+
+        scriptLog.info(`🎬 ${customSceneImageMap.size} imagem(ns) de referência carregada(s) para cenas custom.`)
+      }
+    }
 
     // Extrair metadados de monetização do outline (narrativeRole, strategicNotes, creative direction)
     if (outlineData._monetizationMeta) {
@@ -432,26 +473,43 @@ export class OutputPipelineService {
         const productionCtx: ProductionContext = {
           styleAnchorTags: anchorParts.length > 0 ? anchorParts.join(', ') : undefined,
           visualIdentity: output.dossier?.visualIdentityContext || undefined,
-          storyOutline: outlineData
+          storyOutline: outlineData,
+          customSceneReferences: customSceneRefDescriptions.length > 0 ? customSceneRefDescriptions : undefined
         }
 
-        const refinedScenes = await filmmakerDirector.refineScript(
-          scriptResponse.scenes.map(s => ({
-            order: 0,
-            narration: s.narration,
-            currentVisual: s.visualDescription,
-            currentEnvironment: s.sceneEnvironment,
-            estimatedDuration: s.estimatedDuration || 5
-          })),
-          baseStyleForDirector,
-          undefined,
-          productionCtx
-        )
+        // Batching: dividir cenas em lotes para evitar truncamento de JSON
+        const FILMMAKER_BATCH_SIZE = 15
+        const allInputScenes = scriptResponse.scenes.map(s => ({
+          order: 0,
+          narration: s.narration,
+          currentVisual: s.visualDescription,
+          currentEnvironment: s.sceneEnvironment,
+          estimatedDuration: s.estimatedDuration || 5
+        }))
+
+        type FilmmakerResult = Awaited<ReturnType<typeof filmmakerDirector.refineScript>>
+        let allRefinedScenes: FilmmakerResult = []
+
+        if (allInputScenes.length <= FILMMAKER_BATCH_SIZE) {
+          // Cabe em uma única chamada
+          allRefinedScenes = await filmmakerDirector.refineScript(allInputScenes, baseStyleForDirector, undefined, productionCtx)
+        } else {
+          // Processar em batches sequenciais
+          scriptLog.info(`🎬 Cineasta: ${allInputScenes.length} cenas → ${Math.ceil(allInputScenes.length / FILMMAKER_BATCH_SIZE)} lotes de até ${FILMMAKER_BATCH_SIZE}.`)
+          for (let batchStart = 0; batchStart < allInputScenes.length; batchStart += FILMMAKER_BATCH_SIZE) {
+            const batch = allInputScenes.slice(batchStart, batchStart + FILMMAKER_BATCH_SIZE)
+            scriptLog.info(`🎬 Cineasta: lote ${Math.floor(batchStart / FILMMAKER_BATCH_SIZE) + 1} (${batch.length} cenas)...`)
+            const batchResult = await filmmakerDirector.refineScript(batch, baseStyleForDirector, undefined, productionCtx)
+            if (batchResult) {
+              allRefinedScenes = [...(allRefinedScenes || []), ...batchResult]
+            }
+          }
+        }
 
         // Mesclar refinamentos de volta nas cenas originais
-        if (refinedScenes && refinedScenes.length === scriptResponse.scenes.length) {
+        if (allRefinedScenes && allRefinedScenes.length === scriptResponse.scenes.length) {
           scriptResponse.scenes = scriptResponse.scenes.map((original, i) => {
-            const refined = refinedScenes?.[i]
+            const refined = allRefinedScenes?.[i]
             if (!refined) return original
 
             return {
@@ -461,9 +519,9 @@ export class OutputPipelineService {
               sceneEnvironment: refined.sceneEnvironment || original.sceneEnvironment
             }
           })
-          scriptLog.info('✅ Cineasta refinou todas as cenas com sucesso.')
+          scriptLog.info(`✅ Cineasta refinou todas as ${scriptResponse.scenes.length} cenas com sucesso.`)
         } else {
-          scriptLog.warn(`⚠️ Cineasta retornou número incorreto de cenas (${refinedScenes?.length} vs ${scriptResponse.scenes.length}). Ignorando refinamento para evitar desincronia.`)
+          scriptLog.warn(`⚠️ Cineasta retornou número incorreto de cenas (${allRefinedScenes?.length} vs ${scriptResponse.scenes.length}). Ignorando refinamento para evitar desincronia.`)
         }
       } catch (directorError) {
         scriptLog.error('❌ Erro crítico no Agente Cineasta (ignorando e salvando roteiro bruto):', directorError)
@@ -581,6 +639,44 @@ export class OutputPipelineService {
         log.info(`🎨 Style Anchor: ${styleAnchor.slice(0, 100)}...`)
       }
 
+      // ─── Custom Scenes: carregar imagens de referência para image-to-image ───
+      const customSceneImageMap = new Map<number, Buffer>() // sceneOrder (1-based) → imageBuffer
+      const customScenePromptMap = new Map<number, string>() // sceneOrder (1-based) → imagePrompt
+      const outlineForImages = output.storyOutline as any
+      const imgCustomScenes = outlineForImages?._customScenes as Array<{ order: number; narration: string; referenceImageId?: string | null; imagePrompt?: string | null }> | undefined
+      if (imgCustomScenes && imgCustomScenes.length > 0) {
+        // Coletar prompts de imagem (disponíveis mesmo sem imagem de referência)
+        for (const s of imgCustomScenes) {
+          if (s.imagePrompt) customScenePromptMap.set(s.order, s.imagePrompt)
+        }
+
+        const imageIds = imgCustomScenes
+          .filter(s => s.referenceImageId)
+          .map(s => ({ sceneOrder: s.order, imageId: s.referenceImageId! }))
+
+        if (imageIds.length > 0) {
+          const refImages = await prisma.dossierImage.findMany({
+            where: { id: { in: imageIds.map(i => i.imageId) } },
+            select: { id: true, imageData: true }
+          })
+
+          for (const { sceneOrder, imageId } of imageIds) {
+            const img = refImages.find(i => i.id === imageId)
+            if (img?.imageData) {
+              customSceneImageMap.set(sceneOrder, Buffer.from(img.imageData))
+            }
+          }
+
+          if (customSceneImageMap.size > 0) {
+            log.info(`🎬 ${customSceneImageMap.size} imagem(ns) de referência carregada(s) para cenas personalizadas.`)
+          }
+        }
+
+        if (customScenePromptMap.size > 0) {
+          log.info(`🎬 ${customScenePromptMap.size} prompt(s) de imagem do criador carregado(s).`)
+        }
+      }
+
       for (const chunk of sceneChunks) {
         const results = await Promise.allSettled(chunk.map(async (scene, chunkIndex) => {
           const absoluteIndex = scenes.indexOf(scene)
@@ -603,13 +699,32 @@ export class OutputPipelineService {
           // ── GERAÇÃO DE IMAGEM DA CENA ──
           log.step(`Cena ${absoluteIndex + 1}/${scenes.length}`, `prompt: ${visualPrompt.slice(0, 80)}...`)
 
+          // Custom scene: image reference (image-to-image) + creator's image prompt
+          // absoluteIndex é 0-based, maps usam order 1-based
+          const sceneOrder = absoluteIndex + 1
+          const customRefBuffer = customSceneImageMap.get(sceneOrder)
+          const creatorImagePrompt = customScenePromptMap.get(sceneOrder)
+
+          // Se o criador forneceu o prompt original da imagem, incorporar ao prompt visual
+          if (creatorImagePrompt) {
+            visualPrompt = `${visualPrompt}\n\n[CREATOR IMAGE PROMPT REFERENCE: ${creatorImagePrompt}]`
+          }
+
           const imageRequest: ImageGenerationRequest = {
             prompt: visualPrompt,
             width,
             height,
             aspectRatio: output.aspectRatio || '16:9',
             seed: output.seed?.value,
-            numVariants: 1
+            numVariants: 1,
+            ...(customRefBuffer ? {
+              imageReference: customRefBuffer,
+              imageReferenceWeight: 0.5
+            } : {})
+          }
+
+          if (customRefBuffer) {
+            log.step(`Cena ${absoluteIndex + 1}`, `🎬 Referência visual do criador aplicada (weight: 0.5)`)
           }
 
           const imageResponse = await imageProvider.generate(imageRequest)

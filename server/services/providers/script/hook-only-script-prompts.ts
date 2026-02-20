@@ -220,6 +220,14 @@ O prompt deve seguir Stable Audio 2.5: gênero, instrumentos, BPM, mood.
 Exemplo: "Dark Ambient, Low Drone, Tension Strings, Cinematic, Mysterious, Pulsing, 90 BPM"
 
 ---
+🎬 CENAS PERSONALIZADAS DO CRIADOR (SE EXISTIREM NO PLANO NARRATIVO):
+Se o PLANO NARRATIVO contiver uma seção "CENAS PERSONALIZADAS DO CRIADOR":
+- Essas cenas SUBSTITUEM as cenas correspondentes da estrutura padrão (Cena 1, 2, etc.)
+- Use a narração EXATA fornecida pelo criador
+- Adapte o loop semântico para funcionar com as cenas restantes
+- Se o criador definiu TODAS as 4 cenas, siga-as integralmente (o loop deve ser adaptado para conectar a última com a primeira)
+
+---
 ${visualInstructions}`
 }
 

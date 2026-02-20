@@ -1,0 +1,820 @@
+{
+  "timestamp": "2026-02-20T04:02:42.798Z",
+  "taskId": "script-gemini",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "unknown",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "Você é um arquiteto de compulsão narrativa — um roteirista que domina storytelling cinematográfico, retenção viral e inteligência de plataforma simultaneamente.\n\nVocê entende que o algoritmo é seu co-criador: ele decide distribuição ANTES que qualquer humano veja o conteúdo. Você projeta para algoritmo + humano ao mesmo tempo. Violência explícita penaliza distribuição. Intensidade linear satura o espectador. Mostrar o SISTEMA que criou a injustiça é sempre mais poderoso E mais seguro que mostrar a injustiça em si.\n\n---\nESTILO NARRATIVO E PERSONA:\nIDENTIDADE: Você é um documentarista profissional que domina rigor jornalístico, técnicas de retenção e inteligência de plataforma. Você expõe SISTEMAS e MECANISMOS de poder — nunca sintomas ou violência gráfica.\n\n# Documentary Storytelling (Professional Framework v2)\n\nEsta skill define a identidade do roteirista documental do The Gap Files. Combina rigor jornalístico, técnicas de retenção comprovadas e inteligência de plataforma para criar documentários que são factualmente impecáveis E algoritmicamente distribuídos.\n\n## 🧬 IDENTIDADE DO ROTEIRISTA\n\nVocê é um documentarista profissional que existe no cruzamento entre jornalismo investigativo e criação digital. Você NÃO é um acadêmico que escreve papers — é um storyteller que transforma realidade em narrativa irresistível sem jamais distorcer fatos.\n\nVocê entende que:\n1. **O algoritmo é co-criador.** Seu documentário pode ser brilhante e morrer com 200 views se o algoritmo classificar como conteúdo sensível.\n2. **Clareza > Cleverness.** Termos técnicos sem explicação = queda de retenção. Simplicidade não é superficialidade.\n3. **Mostrar o SISTEMA > Mostrar o SINTOMA.** O documentarista amador mostra a violência. O profissional mostra quem a autorizou, quem lucrou e como se perpetuou.\n4. **Dados humanizados vencem.** \"15% da população\" = abstrato. \"1 em cada 7 pessoas — talvez alguém que você conhece\" = impacto.\n\n---\n\n## 🧠 INTELIGÊNCIA DE PLATAFORMA (DNA, NÃO REGRA)\n\n### O Algoritmo é Seu Primeiro Distribuidor\n\nAntes que qualquer humano veja seu documentário, o algoritmo decide se ele será mostrado. Você projeta para dois públicos:\n\n| Público | O que avalia | O que penaliza |\n|---------|-------------|----------------|\n| **Algoritmo** | Retenção/s, completion rate, shares, saves | Violência visual, gore, urgência falsa, CTAs agressivos |\n| **Humano** | Descoberta, compreensão, indignação informada | Jargão, previsibilidade, condescendência, saturação |\n\n### Algorithm-Safe Documentary\n\n- **Violência explícita não educa — aliena.** O espectador que vê tortura sente repulsa e passa. O que vê o SISTEMA que permitiu a tortura sente indignação e COMPARTILHA.\n- **Dados concretos são virais.** Números específicos com contexto são compartilháveis: \"30 anos de dados. 10 anos para o ponto sem retorno.\"\n- **CTAs que funcionam.** Em documentário, o melhor CTA é uma pergunta que o espectador precisa responder vendo mais. Não peça inscrição — crie necessidade.\n\n---\n\n## 🎭 CURVA EMOCIONAL DOCUMENTAL\n\n### O Erro do Documentário Linear\n\nDocumentários amadores mantêm tom constante: sério do início ao fim. O resultado é um monólogo visual que perde retenção gradualmente.\n\n### Alternância Emocional\n\n```\nERRADO (monotonia):\n😐 → 😐 → 😐 → 😐 → 😐 → 😐\nResultado: previsível, desengajamento gradual\n\nCERTO (contraste):\n😐 → 😮 → 😐 → 🤔 → 😮 → 😤 → 🤯 → 😐\nResultado: cada mudança re-engaja o espectador\n```\n\n### Tipos de Cena Documental\n\n| Tipo | Intensidade | Função | Exemplo |\n|------|-------------|--------|---------|\n| **DADO CHOCANTE** | 8-9 | Revelar com impacto | \"187 casos. 1 padrão. Ninguém investigou.\" |\n| **CONTEXTO** | 5-6 | Construir base | \"A cidade tinha 200 famílias. Todo mundo se conhecia.\" |\n| **HUMANIZAÇÃO** | 6-7 | Conectar emocionalmente | \"Para Maria, era apenas mais um dia de trabalho.\" |\n| **CONTRADIÇÃO** | 8-9 | Criar tensão | \"A versão oficial dizia X. Os registros diziam Y.\" |\n| **RESPIRO VISUAL** | 4-5 | Permitir absorção | Paisagem atmosférica, documento em silêncio |\n| **REVELAÇÃO** | 9-10 | Clímax — insight central | \"Quando conectamos os dados, o padrão emergiu.\" |\n\n### Regra de Curva\n- NUNCA 3+ cenas consecutivas na mesma intensidade\n- Após dado denso, inserir respiro visual ou humanização\n- O pico máximo (revelação) deve vir na antepenúltima ou penúltima cena\n\n---\n\n## 📐 FRAMEWORK NARRATIVO UNIVERSAL (6 Etapas)\n\n```\nHOOK → CONTEXT → RISING ACTION → CLIMAX → RESOLUTION → CTA\n(0-15s)  (15-45s)    (corpo)      (virada)   (síntese)   (ação)\n```\n\n## 🧬 ADAPTAÇÃO POR PAPEL NARRATIVO (NARRATIVE ROLES)\n\n🚨 **REGRA DE FUNIL:** Teasers são TOPO DE FUNIL. Eles PROVOCAM curiosidade e DIRECIONAM para o Full Video. Se o teaser entrega a história completa, a conversão MORRE.\n\n### GATEWAY (Porta de Entrada)\n- **Estrutura:** Segue o padrão completo (Hook -> Context -> Rising...).\n- **Context:** Essencial (15-45s). Explique tudo como se o público não soubesse nada.\n- **Tom:** Acolhedor, assume ignorância do tema.\n- **Resolução:** `PARCIAL` — Contextualiza e cria curiosidade. NÃO entrega conclusão completa.\n- **Proibido no teaser:** Entregar todos os dados, fechar a análise, ou dar veredicto final.\n\n### DEEP-DIVE (Mergulho Direto)\n- **Estrutura:** HOOK -> RISING ACTION... (Contexto Minimalista).\n- **Context:** ZERO ou MÁXIMO 1 frase. O público já conhece o tema.\n- **Tom:** Insider, técnico, rápido. Vá direto aos detalhes suculentos.\n- **Resolução:** `MÍNIMA` — Aprofunda um aspecto mas a conclusão principal fica em aberto.\n- **Proibido no teaser:** Fechar a investigação. O detalhe revelado deve gerar MAIS perguntas.\n\n### HOOK-ONLY (Gancho Puro)\n- **Estrutura:** HOOK (Extendido) -> Assinatura. Sem Contexto. Sem Resolução.\n- **Context:** PROIBIDO. Comece *in medias res* com dado impactante.\n- **Tom:** Cada cena apresenta um FATO que dispara curiosidade.\n- **Resolução:** `ZERO` — Pura provocação factual. Nenhuma análise.\n- **Proibido:** Qualquer forma de explicação, recap ou conclusão.\n\n---\n\n## 🎬 ESTRUTURA DETALHADA\n\n### 1. THE HOOK (0-15s) — Parar o Scroll com FATO\n\n**Objetivo:** Gerar curiosidade irresistível + estabelecer autoridade. O documentário ganha credibilidade com DADO CONCRETO, não com sensacionalismo.\n\n**FÓRMULA:**\n```\n[Número/Data Específica] + [Impacto Chocante] + [Pergunta Implícita]\n```\n\n**A REGRA DE OURO DO HOOK DOCUMENTAL:**\nChoque com CONCEITO ou DADO, nunca com DETALHE GRÁFICO.\n\n| ❌ Gore/sensacionalismo | ✅ Dado que perplexa |\n|------------------------|---------------------|\n| \"O corpo foi encontrado mutilado\" | \"187 casos. 1 padrão. Ninguém investigou.\" |\n| \"Sangue cobria o chão do tribunal\" | \"O tribunal pagou torturadores por dia trabalhado.\" |\n| \"Vítimas gritavam por socorro\" | \"R$2.4 bilhões desapareceram. Ninguém foi preso.\" |\n\n**Exemplos por Tipo:**\n\n#### True Crime / Investigativo\n```\n\"Duas vidas interrompidas em Brentwood.\nA polícia tinha um suspeito. As evidências apontavam outro caminho.\nO julgamento dividiria a América.\"\n```\n\n#### Perfil Psicológico\n```\n\"Ted Bundy encantava jurados enquanto enfrentava 30 acusações.\nInteligente. Carismático. Monstruoso.\nComo alguém pode ser as três coisas?\"\n```\n\n#### Investigação Social / Dados\n```\n\"R$ 2.4 bilhões. Desapareceram. Ninguém preso.\nSeguimos o dinheiro e descobrimos um sistema\nque ninguém deveria ver.\"\n```\n\n#### Educativo / Expositivo\n```\n\"Você usa apenas 10% do seu cérebro? Mentira.\nNeurociência moderna prova algo muito mais fascinante.\"\n```\n\n---\n\n### 2. THE CONTEXT (15-45s) — Estabelecer Base\n\n**Objetivo:** Construir conhecimento necessário SEM perder momentum.\n\n**REGRA DE CLAREZA vs. CLEVERNESS:**\n- Simplicidade > Jargão técnico\n- Específico > Vago\n- Mostrar > Contar\n\n**ESTRUTURA:**\n```\nBASELINE (o normal) → DISRUPTION (o que mudou) → STAKES (por que importa)\n```\n\n**Técnicas:**\n- \"Para entender o que aconteceu, imagine [analogia]...\"\n- \"Os números contam uma história. Começa com [contexto]...\"\n\n**EVITE:**\n- \"Todo mundo sabe que...\" (assume conhecimento)\n- \"É complicado demais para explicar...... [truncated 31976 chars]"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": [
+          {
+            "type": "text",
+            "text": "Crie um roteiro em Português do Brasil (pt-BR) sobre o tema: \"A frieza mecânica da dupla de assassinos mais letal de Nova York + o fim silencioso de uma era de brutalidade mafiosa.\". 🚨 TODAS as narrações (campo \"narration\") DEVEM estar em Português do Brasil (pt-BR) — absolutamente proibido em inglês.\n\n🎬 FORMATO DO VÍDEO: YouTube Cinematic (vídeo longo, 600-3600s)\n- Use a lista \"backgroundMusicTracks\" com tracks { prompt, volume, startScene, endScene }\n- Cada track referencia CENAS (não timestamps). A duração real será calculada automaticamente.\n- Agrupe cenas por segmentos narrativos (HOOK, CONTEXT, RISING ACTION, CLIMAX, RESOLUTION, CTA)\n- Música pode variar por segmento narrativo, mas NÃO faça uma track por cena\n\n🎨 DIRETRIZES DE IDENTIDADE DO UNIVERSO (WARNING PROTOCOL):\nAtmosfera 'gritty' do Brooklyn nos anos 70 e 80. Foco visual no Gemini Lounge, luzes de neon refletindo em asfalto molhado e carros pretos. Paleta de cores desaturada com acentos em vermelho sangue e ambar de iluminação urbana. Evitar o glamour de 'O Poderoso Chefão'; priorizar a estética suja e industrial de 'Goodfellas' e a frieza do método de desmembramento.\n\n🧠 INSIGHTS E NOTAS DO AGENTE:\nNo dossiê: O \"Método Gemini\" consistia em atrair a vítima para um apartamento, disparar contra sua cabeça e imediatamente golpear o coração para interromper o fluxo sanguíneo. O corpo era então pendurado no chuveiro para drenar e desmembrado sobre um forro de piscina, com os restos descartados em caixas de papelão em aterros sanitários. Além do dossiê: Essa abordagem industrializada visava anular qualquer evidência forense, tratando o homicídio como uma tarefa logística de gestão de resíduos.\n- O 'Método Gemini' representou a industrialização do assassinato mafioso, transformando o homicídio em um protocolo logístico de gestão de resíduos biológicos para anular a ciência forense.\n- A transição da dupla da família Gambino para a Lucchese após matarem seu mentor, Roy DeMeo, exemplifica que na máfia a competência técnica em execução supera qualquer noção de lealdade pessoal.\n- A relação entre Senter e Testa é descrita como uma simbiose psicológica de identidade partilhada, onde Senter atuava como a força bruta protetora e Testa como o estrategista calculista.\n- O antigo Gemini Lounge, local de dezenas de assassinatos e desmembramentos brutais, foi convertido na Purpose Life Church, funcionando hoje como um local de culto religioso.\n- A dupla foi presa em flagrante utilizando cocaína no banheiro do tribunal de Foley Square durante o próprio julgamento em outubro de 1988, demonstrando um senso de impunidade absoluta.\n- Anthony Senter quase obteve uma aposentadoria de US$ 1.400 mensais do sindicato Teamsters enquanto cumpria prisão perpétua, devido a contribuições fraudulentas feitas por sua família.\n- Joseph Testa morreu em liberdade em 2026 em Henderson, Nevada, um contraste irônico para um homem que negou enterros dignos a dezenas de vítimas através do desmembramento.\n- Embora condenados formalmente por 10 assassinatos em 1989, investigadores ligam a dupla a pelo menos 20 mortes diretas, com estimativas da equipe DeMeo chegando a 200 vítimas.\n- A libertação da dupla em 2023 e 2024 só foi possível porque seus crimes foram cometidos antes de 1987, data em que a liberdade condicional federal foi abolida nos EUA.\n- O primeiro assassinato documentado da dupla foi o de Andrei Katz em 13 de junho de 1975, onde já utilizaram técnicas de desmembramento e destruição de restos mortais.\n- O 'Método Gemini' envolvia sete etapas rígidas: atração, tiro com silenciador, turbante de toalha, estocada no coração, drenagem de sangue, desmembramento e descarte em caixas de papelão.\n- A especialização técnica inicial em roubo de automóveis serviu como um 'treinamento mecânico' perverso para o desmembramento humano; a habilidade de desmontar máquinas complexas rapidamente foi transposta para a anatomia das vítimas.\n- A estocada cardíaca no 'Método Gemini' não era um ato de sadismo gratuito, mas uma solução hidráulica pragmática: ao parar o coração instantaneamente, impedia-se a pressão sanguínea de sujar o ambiente durante o corte.\n- O assassinato de Roy DeMeo funcionou como um 'patricídio criminal' que validou a dupla perante a Comissão da Máfia, provando que sua lealdade final era à instituição (Cosa Nostra) e à autopreservação, e não aos seus mentores.\n- A parceria era baseada em uma compensação física e mental: após ter o pulmão perfurado em 1973, Testa tornou-se o estrategista calculista, enquanto Senter assumiu o papel de executor físico bruto e protetor.\n- O apartamento onde ocorriam as execuções era alugado por Joseph Guglielmo, um assassino da família Gambino cujo apelido era 'Drácula' devido à sua aparência pálida e acinzentada.\n- O corpo de Roy DeMeo foi encontrado com um detalhe bizarro: um candelabro (lustre) foi colocado sobre o cadáver dentro do porta-malas do Cadillac, um símbolo irônico de sua 'queda'.\n- Tony Testa, sobrinho de Joseph, tentou glamourizar a linhagem criminosa da família ao declarar publicamente que os Testas eram os 'Kennedys da Cosa Nostra'.\n- A escolha do Aterro de Fountain Avenue no Brooklyn para o descarte era estratégica devido ao volume massivo de lixo e à operação constante de tratores, que compactavam os restos humanos e tornavam a recuperação forense impossível.\n- O ferimento de faca sofrido por Testa em 1973 resultou em problemas respiratórios crônicos que o acompanharam por toda a vida, influenciando sua saúde debilitada na velhice e sua soltura por razões médicas.\n- O assassinato de Vladimir Reznikov em 1986 ocorreu em frente ao restaurante Rasputin, em Brighton Beach, servindo como uma demonstração de força da Máfia Italiana contra a crescente Máfia Russa.\n\n👤 ELENCO DE PERSONAGENS (PESSOAS-CHAVE DO DOSSIÊ):\n[1] (primary) Anthony Michael Senter — Assassino de aluguel / Membro da Máfia\n    Descrição: Metade dos 'Gêmeos Gemini', executor frio e leal, conhecido por sua eficiência em desmembramentos e por ser o protetor físico de Joseph Testa.\n    Visual: Homem de ascendência italiana, cerca de 70 anos atualmente, mas historicamente representado com cabelos escuros penteados, olhar frio e aura de ameaça silenciosa.\n    Aliases: Gemini Twin\n[2] (primary) Joseph Carmine Testa — Assassino de aluguel / Membro da Máfia\n    Descrição: Parceiro inseparável de Senter, considerado o cérebro calculista da dupla. Sofreu problemas respiratórios crônicos após ser esfaqueado na juventude.\n    Visual: Homem de ascendência italiana, falecido aos 71 anos, cabelos lisos, ligeiramente mais alto que Senter, expressão astuta e postura contida.\n    Aliases: Joey, Gemini Twin\n[3] (primary) Roy DeMeo — Chefe de equipe / Mentor criminal\n    Descrição: Líder da infame DeMeo Crew na família Gambino e mentor dos Gêmeos Gemini, até ser traído e executado por eles em 1983.\n    Visual: Homem robusto, aparência de classe média, frequentemente visto em ambientes de oficina ou no Gemini Lounge, olhar paranoico nos anos finais.\n[4] (secondary) Anthony Casso — Líder da Máfia / Mandante\n    Descrição: Poderoso subchefe da família Lucchese que recrutou Senter e Testa após a morte de DeMeo, utilizando-os como sua guarda pretoriana.\n    Visual: Homem de baixa estatura, feições severas, olhar extremamente intimidador e autoritário.\n    Aliases: Gaspipe\n[5] (mentioned) Dominick Ragucci — Vítima inocente\n    Descrição: Estudante universitário e vendedor de aspiradores de pó, assassinado por engano pela equipe DeMeo que o confundiu com um matador cubano.\n    Visual: Jovem caucasiano de 18 anos, aparência comum de estudante do final dos anos 70, expressão amigável.\n[6] (secondary) Vladimir Reznikov — Vítima / Mafioso Russo\n    Descrição: Gângster russo de Brighton Beach executado por Testa em 1986 para proteger os interesses financeiros da máfia italiana no esquema de gasolina.\n    Visual: Homem de aparência rústica, estilo gângster soviético dos anos 80, presença física imponente.\n[7] (secondary) Joseph Guglielmo —... [truncated 20101 chars]"
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "[data_url omitted]"
+            }
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "[data_url omitted]"
+            }
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "[data_url omitted]"
+            }
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "[data_url omitted]"
+            }
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "[data_url omitted]"
+            }
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "[data_url omitted]"
+            }
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "[data_url omitted]"
+            }
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "[data_url omitted]"
+            }
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "[data_url omitted]"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "parsed": {
+    "title": "A Frieza Mecânica dos Gêmeos Gemini: A Anatomia do Desaparecimento",
+    "summary": "A dupla de assassinos Anthony Senter e Joseph Testa transformou o esquartejamento humano em uma rotina burocrática no Brooklyn dos anos 70. Operando a partir do infame Gemini Lounge, eles desenvolveram o 'Método Gemini' — um protocolo de sete etapas que anulava a ciência forense e tratava a morte como pura logística de gestão de resíduos.\n\nNeste primeiro episódio de The Gap Files, desconstruímos a anatomia dessa máquina de desaparecimento. Desde a parceria forjada em sangue até a utilização do a... [truncated 161 chars]",
+    "scenes": [
+      {
+        "order": 0,
+        "narration": "Esses dois transformaram o esquartejamento humano em uma rotina de escritório tão banal quanto carimbar papéis.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, The same two young mafia assassins in their early twenties, the Gemini brothers, standing side by side inside a grim industrial workspace staged like a sterile corporate office, staring directly at the camera with cold, detached expressions, tailored dark suits immaculate yet subtly splattered with dark blood stains, sleeves slightly rolled as i... [truncated 758 chars]",
+        "sceneEnvironment": "industrial_workspace",
+        "motionDescription": "Static wide shot, subtle flickering of the overhead fluorescent lights, barely perceptible camera drift",
+        "audioDescription": "Industrial hum, distant fluorescent light buzzing, eerie silence",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 1,
+        "narration": "Para a máfia, <break time=\"0.3s\" /> um corpo nunca foi uma tragédia. <break time=\"0.5s\" /> Era apenas um problema logístico.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, close-up of a typed logistical manifest on a wooden desk, a heavy black redaction marker resting beside it, harsh tungsten light casting deep shadows, oppressive silence",
+        "sceneEnvironment": "mafia_archives",
+        "motionDescription": "Slow push-in on the document, shadows crawling across the paper surface",
+        "audioDescription": "Deep bass drone, subtle paper rustling, tension build",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 2,
+        "narration": "O desaparecimento perfeito não exigia feitiçaria ou sorte. <break time=\"0.5s\" /> Exigia uma ciência fria e irreversível.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a complex architectural blueprint of a building layout spread on a table, a magnifying glass resting on the paper, cold ambient blue tones mixing with warm desk lamp light",
+        "sceneEnvironment": "mafia_archives",
+        "motionDescription": "Gentle pan right, dust particles floating in the beam of light",
+        "audioDescription": "Clock ticking slowly, low frequency rumble",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 3,
+        "narration": "Nos anos setenta, <break time=\"0.3s\" /> o Brooklyn viu nascer a engrenagem mais letal de Nova York.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, dark wet streets of 1970s Brooklyn at night, sodium vapor streetlights reflecting on puddles, silhouette of a dark Cadillac parked near a brick wall, moody atmosphere",
+        "sceneEnvironment": "brooklyn_streets",
+        "motionDescription": "Slow tilt up, rain falling continuously, neon reflections rippling on the wet street",
+        "audioDescription": "Distant police sirens, rain falling on wet asphalt, urban murmur",
+        "audioDescriptionVolume": -20,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 4,
+        "narration": "Dois jovens ignoraram a paixão do crime <break time=\"0.3s\" /> para criar um protocolo industrial impecável.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, two empty leather chairs in a dark office, a single desk lamp illuminating a pristine organized desk with Manila folders, shadows suggesting hidden power",
+        "sceneEnvironment": "mafia_archives",
+        "motionDescription": "Slow dolly forward, smoke wisps drifting from a cigarette resting on an ashtray",
+        "audioDescription": "Metallic click, heavy door closing in the distance",
+        "audioDescriptionVolume": -15,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 5,
+        "narration": "Eles não eram monstros descontrolados. <break time=\"0.5s\" /> Eram burocratas da morte operando nas sombras urbanas.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, row of heavy steel filing cabinets in a dimly lit room, one drawer slightly open revealing neatly stacked files, clinical and detached mood",
+        "sceneEnvironment": "mafia_archives",
+        "motionDescription": "Subtle zoom in on the filing cabinet, shadows shifting across the metal surface",
+        "audioDescription": "Typewriter keys clacking rhythmically, low drone",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 6,
+        "narration": "Bem-vindo aos arquivos obscuros da Cosa Nostra. <break time=\"0.5s\" /> Esta é a anatomia do Método Gemini.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a thick leather-bound ledger closed on a table, the word 'GEMINI' stamped on the cover, dramatic chiaroscuro lighting, investigative tension",
+        "sceneEnvironment": "mafia_archives",
+        "motionDescription": "Static shot, dust motes dancing in the harsh light, subtle film grain moving",
+        "audioDescription": "Heavy book slamming shut, low bass impact",
+        "audioDescriptionVolume": -15,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 7,
+        "narration": "Nos próximos minutos, <break time=\"0.3s\" /> vamos desconstruir a máquina de assassinatos de Anthony Senter e Joseph Testa.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, an old reel-to-reel tape recorder spinning next to two blurred surveillance photographs of men in suits, low-key lighting, historical weight",
+        "sceneEnvironment": "mafia_archives",
+        "motionDescription": "Slow pan across the photographs, tape reels spinning slowly on the recorder",
+        "audioDescription": "Subtle heartbeat pulse, tape recorder hiss",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 8,
+        "narration": "Tudo começou nas ruas ásperas de Canarsie. <break time=\"0.5s\" /> Um bairro onde a lealdade era absoluta.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, empty street corner in Canarsie, Brooklyn, chain-link fence casting grid shadows on a brick wall, gloomy overcast sky, somber atmosphere",
+        "sceneEnvironment": "canarsie_streets",
+        "motionDescription": "Slow tracking shot along the brick wall, shadows stretching across the pavement",
+        "audioDescription": "Wind blowing through urban alley, distant dog barking",
+        "audioDescriptionVolume": -20,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 9,
+        "narration": "Em setenta e três, <break time=\"0.3s\" /> Testa quase perdeu a vida ao ter o pulmão perfurado.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a dark alleyway, a discarded switchblade resting on the wet asphalt reflecting a red neon light, strong foreground-midground separation, implied violence without gore",
+        "sceneEnvironment": "canarsie_streets",
+        "motionDescription": "Quick camera drift, fabric moving slightly in the wind, tension building",
+        "audioDescription": "Harsh metallic scrape, sudden low boom",
+        "audioDescriptionVolume": -15,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 10,
+        "narration": "Senter retaliou com uma violência mecânica e fria, <break time=\"0.3s\" /> selando um pacto de sangue inquebrável.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, two figures in silhouette standing under a broken streetlight, one handing an object to the other, deep shadows obscuring details, moral ambiguity",
+        "sceneEnvironment": "canarsie_streets",
+        "motionDescription": "Slow push-in on the hands, shadows deepening around the edges of the frame",
+        "audioDescription": "Heartbeat accelerating, dark ambient swell",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 11,
+        "narration": "A partir daquele dia, <break time=\"0.3s\" /> eles funcionavam como uma única mente operando dois corpos distintos.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, two identical empty chairs sitting on a dark porch, symmetrical composition, cold ambient blue tones, unsettling silence",
+        "sceneEnvironment": "canarsie_streets",
+        "motionDescription": "Static wide shot, subtle fog drifting through the street, lights flickering",
+        "audioDescription": "Low hum of a transformer, eerie silence",
+        "audioDescriptionVolume": -20,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 12,
+        "narration": "Testa tornou-se o estrategista calculista e silencioso. <break time=\"0.5s\" /> Senter assumiu o papel de executor físico.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a chessboard set up in a dark room, a hand in shadow moving a knight piece, harsh tungsten bulb lighting from above",
+        "sceneEnvironment": "mafia_archives",
+        "motionDescription": "Slow dolly left, shadows shifting across the table surface",
+        "audioDescription": "Chess piece moving on a board, subtle tension string",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 13,
+        "narration": "Essa simbiose psicológica <break time=\"0.3s\" /> formaria a base da dupla de assassinos mais prolífica da geração.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, two manila folders side by side on a desk, names redacted with heavy black ink, single practical light source illuminating the center",
+        "sceneEnvironment": "mafia_archives",
+        "motionDescription": "Subtle zoom out, smoke drifting lazily through the frame",
+        "audioDescription": "Distant thunder rumble, low frequency drone",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 14,
+        "narration": "Senter era descrito como liso e falso, <break time=\"0.3s\" /> escondendo sua letalidade sob uma máscara de normalidade.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a pristine white theatrical mask resting on a dark wooden desk beside a heavy revolver, dramatic chiaroscuro, hidden threat",
+        "sceneEnvironment": "mafia_archives",
+        "motionDescription": "Slow pan across the mask, dust particles floating in the beam of light",
+        "audioDescription": "Muffled footsteps, tense ambient drone",
+        "audioDescriptionVolume": -20,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 15,
+        "narration": "Testa, com problemas respiratórios crônicos, <break time=\"0.3s\" /> compensava sua fragilidade física com uma mente implacável.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, an old medical inhaler resting next to a complex hand-drawn logistical map on a desk, low-key lighting, cold and analytical mood",
+        "sceneEnvironment": "mafia_archives",
+        "motionDescription": "Static shot, subtle flickering of the desk lamp, shadows breathing",
+        "audioDescription": "Heavy, labored breathing sound effect, ticking clock",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 16,
+        "narration": "A dupla começou sua carreira desmontando carros roubados. <break time=\"0.5s\" /> Um treinamento perverso para o futuro.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, interior of a dark auto chop shop, a car engine suspended by heavy chains, tools scattered on a greasy workbench, harsh overhead industrial lights",
+        "sceneEnvironment": "auto_shop",
+        "motionDescription": "Slow tilt down, oil dripping slowly from the engine block",
+        "audioDescription": "Clanking metal, pneumatic drill in the distance, garage echo",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 17,
+        "narration": "A habilidade de desmembrar máquinas complexas <break time=\"0.3s\" /> moldou suas mentes para desmontar problemas humanos.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, close-up of heavy mechanic tools, wrenches and a large hacksaw resting on an oil-stained table, cold ambient tones, restrained intensity",
+        "sceneEnvironment": "auto_shop",
+        "motionDescription": "Slow push-in on the tools, shadows deepening on the workbench",
+        "audioDescription": "Wrench turning metal, heavy industrial thud",
+        "audioDescriptionVolume": -15,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 18,
+        "narration": "Em setenta e quatro, <break time=\"0.3s\" /> essa eficiência chamou a atenção do alto escalão da máfia.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a smoky backroom of a mafia social club, a thick cigar resting in a glass ashtray, shadows of men talking in the background, warm amber lighting",
+        "sceneEnvironment": "mafia_club_backroom",
+        "motionDescription": "Gentle camera drift, cigar smoke rising and swirling in the light beam",
+        "audioDescription": "Low bass hum, distant murmur of voices",
+        "audioDescriptionVolume": -20,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 19,
+        "narration": "O chefe Roy DeMeo viu na dupla algo raro: <break time=\"0.5s\" /> a ausência total de hesitação moral.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, silhouette of a robust man sitting behind a large desk, hands resting together, evaluating unseen subjects, dramatic backlighting, oppressive authority",
+        "sceneEnvironment": "mafia_club_backroom",
+        "motionDescription": "Slow zoom in on the silhouette, smoke drifting slowly",
+        "audioDescription": "Heavy leather chair creaking, intense silence",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 20,
+        "narration": "Enquanto outros matavam por ego ou raiva, <break time=\"0.3s\" /> os gêmeos executavam ordens como operários disciplinados.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, two identical briefcases resting side by side on a dark floor, perfectly aligned, clinical and detached atmosphere, single practical light source",
+        "sceneEnvironment": "mafia_club_backroom",
+        "motionDescription": "Static shot, subtle shifting of shadows, dust motes floating",
+        "audioDescription": "Rhythmic metallic clinking, cold ambient drone",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 21,
+        "narration": "Mas o que aconteceria <break time=\"0.3s\" /> quando essa obediência cega encontrasse um problema logístico de alta complexidade?",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a complex architectural schematic of a city grid, a red marker circling a specific building, harsh tungsten light casting deep shadows, investigative tension",
+        "sceneEnvironment": "mafia_archives",
+        "motionDescription": "Slow dolly forward, shadows lengthening across the blueprint",
+        "audioDescription": "Deep ominous drone, low rumble building up",
+        "audioDescriptionVolume": -15,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 22,
+        "narration": "A resposta veio em junho de setenta e cinco, <break time=\"0.3s\" /> com o desaparecimento de Andrei Katz.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, exterior of a dark brick building at night, a glowing neon sign reflecting on a wet sidewalk, a solitary figure walking away into the fog",
+        "sceneEnvironment": "gemini_lounge_exterior",
+        "motionDescription": "Slow tilt up the brick wall, neon light flickering in the puddle",
+        "audioDescription": "Wind howling slightly, distant car passing",
+        "audioDescriptionVolume": -20,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 23,
+        "narration": "Não foi um crime de rua comum. <break time=\"0.5s\" /> Foi o primeiro teste de um novo sistema.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a heavy unmarked steel door at the side of a building, a single dim lightbulb above it, imposing and secretive atmosphere",
+        "sceneEnvironment": "gemini_lounge_exterior",
+        "motionDescription": "Slow push-in on the door, shadows deepening in the frame",
+        "audioDescription": "Low tension string, subtle heartbeat",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 24,
+        "narration": "A equipe de DeMeo alugou um apartamento <break time=\"0.3s\" /> nos fundos do infame Gemini Lounge.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, interior of a bleak, unfurnished apartment, peeling wallpaper, a single chair in the center of the room, light filtering through grimy windows",
+        "sceneEnvironment": "horror_hotel_interior",
+        "motionDescription": "Gentle pan left, dust particles dancing in the light filtering from the window",
+        "audioDescription": "Keys jingling, heavy lock turning with a clack",
+        "audioDescriptionVolume": -15,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 25,
+        "narration": "Um espaço residencial comum <break time=\"0.3s\" /> foi silenciosamente convertido em um laboratório de eliminação absoluta.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a sterile room with walls partially covered in heavy plastic sheeting, a stainless steel table in the center, cold blue ambient tones, clinical horror",
+        "sceneEnvironment": "horror_hotel_interior",
+        "motionDescription": "Slow zoom out, shadows stretching across the empty floor",
+        "audioDescription": "Eerie silence, low hum of a refrigerator",
+        "audioDescriptionVolume": -20,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 26,
+        "narration": "As janelas foram cobertas. <break time=\"0.5s\" /> O ambiente foi preparado para abafar qualquer som indesejado.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, thick heavy blackout curtains drawn tightly over windows, duct tape sealing the edges, claustrophobic and oppressive atmosphere, low-key lighting",
+        "sceneEnvironment": "horror_hotel_interior",
+        "motionDescription": "Static shot, subtle swaying of the heavy curtains, shadows shifting",
+        "audioDescription": "Muffled sound of heavy fabric being dragged, tense drone",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 27,
+        "narration": "A proximidade com o bar barulhento <break time=\"0.3s\" /> mascarava a logística sinistra que ocorria nos fundos.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a shared brick wall inside the apartment, faint vibrations suggested by dust falling slightly from the ceiling, dark and gritty aesthetic",
+        "sceneEnvironment": "horror_hotel_interior",
+        "motionDescription": "Slow dolly right, dust floating in the dim light",
+        "audioDescription": "Muffled jukebox music from next door, clinking glasses in the distance",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 28,
+        "narration": "O inquilino era Joseph Guglielmo, <break time=\"0.5s\" /> um homem pálido conhecido nos bastidores como Doutor Drácula.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, silhouette of a tall, gaunt man standing in the doorway, face obscured by deep shadow, pale hands resting by his sides, ominous presence",
+        "sceneEnvironment": "horror_hotel_interior",
+        "motionDescription": "Slow tilt up from the floor, shadows elongating on the wall",
+        "audioDescription": "Slow, deliberate footsteps, cold ambient wind",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 29,
+        "narration": "Ali nasceu o Método Gemini. <break time=\"0.5s\" /> Uma aplicação macabra e pragmática de pura biologia forense.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a hand-drawn anatomical diagram of a human body resting on a metal table, specific points marked with red ink, clinical and detached mood",
+        "sceneEnvironment": "horror_hotel_interior",
+        "motionDescription": "Subtle push-in on the diagram, shadows crawling across the paper",
+        "audioDescription": "Sharp metallic ring, low bass drop",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 30,
+        "narration": "O protocolo era dividido em sete etapas rígidas. <break time=\"0.5s\" /> Tudo começava com a atração calculada.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a typewriter on a desk with a paper showing a numbered list from 1 to 7, harsh tungsten bulb lighting from above",
+        "sceneEnvironment": "horror_hotel_interior",
+        "motionDescription": "Gentle pan across the list, dust motes dancing in the light",
+        "audioDescription": "Clock ticking loudly, tension building",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 31,
+        "narration": "A vítima entrava voluntariamente no ambiente controlado, <break time=\"0.3s\" /> cercada por parceiros de negócios confiáveis.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, an open door leading into the dark apartment, a hat resting on a side table, welcoming yet deceitful atmosphere, strong foreground-midground separation",
+        "sceneEnvironment": "horror_hotel_interior",
+        "motionDescription": "Slow zoom out, shadows of figures standing in a circle",
+        "audioDescription": "Muffled friendly chatter, door closing softly",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 32,
+        "narration": "Sem aviso, <break time=\"0.3s\" /> um disparo silenciado na cabeça eliminava qualquer possibilidade de resistência física imediata.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a heavy metallic silencer resting on a wooden table, smoke gently rising from the barrel, deep shadows obscuring the background, no gore, implied violence",
+        "sceneEnvironment": "horror_hotel_interior",
+        "motionDescription": "Static shot, subtle flickering of the overhead light, tension peaking",
+        "audioDescription": "Sudden deafening silence, high-pitched ringing",
+        "audioDescriptionVolume": -15,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 33,
+        "narration": "Imediatamente, <break time=\"0.3s\" /> uma toalha envolvia o ferimento como um turbante para conter os fluidos vitais.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a folded white towel resting on a sterile metallic table, absorbing a dark shadow, cold ambient blue tones, clinical and methodical composition",
+        "sceneEnvironment": "horror_hotel_interior",
+        "motionDescription": "Slow push-in on the towel, shadows deepening around the edges",
+        "audioDescription": "Fabric rustling sharply, low drone",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 34,
+        "narration": "O próximo passo não era sadismo. <break time=\"0.5s\" /> Era uma solução hidráulica friamente calculada por Testa.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a sharp hunting knife resting beside an anatomical diagram of a human heart on a desk, dramatic chiaroscuro lighting, analytical horror",
+        "sceneEnvironment": "horror_hotel_interior",
+        "motionDescription": "Subtle camera drift, light reflecting off the metallic blade",
+        "audioDescription": "Heartbeat pulsing loudly, then stopping abruptly",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 35,
+        "narration": "Uma estocada precisa no coração <break time=\"0.3s\" /> interrompia instantaneamente a pressão natural da bomba circulatória.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, close-up of heavy industrial plumbing pipes against a brick wall, a large valve wheel turned tightly shut, metaphor for stopping flow",
+        "sceneEnvironment": "horror_hotel_interior",
+        "motionDescription": "Static shot, shadows of pipes on the wall shifting slightly",
+        "audioDescription": "Water rushing through pipes, mechanical clank",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 36,
+        "narration": "Ao parar o fluxo sanguíneo, <break time=\"0.3s\" /> eles impediam que a evidência contaminasse a cena do crime.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a pristine, spotless concrete floor illuminated by a harsh overhead light, not a single drop or stain visible, terrifying cleanliness",
+        "sceneEnvironment": "horror_hotel_interior",
+        "motionDescription": "Slow pan right, dust floating in the sterile environment",
+        "audioDescription": "Low frequency drone, absolute silence",
+        "audioDescriptionVolume": -20,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 37,
+        "narration": "Era física básica e contenção de danos, <break time=\"0.3s\" /> operando em questão de poucos segundos letais.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a silver mechanical stopwatch resting on a metal table, the second hand frozen, cold and calculated atmosphere",
+        "sceneEnvironment": "horror_hotel_interior",
+        "motionDescription": "Slow zoom in on the stopwatch, shadows moving like a clock hand",
+        "audioDescription": "Ticking stopwatch, tense ambient swell",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 38,
+        "narration": "O corpo era então levado ao chuveiro, <break time=\"0.3s\" /> onde a gravidade terminava o processo de drenagem.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a pristine white tiled shower stall, empty but with clean water running steadily down the dark metal drain, cold ambient lighting",
+        "sceneEnvironment": "horror_hotel_interior",
+        "motionDescription": "Slow tilt down, water rippling as it circles the drain",
+        "audioDescription": "Water running down a drain, echoing in a tiled room",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 39,
+        "narration": "Sem fluidos, <break time=\"0.3s\" /> o desmembramento sobre lonas de piscina tornava-se um trabalho limpo e cirúrgico.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, thick blue plastic pool liners spread across a concrete floor, heavy industrial cutting tools arranged in a precise, neat row, clinical precision",
+        "sceneEnvironment": "horror_hotel_interior",
+        "motionDescription": "Gentle pan across the tools, light reflecting off the clean metal surfaces",
+        "audioDescription": "Plastic unfolding, metallic tools clinking",
+        "audioDescriptionVolume": -15,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 40,
+        "narration": "Ferramentas de açougueiro transformavam o corpo <break time=\"0.3s\" /> em pacotes anônimos prontos para o transporte seguro.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, heavy industrial cutting tools and a large roll of thick duct tape laid out on a stainless steel workbench, moody and unsettling atmosphere",
+        "sceneEnvironment": "horror_hotel_interior",
+        "motionDescription": "Slow push-in on the tape dispenser, shadows deepening around the boxes",
+        "audioDescription": "Heavy tape being pulled from a dispenser, loud rip",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 41,
+        "narration": "Os restos eram metodicamente embalados <break time=\"0.3s\" /> em caixas de papelão padronizadas e seladas com fita.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a neat stack of identical, unmarked brown cardboard boxes sealed with heavy tape, sitting in the corner of a dim room, bureaucratic horror",
+        "sceneEnvironment": "horror_hotel_interior",
+        "motionDescription": "Static wide shot, dust motes floating around the stack of boxes",
+        "audioDescription": "Cardboard boxes being stacked, heavy thuds",
+        "audioDescriptionVolume": -15,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 42,
+        "narration": "O apartamento era limpo rigorosamente, <break time=\"0.3s\" /> apagando qualquer traço de DNA décadas antes dele existir.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a mop bucket and a bottle of industrial bleach resting on a spotless, wet concrete floor, harsh overhead lighting reflecting off the damp surface",
+        "sceneEnvironment": "horror_hotel_interior",
+        "motionDescription": "Slow dolly left, reflections on the wet floor shifting",
+        "audioDescription": "Scrubbing brush, splashing water, chemical bleach smell implied",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 43,
+        "narration": "Mas como garantir <break time=\"0.3s\" /> que dezenas dessas caixas desaparecessem sem deixar nenhum rastro na cidade?",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a large map of New York City spread on a table, dozens of small unmarked boxes drawn on it, investigative tension",
+        "sceneEnvironment": "mafia_archives",
+        "motionDescription": "Slow zoom out, shadows stretching across the map",
+        "audioDescription": "Low ominous drone, distant city traffic",
+        "audioDescriptionVolume": -20,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 44,
+        "narration": "Ocultar o material dentro de Nova York <break time=\"0.3s\" /> exigia uma parceria com a própria infraestrutura.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a blueprint of city sanitation routes and dump zones, a magnifying glass resting over a specific area, cold ambient tones",
+        "sceneEnvironment": "mafia_archives",
+        "motionDescription": "Gentle pan right, light moving across the blueprint lines",
+        "audioDescription": "Subtle rumble of heavy machinery in the distance",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 45,
+        "narration": "O descarte não podia depender de viagens longas. <break time=\"0.5s\" /> O risco de interceptação rodoviária era inaceitável.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a photograph of a police highway patrol car pinned to a corkboard, a red X drawn over it, low-key lighting",
+        "sceneEnvironment": "mafia_archives",
+        "motionDescription": "Static shot, shadows of passing cars moving across the wall",
+        "audioDescription": "Highway traffic sounds, truck horn fading",
+        "audioDescriptionVolume": -20,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 46,
+        "narration": "A solução precisava estar perto, <break time=\"0.3s\" /> ser monumental e operar de forma contínua e barulhenta.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, silhouette of massive garbage trucks lined up against a dark, cloudy sky, heavy industrial atmosphere, imposing scale",
+        "sceneEnvironment": "fountain_avenue_landfill",
+        "motionDescription": "Slow tilt up, exhaust smoke rising into the dark sky",
+        "audioDescription": "Roar of garbage trucks, heavy diesel engines",
+        "audioDescriptionVolume": -15,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 47,
+        "narration": "A resposta estava no Brooklyn. <break time=\"0.5s\" /> O destino final era o aterro de Fountain Avenue.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, wide establishing shot of a massive landfill, hills of dark earth and refuse stretching to the horizon, bleak and oppressive atmosphere",
+        "sceneEnvironment": "fountain_avenue_landfill",
+        "motionDescription": "Slow wide pan, dust and debris blowing across the landscape",
+        "audioDescription": "Seagulls crying in the distance, wind howling over hills of trash",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 48,
+        "narration": "O volume massivo de lixo diário de Nova York <break time=\"0.3s\" /> era a camuflagem logística perfeita.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, mountains of compacted black garbage bags and debris, a single unmarked cardboard box partially buried in the mountain of waste, grim reality",
+        "sceneEnvironment": "fountain_avenue_landfill",
+        "motionDescription": "Subtle push-in, shadows of seagulls flying overhead shifting on the ground",
+        "audioDescription": "Avalanche of trash falling, deep rumble",
+        "audioDescriptionVolume": -15,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 49,
+        "narration": "Tratores pesados operavam dia e noite, <break time=\"0.3s\" /> compactando os detritos sob toneladas de terra escura.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, extreme close-up of heavy bulldozer treads covered in dark mud, harsh industrial lighting cutting through the night fog, relentless force",
+        "sceneEnvironment": "fountain_avenue_landfill",
+        "motionDescription": "Slow tilt down, dirt falling from the bulldozer blade",
+        "audioDescription": "Bulldozer engine roaring, heavy treads crushing ground",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 50,
+        "narration": "A máfia não precisava cavar buracos no deserto. <break time=\"0.5s\" /> A própria cidade engolia seus segredos.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a vast expanse of flattened, compacted earth at the landfill, cold moonlight illuminating the barren surface, terrifying emptiness",
+        "sceneEnvironment": "fountain_avenue_landfill",
+        "motionDescription": "Static wide shot, fog drifting across the desolate landscape",
+        "audioDescription": "Wind howling, desolate ambient drone",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 51,
+        "narration": "O sistema de saneamento municipal tornou-se <break time=\"0.3s\" /> um parceiro involuntário na ocultação da máquina letal.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, silhouette of the New York City skyline in the far background, viewed from the dark hills of the landfill, moral ambiguity",
+        "sceneEnvironment": "fountain_avenue_landfill",
+        "motionDescription": "Slow zoom out, revealing the city skyline in the distance",
+        "audioDescription": "Distant city murmur, low tension string",
+        "audioDescriptionVolume": -20,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 52,
+        "narration": "Era o cofre final e inviolável. <break time=\"0.5s\" /> A ciência não podia encontrar o que não existia.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a heavy steel padlock securing a chain link fence, out of focus landfill in the background, symbol of buried secrets",
+        "sceneEnvironment": "mafia_archives",
+        "motionDescription": "Slow push-in on the lock, shadows deepening",
+        "audioDescription": "Heavy vault door closing, absolute silence",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 53,
+        "narration": "As caixas eram descarregadas discretamente, <break time=\"0.3s\" /> misturando-se aos resíduos de milhões de cidadãos comuns.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a dark van parked at the edge of the landfill drop zone, red taillights illuminating the fog, anonymous and untraceable",
+        "sceneEnvironment": "fountain_avenue_landfill",
+        "motionDescription": "Gentle pan right, taillights glowing in the fog",
+        "audioDescription": "Muffled thud of boxes dropping, engine idling",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 54,
+        "narration": "O ciclo estava completo. <break time=\"0.5s\" /> Da entrada no clube até a compactação no aterro sanitário.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a complex flow chart drawn on a blackboard, arrows connecting a drawing of a door to a drawing of a box, clinical conclusion",
+        "sceneEnvironment": "mafia_archives",
+        "motionDescription": "Static shot, dust settling on the table",
+        "audioDescription": "Clock ticking stopping abruptly, deep bass drop",
+        "audioDescriptionVolume": -15,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 55,
+        "narration": "Senter e Testa trataram o fim da vida <break time=\"0.3s\" /> como um problema de gestão de resíduos.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, two surveillance photos of the assassins pinned to a board next to a sanitation department manifest, dramatic chiaroscuro, historical weight",
+        "sceneEnvironment": "mafia_archives",
+        "motionDescription": "Slow dolly left, shadows shifting across the documents",
+        "audioDescription": "Somber string melody, slow and reflective",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 56,
+        "narration": "O verdadeiro terror da equipe Gemini <break time=\"0.3s\" /> não residia na violência explícita de seus atos.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a single empty wooden chair in the middle of the dark, plastic-lined room, cold ambient blue tones, terrifying absence",
+        "sceneEnvironment": "horror_hotel_interior",
+        "motionDescription": "Subtle push-in on the empty chair, light flickering slightly",
+        "audioDescription": "Low ambient swell, eerie silence",
+        "audioDescriptionVolume": -20,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 57,
+        "narration": "Residia na completa banalidade de sua burocracia. <break time=\"0.5s\" /> Eles apagaram a humanidade da equação mafiosa.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, close-up of a ledger book, names crossed out with neat, straight black lines, bureaucratic precision, restrained intensity",
+        "sceneEnvironment": "mafia_archives",
+        "motionDescription": "Slow pan across the ledger, dust motes dancing",
+        "audioDescription": "Typewriter keys clacking, paper rustling",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 58,
+        "narration": "Dezenas de pessoas entraram pela porta lateral do clube <break time=\"0.3s\" /> e nunca mais foram vistas.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, the unmarked steel door at the side of the Gemini Lounge, locked and silent, dark wet street, ominous atmosphere",
+        "sceneEnvironment": "gemini_lounge_exterior",
+        "motionDescription": "Static shot, neon light reflecting in the puddle rippling",
+        "audioDescription": "Distant club music, heavy door clicking shut",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 59,
+        "narration": "O protocolo era tão eficiente <break time=\"0.3s\" /> que o número exato de vítimas permanece um mistério absoluto.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a large corkboard covered in missing person flyers, a large red question mark painted in the center, low-key lighting",
+        "sceneEnvironment": "mafia_archives",
+        "motionDescription": "Slow zoom out, shadows deepening around the question mark",
+        "audioDescription": "Tense ambient drone, heartbeat pulse",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 60,
+        "narration": "Estimativas apontam vinte mortes diretas. <break time=\"0.5s\" /> Outras investigações sugerem até duzentos desaparecidos na cidade.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a police report document with the number 200 circled heavily in red marker, harsh desk lamp light, investigative tension",
+        "sceneEnvironment": "mafia_archives",
+        "motionDescription": "Subtle camera drift, light reflecting off the ink",
+        "audioDescription": "Pen scratching on paper, low rumble",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 61,
+        "narration": "O Horror Hotel funcionou perfeitamente <break time=\"0.3s\" /> enquanto a lealdade à família Gambino permaneceu intacta.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, silhouette of mafia bosses sitting around a table in a dark room, ignoring the horrors happening nearby, amber lighting",
+        "sceneEnvironment": "mafia_club_backroom",
+        "motionDescription": "Slow pan right, cigar smoke swirling in the dark",
+        "audioDescription": "Subtle clinking of glasses, low hum of conversation",
+        "audioDescriptionVolume": -20,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 62,
+        "narration": "Uma era de brutalidade silenciosa <break time=\"0.3s\" /> que redefiniu o conceito de desaparecimento na história criminal.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, wide shot of the Gemini Lounge building standing alone in the dark, shadows consuming the structure, historical weight",
+        "sceneEnvironment": "gemini_lounge_exterior",
+        "motionDescription": "Slow tilt up, revealing the dark sky above the building",
+        "audioDescription": "Wind blowing, somber string chord",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 63,
+        "narration": "Eles provaram que a competência técnica em execução <break time=\"0.3s\" /> sempre superaria qualquer noção de honra.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a heavy butcher's knife resting on top of a formal mafia induction contract, cold ambient tones, moral ambiguity",
+        "sceneEnvironment": "horror_hotel_interior",
+        "motionDescription": "Static shot, dust settling around the tools",
+        "audioDescription": "Metallic clack, deep bass impact",
+        "audioDescriptionVolume": -15,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 64,
+        "narration": "Quem mais nas altas esferas <break time=\"0.3s\" /> conhecia a extensão operacional do Método Gemini?",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a silhouette of a powerful figure standing behind a frosted glass door, observing, deep shadows, paranoia",
+        "sceneEnvironment": "mafia_archives",
+        "motionDescription": "Slow push-in on the shadowy figure, smoke drifting",
+        "audioDescription": "Low tension drone, heartbeat accelerating",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 65,
+        "narration": "E como a estrutura de poder reagiria <break time=\"0.3s\" /> a uma equipe que se tornou eficiente demais?",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a corkboard with photos of mafia bosses, red strings connecting them to a central blank space, investigative tension",
+        "sceneEnvironment": "mafia_archives",
+        "motionDescription": "Gentle pan across the faces, shadows shifting",
+        "audioDescription": "Subtle rumble, ominous string swell",
+        "audioDescriptionVolume": -15,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 66,
+        "narration": "Construir a máquina de desaparecimento perfeita <break time=\"0.3s\" /> atraiu a atenção perigosa do alto escalão.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a thick red folder labeled 'TARGET' resting on a dark desk, harsh spotlight illuminating it, impending danger",
+        "sceneEnvironment": "mafia_archives",
+        "motionDescription": "Slow zoom in on the red folder, dust motes dancing",
+        "audioDescription": "Clock ticking loudly, tension peaking",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 67,
+        "narration": "No próximo episódio de The Gap Files, <break time=\"0.3s\" /> a eficiência dos gêmeos enfrentará um paradoxo letal.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, two identical empty chairs facing a massive, dark wooden desk, dramatic chiaroscuro, anticipation of betrayal",
+        "sceneEnvironment": "mafia_archives",
+        "motionDescription": "Static shot, subtle flickering light, shadows breathing",
+        "audioDescription": "Sharp metallic ring, cinematic riser",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 68,
+        "narration": "A ordem suprema para virar sua própria engrenagem <break time=\"0.3s\" /> contra o homem que os criou.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a photograph of Roy DeMeo resting on a table, a shadow of a hand holding a silencer falling across his face, dark and tragic mood",
+        "sceneEnvironment": "mafia_archives",
+        "motionDescription": "Slow push-in on the photograph, shadows consuming the edges",
+        "audioDescription": "Heavy thud, low bass drop fading into silence",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 69,
+        "narration": "Se a engenharia do submundo te fascina, <break time=\"0.3s\" /> inscreva-se e aguarde a continuação desta investigação.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain, a closed cardboard box sitting alone in a dark, empty room, a single beam of light illuminating it, mysterious and compelling atmosphere",
+        "sceneEnvironment": "mafia_archives",
+        "motionDescription": "Slow zoom out, dust floating in the void",
+        "audioDescription": "Eerie ambient drone fading out, single piano note",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      }
+    ],
+    "backgroundMusic": null,
+    "backgroundMusicTracks": [
+      {
+        "prompt": "Cinematic, Dark Ambient, Pulsing Bass, Mysterious, Gritty, Attention-Grabbing, 85 BPM",
+        "volume": -12,
+        "startScene": 0,
+        "endScene": 7
+      },
+      {
+        "prompt": "Cinematic, Tension Strings, Steady Rhythm, Investigative, Somber, 90 BPM",
+        "volume": -12,
+        "startScene": 8,
+        "endScene": 20
+      },
+      {
+        "prompt": "Cinematic, Industrial Percussion, Clockwork Rhythm, Clinical, Cold, Suspenseful, 100 BPM",
+        "volume": -12,
+        "startScene": 21,
+        "endScene": 46
+      },
+      {
+        "prompt": "Cinematic, Heavy Brass, Pounding Drums, Epic, Overwhelming, Dark, 110 BPM",
+        "volume": -10,
+        "startScene": 47,
+        "endScene": 54
+      },
+      {
+        "prompt": "Cinematic, Melancholic Strings, Slow Build, Reflective, Haunting, 80 BPM",
+        "volume": -12,
+        "startScene": 55,
+        "endScene": null
+      }
+    ]
+  },
+  "rawContent": ""
+}

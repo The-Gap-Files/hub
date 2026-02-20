@@ -703,7 +703,7 @@ function buildUserPrompt(request: StoryArchitectRequest): string {
  * Converte o StoryOutline em texto legível para injeção no prompt do Opus.
  * Este texto é adicionado ao user prompt do generateScript.
  */
-export function formatOutlineForPrompt(outline: StoryOutline & { _monetizationMeta?: any, _selectedHookLevel?: string, _customHook?: string }): string {
+export function formatOutlineForPrompt(outline: StoryOutline & { _monetizationMeta?: any, _selectedHookLevel?: string, _customHook?: string, _customScenes?: Array<{ order: number; narration: string; referenceImageId?: string | null; imagePrompt?: string | null }> }): string {
   const beats = outline.risingBeats
     .map((b, i) => `  ${i + 1}. ${b.revelation} → Levanta: "${b.newQuestion}"`)
     .join('\n')
@@ -728,6 +728,38 @@ export function formatOutlineForPrompt(outline: StoryOutline & { _monetizationMe
     // Fallback para outlines antigos que ainda têm hookCandidate
     hookText = selectedVariant?.hook || (outline as any).hookCandidate || ''
     hookLevel = selectedVariant?.level || 'moderate'
+  }
+
+  // Bloco de cenas personalizadas do criador
+  let customScenesBlock = ''
+  const customScenes = (outline as any)._customScenes as Array<{ order: number; narration: string; referenceImageId?: string | null; imagePrompt?: string | null }> | undefined
+  if (customScenes && Array.isArray(customScenes) && customScenes.length > 0) {
+    const sceneLines = customScenes.map(s => {
+      const refTag = s.referenceImageId ? ' [imagem de referência visual fornecida]' : ''
+      const promptTag = s.imagePrompt ? ` [prompt original da imagem: "${s.imagePrompt}"]` : ''
+      return `  Cena ${s.order}: "${s.narration}"${refTag}${promptTag}`
+    }).join('\n')
+
+    const remainingForHookOnly = Math.max(0, 4 - customScenes.length)
+
+    const connectionNote = role === 'hook-only'
+      ? remainingForHookOnly > 0
+        ? `- APÓS estas ${customScenes.length} cena(s), use as ${remainingForHookOnly} cena(s) restantes para CONECTAR com o plano do Arquiteto (loop semântico, beats).`
+        : `- O criador definiu TODAS as cenas. Siga-as integralmente. Adapte o loop semântico para funcionar com estas cenas.`
+      : `- APÓS estas ${customScenes.length} cena(s), use 1-2 cenas de TRANSIÇÃO para conectar com o plano do Arquiteto, e então siga o blueprint normalmente.`
+
+    customScenesBlock = `
+━━ 🎬 CENAS PERSONALIZADAS DO CRIADOR (DIRETIVA OBRIGATÓRIA) ━━
+🚨 O criador definiu ${customScenes.length} cena(s) como INTRODUÇÃO OBRIGATÓRIA do vídeo.
+SIGA estas cenas EXATAMENTE como escritas, na ordem definida:
+${sceneLines}
+
+⚠️ REGRAS:
+- Use a narração EXATA fornecida pelo criador (ajuste apenas pontuação se necessário).
+- Estas cenas SÃO as primeiras ${customScenes.length} cena(s) do roteiro.
+${connectionNote}
+- Se o criador forneceu imagem de referência, o visual da cena deve ser COERENTE com a narração (o Cineasta cuidará da direção visual).
+`
   }
 
   // Bloco de papel narrativo — aparece DENTRO do blueprint, não como nota extra
@@ -824,7 +856,7 @@ ${levelEmoji} Tom selecionado: ${hookLevel.toUpperCase()}
 🎯 Hook de referência: "${hookText}"
 → SIGA o conceito e a técnica deste hook. Você PODE reescrever para maior perplexidade, mas o CONCEITO CENTRAL e a TÉCNICA devem ser mantidos.
 → Se a frase soa acadêmica, REFORMULE como ruptura cognitiva curta — mantendo o mesmo conceito.
-${loopBlock}
+${customScenesBlock}${loopBlock}
 ${titleBlock}
 
 ━━ 🔫 MUNIÇÃO NARRATIVA (escolha 1-3 fatos mais chocantes) ━━
@@ -857,7 +889,7 @@ ${narrativeRoleBlock}
 Estratégia: ${outline.hookStrategy}
 ${levelEmoji} Tom selecionado: ${hookLevel.toUpperCase()}
 Referência de tom: "${hookText}"
-
+${customScenesBlock}
 ${contextLabel}
 
 ━━ RISING ACTION (${dist.rising} cenas) ━━

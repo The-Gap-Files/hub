@@ -27,7 +27,18 @@ export default defineEventHandler(async (event) => {
           updateData.storyOutline = {
             ...(currentOutput.storyOutline as any),
             _selectedHookLevel: body.selectedHookLevel,
-            ...(body.selectedHookLevel === 'custom' && body.customHook ? { _customHook: body.customHook } : {})
+            ...(body.selectedHookLevel === 'custom' && body.customHook ? { _customHook: body.customHook } : {}),
+            // Custom scenes do criador (narração + imagem de referência por cena)
+            ...(Array.isArray(body.customScenes) && body.customScenes.length > 0
+              ? {
+                  _customScenes: body.customScenes.slice(0, 5).map((s: any, i: number) => ({
+                    order: s.order || i + 1,
+                    narration: String(s.narration || '').trim(),
+                    referenceImageId: s.referenceImageId || null,
+                    imagePrompt: s.imagePrompt ? String(s.imagePrompt).trim() : null
+                  })).filter((s: any) => s.narration)
+                }
+              : {})
           }
         }
       }
