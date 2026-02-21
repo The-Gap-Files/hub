@@ -1,8 +1,8 @@
 import { z } from 'zod'
 import { prisma } from '../../../../utils/prisma'
 import type { CreateOutputsDTO, CreateOutputsResponse } from '../../../../types/output.types'
-import { getClassificationById } from '../../../../constants/intelligence-classifications'
-import { getScriptStyleById } from '../../../../constants/script-styles'
+import { getClassificationById } from '../../../../constants/content/intelligence-classifications'
+import { getScriptStyleById } from '../../../../constants/storytelling/script-styles'
 
 // Schema de validação
 const OutputTypeEnum = z.enum(['VIDEO_TEASER', 'VIDEO_FULL', 'TWITTER_THREAD', 'LINKEDIN_POST', 'INSTAGRAM_POST', 'PODCAST_EPISODE', 'BLOG_ARTICLE'])

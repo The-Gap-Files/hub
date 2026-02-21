@@ -6,7 +6,7 @@ import {
   getAllAssignments,
   getDbProviders
 } from '../../services/llm/llm-factory'
-import { getLlmTasks } from '../../constants/llm-registry'
+import { getLlmTasks } from '../../constants/providers/llm-registry'
 
 export default defineEventHandler(async () => {
   const dbProviders = await getDbProviders()

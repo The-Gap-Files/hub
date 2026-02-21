@@ -1,7 +1,7 @@
 import { prisma } from '../../../utils/prisma'
 import { createPipelineLogger } from '../../../utils/pipeline-logger'
 import { CaptionService, type SceneCaptionData } from '../../../services/caption.service'
-import { getRecommendedStyle, CAPTION_STYLES, type CaptionStyleId } from '../../../constants/caption-styles'
+import { getRecommendedStyle, CAPTION_STYLES, type CaptionStyleId } from '../../../constants/cinematography/caption-styles'
 
 /**
  * POST /api/outputs/[id]/add-captions

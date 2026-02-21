@@ -1,4 +1,4 @@
-import { VIDEO_FORMATS } from '../../constants/video-formats'
+import { VIDEO_FORMATS } from '../../constants/distribution/video-formats'
 
 export default defineEventHandler(() => {
   return {

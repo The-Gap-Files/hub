@@ -7,10 +7,10 @@
  * Se o modelo não tiver inputSchema, retorna null — o provider usa fallback hardcoded.
  * Isso garante backward compatibility total.
  * 
- * @see server/constants/media-registry.ts — definição do MediaModelInputSchema
+ * @see server/constants/providers/media-registry.ts — definição do MediaModelInputSchema
  */
 
-import type { MediaModelInputSchema } from '../constants/media-registry'
+import type { MediaModelInputSchema } from '../constants/providers/media-registry'
 
 // =============================================================================
 // IMAGE — Monta payload para geradores de imagem
@@ -83,6 +83,7 @@ export function buildImageInput(
 
 export interface MotionInputContext {
   imageBuffer?: Buffer
+  endImageBuffer?: Buffer // Buffer da imagem final (last_image / end-frame)
   imagePath?: string
   prompt?: string
   duration?: number
@@ -101,13 +102,22 @@ export function buildMotionInput(
   // Prompt
   input[schema.promptField] = ctx.prompt || 'Natural, smooth camera movement. Cinematic lighting.'
 
-  // Imagem
+  // Imagem de início (start frame)
   if (schema.imageField && ctx.imageBuffer) {
     if (schema.imageInputMode === 'base64') {
       input[schema.imageField] = ctx.imageBuffer.toString('base64')
     } else {
       // buffer direto (Replicate aceita Buffer)
       input[schema.imageField] = ctx.imageBuffer
+    }
+  }
+
+  // Imagem final (end frame / last_image) — opcional, melhora transições
+  if (schema.endImageField && ctx.endImageBuffer) {
+    if (schema.imageInputMode === 'base64') {
+      input[schema.endImageField] = ctx.endImageBuffer.toString('base64')
+    } else {
+      input[schema.endImageField] = ctx.endImageBuffer
     }
   }
 

@@ -6,8 +6,8 @@
  */
 import { HumanMessage } from '@langchain/core/messages'
 import { createLlmForTask } from '../../services/llm/llm-factory'
-import { LLM_TASKS } from '../../constants/llm-registry'
-import type { LlmTaskId } from '../../constants/llm-registry'
+import { LLM_TASKS } from '../../constants/providers/llm-registry'
+import type { LlmTaskId } from '../../constants/providers/llm-registry'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)

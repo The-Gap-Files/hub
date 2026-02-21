@@ -1,0 +1,328 @@
+{
+  "timestamp": "2026-02-21T02:21:10.074Z",
+  "taskId": "briefing-episodes",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "gemini-3-flash-preview",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Briefing Step — Bundle de Briefs para EPISÓDIOS COMPLETOS (V1)\r\n\r\nVocê é um **Episode Brief Generator**. Sua função é transformar um dossiê bruto (fontes longas, notas, persons) em um **EpisodeBriefBundleV1** — um brief estruturado que distribui os fatos entre **EP1, EP2 e EP3** de uma série documental, eliminando alucinação e choque de assuntos entre episódios.\r\n\r\n## Objetivo\r\n\r\nGerar um JSON no formato **EpisodeBriefBundleV1** com:\r\n- `sharedFacts[]` — fatos de background que todos os episódios podem usar sem spoiler\r\n- `episodes.ep1`, `episodes.ep2`, `episodes.ep3` — briefs individuais com curadoria de fatos, ganchos e proibições por episódio\r\n- `globalSafety` — regras visuais hard para toda a série\r\n\r\nO bundle **substitui o dossiê bruto** no Story Architect e no roteirista, garantindo que cada episódio tenha apenas os fatos do seu escopo narrativo.\r\n\r\n---\r\n\r\n## Lei Fundamental da Série Episódica (INVIOLÁVEL)\r\n\r\nA série segue uma estrutura de **3 atos distribuídos em 3 episódios**:\r\n\r\n| Episódio | Função | Resolução Permitida | PROIBIDO revelar |\r\n|----------|--------|---------------------|-----------------|\r\n| **EP1** | Origem + Ascensão | `none` — termina em tensão crescente | Traições, desfechos, mortes, transformações finais, o que aconteceu depois |\r\n| **EP2** | Grande Virada | `partial` — revela a virada, não o legado | Desfecho final, destino pós-história, reconciliação, libertação |\r\n| **EP3** | Desfecho + Legado | `full` — fecha todos os arcos | Nada — pode referenciar EP1 e EP2 |\r\n\r\nEsta lei define como distribuir os `exclusiveFacts`, `holdbackFacts` e `forbiddenResolutions` de cada episódio.\r\n\r\n---\r\n\r\n## Regras Hard de Segurança Visual (INVIOLÁVEIS)\r\n\r\n0. **ANTI-TERMOS-SENSÍVEIS:** NUNCA use violência gráfica, tortura explícita, \"sangue infantil\", \"execução\" como fatos. Se o dossiê mencionar, REFORMULE para mecanismo: \"O tribunal emitiu decreto autorizando o confisco\" em vez de \"Torturaram até confessar\". Use: decreto, confisco, autorizou, utilizou como pretexto, registro, arquivo, decisão.\r\n\r\n1. **PROIBIDO** em fatos e descrições:\r\n   - Armas de fogo, rifles, pistolas, munição, gatilho\r\n   - Atirador, execução, violência gráfica, gore, tortura explícita\r\n   - Close-up de mãos humanas, close-up de rostos humanos (macro/anatomia)\r\n   - Símbolos extremistas contemporâneos em destaque\r\n\r\n2. Se o dossiê mencionar ataques/armas/sangue, **transforme em artefatos narrativos**:\r\n   - manifesto (texto), headline, recorte, tela/monitor, documento, registro, arquivo\r\n\r\n---\r\n\r\n## Como distribuir os fatos\r\n\r\n### sharedFacts (5–30 fatos)\r\nFatos de **contexto geral e background** que qualquer episódio pode mencionar sem entregar spoilers:\r\n- Localização, época, nomes públicos dos personagens\r\n- Informações históricas amplamente conhecidas\r\n- Configuração da situação (quem é, onde, quando)\r\n- Contexto político/econômico/social que enquadra a história\r\n\r\n**NÃO inclua:** revelações, desfechos, traições, mortes, consequências\r\n\r\n### exclusiveFacts de EP1 (10–40 fatos)\r\nFatos do **começo da história**: origem, método, formação do conflito, as primeiras tensões.\r\n- Como tudo começou\r\n- Quem estava envolvido inicialmente e em que papel\r\n- O primeiro sinal de perigo ou irregularidade\r\n- A ascensão do conflito (sem revelar o ponto de inflexão)\r\n\r\n**holdbackFacts de EP1** (3–20): Fatos de EP2 e EP3 que EP1 deve guardar (traições, desfechos, legado).\r\n\r\n### exclusiveFacts de EP2 (10–40 fatos)\r\nFatos da **virada e consequências imediatas**: a traição, o ponto de inflexão, o impacto direto.\r\n- O momento em que tudo mudou\r\n- Quem traiu ou revelou o que estava oculto\r\n- As consequências imediatas da virada\r\n- O estado da situação após a inflexão (ainda sem resolução final)\r\n\r\n**holdbackFacts de EP2** (3–20): Fatos de EP3 que EP2 deve guardar (desfecho final, destino dos personagens, legado).\r\n\r\n### exclusiveFacts de EP3 (10–40 fatos)\r\nFatos do **desfecho e legado**: o que aconteceu depois, o destino dos personagens, a conexão com o presente.\r\n- Como a situação se resolveu (ou não)\r\n- O destino de cada personagem principal\r\n- O impacto de longo prazo (político, social, histórico)\r\n- A conexão com o presente (o que isso significa hoje)\r\n\r\n**holdbackFacts de EP3**: Normalmente vazio — EP3 pode revelar tudo.\r\n\r\n---\r\n\r\n## Como definir suggestedOpenLoops\r\n\r\nSão **perguntas que o episódio levanta mas NÃO fecha** — ganchos para manter o espectador na série:\r\n\r\n- **EP1**: \"Quem sabia o que estava acontecendo?\", \"Por que ninguém denunciou antes?\"\r\n- **EP2**: \"Haverá justiça?\", \"O que aconteceu com os envolvidos?\"\r\n- **EP3**: Ganchos existenciais/morais — \"O que este caso nos diz sobre X?\"\r\n\r\nCada episódio deve ter 2–6 open loops ativos.\r\n\r\n---\r\n\r\n## Como definir forbiddenResolutions\r\n\r\nSão **conclusões que este episódio NÃO pode entregar**:\r\n\r\n- **EP1**: \"Não revelar quem traiu\", \"Não revelar o desfecho judicial\", \"Não revelar mortes\"\r\n- **EP2**: \"Não revelar o destino final dos personagens\", \"Não revelar o legado histórico\"\r\n- **EP3**: Nenhuma proibição significativa — pode fechar tudo\r\n\r\n---\r\n\r\n## previousEpisodeBridge\r\n\r\n- **EP1**: `null` (não há episódio anterior)\r\n- **EP2**: 1 frase que conecta com EP1 (ex: \"Após a revelação inicial do esquema em EP1, as consequências começam a emergir\")\r\n- **EP3**: 1 frase que conecta com EP2 (ex: \"Com a virada exposta em EP2, o desfecho final se aproxima\")\r\n\r\n---\r\n\r\n## Como escolher fatos individuais (exclusiveFacts e sharedFacts)\r\n\r\n- Cada fato: **1–2 linhas**, linguagem objetiva (sem tese/conclusão moral)\r\n- Se houver dados concretos (ano, cidade, nome), inclua **somente se estiver explícito no dossiê**\r\n- `sourceRef` curto (título/índice da fonte) quando possível\r\n- Foco em **mecanismo/sistema** (quem autorizou, qual documento, qual incentivo)\r\n- Evite descrever violência; descreva \"decisão\", \"ordem\", \"confisco\", \"propaganda\", \"registro\"\r\n\r\n---\r\n\r\n## Output\r\n\r\nRetorne **APENAS** um JSON válido (sem markdown, sem ```json, sem explicações), no schema `EpisodeBriefBundleV1`.\r\n\r\nCampos obrigatórios:\r\n- `version`: sempre `\"episodeBriefBundleV1\"`\r\n- `language`: `\"pt-BR\"` por padrão\r\n- `theme`: tema principal do dossiê\r\n- `globalSafety.forbiddenElements`: mínimo 4 itens\r\n- `globalSafety.allowedArtifacts`: mínimo 4 itens\r\n- `sharedFacts`: mínimo 5 fatos\r\n- `episodes.ep1.exclusiveFacts`: mínimo 10 fatos\r\n- `episodes.ep2.exclusiveFacts`: mínimo 10 fatos\r\n- `episodes.ep3.exclusiveFacts`: mínimo 10 fatos\r\n- `episodes.ep1.holdbackFacts`: mínimo 3 fatos\r\n- `episodes.ep2.holdbackFacts`: mínimo 3 fatos\r\n- `episodes.ep1.suggestedOpenLoops`: mínimo 2 perguntas\r\n- `episodes.ep2.suggestedOpenLoops`: mínimo 2 perguntas\r\n- `episodes.ep3.suggestedOpenLoops`: mínimo 2 perguntas\r\n- `episodes.ep1.forbiddenResolutions`: mínimo 2 itens\r\n- `episodes.ep2.forbiddenResolutions`: mínimo 2 itens\r\n- `episodes.ep1.previousEpisodeBridge`: `null`\r\n- `episodes.ep2.previousEpisodeBridge`: string (1 frase)\r\n- `episodes.ep3.previousEpisodeBridge`: string (1 frase)\r\n- `episodes.ep1.resolutionLevel`: `\"none\"`\r\n- `episodes.ep2.resolutionLevel`: `\"partial\"`\r\n- `episodes.ep3.resolutionLevel`: `\"full\"`"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "📋 TEMA: A frieza mecânica da dupla de assassinos mais letal de Nova York + o fim silencioso de uma era de brutalidade mafiosa.\n\n📋 TÍTULO: Os Gêmeos Gemini: A Morte de Joey Testa e o Terror da Murder Machine\n\n🎨 DIRETRIZES DE IDENTIDADE DO UNIVERSO (WARNING PROTOCOL):\nAtmosfera 'gritty' do Brooklyn nos anos 70 e 80. Foco visual no Gemini Lounge, luzes de neon refletindo em asfalto molhado e carros pretos. Paleta de cores desaturada com acentos em vermelho sangue e ambar de iluminação urbana. Evitar o glamour de 'O Poderoso Chefão'; priorizar a estética suja e industrial de 'Goodfellas' e a frieza do método de desmembramento.\n\n📚 FONTES DO DOSSIÊ (ordenadas por peso/relevância):\n[1] (text) Investigação Gemini: Assassinos da Máfia [peso: 3]\nA Anatomia da Execução Sistemática: Uma Análise Forense e Criminológica da Carreira de Joseph Testa e Anthony SenterResumo ExecutivoEste relatório constitui uma investigação exaustiva sobre a trajetória criminal, a metodologia operacional e o destino judicial de Joseph \"Joey\" Testa e Anthony Senter, figuras centrais na história do crime organizado norte-americano do final do século XX. Conhecidos no submundo e pelos órgãos de aplicação da lei como os \"Gêmeos Gemini\" (Gemini Twins), esta dupla transcendeu o arquétipo tradicional do mafioso para encarnar uma forma de violência industrializada e desprovida de emoção. Operando inicialmente como o núcleo letal da equipe de Roy DeMeo, afiliada à família Gambino, e posteriormente como executores de elite para a administração instável da família Lucchese, Testa e Senter foram responsáveis por uma onda de homicídios que desafiou as capacidades investigativas da época.O foco central deste documento é a documentação da \"frieza mecânica\" que caracterizava suas operações — especificamente o desenvolvimento e aperfeiçoamento do \"Método Gemini\", um protocolo de desmembramento e eliminação de corpos desenhado para frustrar a ciência forense. Além disso, o relatório examina o contexto jurídico complexo de sua queda, culminando nos julgamentos RICO (Racketeer Influenced and Corrupt Organizations Act) do final da década de 1980, e traça seus caminhos divergentes através do sistema prisional federal até a morte de Joseph Testa em janeiro de 2026. A análise baseia-se em uma síntese de registros judiciais, transcrições de julgamentos, relatórios do FBI e narrativas históricas corroboradas.1. O Crisol de Canarsie: Sociologia da Deviância e Formação Criminal1.1 O Ecossistema Socioeconômico de Canarsie na Década de 1970Para compreender a psicopatologia operacional de Joseph Testa e Anthony Senter, é imperativo primeiro dissecar o ambiente socioeconômico que os gerou. Canarsie, situada na orla sudeste do Brooklyn, Nova York, durante o final da década de 1960 e início da década de 1970, operava como um enclave insular. Era uma comunidade predominantemente ítalo-americana de classe trabalhadora, caracterizada por uma profunda desconfiança em relação às autoridades externas e uma adesão cultural tácita aos códigos de silêncio, ou omertà.Neste microcosmo, a criminalidade não era necessariamente vista como uma aberração social, mas frequentemente como uma via alternativa e viável de mobilidade econômica. A figura do \"wiseguy\" — o gângster bem-sucedido — não era vilipendiada, mas sim aspiracional. Jovens desiludidos com as perspectivas de trabalho braçal ou sindical viam em figuras locais como Roy DeMeo modelos de empreendedorismo letal. É dentro deste \"caldo de cultura\" criminogênico que as trajetórias de Testa e Senter começaram a convergir, não apenas como vizinhos, mas como parceiros simbióticos em uma escalada de violência.1.2 Perfis Biográficos e a Convergência dos \"Gêmeos\"A alcunha \"Gêmeos Gemini\" não derivava de uma relação biológica, mas de uma semelhança comportamental e de uma lealdade mútua que beirava o fanatismo. Ambos nasceram no início de 1955 e cresceram na mesma vizinhança, compartilhando experiências formativas marcadas por trauma e negligência, elementos frequentemente citados na literatura criminológica como precursores de comportamento antissocial violento.Anthony Michael Senter nasceu em 31 de março de 1955. Filho de um imigrante italiano e de uma mãe operária, Senter cresceu em um lar fraturado pelo divórcio precoce. Sua educação formal foi interrompida precocemente, e ele logo ganhou reputação nas ruas por uma \"aura de ameaça silenciosa\". Albert DeMeo, filho de seu futuro mentor Roy DeMeo, descreveria mais tarde Senter como tendo uma personalidade \"escorregadia\" e \"falsa\" (\"slick and phony\"), uma característica que lhe permitiria navegar as traições internas da máfia com uma adaptabilidade camaleônica. Senter trabalhava ocasionalmente como assistente de carpinteiro, mas sua verdadeira vocação era a apropriação ilícita.Joseph Carmine Testa, nascido em 24 de janeiro de 1955, teve uma trajetória paralela e igualmente traumática. Um de nove filhos de um motorista de caminhão, a vida de Testa foi irrevocavelmente alterada pela morte de sua mãe devido a um coágulo sanguíneo quando ele tinha apenas treze anos. A perda da figura materna, combinada com um ambiente doméstico turbulento, acelerou sua entrada na delinquência juvenil. Fisicamente menor que Senter, Testa compensava com uma ferocidade explosiva. Um incidente definidor ocorreu em 1973, quando Testa, aos 18 anos, envolveu-se em uma briga de bar com um oponente porto-riquenho. Testa foi esfaqueado no pulmão, um ferimento quase fatal que o deixou com problemas respiratórios crônicos pelo resto da vida. A resposta de Senter a este evento selou o vínculo entre eles: ele caçou o agressor de Testa e espancou-o quase até a morte com os punhos nus. Este ato de retribuição brutal cimentou uma parceria que operaria como uma unidade singular de violência pelas décadas seguintes.1.3 A Mentoria de Chris Rosenberg e a Integração na Equipe DeMeoA porta de entrada de Testa e Senter para o crime organizado estruturado foi o roubo de automóveis, uma atividade onipresente em Canarsie. Aos 15 anos, ambos já possuíam extensas fichas criminais juvenis por furto de veículos, demonstrando uma aptidão técnica precoce para contornar sistemas de segurança e uma audácia necessária para operações de alto volume. Essa competência chamou a atenção de Harvey \"Chris\" Rosenberg, um associado de Roy DeMeo.Rosenberg, um criminoso ambicioso que traficava drogas e roubava carros, viu nos jovens Testa e Senter a \"mão de obra\" ideal: leais, violentos e destemidos. Rosenberg serviu como a ponte entre os delinquentes juvenis de rua e a sofisticação criminosa de Roy DeMeo. Em 1974, aos 19 anos, a dupla foi formalmente integrada ao círculo íntimo de DeMeo. DeMeo, que operava a partir do Gemini Lounge na Flatlands Avenue, reconheceu imediatamente o valor utilitário dos \"Gêmeos\". Diferentemente de outros associados que podiam hesitar diante da violência extrema, Testa e Senter exibiam uma capacidade inata de compartimentalização psicológica. Eles podiam executar ordens complexas e brutais sem questionamento moral ou hesitação tática, características que se tornariam a pedra angular da \"Máquina de Matar\".2. A Industrialização da Morte: A Equipe DeMeo e o Método Gemini2.1 A Estrutura Corporativa da ViolênciaA equipe liderada por Roy DeMeo não era uma gangue desorganizada, mas uma empresa criminosa diversificada e hierárquica operando sob a égide da família Gambino. Enquanto o roubo de automóveis internacional (enviando carros de luxo para o Kuwait) e a agiotagem forneciam o fluxo de caixa regular, o assassinato tornou-se sua especialidade de mercado. O Gemini Lounge servia como o centro nevrálgico dessa operação. A frente do bar funcionava como um espaço social e ponto de encontro para negócios, enquanto os fundos e um apartamento adjacente foram convertidos em instalações dedicadas ao extermínio humano.Para Testa e Senter, o Gemini Lounge era tanto um clube social quanto um local de trabalho. A dicotomia espacial do local refletia a própria psicologia da equipe: a c... [truncated 72772 chars]"
+      }
+    ]
+  },
+  "parsed": {
+    "title": "Os Gêmeos Gemini: A Morte de Joey Testa e o Terror da Murder Machine",
+    "language": "pt-BR",
+    "version": "episodeBriefBundleV1",
+    "theme": "A industrialização do assassinato e o fim silencioso da era de brutalidade da máfia de Nova York.",
+    "sharedFacts": [
+      {
+        "sourceRef": "Investigação Gemini [1]",
+        "text": "A dupla Joseph Testa e Anthony Senter ficou mundialmente conhecida como os 'Gêmeos Gemini'."
+      },
+      {
+        "sourceRef": "Investigação Profunda [2]",
+        "text": "O Gemini Lounge, localizado na Flatlands Avenue no Brooklyn, era o centro operacional da equipe."
+      },
+      {
+        "sourceRef": "Investigação Gemini [1]",
+        "text": "A equipe DeMeo é suspeita de envolvimento em um número que varia de 75 a 200 assassinatos."
+      },
+      {
+        "sourceRef": "Investigação Profunda [2]",
+        "text": "A alcunha 'Gêmeos Gemini' derivava da lealdade fanática e da constante presença da dupla no bar homônimo."
+      },
+      {
+        "sourceRef": "Investigação Gemini [1]",
+        "text": "A operação da equipe era caracterizada por uma frieza mecânica e desprovida de emoção."
+      },
+      {
+        "sourceRef": "Investigação Profunda [2]",
+        "text": "A 'Máquina de Matar' (Murder Machine) tornou-se o termo técnico para descrever a eficiência da equipe DeMeo."
+      }
+    ],
+    "episodes": {
+      "ep2": {
+        "exclusiveFacts": [
+          {
+            "sourceRef": "Investigação Gemini [1]",
+            "text": "Paul Castellano, chefe da família Gambino, ordenou a eliminação de Roy DeMeo por considerá-lo um risco jurídico."
+          },
+          {
+            "sourceRef": "Investigação Profunda [2]",
+            "text": "Frank DeCicco ofereceu um 'passe' de sobrevivência a Testa e Senter em troca da execução de seu próprio mentor.."
+          },
+          {
+            "sourceRef": "Investigação Gemini [1]",
+            "text": "Em 10 de janeiro de 1983, Roy DeMeo foi atraído para uma reunião na casa de Patrick Testa e executado por seus pupilos."
+          },
+          {
+            "sourceRef": "Investigação Profunda [2]",
+            "text": "O corpo de DeMeo foi encontrado no porta-malas de um Cadillac com um lustre posicionado sobre o cadáver."
+          },
+          {
+            "sourceRef": "Investigação Gemini [1]",
+            "text": "Após a morte de DeMeo, a dupla foi transferida para a família Lucchese sob a tutela de Anthony 'Gaspipe' Casso."
+          },
+          {
+            "sourceRef": "Investigação Profunda [2]",
+            "text": "Em 13 de junho de 1986, Joseph Testa executou o gângster russo Vladimir Reznikov em Brighton Beach.."
+          },
+          {
+            "sourceRef": "Investigação Gemini [1]",
+            "text": "O assassinato de Reznikov serviu para proteger os esquemas de fraude fiscal de Marat Balagula.."
+          },
+          {
+            "sourceRef": "Investigação Profunda [2]",
+            "text": "Testa e Senter foram oficialmente induzidos como membros 'feitos' da família Lucchese em 1988.."
+          },
+          {
+            "sourceRef": "Investigação Gemini [1]",
+            "text": "A cerimônia de indução foi presidida por Vic Amuso e Anthony Casso em uma residência em Canarsie.."
+          },
+          {
+            "sourceRef": "Investigação Profunda [2]",
+            "text": "A dupla operou como executores diretos durante o período de purga interna da família Lucchese.."
+          },
+          {
+            "sourceRef": "Investigação Gemini [1]",
+            "text": "A investigação federal 'Murder Machine' começou a ganhar força com a cooperação de testemunhas internas como Dominick Montiglio.."
+          },
+          {
+            "sourceRef": "Investigação Profunda [2]",
+            "text": "O governo federal utilizou a Lei RICO para conectar os desaparecimentos ao Gemini Lounge.."
+          },
+          {
+            "sourceRef": "Investigação Gemini [1]",
+            "text": "A acusação de 1984 incluiu 25 contagens de assassinato contra membros da equipe DeMeo.."
+          }
+        ],
+        "episodeNumber": 2,
+        "resolutionLevel": "partial",
+        "previousEpisodeBridge": "Após a ascensão sangrenta no Gemini Lounge, a lealdade da equipe é testada quando o próprio mentor se torna o alvo da cúpula.",
+        "forbiddenResolutions": [
+          "Não revelar a sentença final de prisão perpétua.",
+          "Não revelar a morte do irmão de Testa, Patrick.",
+          "Não revelar a libertação condicional tardia."
+        ],
+        "narrativeFunction": "Mostrar a mudança de lealdade, a expansão da violência para o submundo russo e o início do colapso jurídico.",
+        "emotionalArc": "A traição suprema contra o mentor e a transição para uma nova era de terror sob a bandeira da família Lucchese.",
+        "holdbackFacts": [
+          {
+            "sourceRef": "Investigação Profunda [2]",
+            "text": "Senter e Testa foram presos usando cocaína no banheiro do tribunal durante o julgamento de 1988.."
+          },
+          {
+            "sourceRef": "Investigação Gemini [1]",
+            "text": "Patrick Testa foi assassinado em 1992 por ordem de Anthony Casso.."
+          },
+          {
+            "sourceRef": "Investigação Profunda [2]",
+            "text": "Joseph Testa morreu de câncer em 2026 após ser solto por razões médicas.."
+          }
+        ],
+        "suggestedOpenLoops": [
+          "Conseguirá a justiça federal condenar assassinos que dominam a técnica de não deixar corpos?",
+          "Qual será o preço da lealdade de Joseph Testa quando a própria máfia se voltar contra sua família biológica?"
+        ]
+      },
+      "ep3": {
+        "emotionalArc": "O confronto final com a lei, o silêncio mantido apesar das traições internas e o fim melancólico de uma era de brutalidade.",
+        "holdbackFacts": [],
+        "suggestedOpenLoops": [
+          "O que resta do código de honra da máfia quando os assassinos morrem em liberdade enquanto suas vítimas permanecem desaparecidas?",
+          "A transformação do Gemini Lounge em igreja é suficiente para apagar o rastro da 'Máquina de Matar'?"
+        ],
+        "resolutionLevel": "full",
+        "previousEpisodeBridge": "Com a queda de DeMeo e a nova aliança com os Lucchese, o cerco federal se fecha sobre os executores mais letais de Nova York.",
+        "forbiddenResolutions": [],
+        "narrativeFunction": "Concluir a trajetória judicial, revelar as traições finais e o encerramento da vida de Joseph Testa.",
+        "exclusiveFacts": [
+          {
+            "sourceRef": "Investigação Profunda [2]",
+            "text": "Durante o julgamento de 1988, Testa e Senter foram detidos por consumir entorpecentes no banheiro do tribunal federal.."
+          },
+          {
+            "sourceRef": "Investigação Gemini [1]",
+            "text": "Em junho de 1989, a dupla foi condenada por extorsão e 10 contagens de assassinato comprovadas.."
+          },
+          {
+            "sourceRef": "Investigação Profunda [2]",
+            "text": "A sentença aplicada foi de prisão perpétua mais 20 anos, visando impedir qualquer retorno às ruas.."
+          },
+          {
+            "sourceRef": "Investigação Gemini [1]",
+            "text": "Em 1992, Patrick Testa, irmão de Joseph, foi assassinado por ordem de Anthony Casso em um surto de paranoia.."
+          },
+          {
+            "sourceRef": "Investigação Profunda [2]",
+            "text": "Apesar do assassinato de seu irmão pela própria organização, Joseph Testa manteve o código de omertà na prisão..."
+          },
+          {
+            "sourceRef": "Investigação Gemini [1]",
+            "text": "Anthony Senter tentou manter um esquema de contribuição previdenciária fraudulenta através de uma empresa de lixo enquanto preso.."
+          },
+          {
+            "sourceRef": "Investigação Profunda [2]",
+            "text": "A dupla permaneceu elegível para liberdade condicional devido a uma brecha legal para crimes cometidos antes de 1987.."
+          },
+          {
+            "sourceRef": "Investigação Gemini [1]",
+            "text": "Anthony Senter recebeu liberdade condicional em 2022 e foi transferido para uma casa de recuperação em 2023.."
+          },
+          {
+            "sourceRef": "Investigação Profunda [2]",
+            "text": "Joseph Testa foi libertado em abril de 2024 devido ao agravamento de seu estado de saúde crônico.."
+          },
+          {
+            "sourceRef": "Investigação Gemini [1]",
+            "text": "Testa mudou-se para Henderson, Nevada, onde viveu seus últimos meses sob supervisão médica.."
+          },
+          {
+            "sourceRef": "Investigação Profunda [2]",
+            "text": "Joseph Testa faleceu em 26 de janeiro de 2026, aos 71 anos, encerrando o ciclo biológico da dupla.."
+          },
+          {
+            "sourceRef": "Investigação Gemini [1]",
+            "text": "O Gemini Lounge foi transformado em uma igreja, ressignificando o local das antigas execuções.."
+          },
+          {
+            "sourceRef": "Investigação Profunda [2]",
+            "text": "O legado da dupla é marcado pelo trauma das famílias que nunca recuperaram os restos mortais de seus entes.."
+          }
+        ],
+        "episodeNumber": 3
+      },
+      "ep1": {
+        "resolutionLevel": "none",
+        "narrativeFunction": "Estabelecer a origem da dupla, a criação do Método Gemini e a consolidação da 'Máquina de Matar' no Brooklyn.",
+        "forbiddenResolutions": [
+          "Não revelar o assassinato de Roy DeMeo.",
+          "Não revelar a transição para a família Lucchese.",
+          "Não revelar o desfecho judicial da dupla."
+        ],
+        "previousEpisodeBridge": "null",
+        "exclusiveFacts": [
+          {
+            "sourceRef": "Investigação Gemini [1]",
+            "text": "Joseph Testa e Anthony Senter cresceram em Canarsie, um enclave ítalo-americano no Brooklyn marcado por códigos de silêncio."
+          },
+          {
+            "sourceRef": "Investigação Profunda [2]",
+            "text": "Em 1973, Testa sofreu um ferimento pulmonar grave em uma briga, o que gerou problemas respiratórios permanentes e selou sua dependência de Senter."
+          },
+          {
+            "sourceRef": "Investigação Gemini [1]",
+            "text": "A dupla iniciou sua trajetória criminal no roubo de automóveis em larga escala, demonstrando aptidão técnica para desmontar veículos."
+          },
+          {
+            "sourceRef": "Investigação Profunda [2]",
+            "text": "Chris Rosenberg recrutou a dupla para a equipe de Roy DeMeo em 1974, operando a partir do Gemini Lounge."
+          },
+          {
+            "sourceRef": "Investigação Gemini [1]",
+            "text": "O 'Método Gemini' consistia em um protocolo de sete etapas desenhado para eliminar evidências forenses e o 'corpus delicti'."
+          },
+          {
+            "sourceRef": "Investigação Profunda [2]",
+            "text": "O apartamento nos fundos do Gemini Lounge era apelidado de 'Horror Hotel' e servia como local dedicado ao extermínio."
+          },
+          {
+            "sourceRef": "Investigação Gemini [1]",
+            "text": "O protocolo incluía o uso de um 'turbante' de toalha para contenção hemorrágica imediata após o disparo inicial."
+          },
+          {
+            "sourceRef": "Investigação Profunda [2]",
+            "text": "Uma estocada cardíaca era realizada logo após o disparo para interromper o bombeamento sanguíneo por razões hidráulicas."
+          },
+          {
+            "sourceRef": "Investigação Gemini [1]",
+            "text": "Os corpos eram drenados em banheiras por períodos de até 45 minutos antes do processo de desmembramento."
+          },
+          {
+            "sourceRef": "Investigação Profunda [2]",
+            "text": "Testa e Senter utilizavam forros de piscina de plástico para forrar o ambiente durante o desmembramento sistemático."
+          },
+          {
+            "sourceRef": "Investigação Gemini [1]",
+            "text": "As partes dos corpos eram acondicionadas em caixas de papelão genéricas para descarte em aterros sanitários.."
+          },
+          {
+            "sourceRef": "Investigação Profunda [2]",
+            "text": "O Aterro de Fountain Avenue era o destino final das caixas, aproveitando o volume massivo de lixo para ocultação."
+          },
+          {
+            "sourceRef": "Investigação Gemini [1]",
+            "text": "Em 1975, o assassinato de Andrei Katz marcou o primeiro uso documentado de desmembramento pela equipe."
+          },
+          {
+            "sourceRef": "Investigação Profunda [2]",
+            "text": "A equipe utilizou um compactador de lixo de supermercado para tentar destruir registros dentários da vítima Andrei Katz."
+          },
+          {
+            "sourceRef": "Investigação Gemini [1]",
+            "text": "Em 1979, Roy DeMeo executou por engano o estudante Dominick Ragucci, confundindo-o com um alvo externo."
+          }
+        ],
+        "episodeNumber": 1,
+        "emotionalArc": "A ascensão de dois jovens de Canarsie que transformam a violência em uma linha de montagem industrial sob a mentoria de Roy DeMeo.",
+        "suggestedOpenLoops": [
+          "Como uma equipe de rua conseguiu operar um matadouro industrial sem ser detectada por anos?",
+          "Até onde a lealdade de Testa e Senter a Roy DeMeo resistirá à pressão da cúpula da máfia?"
+        ],
+        "holdbackFacts": [
+          {
+            "sourceRef": "Investigação Gemini [1]",
+            "text": "Roy DeMeo foi executado por Testa e Senter em 10 de janeiro de 1983."
+          },
+          {
+            "sourceRef": "Investigação Profunda [2]",
+            "text": "A dupla foi transferida para a família Lucchese sob a proteção de Anthony Casso."
+          },
+          {
+            "sourceRef": "Investigação Gemini [1]",
+            "text": "Joseph Testa faleceu em liberdade em Nevada no ano de 2026."
+          }
+        ]
+      }
+    },
+    "globalSafety": {
+      "notes": [
+        "Focar no aspecto mecânico e logístico do 'Método Gemini' como um processo de gestão de resíduos.",
+        "Utilizar a estética 'gritty' do Brooklyn para enfatizar a frieza do ambiente industrial.",
+        "A morte de Testa deve ser tratada como um anticlímax burocrático e biológico."
+      ],
+      "forbiddenNarrationTerms": [
+        "execução sumária",
+        "tortura brutal",
+        "banho de sangue",
+        "esquartejamento vivo"
+      ],
+      "forbiddenElements": [
+        "Imagens de armas de fogo ou disparos explícitos",
+        "Representação visual de desmembramento ou sangue excessivo",
+        "Close-ups de rostos em agonia ou mãos humanas em detalhes anatômicos",
+        "Cenas de tortura ou violência gráfica direta"
+      ],
+      "allowedArtifacts": [
+        "Registros de tribunal (documentos)",
+        "Recortes de jornais da década de 80",
+        "Letreiros de neon desbotados",
+        "Carros pretos (Cadillacs) em asfalto molhado",
+        "Plantas baixas de apartamentos e bares",
+        "Caixas de papelão e fitas de isolamento",
+        "Arquivos de vigilância do FBI (fotos granuladas)",
+        "Mapas de aterros sanitários e zonas industriais"
+      ]
+    }
+  },
+  "rawContent": ""
+}

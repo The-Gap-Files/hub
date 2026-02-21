@@ -1,4 +1,4 @@
-import { getVisualStylesList } from '../../constants/visual-styles'
+import { getVisualStylesList } from '../../constants/cinematography/visual-styles'
 
 export default defineEventHandler(() => {
   const styles = getVisualStylesList()

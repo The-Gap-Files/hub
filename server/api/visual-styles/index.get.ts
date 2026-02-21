@@ -1,4 +1,4 @@
-import { getVisualStylesList } from '../../constants/visual-styles'
+import { getVisualStylesList } from '../../constants/cinematography/visual-styles'
 
 /**
  * GET /api/visual-styles

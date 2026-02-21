@@ -1,0 +1,143 @@
+{
+  "timestamp": "2026-02-21T01:53:11.058Z",
+  "taskId": "analyze-insights",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "gemini-3.1-pro-preview",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "Você é um analista de inteligência editorial especializado em extrair insights profundos, curiosidades surpreendentes, dados de pesquisa estruturados e PESSOAS-CHAVE de material bruto.\n\nSua função é analisar o dossiê fornecido (fontes do dossiê + notas existentes) e retornar:\n1. Uma lista de descobertas divididas em três categorias (items)\n2. Uma lista de pessoas-chave identificadas no material (persons)\n\n## INSIGHT NEURAL (noteType: \"insight\")\n- Conexões não-óbvias entre informações do material\n- Padrões narrativos que podem ser explorados\n- Ângulos editoriais únicos e diferenciados\n- Contradições internas que geram tensão narrativa\n- Relações causais implícitas no material\n\n## CURIOSIDADE (noteType: \"curiosity\")  \n- Fatos surpreendentes ou pouco conhecidos\n- Dados estatísticos impactantes\n- Detalhes sensoriais ou humanos que enriquecem a narrativa\n- Elementos que geram engajamento e retenção do público\n- Pontos que provocam reflexão ou debate\n\n## DADO DE PESQUISA (noteType: \"research\")\n- Fatos verificáveis e objetivos (nomes, datas, locais)\n- Estatísticas e números concretos mencionados no material\n- Referências documentais ou bibliográficas\n- Linhas do tempo e sequências cronológicas\n- Dados que servem como base factual para roteiros e scripts\n\n## PESSOAS-CHAVE (persons)\nIdentifique todas as pessoas relevantes mencionadas no material:\n- **name**: Nome completo como aparece no material\n- **role**: Papel narrativo (investigador, vítima, suspeito, testemunha, cientista, líder, político, jornalista, etc.)\n- **description**: Quem é esta pessoa e por que é relevante no contexto (1-2 frases)\n- **visualDescription**: Descrição visual da pessoa NA ÉPOCA DOS EVENTOS NARRADOS no dossiê (CRÍTICO: NÃO como a pessoa é hoje). A imagem gerada será usada em cenas do vídeo que retratam os eventos da história. Se os fatos ocorreram nos anos 70 e a pessoa tinha 20 anos na época, descreva alguém de 20 anos com visual e vestimenta dos anos 70. Se a pessoa morreu recentemente com 70 anos mas os crimes foram nos anos 70, a visualDescription deve ser do jovem de 20 anos. SEMPRE em inglês. Inclua: aparência física, idade NA ÉPOCA, vestimenta TÍPICA DA ÉPOCA, expressão. Ex: \"Young caucasian man, early 20s, shaggy brown hair, denim jacket, defiant expression, 1970s style\"\n- **aliases**: Lista de apelidos, codinomes ou outros nomes conhecidos\n- **relevance**: \"primary\" (protagonista/figura central), \"secondary\" (papel importante mas não central), \"mentioned\" (citado brevemente)\n\n## REGRAS:\n- Gere entre 6 e 15 itens no total\n- Balance entre as três categorias (priorize o que o material oferece)\n- Gere pelo menos 2 itens de cada categoria quando possível\n- Cada item deve ser autocontido e compreensível isoladamente\n- Escreva em português brasileiro\n- Seja específico — evite generalidades vagas\n- NÃO repita informações que já existam nas notas existentes do dossiê\n- NÃO repita pessoas que já foram extraídas anteriormente\n- Priorize descobertas que agreguem valor à produção de conteúdo\n- Para visualDescription: (1) SEMPRE em INGLÊS (será usada como prompt para modelo de imagem), (2) descreva a pessoa NA ÉPOCA DOS EVENTOS do dossiê, NÃO como é hoje, (3) seja específico o suficiente para que um modelo de IA consiga gerar a pessoa consistentemente entre cenas"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "Analise o seguinte dossiê e extraia insights neurais, curiosidades e dados de pesquisa:\n\n📋 TEMA: A frieza mecânica da dupla de assassinos mais letal de Nova York + o fim silencioso de uma era de brutalidade mafiosa.\n\n📚 FONTES DO DOSSIÊ:\n[1] (url) Anthony Senter and Joseph Testa - Wikipedia\nAnthony Senter (born March 31, 1955) and Joseph Testa (January 24, 1955 – January 26, 2026), better known as the Gemini twins,[1] are two American mobsters who were associated with the Gambino crime family before being \"made\" in the Lucchese crime family. Senter and Testa are former members of the DeMeo crew in the Gambino family. In June 1989, both Senter and Testa were found guilty of racketeering and 10 counts of murder, and each was sentenced to life in federal prison.[2] However, both men were eligible for parole since their crimes were committed before federal parole was abolished in 1987. Senter and Testa were paroled in 2023 and 2024, respectively. It is believed Testa and Senter had participated in at least 28 murders, from between 1975 and 1987, although they were initially indicted in 1989 for committing 11 murders.[3][4] Testa and Senter primally worked for Gambino family soldier Roy DeMeo before his murder in January 1983, and later for Anthony \"Gaspipe\" Casso and Vic \"Little Vic\" Amuso, who served as underboss and family boss, respectively, for the Lucchese family, before Casso defected as a government witness in March 1994, and Amuso continues to serve as the Lucchese family boss since his accession in 1987. Casso admitted to participation in at least 36 murders, some of which Testa and Senter had also participated with. According to former Assistant U.S. Attorney and Deputy Police Commissioner of New York City for Internal Affairs, Walter Mack Jr., he had linked Testa and Senter to committing 20 murders.[5] Anthony Michael Senter was born to Michael Senter, an Italian immigrant from Rovereto, Trentino, and his wife.[6] He had one sibling, a sister.[7] The original family name was \"Sente\", but was later anglicized to \"Senter\".[8] According to the authors Jerry Capeci and Gene Mustain in the book Murder Machine, Senter is a \"full-blooded Italian\".[9] Philip Carlo, however, wrote in Gaspipe: Confessions of a Mafia Boss that he is of only partial Italian descent and thus \"could not be made\" into the Mafia.[10] Senter grew up in a turbulent home.[9] His parents divorced when he was eight years old then remarried each other when he was fourteen.[11] Senter's uncle, Gambino and Colombo associate Robert Senter,[12] owned the Canarsie Recycling Company.[6] As a young man Anthony worked at both his father's small debris removal business and his uncle's sanitation company.[7] Senter married an Italian-American woman on July 24, 1977, at a catering hall in Canarsie, Brooklyn. The wedding was attended by many criminals including Gambino crime family member Roy DeMeo. Joseph Carmine Testa was one of nine children born to Italian American parents, a transport truck driver father and a housewife mother.[13] Like Senter, Testa had a turbulant home life as a child,[9] and he became a juvenile delinquent after his mother died of a blood clot when he was thirteen years old.[7] One of his younger brothers, Patrick \"Patty\" Testa, also became a mobster.[14] As a teenager, Testa worked as a carpenter's helper and as an apprentice butcher.[7] Senter and Testa became close friends while growing up on the same block in Canarsie, Brooklyn.[9] They became involved in auto theft and marijuana dealing after dropping out of high school.[7] Joseph Testa's brother Patrick, an expert car thief, frequently accompanied them.[7] By 1970, at the age of 15, Senter and Testa had had multiple arrests for car theft but had all of their cases dismissed because they were juveniles at the time.[14] Senter and Testa were fanatically loyal to one another.[9] In 1973, Testa was nearly killed in a bar fight with a Puerto Rican opponent, when the assailant's knife punctured his lung, resulting in him suffering from respiratory problems for the rest of his life. Afterwards, Senter hunted down the Puerto Rican and nearly beat him to death with his fists.[7] Senter and Testa became close friends and associates of Harvey \"Chris\" Rosenberg, stealing cars for Rosenberg's chop shop racket, which he operated with Gambino crime family mobster Roy DeMeo.[9] In 1974, aged nineteen, Senter and Testa joined DeMeo's crew,[15] which operated out of the Gemini Lounge, a blue-collar neighborhood bar in Flatlands, Brooklyn.[16] Because they spent so much time together and frequented the Gemini Lounge, the duo became known as the \"Gemini twins\".[14] DeMeo, Rosenberg, Senter and Testa became the core of the DeMeo crew, and became notorious for their ruthless violence. The crew was suspected to be involved in 75 to 200 murders throughout the mid-1970s and into the 1980s. Senter gained a reputation for providing the crew with significant revenue from auto theft. Although Senter was a large earner for the Gemini Lounge crew, he was highly disliked by Albert DeMeo, the son of Roy DeMeo. Albert's personal judgment of Senter was that \"there was something slick and phony about him\". Roy DeMeo publicly executed college student Dominick Ragucci on April 19, 1979 after mistaking him for a Cuban hitman and the crew subsequently went into hiding, with Senter and Testa fleeing to California.[17] After the murder of Rosenberg, Joseph Testa became Roy’s right hand man. Chris had previously held that position within the crew. On January 10, 1983, Roy DeMeo went to crew member Patrick Testa's bodyshop Patrick Testa Motors Inc. in Canarsie, Brooklyn for a meeting with his men. On January 20, he was found dead in the trunk of his Cadillac Coupe DeVille, a chandelier placed on top of his body. The car was left abandoned at the Varuna Boat Club parking lot. He had been shot multiple times in the head and had a bullet wound in his hand, assumed by law enforcement to be from throwing his hand up to his face in a self-defense reflex when the shots were fired at him. Anthony Gaggi was originally suspected by law enforcement officials of being the one who killed DeMeo. Gaggi was not charged with the crime.[2] According to former Lucchese acting boss Anthony Casso, DeMeo was killed at Patrick Testa's Canarsie home by Joseph Testa and Senter following an agreement with Casso, who was given the contract by Gambino crime family Boss Paul Castellano and Frank DeCicco after they were unable to kill DeMeo in the fall of 1982. DeMeo was seated, about to receive coffee, when Testa and Senter opened fire. Anthony Gaggi was not present.[18] According to Sammy 'The Bull' Gravano, Paul Castellano wanted to have the whole DeMeo crew killed because they had all become serial killers, and gave the contract to Frank DeCicco. Realising how difficult it was going to be, DeCicco went to the Gemini Twins, Testa and Senter, and told them about the contract on them, but promised them they would get a pass (i.e., would be spared) if they killed DeMeo. After DeMeo was hit, the Gambino family kept their word about sparing Senter and Testa, but didn't want them on their books (i.e., would prefer they no longer be associated with their crime family), which is why they were passed off to Anthony Casso and the Luccheses. On March 30, 1984, Senter and Testa were among 21 Gambino family members and associates charged in a federal racketeering indictment stemming from an investigation into the activities of the DeMeo crew. The 51-count federal indictment includes charges of extortion, theft, prostitution, drug trafficking and 25 murders.[19] In March 1986, Senter and Testa were acquitted of conspiracy to ship stolen cars; the jury was deadlocked on charges of murder against the pair.[20] After the murder of Roy DeMeo, Senter and Testa drifted into the Lucchese crime family. According to Casso, they were responsible for the murder on June 13, 1986, of Russian-American gangs... [truncated 59432 chars]"
+      }
+    ]
+  },
+  "parsed": {
+    "items": [
+      {
+        "content": "A traição como rito de passagem corporativo: O assassinato de Roy DeMeo por seus 'filhos' criminais (Senter e Testa) não foi apenas uma queima de arquivo, mas uma prova de fogo exigida pela Comissão da Máfia. Ao matarem o próprio mentor para garantir a própria sobrevivência, a dupla provou que sua lealdade era à instituição e à autopreservação, tornando-se as ferramentas perfeitas e controláveis para a alta cúpula.",
+        "noteType": "insight"
+      },
+      {
+        "content": "A banalidade do mal e a dissociação psicológica: O aspecto mais aterrorizante dos Gêmeos Gemini não era a violência em si, mas a rotina burocrática com que a tratavam. O fato de fazerem pausas para comer pizza enquanto um corpo drenava sangue no banheiro ilustra uma capacidade de compartimentalização extrema, onde o desmembramento humano era encarado com o mesmo distanciamento emocional de desmontar um carro roubado.",
+        "noteType": "insight"
+      },
+      {
+        "content": "O anticlímax burocrático de uma vida ultraviolenta: Há uma ironia narrativa profunda no fim de Joseph Testa. Após uma juventude definida por explosões de brutalidade, onde privou dezenas de famílias de enterrarem seus entes queridos (escondendo-os em lixões), seu próprio fim foi higienizado e pacífico. Ele morreu de causas naturais em uma cama em Nevada, livre graças a uma brecha legal burocrática.",
+        "noteType": "insight"
+      },
+      {
+        "content": "A industrialização do homicídio: Senter e Testa representaram uma mudança de paradigma na criminalidade mafiosa. Eles abandonaram a violência passional ou puramente territorial dos gângsteres clássicos e transformaram o assassinato em um processo logístico de linha de montagem, focado na eliminação eficiente de resíduos biológicos para frustrar a ciência forense.",
+        "noteType": "insight"
+      },
+      {
+        "content": "O uso do 'turbante' de toalha no Método Gemini não tinha fins de tortura, mas puramente sanitários. Imediatamente após o tiro na cabeça da vítima, a toalha era enrolada para conter o sangue e evitar respingos no apartamento, facilitando a limpeza da cena do crime.",
+        "noteType": "curiosity"
+      },
+      {
+        "content": "A estocada no coração, dada logo após o tiro na cabeça, era um cálculo hidráulico e não um ato de sadismo. O objetivo era parar instantaneamente o bombeamento cardíaco, evitando que o sangue jorrasse sob pressão pelo ferimento da bala.",
+        "noteType": "curiosity"
+      },
+      {
+        "content": "A arrogância da dupla era tão desmedida que, durante o próprio julgamento federal em outubro de 1988 — onde enfrentavam acusações de múltiplos assassinatos —, Senter e Testa foram presos em flagrante cheirando cocaína no banheiro do tribunal de Foley Square.",
+        "noteType": "curiosity"
+      },
+      {
+        "content": "Um detalhe macabro e bizarro marcou a cena do crime de Roy DeMeo: quando seu corpo congelado foi encontrado no porta-malas de seu próprio Cadillac, havia um lustre (candelabro) misteriosamente posicionado em cima do cadáver.",
+        "noteType": "curiosity"
+      },
+      {
+        "content": "Mesmo cumprindo prisão perpétua, Anthony Senter continuou recebendo contribuições fraudulentas para sua aposentadoria no sindicato dos Teamsters, pagas pela empresa de lixo de seu primo. Ele teria direito a 1.400 dólares por mês se o esquema não tivesse sido descoberto em 1994.",
+        "noteType": "curiosity"
+      },
+      {
+        "content": "Estatísticas de letalidade: Embora tenham sido condenados formalmente por 10 assassinatos em 1989, o promotor Walter Mack Jr. os ligou diretamente a 20 mortes. O chefe mafioso Anthony Casso admitiu participação em 36 assassinatos junto com a dupla, e a equipe DeMeo como um todo é suspeita de 75 a 200 homicídios.",
+        "noteType": "research"
+      },
+      {
+        "content": "O local de desova primário da equipe era o Aterro Sanitário de Fountain Avenue (Fountain Avenue Dump), no Brooklyn. A escolha era estratégica: o volume massivo de lixo diário e o uso constante de tratores compactadores tornavam a recuperação forense dos corpos esquartejados virtualmente impossível.",
+        "noteType": "research"
+      },
+      {
+        "content": "A brecha da 'Old Law': Senter e Testa só conseguiram liberdade condicional (parole) em 2023 e 2024 porque seus crimes foram cometidos antes de novembro de 1987, data em que o sistema federal dos Estados Unidos aboliu a progressão de pena para crimes hediondos.",
+        "noteType": "research"
+      },
+      {
+        "content": "Linha do tempo final: Anthony Senter foi solto em junho de 2024 para uma casa de transição em Nova York. Joseph Testa foi solto em abril de 2024 por razões médicas e faleceu de câncer aos 71 anos em Henderson, Nevada, no dia 26 de janeiro de 2026.",
+        "noteType": "research"
+      }
+    ],
+    "persons": [
+      {
+        "name": "Joseph Carmine Testa",
+        "description": "Metade dos 'Gêmeos Gemini'. O estrategista frio da dupla, que sofria de problemas respiratórios após ser esfaqueado na juventude, mas compensava com precisão clínica e crueldade metódica.",
+        "relevance": "primary",
+        "aliases": [
+          "Joey",
+          "Gemini Twin"
+        ],
+        "role": "Assassino / Mafioso",
+        "visualDescription": "Young Italian-American man, early 20s, straight dark hair, pale complexion, slightly taller build, wearing 1970s Brooklyn street clothes like a leather jacket over an open-collar shirt, cold and calculating expression, 1970s style."
+      },
+      {
+        "name": "Anthony Michael Senter",
+        "description": "A outra metade dos 'Gêmeos Gemini'. O executor físico e protetor fanático de Testa, conhecido por sua natureza astuta, violenta e habilidade em desmembrar corpos sem demonstrar emoção.",
+        "relevance": "primary",
+        "aliases": [
+          "Gemini Twin"
+        ],
+        "role": "Assassino / Mafioso",
+        "visualDescription": "Young Italian-American man, early 20s, dark slicked-back hair, muscular and athletic build, sharp features, wearing flashy 1970s mobster-associate attire like a tailored suit with gold chains, slick and defiant expression, 1970s style."
+      },
+      {
+        "name": "Roy DeMeo",
+        "description": "Líder da equipe de assassinos da família Gambino e mentor dos Gêmeos Gemini. Acabou sendo assassinado por seus próprios pupilos a mando da cúpula da máfia.",
+        "relevance": "secondary",
+        "aliases": [],
+        "role": "Chefe de Equipe / Mentor / Vítima",
+        "visualDescription": "Middle-aged Italian-American man, heavyset build, dark hair, wearing a sharp 1970s mobster suit, projecting intense paranoia and ruthless authority, late 1970s style."
+      },
+      {
+        "name": "Anthony Casso",
+        "description": "Subchefe da família Lucchese que orquestrou a traição contra Roy DeMeo e posteriormente adotou os Gêmeos Gemini como seus executores de elite.",
+        "relevance": "secondary",
+        "aliases": [
+          "Gaspipe"
+        ],
+        "role": "Líder Mafioso",
+        "visualDescription": "Middle-aged Italian-American man, sharp and hardened features, intense and ruthless gaze, wearing an expensive 1980s tailored business suit, projecting absolute power and underlying paranoia, 1980s style."
+      },
+      {
+        "name": "Dominick Ragucci",
+        "description": "Estudante universitário de 18 anos e vendedor de aspiradores de pó, assassinado por engano pela equipe DeMeo após ser confundido com um matador de aluguel cubano.",
+        "relevance": "mentioned",
+        "aliases": [],
+        "role": "Vítima Inocente",
+        "visualDescription": "Young Caucasian male, 18 years old, clean-cut college student look, wearing typical late 1970s modest casual attire, carrying a vacuum cleaner case, expression of absolute terror and confusion, 1979 style."
+      },
+      {
+        "name": "Vladimir Reznikov",
+        "description": "Gângster russo volátil que ameaçou os negócios da Máfia Italiana em Brighton Beach e foi executado à luz do dia por Joseph Testa.",
+        "relevance": "mentioned",
+        "aliases": [],
+        "role": "Vítima / Gângster Rival",
+        "visualDescription": "Tough Eastern European man, rugged and aggressive features, wearing a dark leather jacket and typical 1980s Brighton Beach Russian mobster attire, confrontational demeanor, 1980s style."
+      },
+      {
+        "name": "Paul Castellano",
+        "description": "Chefe da família Gambino que, temendo investigações federais, ordenou o extermínio de Roy DeMeo.",
+        "relevance": "mentioned",
+        "aliases": [],
+        "role": "Chefe Mafioso",
+        "visualDescription": "Older Italian-American man, tall and imposing figure, grandfatherly but deeply menacing, wearing a highly conservative and expensive business suit, projecting corporate mafia power, early 1980s style."
+      }
+    ]
+  },
+  "rawContent": "{\n  \"items\": [\n    {\n      \"content\": \"A traição como rito de passagem corporativo: O assassinato de Roy DeMeo por seus 'filhos' criminais (Senter e Testa) não foi apenas uma queima de arquivo, mas uma prova de fogo exigida pela Comissão da Máfia. Ao matarem o próprio mentor para garantir a própria sobrevivência, a dupla provou que sua lealdade era à instituição e à autopreservação, tornando-se as ferramentas perfeitas e controláveis para a alta cúpula.\",\n      \"noteType\": \"insight\"\n    },\n    {\n      \"content\": \"A banalidade do mal e a dissociação psicológica: O aspecto mais aterrorizante dos Gêmeos Gemini não era a violência em si, mas a rotina burocrática com que a tratavam. O fato de fazerem pausas para comer pizza enquanto um corpo drenava sangue no banheiro ilustra uma capacidade de compartimentalização extrema, onde o desmembramento humano era encarado com o mesmo distanciamento emocional de desmontar um carro roubado.\",\n      \"noteType\": \"insight\"\n    },\n    {\n      \"content\": \"O anticlímax burocrático de uma vida ultraviolenta: Há uma ironia narrativa profunda no fim de Joseph Testa. Após uma juventude definida por explosões de brutalidade, onde privou dezenas de famílias de enterrarem seus entes queridos (escondendo-os em lixões), seu próprio fim foi higienizado e pacífico. Ele morreu de causas naturais em uma cama em Nevada, livre graças a uma brecha legal burocrática.\",\n      \"noteType\": \"insight\"\n    },\n    {\n      \"content\": \"A industrialização do homicídio: Senter e Testa representaram uma mudança de paradigma na criminalidade mafiosa. Eles abandonaram a violência passional ou puramente territorial dos gângsteres clássicos e transformaram o assassinato em um processo logístico de linha de montagem, focado na eliminação eficiente de resíduos biológicos para frustrar a ciência forense.\",\n      \"noteType\": \"insight\"\n    },\n    {\n      \"content\": \"O uso do 'turbante' de toalha no Método Gemini não tinha fins de tortura, mas puramente sanitários. Imediatamente após o tiro na cabeça da vítima, a toalha era enrolada para conter o sangue e evitar respingos no apartamento, facilitando a limpeza da cena do crime.\",\n      \"noteType\": \"curiosity\"\n    },\n    {\n      \"content\": \"A estocada no coração, dada logo após o tiro na cabeça, era um cálculo hidráulico e não um ato de sadismo. O objetivo era parar instantaneamente o bombeamento cardíaco, evitando que o sangue jorrasse sob pressão pelo ferimento da bala.\",\n      \"noteType\": \"curiosity\"\n    },\n    {\n      \"content\": \"A arrogância da dupla era tão desmedida que, durante o próprio julgamento federal em outubro de 1988 — onde enfrentavam acusações de múltiplos assassinatos —, Senter e Testa foram presos em flagrante cheirando cocaína no banheiro do tribunal de Foley Square.\",\n      \"noteType\": \"curiosity\"\n    },\n    {\n      \"content\": \"Um detalhe macabro e bizarro marcou a cena do crime de Roy DeMeo: quando seu corpo congelado foi encontrado no porta-malas de seu próprio Cadillac, havia um lustre (candelabro) misteriosamente posicionado em cima do cadáver.\",\n      \"noteType\": \"curiosity\"\n    },\n    {\n      \"content\": \"Mesmo cumprindo prisão perpétua, Anthony Senter continuou recebendo contribuições fraudulentas para sua aposentadoria no sindicato dos Teamsters, pagas pela empresa de lixo de seu primo. Ele teria direito a 1.400 dólares por mês se o esquema não tivesse sido descoberto em 1994.\",\n      \"noteType\": \"curiosity\"\n    },\n    {\n      \"content\": \"Estatísticas de letalidade: Embora tenham sido condenados formalmente por 10 assassinatos em 1989, o promotor Walter Mack Jr. os ligou diretamente a 20 mortes. O chefe mafioso Anthony Casso admitiu participação em 36 assassinatos junto com a dupla, e a equipe DeMeo como um todo é suspeita de 75 a 200 homicídios.\",\n      \"noteType\": \"research\"\n    },\n    {\n      \"content\": \"O local de desova primário da equipe era o Aterro Sanitário de Fountain Avenue (Fountain Avenue Dump), no Brooklyn. A escolha era estratégica: o volume massivo de lixo diário e o uso constante de tratores compactadores tornavam a recuperação forense dos corpos esquartejados virtualmente impossível.\",\n      \"noteType\": \"research\"\n    },\n    {\n      \"content\": \"A brecha da 'Old Law': Senter e Testa só conseguiram liberdade condicional (parole) em 2023 e 2024 porque seus crimes foram cometidos antes de novembro de 1987, data em que o sistema federal dos Estados Unidos aboliu a progressão de pena para crimes hediondos.\",\n      \"noteType\": \"research\"\n    },\n    {\n      \"content\": \"Linha do tempo final: Anthony Senter foi solto em junho de 2024 para uma casa de transição em Nova York. Joseph Testa foi solto em abril de 2024 por razões médicas e faleceu de câncer aos 71 anos em Henderson, Nevada, no dia 26 de janeiro de 2026.\",\n      \"noteType\": \"research\"\n    }\n  ],\n  \"persons\": [\n    {\n      \"name\": \"Joseph Carmine Testa\",\n      \"description\": \"Metade dos 'Gêmeos Gemini'. O estrategista frio da dupla, que sofria de problemas respiratórios ap"
+}

@@ -110,7 +110,7 @@ export async function getOrCreateEpisodeBriefBundleV1ForDossier(
   console.log(`${LOG} 🎬 Gerando EpisodeBriefBundleV1 para dossier=${dossierId} (force=${force})...`)
 
   const assignment = await getAssignment('briefing-episodes')
-  const model = await createLlmForTask('briefing-episodes', { temperature: 0.3, maxTokens: 16000 })
+  const model = await createLlmForTask('briefing-episodes', { temperature: 0.3, maxTokens: 50000 })
 
   // Gemini: functionCalling evita limitações de response_schema (const, default).
   // jsonMode foi removido de @langchain/google-genai v2.x — apenas jsonSchema e functionCalling são suportados.

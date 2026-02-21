@@ -9,7 +9,7 @@
  * Providers e modelos são persistidos no banco (LlmProvider com category='media' / LlmModel).
  * API Keys migram do .env para o banco — o .env serve apenas como fallback.
  *
- * @see server/constants/media-registry.ts
+ * @see server/constants/providers/media-registry.ts
  */
 
 import {
@@ -17,7 +17,7 @@ import {
   type MediaTaskId,
   MEDIA_PROVIDERS,
   MEDIA_TASKS
-} from '../../constants/media-registry'
+} from '../../constants/providers/media-registry'
 import { prisma } from '../../utils/prisma'
 
 // ─── Tipos ──────────────────────────────────────────────────────

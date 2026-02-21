@@ -1,7 +1,7 @@
 import { prisma } from '../../../utils/prisma'
-import { getScriptStyleById } from '../../../constants/script-styles'
-import { getVisualStyleById } from '../../../constants/visual-styles'
-import { getEditorialObjectiveById } from '../../../constants/editorial-objectives'
+import { getScriptStyleById } from '../../../constants/storytelling/script-styles'
+import { getVisualStyleById } from '../../../constants/cinematography/visual-styles'
+import { getEditorialObjectiveById } from '../../../constants/content/editorial-objectives'
 
 type Body = {
   scriptStyleId?: string | null

@@ -9,7 +9,7 @@
 
 import { SystemMessage, HumanMessage } from '@langchain/core/messages'
 import { createLlmForTask, getAssignment } from './llm/llm-factory'
-import { getClassificationById } from '../constants/intelligence-classifications'
+import { getClassificationById } from '../constants/content/intelligence-classifications'
 
 // =============================================================================
 // TIPOS

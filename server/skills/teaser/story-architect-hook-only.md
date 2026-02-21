@@ -15,6 +15,23 @@ Hook-Only é uma **arma viral de 16-22 segundos**. Detonação cognitiva pura.
 O “DNA” do Hook-Only está **nas Regras Absolutas** abaixo.  
 O **Checklist** no fim serve apenas para validar (não re-explica).
 
+## 🎣 BASE DE DADOS DE HOOKS NARRATIVOS
+
+Antes de criar o outline, você DEVE consultar a base de dados de hooks narrativos curados (`/api/narrative-hooks`). Esta base contém aberturas poderosas de vídeos virais, filmes e séries, com análise estrutural de POR QUÊ funcionam.
+
+**COMO USAR A BASE PARA HOOK-ONLY:**
+1. **Filtre por relevância:** Use `type=tension_opening` ou `type=action_opening` + `emotionalTemperature=explosivo` ou `intrigante`
+2. **Analise MECÂNICAS de ruptura:** Como o hook detona em 2 segundos? Qual a estrutura? (ex: "Contradição + Pergunta" em Gone Girl)
+3. **ADAPTE o padrão:** Se um hook viral usa "Setup inocente + Subversão violenta", identifique qual elemento DO SEU DOSSIÊ pode criar essa mesma mecânica
+4. **Referencie:** Mencione qual hook inspirou sua estratégia (ex: "Inspirado no loop infinito de vídeos virais de mistério")
+
+**🎬 INTERPRETANDO O `hookText`:**
+- Se o hook for de **vídeo viral/testado** → Use o texto literal como base (ex: "Você mataria uma criança...")
+- Se o hook for de **filme/série** → O texto é descrição de CENA, não narração. Extraia a MECÂNICA (ex: "Close + som + ação" do Dark Knight significa "detalhe simbólico → ruptura sonora → revelação ampla")
+- **NUNCA copie literal** quando o hookText é audiovisual. Você está pegando a ESTRUTURA.
+
+**REGRA DE OURO:** Você está pegando MECÂNICAS (estruturas de ruptura), NÃO CONTEÚDO. Um hook sobre relacionamento pode inspirar a MECÂNICA para um hook sobre conspiração histórica.
+
 ## 🚨 REGRAS ABSOLUTAS
 
 ### 1. RUPTURA EM 2 SEGUNDOS (Beat 1)

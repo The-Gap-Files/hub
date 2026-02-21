@@ -32,6 +32,9 @@ export const ScriptSceneSchema = z.object({
   motionDescription: z.string().nullable().describe('Instruções de MOVIMENTO para o modelo image-to-video (SEMPRE EM INGLÊS). Descreva movimentos de câmera (dolly, pan, tilt) e elementos animados (chamas, água, vento, poeira) que devem animar a imagem. NÃO repita o que já está na imagem — foque no que se MOVE. 15-40 palavras.'),
   audioDescription: z.string().nullable().describe('Atmosfera sonora e SFX em inglês técnico. Descreva sons de ambiente (rain, wind, crowd murmur), impactos (door slam, thunder crack), e atmosfera (eerie drone, tension strings). Seja ESPECÍFICO: "distant church bells with reverb" é melhor que "bells".'),
   audioDescriptionVolume: z.number().min(-24).max(-12).default(-18).describe('Volume do SFX em dB para mixagem com a narração. Range: -24 (quase inaudível) a -12 (máximo permitido). Default: -18 (equilíbrio). Sons de ambiente: -24 a -20. Impactos dramáticos: -15 a -12.'),
+  endVisualDescription: z.string().nullable().optional().describe('(OPCIONAL) Descrição visual do FINAL da cena — keyframe de destino para o modelo de vídeo (SEMPRE EM INGLÊS). Se presente, o pipeline gera uma segunda imagem usada como last_image no modelo I2V, melhorando transições e reduzindo drift visual. Use quando: (1) a cena tem MUDANÇA VISUAL significativa entre início e fim (ex: porta que abre, luz que muda, personagem que se move para outro ponto), (2) o movimento de câmera revela algo novo no final, (3) você quer forçar um loop perfeito (endVisual = visualDescription). NÃO use em cenas estáticas ou com movimento sutil — nesses casos, null é melhor.'),
+  endImageReferenceWeight: z.number().min(0).max(1).nullable().optional().describe('(OPCIONAL) Peso da imagem START como referência visual para gerar a imagem END (0.0-1.0). Controla quanto a imagem de início influencia o visual do final. 0.8 = mudança sutil (mesmo enquadramento, pequena variação). 0.5 = mudança moderada (novo ângulo, nova luz). 0.3 = mudança drástica (novo ambiente revelado). Default: 0.7 se endVisualDescription estiver presente.'),
+  characterRef: z.string().nullable().optional().describe('(OPCIONAL) ID da pessoa-chave (DossierPerson) cujo rosto/aparência deve ser mantido nesta cena via imagem de referência. Use APENAS quando a cena mostra claramente essa pessoa como foco visual principal. Se a cena é de ambiente, objeto, multidão ou paisagem, use null. O ID vem da seção ELENCO DE PERSONAGENS (campo [ID:]). Use apenas IDs marcados com [REF_IMG] — os demais não têm imagem de referência gerada.'),
   estimatedDuration: z.number().default(5).describe('Duração estimada em segundos (entre 5 e 6 segundos)')
 })
 
@@ -297,6 +300,7 @@ DIRETRIZES TÉCNICAS (CRÍTICO):
   - "Slow push-in on the document, smoke wisps rising from cooling wax"
 
 - 🎨 AMBIENTE DA CENA (sceneEnvironment — OBRIGATÓRIO): Cada cena DEVE ter um campo "sceneEnvironment" com um identificador curto em snake_case (inglês) do ambiente/locação. Exemplos: "bishop_study", "canal_dawn", "courtroom_trento", "ocean_surface". REGRAS: (1) Cenas consecutivas que ocorrem no MESMO local devem ter o MESMO sceneEnvironment. (2) Quando a narrativa muda de local, o sceneEnvironment DEVE mudar. (3) Isso é usado automaticamente pelo pipeline para injetar continuidade visual entre cenas — NÃO inclua prefixos de estilo no visualDescription, eles serão adicionados pelo sistema.
+- 🎬 KEYFRAME FINAL (endVisualDescription — OPCIONAL): Para cenas com MUDANÇA VISUAL significativa entre início e fim, inclua "endVisualDescription" descrevendo como o quadro FINAL da cena deve ser. O pipeline gera uma segunda imagem usada como last_image no modelo de vídeo, melhorando drasticamente a qualidade das transições e reduzindo drift/distorção. QUANDO USAR: (1) Câmera revela algo novo no final (push-in que chega a um close-up); (2) Mudança de iluminação (luz acende, sol nasce); (3) Personagem muda posição significativamente; (4) Loop viral (endVisualDescription = visualDescription para criar ciclo infinito). QUANDO NÃO USAR: Cenas estáticas, breathing camera sutil, locked-off shots — nestas, null é melhor pois o modelo gera movimento mais natural sem constraining. Se incluir endVisualDescription, inclua também "endImageReferenceWeight" (0.0-1.0): 0.8 = mudança sutil, 0.5 = moderada, 0.3 = drástica. Default: 0.7.
 - 🎨 COERÊNCIA CROMÁTICA (CRÍTICO): As cores descritas no visualDescription de cada cena DEVEM ser compatíveis com a paleta base do estilo visual definido. Se o estilo é amber/noir, não descreva céus violeta ou vegetação verde vibrante — use tons compatíveis (amber-grey sky, muted dark tones). As cores naturais do ambiente devem ALINHAR-SE com a paleta do estilo, não competir com ela.
 - PERSONAGENS: Quando houver personagens recorrentes na narrativa, use SEMPRE os nomes (ou um descritor consistente, ex.: "the detective", "Maria") no visualDescription em todas as cenas em que aparecem. Isso reduz variação entre cenas e ajuda a manter coerência visual (ex.: "John standing by the window" em vez de "a man by the window").
 - CONSISTÊNCIA VISUAL DE PERSONAGENS: Quando o dossiê fornecer visualDescription para personagens-chave, incorpore EXATAMENTE esses descritores visuais no visualDescription de cada cena onde o personagem aparece. Isso garante que o modelo de imagem mantenha a mesma aparência entre cenas.
@@ -346,11 +350,12 @@ export function buildUserPrompt(request: ScriptGenerationRequest, providerHint?:
   const isShortFormat = videoFormat.includes('tiktok') || videoFormat.includes('reels') || videoFormat.includes('teaser') || videoFormat.includes('shorts')
   const isYouTubeCinematic = videoFormat.includes('youtube') || videoFormat.includes('full')
 
-  // Caminho B: para full video, o Roteirista decide quantas cenas o conteúdo sustenta.
-  // O idealSceneCount é o TETO (plano do Arquiteto). O mínimo garante que não vire um teaser.
+  // Caminho B: para full video, o mínimo é 85% do idealSceneCount.
+  // O roteirista tem licença criativa para criar pontes ficcionais e dramatizações
+  // que sustentem a contagem de cenas — não deve parar por "falta de material factual".
   const minSceneCount = isShortFormat
     ? idealSceneCount // formatos curtos mantêm contagem fixa
-    : Math.max(40, Math.round(idealSceneCount * 0.45)) // full video: mínimo 40 ou 45% do plano
+    : Math.max(40, Math.round(idealSceneCount * 0.85)) // full video: mínimo 40 ou 85% do plano
 
   let formatContext = ''
   if (isShortFormat) {
@@ -577,19 +582,20 @@ Máximo de 38 cenas por track (limite do modelo). Defina "backgroundMusic" como 
 
 ---
 ⚠️ REQUISITOS OBRIGATÓRIOS PARA APROVAÇÃO:
-1. QUANTIDADE DE CENAS: Gere entre ${minSceneCount} e ${maxSceneCount} cenas. O número exato deve refletir o que o CONTEÚDO DISPONÍVEL sustenta com qualidade — nem mais (padding vazio), nem menos (conteúdo cortado). O Arquiteto planejou ${idealSceneCount} cenas como teto de referência, mas você pode (e deve) gerar menos se o material não justificar mais sem repetição. Mínimo absoluto: ${minSceneCount} cenas.
-2. ANTI-PADDING: Não force cenas para atingir um número. Se a história está contada com qualidade em ${Math.round(minSceneCount * 1.3)} cenas, pare aí. Cenas extras sem conteúdo novo pioram a retenção.
-3. DURAÇÃO DA CENA: Cada cena tem slots fixos de 5 segundos.
-4. CONTAGEM DE PALAVRAS: Cada narração DEVE ter entre ${minWords} e ${maxWords} palavras (${targetWPM} WPM ÷ 60 × 5s = ${wordsPerScene} palavras ideais). 🚨 NUNCA exceda ${maxWords} palavras - isso faz o áudio ultrapassar 5 segundos e quebra a sincronia. NUNCA faça cenas com menos de ${minWords} palavras - isso gera silêncio.
-5. MÚSICA DE FUNDO: ${isShortFormat ? 'Use "backgroundMusic" { prompt, volume } para UMA música para TODO o vídeo. O prompt deve ser compatível com Stable Audio 2.5.' : 'Use "backgroundMusicTracks" com tracks { prompt, volume, startScene, endScene }. Calibre startScene/endScene com base no número REAL de cenas que você gerou — não no número planejado. A última track DEVE ter endScene: null.'}
-6. Se houver imagens anexas, use-as como referência visual primária.
-7. 📐 PROPORÇÃO NARRATIVA: A seção de REFLEXÃO/LIÇÃO (após o corpo factual + ponte temporal) deve ter no MÁXIMO ${maxReflectionScenes} cenas (15% ideal, ${maxReflectionCeiling} cenas = teto absoluto de 20%). Invista as cenas no CORPO FACTUAL, não na reflexão.
-8. 🚫 ANTI-REPETIÇÃO: Antes de finalizar, releia TODAS as cenas de reflexão. Se duas cenas expressam a mesma ideia com palavras diferentes, ELIMINE uma e redistribua o conteúdo para o corpo factual. Cada cena de reflexão deve trazer um ARGUMENTO ÚNICO e INÉDITO.${providerSpecificItems}
+1. QUANTIDADE DE CENAS: Gere entre ${minSceneCount} e ${maxSceneCount} cenas. O Arquiteto planejou ${idealSceneCount} cenas — mire nesse alvo. O mínimo absoluto é ${minSceneCount} cenas — gerar MENOS que isso é REPROVAÇÃO AUTOMÁTICA.
+2. LICENÇA CRIATIVA: Se os fatos do dossiê não preenchem ${minSceneCount} cenas sozinhos, você TEM LICENÇA para criar conteúdo ficcional que ENRIQUEÇA a narrativa: dramatizações de bastidores, diálogos imaginados entre personagens, reconstruções históricas plausíveis, pontes narrativas que conectem fatos do dossiê, contextualizações cinematográficas e reflexões do narrador. Use essa licença para SUSTENTAR a contagem de cenas com qualidade narrativa — nunca para repetir informação.
+3. ANTI-REPETIÇÃO (NÃO anti-padding): O problema a evitar é REPETIÇÃO de informação, não quantidade de cenas. Cenas ficcionais/dramáticas que expandem a história são BEM-VINDAS. Cenas que reafirmam o mesmo fato com palavras diferentes são PROIBIDAS.
+4. DURAÇÃO DA CENA: Cada cena tem slots fixos de 5 segundos.
+5. CONTAGEM DE PALAVRAS: Cada narração DEVE ter entre ${minWords} e ${maxWords} palavras (${targetWPM} WPM ÷ 60 × 5s = ${wordsPerScene} palavras ideais). 🚨 NUNCA exceda ${maxWords} palavras - isso faz o áudio ultrapassar 5 segundos e quebra a sincronia. NUNCA faça cenas com menos de ${minWords} palavras - isso gera silêncio.
+6. MÚSICA DE FUNDO: ${isShortFormat ? 'Use "backgroundMusic" { prompt, volume } para UMA música para TODO o vídeo. O prompt deve ser compatível com Stable Audio 2.5.' : 'Use "backgroundMusicTracks" com tracks { prompt, volume, startScene, endScene }. Calibre startScene/endScene com base no número REAL de cenas que você gerou — não no número planejado. A última track DEVE ter endScene: null.'}
+7. Se houver imagens anexas, use-as como referência visual primária.
+8. 📐 PROPORÇÃO NARRATIVA: A seção de REFLEXÃO/LIÇÃO (após o corpo factual + ponte temporal) deve ter no MÁXIMO ${maxReflectionScenes} cenas (15% ideal, ${maxReflectionCeiling} cenas = teto absoluto de 20%). Invista as cenas no CORPO FACTUAL e nas dramatizações ficcionais, não na reflexão.
+9. 🚫 CHECAGEM DE REPETIÇÃO: Antes de finalizar, releia TODAS as cenas. Se duas cenas expressam a mesma ideia com palavras diferentes, ELIMINE uma e substitua por conteúdo ficcional novo (dramatização, diálogo, reconstrução). Cada cena deve trazer informação ou narrativa ÚNICA e INÉDITA.${providerSpecificItems}
 ${guidelines}${musicWarning}
 
 🛡️ VALIDAÇÃO FINAL OBRIGATÓRIA:
 Antes de retornar o JSON, faça esta auditoria interna:
-1. CONTE as cenas totais — deve estar entre ${minSceneCount} e ${maxSceneCount}. Pergunte: "Cada cena adiciona informação nova ou é padding?" Se padding → elimine.
+1. CONTE as cenas totais — deve estar entre ${minSceneCount} e ${maxSceneCount}. Se está ABAIXO de ${minSceneCount}, ADICIONE cenas ficcionais (dramatizações, diálogos, reconstruções) até atingir o mínimo. Se uma cena repete informação de outra, SUBSTITUA por conteúdo ficcional novo.
 2. CONTE as cenas de reflexão/lição (após o corpo factual) — deve ser ≤${maxReflectionCeiling} cenas.
 3. PROCURE repetições temáticas — se encontrar, ELIMINE e COMPACTE.
 4. A última cena de conteúdo deve terminar com frase completa.
@@ -597,6 +603,115 @@ Antes de retornar o JSON, faça esta auditoria interna:
 6. 🔗 SINCRONIZAÇÃO NARRAÇÃO ↔ VISUAL (CHECAR CENA POR CENA): Para CADA cena, a narração fala de X — o visualDescription MOSTRA X visualmente? Se a narração fala de "bispo assinou", o visual mostra assinatura/documento/selo? Se NÃO → REESCREVA o visualDescription.
 7. 🔗 MOTION ↔ VISUAL: O motionDescription descreve movimento coerente com o visualDescription? O motion anima elementos que existem na imagem? Se incompatível → REESCREVA.
 8. 📺 TRANSIÇÃO DE EPISÓDIO: Se episodeNumber < totalEpisodes, as últimas 2-3 cenas ANTES do CTA devem provocar o próximo episódio (teaser/gancho). Se não houver teaser → ADICIONE.`
+}
+
+// =============================================================================
+// DEGENERATION DETECTOR
+// =============================================================================
+
+interface DegenerationReport {
+  cleanedScenes: ScriptScene[]
+  removedCount: number
+  reasons: string[]
+}
+
+/**
+ * Detecta e remove cenas degeneradas do roteiro.
+ *
+ * O LLM (especialmente Gemini) pode entrar em loop de repetição no tail do roteiro,
+ * gerando cenas com narração duplicada ou com "Fim. Fim. Fim." acumulado.
+ *
+ * 3 passes:
+ * 1. Trailing "Fim." accumulation — strip e/ou remover cenas que são apenas "Fim."
+ * 2. Duplicatas exatas (após normalização) — manter apenas a primeira ocorrência
+ * 3. Quase-duplicatas no tail (últimos 30%) — Jaccard similarity > 85%
+ */
+function detectAndPurgeDegeneration(scenes: ScriptScene[]): DegenerationReport {
+  if (scenes.length === 0) {
+    return { cleanedScenes: [], removedCount: 0, reasons: [] }
+  }
+
+  const reasons: string[] = []
+  const indicesToRemove = new Set<number>()
+
+  // ── PASS 1: Trailing "Fim." accumulation ──────────────────────────────────
+  const FIM_TAIL_PATTERN = /(\s*\bFim\b\.?\s*){2,}$/i
+  const processedNarrations: string[] = scenes.map((scene, idx) => {
+    const original = scene.narration ?? ''
+    const stripped = original.replace(FIM_TAIL_PATTERN, '').trim()
+
+    if (stripped.length < 5 && original.length > 0) {
+      indicesToRemove.add(idx)
+      reasons.push(`Cena ${idx}: degeneração — apenas repetições de "Fim."`)
+    }
+
+    return stripped || original
+  })
+
+  // ── PASS 2: Duplicatas exatas (normalized) ────────────────────────────────
+  function normalize(text: string): string {
+    return text
+      .toLowerCase()
+      .replace(/<break[^>]*\/>/g, '')
+      .replace(/<\/?prosody[^>]*>/g, '')
+      .replace(/[.,;:!?'"()\-–—]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+  }
+
+  const seenNarrations = new Map<string, number>()
+  for (let i = 0; i < processedNarrations.length; i++) {
+    if (indicesToRemove.has(i)) continue
+    const normalized = normalize(processedNarrations[i]!)
+    if (normalized.length < 10) continue
+
+    if (seenNarrations.has(normalized)) {
+      indicesToRemove.add(i)
+      const firstIdx = seenNarrations.get(normalized)!
+      reasons.push(`Cena ${i}: duplicata exata da cena ${firstIdx}`)
+    } else {
+      seenNarrations.set(normalized, i)
+    }
+  }
+
+  // ── PASS 3: Quase-duplicatas no tail (últimos 30%) ────────────────────────
+  const tailStartIndex = Math.floor(scenes.length * 0.7)
+
+  function wordSet(text: string): Set<string> {
+    return new Set(normalize(text).split(' ').filter(w => w.length > 3))
+  }
+
+  for (let i = tailStartIndex; i < processedNarrations.length; i++) {
+    if (indicesToRemove.has(i)) continue
+    const wordsI = wordSet(processedNarrations[i]!)
+    if (wordsI.size < 5) continue
+
+    for (let j = tailStartIndex; j < i; j++) {
+      if (indicesToRemove.has(j)) continue
+      const wordsJ = wordSet(processedNarrations[j]!)
+      if (wordsJ.size < 5) continue
+
+      const intersection = new Set([...wordsI].filter(w => wordsJ.has(w)))
+      const unionSize = new Set([...wordsI, ...wordsJ]).size
+      const similarity = unionSize > 0 ? intersection.size / unionSize : 0
+
+      if (similarity >= 0.85) {
+        indicesToRemove.add(i)
+        reasons.push(`Cena ${i}: quase-duplicata da cena ${j} (${(similarity * 100).toFixed(0)}% similaridade)`)
+        break
+      }
+    }
+  }
+
+  // ── Build cleaned scenes com re-indexação ─────────────────────────────────
+  const cleanedScenes: ScriptScene[] = []
+  let newOrder = 0
+  for (let i = 0; i < scenes.length; i++) {
+    if (indicesToRemove.has(i)) continue
+    cleanedScenes.push({ ...scenes[i]!, order: newOrder++ })
+  }
+
+  return { cleanedScenes, removedCount: indicesToRemove.size, reasons }
 }
 
 // =============================================================================
@@ -610,15 +725,38 @@ export function parseScriptResponse(
   modelName: string,
   tokenUsage?: { inputTokens: number; outputTokens: number; totalTokens: number }
 ): ScriptGenerationResponse {
-  const scenes: ScriptScene[] = content.scenes.map((scene, index) => ({
+  let scenes: ScriptScene[] = content.scenes.map((scene, index) => ({
     order: scene.order ?? index + 1,
     narration: scene.narration,
     visualDescription: scene.visualDescription,
+    endVisualDescription: scene.endVisualDescription ?? undefined,
+    endImageReferenceWeight: scene.endImageReferenceWeight ?? undefined,
     sceneEnvironment: scene.sceneEnvironment ?? undefined,
     motionDescription: scene.motionDescription ?? undefined,
     audioDescription: scene.audioDescription ?? undefined,
+    characterRef: scene.characterRef ?? undefined,
     estimatedDuration: scene.estimatedDuration ?? 5
   }))
+
+  // ── Detecção e purge de degeneração (duplicatas, "Fim. Fim. Fim.") ────────
+  const degenerationReport = detectAndPurgeDegeneration(scenes)
+  if (degenerationReport.removedCount > 0) {
+    if (degenerationReport.removedCount >= scenes.length) {
+      console.error(
+        `[parseScriptResponse] ❌ PURGE ABORTADO: todas as ${scenes.length} cenas seriam removidas. ` +
+        `Usando roteiro original sem purge para evitar perda total de conteúdo.`
+      )
+    } else {
+      console.warn(
+        `[parseScriptResponse] ⚠️ DEGENERAÇÃO DETECTADA: ${degenerationReport.removedCount} cena(s) removida(s). ` +
+        `Roteiro original: ${scenes.length} cenas → após purge: ${degenerationReport.cleanedScenes.length} cenas.`
+      )
+      for (const reason of degenerationReport.reasons) {
+        console.warn(`  └─ ${reason}`)
+      }
+      scenes = degenerationReport.cleanedScenes
+    }
+  }
 
   const fullText = scenes.map(s => s.narration).join('\n\n')
   const wordCount = fullText.split(/\s+/).length

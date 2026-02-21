@@ -2,7 +2,7 @@ import { Prisma } from '@prisma/client'
 import { prisma } from '../../../utils/prisma'
 import { outputPipelineService } from '../../../services/pipeline/output-pipeline.service'
 import { createPipelineLogger } from '../../../utils/pipeline-logger'
-import { CAPTION_STYLES } from '../../../constants/caption-styles'
+import { CAPTION_STYLES } from '../../../constants/cinematography/caption-styles'
 
 type RenderOptionsBody = {
   includeLogo?: boolean

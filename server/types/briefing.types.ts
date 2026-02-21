@@ -9,8 +9,8 @@ import { z } from 'zod'
  */
 
 export const BriefFactSchema = z.object({
-  /** Frase factual curta (1-2 linhas) */
-  text: z.string().min(8).max(280),
+  /** Fato detalhado (2-4 linhas com nomes, datas, mecanismos, consequências) */
+  text: z.string().min(8).max(600),
   /** Referência opcional (título da fonte / índice / url) */
   sourceRef: z.string().max(300).optional().transform(v => v && v.length >= 3 ? v : undefined)
 })

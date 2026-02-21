@@ -1,7 +1,7 @@
 import { prisma } from '../../../../utils/prisma'
-import { getVisualStyleById } from '../../../../constants/visual-styles'
-import { getScriptStyleById } from '../../../../constants/script-styles'
-import { getClassificationById } from '../../../../constants/intelligence-classifications'
+import { getVisualStyleById } from '../../../../constants/cinematography/visual-styles'
+import { getScriptStyleById } from '../../../../constants/storytelling/script-styles'
+import { getClassificationById } from '../../../../constants/content/intelligence-classifications'
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')

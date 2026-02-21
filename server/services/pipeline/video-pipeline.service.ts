@@ -16,7 +16,7 @@ import { Prisma } from '@prisma/client'
 import { prisma } from '../../utils/prisma'
 import { createPipelineLogger } from '../../utils/pipeline-logger'
 import { CaptionService, type SceneCaptionData } from '../caption.service'
-import type { CaptionStyleId } from '../../constants/caption-styles'
+import type { CaptionStyleId } from '../../constants/cinematography/caption-styles'
 
 // Configurar FFmpeg
 ffmpeg.setFfmpegPath(ffmpegInstaller.path)

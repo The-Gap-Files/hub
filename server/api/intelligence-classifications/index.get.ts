@@ -1,4 +1,4 @@
-import { getActiveClassifications } from '../../constants/intelligence-classifications'
+import { getActiveClassifications } from '../../constants/content/intelligence-classifications'
 
 /**
  * GET /api/intelligence-classifications

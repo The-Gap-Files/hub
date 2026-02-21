@@ -13,7 +13,7 @@ import { serializeConstantsCatalog, serializeRoleDistribution, SHORT_FORMAT_TYPE
 import { createLlmForTask, getAssignment } from './llm/llm-factory'
 import type { CreativeDirection } from './creative-direction-advisor.service'
 import { buildDossierBlock } from '../utils/dossier-prompt-block'
-import { getNarrativeRoleById } from '../constants/narrative-roles'
+import { getNarrativeRoleById } from '../constants/content/narrative-roles'
 import { buildCacheableMessages, logCacheMetrics } from './llm/anthropic-cache-helper'
 import { sanitizeSchemaForGemini } from '../utils/gemini-schema-sanitizer'
 import { toJsonSchema } from '@langchain/core/utils/json_schema'

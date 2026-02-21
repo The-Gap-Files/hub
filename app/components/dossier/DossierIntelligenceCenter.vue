@@ -118,6 +118,22 @@
                 <span v-for="alias in person.aliases" :key="alias" class="nic-tag person-tag">{{ alias }}</span>
               </div>
 
+              <!-- Reference Image / Generate Button -->
+              <div class="nic-person-ref-section" @click.stop>
+                <div v-if="person.hasReferenceImage" class="nic-person-ref-preview">
+                  <img :src="`/api/persons/${person.id}/image?t=${person._imageTs || ''}`" alt="Referência" class="nic-ref-thumb" />
+                  <button @click.stop="generatePersonImage(person)" :disabled="generatingPersonId === person.id" class="nic-ref-regen-btn" title="Regenerar imagem">
+                    <Loader2 v-if="generatingPersonId === person.id" :size="11" class="animate-spin" />
+                    <RotateCcw v-else :size="11" />
+                  </button>
+                </div>
+                <button v-else-if="person.visualDescription" @click.stop="generatePersonImage(person)" :disabled="generatingPersonId === person.id" class="nic-generate-person-btn">
+                  <Loader2 v-if="generatingPersonId === person.id" :size="12" class="animate-spin" />
+                  <ImageIcon v-else :size="12" />
+                  <span>{{ generatingPersonId === person.id ? 'Gerando...' : 'Gerar Pessoa' }}</span>
+                </button>
+              </div>
+
               <Transition name="expand">
                 <div v-if="expandedPerson === person.id && person.visualDescription" class="nic-visual-desc" @click.stop>
                   <span class="text-xs text-zinc-500 font-mono uppercase tracking-wider flex items-center gap-1 mb-1.5">
@@ -245,10 +261,11 @@
 </template>
 
 <script setup lang="ts">
-import { 
+import {
   Brain, Users, User, Lightbulb, Search, Database, Terminal,
   ChevronUp, ChevronDown, Sparkles, Loader2, X, Trash2,
-  Eye, FileText, Globe, BookmarkPlus, RotateCcw, Plus, Layers
+  Eye, FileText, Globe, BookmarkPlus, RotateCcw, Plus, Layers,
+  ImageIcon
 } from 'lucide-vue-next'
 
 const props = defineProps<{
@@ -265,6 +282,7 @@ const persons = ref([...props.initialPersons])
 const isAnalyzing = ref(false)
 const analysisResult = ref<{ notesCount: number; personsCount: number; provider: string; cleared: boolean } | null>(null)
 const expandedPerson = ref<string | null>(null)
+const generatingPersonId = ref<string | null>(null)
 const maxDisplayed = ref(20)
 const activeSection = ref<'persons' | 'insights' | 'curiosities' | 'research'>('persons')
 
@@ -400,6 +418,23 @@ async function saveQueryResult() {
     emit('updated')
   } catch (error) { console.error('Erro ao salvar resultado:', error) }
   finally { savingQuery.value = false }
+}
+
+async function generatePersonImage(person: any) {
+  generatingPersonId.value = person.id
+  try {
+    await $fetch(`/api/persons/${person.id}/generate-image`, {
+      method: 'POST',
+      body: { visualPrompt: person.visualDescription }
+    })
+    person.hasReferenceImage = true
+    person._imageTs = Date.now() // bust cache on regeneration
+  } catch (error: any) {
+    console.error('Erro ao gerar imagem:', error)
+    alert(error.data?.message || 'Erro ao gerar imagem do personagem.')
+  } finally {
+    generatingPersonId.value = null
+  }
 }
 
 function formatDate(date: string) {
@@ -634,6 +669,45 @@ watch(() => props.initialPersons, (newVal) => { persons.value = [...newVal] })
 
 .nic-tag { font-family: 'Fira Code', monospace; font-size: 0.75rem; padding: 1px 6px; border-radius: 4px; }
 .person-tag { background: rgba(245, 158, 11, 0.05); color: rgba(245, 158, 11, 0.5); border: 1px solid rgba(245, 158, 11, 0.08); }
+
+/* Person Reference Image */
+.nic-person-ref-section { margin-top: 0.5rem; }
+
+.nic-person-ref-preview {
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.nic-ref-thumb {
+  width: 48px; height: 48px; border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.08);
+}
+.nic-ref-regen-btn {
+  width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+  border-radius: 6px; cursor: pointer;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.3); transition: all 200ms ease;
+}
+.nic-ref-regen-btn:hover:not(:disabled) {
+  background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.3); color: #f59e0b;
+}
+.nic-ref-regen-btn:disabled { opacity: 0.5; cursor: wait; }
+
+.nic-generate-person-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 7px;
+  font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.06), rgba(250, 84, 1, 0.04));
+  border: 1px solid rgba(245, 158, 11, 0.12);
+  color: rgba(245, 158, 11, 0.6); cursor: pointer;
+  transition: all 250ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nic-generate-person-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(250, 84, 1, 0.08));
+  border-color: rgba(245, 158, 11, 0.3); color: #f59e0b;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.08);
+}
+.nic-generate-person-btn:disabled { opacity: 0.5; cursor: wait; }
 
 .nic-visual-desc {
   margin-top: 0.625rem; padding-top: 0.625rem;

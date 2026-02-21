@@ -4,11 +4,11 @@
  * O Replicate retorna schemas no formato JSON Schema padrão (type, properties, required).
  * Este conversor extrai as informações necessárias para construir payloads via input-schema-builder.
  *
- * @see server/constants/media-registry.ts — MediaModelInputSchema
+ * @see server/constants/providers/media-registry.ts — MediaModelInputSchema
  * @see server/utils/input-schema-builder.ts
  */
 
-import type { MediaModelInputSchema } from '../constants/media-registry'
+import type { MediaModelInputSchema } from '../constants/providers/media-registry'
 
 interface ReplicateJsonSchemaProperty {
   type?: string

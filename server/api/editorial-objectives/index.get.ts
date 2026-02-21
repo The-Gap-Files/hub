@@ -1,4 +1,4 @@
-import { EDITORIAL_OBJECTIVES } from '../../constants/editorial-objectives'
+import { EDITORIAL_OBJECTIVES } from '../../constants/content/editorial-objectives'
 
 export default defineEventHandler(() => {
   return {

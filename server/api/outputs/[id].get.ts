@@ -1,8 +1,8 @@
 import { prisma } from '../../utils/prisma'
-import { getVisualStyleById } from '../../constants/visual-styles'
-import { getScriptStyleById } from '../../constants/script-styles'
-import { getClassificationById } from '../../constants/intelligence-classifications'
-import { getEditorialObjectiveById } from '../../constants/editorial-objectives'
+import { getVisualStyleById } from '../../constants/cinematography/visual-styles'
+import { getScriptStyleById } from '../../constants/storytelling/script-styles'
+import { getClassificationById } from '../../constants/content/intelligence-classifications'
+import { getEditorialObjectiveById } from '../../constants/content/editorial-objectives'
 import type { OutputWithRelationsResponse } from '../../types/output.types'
 
 export default defineEventHandler(async (event): Promise<OutputWithRelationsResponse> => {

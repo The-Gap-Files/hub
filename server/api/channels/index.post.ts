@@ -1,8 +1,8 @@
 import { z } from 'zod'
 import { prisma } from '../../utils/prisma'
 import type { CreateChannelDTO, ChannelResponse } from '../../types/channel.types'
-import { getVisualStyleById } from '../../constants/visual-styles'
-import { getScriptStyleById } from '../../constants/script-styles'
+import { getVisualStyleById } from '../../constants/cinematography/visual-styles'
+import { getScriptStyleById } from '../../constants/storytelling/script-styles'
 
 const CreateChannelSchema = z.object({
   name: z.string().min(2).max(100),

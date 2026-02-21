@@ -11,7 +11,7 @@
 
 import { SystemMessage, HumanMessage } from '@langchain/core/messages'
 import { createLlmForTask, getAssignment } from './llm/llm-factory'
-import type { LlmTaskId } from '../constants/llm-registry'
+import type { LlmTaskId } from '../constants/providers/llm-registry'
 
 const TASK_ID: LlmTaskId = 'merge'
 
@@ -44,6 +44,8 @@ export interface PromptMergeRequest {
     lightingTags?: string
     atmosphereTags?: string
     compositionTags?: string
+    colorPalette?: string
+    qualityTags?: string
     tags?: string
   }
 }
@@ -148,6 +150,8 @@ Merge these into a single optimized prompt:`
       visualStyle.lightingTags,
       visualStyle.atmosphereTags,
       visualStyle.compositionTags,
+      visualStyle.colorPalette,
+      visualStyle.qualityTags,
       visualStyle.tags
     ].filter(t => t && t.trim().length > 0).join(', ')
 

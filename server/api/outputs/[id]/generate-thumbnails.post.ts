@@ -19,7 +19,7 @@ import { costLogService } from '../../../services/cost-log.service'
 import { SystemMessage, HumanMessage } from '@langchain/core/messages'
 import Replicate from 'replicate'
 import { createLlmForTask, getAssignment } from '../../../services/llm/llm-factory'
-import type { LlmTaskId } from '../../../constants/llm-registry'
+import type { LlmTaskId } from '../../../constants/providers/llm-registry'
 import { getMediaProviderForTask } from '../../../services/media/media-factory'
 
 // Modelo de imagem para thumbnails

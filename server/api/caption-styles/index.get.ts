@@ -1,4 +1,4 @@
-import { CAPTION_STYLES, getStylesByPlatform } from '../../constants/caption-styles'
+import { CAPTION_STYLES, getStylesByPlatform } from '../../constants/cinematography/caption-styles'
 
 /**
  * GET /api/caption-styles

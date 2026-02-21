@@ -56,6 +56,11 @@
           <span class="nav-text">Banco de Seeds</span>
         </NuxtLink>
 
+        <NuxtLink to="/settings/hooks" class="nav-item group" active-class="active">
+          <Sparkles :size="18" class="nav-icon" />
+          <span class="nav-text">Base de Hooks</span>
+        </NuxtLink>
+
         <NuxtLink to="/settings/providers" class="nav-item group" active-class="active">
           <Zap :size="18" class="nav-icon" />
           <span class="nav-text">Núcleos de IA</span>
@@ -109,9 +114,9 @@
 </template>
 
 <script setup lang="ts">
-import { 
+import {
   LayoutDashboard, Library, Tv,
-  Database, Zap, User, Settings,
+  Database, Sparkles, Zap, User, Settings,
   ChevronRight
 } from 'lucide-vue-next'
 

@@ -12,10 +12,12 @@
 // =============================================================================
 
 export interface PersonContext {
+  id?: string
   name: string
   role?: string | null
   description?: string | null
   visualDescription?: string | null
+  hasReferenceImage?: boolean
   aliases?: string[]
   relevance: string
 }
@@ -41,6 +43,8 @@ export function formatPersonsForPrompt(persons: PersonContext[]): string {
   persons.forEach((p, i) => {
     block += `[${i + 1}] (${p.relevance}) ${p.name}`
     if (p.role) block += ` — ${p.role}`
+    if (p.id) block += ` [ID: ${p.id}]`
+    if (p.hasReferenceImage) block += ` [REF_IMG]`
     block += `\n`
     if (p.description) block += `    Descrição: ${p.description}\n`
     if (p.visualDescription) block += `    Visual: ${p.visualDescription}\n`
@@ -93,10 +97,12 @@ export function formatNeuralInsightsForPrompt(insights: NeuralInsightContext[]):
 export function mapPersonsFromPrisma(persons: any[]): PersonContext[] {
   if (!persons?.length) return []
   return persons.map(p => ({
+    id: p.id,
     name: p.name,
     role: p.role,
     description: p.description,
     visualDescription: p.visualDescription,
+    hasReferenceImage: !!p.referenceImage,
     aliases: p.aliases || [],
     relevance: p.relevance
   }))

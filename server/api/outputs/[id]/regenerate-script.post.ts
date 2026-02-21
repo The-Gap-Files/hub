@@ -2,11 +2,12 @@ import { prisma } from '../../../utils/prisma'
 import { providerManager } from '../../../services/providers'
 import { costLogService } from '../../../services/cost-log.service'
 import { calculateLLMCost } from '../../../constants/pricing'
-import { getVisualStyleById } from '../../../constants/visual-styles'
-import { getScriptStyleById } from '../../../constants/script-styles'
-import { getClassificationById } from '../../../constants/intelligence-classifications'
+import { getVisualStyleById } from '../../../constants/cinematography/visual-styles'
+import { getScriptStyleById } from '../../../constants/storytelling/script-styles'
+import { getClassificationById } from '../../../constants/content/intelligence-classifications'
 import { formatOutlineForPrompt, type StoryOutline } from '../../../services/story-architect.service'
 import { validateScript } from '../../../services/script-validator.service'
+import { filmmakerDirector, type ProductionContext } from '../../../services/filmmaker-director.service'
 import type { ScriptGenerationRequest } from '../../../types/ai-providers'
 import { validatorsEnabled } from '../../../utils/validators'
 
@@ -256,7 +257,87 @@ export default defineEventHandler(async (event) => {
       }
     }
 
+    // ─── AGENTE CINEASTA (FILMMAKER DIRECTOR) — PÓS-PROCESSAMENTO ───
+    // Polir descrições visuais do roteiro antes de salvar.
+    // Mesmo fluxo do output-pipeline.service.ts: batching de 50 cenas.
+    if (scriptResponse.scenes && scriptResponse.scenes.length > 0) {
+      try {
+        console.log(`[RegenerateScript] 🎬 Acionando o Agente Cineasta para ${scriptResponse.scenes.length} cenas...`)
+
+        const baseStyleForDirector = visualStyle?.baseStyle ||
+          promptContext.visualBaseStyle ||
+          'Cinematic 35mm photography, hyperrealistic dark mystery style'
+
+        // Montar Production Context a partir do visual style (constantes)
+        const anchorParts: string[] = []
+        if (visualStyle) {
+          if (visualStyle.baseStyle) anchorParts.push(visualStyle.baseStyle)
+          if (visualStyle.lightingTags) anchorParts.push(visualStyle.lightingTags)
+          if (visualStyle.atmosphereTags) anchorParts.push(visualStyle.atmosphereTags)
+          if (visualStyle.compositionTags) anchorParts.push(visualStyle.compositionTags)
+          if (visualStyle.colorPalette) anchorParts.push(visualStyle.colorPalette)
+          if (visualStyle.qualityTags) anchorParts.push(visualStyle.qualityTags)
+          if (visualStyle.tags) anchorParts.push(visualStyle.tags)
+        }
+
+        const productionCtx: ProductionContext = {
+          styleAnchorTags: anchorParts.length > 0 ? anchorParts.join(', ') : undefined,
+          visualIdentity: dossier.visualIdentityContext || undefined,
+          storyOutline: output.storyOutline as any || undefined,
+        }
+
+        // Batching: dividir cenas em lotes para evitar truncamento
+        const FILMMAKER_BATCH_SIZE = 50
+        const allInputScenes = scriptResponse.scenes.map((s: any) => ({
+          order: 0,
+          narration: s.narration,
+          currentVisual: s.visualDescription,
+          currentEnvironment: s.sceneEnvironment,
+          estimatedDuration: s.estimatedDuration || 5
+        }))
+
+        type FilmmakerResult = Awaited<ReturnType<typeof filmmakerDirector.refineScript>>
+        let allRefinedScenes: FilmmakerResult = []
+
+        if (allInputScenes.length <= FILMMAKER_BATCH_SIZE) {
+          allRefinedScenes = await filmmakerDirector.refineScript(allInputScenes, baseStyleForDirector, undefined, productionCtx)
+        } else {
+          console.log(`[RegenerateScript] 🎬 Cineasta: ${allInputScenes.length} cenas → ${Math.ceil(allInputScenes.length / FILMMAKER_BATCH_SIZE)} lotes de até ${FILMMAKER_BATCH_SIZE}.`)
+          for (let batchStart = 0; batchStart < allInputScenes.length; batchStart += FILMMAKER_BATCH_SIZE) {
+            const batch = allInputScenes.slice(batchStart, batchStart + FILMMAKER_BATCH_SIZE)
+            console.log(`[RegenerateScript] 🎬 Cineasta: lote ${Math.floor(batchStart / FILMMAKER_BATCH_SIZE) + 1} (${batch.length} cenas)...`)
+            const batchResult = await filmmakerDirector.refineScript(batch, baseStyleForDirector, undefined, productionCtx)
+            if (batchResult) {
+              allRefinedScenes = [...(allRefinedScenes || []), ...batchResult]
+            }
+          }
+        }
+
+        // Mesclar refinamentos de volta nas cenas originais
+        if (allRefinedScenes && allRefinedScenes.length === scriptResponse.scenes.length) {
+          scriptResponse.scenes = scriptResponse.scenes.map((original: any, i: number) => {
+            const refined = allRefinedScenes?.[i]
+            if (!refined) return original
+            return {
+              ...original,
+              visualDescription: refined.visualDescription || original.visualDescription,
+              motionDescription: refined.motionDescription || original.motionDescription,
+              sceneEnvironment: refined.sceneEnvironment || original.sceneEnvironment,
+              endVisualDescription: refined.endVisualDescription ?? original.endVisualDescription,
+              endImageReferenceWeight: refined.endImageReferenceWeight ?? original.endImageReferenceWeight
+            }
+          })
+          console.log(`[RegenerateScript] ✅ Cineasta refinou todas as ${scriptResponse.scenes.length} cenas com sucesso.`)
+        } else {
+          console.warn(`[RegenerateScript] ⚠️ Cineasta retornou número incorreto de cenas (${allRefinedScenes?.length} vs ${scriptResponse.scenes.length}). Ignorando refinamento.`)
+        }
+      } catch (directorError) {
+        console.error('[RegenerateScript] ❌ Erro no Agente Cineasta (salvando roteiro bruto):', directorError)
+      }
+    }
+
     // 5. Atualizar no Banco (Transação)
+    // Timeout aumentado para suportar scripts grandes (100+ cenas)
     await prisma.$transaction(async (tx: any) => {
       // 5.1 Atualizar ou Criar Script
       const existingScript = await tx.script.findUnique({ where: { outputId } })
@@ -336,7 +417,7 @@ export default defineEventHandler(async (event) => {
         })
       }
 
-      // 5.4 Atualizar Status do Output para exigir nova aprovação
+      // 5.5 Atualizar Status do Output para exigir nova aprovação
       await tx.output.update({
         where: { id: outputId },
         data: {
@@ -345,7 +426,7 @@ export default defineEventHandler(async (event) => {
           status: 'GENERATING' // Mantém/Volta status
         }
       })
-    })
+    }, { timeout: 30000 })
 
     return {
       success: true,

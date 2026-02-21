@@ -4,7 +4,7 @@
  * Body: { taskId, provider, model, temperature? }
  */
 import { setAssignment, getDbProviders } from '../../services/llm/llm-factory'
-import { type LlmTaskId, type LlmProviderId, LLM_TASKS } from '../../constants/llm-registry'
+import { type LlmTaskId, type LlmProviderId, LLM_TASKS } from '../../constants/providers/llm-registry'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)

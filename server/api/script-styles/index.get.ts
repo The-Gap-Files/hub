@@ -1,4 +1,4 @@
-import { getScriptStylesList } from '../../constants/script-styles'
+import { getScriptStylesList } from '../../constants/storytelling/script-styles'
 
 /**
  * GET /api/script-styles

@@ -1,0 +1,160 @@
+{
+  "timestamp": "2026-02-21T12:04:23.970Z",
+  "taskId": "story-architect",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "gemini-3-flash-preview",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Story Architect — Full Video (Plano Narrativo para Vídeo Completo)\n\nVocê é um arquiteto narrativo especializado em vídeos longos investigativos (8-15 minutos).\nSeu trabalho é criar um plano narrativo de alta retenção para um **vídeo completo** —\ndiferente de um teaser, o full video precisa sustentar atenção por toda a duração,\nusando escalação progressiva, midpoints narrativos, e re-engagement hooks.\n\n## 🎬 Modo Série (EP1–EP3) — quando aplicável\n\nÀs vezes o full video é um **episódio** dentro de uma série (EP1, EP2, EP3). Isso é indicado por:\n- `monetizationContext.episodeNumber` **OU**\n- `monetizationContext.angleCategory` começando com `episode-`\n\nQuando estiver em modo série:\n- **NÃO recontar** os mesmos assuntos, revelações, hooks ou key points de episódios anteriores.\n- Se houver no dossiê/notas um bloco `EPISÓDIOS ANTERIORES (NÃO REPETIR)`, trate como **restrição dura**.\n- **Foque no território novo** do episódio, mas mantenha coerência com a premissa da série.\n\nObjetivo por episódio (guia):\n- **EP1**: contextualiza + estabelece universo + primeira grande virada.\n- **EP2**: complica + contradições + midpoint forte + novas evidências.\n- **EP3**: amarra + fecha arcos + implicações + conclusão satisfatória.\n\n## 🎯 Objetivo\n\nCriar o **blueprint completo** que um roteirista vai seguir para escrever o roteiro\ncena-a-cena de um vídeo investigativo/documental longo. Você NÃO escreve o roteiro —\nvocê projeta a ESTRUTURA que maximiza retenção.\n\n## 🎣 BASE DE DADOS DE HOOKS NARRATIVOS\n\nAntes de criar o outline, consulte a base de dados de hooks narrativos curados (`/api/narrative-hooks`). Esta base contém aberturas poderosas de documentários, séries investigativas e vídeos de alta retenção, com análise estrutural.\n\n**COMO USAR A BASE PARA FULL VIDEO:**\n1. **Foco no primeiro minuto:** Consulte hooks tipo `mystery_hook`, `world_building` ou `emotional_impact` que estabelecem mistério sustentado\n2. **Analise estruturas de 3 atos:** Como True Detective ou The Last of Us estabelecem presságio + contexto + ruptura?\n3. **Adapte para longevidade:** Hooks de vídeos virais detonam em 2s; hooks de séries plantam seeds que pagam depois\n4. **Referencie:** Mencione qual hook inspirou sua estratégia de abertura (ex: \"Inspirado na abertura de The Last of Us: presságio científico + jump temporal\")\n\n**🎬 INTERPRETANDO O `hookText`:**\nHooks de **séries/filmes** no banco contém descrições audiovisuais, não narração final:\n- Exemplo: *\"Wide shot: campos solares... um homem cultiva... algo está errado. Seus olhos.\"*\n- **Como usar:** Extraia a progressão (estabelecer mundo → zoom em detalhe → revelação perturbadora)\n- **Para o outline:** Traduza a MECÂNICA: \"Abertura contemplativa do cenário → aproximação gradual → detalhe que transforma paz em ameaça\"\n- Hooks de **vídeos virais testados** geralmente têm texto literal utilizável (ex: \"Você mataria uma criança...\")\n\n**DIFERENÇA CRÍTICA:** Em teasers, o hook é DETONAÇÃO. Em full videos, o hook é IMERSÃO — cria perguntas que só serão respondidas aos 8, 12, 15 minutos.\n\n## 📐 ESTRUTURA OBRIGATÓRIA: A Jornada Imersiva de 6 Passos (YouTube Dark 2026)\n\nEm vez de uma estrutura genérica, o vídeo completo DEVE seguir rigorosamente a **Jornada Imersiva** detalhada na pesquisa de retenção, mapeada para a estrutura de 3 atos:\n\n1.  **A Missão (0:00 - 1:00) | O Gancho Visceral**\n    *   **Objetivo:** Estabelecer o mistério central e a \"Aposta\" (O que está em jogo?).\n    *   **Técnica:** Ruptura imediata (0s) + Pergunta \"impossível\".\n    *   **Mid-Hook (30s):** Reafirmação da promessa para evitar abandono precoce.\n\n2.  **O Contexto (1:00 - 3:00) | Conexão Emocional**\n    *   **Objetivo:** Conectar o mistério a uma emoção universal ou fato histórico. \"Por que se importar *agora*?\"\n    *   **Atenção:** Evite \"Wikipedia dump\". Contexto deve ser tensão, não aula.\n\n3.  **O Plano / A Investigação (Inicio do Ato 2)**\n    *   **Objetivo:** Detalhar os passos que serão tomados. Cria expectativa de progresso.\n    *   **Dinâmica:** \"Vamos analisar as evidências X, Y e Z.\"\n\n4.  **A Progressão \"Roller Coaster\" (O Corpo Principal)**\n    *   **Objetivo:** Série de sucessos e fracassos. Cada pista leva a uma NOVA pergunta (Cliffhanger em Cadeia).\n    *   **Midpoint (50%):** A \"Virada\". Uma evidência muda tudo.\n    *   **Dark Moment (75%):** O beco sem saída. Parece que não haverá resposta.\n\n5.  **O Clímax (A Revelação)**\n    *   **Objetivo:** A teoria mais forte ou a revelação final.\n    *   **Audiovisual:** Máximo impacto. Use a \"Pilha Sonora\" completa aqui.\n\n6.  **A Reflexão (Conclusão)**\n    *   **Objetivo:** Conectar de volta ao espectador. O que isso diz sobre a natureza humana?\n    *   **CTA Orgânico:** Convite para a próxima jornada (Loop de Sessão).\n\n## 🧠 RETENÇÃO — Técnicas Obrigatórias (baseado em dados reais de YouTube Analytics)\n\n### 1. Pattern Interrupts (~a cada 30 segundos / 6 cenas)\nO espectador decide cada ~30 segundos se continua assistindo. Garanta que o outline\nprevê uma **mudança de estímulo** a cada bloco de 6 cenas:\n- Mudança de localização visual (exterior → interior → close-up de documento)\n- Shift narrativo (fato → pergunta → revelação → dado numérico)\n- Mudança tonal (factual → tenso → reflexivo)\n\n### 2. Re-engagement Hooks (~a cada 3 minutos / 36 cenas)\nCada bloco de ~3 minutos deve terminar com um mini-cliffhanger que puxa o espectador\npara o próximo bloco:\n- \"Mas o que ninguém sabia era que...\"\n- \"E então surgiu um detalhe que mudou tudo.\"\n- Perguntas retóricas que o espectador quer ver respondidas\n\n### 3. Subconscious Loops (Técnica MrBeast)\nAbrir threads narrativas antes de fechá-las. O cérebro precisa da closure:\n- Introduza um fato intrigante no começo do ato 2 → só resolva no ato 3\n- Mencione um documento/evidência → mostre seu conteúdo 2 minutos depois\n\n### 3.1 REGRA DE TRÊS PARA FORESHADOWING (YouTube Retention Research)\nPara cada revelação importante no vídeo, plante EXATAMENTE 3 pistas anteriores:\n- **Pista 1 (~15% do vídeo):** Menção casual, quase imperceptível. O espectador não nota conscientemente.\n- **Pista 2 (~40% do vídeo):** Detalhe que ganha contexto. O espectador atento começa a suspeitar.\n- **Pista 3 (~65% do vídeo):** Evidência direta que prepara a revelação. O espectador sente que \"algo vai acontecer\".\n- **Revelação (~80%):** Payoff. O espectador conecta as 3 pistas retroativamente.\n\nO outline DEVE indicar para cada beat de revelação: quais são as 3 pistas anteriores e em qual beat foram plantadas.\nIsso cria \"ah-ha moments\" que são o driver #1 de compartilhamento e rewatch.\n\n### 4. Stair-Stepping (Escalação Progressiva)\nCada beat DEVE ser mais intenso que o anterior. NÃO pode haver platô narrativo.\nA progressão ideal:\n```\nCurioso → Intrigado → Perplexo → Perturbado → Chocado → Resolvido (ou: Perturbado permanente)\n```\n\n### 5. Value Loop (Técnica Veritasium) — Para cada beat principal:\n1. **Contexto** — O que é (o fato)\n2. **Aplicação** — Como funciona (a mecânica)\n3. **Framing** — Por que importa (a implicação)\n\n### 6. MONTAGEM E ÁUDIO (INTENCIONALIDADE CINEMATOGRÁFICA)\nO roteirista não escreve apenas palavras; ele desenha a experiência audiovisual.\n- **ÁUDIO DISSOCIADO (J-Cut / L-Cut):** Instrua explicitamente quando o áudio de uma cena começa antes (J) ou continua depois (L).\n- **TAGS DE ÁUDIO SSML:** Use `<break time=\"1.5s\" />` e `<prosody rate=\"115%\">` conforme definido no skill `audio-direction-tags.md`.\n- **ENGENHARIA SONORA (Pilha de 5 Camadas):** Instrua o uso de:\n    1. **Sub-Bass (20-80Hz):** Pavor físico, \"Presença\".\n    2. **Média (80-500Hz):** Corpo, ambiente real.\n    3. **Alta (2kHz+):** Textura, metais, sussurros (arrepio).\n    4. **Sweetener:** Assinatura sonora única (ex: som invertido).\n    5. **Espacialidade:** Reverb para coesão.\n- **SILÊNCIO ESTRATÉGICO:** O \"vácuo de som\" antes de revelações visuais é OBRIGATÓRIO. Defina onde ocorre.\n\n### 7. BRAND SAFETY & GORE (CRÍTICO)\n- REPROVADO se usar termos: \"Assassinato\", \"Estupro\", \"Pedofilia\", \"Mutilado\", \"Tripas\".\n- REPROVADO se descrev... [truncated 13691 chars]"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "📋 TEMA: A frieza mecânica da dupla de assassinos mais letal de Nova York + o fim silencioso de uma era de brutalidade mafiosa.\n\n🎨 DIRETRIZES DE IDENTIDADE DO UNIVERSO (WARNING PROTOCOL):\nAtmosfera 'gritty' do Brooklyn nos anos 70 e 80. Foco visual no Gemini Lounge, luzes de neon refletindo em asfalto molhado e carros pretos. Paleta de cores desaturada com acentos em vermelho sangue e ambar de iluminação urbana. Evitar o glamour de 'O Poderoso Chefão'; priorizar a estética suja e industrial de 'Goodfellas' e a frieza do método de desmembramento.\n\n📚 FONTES DO DOSSIÊ (ordenadas por peso/relevância):\n[1] (brief) Brief EP1 (fonte da verdade — episodeBriefBundleV1) [peso: 2]\n📋 TEMA: A industrialização do homicídio e o colapso da era DeMeo através da frieza mecânica dos Gêmeos Gemini.\n📋 TÍTULO DO DOSSIER: Os Gêmeos Gemini: A Morte de Joey Testa e o Terror da Murder Machine\n🎬 EPISODE BRIEF — EP1 (versão: episodeBriefBundleV1)\n🎭 Função narrativa: Estabelecer a origem da dupla, a metodologia da 'Murder Machine' e a ascensão dentro da família Gambino.\n💫 Arco emocional: Da delinquência juvenil à ascensão como técnicos de elite da morte, focando na formação do vínculo inquebrável e na criação de um sistema industrial de extermínio.\n📊 Nível de resolução: none\n\n🌐 FATOS DE BACKGROUND (todos os EPs podem usar)\n1. A história se passa principalmente no Brooklyn, Nova York, entre as décadas de 1970 e 1980. [fonte: [1] 1.1]\n2. Joseph 'Joey' Testa e Anthony Senter eram conhecidos no submundo como os 'Gêmeos Gemini'. [fonte: [1] 1.2]\n3. A equipe operava sob a égide da família Gambino, liderada localmente por Roy DeMeo. [fonte: [1] 2.1]\n4. O 'Método Gemini' foi desenvolvido para garantir que não houvesse corpo, dificultando investigações criminais. [fonte: [1] 2.2]\n5. O Aterro de Fountain Avenue era o destino final para os resíduos biológicos da operação. [fonte: [1] 2.2]\n6. Joseph Testa faleceu em janeiro de 2026, encerrando o ciclo biológico da dupla. [fonte: [2] 1.0]\n\n🔑 FATOS EXCLUSIVOS DO EP1 (somente estes podem ser revelados aqui)\n1. Joseph Testa e Anthony Senter nasceram em 1955 e cresceram em Canarsie, Brooklyn, um enclave com códigos rígidos de omertà. [fonte: [1] 1.2]\n2. Em 1973, Testa teve o pulmão perfurado em uma briga; a retaliação brutal de Senter contra o agressor selou a simbiose da dupla. [fonte: [1] 1.2]\n3. Aos 15 anos, a dupla já possuía extensas fichas criminais por roubo de automóveis, chamando a atenção de Chris Rosenberg. [fonte: [1] 1.3]\n4. O Gemini Lounge, na Flatlands Avenue, servia como centro nevrálgico: bar na frente e instalação de extermínio nos fundos. [fonte: [1] 2.1]\n5. O 'Método Gemini' era um protocolo de sete etapas desenhado como uma linha de montagem para evitar a produção de evidências físicas. [fonte: [1] 2.2]\n6. O apartamento adjacente ao bar, usado para as operações, era apelidado internamente de 'Horror Hotel'. [fonte: [2] 3.1]\n7. O protocolo incluía o uso de uma toalha como 'turbante' para contenção hemorrágica imediata após o disparo inicial. [fonte: [1] 2.2]\n8. Para evitar manchas de sangue em suas roupas, os membros da equipe frequentemente realizavam o procedimento vestindo apenas roupas íntimas. [fonte: [4]]\n9. A estocada cardíaca era um cálculo hidráulico para interromper o bombeamento sanguíneo e facilitar o desmembramento limpo. [fonte: [1] 2.2]\n10. Os corpos eram drenados em banheiras por até 45 minutos antes de serem processados sobre forros de plástico. [fonte: [2] 3.1]\n11. O assassinato de Andrei Katz em 1975 marcou o primeiro uso documentado de um compactador de lixo para destruir registros dentários da vítima. [fonte: [1] 2.3]\n12. O descarte final ocorria no Aterro de Fountain Avenue, utilizando o volume massivo de lixo para ocultar permanentemente os restos. [fonte: [1] 2.2]\n\n🔒 FATOS BLOQUEADOS — guardar para episódios futuros (NÃO REVELAR NESTE EP)\n1. ❌ A execução de Roy DeMeo em 1983 pelos próprios pupilos. [fonte: [1] 3.3]\n2. ❌ O assassinato de Vladimir Reznikov em 1986. [fonte: [1] 4.2]\n3. ❌ A condenação à prisão perpétua em 1989. [fonte: [1] 5.3]\n\n⛔ RESOLUÇÕES PROIBIDAS NESTE EPISÓDIO\n- ❌ Não revelar o assassinato de Roy DeMeo\n- ❌ Não mencionar a transferência para a família Lucchese\n- ❌ Não citar o desfecho judicial de 1989\n\n🪝 GANCHOS ABERTOS SUGERIDOS (perguntas que este EP levanta mas NÃO fecha)\n1. Até onde a eficiência mecânica da dupla os levaria na hierarquia da Máfia?\n2. O 'Método Gemini' seria realmente infalível contra a ciência forense?\n\n🔗 PONTE COM EPISÓDIO ANTERIOR (1 frase máx.)\n\"null\"\n\n🛡️ REGRAS VISUAIS GLOBAIS\n- ❌ Imagens explícitas de desmembramento humano\n- ❌ Close-ups de ferimentos de bala ou facadas\n- ❌ Armas de fogo em disparo direto contra a câmera\n- ❌ Tortura gráfica ou sofrimento explícito de vítimas\n- ❌ Sangue em abundância ou poças de sangue realistas\n- ❌ armas de fogo, rifles, pistolas, munição, gatilho\n- ❌ atirador, execução, assassinato explícito, violência gráfica\n- ❌ sangue, gore, corpos mutilados, tortura explícita\n- ❌ close-up de mãos humanas, close-up de rostos humanos (evitar macro/anatomia)\n- ❌ cenas em sinagogas/templos com ameaça explícita (substituir por artefatos: manifesto, tela, manchete)\n- ❌ símbolos/extremismo contemporâneo em destaque (substituir por “texto recortado/blur”)\n\n🧰 ARTEFATOS VISUAIS PERMITIDOS\n- ✅ Luzes de neon refletindo em asfalto molhado\n- ✅ Recortes de jornais e headlines de época\n- ✅ Documentos judiciais e registros do FBI\n- ✅ Plantas arquitetônicas do Gemini Lounge\n- ✅ Candelabros e lustres clássicos\n- ✅ Sacos plásticos e caixas de papelão genéricas\n- ✅ Ambientes industriais e aterros sanitários sob neblina\n- ✅ documento, decreto, registro, arquivo, dossiê, carimbo, selo de cera\n- ✅ moedas, cofre, livro-caixa, inventário, recibo, contrato\n- ✅ monitor, tela, manifesto (sem arma), headline, recorte de jornal, thread desfocada\n- ✅ mapa, corredor de arquivo, sala de leitura, prateleiras, luz de vela, sombras\n- ✅ silhuetas não-identificáveis sem rosto/mãos em close\n---\n\n\nAnalise o seguinte dossiê e crie o plano narrativo estruturado:\n\n📋 TEMA: A frieza mecânica da dupla de assassinos mais letal de Nova York + o fim silencioso de uma era de brutalidade mafiosa.\n\n🎯 CONTEXTO DE MONETIZAÇÃO — ESTE OUTLINE É BASEADO EM UM ITEM DO PLANO\n\nEste outline deve seguir a direção de um **full video** planejado:\n- **Título planejado:** A Linha de Montagem do Fim | O Terror da Murder Machine\n- **Hook sugerido:** \"No submundo de Nova York, o desaparecimento perfeito não era mágica. Era uma ciência fria, calculada e executada em sete etapas irreversíveis.\"\n  → 🚨 REGRA OBRIGATÓRIA: As 4 variantes em hookVariants DEVEM SEGUIR este gancho. Cada variante (green, moderate, aggressive, lawless) calibra o MESMO conceito em níveis tonais diferentes — NÃO invente um gancho novo. O hook do plano de monetização é a fonte da verdade.\n- **Ângulo narrativo:** Científico: A anatomia do método e a industrialização do desaparecimento (categoria: episode-1)\n- **Série (episódios):** Este full video é um episódio (EP1).\n  → REGRA: Mantenha o foco 100% no ângulo do episódio e trate qualquer bloco \"EPISÓDIOS ANTERIORES (NÃO REPETIR)\" presente em userNotes como RESTRIÇÃO DURA.\n  → Objetivo: explorar TERRITÓRIO NOVO e complementar, sem recontar as mesmas revelações.\n- **REGRA CTA DO EP1 (INEGOCIÁVEL):**\n  → segmentDistribution.cta = 1. SEMPRE 1. Nunca mais que 1 cena de CTA.\n  → O CTA é 1 único bloco no final. O vídeo tem UM único encerramento.\n  → ctaApproach: convidar para EP2 com gancho narrativo. NÃO mencionar \"The Gap Files\" como assinatura — apenas o tease do próximo episódio.\n  → Tom: \"O que aconteceu depois é ainda mais perturbador. [Gancho do EP2]\"\n  → PROIBIDO: mais de 1 bloco de CTA, tagline \"The Gap Files\" repetida, meta-referências (duração, contagem de cenas).\n\n💡 **NOTAS ESTRATÉGICAS DO PLANO DE MONETIZAÇÃO:**\nA estratégia central deste plano é a 'banalidade do mal'. Para blindar o conteúdo contra as diretrizes do YouTube (evitando desmonetização por violência... [truncated 7667 chars]"
+      }
+    ]
+  },
+  "parsed": {
+    "hookStrategy": "In Medias Res + Processo Técnico: Começa descrevendo o resultado final (o vácuo de evidências) para retroceder à engenharia por trás dele. Funciona ao desviar o foco da violência para a lógica.",
+    "hookVariants": [
+      {
+        "level": "green",
+        "hook": "No submundo de Nova York, o desaparecimento perfeito não era mágica. Era uma ciência fria, calculada e executada em sete etapas irreversíveis.",
+        "rationale": "Foca no aspecto técnico e investigativo, removendo qualquer carga de choque imediato."
+      },
+      {
+        "level": "moderate",
+        "hook": "Para os Gêmeos Gemini, a morte não era um ato de paixão. Era um processo industrial de sete etapas, onde o corpo humano era apenas matéria-prima para o desaparecimento.",
+        "rationale": "Introduz a desumanização do processo, criando uma tensão ética sem violar diretrizes."
+      },
+      {
+        "level": "aggressive",
+        "hook": "Você está prestes a entrar no Horror Hotel, onde o crime foi transformado em linha de montagem e cada gota de evidência era eliminada por um cálculo hidráulico cruel.",
+        "rationale": "Usa termos mais fortes como 'Horror Hotel' e 'cruel' para evocar uma atmosfera mais densa e urgente."
+      },
+      {
+        "level": "lawless",
+        "hook": "Eles não apenas eliminavam pessoas; eles as processavam. Conheça a engenharia dos Gêmeos Gemini, os homens que provaram que, com plástico e precisão, qualquer um pode evaporar.",
+        "rationale": "Explora o limite da desumanização ao tratar pessoas como objetos de processamento técnico."
+      }
+    ],
+    "promiseSetup": "Nos próximos 12 minutos, vamos dissecar a anatomia da 'Murder Machine' e entender como dois jovens do Brooklyn criaram o protocolo de extermínio mais eficiente da história do crime organizado.",
+    "risingBeats": [
+      {
+        "order": 1,
+        "revelation": "Joseph Testa e Anthony Senter formaram um vínculo inquebrável após uma retaliação brutal em 1973, selando sua simbiose criminosa.",
+        "questionAnswered": "A origem da dupla em Canarsie.",
+        "newQuestion": "Como essa amizade se transformou em uma ferramenta de trabalho para a Máfia?",
+        "sourceReference": "[1] 1.2"
+      },
+      {
+        "order": 2,
+        "revelation": "A eficiência da dupla no roubo de automóveis atraiu Roy DeMeo, que viu neles os técnicos ideais para sua nova 'Murder Machine'.",
+        "questionAnswered": "Como eles chamaram a atenção dos Gambino.",
+        "newQuestion": "Qual era a infraestrutura necessária para manter esse volume de operações em segredo?",
+        "sourceReference": "[1] 1.3, 2.1"
+      },
+      {
+        "order": 3,
+        "revelation": "O Gemini Lounge escondia o 'Horror Hotel', um apartamento adjacente configurado exclusivamente para o processamento de resíduos biológicos.",
+        "questionAnswered": "A estrutura do centro de operações.",
+        "newQuestion": "Qual era a lógica científica por trás do 'turbante' e da 'estocada'?",
+        "sourceReference": "[2] 3.1"
+      },
+      {
+        "order": 4,
+        "revelation": "O uso de toalhas como turbantes e a estocada cardíaca não eram sadismo, mas cálculos hidráulicos para interromper o fluxo sanguíneo e evitar sujeira. (MIDPOINT)",
+        "questionAnswered": "A primeira fase do protocolo de extermínio.",
+        "newQuestion": "O que aconteceu quando o método foi testado contra um alvo que possuía registros dentários? (MIDPOINT)",
+        "sourceReference": "[1] 2.2"
+      },
+      {
+        "order": 5,
+        "revelation": "O caso Andrei Katz em 1975 introduziu o uso do compactador de lixo para destruir dentes e ossos, garantindo o anonimato total dos restos.",
+        "questionAnswered": "A evolução do método para destruir evidências físicas complexas.",
+        "newQuestion": "Como eles garantiam que nada sobraria após o desmembramento?",
+        "sourceReference": "[1] 2.3"
+      },
+      {
+        "order": 6,
+        "revelation": "A equipe operava frequentemente em roupas íntimas para evitar contaminação e utilizava banheiras para drenagem completa antes da fragmentação sobre plásticos.",
+        "questionAnswered": "A logística de limpeza e drenagem.",
+        "newQuestion": "Qual o destino final de toda essa operação industrial? (ALL IS LOST)",
+        "sourceReference": "[2] 3.1, [4]"
+      }
+    ],
+    "climaxMoment": "A revelação de que o Método Gemini não era apenas para esconder corpos, mas uma ferramenta de gestão logística que transformou o homicídio em uma commodity burocrática da Máfia.",
+    "climaxFormula": "Pattern Recognition (A transição do crime passional para o crime industrial)",
+    "resolutionPoints": [
+      "A simbiose entre Testa e Senter nasceu de um ato de retaliação brutal em 1973.",
+      "O Gemini Lounge e o Horror Hotel foram projetados como uma instalação industrial de extermínio.",
+      "O Método Gemini consistia em 7 etapas focadas na contenção hemorrágica e drenagem biológica.",
+      "O uso do compactador de lixo em 1975 marcou a transição para a destruição total de registros físicos.",
+      "O Aterro de Fountain Avenue serviu como o destino final indetectável para centenas de operações."
+    ],
+    "resolutionAngle": "A história dos Gêmeos Gemini nos obriga a encarar a 'banalidade do mal' em sua forma mais técnica: quando o ato final deixa de ser um crime e passa a ser apenas uma questão de gerenciamento de resíduos.",
+    "ctaApproach": "O que aconteceu depois é ainda mais perturbador. Com a máquina de extermínio operando em plena capacidade, a lealdade da dupla seria testada pelo próprio homem que os criou. No próximo episódio: A Queda do Criador.",
+    "emotionalArc": "Curiosidade (O mistério do desaparecimento) → Intrigado (A formação da dupla) → Desconforto (A frieza do método) → Perplexidade (A escala industrial) → Reflexão (A banalidade do mal burocratizado).",
+    "toneProgression": "Analítico → Tenso → Clínico → Industrial → Reflexivo.",
+    "whatToReveal": [
+      "O Método Gemini de 7 etapas.",
+      "O Horror Hotel e o Gemini Lounge.",
+      "A simbiose de 1973.",
+      "O caso Andrei Katz e o compactador de lixo.",
+      "A logística do Aterro de Fountain Avenue."
+    ],
+    "whatToHold": [
+      "A execução de Roy DeMeo em 1983.",
+      "A transferência para a família Lucchese.",
+      "O destino final na prisão perpétua em 1989."
+    ],
+    "whatToIgnore": [
+      "Detalhes anatômicos gráficos de ferimentos.",
+      "Nomes de vítimas além de Andrei Katz (foco no método).",
+      "Discussões sobre a vida pessoal dos assassinos fora do crime."
+    ],
+    "segmentDistribution": {
+      "hook": 9,
+      "context": 22,
+      "rising": 89,
+      "climax": 15,
+      "resolution": 12,
+      "cta": 1
+    },
+    "tensionCurve": [
+      "low",
+      "medium",
+      "high",
+      "pause",
+      "high",
+      "peak",
+      "medium",
+      "high",
+      "pause",
+      "peak"
+    ],
+    "openLoops": [
+      {
+        "question": "Até onde a eficiência mecânica da dupla os levaria na hierarquia da Máfia?",
+        "openedAtBeat": 4,
+        "closedAtBeat": null
+      },
+      {
+        "question": "O Método Gemini seria realmente infalível contra a ciência forense a longo prazo?",
+        "openedAtBeat": 6,
+        "closedAtBeat": null
+      }
+    ],
+    "resolutionLevel": "none",
+    "loopSentence": {
+      "fullSentence": "O desaparecimento perfeito não era mágica. Era uma ciência fria, calculada e executada em sete etapas irreversíveis.",
+      "partA": "O desaparecimento perfeito não era mágica. Era uma ciência fria, calculada e...",
+      "partB": "...executada em sete etapas irreversíveis."
+    }
+  },
+  "rawContent": ""
+}

@@ -427,7 +427,7 @@ describe('Monetization Plan — Creative Direction Integration', () => {
 describe('Constants Catalog', () => {
   it('deve serializar script styles corretamente', async () => {
     // Import dinâmico para evitar problemas de ESM
-    const { getScriptStylesList } = await import('../../../constants/script-styles')
+    const { getScriptStylesList } = await import('../../../constants/storytelling/script-styles')
 
     const styles = getScriptStylesList()
     expect(styles.length).toBeGreaterThanOrEqual(4)
@@ -449,7 +449,7 @@ describe('Constants Catalog', () => {
   })
 
   it('deve serializar visual styles corretamente', async () => {
-    const { getVisualStylesList } = await import('../../../constants/visual-styles')
+    const { getVisualStylesList } = await import('../../../constants/cinematography/visual-styles')
 
     const styles = getVisualStylesList()
     expect(styles.length).toBeGreaterThanOrEqual(6)
@@ -471,7 +471,7 @@ describe('Constants Catalog', () => {
   })
 
   it('deve serializar editorial objectives corretamente', async () => {
-    const { EDITORIAL_OBJECTIVES } = await import('../../../constants/editorial-objectives')
+    const { EDITORIAL_OBJECTIVES } = await import('../../../constants/content/editorial-objectives')
 
     expect(EDITORIAL_OBJECTIVES.length).toBeGreaterThanOrEqual(8)
 

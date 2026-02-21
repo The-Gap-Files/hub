@@ -3,7 +3,7 @@ import { providerManager } from '../../../services/providers'
 import { createImageProvider } from '../../../services/providers'
 import { costLogService } from '../../../services/cost-log.service'
 import { validateMediaPricing, PricingNotConfiguredError, calculateReplicateOutputCost } from '../../../constants/pricing'
-import { getVisualStyleById } from '../../../constants/visual-styles'
+import { getVisualStyleById } from '../../../constants/cinematography/visual-styles'
 import type { ImageGenerationRequest } from '../../../types/ai-providers'
 import { ContentRestrictedError } from '../../../services/providers/image/replicate-image.provider'
 import { GeminiContentFilteredError } from '../../../services/providers/image/gemini-image.provider'
@@ -77,8 +77,11 @@ export default defineEventHandler(async (event) => {
     if (vs.lightingTags) styleAnchorParts.push(vs.lightingTags)
     if (vs.atmosphereTags) styleAnchorParts.push(vs.atmosphereTags)
     if (vs.compositionTags) styleAnchorParts.push(vs.compositionTags)
+    if (vs.colorPalette) styleAnchorParts.push(vs.colorPalette)
+    if (vs.qualityTags) styleAnchorParts.push(vs.qualityTags)
     if (vs.tags) styleAnchorParts.push(vs.tags)
   }
+  const styleNegativePrompt = vs?.negativeTags || undefined
   const styleAnchor = styleAnchorParts.length > 0
     ? `[VISUAL STYLE ANCHOR — ${styleAnchorParts.join(', ')}]`
     : ''
@@ -129,6 +132,7 @@ export default defineEventHandler(async (event) => {
 
     const request: ImageGenerationRequest = {
       prompt: promptToUse,
+      negativePrompt: styleNegativePrompt,
       width,
       height,
       aspectRatio: output.aspectRatio || '16:9',

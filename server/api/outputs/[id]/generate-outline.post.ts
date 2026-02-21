@@ -12,7 +12,7 @@ import { prisma } from '../../../utils/prisma'
 import { generateStoryOutline } from '../../../services/story-architect.service'
 import { costLogService } from '../../../services/cost-log.service'
 import { calculateLLMCost } from '../../../constants/pricing'
-import { getScriptStyleById } from '../../../constants/script-styles'
+import { getScriptStyleById } from '../../../constants/storytelling/script-styles'
 import { mapPersonsFromPrisma, mapNeuralInsightsFromNotes } from '../../../utils/format-intelligence-context'
 import { TeaserMicroBriefV1Schema, formatTeaserMicroBriefV1ForPrompt } from '../../../types/briefing.types'
 import { getOrCreateEpisodeBriefBundleV1ForDossier } from '../../../services/briefing/episode-briefing.service'
@@ -166,8 +166,11 @@ export default defineEventHandler(async (event) => {
         }
         console.log(`[API] ✅ Usando EpisodeBriefBundle EP${episodeNumber} para output ${outputId}`)
       } catch (err) {
-        // Best-effort: se o brief falhar, cai no fallback do dossier bruto com aviso
-        console.warn(`[API] ⚠️ EpisodeBriefBundle indisponível para EP${episodeNumber} — usando dossier bruto. Erro: ${err}`)
+        console.error(`[API] ❌ EpisodeBriefBundle falhou para EP${episodeNumber}. Erro: ${err}`)
+        throw createError({
+          statusCode: 500,
+          message: `Falha ao carregar Episode Brief para EP${episodeNumber}. Corrija o brief do dossiê antes de gerar o outline.`
+        })
       }
     }
 
@@ -186,6 +189,21 @@ export default defineEventHandler(async (event) => {
           type: s.sourceType,
           weight: s.weight ?? 1.0
         })) || [])
+
+    // ── GUARD: Arquiteto NUNCA recebe o dossiê bruto ──────────────────
+    // Somente briefs curados (EpisodeBriefBundle ou MicroBrief) são permitidos.
+    // O dossiê bruto contém fatos de TODOS os episódios e causa spoilers cruzados.
+    const useBrief = !!episodeBriefSource || microBriefParsed.success
+    if (!useBrief) {
+      throw createError({
+        statusCode: 400,
+        message:
+          'O Story Architect requer um brief curado para gerar o plano narrativo. ' +
+          'Para full videos: vincule este output a um episódio (EP1/EP2/EP3) via Plano de Monetização. ' +
+          'Para teasers: gere o Plano de Monetização com micro-briefs antes de gerar o outline. ' +
+          'O dossiê bruto não é mais aceito como fonte do Arquiteto.'
+      })
+    }
 
     // Quando o episode brief está ativo, limpa o contexto bruto para evitar contaminação
     const useEpisodeBrief = !!episodeBriefSource

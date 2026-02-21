@@ -1,4 +1,4 @@
-import { getScriptStylesList } from '../../constants/script-styles'
+import { getScriptStylesList } from '../../constants/storytelling/script-styles'
 
 export default defineEventHandler(() => {
   const styles = getScriptStylesList()

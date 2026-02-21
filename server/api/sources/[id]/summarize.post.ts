@@ -14,7 +14,7 @@ import { SystemMessage, HumanMessage } from '@langchain/core/messages'
 import { costLogService } from '../../../services/cost-log.service'
 import { calculateLLMCost } from '../../../constants/pricing'
 import { createLlmForTask, getAssignment } from '../../../services/llm/llm-factory'
-import type { LlmTaskId } from '../../../constants/llm-registry'
+import type { LlmTaskId } from '../../../constants/providers/llm-registry'
 
 const BodySchema = z.object({
   save: z.boolean().default(false)

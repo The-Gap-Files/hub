@@ -26,7 +26,7 @@ import {
   LLM_PROVIDERS,
   LLM_TASKS,
   isValidLlmConfig
-} from '../../constants/llm-registry'
+} from '../../constants/providers/llm-registry'
 import { prisma } from '../../utils/prisma'
 
 // ─── Tipos ──────────────────────────────────────────────────────

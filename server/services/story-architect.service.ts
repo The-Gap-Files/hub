@@ -927,6 +927,6 @@ ${outline.resolutionLevel ? `
 ━━ NÍVEL DE RESOLUÇÃO: ${outline.resolutionLevel.toUpperCase()} ━━
 ${outline.resolutionLevel === 'none' ? '🚨 RESOLUÇÃO ZERO — Pura provocação. NENHUMA explicação, recap ou conclusão. Corte seco.' : ''}${outline.resolutionLevel === 'partial' ? '🚨 RESOLUÇÃO PARCIAL — Contextualiza mas NÃO fecha. Deixe perguntas sem resposta.' : ''}${outline.resolutionLevel === 'full' ? 'Resolução completa — história fechada com todas as respostas.' : ''}` : ''}
 
-📐 BLUEPRINT DE REFERÊNCIA: A estrutura e ordem dos beats acima são o esqueleto narrativo — siga-os obrigatoriamente. A distribuição de cenas por segmento é uma estimativa: escreva tantas cenas quantas o conteúdo justificar com qualidade em cada segmento. Não force cenas para atingir o número planejado se o material do segmento já foi coberto.`
+📐 BLUEPRINT DE REFERÊNCIA: A estrutura e ordem dos beats acima são o esqueleto narrativo — siga-os obrigatoriamente. A distribuição de cenas por segmento é o ALVO — mire nela. Se os fatos do dossiê não preenchem todas as cenas de um segmento, use LICENÇA CRIATIVA: crie dramatizações, diálogos ficcionais entre personagens, reconstruções históricas plausíveis e pontes narrativas para sustentar a contagem. O mínimo absoluto de cenas é INEGOCIÁVEL.`
 }
 

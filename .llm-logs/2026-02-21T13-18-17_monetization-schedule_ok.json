@@ -1,0 +1,116 @@
+{
+  "timestamp": "2026-02-21T13:18:17.800Z",
+  "taskId": "monetization-schedule",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "gemini-3-flash-preview",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Monetization — Publication Schedule Generator\r\n\r\nVocê é um estrategista de publicação de conteúdo. Nesta etapa, você vai criar o cronograma de publicação ideal para maximizar alcance e engajamento.\r\n\r\n## 🎯 Contexto\r\n\r\nVocê recebe:\r\n- O Full Video e todos os teasers já gerados\r\n- As plataformas de cada teaser\r\n- A quantidade total de itens\r\n\r\n## 📐 O QUE PRODUZIR\r\n\r\nUm array de `publicationSchedule` com:\r\n- **dayOfWeek**: Dia da semana (ex: \"Segunda\", \"Terça\")\r\n- **content**: O que publicar (ex: \"Full Video no YouTube\", \"Teaser 1 (Gateway) - YouTube Shorts\")\r\n- **platform**: Plataforma alvo\r\n- **notes**: Notas sobre timing (opcional)\r\n\r\n## 🚨 REGRAS\r\n\r\n1. **Full Video PRIMEIRO** — sempre publicado antes dos teasers\r\n2. **1 teaser por dia** (ou 2 se >10 teasers)\r\n3. **Plataforma fixa (YouTube-first)**:\r\n   - Full Video: **YouTube**\r\n   - Teasers: **YouTube Shorts**\r\n4. **Gateway logo após o Full Video** — é a porta de entrada (primeiro Short do pacote)\r\n5. **Hook-only no final** — são os \"lembretes virais\" (alta repetição e replay)\r\n6. **Para 10+ teasers**, distribuir em 2 semanas\r\n7. **Evitar fins de semana** para o Full Video (melhor performance seg-qui)"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "\n\nCrie o cronograma de publicação para:\n\nFull Video EP1: \"A Ciência da Eliminação | O Método Industrial dos Gêmeos Gemini\" (YouTube)\nFull Video EP2: \"A Traição Suprema | O Fim de Roy DeMeo e a Ascensão dos Gêmeos Gemini\" (YouTube)\nFull Video EP3: \"O Silêncio da Máquina | O Fim de Joey Testa e o Legado de Sangue dos Gemini\" (YouTube)\nTeaser 1 [gateway]: \"A Máquina de Matar do Brooklyn\" (YouTube Shorts)\nTeaser 2 [deep-dive]: \"O Protocolo de 7 Etapas\" (YouTube Shorts)\nTeaser 3 [deep-dive]: \"O Lucro do Sangue\" (YouTube Shorts)\nTeaser 4 [deep-dive]: \"O Último Guardião do Silêncio\" (YouTube Shorts)\nTeaser 5 [deep-dive]: \"Conexão Brighton Beach\" (YouTube Shorts)\nTeaser 6 [deep-dive]: \"Justiça Sem Vestígios\" (YouTube Shorts)\nTeaser 7 [deep-dive]: \"O Cemitério de Detritos\" (YouTube Shorts)\nTeaser 8 [deep-dive]: \"A Redenção do Matadouro\" (YouTube Shorts)\nTeaser 9 [hook-only]: \"Onde o perdão esconde um matadouro\" (YouTube Shorts)\nTeaser 10 [hook-only]: \"O Cadillac preto e o preço da traição\" (YouTube Shorts)\nTeaser 11 [hook-only]: \"Horror Hotel: Onde o rastro terminava\" (YouTube Shorts)\nTeaser 12 [hook-only]: \"2026: O fim do silêncio de Joseph Testa\" (YouTube Shorts)\n\nRetorne um JSON com campo \"schedule\" contendo o cronograma."
+      }
+    ]
+  },
+  "parsed": {
+    "schedule": [
+      {
+        "platform": "YouTube",
+        "notes": "Lançamento principal do primeiro episódio. Horário nobre (18h-20h).",
+        "content": "Full Video EP1: \"A Ciência da Eliminação | O Método Industrial dos Gêmeos Gemini\"",
+        "dayOfWeek": "Segunda (Semana 1)"
+      },
+      {
+        "content": "Teaser 1 [gateway]: \"A Máquina de Matar do Brooklyn\"",
+        "dayOfWeek": "Terça (Semana 1)",
+        "notes": "Gateway: Porta de entrada para atrair novos espectadores para o EP1.",
+        "platform": "YouTube Shorts"
+      },
+      {
+        "platform": "YouTube Shorts",
+        "notes": "Deep-dive: Detalhe técnico para aumentar a retenção.",
+        "dayOfWeek": "Terça (Semana 1)",
+        "content": "Teaser 2 [deep-dive]: \"O Protocolo de 7 Etapas\""
+      },
+      {
+        "dayOfWeek": "Quarta (Semana 1)",
+        "content": "Full Video EP2: \"A Traição Suprema | O Fim de Roy DeMeo e a Ascensão dos Gêmeos Gemini\"",
+        "platform": "YouTube",
+        "notes": "Continuação da série. Publicação estratégica no meio da semana."
+      },
+      {
+        "content": "Teaser 3 [deep-dive]: \"O Lucro do Sangue\"",
+        "dayOfWeek": "Quinta (Semana 1)",
+        "notes": "Foco na economia do crime abordada no EP2.",
+        "platform": "YouTube Shorts"
+      },
+      {
+        "platform": "YouTube Shorts",
+        "notes": "Gancho de personagem para o EP2.",
+        "dayOfWeek": "Quinta (Semana 1)",
+        "content": "Teaser 4 [deep-dive]: \"O Último Guardião do Silêncio\""
+      },
+      {
+        "notes": "Expansão do universo narrativo antes do final de semana.",
+        "platform": "YouTube Shorts",
+        "content": "Teaser 5 [deep-dive]: \"Conexão Brighton Beach\"",
+        "dayOfWeek": "Sexta (Semana 1)"
+      },
+      {
+        "notes": "Reforço de autoridade sobre o método Gemini.",
+        "platform": "YouTube Shorts",
+        "content": "Teaser 6 [deep-dive]: \"Justiça Sem Vestígios\"",
+        "dayOfWeek": "Sexta (Semana 1)"
+      },
+      {
+        "platform": "YouTube",
+        "notes": "Grand Finale da trilogia. Publicação para dominar a semana.",
+        "content": "Full Video EP3: \"O Silêncio da Máquina | O Fim de Joey Testa e o Legado de Sangue dos Gemini\"",
+        "dayOfWeek": "Segunda (Semana 2)"
+      },
+      {
+        "content": "Teaser 7 [deep-dive]: \"O Cemitério de Detritos\"",
+        "dayOfWeek": "Terça (Semana 2)",
+        "platform": "YouTube Shorts",
+        "notes": "Aprofundamento em um dos locais icônicos do EP3."
+      },
+      {
+        "notes": "Conclusão dos arcos de 'deep-dive'.",
+        "platform": "YouTube Shorts",
+        "dayOfWeek": "Terça (Semana 2)",
+        "content": "Teaser 8 [deep-dive]: \"A Redenção do Matadouro\""
+      },
+      {
+        "notes": "Hook-only: Alta curiosidade e potencial de replay.",
+        "platform": "YouTube Shorts",
+        "dayOfWeek": "Quarta (Semana 2)",
+        "content": "Teaser 9 [hook-only]: \"Onde o perdão esconde um matadouro\""
+      },
+      {
+        "content": "Teaser 10 [hook-only]: \"O Cadillac preto e o preço da traição\"",
+        "dayOfWeek": "Quinta (Semana 2)",
+        "platform": "YouTube Shorts",
+        "notes": "Hook-only: Visual e direto."
+      },
+      {
+        "platform": "YouTube Shorts",
+        "notes": "Hook-only: Foco em atmosfera e mistério.",
+        "dayOfWeek": "Sexta (Semana 2)",
+        "content": "Teaser 11 [hook-only]: \"Horror Hotel: Onde o rastro terminava\""
+      },
+      {
+        "notes": "Hook-only final: Lembrança viral e gancho para o futuro do canal.",
+        "platform": "YouTube Shorts",
+        "dayOfWeek": "Sexta (Semana 2)",
+        "content": "Teaser 12 [hook-only]: \"2026: O fim do silêncio de Joseph Testa\""
+      }
+    ]
+  },
+  "rawContent": ""
+}

@@ -17,8 +17,8 @@ import { join } from 'path'
 import { SystemMessage, HumanMessage } from '@langchain/core/messages'
 import { z } from 'zod'
 import { createLlmForTask, getAssignment } from './llm/llm-factory'
-import { getActiveClassifications, type IntelligenceClassificationId } from '../constants/intelligence-classifications'
-import { getVisualStylesList, type VisualStyleId } from '../constants/visual-styles'
+import { getActiveClassifications, type IntelligenceClassificationId } from '../constants/content/intelligence-classifications'
+import { getVisualStylesList, type VisualStyleId } from '../constants/cinematography/visual-styles'
 
 // =============================================================================
 // TIPOS

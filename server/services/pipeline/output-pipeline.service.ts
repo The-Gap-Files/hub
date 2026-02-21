@@ -20,14 +20,14 @@ import type {
   MusicGenerationRequest
 } from '../../types/ai-providers'
 import { prisma } from '../../utils/prisma'
-import { getVisualStyleById } from '../../constants/visual-styles'
-import { getScriptStyleById } from '../../constants/script-styles'
+import { getVisualStyleById } from '../../constants/cinematography/visual-styles'
+import { getScriptStyleById } from '../../constants/storytelling/script-styles'
 import { providerManager } from '../providers'
 import { costLogService } from '../cost-log.service'
 import { formatOutlineForPrompt } from '../story-architect.service'
 import type { StoryOutline } from '../story-architect.service'
 import { validateScript } from '../script-validator.service'
-import { getClassificationById } from '../../constants/intelligence-classifications'
+import { getClassificationById } from '../../constants/content/intelligence-classifications'
 import { validateMediaPricing } from '../../constants/pricing'
 import { mapPersonsFromPrisma, mapNeuralInsightsFromNotes } from '../../utils/format-intelligence-context'
 import fs from 'node:fs/promises'
@@ -203,6 +203,8 @@ export class OutputPipelineService {
       visualLightingTags: output.visualStyle?.lightingTags || undefined,
       visualAtmosphereTags: output.visualStyle?.atmosphereTags || undefined,
       visualCompositionTags: output.visualStyle?.compositionTags || undefined,
+      visualColorPalette: output.visualStyle?.colorPalette || undefined,
+      visualQualityTags: output.visualStyle?.qualityTags || undefined,
       visualGeneralTags: output.visualStyle?.tags || undefined,
 
       // Objetivo Editorial (diretriz narrativa prioritária)
@@ -467,6 +469,8 @@ export class OutputPipelineService {
           if (vs.lightingTags) anchorParts.push(vs.lightingTags)
           if (vs.atmosphereTags) anchorParts.push(vs.atmosphereTags)
           if (vs.compositionTags) anchorParts.push(vs.compositionTags)
+          if (vs.colorPalette) anchorParts.push(vs.colorPalette)
+          if (vs.qualityTags) anchorParts.push(vs.qualityTags)
           if (vs.tags) anchorParts.push(vs.tags)
         }
 
@@ -478,7 +482,7 @@ export class OutputPipelineService {
         }
 
         // Batching: dividir cenas em lotes para evitar truncamento de JSON
-        const FILMMAKER_BATCH_SIZE = 15
+        const FILMMAKER_BATCH_SIZE = 50
         const allInputScenes = scriptResponse.scenes.map(s => ({
           order: 0,
           narration: s.narration,
@@ -516,7 +520,9 @@ export class OutputPipelineService {
               ...original,
               visualDescription: refined.visualDescription || original.visualDescription,
               motionDescription: refined.motionDescription || original.motionDescription,
-              sceneEnvironment: refined.sceneEnvironment || original.sceneEnvironment
+              sceneEnvironment: refined.sceneEnvironment || original.sceneEnvironment,
+              endVisualDescription: refined.endVisualDescription ?? original.endVisualDescription,
+              endImageReferenceWeight: refined.endImageReferenceWeight ?? original.endImageReferenceWeight
             }
           })
           scriptLog.info(`✅ Cineasta refinou todas as ${scriptResponse.scenes.length} cenas com sucesso.`)
@@ -559,10 +565,13 @@ export class OutputPipelineService {
           order: index,
           narration: scene.narration?.trim(),
           visualDescription: scene.visualDescription?.trim(),
+          endVisualDescription: scene.endVisualDescription?.trim() || null,
+          endImageReferenceWeight: scene.endImageReferenceWeight ?? null,
           sceneEnvironment: scene.sceneEnvironment?.trim() || null,
           motionDescription: scene.motionDescription?.trim() || null,
           audioDescription: scene.audioDescription?.trim() || null,
           audioDescriptionVolume: scene.audioDescriptionVolume ?? null,
+          characterRef: (scene as any).characterRef?.trim() || null,
           estimatedDuration: scene.estimatedDuration || 5
         }))
       })
@@ -605,12 +614,6 @@ export class OutputPipelineService {
 
       log.info(`${scenes.length} cenas para gerar imagens.`)
 
-      const CONCURRENCY_LIMIT = 5 // Lotes de 5 para evitar rate-limit/erros da API
-      const sceneChunks = []
-      for (let i = 0; i < scenes.length; i += CONCURRENCY_LIMIT) {
-        sceneChunks.push(scenes.slice(i, i + CONCURRENCY_LIMIT))
-      }
-
       let restrictedCount = 0
       let successCount = 0
       let errorCount = 0
@@ -629,11 +632,15 @@ export class OutputPipelineService {
         if (imgVs.lightingTags) imgAnchorParts.push(imgVs.lightingTags)
         if (imgVs.atmosphereTags) imgAnchorParts.push(imgVs.atmosphereTags)
         if (imgVs.compositionTags) imgAnchorParts.push(imgVs.compositionTags)
+        if (imgVs.colorPalette) imgAnchorParts.push(imgVs.colorPalette)
+        if (imgVs.qualityTags) imgAnchorParts.push(imgVs.qualityTags)
         if (imgVs.tags) imgAnchorParts.push(imgVs.tags)
       }
       const styleAnchor = imgAnchorParts.length > 0
         ? `[VISUAL STYLE ANCHOR — ${imgAnchorParts.join(', ')}]`
         : ''
+      // negativeTags do estilo visual — enviadas como negative_prompt ao modelo de imagem
+      const styleNegativePrompt = imgVs?.negativeTags || undefined
 
       if (styleAnchor) {
         log.info(`🎨 Style Anchor: ${styleAnchor.slice(0, 100)}...`)
@@ -677,60 +684,109 @@ export class OutputPipelineService {
         }
       }
 
-      for (const chunk of sceneChunks) {
-        const results = await Promise.allSettled(chunk.map(async (scene, chunkIndex) => {
-          const absoluteIndex = scenes.indexOf(scene)
+      // ─── Character References: carregar imagens de personagens para consistência visual ───
+      const characterRefMap = new Map<string, Buffer>()
+      const characterRefIds = [...new Set(
+        scenes.filter(s => s.characterRef).map(s => s.characterRef!)
+      )]
+      if (characterRefIds.length > 0) {
+        const refPersons = await prisma.dossierPerson.findMany({
+          where: { id: { in: characterRefIds }, referenceImage: { not: null } },
+          select: { id: true, referenceImage: true }
+        })
+        for (const p of refPersons) {
+          if (p.referenceImage) {
+            characterRefMap.set(p.id, Buffer.from(p.referenceImage))
+          }
+        }
+        log.info(`👤 ${characterRefMap.size}/${characterRefIds.length} referência(s) de personagem carregada(s).`)
+      }
+
+      // ── PROCESSAMENTO SEQUENCIAL COM CONTINUIDADE VISUAL ──
+      // Cenas são processadas uma a uma para permitir que a imagem gerada
+      // da cena anterior sirva como imageReference para a próxima (mesmo ambiente).
+      // Prioridade de referência: customRef > characterRef > previousSceneRef
+      const generatedImageMap = new Map<number, Buffer>()
+
+      for (let absoluteIndex = 0; absoluteIndex < scenes.length; absoluteIndex++) {
+        const scene = scenes[absoluteIndex]!
+        try {
           log.step(`Cena ${absoluteIndex + 1}/${scenes.length}`, `sceneId=${scene.id}`)
 
           const isPortrait = output.aspectRatio === '9:16'
           const width = isPortrait ? 768 : 1344
           const height = isPortrait ? 1344 : 768
 
-          // Montar prompt visual: Style Anchor (safety net) + visualDescription do filmmaker
-          // Continuidade visual e identidade já foram incorporadas pelo filmmaker via Production Awareness
+          // Montar prompt visual: Style Anchor + Visual Continuity (se mesmo ambiente) + visualDescription
           let visualPrompt = scene.visualDescription
+          const prevScene = absoluteIndex > 0 ? scenes[absoluteIndex - 1] : undefined
+          const isSameEnv = prevScene
+            && scene.sceneEnvironment
+            && prevScene.sceneEnvironment
+            && scene.sceneEnvironment === prevScene.sceneEnvironment
 
           if (styleAnchor) {
-            visualPrompt = `${styleAnchor}\n\n${visualPrompt}`
+            if (isSameEnv && prevScene) {
+              const continuityContext = prevScene.visualDescription.slice(0, 300)
+              visualPrompt = `${styleAnchor}\n[VISUAL CONTINUITY — same environment "${scene.sceneEnvironment}": ${continuityContext}]\n\n${visualPrompt}`
+              log.step(`Cena ${absoluteIndex + 1}`, `🔗 Continuity tag injected (env: ${scene.sceneEnvironment})`)
+            } else {
+              visualPrompt = `${styleAnchor}\n\n${visualPrompt}`
+            }
             log.step(`Cena ${absoluteIndex + 1}`, `🎨 Anchor applied${scene.sceneEnvironment ? ` (env: ${scene.sceneEnvironment})` : ''}`)
           }
-
 
           // ── GERAÇÃO DE IMAGEM DA CENA ──
           log.step(`Cena ${absoluteIndex + 1}/${scenes.length}`, `prompt: ${visualPrompt.slice(0, 80)}...`)
 
           // Custom scene: image reference (image-to-image) + creator's image prompt
-          // absoluteIndex é 0-based, maps usam order 1-based
           const sceneOrder = absoluteIndex + 1
           const customRefBuffer = customSceneImageMap.get(sceneOrder)
           const creatorImagePrompt = customScenePromptMap.get(sceneOrder)
 
-          // Se o criador forneceu o prompt original da imagem, incorporar ao prompt visual
           if (creatorImagePrompt) {
             visualPrompt = `${visualPrompt}\n\n[CREATOR IMAGE PROMPT REFERENCE: ${creatorImagePrompt}]`
           }
 
+          // Character reference
+          const charRefBuffer = scene.characterRef
+            ? characterRefMap.get(scene.characterRef)
+            : undefined
+
+          // Previous scene image reference (continuidade visual entre cenas do mesmo ambiente)
+          const prevSceneImageBuffer = isSameEnv ? generatedImageMap.get(absoluteIndex - 1) : undefined
+
+          // Prioridade: customRef > characterRef > previousSceneRef
+          let imageRefConfig: { imageReference: Buffer; imageReferenceWeight: number } | undefined
+          if (customRefBuffer) {
+            imageRefConfig = { imageReference: customRefBuffer, imageReferenceWeight: 0.5 }
+            log.step(`Cena ${absoluteIndex + 1}`, `🎬 Referência visual do criador aplicada (weight: 0.5)`)
+          } else if (charRefBuffer) {
+            imageRefConfig = { imageReference: charRefBuffer, imageReferenceWeight: 0.5 }
+            log.step(`Cena ${absoluteIndex + 1}`, `👤 Referência de personagem aplicada (weight: 0.5, ref: ${scene.characterRef})`)
+          } else if (prevSceneImageBuffer) {
+            imageRefConfig = { imageReference: prevSceneImageBuffer, imageReferenceWeight: 0.4 }
+            log.step(`Cena ${absoluteIndex + 1}`, `🔗 Referência da cena anterior aplicada (weight: 0.4, env: ${scene.sceneEnvironment})`)
+          }
+
           const imageRequest: ImageGenerationRequest = {
             prompt: visualPrompt,
+            negativePrompt: styleNegativePrompt,
             width,
             height,
             aspectRatio: output.aspectRatio || '16:9',
             seed: output.seed?.value,
             numVariants: 1,
-            ...(customRefBuffer ? {
-              imageReference: customRefBuffer,
-              imageReferenceWeight: 0.5
-            } : {})
-          }
-
-          if (customRefBuffer) {
-            log.step(`Cena ${absoluteIndex + 1}`, `🎬 Referência visual do criador aplicada (weight: 0.5)`)
+            ...(imageRefConfig || {})
           }
 
           const imageResponse = await imageProvider.generate(imageRequest)
           const generatedImage = imageResponse.images[0]
 
           if (generatedImage) {
+            // Armazenar imagem para referência da próxima cena
+            generatedImageMap.set(absoluteIndex, Buffer.from(generatedImage.buffer))
+
             await prisma.sceneImage.create({
               data: {
                 sceneId: scene.id,
@@ -757,47 +813,90 @@ export class OutputPipelineService {
               metadata: imageResponse.costInfo.metadata,
               detail: `Scene ${absoluteIndex + 1} - image generation`
             }).catch(() => { })
-          }
-        }))
 
-        // Processar resultados do allSettled
-        for (let i = 0; i < results.length; i++) {
-          const result = results[i]!
-          const scene = chunk[i]!
-          const absoluteIndex = scenes.indexOf(scene)
+            // ── END IMAGE (last_image keyframe) ──
+            if (scene.endVisualDescription) {
+              try {
+                let endVisualPrompt = scene.endVisualDescription
+                if (styleAnchor) endVisualPrompt = `${styleAnchor}\n\n${endVisualPrompt}`
 
-          if (result.status === 'fulfilled') {
-            successCount++
-          } else if (result.status === 'rejected') {
-            const error = (result as PromiseRejectedResult).reason
-            const { ContentRestrictedError } = await import('../providers/image/replicate-image.provider')
-            const { GeminiContentFilteredError } = await import('../providers/image/gemini-image.provider')
-
-            if (error instanceof ContentRestrictedError || error instanceof GeminiContentFilteredError) {
-              restrictedCount++
-              log.warn(`Cena ${absoluteIndex + 1} RESTRITA pelo filtro de conteúdo: ${error.message.slice(0, 100)}`)
-
-              // Marcar a cena como restrita no banco
-              await prisma.scene.update({
-                where: { id: scene.id },
-                data: {
-                  imageStatus: 'restricted',
-                  imageRestrictionReason: error.message
+                const endImageRequest: ImageGenerationRequest = {
+                  prompt: endVisualPrompt,
+                  width,
+                  height,
+                  aspectRatio: output.aspectRatio || '16:9',
+                  seed: output.seed?.value,
+                  numVariants: 1,
+                  imageReference: Buffer.from(generatedImage.buffer),
+                  imageReferenceWeight: scene.endImageReferenceWeight ?? 0.7
                 }
-              })
-            } else {
-              errorCount++
-              log.error(`Cena ${absoluteIndex + 1} falhou (erro não-safety): ${error?.message?.slice(0, 100) || error}`)
 
-              // Marcar como erro genérico
-              await prisma.scene.update({
-                where: { id: scene.id },
-                data: {
-                  imageStatus: 'error',
-                  imageRestrictionReason: error?.message?.slice(0, 500) || 'Unknown error'
+                const endImageResponse = await imageProvider.generate(endImageRequest)
+                const endGenerated = endImageResponse.images[0]
+
+                if (endGenerated) {
+                  await prisma.sceneImage.create({
+                    data: {
+                      sceneId: scene.id,
+                      role: 'end',
+                      provider: imageProvider.getName() as any,
+                      promptUsed: scene.endVisualDescription,
+                      fileData: Buffer.from(endGenerated.buffer) as any,
+                      mimeType: 'image/png',
+                      originalSize: endGenerated.buffer.length,
+                      width: endGenerated.width,
+                      height: endGenerated.height,
+                      isSelected: true,
+                      variantIndex: 0
+                    }
+                  })
+
+                  costLogService.log({
+                    outputId,
+                    resource: 'image',
+                    action: 'create',
+                    provider: endImageResponse.costInfo.provider,
+                    model: endImageResponse.costInfo.model,
+                    cost: endImageResponse.costInfo.cost,
+                    metadata: endImageResponse.costInfo.metadata,
+                    detail: `Scene ${absoluteIndex + 1} - end image (last_image keyframe)`
+                  }).catch(() => { })
+
+                  log.step(`Cena ${absoluteIndex + 1}`, `🎬 End image generated (ref weight: ${scene.endImageReferenceWeight ?? 0.7})`)
                 }
-              })
+              } catch (endErr: any) {
+                log.warn(`Cena ${absoluteIndex + 1} — end image failed (non-blocking): ${endErr?.message?.slice(0, 100)}`)
+              }
             }
+          }
+
+          successCount++
+        } catch (error: any) {
+          const { ContentRestrictedError } = await import('../providers/image/replicate-image.provider')
+          const { GeminiContentFilteredError } = await import('../providers/image/gemini-image.provider')
+
+          if (error instanceof ContentRestrictedError || error instanceof GeminiContentFilteredError) {
+            restrictedCount++
+            log.warn(`Cena ${absoluteIndex + 1} RESTRITA pelo filtro de conteúdo: ${error.message.slice(0, 100)}`)
+
+            await prisma.scene.update({
+              where: { id: scene.id },
+              data: {
+                imageStatus: 'restricted',
+                imageRestrictionReason: error.message
+              }
+            })
+          } else {
+            errorCount++
+            log.error(`Cena ${absoluteIndex + 1} falhou (erro não-safety): ${error?.message?.slice(0, 100) || error}`)
+
+            await prisma.scene.update({
+              where: { id: scene.id },
+              data: {
+                imageStatus: 'error',
+                imageRestrictionReason: error?.message?.slice(0, 500) || 'Unknown error'
+              }
+            })
           }
         }
       }
@@ -1425,6 +1524,9 @@ export class OutputPipelineService {
 
         if (!startImage?.fileData) return
 
+        // Buscar endImage (role='end') — usado como last_image no Wan 2.2
+        const endImage = scene.images.find(img => img.role === 'end')
+
         // Motion prompt: prefere motionDescription (focado em movimento)
         // Fallback: visualDescription (backward-compatible com roteiros antigos)
         const motionPrompt = scene.motionDescription || scene.visualDescription
@@ -1432,9 +1534,14 @@ export class OutputPipelineService {
         const durationSeconds = scene.audioTracks[0]?.duration ?? scene.estimatedDuration ?? 5
         const request: MotionGenerationRequest = {
           imageBuffer: Buffer.from(startImage.fileData!) as any,
+          endImageBuffer: endImage?.fileData ? Buffer.from(endImage.fileData) as any : undefined,
           prompt: motionPrompt,
           duration: durationSeconds,
           aspectRatio: output.aspectRatio || '16:9'
+        }
+
+        if (endImage?.fileData) {
+          console.log(`[OutputPipeline] 🎬 Motion scene ${scene.order + 1} — last_image detected, using start+end frame conditioning`)
         }
 
         console.log(`[OutputPipeline] 🎬 Motion scene ${scene.order + 1} (duration: ${durationSeconds.toFixed(1)}s) prompt: ${motionPrompt.slice(0, 80)}...`)
@@ -1504,6 +1611,9 @@ export class OutputPipelineService {
 
     if (!startImage) throw new Error('Imagem inicial não encontrada')
 
+    // Buscar endImage (role='end') — usado como last_image no Wan 2.2
+    const endImage = scene.images.find(img => img.role === 'end')
+
     // 2. Obter provider de motion
     const motionProvider = providerManager.getMotionProvider()
 
@@ -1523,9 +1633,14 @@ export class OutputPipelineService {
     const durationSeconds = scene.audioTracks[0]?.duration ?? scene.estimatedDuration ?? 5
     const request: MotionGenerationRequest = {
       imageBuffer: Buffer.from(startImage.fileData!) as any,
+      endImageBuffer: endImage?.fileData ? Buffer.from(endImage.fileData) as any : undefined,
       prompt: motionPrompt,
       duration: durationSeconds,
       aspectRatio: output.aspectRatio || '16:9'
+    }
+
+    if (endImage?.fileData) {
+      console.log(`[OutputPipeline] 🎬 Scene ${scene.order + 1} — last_image detected for regeneration`)
     }
 
     console.log(`[OutputPipeline] 🎬 Regenerating motion for scene ${scene.order + 1} (${sceneId}, duration: ${durationSeconds.toFixed(1)}s)`)

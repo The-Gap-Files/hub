@@ -11,7 +11,7 @@
 
 import { prisma } from '../../../utils/prisma'
 import { ReplicateImageProvider } from '../../../services/providers'
-import { getVisualStyleById } from '../../../constants/visual-styles'
+import { getVisualStyleById } from '../../../constants/cinematography/visual-styles'
 import { z } from 'zod'
 
 const requestSchema = z.object({

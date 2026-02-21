@@ -55,6 +55,7 @@ export class ReplicateMotionProvider implements IMotionProvider {
         // Dynamic: build from schema
         const result = buildMotionInput(this.inputSchema, {
           imageBuffer: request.imageBuffer || await fs.readFile(request.imagePath!),
+          endImageBuffer: request.endImageBuffer,
           prompt: request.prompt,
           duration: request.duration,
           aspectRatio: request.aspectRatio,

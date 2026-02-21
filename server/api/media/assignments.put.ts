@@ -4,7 +4,7 @@
  * Body: { taskId, provider, model, extraConfig? }
  */
 import { setMediaAssignment, getMediaProviders } from '../../services/media/media-factory'
-import { MEDIA_TASKS } from '../../constants/media-registry'
+import { MEDIA_TASKS } from '../../constants/providers/media-registry'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)

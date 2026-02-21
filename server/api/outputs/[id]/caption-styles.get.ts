@@ -1,5 +1,5 @@
 import { prisma } from '../../../utils/prisma'
-import { CAPTION_STYLES, getRecommendedStyle, getStylesByPlatform } from '../../../constants/caption-styles'
+import { CAPTION_STYLES, getRecommendedStyle, getStylesByPlatform } from '../../../constants/cinematography/caption-styles'
 
 /**
  * GET /api/outputs/[id]/caption-styles

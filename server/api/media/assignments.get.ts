@@ -2,7 +2,7 @@
  * GET /api/media/assignments — Retorna todos os media assignments + providers + tasks
  */
 import { getAllMediaAssignments, getMediaProviders } from '../../services/media/media-factory'
-import { getMediaTasks } from '../../constants/media-registry'
+import { getMediaTasks } from '../../constants/providers/media-registry'
 
 export default defineEventHandler(async () => {
   const assignments = await getAllMediaAssignments()

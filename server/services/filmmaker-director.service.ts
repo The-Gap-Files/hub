@@ -31,6 +31,8 @@ interface RefinedScene {
   visualDescription: string
   motionDescription: string
   sceneEnvironment?: string
+  endVisualDescription?: string | null
+  endImageReferenceWeight?: number | null
 }
 
 /**
@@ -422,19 +424,21 @@ IMPORTANTE SOBRE QUALIDADE VISUAL E MOVIMENTO:
 - Use gerúndios apenas para elementos dinâmicos de ambiente (poeira, fumaça, chuva, cortinas, chamas, neblina, etc.), nunca para mudanças bruscas de posição de objetos sólidos.
 
 Campos a gerar por cena:
-- visualDescription: prompt completo para gerar a imagem da cena (em inglês, com estilo visual aplicado). Priorize RIQUEZA descritiva (50-120 palavras). Toda visualDescription DEVE incluir: lente + focal length, DOF explícito, fonte física de luz, texturas concretas, tag de realismo. NÃO repita tags do Style Anchor — elas já serão prefixadas automaticamente pelo pipeline. Prompts com poucos detalhes geram imagens genéricas — invista em densidade e especificidade.
+- visualDescription: prompt completo para gerar a imagem INICIAL da cena (em inglês, com estilo visual aplicado). Priorize RIQUEZA descritiva (50-120 palavras). Toda visualDescription DEVE incluir: lente + focal length, DOF explícito, fonte física de luz, texturas concretas, tag de realismo. NÃO repita tags do Style Anchor — elas já serão prefixadas automaticamente pelo pipeline. Prompts com poucos detalhes geram imagens genéricas — invista em densidade e especificidade.
 - motionDescription: descrição técnica do movimento de câmera/sujeito para o modelo de vídeo, explicando claramente como a câmera se move e quais elementos animados existem na cena. PROIBIDO: zoom, handheld, wobble, shake, tremor, truck, fast, quick, rapid, swift.
+- endVisualDescription (OPCIONAL, null se não aplicável): prompt para a imagem FINAL da cena (keyframe de destino). Usado como last_image no modelo de vídeo para melhorar transições. Use quando o movimento de câmera REVELA algo novo ou MUDA significativamente o quadro (push-in, pull-back, rack focus, pan que revela). NÃO use em cenas estáticas ou com breathing camera sutil — nestes casos, null é melhor. Consulte a seção 7 do seu manual para regras detalhadas.
+- endImageReferenceWeight (OPCIONAL, null se endVisualDescription é null): peso de referência (0.0-1.0) entre start e end image. 0.8 = mudança sutil, 0.5 = moderada, 0.3 = drástica.
 
 Retorne APENAS um JSON válido (sem markdown, sem explicações):
 {
   "scenes": [
-    { "order": 0, "visualDescription": "...", "motionDescription": "..." }
+    { "order": 0, "visualDescription": "...", "motionDescription": "...", "endVisualDescription": "..." | null, "endImageReferenceWeight": 0.7 | null }
   ]
 }`
 
     // 4. Chamar o LLM via Factory
     log.info(`Chamando LLM para refinar ${scenes.length} cenas...`)
-    const llm = await createLlmForTask('filmmaker-director', { temperature: 0.6, maxTokens: 32768 })
+    const llm = await createLlmForTask('filmmaker-director', { temperature: 0.6, maxTokens: 50000 })
 
     const response = await llm.invoke([
       new SystemMessage(systemPrompt),

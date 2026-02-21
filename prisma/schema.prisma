@@ -135,6 +135,7 @@ model DossierPerson {
   description       String? /// descrição breve da pessoa e sua relevância
   visualDescription String? /// descrição visual para consistência entre cenas de vídeo
   aliases           String[] /// apelidos, outros nomes conhecidos
+  referenceImage    Bytes? /// imagem de referência gerada pelo Photon Flash para consistência visual entre cenas
   relevance         String   @default("secondary") @db.VarChar(20) /// primary | secondary | mentioned
   order             Int      @default(0)
   createdAt         DateTime @default(now())
@@ -267,6 +268,7 @@ model Scene {
   estimatedDuration      Float        @default(5)
   sceneEnvironment       String?      @db.VarChar(100) /// Identificador de ambiente (ex: "bishop_study", "canal") para agrupamento de continuidade visual
   motionDescription      String? /// Instruções de movimento para i2v (câmera, sujeito, atmosfera dinâmica). Usado no pipeline de motion em vez de visualDescription.
+  characterRef           String? /// ID do DossierPerson para referência visual de personagem nesta cena
   imageStatus            String       @default("pending") @db.VarChar(20) /// pending | generated | restricted | error
   imageRestrictionReason String? /// Razão da restrição pelo filtro de conteúdo
   createdAt              DateTime     @default(now())
@@ -604,4 +606,32 @@ model NewsItem {
   @@index([category])
   @@index([fetchedAt])
   @@map("news_items")
+}
+
+/// Hook narrativo curado para inspirar aberturas poderosas
+/// Base de dados para o narrative-architect consultar e adaptar ao dossiê
+model NarrativeHook {
+  id                   String   @id @default(uuid())
+  type                 String   @db.VarChar(50) // "action_opening" | "mystery_hook" | "intriguing_dialogue" | "emotional_impact" | "world_building" | "tension_opening"
+  sourceType           String   @db.VarChar(50) // "book" | "movie" | "series" | "viral_short" | "other"
+  sourceTitle          String   @db.VarChar(255) // Nome da obra/vídeo
+  genres               String[] // ["thriller", "drama", "sci-fi", ...]
+  hookText             String   @db.Text // O hook original
+  duration             String   @db.VarChar(20) // "curto" | "médio" | "longo" (tempo narrativo)
+  emotionalTemperature String   @db.VarChar(50) // "explosivo" | "tenso" | "melancólico" | "intrigante" | ...
+  tags                 String[] // ["isolamento", "ação", "mistério", "plot twist", ...]
+  structuralPattern    String? // (opcional) Ex: "3 frases curtas + revelação"
+  structuralElements   String[] // (opcional) ["conflito imediato", "pergunta sem resposta", ...]
+  pacing               String?  @db.VarChar(20) // (opcional) "rápido" | "moderado" | "lento"
+  whyItWorks           String?  @db.Text // (opcional) Análise breve do porquê funciona
+  usageCount           Int      @default(0) // Quantas vezes foi usado/consultado
+  isActive             Boolean  @default(true) // Para desativar hooks que não funcionaram bem
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@index([type])
+  @@index([sourceType])
+  @@index([emotionalTemperature])
+  @@index([isActive])
+  @@map("narrative_hooks")
 }

@@ -22,7 +22,7 @@ const PersonItemSchema = z.object({
   name: z.string().describe('Nome completo da pessoa'),
   role: z.string().optional().describe('Papel narrativo: investigador, vítima, suspeito, testemunha, cientista, líder, autor, etc.'),
   description: z.string().describe('Descrição breve da pessoa e sua relevância no contexto do dossiê (1-2 frases)'),
-  visualDescription: z.string().optional().describe('Descrição visual da pessoa para consistência em geração de imagens/vídeos: aparência física, vestimenta típica, expressão, edad aparente. Ex: "Homem caucasiano, 50 anos, cabelo grisalho curto, terno escuro, expressão severa"'),
+  visualDescription: z.string().optional().describe('Descrição visual da pessoa NA ÉPOCA DOS EVENTOS NARRADOS (não como é hoje). Aparência física, idade na época, vestimenta da época, expressão. Se a história se passa nos anos 70 e a pessoa tinha 20 anos, descreva alguém de 20 anos com visual dos anos 70 — NÃO a pessoa idosa de hoje. Ex: "Young caucasian man, early 20s, shaggy brown hair, denim jacket, defiant expression, 1970s style"'),
   aliases: z.array(z.string()).optional().describe('Apelidos, codinomes ou outros nomes pelos quais a pessoa é conhecida'),
   relevance: z.enum(['primary', 'secondary', 'mentioned']).describe('primary = protagonista ou figura central. secondary = papel importante mas não central. mentioned = citado brevemente')
 })
@@ -174,7 +174,7 @@ Identifique todas as pessoas relevantes mencionadas no material:
 - **name**: Nome completo como aparece no material
 - **role**: Papel narrativo (investigador, vítima, suspeito, testemunha, cientista, líder, político, jornalista, etc.)
 - **description**: Quem é esta pessoa e por que é relevante no contexto (1-2 frases)
-- **visualDescription**: Descrição visual da pessoa para geração de imagens/vídeos consistentes. Inclua: aparência física, idade aparente, vestimenta típica, expressão. Ex: "Homem caucasiano, ~50 anos, cabelo grisalho curto, terno escuro, expressão severa"
+- **visualDescription**: Descrição visual da pessoa NA ÉPOCA DOS EVENTOS NARRADOS no dossiê (CRÍTICO: NÃO como a pessoa é hoje). A imagem gerada será usada em cenas do vídeo que retratam os eventos da história. Se os fatos ocorreram nos anos 70 e a pessoa tinha 20 anos na época, descreva alguém de 20 anos com visual e vestimenta dos anos 70. Se a pessoa morreu recentemente com 70 anos mas os crimes foram nos anos 70, a visualDescription deve ser do jovem de 20 anos. SEMPRE em inglês. Inclua: aparência física, idade NA ÉPOCA, vestimenta TÍPICA DA ÉPOCA, expressão. Ex: "Young caucasian man, early 20s, shaggy brown hair, denim jacket, defiant expression, 1970s style"
 - **aliases**: Lista de apelidos, codinomes ou outros nomes conhecidos
 - **relevance**: "primary" (protagonista/figura central), "secondary" (papel importante mas não central), "mentioned" (citado brevemente)
 
@@ -188,7 +188,7 @@ Identifique todas as pessoas relevantes mencionadas no material:
 - NÃO repita informações que já existam nas notas existentes do dossiê
 - NÃO repita pessoas que já foram extraídas anteriormente
 - Priorize descobertas que agreguem valor à produção de conteúdo
-- Para visualDescription, seja específico o suficiente para que um modelo de IA consiga gerar a pessoa consistentemente entre cenas`
+- Para visualDescription: (1) SEMPRE em INGLÊS (será usada como prompt para modelo de imagem), (2) descreva a pessoa NA ÉPOCA DOS EVENTOS do dossiê, NÃO como é hoje, (3) seja específico o suficiente para que um modelo de IA consiga gerar a pessoa consistentemente entre cenas`
 }
 
 // =============================================================================

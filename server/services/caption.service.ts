@@ -33,7 +33,7 @@ import {
   type CaptionEffect,
   CAPTION_STYLES,
   hexToASS
-} from '../constants/caption-styles'
+} from '../constants/cinematography/caption-styles'
 
 // ---------------------------------------------------------------------------
 //  Types

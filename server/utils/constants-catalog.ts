@@ -8,11 +8,11 @@
  * conheça todas as opções disponíveis e possa escolher ou sugerir novas.
  */
 
-import { getScriptStylesList } from '../constants/script-styles'
-import { getVisualStylesList } from '../constants/visual-styles'
-import { EDITORIAL_OBJECTIVES } from '../constants/editorial-objectives'
-import { NARRATIVE_ANGLES } from '../constants/narrative-angles'
-import { NARRATIVE_ROLES, calculateRoleDistribution } from '../constants/narrative-roles'
+import { getScriptStylesList } from '../constants/storytelling/script-styles'
+import { getVisualStylesList } from '../constants/cinematography/visual-styles'
+import { EDITORIAL_OBJECTIVES } from '../constants/content/editorial-objectives'
+import { NARRATIVE_ANGLES } from '../constants/content/narrative-angles'
+import { NARRATIVE_ROLES, calculateRoleDistribution } from '../constants/content/narrative-roles'
 
 /**
  * Serializa todas as constants criativas em formato legível para a LLM.

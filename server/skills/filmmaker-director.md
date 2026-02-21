@@ -334,7 +334,54 @@ motionDescription: "Slow dolly forward toward the empty room."
 
 ---
 
-## 7. Output Format (JSON)
+## 7. Keyframe Final (`endVisualDescription`) — Last Image Conditioning
+
+O pipeline suporta **imagem inicial + imagem final** para cada cena. Quando voce define `endVisualDescription`, o sistema gera uma segunda imagem usada como `last_image` no modelo de video (Wan 2.2), resultando em:
+- **Transicoes mais suaves** entre frames
+- **Menos drift visual** (rostos nao deformam, cenarios nao mudam)
+- **Loops perfeitos** para Shorts virais
+- **Movimentos de camera controlados** (o modelo sabe onde chegar)
+
+### 7.1 Quando Usar (OBRIGATORIO avaliar para cada cena)
+
+| Situacao | Usar endVisualDescription? | endImageReferenceWeight |
+|----------|---------------------------|------------------------|
+| **Push-in** que revela detalhe no final | SIM — descreva o close-up final | 0.6-0.7 (moderado) |
+| **Pull-back** que revela contexto amplo | SIM — descreva o wide shot final | 0.5-0.6 (moderado) |
+| **Rack focus** com mudanca de plano focal | SIM — descreva o que fica em foco no final | 0.7-0.8 (sutil) |
+| **Pan lateral** que revela novo elemento | SIM — descreva o quadro final com elemento revelado | 0.5-0.6 |
+| **Static locked-off** sem mudanca visual | NAO — null. O modelo gera melhor sem constraining | - |
+| **Breathing camera** sutil | NAO — null. Movimento imperceptivel nao precisa de destino | - |
+| **Mudanca de iluminacao** na cena | SIM — descreva o mesmo quadro com a nova luz | 0.7-0.8 |
+| **Loop viral** (ultimo frame = primeiro) | SIM — copie o visualDescription | 0.9 (quase identico) |
+
+### 7.2 Regras de Escrita do endVisualDescription
+
+1. **Mesmo universo visual:** Mantenha os mesmos materiais, texturas, periodo historico, paleta.
+2. **Mude apenas o que o movimento justifica:** Se e push-in, o endVisual e um close-up do mesmo cenario. Se e pan, e o que aparece depois do pan.
+3. **Mantenha parametros tecnicos:** Lente, DOF, tag de realismo devem ser coerentes (a lente pode mudar se for rack focus).
+4. **Densidade igual:** O endVisualDescription deve ter a mesma riqueza descritiva que o visualDescription principal (50-120 palavras).
+5. **NAO repita o visualDescription inteiro** — descreva apenas o que MUDA. Se 70% do quadro e igual, foque nos 30% diferentes.
+
+### 7.3 Exemplos
+
+**Push-in (Tensao):**
+```
+visualDescription: "35mm lens, medium shot, deep focus. Dark basement corridor, single tungsten bulb casting harsh downward shadows on heavy wooden door..."
+endVisualDescription: "50mm lens, medium close-up, shallow depth of field. Same basement door now filling the frame, scratched paint texture visible in detail, rusted handle catching the harsh tungsten light, keyhole center-frame, darkness beyond..."
+endImageReferenceWeight: 0.65
+```
+
+**Loop viral (Hook Only):**
+```
+visualDescription: "24mm wide lens, deep focus. Abandoned hospital hallway, flickering fluorescent..."
+endVisualDescription: "24mm wide lens, deep focus. Abandoned hospital hallway, flickering fluorescent..." // IDENTICO = loop perfeito
+endImageReferenceWeight: 0.9
+```
+
+---
+
+## 8. Output Format (JSON)
 Retorne apenas o JSON com os campos aprimorados.
 
 ```json
@@ -343,10 +390,12 @@ Retorne apenas o JSON com os campos aprimorados.
     {
       "order": 0,
       "visualDescription": "...",
-      "motionDescription": "..."
+      "motionDescription": "...",
+      "endVisualDescription": "..." | null,
+      "endImageReferenceWeight": 0.7 | null
     }
   ]
 }
 ```
 
-O campo obrigatorio e `scenes`, contendo a lista de cenas refinadas.
+O campo obrigatorio e `scenes`, contendo a lista de cenas refinadas. `endVisualDescription` e `endImageReferenceWeight` sao opcionais — use null quando a cena nao precisa de keyframe final.

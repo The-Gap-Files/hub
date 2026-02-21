@@ -44,6 +44,8 @@ export interface ScriptGenerationRequest {
   visualLightingTags?: string
   visualAtmosphereTags?: string
   visualCompositionTags?: string
+  visualColorPalette?: string
+  visualQualityTags?: string
   visualGeneralTags?: string
 
   // Fontes unificadas (arquitetura flat/democratizada — todas as fontes são tratadas igualmente)
@@ -113,10 +115,13 @@ export interface ScriptScene {
   order: number
   narration: string
   visualDescription: string
+  endVisualDescription?: string | null // Descrição visual do FINAL da cena (keyframe final para last_image no Wan 2.2)
+  endImageReferenceWeight?: number | null // Peso (0.0-1.0) da start image como referência para gerar end image
   sceneEnvironment?: string // Identificador do ambiente (ex: "bishop_study", "canal_dawn") para continuidade visual
   motionDescription?: string // Instruções de movimento para i2v (câmera, sujeito, atmosfera dinâmica)
   audioDescription?: string // Descrição de SFX ou atmosfera sonora
   audioDescriptionVolume?: number // Volume do SFX em dB para mixagem (-24 a -6, default -12)
+  characterRef?: string | null // ID do DossierPerson para referência visual de personagem
   estimatedDuration: number // em segundos
 }
 
@@ -281,6 +286,7 @@ export interface IImageGenerator {
 export interface MotionGenerationRequest {
   imagePath?: string // Caminho local ou URL da imagem de origem (deprecated)
   imageBuffer?: Buffer // Buffer da imagem (preferido)
+  endImageBuffer?: Buffer // Buffer da imagem final (last_image para Wan 2.2 — keyframe final)
   duration?: number // Duração desejada (2-4s geralmente)
   motionBucketId?: number // Intensidade do movimento (1-255, default 127)
   noiseAugStrength?: number // Fidelidade à imagem (0-1, default 0.1)

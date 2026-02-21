@@ -136,7 +136,7 @@ export default defineEventHandler(async (event) => {
     return {
       success: true,
       notes: createdNotes,
-      persons: createdPersons,
+      persons: createdPersons.map(p => ({ ...p, hasReferenceImage: false })),
       count: createdNotes.length,
       personsCount: createdPersons.length,
       cleared: clearExisting,

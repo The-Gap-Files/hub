@@ -42,13 +42,14 @@ export const EpisodeBriefSchema = z.object({
    * Fatos EXCLUSIVOS deste episódio — o que este EP pode revelar.
    * São selecionados do dossier bruto e curados para o escopo narrativo deste EP.
    */
-  exclusiveFacts: z.array(BriefFactSchema).min(10).max(40),
+  exclusiveFacts: z.array(BriefFactSchema).min(15).max(50),
 
   /**
    * Fatos que este episódio DEVE GUARDAR para os próximos.
    * O Story Architect e o roteirista NÃO devem revelar estes fatos aqui.
+   * EP3 pode ter 0 holdbacks (revela tudo — é o desfecho).
    */
-  holdbackFacts: z.array(BriefFactSchema).min(3).max(20),
+  holdbackFacts: z.array(BriefFactSchema).min(0).max(20),
 
   /**
    * Perguntas abertas que este episódio levanta mas não fecha.
@@ -59,14 +60,15 @@ export const EpisodeBriefSchema = z.object({
   /**
    * O que este episódio PROIBIDO de resolver.
    * Evita que o roteirista queime revelações de episódios futuros.
+   * EP3 pode ter 0 (desfecho — nada proibido de resolver).
    */
-  forbiddenResolutions: z.array(z.string().min(5).max(200)).min(2).max(10),
+  forbiddenResolutions: z.array(z.string().min(5).max(200)).min(0).max(10),
 
   /**
    * Frase de conexão com o episódio anterior (máximo 1 frase).
-   * null para EP1 (sem episódio anterior).
+   * null ou string vazia para EP1 (sem episódio anterior).
    */
-  previousEpisodeBridge: z.string().min(5).max(300).nullable(),
+  previousEpisodeBridge: z.string().max(300).nullable(),
 })
 
 export type EpisodeBrief = z.infer<typeof EpisodeBriefSchema>
@@ -183,16 +185,20 @@ export function formatEpisodeBriefForPrompt(
     lines.push(`${i + 1}. ${fact.text}${ref}`)
   })
 
-  // Fatos proibidos de revelar
-  lines.push(`\n🔒 FATOS BLOQUEADOS — guardar para episódios futuros (NÃO REVELAR NESTE EP)`)
-  ep.holdbackFacts.forEach((fact, i) => {
-    const ref = fact.sourceRef ? ` [fonte: ${fact.sourceRef}]` : ''
-    lines.push(`${i + 1}. ❌ ${fact.text}${ref}`)
-  })
+  // Fatos proibidos de revelar (EP3 pode ter 0 — revela tudo)
+  if (ep.holdbackFacts.length > 0) {
+    lines.push(`\n🔒 FATOS BLOQUEADOS — guardar para episódios futuros (NÃO REVELAR NESTE EP)`)
+    ep.holdbackFacts.forEach((fact, i) => {
+      const ref = fact.sourceRef ? ` [fonte: ${fact.sourceRef}]` : ''
+      lines.push(`${i + 1}. ❌ ${fact.text}${ref}`)
+    })
+  }
 
-  // Resoluções proibidas
-  lines.push(`\n⛔ RESOLUÇÕES PROIBIDAS NESTE EPISÓDIO`)
-  ep.forbiddenResolutions.forEach(r => lines.push(`- ❌ ${r}`))
+  // Resoluções proibidas (EP3 pode ter 0 — desfecho sem restrições)
+  if (ep.forbiddenResolutions.length > 0) {
+    lines.push(`\n⛔ RESOLUÇÕES PROIBIDAS NESTE EPISÓDIO`)
+    ep.forbiddenResolutions.forEach(r => lines.push(`- ❌ ${r}`))
+  }
 
   // Ganchos sugeridos
   lines.push(`\n🪝 GANCHOS ABERTOS SUGERIDOS (perguntas que este EP levanta mas NÃO fecha)`)

@@ -1,7 +1,7 @@
 import { prisma } from '../../../utils/prisma'
-import { getScriptStyleById } from '../../../constants/script-styles'
-import { getEditorialObjectiveById } from '../../../constants/editorial-objectives'
-import { getVisualStyleById } from '../../../constants/visual-styles'
+import { getScriptStyleById } from '../../../constants/storytelling/script-styles'
+import { getEditorialObjectiveById } from '../../../constants/content/editorial-objectives'
+import { getVisualStyleById } from '../../../constants/cinematography/visual-styles'
 
 type PackageCreateResponse = {
   success: true

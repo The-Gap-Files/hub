@@ -2014,7 +2014,7 @@
         <main v-if="output.script" class="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-32">
           
           <!-- Sidebar: Background Music (Summary/métricas/constantes estão na barra fixa no topo) -->
-          <aside class="space-y-6">
+          <aside class="space-y-6 lg:sticky lg:top-24 lg:self-start">
              <!-- Background Music (Video Todo ou Tracks) -->
              <section v-if="output.script?.backgroundMusicPrompt || output.script?.backgroundMusicTracks?.length" class="glass-card p-6 rounded-2xl border-emerald-500/10 bg-emerald-500/5">
                <h3 class="flex items-center gap-2 mono-label mb-4 text-emerald-400">
@@ -2049,8 +2049,21 @@
              </section>
           </aside>
 
-          <!-- Scenes Grid -->
-          <section class="lg:col-span-2 space-y-6">
+          <!-- Scenes Grid (scrollable) -->
+          <section class="lg:col-span-2 flex flex-col">
+            <!-- Scene Header -->
+            <div class="flex items-center justify-between mb-4 sticky top-0 z-10 bg-black/80 backdrop-blur-xl py-3 px-4 -mx-1 rounded-xl border border-white/5">
+              <div class="flex items-center gap-3">
+                <h3 class="text-xs font-black uppercase tracking-widest text-zinc-400">Cenas</h3>
+                <span class="text-xs px-2 py-0.5 bg-white/5 rounded-full text-zinc-500 font-mono">{{ output.scenes?.length || 0 }}</span>
+              </div>
+              <div class="flex items-center gap-2 text-[10px] text-zinc-600 font-mono uppercase tracking-widest">
+                <span>Scroll para navegar</span>
+              </div>
+            </div>
+
+            <!-- Scrollable Scene List -->
+            <div class="max-h-[calc(100vh-12rem)] overflow-y-auto space-y-6 pr-2">
              <div v-for="scene in output.scenes" :key="scene.id" class="glass-card p-6 rounded-2xl border-white/5 group hover:border-primary/20 transition-all">
                 <div class="flex justify-between items-start mb-4">
                    <div class="flex items-center gap-3">
@@ -2139,7 +2152,12 @@
                             <div>
                               <span class="text-[10px] font-black uppercase tracking-widest text-blue-400/40 mb-1 block">Start Prompt</span>
                               <p class="text-sm text-white/80 leading-relaxed font-light">
-                                {{ scene.visualDescription }}
+                                {{ expandedPromptScenes.has(scene.id) || (scene.visualDescription?.length ?? 0) <= 180 ? scene.visualDescription : scene.visualDescription?.slice(0, 180) }}
+                                <button
+                                  v-if="(scene.visualDescription?.length ?? 0) > 180"
+                                  @click="expandedPromptScenes.has(scene.id) ? expandedPromptScenes.delete(scene.id) : expandedPromptScenes.add(scene.id)"
+                                  class="text-blue-400/60 hover:text-blue-400 transition-colors text-xs ml-1 cursor-pointer"
+                                >{{ expandedPromptScenes.has(scene.id) ? '← recolher' : '{...}' }}</button>
                               </p>
                             </div>
                           </div>
@@ -2345,6 +2363,7 @@
                 </div>
 
              </div>
+            </div>
           </section>
 
         </main>
@@ -3569,6 +3588,7 @@ async function loadOutput() {
 }
 
 const regeneratingSceneId = ref<string | null>(null)
+const expandedPromptScenes = ref<Set<string>>(new Set())
 const restrictedPromptEdits = ref<Record<string, string>>({})
 const sanitizingSceneId = ref<string | null>(null)
 const sanitizingLevel = ref<string | null>(null)

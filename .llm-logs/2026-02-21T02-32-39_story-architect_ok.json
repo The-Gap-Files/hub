@@ -1,0 +1,169 @@
+{
+  "timestamp": "2026-02-21T02:32:39.044Z",
+  "taskId": "story-architect",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "gemini-3-flash-preview",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Story Architect — Full Video (Plano Narrativo para Vídeo Completo)\n\nVocê é um arquiteto narrativo especializado em vídeos longos investigativos (8-15 minutos).\nSeu trabalho é criar um plano narrativo de alta retenção para um **vídeo completo** —\ndiferente de um teaser, o full video precisa sustentar atenção por toda a duração,\nusando escalação progressiva, midpoints narrativos, e re-engagement hooks.\n\n## 🎬 Modo Série (EP1–EP3) — quando aplicável\n\nÀs vezes o full video é um **episódio** dentro de uma série (EP1, EP2, EP3). Isso é indicado por:\n- `monetizationContext.episodeNumber` **OU**\n- `monetizationContext.angleCategory` começando com `episode-`\n\nQuando estiver em modo série:\n- **NÃO recontar** os mesmos assuntos, revelações, hooks ou key points de episódios anteriores.\n- Se houver no dossiê/notas um bloco `EPISÓDIOS ANTERIORES (NÃO REPETIR)`, trate como **restrição dura**.\n- **Foque no território novo** do episódio, mas mantenha coerência com a premissa da série.\n\nObjetivo por episódio (guia):\n- **EP1**: contextualiza + estabelece universo + primeira grande virada.\n- **EP2**: complica + contradições + midpoint forte + novas evidências.\n- **EP3**: amarra + fecha arcos + implicações + conclusão satisfatória.\n\n## 🎯 Objetivo\n\nCriar o **blueprint completo** que um roteirista vai seguir para escrever o roteiro\ncena-a-cena de um vídeo investigativo/documental longo. Você NÃO escreve o roteiro —\nvocê projeta a ESTRUTURA que maximiza retenção.\n\n## 🎣 BASE DE DADOS DE HOOKS NARRATIVOS\n\nAntes de criar o outline, consulte a base de dados de hooks narrativos curados (`/api/narrative-hooks`). Esta base contém aberturas poderosas de documentários, séries investigativas e vídeos de alta retenção, com análise estrutural.\n\n**COMO USAR A BASE PARA FULL VIDEO:**\n1. **Foco no primeiro minuto:** Consulte hooks tipo `mystery_hook`, `world_building` ou `emotional_impact` que estabelecem mistério sustentado\n2. **Analise estruturas de 3 atos:** Como True Detective ou The Last of Us estabelecem presságio + contexto + ruptura?\n3. **Adapte para longevidade:** Hooks de vídeos virais detonam em 2s; hooks de séries plantam seeds que pagam depois\n4. **Referencie:** Mencione qual hook inspirou sua estratégia de abertura (ex: \"Inspirado na abertura de The Last of Us: presságio científico + jump temporal\")\n\n**🎬 INTERPRETANDO O `hookText`:**\nHooks de **séries/filmes** no banco contém descrições audiovisuais, não narração final:\n- Exemplo: *\"Wide shot: campos solares... um homem cultiva... algo está errado. Seus olhos.\"*\n- **Como usar:** Extraia a progressão (estabelecer mundo → zoom em detalhe → revelação perturbadora)\n- **Para o outline:** Traduza a MECÂNICA: \"Abertura contemplativa do cenário → aproximação gradual → detalhe que transforma paz em ameaça\"\n- Hooks de **vídeos virais testados** geralmente têm texto literal utilizável (ex: \"Você mataria uma criança...\")\n\n**DIFERENÇA CRÍTICA:** Em teasers, o hook é DETONAÇÃO. Em full videos, o hook é IMERSÃO — cria perguntas que só serão respondidas aos 8, 12, 15 minutos.\n\n## 📐 ESTRUTURA OBRIGATÓRIA: A Jornada Imersiva de 6 Passos (YouTube Dark 2026)\n\nEm vez de uma estrutura genérica, o vídeo completo DEVE seguir rigorosamente a **Jornada Imersiva** detalhada na pesquisa de retenção, mapeada para a estrutura de 3 atos:\n\n1.  **A Missão (0:00 - 1:00) | O Gancho Visceral**\n    *   **Objetivo:** Estabelecer o mistério central e a \"Aposta\" (O que está em jogo?).\n    *   **Técnica:** Ruptura imediata (0s) + Pergunta \"impossível\".\n    *   **Mid-Hook (30s):** Reafirmação da promessa para evitar abandono precoce.\n\n2.  **O Contexto (1:00 - 3:00) | Conexão Emocional**\n    *   **Objetivo:** Conectar o mistério a uma emoção universal ou fato histórico. \"Por que se importar *agora*?\"\n    *   **Atenção:** Evite \"Wikipedia dump\". Contexto deve ser tensão, não aula.\n\n3.  **O Plano / A Investigação (Inicio do Ato 2)**\n    *   **Objetivo:** Detalhar os passos que serão tomados. Cria expectativa de progresso.\n    *   **Dinâmica:** \"Vamos analisar as evidências X, Y e Z.\"\n\n4.  **A Progressão \"Roller Coaster\" (O Corpo Principal)**\n    *   **Objetivo:** Série de sucessos e fracassos. Cada pista leva a uma NOVA pergunta (Cliffhanger em Cadeia).\n    *   **Midpoint (50%):** A \"Virada\". Uma evidência muda tudo.\n    *   **Dark Moment (75%):** O beco sem saída. Parece que não haverá resposta.\n\n5.  **O Clímax (A Revelação)**\n    *   **Objetivo:** A teoria mais forte ou a revelação final.\n    *   **Audiovisual:** Máximo impacto. Use a \"Pilha Sonora\" completa aqui.\n\n6.  **A Reflexão (Conclusão)**\n    *   **Objetivo:** Conectar de volta ao espectador. O que isso diz sobre a natureza humana?\n    *   **CTA Orgânico:** Convite para a próxima jornada (Loop de Sessão).\n\n## 🧠 RETENÇÃO — Técnicas Obrigatórias (baseado em dados reais de YouTube Analytics)\n\n### 1. Pattern Interrupts (~a cada 30 segundos / 6 cenas)\nO espectador decide cada ~30 segundos se continua assistindo. Garanta que o outline\nprevê uma **mudança de estímulo** a cada bloco de 6 cenas:\n- Mudança de localização visual (exterior → interior → close-up de documento)\n- Shift narrativo (fato → pergunta → revelação → dado numérico)\n- Mudança tonal (factual → tenso → reflexivo)\n\n### 2. Re-engagement Hooks (~a cada 3 minutos / 36 cenas)\nCada bloco de ~3 minutos deve terminar com um mini-cliffhanger que puxa o espectador\npara o próximo bloco:\n- \"Mas o que ninguém sabia era que...\"\n- \"E então surgiu um detalhe que mudou tudo.\"\n- Perguntas retóricas que o espectador quer ver respondidas\n\n### 3. Subconscious Loops (Técnica MrBeast)\nAbrir threads narrativas antes de fechá-las. O cérebro precisa da closure:\n- Introduza um fato intrigante no começo do ato 2 → só resolva no ato 3\n- Mencione um documento/evidência → mostre seu conteúdo 2 minutos depois\n\n### 3.1 REGRA DE TRÊS PARA FORESHADOWING (YouTube Retention Research)\nPara cada revelação importante no vídeo, plante EXATAMENTE 3 pistas anteriores:\n- **Pista 1 (~15% do vídeo):** Menção casual, quase imperceptível. O espectador não nota conscientemente.\n- **Pista 2 (~40% do vídeo):** Detalhe que ganha contexto. O espectador atento começa a suspeitar.\n- **Pista 3 (~65% do vídeo):** Evidência direta que prepara a revelação. O espectador sente que \"algo vai acontecer\".\n- **Revelação (~80%):** Payoff. O espectador conecta as 3 pistas retroativamente.\n\nO outline DEVE indicar para cada beat de revelação: quais são as 3 pistas anteriores e em qual beat foram plantadas.\nIsso cria \"ah-ha moments\" que são o driver #1 de compartilhamento e rewatch.\n\n### 4. Stair-Stepping (Escalação Progressiva)\nCada beat DEVE ser mais intenso que o anterior. NÃO pode haver platô narrativo.\nA progressão ideal:\n```\nCurioso → Intrigado → Perplexo → Perturbado → Chocado → Resolvido (ou: Perturbado permanente)\n```\n\n### 5. Value Loop (Técnica Veritasium) — Para cada beat principal:\n1. **Contexto** — O que é (o fato)\n2. **Aplicação** — Como funciona (a mecânica)\n3. **Framing** — Por que importa (a implicação)\n\n### 6. MONTAGEM E ÁUDIO (INTENCIONALIDADE CINEMATOGRÁFICA)\nO roteirista não escreve apenas palavras; ele desenha a experiência audiovisual.\n- **ÁUDIO DISSOCIADO (J-Cut / L-Cut):** Instrua explicitamente quando o áudio de uma cena começa antes (J) ou continua depois (L).\n- **TAGS DE ÁUDIO SSML:** Use `<break time=\"1.5s\" />` e `<prosody rate=\"115%\">` conforme definido no skill `audio-direction-tags.md`.\n- **ENGENHARIA SONORA (Pilha de 5 Camadas):** Instrua o uso de:\n    1. **Sub-Bass (20-80Hz):** Pavor físico, \"Presença\".\n    2. **Média (80-500Hz):** Corpo, ambiente real.\n    3. **Alta (2kHz+):** Textura, metais, sussurros (arrepio).\n    4. **Sweetener:** Assinatura sonora única (ex: som invertido).\n    5. **Espacialidade:** Reverb para coesão.\n- **SILÊNCIO ESTRATÉGICO:** O \"vácuo de som\" antes de revelações visuais é OBRIGATÓRIO. Defina onde ocorre.\n\n### 7. BRAND SAFETY & GORE (CRÍTICO)\n- REPROVADO se usar termos: \"Assassinato\", \"Estupro\", \"Pedofilia\", \"Mutilado\", \"Tripas\".\n- REPROVADO se descrev... [truncated 13691 chars]"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "📋 TEMA: A frieza mecânica da dupla de assassinos mais letal de Nova York + o fim silencioso de uma era de brutalidade mafiosa.\n\n🎨 DIRETRIZES DE IDENTIDADE DO UNIVERSO (WARNING PROTOCOL):\nAtmosfera 'gritty' do Brooklyn nos anos 70 e 80. Foco visual no Gemini Lounge, luzes de neon refletindo em asfalto molhado e carros pretos. Paleta de cores desaturada com acentos em vermelho sangue e ambar de iluminação urbana. Evitar o glamour de 'O Poderoso Chefão'; priorizar a estética suja e industrial de 'Goodfellas' e a frieza do método de desmembramento.\n\n📚 FONTES DO DOSSIÊ (ordenadas por peso/relevância):\n[1] (text) Investigação Gemini: Assassinos da Máfia [peso: 3]\nA Anatomia da Execução Sistemática: Uma Análise Forense e Criminológica da Carreira de Joseph Testa e Anthony SenterResumo ExecutivoEste relatório constitui uma investigação exaustiva sobre a trajetória criminal, a metodologia operacional e o destino judicial de Joseph \"Joey\" Testa e Anthony Senter, figuras centrais na história do crime organizado norte-americano do final do século XX. Conhecidos no submundo e pelos órgãos de aplicação da lei como os \"Gêmeos Gemini\" (Gemini Twins), esta dupla transcendeu o arquétipo tradicional do mafioso para encarnar uma forma de violência industrializada e desprovida de emoção. Operando inicialmente como o núcleo letal da equipe de Roy DeMeo, afiliada à família Gambino, e posteriormente como executores de elite para a administração instável da família Lucchese, Testa e Senter foram responsáveis por uma onda de homicídios que desafiou as capacidades investigativas da época.O foco central deste documento é a documentação da \"frieza mecânica\" que caracterizava suas operações — especificamente o desenvolvimento e aperfeiçoamento do \"Método Gemini\", um protocolo de desmembramento e eliminação de corpos desenhado para frustrar a ciência forense. Além disso, o relatório examina o contexto jurídico complexo de sua queda, culminando nos julgamentos RICO (Racketeer Influenced and Corrupt Organizations Act) do final da década de 1980, e traça seus caminhos divergentes através do sistema prisional federal até a morte de Joseph Testa em janeiro de 2026. A análise baseia-se em uma síntese de registros judiciais, transcrições de julgamentos, relatórios do FBI e narrativas históricas corroboradas.1. O Crisol de Canarsie: Sociologia da Deviância e Formação Criminal1.1 O Ecossistema Socioeconômico de Canarsie na Década de 1970Para compreender a psicopatologia operacional de Joseph Testa e Anthony Senter, é imperativo primeiro dissecar o ambiente socioeconômico que os gerou. Canarsie, situada na orla sudeste do Brooklyn, Nova York, durante o final da década de 1960 e início da década de 1970, operava como um enclave insular. Era uma comunidade predominantemente ítalo-americana de classe trabalhadora, caracterizada por uma profunda desconfiança em relação às autoridades externas e uma adesão cultural tácita aos códigos de silêncio, ou omertà.Neste microcosmo, a criminalidade não era necessariamente vista como uma aberração social, mas frequentemente como uma via alternativa e viável de mobilidade econômica. A figura do \"wiseguy\" — o gângster bem-sucedido — não era vilipendiada, mas sim aspiracional. Jovens desiludidos com as perspectivas de trabalho braçal ou sindical viam em figuras locais como Roy DeMeo modelos de empreendedorismo letal. É dentro deste \"caldo de cultura\" criminogênico que as trajetórias de Testa e Senter começaram a convergir, não apenas como vizinhos, mas como parceiros simbióticos em uma escalada de violência.1.2 Perfis Biográficos e a Convergência dos \"Gêmeos\"A alcunha \"Gêmeos Gemini\" não derivava de uma relação biológica, mas de uma semelhança comportamental e de uma lealdade mútua que beirava o fanatismo. Ambos nasceram no início de 1955 e cresceram na mesma vizinhança, compartilhando experiências formativas marcadas por trauma e negligência, elementos frequentemente citados na literatura criminológica como precursores de comportamento antissocial violento.Anthony Michael Senter nasceu em 31 de março de 1955. Filho de um imigrante italiano e de uma mãe operária, Senter cresceu em um lar fraturado pelo divórcio precoce. Sua educação formal foi interrompida precocemente, e ele logo ganhou reputação nas ruas por uma \"aura de ameaça silenciosa\". Albert DeMeo, filho de seu futuro mentor Roy DeMeo, descreveria mais tarde Senter como tendo uma personalidade \"escorregadia\" e \"falsa\" (\"slick and phony\"), uma característica que lhe permitiria navegar as traições internas da máfia com uma adaptabilidade camaleônica. Senter trabalhava ocasionalmente como assistente de carpinteiro, mas sua verdadeira vocação era a apropriação ilícita.Joseph Carmine Testa, nascido em 24 de janeiro de 1955, teve uma trajetória paralela e igualmente traumática. Um de nove filhos de um motorista de caminhão, a vida de Testa foi irrevocavelmente alterada pela morte de sua mãe devido a um coágulo sanguíneo quando ele tinha apenas treze anos. A perda da figura materna, combinada com um ambiente doméstico turbulento, acelerou sua entrada na delinquência juvenil. Fisicamente menor que Senter, Testa compensava com uma ferocidade explosiva. Um incidente definidor ocorreu em 1973, quando Testa, aos 18 anos, envolveu-se em uma briga de bar com um oponente porto-riquenho. Testa foi esfaqueado no pulmão, um ferimento quase fatal que o deixou com problemas respiratórios crônicos pelo resto da vida. A resposta de Senter a este evento selou o vínculo entre eles: ele caçou o agressor de Testa e espancou-o quase até a morte com os punhos nus. Este ato de retribuição brutal cimentou uma parceria que operaria como uma unidade singular de violência pelas décadas seguintes.1.3 A Mentoria de Chris Rosenberg e a Integração na Equipe DeMeoA porta de entrada de Testa e Senter para o crime organizado estruturado foi o roubo de automóveis, uma atividade onipresente em Canarsie. Aos 15 anos, ambos já possuíam extensas fichas criminais juvenis por furto de veículos, demonstrando uma aptidão técnica precoce para contornar sistemas de segurança e uma audácia necessária para operações de alto volume. Essa competência chamou a atenção de Harvey \"Chris\" Rosenberg, um associado de Roy DeMeo.Rosenberg, um criminoso ambicioso que traficava drogas e roubava carros, viu nos jovens Testa e Senter a \"mão de obra\" ideal: leais, violentos e destemidos. Rosenberg serviu como a ponte entre os delinquentes juvenis de rua e a sofisticação criminosa de Roy DeMeo. Em 1974, aos 19 anos, a dupla foi formalmente integrada ao círculo íntimo de DeMeo. DeMeo, que operava a partir do Gemini Lounge na Flatlands Avenue, reconheceu imediatamente o valor utilitário dos \"Gêmeos\". Diferentemente de outros associados que podiam hesitar diante da violência extrema, Testa e Senter exibiam uma capacidade inata de compartimentalização psicológica. Eles podiam executar ordens complexas e brutais sem questionamento moral ou hesitação tática, características que se tornariam a pedra angular da \"Máquina de Matar\".2. A Industrialização da Morte: A Equipe DeMeo e o Método Gemini2.1 A Estrutura Corporativa da ViolênciaA equipe liderada por Roy DeMeo não era uma gangue desorganizada, mas uma empresa criminosa diversificada e hierárquica operando sob a égide da família Gambino. Enquanto o roubo de automóveis internacional (enviando carros de luxo para o Kuwait) e a agiotagem forneciam o fluxo de caixa regular, o assassinato tornou-se sua especialidade de mercado. O Gemini Lounge servia como o centro nevrálgico dessa operação. A frente do bar funcionava como um espaço social e ponto de encontro para negócios, enquanto os fundos e um apartamento adjacente foram convertidos em instalações dedicadas ao extermínio humano.Para Testa e Senter, o Gemini Lounge era tanto um clube social quanto um local de trabalho. A dicotomia espacial do local refletia a própria psicologia da equipe: a capacidade de transitar instantaneamente entre a camaradagem social e a execução m... [truncated 158285 chars]"
+      }
+    ]
+  },
+  "parsed": {
+    "hookStrategy": "Ruptura imediata com o glamour da máfia cinematográfica para estabelecer a premissa de que o desaparecimento perfeito era uma ciência industrial de sete etapas.",
+    "hookVariants": [
+      {
+        "level": "green",
+        "hook": "No submundo de Nova York, o desaparecimento perfeito não era mágica. Era uma ciência fria, calculada e executada em sete etapas irreversíveis.",
+        "rationale": "Foca no aspecto intelectual e processual, 100% brand-safe."
+      },
+      {
+        "level": "moderate",
+        "hook": "Esqueça os filmes de máfia. No Brooklyn, o sumiço de centenas de pessoas era uma operação logística industrial, onde o fim trágico seguia um manual técnico.",
+        "rationale": "Descontrói o mito cinematográfico e introduz a ideia de manual técnico."
+      },
+      {
+        "level": "aggressive",
+        "hook": "Eles não eram apenas assassinos; eram engenheiros da cena vermelha. Conheça a linha de montagem de corpos que transformou um bar do Brooklyn no necrotério mais eficiente da história.",
+        "rationale": "Usa termos fortes como \"engenheiros da cena vermelha\" para maximizar o impacto visual."
+      },
+      {
+        "level": "lawless",
+        "hook": "Enquanto o alvo entrava no Gemini Lounge, o cronômetro da sua drenagem já estava correndo. Esta é a anatomia da Murder Machine: onde a morte era processada entre fatias de pizza.",
+        "rationale": "Extremo impacto psicológico ao contrastar a morte com o ato banal de comer pizza."
+      }
+    ],
+    "promiseSetup": "Estabelecer que o vídeo não é sobre violência passional, mas sobre a industrialização do desaparecimento através do Método Gemini, prometendo revelar a anatomia por trás da 'Murder Machine'.",
+    "risingBeats": [
+      {
+        "order": 1,
+        "revelation": "O vínculo de sangue de 1973: após Testa ter o pulmão perfurado, Senter caça o agressor, estabelecendo a dinâmica de proteção mútua absoluta.",
+        "questionAnswered": "A origem da parceria dos Gêmeos Gemini.",
+        "newQuestion": "Como essa amizade se transformou em uma unidade de extermínio profissional?",
+        "sourceReference": "[1] 1.2"
+      },
+      {
+        "order": 2,
+        "revelation": "O recrutamento por Roy DeMeo através de Chris Rosenberg no Gemini Lounge, onde sua capacidade de compartimentalização psicológica foi notada.",
+        "questionAnswered": "Como a dupla entrou para a alta hierarquia da máfia.",
+        "newQuestion": "Qual foi a primeira prova real desse método industrial?",
+        "sourceReference": "[1] 1.3"
+      },
+      {
+        "order": 3,
+        "revelation": "O caso Andrei Katz (1975): o uso pioneiro de um compactador de lixo de supermercado para destruir evidências dentárias, o protótipo do que viria a ser o Método Gemini.",
+        "questionAnswered": "O nascimento da metodologia de ocultação.",
+        "newQuestion": "Como o método evoluiu de atos brutos para um protocolo forense refinado?",
+        "sourceReference": "[1] 2.3"
+      },
+      {
+        "order": 4,
+        "revelation": "O assassinato de Dominick Ragucci (1979): a paranoia de DeMeo leva a equipe a executar um estudante inocente, atraindo atenção federal indesejada e forçando a fuga para a Califórnia.",
+        "questionAnswered": "MIDPOINT: A virada narrativa e o primeiro grande erro.",
+        "newQuestion": "Pode um sistema industrial perfeito falhar por causa do erro humano?",
+        "sourceReference": "[2] 4.1"
+      },
+      {
+        "order": 5,
+        "revelation": "O detalhamento das 7 etapas do Método Gemini: Atração, Disparo, Turbante, Estocada, Drenagem, Desmembramento e Descarte no Aterro de Fountain Avenue.",
+        "questionAnswered": "A anatomia técnica do desaparecimento.",
+        "newQuestion": "Quais eram os passos exatos que tornavam o corpo indetectável?",
+        "sourceReference": "[1] 2.2"
+      },
+      {
+        "order": 6,
+        "revelation": "A 'Crise Cubana' e o assassinato de Chris Rosenberg por DeMeo provam que ninguém está seguro, nem mesmo os membros fundadores da equipe.",
+        "questionAnswered": "ALL IS LOST: O colapso da confiança interna.",
+        "newQuestion": "O que acontece quando o mentor se torna um risco para a própria máquina que ele criou?",
+        "sourceReference": "[1] 2.3"
+      },
+      {
+        "order": 7,
+        "revelation": "A estatística aterrorizante: a equipe é ligada a até 200 mortes, operando com tal eficiência que o FBI aborta escavações no aterro por inviabilidade logística.",
+        "questionAnswered": "A escala real da Murder Machine.",
+        "newQuestion": "Qual o saldo final dessa linha de montagem antes do cerco jurídico?",
+        "sourceReference": "[5] DADOS DE PESQUISA"
+      }
+    ],
+    "climaxMoment": "A revelação da estatística de letalidade da equipe (até 200 mortes) contrastada com a absoluta normalidade burocrática dos perpetradores, que faziam pausas para comer pizza durante o processamento dos restos.",
+    "climaxFormula": "Pattern Recognition (A revelação de que o horror era um sistema logístico replicável)",
+    "resolutionPoints": [
+      "A simbiose psicológica entre Joseph Testa (estratégia) e Anthony Senter (execução) como motor da eficiência.",
+      "O 'Método Gemini' como um protocolo de sete etapas desenhado para anular a ciência forense da época.",
+      "O Gemini Lounge como um espaço dual: bar social na frente e instalação de extermínio industrial nos fundos.",
+      "A transição da máfia de rua para uma corporação da morte focada na máxima 'sem corpo, sem crime'."
+    ],
+    "resolutionAngle": "A compreensão de que a 'banalidade do mal' atinge seu ápice quando o horror humano é reduzido a um protocolo logístico de gestão de resíduos biológicos.",
+    "ctaApproach": "EP1 → Tease do EP2: \"Mas o que acontece quando a própria máquina de matar decide que seu criador é o próximo passivo a ser eliminado? No próximo episódio: O Matricídio Profissional.\" (1 única cena final).",
+    "emotionalArc": "Curiosidade Intelectual → Desconforto Crescente → Fascínio Técnico → Horror Sistêmico → Reflexão Solene.",
+    "toneProgression": "Factual e Analítico → Tenso e Investigativo → Clínico e Técnico → Sombrio e Reflexivo → Solene e Documental.",
+    "whatToReveal": [
+      "O vínculo de 1973 entre Testa e Senter.",
+      "As 7 etapas detalhadas do Método Gemini.",
+      "O caso Andrei Katz e o protótipo do desmembramento.",
+      "O erro fatal com Dominick Ragucci em 1979.",
+      "A localização e logística do Aterro de Fountain Avenue.",
+      "O Gemini Lounge como 'Horror Hotel'."
+    ],
+    "whatToHold": [
+      "O assassinato de Roy DeMeo pelos Gêmeos (EP2)",
+      "A transferência da dupla para a família Lucchese (EP2)",
+      "O destino final de Joseph Testa em Nevada (EP3)",
+      "A morte de Patrick Testa (EP3)"
+    ],
+    "whatToIgnore": [
+      "Detalhes da vida na prisão nos anos 90-2000 (EP3)",
+      "O incidente da cocaína no tribunal (EP3)",
+      "O assassinato de Vladimir Reznikov (EP2)"
+    ],
+    "segmentDistribution": {
+      "hook": 8,
+      "context": 22,
+      "rising": 90,
+      "climax": 18,
+      "resolution": 11,
+      "cta": 1
+    },
+    "tensionCurve": [
+      "low",
+      "medium",
+      "high",
+      "pause",
+      "peak"
+    ],
+    "openLoops": [
+      {
+        "question": "Como dois ladrões de carros adolescentes se tornaram os técnicos de eliminação mais confiáveis da Cosa Nostra?",
+        "openedAtBeat": 1,
+        "closedAtBeat": null
+      },
+      {
+        "question": "O que acontece quando uma máquina de precisão industrial comete um erro de identificação grosseiro sob o efeito de substâncias?",
+        "openedAtBeat": 4,
+        "closedAtBeat": 4
+      },
+      {
+        "question": "Roy DeMeo criou uma ferramenta de extermínio que se tornaria autônoma e perigosa demais para seus próprios criadores?",
+        "openedAtBeat": 5,
+        "closedAtBeat": null
+      }
+    ],
+    "resolutionLevel": "partial",
+    "loopSentence": {
+      "fullSentence": "E no final, o silêncio de Nova York provou que a linha de montagem do fim era a única ciência que realmente funcionava no Brooklyn.",
+      "partA": "E no final, o silêncio de Nova York provou que a linha de montagem...",
+      "partB": "...do fim era a única ciência que realmente funcionava no Brooklyn."
+    },
+    "title": "A Linha de Montagem do Fim | O Terror da Murder Machine"
+  },
+  "rawContent": ""
+}

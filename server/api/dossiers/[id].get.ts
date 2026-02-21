@@ -2,6 +2,16 @@ import { prisma } from '../../utils/prisma'
 import { costLogService } from '../../services/cost-log.service'
 import type { DossierWithRelationsResponse } from '../../types/dossier.types'
 
+async function addHasReferenceImage(persons: any[]) {
+  if (!persons.length) return persons
+  const withImage = await prisma.dossierPerson.findMany({
+    where: { id: { in: persons.map(p => p.id) }, referenceImage: { not: null } },
+    select: { id: true }
+  })
+  const imageSet = new Set(withImage.map(p => p.id))
+  return persons.map(p => ({ ...p, hasReferenceImage: imageSet.has(p.id) }))
+}
+
 export default defineEventHandler(async (event): Promise<DossierWithRelationsResponse> => {
   const id = getRouterParam(event, 'id')
 
@@ -27,6 +37,12 @@ export default defineEventHandler(async (event): Promise<DossierWithRelationsRes
         orderBy: { order: 'asc' }
       },
       persons: {
+        select: {
+          id: true, dossierId: true, name: true, role: true,
+          description: true, visualDescription: true, aliases: true,
+          relevance: true, order: true, createdAt: true, updatedAt: true
+          // referenceImage omitido — Buffer pesado
+        },
         orderBy: [{ relevance: 'asc' }, { order: 'asc' }]
       },
       _count: {
@@ -66,6 +82,6 @@ export default defineEventHandler(async (event): Promise<DossierWithRelationsRes
     sources: dossier.sources,
     images: dossier.images,
     notes: dossier.notes,
-    persons: dossier.persons
+    persons: await addHasReferenceImage(dossier.persons)
   }
 })
