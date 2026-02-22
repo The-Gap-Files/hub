@@ -97,7 +97,29 @@ Hard rule: nunca repita o mesmo tipo de fonte de luz em mais de 2 cenas consecut
 
 Evite usar palavras subjetivas como UNICO descritor de uma cena. Palavras como "moody", "atmospheric", "gritty" sao permitidas quando acompanhadas de ancoragem fisica concreta (fonte de luz, textura, material). Proibido: usar APENAS adjetivos subjetivos sem parametros tecnicos.
 
-**Coesao Temporal:** Se a narrativa e de uma epoca especifica, todas as escolhas respeitam o periodo (veiculos, iluminacao, letreiros, vestuario, arquitetura). Evite anacronismos.
+### 2.4 Coerencia Temporal (Period Accuracy) — CRITICO
+
+Se o TEMPORAL CONTEXT do Production Awareness menciona uma epoca/decada/ano, TODAS as escolhas visuais DEVEM ser period-accurate. Anacronismos destroem credibilidade e sao o erro mais visivel para o espectador.
+
+**Checklist por cena (validar mentalmente antes de escrever):**
+
+| Categoria | O que verificar | Exemplo de erro |
+|-----------|----------------|-----------------|
+| **Veiculos** | Modelo e design compativel com a epoca | Historia de 1985 com SUV moderno no fundo |
+| **Tecnologia** | Telas, telefones, computadores, camaras | Anos 1970 com monitor LCD ou smartphone |
+| **Vestuario** | Roupas, cortes de cabelo, acessorios | Anos 1960 com tenis Nike Air Max |
+| **Arquitetura** | Fachadas, interiores, materiais | Anos 1950 com fachada de vidro espelhado |
+| **Sinalizacao** | Letreiros, placas, neon, tipografia | Anos 1940 com placa LED digital |
+| **Iluminacao** | Tipo de lampada, fixture design | Anos 1930 com luminaria LED embutida |
+| **Mobiliario** | Moveis, eletrodomesticos, utensilios | Anos 1970 com geladeira french door moderna |
+| **Midia** | Jornais, TV, radio, cartazes | Anos 1980 com TV flatscreen |
+
+**Regras:**
+- Se a epoca e clara (ex: "anos 1980"), TODOS os elementos devem ser de 1980 ou anterior. NADA posterior.
+- Se a epoca e ambigua, deduza pela narracao. Se nao houver pistas, use elementos atemporais.
+- Quando descrever ambientes, inclua ao menos 1 detalhe period-specific (ex: "rotary dial telephone", "CRT television with rabbit ears", "wood-paneled station wagon").
+- Para iluminacao: epocas antigas usam tungsten, neon, fluorescent tube. NAO use "LED strip", "smart bulb", "ring light" em periodos pre-2000.
+- Preferir film stock references compatíveis com a época: pre-1970 → Tri-X, Plus-X; 1970-90 → Kodachrome, Ektachrome, Portra; 2000+ → digital cinema.
 
 **Complexidade do Quadro:** Evite clutter visual. Favoreca formas fortes, separacao sujeito/fundo, hierarquia espacial legivel (foreground/midground/background). Pense em thumbnail e compressao YouTube.
 
@@ -378,6 +400,83 @@ visualDescription: "24mm wide lens, deep focus. Abandoned hospital hallway, flic
 endVisualDescription: "24mm wide lens, deep focus. Abandoned hospital hallway, flickering fluorescent..." // IDENTICO = loop perfeito
 endImageReferenceWeight: 0.9
 ```
+
+### 7.4 Calibracao Duracao ↔ Transicao (OBRIGATORIO)
+
+A amplitude da mudanca visual entre start e end e GOVERNADA pela duracao da cena (campo durationSeconds):
+
+| Duracao | Amplitude maxima | endImageReferenceWeight | Movimentos permitidos |
+|---------|-----------------|------------------------|-----------------------|
+| **3-4s** | Minima (mesmo enquadramento, leve reframing) | 0.85-0.95 | Static, breathing, rack focus |
+| **5-6s** | Moderada (mudanca de plano, leve pan) | 0.65-0.80 | Push-in/pull-back curto, pan curto |
+| **7-7.5s** | Expressiva (reframing completo, revelacao) | 0.45-0.70 | Dolly completo, pan revelador, lateral slide |
+
+**Regra de ouro:** Se nao ha tempo suficiente para o modelo de video executar a transicao de forma suave, REDUZA a amplitude ou use `endVisualDescription: null`. Uma transicao abrupta e PIOR que nenhuma transicao.
+
+---
+
+## 7.5 Coerencia da Transicao Start → End (Transition Coherence)
+
+Quando `endVisualDescription` existe, o modelo de video (Wan 2.2) interpola entre a imagem inicial e a imagem final. Se essas imagens forem muito diferentes ou incoerentes, o resultado sera uma transicao bizarra com artefatos.
+
+### Regras de Coerencia
+
+1. **Continuidade fisica:** Start e end devem pertencer ao MESMO cenario, mesma hora do dia, mesma iluminacao, mesmos materiais. O end e o que a camera VE ao final do movimento.
+
+2. **O motion EXPLICA a transicao:** A motionDescription deve descrever COMO a camera vai do start ao end. Se nao consegue explicar a jornada em uma frase, a transicao e complexa demais.
+
+3. **Proibicoes absolutas entre start e end:**
+   - Dia → Noite (ou vice-versa)
+   - Interior → Exterior (ou vice-versa)
+   - Epoca diferente (ex: 1980 start → 2020 end)
+   - Estacao/clima diferente (sol → chuva)
+   - Sujeito diferente (pessoa A → pessoa B)
+
+4. **Mapeamento movimento → end:**
+   | Movimento | O que o end deve mostrar |
+   |-----------|------------------------|
+   | Push-in | Close-up de um ELEMENTO que ja existe no start (mais perto, mais detalhe) |
+   | Pull-back | Wide shot que CONTEM todo o start como um elemento menor no quadro |
+   | Pan L/R | O que esta ADJACENTE ao start, com mesma profundidade e iluminacao |
+   | Tilt up/down | O que esta ACIMA/ABAIXO do start, com mesma paleta |
+   | Rack focus | MESMO quadro, mas com plano focal diferente (foreground↔background) |
+   | Static | NULL -- nao use endVisualDescription em cenas estaticas |
+   | Breathing | NULL -- movimento imperceptivel nao precisa de destino |
+
+5. **Teste mental:** Imagine que voce esta segurando a camera. Voce CONSEGUE fisicamente ir do start ao end com o movimento descrito, nessa duracao? Se nao → simplifique ou use null.
+
+### Contra-Exemplos
+
+❌ **Transicao incoerente (push-in):**
+```
+visualDescription: "Wide shot of a 1970s Brooklyn street at night, sodium vapor lamps..."
+endVisualDescription: "Close-up of a detective in a brightly lit office, papers on desk..."
+```
+Problema: O push-in mudou de exterior noturno para interior iluminado. Impossivel em um unico plano.
+
+✅ **Transicao coerente (push-in):**
+```
+visualDescription: "Wide shot of a 1970s Brooklyn street at night, sodium vapor lamps, detective's silhouette near a payphone..."
+endVisualDescription: "Medium close-up of the detective's hand gripping the payphone receiver, knuckles lit by sodium vapor from above, wet metal surface..."
+```
+Mesmo cenario, mesma luz, camera apenas se aproximou.
+
+❌ **Transicao rapida demais (4s + dolly completo):**
+```
+durationSeconds: 4
+motionDescription: "Full dolly forward through the corridor toward the far door..."
+endImageReferenceWeight: 0.5
+```
+Problema: 4 segundos nao dao tempo para um dolly completo. O modelo vai interpolar de forma abrupta.
+
+✅ **Transicao calibrada (4s):**
+```
+durationSeconds: 4
+motionDescription: "Subtle breathing camera, barely perceptible forward oscillation..."
+endVisualDescription: null
+endImageReferenceWeight: null
+```
+4 segundos = static ou breathing. Sem end image, o modelo gera livremente dentro da duracao.
 
 ---
 

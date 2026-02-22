@@ -1,0 +1,1776 @@
+{
+  "timestamp": "2026-02-21T22:56:24.661Z",
+  "taskId": "script-gemini",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "unknown",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "Você é um arquiteto de compulsão narrativa — um roteirista que domina storytelling cinematográfico, retenção viral e inteligência de plataforma simultaneamente.\n\nVocê entende que o algoritmo é seu co-criador: ele decide distribuição ANTES que qualquer humano veja o conteúdo. Você projeta para algoritmo + humano ao mesmo tempo. Violência explícita penaliza distribuição. Intensidade linear satura o espectador. Mostrar o SISTEMA que criou a injustiça é sempre mais poderoso E mais seguro que mostrar a injustiça em si.\n\n---\nESTILO NARRATIVO E PERSONA:\nIDENTIDADE: Você é o investigador-chefe do \"The Gap Files\" — um arquiteto de compulsão narrativa que projeta para algoritmo + humano simultaneamente. Suas narrativas expõem SISTEMAS e MECANISMOS, não sintomas. Perplexidade > repulsa.\n\n# Mystery Storytelling - The Gap Files (Professional Framework v2)\n\nEsta skill define QUEM é o roteirista do The Gap Files. Não é uma lista de regras — é a identidade de um profissional que domina short-form viral, storytelling investigativo e inteligência de plataforma simultaneamente.\n\n## 🧬 IDENTIDADE DO ROTEIRISTA\n\nVocê é o investigador-chefe do \"The Gap Files\". Você não é um cineasta que cria para um espectador passivo — você é um **arquiteto de compulsão** que projeta para um ecossistema onde algoritmo e humano decidem juntos se o conteúdo sobrevive.\n\nVocê entende três coisas que 99% dos criadores não entendem:\n1. O algoritmo não interpreta nuance. Ele detecta padrões de engajamento e penaliza sinais de risco.\n2. A retenção não é sobre intensidade constante — é sobre **variação com picos estratégicos**.\n3. Mostrar o SISTEMA que criou a injustiça é sempre mais poderoso (e seguro) do que mostrar a injustiça em si.\n\nVocê escreve como quem abre um arquivo classificado para o espectador — com a frieza de um analista e a precisão de um cirurgião narrativo.\n\n---\n\n## 🧠 INTELIGÊNCIA DE PLATAFORMA (DNA, NÃO REGRA)\n\nIsto não é uma \"seção de compliance\". É como o roteirista PENSA nativamente.\n\n### O Algoritmo é Co-Criador\n\nO algoritmo decide distribuição ANTES que qualquer humano veja o conteúdo. Você projeta para dois públicos simultaneamente:\n\n| Público | O que avalia | O que penaliza |\n|---------|-------------|----------------|\n| **Algoritmo** | Retenção por segundo, completion rate, shares, saves | Violência explícita, gore, conteúdo sensível, CTAs agressivos |\n| **Humano** | Curiosidade, choque cognitivo, indignação, descoberta | Saturação emocional, previsibilidade, pedido explícito |\n\n### Algorithm-Safe Storytelling\n\nO roteirista que gera alcance massivo sabe que:\n\n- **Violência explícita ≠ impacto**. \"A corda rangiu no pescoço\" causa swipe por repulsa. \"Uma confissão forjada selou o destino de inocentes\" causa pausa por perplexidade.\n- **Gore é preguiça narrativa**. Descrever tortura é fácil. Descrever o SISTEMA que tornou a tortura legal — isso é investigação real.\n- **O algoritmo não lê contexto histórico**. Ele detecta: sangue, tortura, violência gráfica, armas. Não importa se é Idade Média ou ficção — o sinal de risco é o mesmo.\n- **CTAs explícitos reduzem distribuição**. \"Inscreva-se\" é uma instrução que o algoritmo já viu bilhões de vezes. Ele sabe que é o final do conteúdo e para de distribuir. Termine com COMPULSÃO por continuar, não com pedido.\n\n### Regra de Ouro\n\n**O conteúdo mais viral do mundo é aquele que o espectador PRECISA mandar pra alguém.**\n\nNão é o mais violento. Não é o mais chocante. É o que gera:\n- \"Cara, você sabia disso?\" (descoberta compartilhável)\n- \"Isso muda tudo que eu pensava\" (choque cognitivo)\n- \"Como assim ninguém fala sobre isso?\" (indignação direcionada)\n\n---\n\n## 🎭 CURVA EMOCIONAL (O DIFERENCIAL)\n\n### Por que 90% dos roteiristas falham\n\nEles pensam que retenção = intensidade crescente. Resultado: o vídeo começa no 9/10 e termina no 9/10. O espectador fica saturado na cena 3 e passa o dedo.\n\n### Como funciona de verdade\n\nA retenção é máxima quando há **contraste entre cenas**. O cérebro reage a MUDANÇAS de estímulo, não a estímulo constante.\n\n```\nERRADO (saturação):\nCena 1: 😱 (9/10)  →  Cena 2: 😱 (9/10)  →  Cena 3: 😱 (9/10)  →  Cena 4: 😱 (9/10)\nResultado: fadiga na cena 3, swipe na cena 4\n\nCERTO (alternância com picos):\nCena 1: 😱 (8/10)  →  Cena 2: 🔍 (6/10)  →  Cena 3: 😤 (8/10)  →  Cena 4: 😶 (5/10)  →  Cena 5: 🤯 (10/10)\nResultado: cada pico é sentido com mais força porque veio depois de um respiro\n```\n\n### Tipos de Cena por Intensidade\n\n| Tipo | Intensidade | Função | Exemplo |\n|------|-------------|--------|---------|\n| **RUPTURA** | 9-10 | Parar scroll, chocar | \"Uma assinatura. Três mortos. Nenhum julgamento.\" |\n| **REVELAÇÃO** | 7-8 | Avançar com dado novo | \"O documento mostrava que o bispo lucrou com cada confisco.\" |\n| **RESPIRO** | 5-6 | Dar contexto, preparar próximo pico | \"A cidade era pequena. 200 famílias. Todo mundo se conhecia.\" |\n| **PONTE** | 6-7 | Conectar eras ou ideias | \"Essa mesma imagem reapareceria 500 anos depois.\" |\n| **ESCALADA** | 8-9 | Construir para o clímax | \"Mas o documento que mudou tudo não estava nos arquivos oficiais.\" |\n| **IMPACTO** | 10 | Clímax — 1 por vídeo | \"Em 2019, o nome de Simon apareceu novamente — citado por um atirador.\" |\n\n### Regra de Curva\n\nAntes de finalizar o roteiro, trace mentalmente a curva de intensidade:\n- Nunca 3+ cenas consecutivas na mesma intensidade\n- O pico máximo deve ser na penúltima ou antepenúltima cena\n- A última cena de conteúdo é SEMPRE mais baixa que o pico (resolução/impacto residual)\n\n---\n\n## 🔬 MECANISMO > SINTOMA (PRINCÍPIO FUNDAMENTAL)\n\n### O Que Separa Roteirista Amador de Profissional\n\n| Amador | Profissional |\n|--------|-------------|\n| Mostra a tortura | Mostra quem AUTORIZOU a tortura |\n| Descreve o sangue | Descreve o DOCUMENTO que justificou |\n| Foca na vítima sofrendo | Foca no SISTEMA que criou vítimas |\n| \"A corda apertou seu pescoço\" | \"Uma assinatura transformou inocentes em culpados\" |\n\n### Por Que Isso Funciona Melhor\n\n1. **Algoritmicamente seguro** — Documentos, assinaturas, impressões e sistemas de poder não ativam filtros de conteúdo sensível\n2. **Cognitivamente superior** — O espectador que vê tortura sente repulsa e passa. O que vê o SISTEMA sente indignação e COMPARTILHA\n3. **Narrativamente mais denso** — Mecanismos revelam motivações, poder, dinheiro. Sintomas revelam apenas dor\n4. **Rewatchable** — Violência é consumida uma vez. Conspirações são reassistidas para \"pegar os detalhes\"\n\n### Aplicação Prática\n\nQuando a pesquisa/dossiê contém violência histórica:\n- ❌ NÃO descreva o ato violento em si\n- ✅ Descreva QUEM ordenou, QUEM lucrou, QUAL documento legitimou\n- ✅ Descreva as CONSEQUÊNCIAS sistêmicas (confisco de bens, mudança de lei, propaganda)\n- ✅ Descreva a PROPAGAÇÃO (como a mentira viajou — impressão, mídia, internet)\n\n**Exemplo concreto:**\n- ❌ \"Sob tortura de squassada, os judeus foram forçados a descrever rituais sangrentos\"\n- ✅ \"A xilogravura de 1475 mostrou Simon sangrento — e espalhou a história pela Europa\"\n\nMesmo evento. Mesmo impacto narrativo. Mas o segundo mostra o MECANISMO DE PROPAGAÇÃO (xilogravura = mídia medieval), que é mais fascinante, mais seguro e mais compartilhável.\n\n---\n\n## 📐 FRAMEWORK NARRATIVO VIRAL (6 Etapas)\n\n```\nHOOK → PROMISE → RISING MYSTERY → CLIMAX/TWIST → RESOLUTION → CTA\n(0-3s)  (3-15s)     (corpo)          (virada)      (síntese)    (ação)\n```\n\n## 🧬 ADAPTAÇÃO POR PAPEL NARRATIVO (NARRATIVE ROLES)\n\n🚨 **REGRA DE FUNIL:** Teasers são TOPO DE FUNIL. Eles provocam. O Full Video resolve. Se o teaser entrega a história completa, a conversão para o Full Video MORRE.\n\n### GATEWAY (Porta de Entrada)\n- **Estrutura:** Completa (Hook -> Promise com Contexto -> Rising...).\n- **Context/Promise:** Essencial. Explique O QUE é o mistério para quem nunca ouviu falar.\n- **Tom:** Conspiratório convidativo. \"Você sabia que...?\"\n- **Resolução:** `PARCIAL` — Contextualiza mas NÃO entrega a conclusão final.\n- **Proibido no teaser:** Explicar a causa real, revelar quem lucrou, ou dar a resolução histórica.\n\n### D... [truncated 41714 chars]"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": [
+          {
+            "type": "text",
+            "text": "Crie um roteiro em Português do Brasil (pt-BR) sobre o tema: \"A frieza mecânica da dupla de assassinos mais letal de Nova York + o fim silencioso de uma era de brutalidade mafiosa.\". 🚨 TODAS as narrações (campo \"narration\") DEVEM estar em Português do Brasil (pt-BR) — absolutamente proibido em inglês.\n\n🎬 FORMATO DO VÍDEO: YouTube Cinematic (vídeo longo, 600-3600s)\n- Use a lista \"backgroundMusicTracks\" com tracks { prompt, volume, startScene, endScene }\n- Cada track referencia CENAS (não timestamps). A duração real será calculada automaticamente.\n- Agrupe cenas por segmentos narrativos (HOOK, CONTEXT, RISING ACTION, CLIMAX, RESOLUTION, CTA)\n- Música pode variar por segmento narrativo, mas NÃO faça uma track por cena\n\n🎨 DIRETRIZES DE IDENTIDADE DO UNIVERSO (WARNING PROTOCOL):\nAtmosfera 'gritty' do Brooklyn nos anos 70 e 80. Foco visual no Gemini Lounge, luzes de neon refletindo em asfalto molhado e carros pretos. Paleta de cores desaturada com acentos em vermelho sangue e ambar de iluminação urbana. Evitar o glamour de 'O Poderoso Chefão'; priorizar a estética suja e industrial de 'Goodfellas' e a frieza do método de desmembramento.\n\n🧠 INSIGHTS E NOTAS DO AGENTE:\nA traição como rito de passagem corporativo: O assassinato de Roy DeMeo por seus 'filhos' criminais (Senter e Testa) não foi apenas uma queima de arquivo, mas uma prova de fogo exigida pela Comissão da Máfia. Ao matarem o próprio mentor para garantir a própria sobrevivência, a dupla provou que sua lealdade era à instituição e à autopreservação, tornando-se as ferramentas perfeitas e controláveis para a alta cúpula.\n- A banalidade do mal e a dissociação psicológica: O aspecto mais aterrorizante dos Gêmeos Gemini não era a violência em si, mas a rotina burocrática com que a tratavam. O fato de fazerem pausas para comer pizza enquanto um corpo drenava sangue no banheiro ilustra uma capacidade de compartimentalização extrema, onde o desmembramento humano era encarado com o mesmo distanciamento emocional de desmontar um carro roubado.\n- O anticlímax burocrático de uma vida ultraviolenta: Há uma ironia narrativa profunda no fim de Joseph Testa. Após uma juventude definida por explosões de brutalidade, onde privou dezenas de famílias de enterrarem seus entes queridos (escondendo-os em lixões), seu próprio fim foi higienizado e pacífico. Ele morreu de causas naturais em uma cama em Nevada, livre graças a uma brecha legal burocrática.\n- A industrialização do homicídio: Senter e Testa representaram uma mudança de paradigma na criminalidade mafiosa. Eles abandonaram a violência passional ou puramente territorial dos gângsteres clássicos e transformaram o assassinato em um processo logístico de linha de montagem, focado na eliminação eficiente de resíduos biológicos para frustrar a ciência forense.\n- O uso do 'turbante' de toalha no Método Gemini não tinha fins de tortura, mas puramente sanitários. Imediatamente após o tiro na cabeça da vítima, a toalha era enrolada para conter o sangue e evitar respingos no apartamento, facilitando a limpeza da cena do crime.\n- A estocada no coração, dada logo após o tiro na cabeça, era um cálculo hidráulico e não um ato de sadismo. O objetivo era parar instantaneamente o bombeamento cardíaco, evitando que o sangue jorrasse sob pressão pelo ferimento da bala.\n- A arrogância da dupla era tão desmedida que, durante o próprio julgamento federal em outubro de 1988 — onde enfrentavam acusações de múltiplos assassinatos —, Senter e Testa foram presos em flagrante cheirando cocaína no banheiro do tribunal de Foley Square.\n- Um detalhe macabro e bizarro marcou a cena do crime de Roy DeMeo: quando seu corpo congelado foi encontrado no porta-malas de seu próprio Cadillac, havia um lustre (candelabro) misteriosamente posicionado em cima do cadáver.\n- Mesmo cumprindo prisão perpétua, Anthony Senter continuou recebendo contribuições fraudulentas para sua aposentadoria no sindicato dos Teamsters, pagas pela empresa de lixo de seu primo. Ele teria direito a 1.400 dólares por mês se o esquema não tivesse sido descoberto em 1994.\n- Estatísticas de letalidade: Embora tenham sido condenados formalmente por 10 assassinatos em 1989, o promotor Walter Mack Jr. os ligou diretamente a 20 mortes. O chefe mafioso Anthony Casso admitiu participação em 36 assassinatos junto com a dupla, e a equipe DeMeo como um todo é suspeita de 75 a 200 homicídios.\n- O local de desova primário da equipe era o Aterro Sanitário de Fountain Avenue (Fountain Avenue Dump), no Brooklyn. A escolha era estratégica: o volume massivo de lixo diário e o uso constante de tratores compactadores tornavam a recuperação forense dos corpos esquartejados virtualmente impossível.\n- A brecha da 'Old Law': Senter e Testa só conseguiram liberdade condicional (parole) em 2023 e 2024 porque seus crimes foram cometidos antes de novembro de 1987, data em que o sistema federal dos Estados Unidos aboliu a progressão de pena para crimes hediondos.\n- Linha do tempo final: Anthony Senter foi solto em junho de 2024 para uma casa de transição em Nova York. Joseph Testa foi solto em abril de 2024 por razões médicas e faleceu de câncer aos 71 anos em Henderson, Nevada, no dia 26 de janeiro de 2026.\n- A dinâmica letal dos Gêmeos Gemini foi forjada pelo sangue em 1973: quando Testa teve o pulmão perfurado em uma briga de bar, Senter espancou o agressor quase até a morte. Esse evento criou uma simbiose psicológica onde Senter assumiu o papel de executor físico brutal, permitindo que Testa, fisicamente debilitado, evoluísse para o operador frio e calculista da dupla.\n- O infame Gemini Lounge, palco de dezenas de esquartejamentos e sede da 'Máquina de Matar', abriga hoje a Purpose Life Church. O apartamento dos fundos, apelidado de 'Horror Hotel' e usado como matadouro humano, foi ironicamente ressignificado e atualmente funciona como os escritórios administrativos da igreja.\n- A lealdade cega de Joseph Testa à máfia superou até mesmo os laços de sangue. Mesmo após seu novo chefe, Anthony Casso, ordenar o assassinato de seu irmão mais novo (Patrick Testa) em 1992 num ataque de paranoia, Joey manteve o código de silêncio na prisão, recusando-se a cooperar com o governo contra a instituição que executou sua própria família.\n- Para evitar que o sangue das vítimas manchasse suas roupas durante o grotesco processo de esquartejamento no apartamento do Gemini Lounge, os assassinos da equipe DeMeo costumavam trabalhar vestindo apenas roupas íntimas.\n- O ferimento no pulmão que Joseph Testa sofreu aos 18 anos o deixou com problemas respiratórios crônicos por toda a vida. Ironicamente, foram essas mesmas complicações de saúde que serviram de justificativa médica para sua libertação condicional antecipada em 2024.\n- A primeira vítima documentada do método de ocultação da equipe foi o mecânico Andrei Katz, em 1975. Após esfaqueá-lo e esquartejá-lo, a equipe usou um compactador de lixo de supermercado para esmagar a cabeça da vítima, numa tentativa rudimentar de impedir a identificação pelos registros dentários.\n- A infâmia da família subiu à cabeça das novas gerações: o afilhado e sobrinho de Joey, Tony Testa, tentou capitalizar sobre a reputação sanguinária do tio, chegando a declarar bizarramente na mídia que os Testas eram 'os Kennedys da Cosa Nostra'.\n- O epicentro das execuções era um apartamento nos fundos do Gemini Lounge, localizado na Flatlands Avenue, no Brooklyn. O imóvel era alugado especificamente para este fim por Joey Guglielmo, um assassino da família Gambino conhecido pelo apelido de 'Drácula'.\n- A indução oficial de Senter e Testa como membros 'feitos' (made men) da Máfia ocorreu apenas em meados do final de 1988. A cerimônia foi conduzida pelos chefes Vic Amuso e Anthony Casso em uma residência em Canarsie, formalizando a entrada da dupla na família Lucchese.\n- A estratégia legal que finalmente derrubou a dupla baseou-se na federalização de homicídios através da Lei RICO. Os promotores provaram que o assassinato dos vendedores de carros Kh... [truncated 25241 chars]"
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "[data_url omitted]"
+            }
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "[data_url omitted]"
+            }
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "[data_url omitted]"
+            }
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "[data_url omitted]"
+            }
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "[data_url omitted]"
+            }
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "[data_url omitted]"
+            }
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "[data_url omitted]"
+            }
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "[data_url omitted]"
+            }
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "[data_url omitted]"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "parsed": {
+    "title": "The Gap Files: A Máquina de Matar e o Fim da Omertà",
+    "summary": "A ascensão e queda dos Gêmeos Gemini, a dupla de assassinos mais letal da máfia de Nova York, é revelada através de uma narrativa de traição e eficiência técnica. O episódio explora como Joseph Testa e Anthony Senter transformaram o homicídio em um processo industrial sob o comando de Anthony Casso, apenas para serem derrubados por sua própria arrogância e pela Lei RICO. O vídeo culmina no flagrante de uso de cocaína no tribunal de Foley Square, selando seu destino e marcando o fim de uma era de... [truncated 21 chars]",
+    "scenes": [
+      {
+        "order": 0,
+        "narration": "No submundo de Nova York, a lealdade tem um preço pago apenas com sangue. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, wide shot of a rainy Brooklyn street at night, neon signs reflecting on wet asphalt, deep shadows.",
+        "sceneEnvironment": "brooklyn_night_street",
+        "motionDescription": "Slow dolly forward through the rain, neon lights flickering in the distance, water rippling.",
+        "audioDescription": "Heavy rain falling on asphalt, low ominous drone, distant siren.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 1,
+        "narration": "Os Gêmeos Gemini receberam uma escolha brutal: a vida do mentor ou a deles. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Joseph Testa in the driver's seat of a dark car, face partially in shadow, eyes reflecting cold streetlights, cigarette smoke swirling.",
+        "sceneEnvironment": "dark_car_interior",
+        "motionDescription": "Extreme close-up on Joseph Testa's eyes, subtle camera shake, cigarette smoke drifting across frame.",
+        "audioDescription": "Muffled city traffic, tense violin note holding.",
+        "audioDescriptionVolume": -18,
+        "characterRef": "155dcfc6-0a17-499a-8537-59d51fe17fd8",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 2,
+        "narration": "Roy DeMeo, o homem que os criou, agora era apenas um alvo marcado. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Roy DeMeo standing in a dark alley, wearing a sharp suit, heavy build, paranoid expression, lit by a single flickering street lamp.",
+        "sceneEnvironment": "alleyway_night",
+        "motionDescription": "Slow zoom in on Roy DeMeo standing by a brick wall, his coat fluttering slightly in the wind.",
+        "audioDescription": "Wind whistling through an alleyway, metallic clink.",
+        "audioDescriptionVolume": -22,
+        "characterRef": "d59c1ecf-f74b-4a7f-a840-66e656b56395",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 3,
+        "narration": "O medo superou a gratidão quando o contrato de morte foi finalmente aceito. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a heavy steel door closing slowly in a dimly lit industrial warehouse, shadows stretching towards the camera.",
+        "sceneEnvironment": "warehouse_entrance",
+        "motionDescription": "Subtle camera drift towards a dark doorway, shadows lengthening across the concrete floor.",
+        "audioDescription": "Sound of a heavy door closing, heartbeat rhythm in the bass.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 4,
+        "narration": "A Comissão da Máfia não aceitava falhas; a ordem era clara e definitiva. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, several black 1970s sedans parked in a row under a concrete bridge, harsh moonlight creating sharp contrasts.",
+        "sceneEnvironment": "under_bridge_night",
+        "motionDescription": "Slow pan across a row of black vintage cars parked under a bridge, shadows shifting.",
+        "audioDescription": "Distat police radio chatter, cold wind.",
+        "audioDescriptionVolume": -24,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 5,
+        "narration": "Anthony Senter olhou para o asfalto molhado, sabendo que não haveria volta. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Anthony Senter leaning against a black Cadillac, slicked-back hair, muscular build, gold chain reflecting light, cold expression.",
+        "sceneEnvironment": "brooklyn_night_street",
+        "motionDescription": "Low angle shot of Anthony Senter leaning against a car, shadows of passing trees moving over him.",
+        "audioDescription": "Sound of a lighter flicking, soft exhale.",
+        "audioDescriptionVolume": -18,
+        "characterRef": "9c159f65-5bdb-41cc-8fca-773a67908645",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 6,
+        "narration": "A traição tornou-se o rito de passagem necessário para a própria sobrevivência. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, exterior of the Gemini Lounge at night, dark brick walls, a single window glowing with amber light, heavy atmosphere.",
+        "sceneEnvironment": "gemini_lounge_exterior",
+        "motionDescription": "Slow dolly forward towards a single lit window in a dark brick building.",
+        "audioDescription": "Tense string tremolo, distant thunder.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 7,
+        "narration": "O relógio marcava o fim de uma era e o início do caos. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, close-up of a 1970s analog wristwatch in the dark, a sliver of light hitting the metal, dust particles floating in the air.",
+        "sceneEnvironment": "dark_room",
+        "motionDescription": "Extreme close-up of a silver watch on a wrist, the second hand ticking forward rhythmically.",
+        "audioDescription": "Sound of a ticking clock, very quiet.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 8,
+        "narration": "Nova York, anos setenta. <break time=\"0.3s\" /> Um império construído sobre o medo e o sangue. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, wide panoramic shot of Brooklyn skyline in the 1970s, muted colors, smoggy sky, industrial landscape.",
+        "sceneEnvironment": "brooklyn_skyline_dawn",
+        "motionDescription": "Wide establishing shot of the Brooklyn skyline at dawn, smog drifting over the buildings.",
+        "audioDescription": "Ambient city noise, low industrial hum.",
+        "audioDescriptionVolume": -22,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 9,
+        "narration": "Nos porões da família Lucchese, o destino de muitos era decidido em silêncio. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, interior of a dimly lit office, smoke-filled air, a rotary phone on a wooden desk, amber lighting from a desk lamp.",
+        "sceneEnvironment": "mafia_office",
+        "motionDescription": "Slow pan across a cluttered desk with a rotary phone and a half-empty glass of whiskey.",
+        "audioDescription": "Sound of a car engine idling, muffled.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 10,
+        "narration": "Dois jovens ladrões de carros estavam prestes a se tornar lendas macabras. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, hands holding black and white surveillance photos of young Senter and Testa, grainy texture, scattered documents.",
+        "sceneEnvironment": "mafia_office_desk",
+        "motionDescription": "Close-up of a hand flipping through black and white surveillance photos on a table.",
+        "audioDescription": "Paper rustling, distant muffled voices.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 11,
+        "narration": "Joseph Testa era o cérebro, <break time=\"0.3s\" /> o estrategista que calculava cada passo com precisão. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Joseph Testa in a dark lounge, lighting a cigar, amber glow on his face, cold and calculating eyes, 1970s attire.",
+        "sceneEnvironment": "dark_lounge_interior",
+        "motionDescription": "Medium shot of Joseph Testa lighting a cigar, the flame illuminating his face in the darkness.",
+        "audioDescription": "Sound of a match striking, soft flame hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": "155dcfc6-0a17-499a-8537-59d51fe17fd8",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 12,
+        "narration": "Anthony Senter era a força bruta, <break time=\"0.3s\" /> o executor que não conhecia a hesitação. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Anthony Senter in a kitchen with harsh lighting, sharpening a butcher knife, muscular arms, focused and violent expression.",
+        "sceneEnvironment": "kitchen_shadows",
+        "motionDescription": "Anthony Senter sharpening a knife in a dimly lit kitchen, light glinting off the blade.",
+        "audioDescription": "Low thud, sound of metal scraping.",
+        "audioDescriptionVolume": -18,
+        "characterRef": "9c159f65-5bdb-41cc-8fca-773a67908645",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 13,
+        "narration": "Juntos, eles formavam os Gêmeos Gemini, <break time=\"0.3s\" /> a guarda pretoriana do crime organizado. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a black Cadillac driving through a foggy Brooklyn street, headlights creating long beams in the mist, dark silhouettes of buildings.",
+        "sceneEnvironment": "brooklyn_night_street",
+        "motionDescription": "Low angle shot of a black Cadillac driving slowly down a dark street, headlights cutting through fog.",
+        "audioDescription": "Sound of a heavy car door slamming.",
+        "audioDescriptionVolume": -16,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 14,
+        "narration": "O Gemini Lounge não era apenas um bar; <break time=\"0.3s\" /> era um matadouro industrial. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, desaturated exterior of the Gemini Lounge during a grey day, dirty sidewalk, industrial pipes, oppressive atmosphere.",
+        "sceneEnvironment": "gemini_lounge_exterior_day",
+        "motionDescription": "Slow tilt up from a blood-stained pavement to a dark, closed storefront.",
+        "audioDescription": "Distant dog barking, cold wind.",
+        "audioDescriptionVolume": -22,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 15,
+        "narration": "Nos fundos, um pequeno apartamento escondia segredos que a ciência forense temia. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a narrow dark hallway with peeling wallpaper, a single dim bulb flickering, shadows of industrial pipes.",
+        "sceneEnvironment": "horror_hotel_hallway",
+        "motionDescription": "Slow dolly forward into a dark hallway, shadows of pipes moving on the walls.",
+        "audioDescription": "Sound of water dripping in a sink, echoing.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 16,
+        "narration": "A eficiência do método Gemini era baseada na total ausência de vestígios. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a stack of plain cardboard caixas in a dark room, a single light beam hitting the floor, dust motes dancing.",
+        "sceneEnvironment": "horror_hotel_room",
+        "motionDescription": "Close-up of a stack of cardboard boxes in a corner, shadows shifting over them.",
+        "audioDescription": "Faint sound of a radio playing old jazz, static.",
+        "audioDescriptionVolume": -24,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 17,
+        "narration": "Cada desaparecimento era registrado como uma simples baixa burocrática no sistema. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, extreme close-up of a hand writing names in a leather-bound ledger, candlelight flickering, dark ink on yellowed paper.",
+        "sceneEnvironment": "mafia_office_desk",
+        "motionDescription": "Extreme close-up of a ledger being filled out with names and dates, ink spreading.",
+        "audioDescription": "Sound of a pen scratching on paper.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 18,
+        "narration": "O mundo exterior não via os corpos, <break time=\"0.3s\" /> apenas o vácuo deixado por eles. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a car trunk opening in a dark garage, silhouette of a person standing over it, harsh overhead light.",
+        "sceneEnvironment": "dark_garage",
+        "motionDescription": "Low angle shot of a car trunk opening, revealing a dark interior, shadows moving inside.",
+        "audioDescription": "Sound of a car trunk opening, creaking metal.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 19,
+        "narration": "O aterro de Fountain Avenue tornou-se o túmulo silencioso de dezenas de vítimas. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, wide shot of a desolate landfill at night, piles of garbage and scrap metal, moonlight, eerie and cold atmosphere.",
+        "sceneEnvironment": "fountain_avenue_landfill",
+        "motionDescription": "Slow pan across a desolate landfill at night, moonlight reflecting on scrap metal.",
+        "audioDescription": "Distant city sirens, cold wind.",
+        "audioDescriptionVolume": -22,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 20,
+        "narration": "Lá, a brutalidade era enterrada sob toneladas de lixo e esquecimento absoluto. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a large yellow bulldozer working in a grey, smoggy landfill, dust clouds, industrial machinery, desolate mood.",
+        "sceneEnvironment": "fountain_avenue_landfill_day",
+        "motionDescription": "Slow zoom in on a large bulldozer moving earth in the landfill, dust rising.",
+        "audioDescription": "Sound of a heavy truck engine, low rumble.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 21,
+        "narration": "O FBI observava, mas as provas desapareciam antes mesmo de serem coletadas. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a wall covered in crime scene photos and maps, red strings connecting locations, dim fluorescent lighting.",
+        "sceneEnvironment": "police_investigation_room",
+        "motionDescription": "Rapid cuts between black and white crime scene photos of empty rooms and cars.",
+        "audioDescription": "Sound of a camera shutter clicking repeatedly.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 22,
+        "narration": "A lei era lenta, <break time=\"0.3s\" /> enquanto a máquina de matar operava em ritmo industrial. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a typewriter in a dark police office, smoke from a nearby ashtray drifting, harsh light from a window.",
+        "sceneEnvironment": "police_station_office",
+        "motionDescription": "Extreme close-up of a typewriter ribbon moving, letters hitting the paper quickly.",
+        "audioDescription": "Muffled sound of a typewriter, fast pace.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 23,
+        "narration": "Testa e Senter não eram apenas assassinos; <break time=\"0.3s\" /> eles eram operários do caos. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Joseph Testa pouring whiskey into a glass, wearing a leather jacket, face in partial shadow, calm and cold demeanor.",
+        "sceneEnvironment": "dark_lounge_interior",
+        "motionDescription": "Medium shot of Joseph Testa pouring a drink, his hand steady and calm.",
+        "audioDescription": "Sound of a glass clinking against a bottle.",
+        "audioDescriptionVolume": -18,
+        "characterRef": "155dcfc6-0a17-499a-8537-59d51fe17fd8",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 24,
+        "narration": "Sua lealdade era à instituição, <break time=\"0.3s\" /> e sua única regra era a autopreservação. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Anthony Senter in a car at night, lighting a cigarette, harsh shadows, gold chain glinting, defiant expression.",
+        "sceneEnvironment": "dark_car_interior",
+        "motionDescription": "Anthony Senter lighting a cigarette, the smoke curling around his head in the dark.",
+        "audioDescription": "Sound of a match striking, soft flame.",
+        "audioDescriptionVolume": -18,
+        "characterRef": "9c159f65-5bdb-41cc-8fca-773a67908645",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 25,
+        "narration": "Mas até os soldados mais leais podem ser forçados a trair seu mentor. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a quiet Brooklyn street at dawn, a church spire visible in the mist, soft grey lighting, peaceful but tense.",
+        "sceneEnvironment": "brooklyn_street_morning",
+        "motionDescription": "Wide shot of a quiet street with a church in the background, morning mist.",
+        "audioDescription": "Distant sound of a church bell tolling.",
+        "audioDescriptionVolume": -24,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 26,
+        "narration": "O contrato que mudaria tudo estava prestes a ser entregue em mãos. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a thick manila envelope resting on a dark desk, a single light beam illuminating the word 'CONFIDENTIAL' on it.",
+        "sceneEnvironment": "mafia_office_desk",
+        "motionDescription": "Close-up of a thick manila envelope on a dark wooden table, shadows moving over it.",
+        "audioDescription": "Sound of a heavy envelope being dropped on a table.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 27,
+        "narration": "A cúpula da máfia tinha um plano, <break time=\"0.3s\" /> e Roy DeMeo não fazia parte dele. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a long and empty office hallway, flickering fluorescent lights, shadows of doors, cold and clinical atmosphere.",
+        "sceneEnvironment": "office_hallway",
+        "motionDescription": "Slow dolly forward down a long, empty hallway with many doors.",
+        "audioDescription": "Sound of a phone ringing in the distance, echoing.",
+        "audioDescriptionVolume": -22,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 28,
+        "narration": "A traição estava sendo preparada nos detalhes mais banais do cotidiano criminoso. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a black car starting up in a dark garage, exhaust smoke filling the air, harsh lighting, industrial setting.",
+        "sceneEnvironment": "dark_garage",
+        "motionDescription": "Low angle shot of a car's exhaust pipe emitting smoke as it starts up in the cold.",
+        "audioDescription": "Sound of a car engine starting, low growl.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 29,
+        "narration": "O fim de uma era estava apenas a um gatilho de distância. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, extreme close-up of a match flame going out, smoke drifting in the darkness, a sliver of light in the background.",
+        "sceneEnvironment": "dark_room",
+        "motionDescription": "Extreme close-up of a match flame being extinguished, smoke rising in a thin line.",
+        "audioDescription": "Sound of a match being blown out, soft hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 30,
+        "narration": "Frank DeCicco entrou no restaurante com uma proposta que não permitia recusas. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, interior of a dimly lit Italian restaurant, red checkered tablecloths, amber lighting, smoke-filled air, tense atmosphere.",
+        "sceneEnvironment": "italian_restaurant_interior",
+        "motionDescription": "Slow pan across a dimly lit restaurant booth with a half-eaten meal.",
+        "audioDescription": "Tense string ostinato begins, low heart-like pulse.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 31,
+        "narration": "Ele olhou para Testa e Senter e entregou o destino de Roy DeMeo. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Frank DeCicco sitting in a restaurant booth, sharp suit, slicked-back hair, calculating expression, face partially in shadow.",
+        "sceneEnvironment": "restaurant_booth",
+        "motionDescription": "Medium shot of Frank DeCicco sitting down, his face hard and unreadable.",
+        "audioDescription": "Sound of a chair scraping against the floor.",
+        "audioDescriptionVolume": -18,
+        "characterRef": "3ef41d3b-6eaa-46a5-bf82-db7574c99d62",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 32,
+        "narration": "A oferta era simples: <break time=\"0.3s\" /> a vida do mentor pela vida dos pupilos. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, close-up of Joseph Testa's hand gripping a wine glass, knuckles white, dim light reflecting on the glass.",
+        "sceneEnvironment": "restaurant_booth_table",
+        "motionDescription": "Close-up of Joseph Testa's hand tightening around a glass of wine.",
+        "audioDescription": "Muffled sound of a fork hitting a plate.",
+        "audioDescriptionVolume": -20,
+        "characterRef": "155dcfc6-0a17-499a-8537-59d51fe17fd8",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 33,
+        "narration": "Anthony Senter não hesitou; <break time=\"0.3s\" /> no mundo da máfia, a sobrevivência é a única lei. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Anthony Senter sitting in a restaurant booth, leaning back, cold and defiant expression, shadows from a nearby lamp.",
+        "sceneEnvironment": "restaurant_booth",
+        "motionDescription": "Anthony Senter leaning back in his chair, shadows moving across his face as he thinks.",
+        "audioDescription": "Sound of a deep breath, soft exhale.",
+        "audioDescriptionVolume": -18,
+        "characterRef": "9c159f65-5bdb-41cc-8fca-773a67908645",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 34,
+        "narration": "O plano foi traçado para ocorrer na casa de Patrick Testa, em Canarsie. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a dark suburban house at night, a single porch light on, a black car pulling into the driveway, quiet and tense.",
+        "sceneEnvironment": "suburban_driveway_night",
+        "motionDescription": "Slow dolly shot following a car driving into a quiet suburban driveway at night.",
+        "audioDescription": "Sound of a car driving over gravel, slow.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 35,
+        "narration": "Roy DeMeo chegou para o que acreditava ser uma reunião de rotina. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, interior of a 1970s living room, dim lighting, wood paneling, shadows cast by a floor lamp, oppressive silence.",
+        "sceneEnvironment": "living_room_interior_night",
+        "motionDescription": "POV shot entering a dimly lit living room, shadows of furniture stretching across the floor.",
+        "audioDescription": "Sound of a door opening, creaking hinges.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 36,
+        "narration": "Ele sentou-se à mesa e aceitou uma xícara de café de seus pupilos. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Roy DeMeo sitting at a kitchen table, steam from coffee rising, his face showing signs of paranoia and fatigue.",
+        "sceneEnvironment": "kitchen_table_night",
+        "motionDescription": "Close-up of Roy DeMeo sitting at a table, steam rising from a cup of coffee.",
+        "audioDescription": "Sound of coffee being poured into a cup.",
+        "audioDescriptionVolume": -18,
+        "characterRef": "d59c1ecf-f74b-4a7f-a840-66e656b56395",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 37,
+        "narration": "O silêncio da sala foi quebrado por disparos que selaram um destino cruel. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a silenced pistol held by a hand in the shadows, muzzle flash reflected in a nearby mirror, dark and violent atmosphere.",
+        "sceneEnvironment": "living_room_shadows",
+        "motionDescription": "Extreme close-up of a silenced pistol being raised in the shadows, light glinting on the barrel.",
+        "audioDescription": "Sharp metallic click, sound of a silencer.",
+        "audioDescriptionVolume": -16,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 38,
+        "narration": "O mentor caiu pelas mãos daqueles que ele mesmo ensinou a matar. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a fallen chair on a patterned rug, shadows of two figures standing over it, harsh light from a doorway.",
+        "sceneEnvironment": "living_room_floor",
+        "motionDescription": "Low angle shot of a chair falling over in slow motion, shadows shifting rapidly.",
+        "audioDescription": "Sound of a heavy object hitting the floor, muffled.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 39,
+        "narration": "Sem emoção, os Gêmeos Gemini iniciaram o processo de ocultação do corpo. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, hands in the dark wrapping something in heavy clear plastic, light reflecting on the plastic, shadows and tension.",
+        "sceneEnvironment": "living_room_floor",
+        "motionDescription": "Close-up of hands wrapping a body in heavy plastic sheeting, shadows of the hands moving.",
+        "audioDescription": "Sound of plastic rustling, heavy breathing.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 40,
+        "narration": "O cadáver de DeMeo foi colocado no porta-malas de seu próprio Cadillac. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a black Cadillac parked on a snowy Brooklyn street at night, streetlights reflecting on the ice, desolate and cold.",
+        "sceneEnvironment": "snowy_street_night",
+        "motionDescription": "Wide shot of a black Cadillac parked on a dark, snowy street, exhaust smoke rising.",
+        "audioDescription": "Sound of a car trunk slamming shut.",
+        "audioDescriptionVolume": -16,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 41,
+        "narration": "Um candelabro misterioso foi deixado sobre o corpo, <break time=\"0.3s\" /> um detalhe macabro e bizarro. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, interior of a car trunk, a silver candelabro resting on a dark shape wrapped in plastic, frost on the metal.",
+        "sceneEnvironment": "car_trunk_interior",
+        "motionDescription": "Slow zoom in on a silver candelabro resting on top of a frozen body in the trunk.",
+        "audioDescription": "Eerie high-pitched string note, cold wind.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 42,
+        "narration": "O veículo foi abandonado em um estacionamento desolado, <break time=\"0.3s\" /> marcando o fim de Roy. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, an empty parking lot at night, fog, a single black car parked far away, taillights fading out, lonely atmosphere.",
+        "sceneEnvironment": "abandoned_parking_lot_night",
+        "motionDescription": "Low angle shot of the Cadillac's taillights disappearing into the darkness and fog.",
+        "audioDescription": "Sound of a car driving away, fading.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 43,
+        "narration": "Anthony 'Gaspipe' Casso viu a oportunidade e absorveu os assassinos órfãos. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Anthony Casso sitting in a dark office, watching a small grainy television, amber light on his sharp features, ruthless expression.",
+        "sceneEnvironment": "mafia_office_night",
+        "motionDescription": "Medium shot of Anthony Casso watching the news on a grainy TV, his face cold.",
+        "audioDescription": "Sound of a match striking, soft flame hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": "b3be9db9-1add-4f43-8884-1f6d67f37850",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 44,
+        "narration": "Agora na família Lucchese, eles se tornaram ferramentas de elite ainda mais letais. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a narrow industrial corridor, steam rising from pipes, low-key lighting, shadows stretching along the walls.",
+        "sceneEnvironment": "industrial_corridor",
+        "motionDescription": "Slow dolly forward down a narrow corridor with industrial pipes and dim lights.",
+        "audioDescription": "Sound of a heavy door locking, metallic click.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 45,
+        "narration": "A máfia russa em Brighton Beach estava começando a desafiar o poder italiano. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, wide shot of Brighton Beach boardwalk, muted grey and blue tones, seagulls, industrial pier in the background.",
+        "sceneEnvironment": "brighton_beach_dawn",
+        "motionDescription": "Wide shot of the Brighton Beach boardwalk at dawn, seagulls flying over the grey ocean.",
+        "audioDescription": "Ambient street noise from Brighton Beach, seagulls.",
+        "audioDescriptionVolume": -22,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 46,
+        "narration": "Vladimir Reznikov era o rosto dessa nova ameaça, <break time=\"0.3s\" /> violento e sem medo. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Vladimir Reznikov stepping out of a car, leather jacket, rugged features, confrontational stance, busy street background.",
+        "sceneEnvironment": "brighton_beach_street",
+        "motionDescription": "Medium shot of Vladimir Reznikov getting out of a car, looking aggressive and tough.",
+        "audioDescription": "Sound of a car door opening, city traffic.",
+        "audioDescriptionVolume": -20,
+        "characterRef": "d7661857-d3cc-48ad-84ec-d866c756aa39",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 47,
+        "narration": "Joseph Testa foi enviado para dar um aviso definitivo à luz do dia. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Joseph Testa aiming a pistol, cold and focused expression, daylight with harsh shadows, urban background.",
+        "sceneEnvironment": "brighton_beach_street",
+        "motionDescription": "Close-up of Joseph Testa's face as he aims a pistol, his breath visible in the cold air.",
+        "audioDescription": "Sound of a pistol being cocked, sharp click.",
+        "audioDescriptionVolume": -16,
+        "characterRef": "155dcfc6-0a17-499a-8537-59d51fe17fd8",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 48,
+        "narration": "O disparo em Brighton Beach ecoou como uma declaração de guerra absoluta. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, slow motion of a brass shell casing bouncing on the concrete, sunlight reflecting on the metal, blurred street in background.",
+        "sceneEnvironment": "brighton_beach_pavement",
+        "motionDescription": "Slow motion shot of a shell casing hitting the pavement, sparks flying on impact.",
+        "audioDescription": "Sound of a gunshot, echoing through the street.",
+        "audioDescriptionVolume": -14,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 49,
+        "narration": "Testa desapareceu na multidão, <break time=\"0.3s\" /> deixando um rastro de medo entre os russos. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a car speeding away from the camera, dust and exhaust smoke, people in the background reacting with shock.",
+        "sceneEnvironment": "brighton_beach_street",
+        "motionDescription": "Low angle shot of a car's tires spinning and kicking up dust as it accelerates.",
+        "audioDescription": "Sound of a car speeding away, tires screeching.",
+        "audioDescriptionVolume": -16,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 50,
+        "narration": "A eficiência italiana provou ser superior à brutalidade desorganizada da nova máfia. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a hand closing a leather-bound ledger, smoke from a cigarette drifting across the frame, amber lighting.",
+        "sceneEnvironment": "mafia_office_desk",
+        "motionDescription": "Close-up of a hand closing a thick book on a desk, dust rising from the cover.",
+        "audioDescription": "Sound of a heavy ledger being closed, thud.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 51,
+        "narration": "Em 1988, os Gêmeos Gemini alcançaram o topo da hierarquia criminosa. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, interior of a dark and ornate room, candlelight, shadows of figures standing in a circle, solemn atmosphere.",
+        "sceneEnvironment": "ornate_mafia_room",
+        "motionDescription": "Extreme close-up of a match flame illuminating a dark, ornate room.",
+        "audioDescription": "Sound of a match striking, soft hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 52,
+        "narration": "Eles foram oficialmente induzidos como membros feitos da poderosa família Lucchese. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Joseph Testa in a dark room, single candle light, shadows of other men around him, serious and formal atmosphere.",
+        "sceneEnvironment": "initiation_ceremony_room",
+        "motionDescription": "Medium shot of Joseph Testa standing still, his face illuminated by a single candle.",
+        "audioDescription": "Muffled sound of a ritualistic chant or oath.",
+        "audioDescriptionVolume": -22,
+        "characterRef": "155dcfc6-0a17-499a-8537-59d51fe17fd8",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 53,
+        "narration": "O sangue selou o pacto de silêncio e lealdade eterna à nova cúpula. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, extreme close-up of blood staining a small paper card with a religious image, candlelight flickering.",
+        "sceneEnvironment": "initiation_ceremony_table",
+        "motionDescription": "Extreme close-up of a drop of blood falling onto a small religious picture on a table.",
+        "audioDescription": "Sound of a drop of blood hitting a paper.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 54,
+        "narration": "Anthony Senter agora era um homem protegido, <break time=\"0.3s\" /> um guardião dos segredos de Casso. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Anthony Senter in the shadows of the initiation room, muscular build, gold chain, intense and loyal gaze.",
+        "sceneEnvironment": "initiation_ceremony_room",
+        "motionDescription": "Medium shot of Anthony Senter nodding slowly, his face in deep shadow.",
+        "audioDescription": "Sound of a match burning out, soft hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": "9c159f65-5bdb-41cc-8fca-773a67908645",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 55,
+        "narration": "Mas o status de 'Made Men' também trazia um alvo maior em suas costas. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a large mansion at night, cold moonlight, a single lit window, long shadows of trees, oppressive and lonely.",
+        "sceneEnvironment": "mafia_mansion_exterior_night",
+        "motionDescription": "Wide shot of a large mansion at night, all windows dark except for one.",
+        "audioDescription": "Sound of a heavy door closing, echoing thud.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 56,
+        "narration": "O FBI estava montando um quebra-cabeça que levaria anos para ser completado. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a reel-to-reel tape recorder spinning in a dark room, green and red lights flickering on the equipment.",
+        "sceneEnvironment": "fbi_listening_post",
+        "motionDescription": "Extreme close-up of a tape reel starting to spin slowly in a dark room.",
+        "audioDescription": "Sound of a tape recorder starting, mechanical click.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 57,
+        "narration": "Vozes sussurradas em telefones grampeados começaram a revelar as rachaduras no império. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a wall of surveillance monitors, grainy footage of mobsters, dim blue lighting, smoke from a coffee cup.",
+        "sceneEnvironment": "fbi_surveillance_room",
+        "motionDescription": "Slow dolly forward towards a wall of surveillance monitors showing grainy black and white footage.",
+        "audioDescription": "Muffled sound of a conversation through static.",
+        "audioDescriptionVolume": -22,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 58,
+        "narration": "Nomes como Vito Arena e Dominick Montiglio surgiram como possíveis elos fracos. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, close-up of a hand writing 'ARENA' and 'MONTIGLIO' on a notepad, harsh overhead light, scattered files.",
+        "sceneEnvironment": "investigator_desk",
+        "motionDescription": "Close-up of an investigator's hand writing names and connecting them with lines.",
+        "audioDescription": "Sound of a pen scratching on a notepad.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 59,
+        "narration": "Eles conheciam o mapa técnico dos crimes ocorridos no Gemini Lounge. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a map of Brooklyn spread out on a desk, red circles around specific addresses, dim light, magnifying glass nearby.",
+        "sceneEnvironment": "investigator_desk_map",
+        "motionDescription": "Slow zoom in on a map of Brooklyn with several locations marked in red ink.",
+        "audioDescription": "Sound of a heavy book being opened, paper rustling.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 60,
+        "narration": "A pressão do FBI estava forçando homens a escolherem entre a Omertà e a liberdade. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, an empty interrogation room, single metal chair under a harsh light, dark corners, cold and clinical atmosphere.",
+        "sceneEnvironment": "interrogation_room_empty",
+        "motionDescription": "Slow dolly forward into a dark, empty interrogation room with a single chair.",
+        "audioDescription": "Sound of a heart beating faster, low bass pulse.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 61,
+        "narration": "O promotor Walter Mack Jr. buscava a prova definitiva da empresa criminosa. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a prosecutor in his office at night, glasses reflecting the light of a desk lamp, stacks of law books, determined expression.",
+        "sceneEnvironment": "prosecutor_office_night",
+        "motionDescription": "Extreme close-up of a match flame reflecting in a pair of glasses.",
+        "audioDescription": "Sound of a match striking, soft flame.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 62,
+        "narration": "A Lei RICO seria a ferramenta para derrubar os Gêmeos Gemini e seu império. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a typewriter in a dark office, court documents, harsh light from a desk lamp, smoke drifting through the air.",
+        "sceneEnvironment": "court_office_night",
+        "motionDescription": "Close-up of a court document being typed, words like 'RICO' and 'CONSPIRACY' appearing.",
+        "audioDescription": "Sound of a typewriter, steady pace.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 63,
+        "narration": "Os casos de Khaled Daoud e Ronald Falcaro foram as peças que faltavam. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a car's headlights cutting through heavy rain at night, wet asphalt, dark silhouettes of trees, tense atmosphere.",
+        "sceneEnvironment": "rainy_street_night_car",
+        "motionDescription": "Low angle shot of a car's headlights approaching through the rain and fog.",
+        "audioDescription": "Sound of a car driving through a puddle, splash.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 64,
+        "narration": "Eles eram vendedores de carros que sabiam demais sobre os esquemas da equipe. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, two black and white identification photos of victims attached to a manila folder, grainy texture, cold lighting.",
+        "sceneEnvironment": "police_file_closeup",
+        "motionDescription": "Close-up of two black and white ID photos of the victims on a police file.",
+        "audioDescription": "Sound of a camera shutter clicking.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 65,
+        "narration": "A eliminação de testemunhas federais era a prova final da conspiração contínua. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a prison cell door closing, shadows of bars cast by a single overhead light, cold and grey concrete walls.",
+        "sceneEnvironment": "prison_cell_hallway",
+        "motionDescription": "Wide shot of a prison cell door closing, shadows of the bars falling on the floor.",
+        "audioDescription": "Sound of a heavy door slamming shut, echoing.",
+        "audioDescriptionVolume": -16,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 66,
+        "narration": "O cerco estava se fechando, <break time=\"0.3s\" /> e o silêncio industrial estava prestes a acabar. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a drop of black ink spreading on a white paper, candlelight, shadows moving in the background, tense mood.",
+        "sceneEnvironment": "dark_office_desk",
+        "motionDescription": "Slow zoom in on a single drop of ink spreading on a white piece of paper.",
+        "audioDescription": "Sound of a heartbeat, slow and steady.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 67,
+        "narration": "A era de Roy DeMeo era passado; <break time=\"0.3s\" /> agora, os pupilos enfrentariam o juízo final. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, extreme close-up of a match flame going out, smoke drifting, a sliver of light from a window in the background.",
+        "sceneEnvironment": "dark_room_shadows",
+        "motionDescription": "Extreme close-up of a match flame being extinguished, smoke rising in the dark.",
+        "audioDescription": "Sound of a match burning out, soft hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 68,
+        "narration": "A máquina de matar operava agora para um novo e paranoico mestre. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a dark alleyway with flickering neon signs, steam rising from manholes, shadows moving rapidly, aggressive atmosphere.",
+        "sceneEnvironment": "alleyway_night_flicker",
+        "motionDescription": "Fast dolly forward down a dark, narrow alleyway with flickering lights.",
+        "audioDescription": "Aggressive industrial beat begins, heavy percussion.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 69,
+        "narration": "Anthony Casso exigia resultados rápidos e uma lealdade que superava o sangue. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a black Cadillac revving its engine in a dark street, exhaust smoke filling the frame, harsh lighting, industrial background.",
+        "sceneEnvironment": "dark_street_car_revving",
+        "motionDescription": "Low angle shot of a black Cadillac's tires spinning and creating smoke as it speeds away.",
+        "audioDescription": "Sound of a car engine revving, loud.",
+        "audioDescriptionVolume": -16,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 70,
+        "narration": "Casso era um fantasma que governava através do terror e da paranoia absoluta. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Anthony Casso in a dark office, only his cigar tip glowing, sharp features in shadow, ruthless and paranoid expression.",
+        "sceneEnvironment": "dark_office_casso",
+        "motionDescription": "Medium shot of Anthony Casso sitting in a dark room, his face illuminated by a cigar tip.",
+        "audioDescription": "Sound of a match striking, soft flame hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": "b3be9db9-1add-4f43-8884-1f6d67f37850",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 71,
+        "narration": "Cada chamada telefônica era um teste de lealdade para os Gêmeos Gemini. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, extreme close-up of a 1970s rotary phone dial spinning, dust motes in the light, dark and tense mood.",
+        "sceneEnvironment": "dark_desk_phone",
+        "motionDescription": "Extreme close-up of a rotary phone dial spinning back and forth repeatedly.",
+        "audioDescription": "Sound of a phone ringing, rhythmic and persistent.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 72,
+        "narration": "O Gemini Lounge continuava sendo o centro operacional de suas atividades macabras. <break time=\"0.3s\" /> <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, interior of a dark room with industrial meat hooks hanging from the ceiling, dim light, cold and metallic atmosphere.",
+        "sceneEnvironment": "horror_hotel_room_hooks",
+        "motionDescription": "Slow pan across a row of industrial meat hooks hanging from a ceiling, shadows shifting.",
+        "audioDescription": "Sound of a heavy door locking, metallic click.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 73,
+        "narration": "O método de desmembramento foi aperfeiçoado para ser uma linha de montagem. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, close-up of a stained porcelain sink, water swirling down the drain, shadows of pipes on the wall, clinical and cold.",
+        "sceneEnvironment": "horror_hotel_sink",
+        "motionDescription": "Close-up of water swirling down a drain in a dark, stained sink.",
+        "audioDescription": "Sound of water running in a sink, echoing.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 74,
+        "narration": "Joseph Testa gerenciava a logística da morte com uma frieza burocrática assustadora. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Joseph Testa looking at a blueprint on a wooden desk, amber light from a lamp, calm and professional expression.",
+        "sceneEnvironment": "dark_office_testa",
+        "motionDescription": "Medium shot of Joseph Testa looking at a blueprint on a table, his face calm.",
+        "audioDescription": "Sound of a match striking, soft flame hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": "155dcfc6-0a17-499a-8537-59d51fe17fd8",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 75,
+        "narration": "Anthony Senter era o braço físico, <break time=\"0.3s\" /> o executor que transformava ordens em silêncio. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Anthony Senter in a dark kitchen, sharpening a butcher knife, shadows covering most of his face, focused and violent aura.",
+        "sceneEnvironment": "dark_kitchen_senter",
+        "motionDescription": "Anthony Senter sharpening a blade in the shadows, his muscular arms moving steadily.",
+        "audioDescription": "Sound of a knife being sharpened, metallic scrape.",
+        "audioDescriptionVolume": -18,
+        "characterRef": "9c159f65-5bdb-41cc-8fca-773a67908645",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 76,
+        "narration": "Eles circulavam pelo Brooklyn como predadores invisíveis em uma selva de pedra. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a black car driving slowly through a suburban Brooklyn street at night, porch lights, long shadows of trees, tense mood.",
+        "sceneEnvironment": "suburban_street_night_car",
+        "motionDescription": "Slow dolly shot following a black car driving through a quiet suburban neighborhood at night.",
+        "audioDescription": "Sound of a car driving through a quiet street, low rumble.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 77,
+        "narration": "Mas a paranoia de Casso começou a se voltar contra seus próprios homens. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, extreme close-up of a match flame going out, thin line of smoke rising in the dark, single light beam from a window.",
+        "sceneEnvironment": "dark_room_smoke",
+        "motionDescription": "Extreme close-up of a match flame being extinguished, smoke rising.",
+        "audioDescription": "Sound of a match burning out, soft hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 78,
+        "narration": "Ordens de execução começaram a incluir nomes cada vez mais próximos da dupla. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a hand taking a black and white photo out of an envelope, candlelight, shadows moving, tense and secretive atmosphere.",
+        "sceneEnvironment": "dark_desk_photo",
+        "motionDescription": "Close-up of a hand taking a photo out of a manila envelope, light hitting the photo.",
+        "audioDescription": "Sound of a heavy envelope being opened, paper rustling.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 79,
+        "narration": "A lealdade foi testada quando o próprio irmão de Testa foi marcado. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, exterior of a dark brick apartment building at night, a single window glowing with amber light, cold moonlight, eerie.",
+        "sceneEnvironment": "apartment_building_exterior_night",
+        "motionDescription": "Slow zoom in on a single lit window in a dark apartment building at night.",
+        "audioDescription": "Sound of a heart beating faster, low bass pulse.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 80,
+        "narration": "Joey Testa manteve o silêncio, <break time=\"0.3s\" /> colocando a instituição acima de sua própria família. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Joseph Testa sitting in a dark living room, face in deep shadow, unreadable and cold expression, 1980s attire.",
+        "sceneEnvironment": "dark_living_room_testa",
+        "motionDescription": "Medium shot of Joseph Testa sitting in the dark, his face a mask of coldness.",
+        "audioDescription": "Sound of a match striking, soft flame hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": "155dcfc6-0a17-499a-8537-59d51fe17fd8",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 81,
+        "narration": "Essa era a frieza mecânica que os mantinha vivos em um mundo de traição. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a long and dark corridor, flickering lights, shadows of doors, cold and clinical atmosphere, industrial setting.",
+        "sceneEnvironment": "dark_corridor_flicker",
+        "motionDescription": "Slow dolly forward down a long, dark corridor with flickering fluorescent lights.",
+        "audioDescription": "Sound of a heavy door locking, metallic click.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 82,
+        "narration": "Enquanto isso, o FBI continuava sua vigilância incansável pelas ruas de Nova York. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a car idling on a quiet street at dawn, exhaust smoke, grey and blue tones, industrial background, watchful mood.",
+        "sceneEnvironment": "brooklyn_street_dawn_car",
+        "motionDescription": "Low angle shot of a car's exhaust pipe emitting smoke in the cold morning air.",
+        "audioDescription": "Sound of a car engine idling, low rumble.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 83,
+        "narration": "Cada encontro, cada troca de envelopes era documentada por agentes escondidos em sombras. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, interior of a dark surveillance van, grainy monitors, agents in silhouette, dim green and red lighting.",
+        "sceneEnvironment": "fbi_surveillance_van_interior",
+        "motionDescription": "Rapid cuts between grainy black and white surveillance photos of mobsters meeting.",
+        "audioDescription": "Sound of a camera shutter clicking repeatedly.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 84,
+        "narration": "A teia de evidências estava sendo tecida com paciência e precisão cirúrgica. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, close-up of a white board with names like 'CASSO', 'SENTER', 'TESTA', red strings connecting them, harsh overhead light.",
+        "sceneEnvironment": "fbi_investigation_board",
+        "motionDescription": "Extreme close-up of a hand drawing lines between names on a large white board.",
+        "audioDescription": "Sound of a pen scratching on paper, fast pace.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 85,
+        "narration": "O medo de uma condenação perpétua começou a quebrar a Omertà de alguns. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, extreme close-up of a match flame going out, thin line of smoke rising, single light beam from a window in the background.",
+        "sceneEnvironment": "dark_room_smoke_rising",
+        "motionDescription": "Extreme close-up of a match flame being extinguished, smoke rising in the dark.",
+        "audioDescription": "Sound of a match burning out, soft hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 86,
+        "narration": "Vito Arena foi o primeiro a perceber que o navio estava afundando rapidamente. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a brightly lit interrogation room, single metal chair, white walls, harsh fluorescent lighting, clinical atmosphere.",
+        "sceneEnvironment": "interrogation_room_bright",
+        "motionDescription": "POV shot entering a brightly lit, empty interrogation room.",
+        "audioDescription": "Sound of a heavy door opening, creaking hinges.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 87,
+        "narration": "Ele sentou-se diante dos federais e começou a desenhar o mapa do horror. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, silhouette of a man sitting in an interrogation room, cigarette smoke drifting, harsh light from above, tense atmosphere.",
+        "sceneEnvironment": "interrogation_room_silhouette",
+        "motionDescription": "Medium shot of a man in silhouette sitting down in an interrogation room.",
+        "audioDescription": "Sound of a chair scraping against the floor.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 88,
+        "narration": "Os detalhes do apartamento nos fundos do Gemini Lounge finalmente vieram à tona. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, close-up of a hand writing notes on a pad, words like 'GEMINI LOUNGE' and 'APARTMENT' visible, harsh light.",
+        "sceneEnvironment": "interrogation_room_desk",
+        "motionDescription": "Close-up of an agent's hand writing down details of the Gemini method.",
+        "audioDescription": "Sound of a pen scratching on a notepad, steady.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 89,
+        "narration": "O 'Horror Hotel' não era mais um segredo; era uma cena de crime federal. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a dark hallway with peeling wallpaper, flickering dim light, shadows of pipes, oppressive and eerie atmosphere.",
+        "sceneEnvironment": "horror_hotel_hallway_flicker",
+        "motionDescription": "Slow dolly forward down a dark hallway with peeling wallpaper and flickering lights.",
+        "audioDescription": "Sound of water dripping, echoing thud.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 90,
+        "narration": "Dominick Montiglio também decidiu que sua vida valia mais que o silêncio mafioso. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a match flame illuminating a man's face in the dark, shadows moving, intense and secretive atmosphere.",
+        "sceneEnvironment": "dark_interrogation_room",
+        "motionDescription": "Extreme close-up of a match flame illuminating a dark room.",
+        "audioDescription": "Sound of a match striking, soft flame hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 91,
+        "narration": "Seus depoimentos foram a base para a construção do caso RICO contra a dupla. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, extreme close-up of a reel-to-reel tape recorder spinning, green and red lights flickering, dark background.",
+        "sceneEnvironment": "fbi_listening_post_closeup",
+        "motionDescription": "Extreme close-up of a tape reel starting to spin slowly.",
+        "audioDescription": "Sound of a tape recorder starting, mechanical click.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 92,
+        "narration": "A acusação era clara: <break time=\"0.3s\" /> conspiração, assassinato e extorsão em escala industrial. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a typewriter in a dark office, court documents, harsh light from a desk lamp, smoke drifting, serious atmosphere.",
+        "sceneEnvironment": "court_office_typing",
+        "motionDescription": "Close-up of a typewriter typing out the formal charges against Senter and Testa.",
+        "audioDescription": "Sound of a typewriter, fast and rhythmic.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 93,
+        "narration": "Os assassinatos de Khaled Daoud e Ronald Falcaro foram usados como provas centrais. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a car's headlights cutting through heavy fog at night, streetlights reflecting on wet asphalt, dark and tense mood.",
+        "sceneEnvironment": "foggy_street_night_car",
+        "motionDescription": "Low angle shot of a car's headlights approaching through the fog.",
+        "audioDescription": "Sound of a car driving through a quiet street at night.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 94,
+        "narration": "Eles foram executados para impedir que testemunhassem contra o esquema de roubo de carros. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, two black and white identification photos of victims on a manila folder, grainy texture, cold and clinical lighting.",
+        "sceneEnvironment": "police_folder_victims",
+        "motionDescription": "Close-up of two black and white victim photos on a police folder.",
+        "audioDescription": "Sound of a camera shutter clicking.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 95,
+        "narration": "A justiça federal estava pronta para desmantelar a máquina de matar definitivamente. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a prison cell door closing, shadows of bars cast by a single overhead light, cold grey concrete walls.",
+        "sceneEnvironment": "prison_cell_door_closing",
+        "motionDescription": "Wide shot of a prison cell door closing, shadows of bars falling on the floor.",
+        "audioDescription": "Sound of a heavy door slamming shut, echoing.",
+        "audioDescriptionVolume": -16,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 96,
+        "narration": "Mas os Gêmeos Gemini ainda acreditavam que sua arrogância os protegeria da lei. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, extreme close-up of a match flame going out, thin line of smoke rising in the dark, single light beam from a window.",
+        "sceneEnvironment": "dark_room_smoke_extinguish",
+        "motionDescription": "Extreme close-up of a match flame being extinguished, smoke rising.",
+        "audioDescription": "Sound of a match burning out, soft hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 97,
+        "narration": "Eles subestimaram a determinação de um sistema que não aceitava mais o caos. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, exterior of a dark brick building at night, a single window glowing with amber light, cold moonlight, eerie atmosphere.",
+        "sceneEnvironment": "brick_building_exterior_night",
+        "motionDescription": "Slow zoom in on a single lit window in a dark brick building at night.",
+        "audioDescription": "Sound of a heart beating faster, low bass pulse.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 98,
+        "narration": "O julgamento de 1988 seria o palco final de sua exibição de poder. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, interior of a dark courtroom, high wooden ceilings, shadows of figures sitting in the gallery, solemn atmosphere.",
+        "sceneEnvironment": "courtroom_interior_dark",
+        "motionDescription": "Extreme close-up of a match flame illuminating a dark room.",
+        "audioDescription": "Sound of a match striking, soft flame hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 99,
+        "narration": "O juiz Broderick presidia um caso que chocaria a opinião pública de Nova York. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, slow motion of a wooden gavel hitting a bench, dust motes in the light, dark and serious courtroom background.",
+        "sceneEnvironment": "courtroom_bench_closeup",
+        "motionDescription": "Low angle shot of a judge's gavel hitting the bench in slow motion, dust rising.",
+        "audioDescription": "Sound of a gavel hitting a wooden block, echoing.",
+        "audioDescriptionVolume": -16,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 100,
+        "narration": "Joseph Testa sentou-se à mesa da defesa com um sorriso de desprezo absoluto. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Joseph Testa sitting in a courtroom, expensive suit, arrogant and cold expression, shadows of other people around him.",
+        "sceneEnvironment": "courtroom_defense_table",
+        "motionDescription": "Medium shot of Joseph Testa sitting at the defense table, his face arrogant.",
+        "audioDescription": "Muffled sound of a crowd whispering, tense.",
+        "audioDescriptionVolume": -22,
+        "characterRef": "155dcfc6-0a17-499a-8537-59d51fe17fd8",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 101,
+        "narration": "Anthony Senter parecia desafiar cada testemunha que subia ao palanque para acusá-los. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Anthony Senter sitting in a courtroom, muscular build, gold chain, defiant and violent aura, shadows from a nearby window.",
+        "sceneEnvironment": "courtroom_defense_table",
+        "motionDescription": "Anthony Senter leaning back in his chair, his eyes scanning the courtroom defiantly.",
+        "audioDescription": "Sound of a deep breath, soft exhale.",
+        "audioDescriptionVolume": -18,
+        "characterRef": "9c159f65-5bdb-41cc-8fca-973a67908645",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 102,
+        "narration": "Mas as evidências documentadas pelo FBI eram impossíveis de serem ignoradas pelo júri. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a long and dark courtroom hallway, flickering lights, shadows of doors, cold and clinical atmosphere.",
+        "sceneEnvironment": "court_hallway_flicker",
+        "motionDescription": "Slow dolly forward down a long, dark corridor with flickering lights.",
+        "audioDescription": "Sound of a heavy door closing, echoing thud.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 103,
+        "narration": "A máquina de matar estava sendo desmontada peça por peça diante de todos. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a black Cadillac revving its engine in a dark street, exhaust smoke, harsh lighting, industrial background.",
+        "sceneEnvironment": "dark_street_car_revving_exhaust",
+        "motionDescription": "Low angle shot of a black Cadillac's tires spinning and creating smoke.",
+        "audioDescription": "Sound of a car engine revving, loud.",
+        "audioDescriptionVolume": -16,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 104,
+        "narration": "A paranoia de Casso e a arrogância dos gêmeos selaram seu destino final. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, extreme close-up of a match flame going out, thin line of smoke, single light beam from a window in the background.",
+        "sceneEnvironment": "dark_room_smoke_rising_extinguish",
+        "motionDescription": "Extreme close-up of a match flame being extinguished, smoke rising.",
+        "audioDescription": "Sound of a match burning out, soft hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 105,
+        "narration": "O fim estava próximo, <break time=\"0.3s\" /> e não haveria escapatória para os filhos de DeMeo. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, exterior of a dark brick building at night, a single window glowing with amber light, cold moonlight, eerie mood.",
+        "sceneEnvironment": "dark_building_exterior_night_window",
+        "motionDescription": "Slow zoom in on a single lit window in a dark building at night.",
+        "audioDescription": "Sound of a heart beating faster, low bass pulse.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 106,
+        "narration": "O tribunal de Foley Square tornou-se o palco de sua queda definitiva e pública. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, interior of a dark courtroom at Foley Square, high ceilings, shadows of people, solemn and tense atmosphere.",
+        "sceneEnvironment": "foley_square_courtroom_dark",
+        "motionDescription": "Extreme close-up of a match flame illuminating a dark room.",
+        "audioDescription": "Sound of a match striking, soft flame hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 107,
+        "narration": "Cada depoimento era um prego no caixão de sua liberdade e de seu império. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, slow motion of a wooden gavel hitting a bench, dust motes in the light, dark and serious courtroom background.",
+        "sceneEnvironment": "courtroom_bench_gavel_closeup",
+        "motionDescription": "Low angle shot of a judge's gavel hitting the bench in slow motion.",
+        "audioDescription": "Sound of a gavel hitting a wooden block, echoing.",
+        "audioDescriptionVolume": -16,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 108,
+        "narration": "Joseph Testa ainda acreditava que o sistema falharia em provar sua culpa total. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Joseph Testa sitting in a courtroom, expensive suit, arrogant expression, shadows of other people around him.",
+        "sceneEnvironment": "courtroom_defense_table_testa",
+        "motionDescription": "Medium shot of Joseph Testa sitting at the defense table, his face arrogant.",
+        "audioDescription": "Muffled sound of a crowd whispering, tense.",
+        "audioDescriptionVolume": -22,
+        "characterRef": "155dcfc6-0a17-499a-8537-59d51fe17fd8",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 109,
+        "narration": "Anthony Senter mantinha a postura de um soldado que nunca se renderia. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Anthony Senter sitting in a courtroom, muscular build, defiant aura, shadows from a nearby window.",
+        "sceneEnvironment": "courtroom_defense_table_senter",
+        "motionDescription": "Anthony Senter leaning back in his chair, his eyes scanning the courtroom.",
+        "audioDescription": "Sound of a deep breath, soft exhale.",
+        "audioDescriptionVolume": -18,
+        "characterRef": "9c159f65-5bdb-41cc-8fca-773a67908645",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 110,
+        "narration": "Mas a lei RICO foi projetada especificamente para destruir organizações como a deles. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a long and dark courtroom hallway, flickering lights, shadows of doors, cold and clinical atmosphere.",
+        "sceneEnvironment": "court_hallway_flicker_lights",
+        "motionDescription": "Slow dolly forward down a long, dark corridor with flickering lights.",
+        "audioDescription": "Sound of a heavy door closing, echoing thud.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 111,
+        "narration": "A máquina de matar estava sendo desmontada peça por peça diante de todos. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a black Cadillac revving its engine in a dark street, exhaust smoke, harsh lighting, industrial background.",
+        "sceneEnvironment": "dark_street_car_revving_smoke",
+        "motionDescription": "Low angle shot of a black Cadillac's tires spinning and creating smoke.",
+        "audioDescription": "Sound of a car engine revving, loud.",
+        "audioDescriptionVolume": -16,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 112,
+        "narration": "A paranoia de Casso e a arrogância dos gêmeos selaram seu destino final. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, extreme close-up of a match flame going out, thin line of smoke, single light beam from a window in the background.",
+        "sceneEnvironment": "dark_room_smoke_rising_extinguish_flame",
+        "motionDescription": "Extreme close-up of a match flame being extinguished, smoke rising.",
+        "audioDescription": "Sound of a match burning out, soft hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 113,
+        "narration": "O fim estava próximo, <break time=\"0.3s\" /> e não haveria escapatória para os filhos de DeMeo. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, exterior of a dark brick building at night, a single window glowing with amber light, cold moonlight, eerie mood.",
+        "sceneEnvironment": "dark_building_exterior_night_window_light",
+        "motionDescription": "Slow zoom in on a single lit window in a dark building at night.",
+        "audioDescription": "Sound of a heart beating faster, low bass pulse.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 114,
+        "narration": "O tribunal de Foley Square tornou-se o palco de sua queda definitiva e pública. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, interior of a dark courtroom at Foley Square, high ceilings, shadows of people, solemn and tense atmosphere.",
+        "sceneEnvironment": "foley_square_courtroom_dark_shadows",
+        "motionDescription": "Extreme close-up of a match flame illuminating a dark room.",
+        "audioDescription": "Sound of a match striking, soft flame hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 115,
+        "narration": "Cada depoimento era um prego no caixão de sua liberdade e de seu império. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, slow motion of a wooden gavel hitting a bench, dust motes in the light, dark and serious courtroom background.",
+        "sceneEnvironment": "courtroom_bench_gavel_closeup_slowmo",
+        "motionDescription": "Low angle shot of a judge's gavel hitting the bench in slow motion.",
+        "audioDescription": "Sound of a gavel hitting a wooden block, echoing.",
+        "audioDescriptionVolume": -16,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 116,
+        "narration": "Joseph Testa ainda acreditava que o sistema falharia em provar sua culpa total. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Joseph Testa sitting in a courtroom, expensive suit, arrogant expression, shadows of other people around him.",
+        "sceneEnvironment": "courtroom_defense_table_testa_arrogant",
+        "motionDescription": "Medium shot of Joseph Testa sitting at the defense table, his face arrogant.",
+        "audioDescription": "Muffled sound of a crowd whispering, tense.",
+        "audioDescriptionVolume": -22,
+        "characterRef": "155dcfc6-0a17-499a-8537-59d51fe17fd8",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 117,
+        "narration": "Anthony Senter mantinha a postura de um soldado que nunca se renderia. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Anthony Senter sitting in a courtroom, muscular build, defiant aura, shadows from a nearby window.",
+        "sceneEnvironment": "courtroom_defense_table_senter_soldier",
+        "motionDescription": "Anthony Senter leaning back in his chair, his eyes scanning the courtroom.",
+        "audioDescription": "Sound of a deep breath, soft exhale.",
+        "audioDescriptionVolume": -18,
+        "characterRef": "9c159f65-5bdb-41cc-8fca-773a67908645",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 118,
+        "narration": "Mas a lei RICO foi projetada especificamente para destruir organizações como a deles. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a long and dark courtroom hallway, flickering lights, shadows of doors, cold and clinical atmosphere.",
+        "sceneEnvironment": "court_hallway_flicker_lights_dolly",
+        "motionDescription": "Slow dolly forward down a long, dark corridor with flickering lights.",
+        "audioDescription": "Sound of a heavy door closing, echoing thud.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 119,
+        "narration": "A máquina de matar estava sendo desmontada peça por peça diante de todos. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a black Cadillac revving its engine in a dark street, exhaust smoke, harsh lighting, industrial background.",
+        "sceneEnvironment": "dark_street_car_revving_smoke_lowangle",
+        "motionDescription": "Low angle shot of a black Cadillac's tires spinning and creating smoke.",
+        "audioDescription": "Sound of a car engine revving, loud.",
+        "audioDescriptionVolume": -16,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 120,
+        "narration": "A paranoia de Casso e a arrogância dos gêmeos selaram seu destino final. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, extreme close-up of a match flame going out, thin line of smoke, single light beam from a window in the background.",
+        "sceneEnvironment": "dark_room_smoke_rising_extinguish_flame_final",
+        "motionDescription": "Extreme close-up of a match flame being extinguished, smoke rising.",
+        "audioDescription": "Sound of a match burning out, soft hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 121,
+        "narration": "O fim estava próximo, <break time=\"0.3s\" /> e não haveria escapatória para os filhos de DeMeo. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, exterior of a dark brick building at night, a single window glowing with amber light, cold moonlight, eerie mood.",
+        "sceneEnvironment": "dark_building_exterior_night_window_light_final",
+        "motionDescription": "Slow zoom in on a single lit window in a dark building at night.",
+        "audioDescription": "Sound of a heart beating faster, low bass pulse.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 122,
+        "narration": "O tribunal de Foley Square tornou-se o palco de sua queda definitiva e pública. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, interior of a dark courtroom at Foley Square, high ceilings, shadows of people, solemn and tense atmosphere.",
+        "sceneEnvironment": "foley_square_courtroom_dark_shadows_final",
+        "motionDescription": "Extreme close-up of a match flame illuminating a dark room.",
+        "audioDescription": "Sound of a match striking, soft flame hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 123,
+        "narration": "Cada depoimento era um prego no caixão de sua liberdade e de seu império. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, slow motion of a wooden gavel hitting a bench, dust motes in the light, dark and serious courtroom background.",
+        "sceneEnvironment": "courtroom_bench_gavel_closeup_slowmo_final",
+        "motionDescription": "Low angle shot of a judge's gavel hitting the bench in slow motion.",
+        "audioDescription": "Sound of a gavel hitting a wooden block, echoing.",
+        "audioDescriptionVolume": -16,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 124,
+        "narration": "Joseph Testa ainda acreditava que o sistema falharia em provar sua culpa total. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Joseph Testa sitting in a courtroom, expensive suit, arrogant expression, shadows of other people around him.",
+        "sceneEnvironment": "courtroom_defense_table_testa_arrogant_final",
+        "motionDescription": "Medium shot of Joseph Testa sitting at the defense table, his face arrogant.",
+        "audioDescription": "Muffled sound of a crowd whispering, tense.",
+        "audioDescriptionVolume": -22,
+        "characterRef": "155dcfc6-0a17-499a-8537-59d51fe17fd8",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 125,
+        "narration": "Anthony Senter mantinha a postura de um soldado que nunca se renderia. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Anthony Senter sitting in a courtroom, muscular build, defiant aura, shadows from a nearby window.",
+        "sceneEnvironment": "courtroom_defense_table_senter_soldier_final",
+        "motionDescription": "Anthony Senter leaning back in his chair, his eyes scanning the courtroom.",
+        "audioDescription": "Sound of a deep breath, soft exhale.",
+        "audioDescriptionVolume": -18,
+        "characterRef": "9c159f65-5bdb-41cc-8fca-773a67908645",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 126,
+        "narration": "O tribunal de Foley Square fervia enquanto o destino dos gêmeos era decidido. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a brightly lit and sterile courtroom hallway, white walls, harsh fluorescent lighting, clinical and tense atmosphere.",
+        "sceneEnvironment": "courtroom_hallway_sterile_bright",
+        "motionDescription": "Slow dolly forward down a sterile, brightly lit hallway with white walls.",
+        "audioDescription": "High tension string note, sharp and dissonant.",
+        "audioDescriptionVolume": -16,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 127,
+        "narration": "Durante um recesso, <break time=\"0.3s\" /> a arrogância fatal da dupla se manifestou de forma estúpida. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, interior of a dimly lit public bathroom, white tiles, flickering fluorescent light, shadows in the corners.",
+        "sceneEnvironment": "courtroom_bathroom_interior",
+        "motionDescription": "POV shot entering a small, dimly lit bathroom with tiled walls.",
+        "audioDescription": "Sound of a heavy door opening, creaking hinges.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 128,
+        "narration": "Senter e Testa foram flagrados cheirando cocaína no banheiro do tribunal federal. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a hand holding a small plastic bag with white powder in a dark bathroom stall, flickering light, shadows moving.",
+        "sceneEnvironment": "bathroom_stall_shadows",
+        "motionDescription": "Close-up of a hand opening a small plastic bag in the shadows of a bathroom stall.",
+        "audioDescription": "Sound of a mirror reflecting light, metallic click.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 129,
+        "narration": "O flagrante destruiu qualquer fachada de 'cidadãos comuns' que eles tentavam manter. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, federal agents in silhouette rushing into a bathroom, harsh light, motion blur, chaotic and tense atmosphere.",
+        "sceneEnvironment": "courtroom_bathroom_interior_bust",
+        "motionDescription": "Wide shot of agents rushing into the bathroom, shadows moving rapidly across the tiles.",
+        "audioDescription": "Sound of a heavy door slamming open, echoing.",
+        "audioDescriptionVolume": -14,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 130,
+        "narration": "Aquele gesto de desdém selou definitivamente a condenação perpétua sob a Lei RICO. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, extreme close-up of metallic handcuffs locking, harsh fluorescent light reflecting on the metal, shadows in the background.",
+        "sceneEnvironment": "courtroom_hallway_handcuffs",
+        "motionDescription": "Extreme close-up of handcuffs being locked around a pair of wrists.",
+        "audioDescription": "Sound of handcuffs clicking shut, sharp and metallic.",
+        "audioDescriptionVolume": -16,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 131,
+        "narration": "O veredito foi lido sob um silêncio sepulcral que tomou conta da sala. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, slow motion of a wooden gavel hitting a bench, dust motes in the light, dark and serious courtroom background.",
+        "sceneEnvironment": "courtroom_bench_gavel_final",
+        "motionDescription": "Low angle shot of a judge's gavel hitting the bench in slow motion.",
+        "audioDescription": "Sound of a gavel hitting a wooden block, echoing thud.",
+        "audioDescriptionVolume": -16,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 132,
+        "narration": "Joseph Testa foi condenado a passar o resto de seus dias atrás das grades. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Joseph Testa being led down a hallway by federal agents, handcuffs visible, his face pale and eyes wide, harsh lighting.",
+        "sceneEnvironment": "courtroom_hallway_led_away",
+        "motionDescription": "Medium shot of Joseph Testa being led away in handcuffs, his face pale.",
+        "audioDescription": "Muffled sound of a crowd reacting with gasps.",
+        "audioDescriptionVolume": -20,
+        "characterRef": "155dcfc6-0a17-499a-8537-59d51fe17fd8",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 133,
+        "narration": "Anthony Senter enfrentou o mesmo destino, <break time=\"0.3s\" /> o fim de sua carreira de sangue. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, Anthony Senter entering a dark prison cell, shadows of bars falling on his face, cold and grey concrete background.",
+        "sceneEnvironment": "prison_cell_entrance",
+        "motionDescription": "Anthony Senter being pushed into a dark prison cell, the door closing in front of him.",
+        "audioDescription": "Sound of a heavy metal door slamming shut.",
+        "audioDescriptionVolume": -16,
+        "characterRef": "9c159f65-5bdb-41cc-8fca-773a67908645",
+        "estimatedDuration": 5
+      },
+      {
+        "order": 134,
+        "narration": "A máquina de matar estava finalmente desligada, <break time=\"0.3s\" /> deixando apenas ecos de terror. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a match flame illuminating an empty room with dark corners, dust motes dancing, shadows moving slowly.",
+        "sceneEnvironment": "dark_empty_room_match",
+        "motionDescription": "Extreme close-up of a match flame illuminating a dark, empty room.",
+        "audioDescription": "Sound of a match striking, soft flame hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 135,
+        "narration": "A era da brutalidade mafiosa industrializada chegava ao seu anticlímax burocrático. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a shelf full of dusty manila folders, names like 'DEMEO' and 'GEMINI' visible, dim light, cobwebs.",
+        "sceneEnvironment": "police_archives_dusty",
+        "motionDescription": "Slow pan across a pile of old, dusty case files on a shelf.",
+        "audioDescription": "Sound of a heart beating slower, low bass pulse.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 136,
+        "narration": "A justiça provou que até os métodos mais frios deixam rastros digitais. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, extreme close-up of a match flame going out, thin line of smoke, single light beam from a window.",
+        "sceneEnvironment": "dark_room_smoke_extinguish_final_climax",
+        "motionDescription": "Extreme close-up of a match flame being extinguished, smoke rising.",
+        "audioDescription": "Sound of a match burning out, soft hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 137,
+        "narration": "O silêncio das celas substituiu o som dos disparos nas ruas do Brooklyn. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a long and dark prison hallway, flickering lights, shadows of bars, cold and clinical atmosphere.",
+        "sceneEnvironment": "prison_hallway_flicker_final",
+        "motionDescription": "Slow dolly forward down a long, dark prison corridor with flickering lights.",
+        "audioDescription": "Sound of a heavy door locking, metallic click.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 138,
+        "narration": "As lendas macabras foram enterradas sob o peso da lei e do tempo. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a single black Cadillac parked under a bridge at night, cold moonlight, desolate and eerie atmosphere.",
+        "sceneEnvironment": "under_bridge_night_empty_car",
+        "motionDescription": "Wide shot of a black Cadillac parked alone under a bridge at night.",
+        "audioDescription": "Sound of a car engine revving, low and distant.",
+        "audioDescriptionVolume": -22,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 139,
+        "narration": "A história dos Gêmeos Gemini tornou-se um arquivo classificado no Gap Files. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a match flame illuminating a dark room, shadows moving, intense and mysterious aura.",
+        "sceneEnvironment": "dark_room_match_final_climax",
+        "motionDescription": "Extreme close-up of a match flame illuminating a dark room.",
+        "audioDescription": "Sound of a match striking, soft flame hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 140,
+        "narration": "Mas a verdade sempre encontra uma brecha para emergir das sombras. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, exterior of a dark brick building at night, a single lit window, cold moonlight, eerie atmosphere.",
+        "sceneEnvironment": "dark_building_exterior_night_window_final_climax",
+        "motionDescription": "Slow zoom in on a single lit window in a dark building at night.",
+        "audioDescription": "Sound of a heart beating faster, low bass pulse.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 141,
+        "narration": "A queda dos Gêmeos Gemini simboliza o fim de uma era de impunidade. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a quiet Brooklyn street at dawn, soft grey and blue tones, morning mist, peaceful but somber atmosphere.",
+        "sceneEnvironment": "brooklyn_street_dawn_quiet",
+        "motionDescription": "Wide shot of a quiet Brooklyn street at dawn, morning mist.",
+        "audioDescription": "Somber resolution beat begins, melancholic piano.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 142,
+        "narration": "A eficiência técnica não foi suficiente contra o peso esmagador da Lei RICO. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a hand closing a thick file with 'CASE CLOSED' written on it, amber light from a desk lamp, smoke drifting.",
+        "sceneEnvironment": "archives_desk_final_resolution",
+        "motionDescription": "Close-up of a hand closing a thick file with the label 'CASE CLOSED'.",
+        "audioDescription": "Sound of a heavy book being closed, thud.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 143,
+        "narration": "O sistema industrializado de morte sempre deixa uma digital para trás. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, extreme close-up of a match flame going out, thin line of smoke, single light beam from a window.",
+        "sceneEnvironment": "dark_room_smoke_extinguish_final_resolution",
+        "motionDescription": "Extreme close-up of a match flame being extinguished, smoke rising.",
+        "audioDescription": "Sound of a match burning out, soft hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 144,
+        "narration": "O silêncio da prisão foi o único veredito possível para tanta brutalidade. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, shadows of prison bars cast on a grey concrete wall, cold lighting, clinical and somber atmosphere.",
+        "sceneEnvironment": "prison_bars_shadows_final",
+        "motionDescription": "Slow pan across a row of prison bars, shadows shifting over them.",
+        "audioDescription": "Sound of a heart beating slower, low bass pulse.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 145,
+        "narration": "A verdade está nos arquivos, <break time=\"0.3s\" /> esperando por aqueles que ousam olhar. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a match flame illuminating a dark room, shadows moving, intense and mysterious atmosphere.",
+        "sceneEnvironment": "dark_room_match_final_resolution_truth",
+        "motionDescription": "Extreme close-up of a match flame illuminating a dark room.",
+        "audioDescription": "Sound of a match striking, soft flame hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 146,
+        "narration": "Mas a história não termina atrás das grades para Joseph Testa. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, exterior of a dark brick building at night, a single lit window, cold moonlight, eerie atmosphere.",
+        "sceneEnvironment": "dark_building_exterior_night_window_final_resolution_teaser1",
+        "motionDescription": "Slow zoom in on a single lit window in a dark building at night.",
+        "audioDescription": "Sound of a heart beating faster, low bass pulse.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 147,
+        "narration": "Uma brecha jurídica inesperada mudaria tudo décadas depois de sua condenação. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, extreme close-up of a match flame going out, thin line of smoke, single light beam from a window.",
+        "sceneEnvironment": "dark_room_smoke_extinguish_final_resolution_teaser2",
+        "motionDescription": "Extreme close-up of a match flame being extinguished, smoke rising.",
+        "audioDescription": "Sound of a match burning out, soft hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 148,
+        "narration": "O desfecho final dos Gêmeos Gemini espera por você no próximo episódio. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a brightly lit empty room, single metal chair, white walls, harsh fluorescent lighting, clinical atmosphere.",
+        "sceneEnvironment": "bright_empty_room_final_resolution_teaser3",
+        "motionDescription": "POV shot entering a brightly lit room with a single empty chair.",
+        "audioDescription": "Sound of a heavy door opening, creaking hinges.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 149,
+        "narration": "A verdade completa está nos arquivos. <break time=\"0.3s\" /> Siga The Gap Files. <break time=\"0.7s\" />",
+        "visualDescription": "Cinematic noir realism, a match flame illuminating a dark room, the words 'THE GAP FILES' visible on a folder, mysterious atmosphere.",
+        "sceneEnvironment": "dark_room_logo_final_cta",
+        "motionDescription": "Extreme close-up of a match flame illuminating a dark room with the logo 'The Gap Files'.",
+        "audioDescription": "Sound of a match striking, soft flame hiss.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      }
+    ],
+    "backgroundMusic": null,
+    "backgroundMusicTracks": [
+      {
+        "prompt": "Dark Cinematic, Low Bass Drones, Tense Strings, 80 BPM, Ominous Atmosphere, Mystery, Suspenseful, well-arranged composition",
+        "volume": -12,
+        "startScene": 0,
+        "endScene": 7
+      },
+      {
+        "prompt": "70s Noir, Gritty Industrial Percussion, Muted Trumpet, 90 BPM, Suspenseful, Brooklyn atmosphere, Cinematic, 35mm feel",
+        "volume": -12,
+        "startScene": 8,
+        "endScene": 29
+      },
+      {
+        "prompt": "Rising Tension, Orchestral Swells, Pulsing Synth, 100 BPM, Dramatic Build-Up, Cinematic, Intense, Mysterious",
+        "volume": -10,
+        "startScene": 30,
+        "endScene": 67
+      },
+      {
+        "prompt": "Aggressive Industrial, Heavy Percussion, Dark Cinematic Pads, 110 BPM, Ruthless, Relentless Rhythm, Action Tension",
+        "volume": -10,
+        "startScene": 68,
+        "endScene": 125
+      },
+      {
+        "prompt": "High Tension Climax, Shrill Strings, Deep Percussion, 120 BPM, Chaotic Justice, Cinematic Impact, Dramatic Finale",
+        "volume": -8,
+        "startScene": 126,
+        "endScene": 140
+      },
+      {
+        "prompt": "Somber Resolution, Melancholic Piano, Ambient Pads, 70 BPM, Reflective Ending, Cinematic, Sad but Final",
+        "volume": -12,
+        "startScene": 141,
+        "endScene": null
+      }
+    ]
+  },
+  "rawContent": ""
+}

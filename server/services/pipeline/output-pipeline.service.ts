@@ -1,60 +1,33 @@
 /**
- * Output Pipeline Service
+ * Output Pipeline Service — Slim Orchestrator
  *
- * Serviço principal que ORQUESTRA todo o processo de geração de conteúdo,
- * delegando cada etapa ao "provider" ativo (abstração de provedor IA).
+ * Orchestrates the content generation pipeline by delegating each stage
+ * to its own isolated module under ./stages/.
  *
- * Integra Persons & Neural Insights do Intelligence Center ao pipeline.
- *
- * Suporta:
- * - VIDEO_TEASER (15-60s, vertical, cliffhanger)
- * - VIDEO_FULL (5-20min, horizontal, narrativa completa)
- * - Outros formatos futuros
+ * Each public method is a thin wrapper that loads context and delegates.
+ * Business logic lives in the stage files.
  */
 
-import type {
-  ScriptGenerationRequest,
-  TTSRequest,
-  ImageGenerationRequest,
-  MotionGenerationRequest,
-  MusicGenerationRequest
-} from '../../types/ai-providers'
+import type { ScriptGenerationRequest } from '../../types/ai-providers'
 import { prisma } from '../../utils/prisma'
 import { getVisualStyleById } from '../../constants/cinematography/visual-styles'
 import { getScriptStyleById } from '../../constants/storytelling/script-styles'
-import { providerManager } from '../providers'
-import { costLogService } from '../cost-log.service'
+import { getClassificationById } from '../../constants/content/intelligence-classifications'
 import { formatOutlineForPrompt } from '../story-architect.service'
 import type { StoryOutline } from '../story-architect.service'
-import { validateScript } from '../script-validator.service'
-import { getClassificationById } from '../../constants/content/intelligence-classifications'
-import { validateMediaPricing } from '../../constants/pricing'
 import { mapPersonsFromPrisma, mapNeuralInsightsFromNotes } from '../../utils/format-intelligence-context'
-import fs from 'node:fs/promises'
-import path from 'node:path'
-import { spawn } from 'node:child_process'
-import ffmpeg from 'fluent-ffmpeg'
-import ffmpegInstaller from '@ffmpeg-installer/ffmpeg'
-import ffprobeInstaller from '@ffprobe-installer/ffprobe'
 import { videoPipelineService } from './video-pipeline.service'
 import { createPipelineLogger } from '../../utils/pipeline-logger'
-import { validatorsEnabled } from '../../utils/validators'
-import {
-  appendPauseTagsForV3,
-  clamp,
-  computeHookOnlySceneBudgetsSeconds,
-  computeSpeedForBudget,
-  countWords,
-  estimateSpeechSeconds,
-  resolveHookOnlyTotalDurationSeconds,
-  stripInlineAudioTags,
-  stripSsmlBreakTags
-} from '../../utils/hook-only-audio-timing'
-import { filmmakerDirector, type ProductionContext } from '../filmmaker-director.service'
 
-ffmpeg.setFfmpegPath(ffmpegInstaller.path)
-import os from 'node:os'
-import crypto from 'node:crypto'
+// ---- Stage imports -------------------------------------------------------
+import { scriptGenerationStage } from './stages/script-generation.stage'
+import { imageGenerationStage } from './stages/image-generation.stage'
+import { musicGenerationStage } from './stages/music-generation.stage'
+import { audioGenerationStage } from './stages/audio-generation.stage'
+import { sfxGenerationStage } from './stages/sfx-generation.stage'
+import { motionGenerationStage } from './stages/motion-generation.stage'
+
+// --------------------------------------------------------------------------
 
 export interface OutputPipelineResult {
   outputId: string
@@ -66,29 +39,26 @@ export interface OutputPipelineResult {
 
 export class OutputPipelineService {
   /**
-   * Executa o pipeline completo para um Output
+   * Full pipeline execution (render only — all stages must be pre-approved).
    */
   async execute(outputId: string): Promise<OutputPipelineResult> {
     const log = createPipelineLogger({ stage: 'Pipeline', outputId })
-    log.info('Render solicitado; validando aprovações.')
+    log.info('Render solicitado; validando aprova\u00e7\u00f5es.')
     try {
       const output = await this.loadOutputContext(outputId)
 
-      log.info('Aprovações', {
+      log.info('Aprova\u00e7\u00f5es', {
         script: output.scriptApproved,
         images: output.imagesApproved,
         audio: output.audioApproved,
         motion: output.videosApproved
       })
 
-      // Validate Approvals
-      if (!output.scriptApproved) throw new Error("Aprovação pendente: Roteiro")
-      if (!output.imagesApproved) throw new Error("Aprovação pendente: Imagens (Visual)")
-      if (!output.audioApproved) throw new Error("Aprovação pendente: Áudio (Narração)")
-      // Motion agora é etapa obrigatória (sempre) antes do render.
-      if (!output.videosApproved) throw new Error("Aprovação pendente: Motion (Vídeos)")
+      if (!output.scriptApproved) throw new Error('Aprova\u00e7\u00e3o pendente: Roteiro')
+      if (!output.imagesApproved) throw new Error('Aprova\u00e7\u00e3o pendente: Imagens (Visual)')
+      if (!output.audioApproved) throw new Error('Aprova\u00e7\u00e3o pendente: \u00c1udio (Narra\u00e7\u00e3o)')
+      if (!output.videosApproved) throw new Error('Aprova\u00e7\u00e3o pendente: Motion (V\u00eddeos)')
 
-      // Execute Render
       await this.logExecution(outputId, 'render', 'started', 'Renderizando Master...')
       await this.renderVideo(outputId)
 
@@ -108,7 +78,7 @@ export class OutputPipelineService {
   }
 
   /**
-   * Carrega contexto completo do Output
+   * Loads the full output context with dossier, styles, and classification.
    */
   public async loadOutputContext(outputId: string) {
     const output = await prisma.output.findUnique({
@@ -126,9 +96,8 @@ export class OutputPipelineService {
       }
     })
 
-    if (!output) throw new Error('Output não encontrado')
+    if (!output) throw new Error('Output n\u00e3o encontrado')
 
-    // Resolver estilos e classificação a partir das constantes (não mais do DB)
     const scriptStyle = output.scriptStyleId ? getScriptStyleById(output.scriptStyleId) : undefined
     const visualStyle = output.visualStyleId ? getVisualStyleById(output.visualStyleId) : undefined
     const classification = output.classificationId ? getClassificationById(output.classificationId) : undefined
@@ -136,67 +105,48 @@ export class OutputPipelineService {
     return { ...output, scriptStyle, visualStyle, classification }
   }
 
-  /**
-   * Gera roteiro com contexto rico do dossier
-   */
+  // ---- Script Generation -------------------------------------------------
+
   public async generateScript(outputId: string) {
     const output = await this.loadOutputContext(outputId)
     const dossier = output.dossier
 
-    // Construir prompt com TODAS as fontes
+    if (!output.storyOutline) {
+      throw new Error('Plano narrativo n\u00e3o gerado. Gere o plano (Story Architect) na etapa anterior.')
+    }
+    if (!output.storyOutlineApproved) {
+      throw new Error('Plano narrativo pendente de aprova\u00e7\u00e3o. Aprove antes de gerar o roteiro.')
+    }
+
+    const outlineData = output.storyOutline as StoryOutline & { _monetizationMeta?: any, _customScenes?: any[], _selectedHookLevel?: string }
+
     const promptContext: ScriptGenerationRequest = {
       theme: dossier.theme,
       visualIdentityContext: dossier.visualIdentityContext || undefined,
       language: output.language || 'pt-BR',
       narrationLanguage: output.narrationLanguage || 'pt-BR',
-
-      // FONTES UNIFICADAS (arquitetura flat/democratizada)
       sources: dossier.sources?.map((s: any) => ({
-        title: s.title,
-        content: s.content,
-        type: s.sourceType,
-        weight: s.weight ?? 1.0
+        title: s.title, content: s.content, type: s.sourceType, weight: s.weight ?? 1.0,
       })) || [],
-
-      // Insights do usuário
       userNotes: dossier.notes?.map((n: any) => n.content) || [],
-
-      // Referências visuais (descrições)
       visualReferences: dossier.images?.map((i: any) => i.description) || [],
-
-      // IMAGENS (MULTIMODAL - NOVO)
-      // Enviamos os buffers das imagens para o provedor IA analisar visualmente
       images: dossier.images?.map((i: any) => ({
-        data: i.imageData,
-        mimeType: i.mimeType || 'image/jpeg',
-        title: i.description
+        data: i.imageData, mimeType: i.mimeType || 'image/jpeg', title: i.description,
       })).filter((img: any) => img.data) || [],
-
-      // Dados estruturados
       researchData: dossier.researchData,
-
-      // Classificação temática (no output) + orientação musical e visual
       dossierCategory: output.classificationId || undefined,
       musicGuidance: output.classificationId ? getClassificationById(output.classificationId)?.musicGuidance : undefined,
       musicMood: output.classificationId ? getClassificationById(output.classificationId)?.musicMood : undefined,
       visualGuidance: output.classificationId ? getClassificationById(output.classificationId)?.visualGuidance : undefined,
-
-      // Configuração de duração e tipo (fonte da verdade: cena; duration derivado quando sceneCount existe)
       targetDuration: (output.monetizationContext as any)?.sceneCount
         ? (output.monetizationContext as any).sceneCount * 5
         : (output.duration || 300),
       targetSceneCount: (output.monetizationContext as any)?.sceneCount,
       targetWPM: output.targetWPM || 150,
-
-      // OUTPUT TYPE ESPECÍFICO
       outputType: output.outputType,
       format: output.format,
-
-      // Estilo de roteiro
       scriptStyleDescription: output.scriptStyle?.description,
       scriptStyleInstructions: output.scriptStyle?.instructions,
-
-      // Estilo visual (resolvido das constantes) — tags completas para o roteiro incorporar no visualDescription
       visualStyleName: output.visualStyle?.name,
       visualStyleDescription: output.visualStyle?.description,
       visualBaseStyle: output.visualStyle?.baseStyle || undefined,
@@ -206,1262 +156,102 @@ export class OutputPipelineService {
       visualColorPalette: output.visualStyle?.colorPalette || undefined,
       visualQualityTags: output.visualStyle?.qualityTags || undefined,
       visualGeneralTags: output.visualStyle?.tags || undefined,
-
-      // Objetivo Editorial (diretriz narrativa prioritária)
       additionalContext: output.objective
-        ? `🎯 OBJETIVO EDITORIAL (CRÍTICO - GOVERNA TODA A NARRATIVA):\n${output.objective}`
+        ? `\ud83c\udfaf OBJETIVO EDITORIAL (CR\u00cdTICO - GOVERNA TODA A NARRATIVA):\n${output.objective}`
         : undefined,
-
-      // Diretrizes
       mustInclude: output.mustInclude || undefined,
       mustExclude: output.mustExclude || undefined,
-
-      // Persons & Neural Insights (Intelligence Center)
       persons: mapPersonsFromPrisma(dossier.persons),
-      neuralInsights: mapNeuralInsightsFromNotes(dossier.notes)
+      neuralInsights: mapNeuralInsightsFromNotes(dossier.notes),
+      storyOutline: formatOutlineForPrompt(outlineData),
     }
 
-    // ─── Story Architect: plano narrativo é etapa isolada e deve estar aprovado ───
-    if (!output.storyOutline) {
-      throw new Error(
-        'Plano narrativo não gerado. Gere o plano (Story Architect) na etapa anterior e valide antes de criar o roteiro.'
-      )
-    }
-    if (!output.storyOutlineApproved) {
-      throw new Error(
-        'Plano narrativo pendente de aprovação. Aprove o plano narrativo antes de gerar o roteiro.'
-      )
-    }
-
-    const outlineData = output.storyOutline as StoryOutline & { _monetizationMeta?: any, _customScenes?: Array<{ order: number; narration: string; referenceImageId?: string | null }> }
-    promptContext.storyOutline = formatOutlineForPrompt(outlineData)
-    const scriptLog = createPipelineLogger({ stage: 'Outline', outputId })
-    scriptLog.info(`Plano narrativo aprovado: ${outlineData.risingBeats?.length || 0} beats.`)
-
-    // ─── Custom Scenes: carregar imagens de referência do criador ───
-    const customScenesDef = (outlineData as any)._customScenes as Array<{ order: number; narration: string; referenceImageId?: string | null; imagePrompt?: string | null }> | undefined
-    let customSceneImageMap = new Map<number, Buffer>() // sceneOrder (1-based) → imageBuffer
-    let customSceneRefDescriptions: Array<{ sceneOrder: number; description: string; mimeType: string; imagePrompt?: string | null }> = []
-
-    if (customScenesDef && customScenesDef.length > 0) {
-      scriptLog.info(`🎬 ${customScenesDef.length} cena(s) personalizada(s) do criador detectada(s).`)
-
-      const imageIds = customScenesDef
-        .filter(s => s.referenceImageId)
-        .map(s => ({ sceneOrder: s.order, imageId: s.referenceImageId! }))
-
-      if (imageIds.length > 0) {
-        const refImages = await prisma.dossierImage.findMany({
-          where: { id: { in: imageIds.map(i => i.imageId) } },
-          select: { id: true, imageData: true, mimeType: true, description: true }
-        })
-
-        for (const { sceneOrder, imageId } of imageIds) {
-          const img = refImages.find(i => i.id === imageId)
-          const sceneDef = customScenesDef.find(s => s.order === sceneOrder)
-          if (img?.imageData) {
-            const buf = Buffer.from(img.imageData)
-            const mime = img.mimeType || 'image/jpeg'
-            const desc = img.description || 'Referência visual do criador'
-
-            customSceneImageMap.set(sceneOrder, buf)
-            customSceneRefDescriptions.push({ sceneOrder, description: desc, mimeType: mime, imagePrompt: sceneDef?.imagePrompt })
-
-            // Add to scriptwriter's multimodal images
-            promptContext.images = [
-              ...(promptContext.images || []),
-              { data: buf, mimeType: mime, title: `[CENA PERSONALIZADA ${sceneOrder}] ${desc}` }
-            ]
-          }
-        }
-
-        scriptLog.info(`🎬 ${customSceneImageMap.size} imagem(ns) de referência carregada(s) para cenas custom.`)
-      }
-    }
-
-    // Extrair metadados de monetização do outline (narrativeRole, strategicNotes, creative direction)
-    if (outlineData._monetizationMeta) {
-      const meta = outlineData._monetizationMeta
-      promptContext.narrativeRole = meta.narrativeRole || undefined
-      promptContext.shortFormatType = meta.shortFormatType || undefined
-      promptContext.strategicNotes = meta.strategicNotes || undefined
-
-      // Episódio da série (governa transições e teasers entre EPs)
-      if (meta.episodeNumber) {
-        promptContext.episodeNumber = meta.episodeNumber
-        promptContext.totalEpisodes = 3 // série fixa de 3 episódios
-        scriptLog.info(`📺 Série: EP${meta.episodeNumber}/3`)
-      }
-
-      // Sobrescrever estilo de roteiro se o monetizador sugeriu um específico para este teaser
-      if (meta.scriptStyleId) {
-        const monetizationStyle = getScriptStyleById(meta.scriptStyleId)
-        if (monetizationStyle) {
-          promptContext.scriptStyleDescription = monetizationStyle.description
-          promptContext.scriptStyleInstructions = monetizationStyle.instructions
-          scriptLog.info(`🎭 Estilo de roteiro sobrescrito pelo monetizador: ${meta.scriptStyleId} (${meta.scriptStyleName || monetizationStyle.name})`)
-        }
-      }
-
-      // Sobrescrever objetivo editorial se o monetizador sugeriu um específico
-      if (meta.editorialObjectiveId && meta.editorialObjectiveName) {
-        promptContext.additionalContext = `🎯 OBJETIVO EDITORIAL (CRÍTICO - GOVERNA TODA A NARRATIVA):\n${meta.editorialObjectiveName}`
-        scriptLog.info(`🎯 Objetivo editorial sobrescrito pelo monetizador: ${meta.editorialObjectiveId} (${meta.editorialObjectiveName})`)
-      }
-
-      // Anti-padrões do monetizador (instruções de "O que NÃO fazer")
-      if (meta.avoidPatterns && meta.avoidPatterns.length > 0) {
-        promptContext.avoidPatterns = meta.avoidPatterns
-        scriptLog.info(`⛔ ${meta.avoidPatterns.length} anti-padrões do monetizador injetados`)
-      }
-
-      scriptLog.info(`💰 Monetization meta: role=${meta.narrativeRole || 'none'}, style=${meta.scriptStyleId || 'default'}, editorial=${meta.editorialObjectiveId || 'default'}, avoidPatterns=${meta.avoidPatterns?.length || 0}, notes=${meta.strategicNotes ? 'yes' : 'no'}`)
-    }
-
-    // ── Teasers: depender do outline aprovado (sem dossiê/brief global) ─────────
-    if (outlineData._monetizationMeta?.itemType === 'teaser') {
-      promptContext.sources = []
-      promptContext.additionalSources = []
-      promptContext.userNotes = []
-      promptContext.visualReferences = []
-      promptContext.researchData = undefined
-      promptContext.persons = []
-      promptContext.neuralInsights = []
-      scriptLog.info('🧼 Teaser: contexto do dossiê removido (roteiro depende do outline aprovado)')
-    }
-
-    // ── Full Video (episódios): roteirista recebe apenas o brief curado ────────
-    // O Arquiteto leu o brief e gerou o StoryOutline com whatToReveal/whatToHold.
-    // Passar o dossiê bruto ao Roteirista faz ele ignorar os holdbacks do Arquiteto.
-    // Solução: filtrar fontes para só o brief do episódio (sourceType === 'brief').
-    if (outlineData._monetizationMeta?.itemType === 'fullVideo') {
-      const allSources = promptContext.sources || []
-      promptContext.sources = allSources.filter((s: any) => s.type === 'brief')
-      scriptLog.info(`📺 Full Video: fontes filtradas para brief only (${promptContext.sources.length}/${allSources.length}) — dossiê bruto removido do contexto do Roteirista`)
-    }
-
-    // ── Resolver Script Provider (ROTEAMENTO SOLID) ────────
-    // Hook-only usa provider dedicado com prompts cirúrgicos (~130 linhas, sem ruído).
-    // Outros roles usam o provider genérico (~270 linhas, regras completas).
-    const isHookOnly = promptContext.narrativeRole === 'hook-only'
-    const scriptProvider = isHookOnly
-      ? await providerManager.getHookOnlyScriptProvider()
-      : await providerManager.getScriptProvider()
-
-    if (isHookOnly) {
-      scriptLog.info(`💥 HOOK-ONLY: usando provider dedicado (${scriptProvider.getName()}) com prompts cirúrgicos.`)
-    }
-
-    // ── Gerar roteiro com loop de validação (máx 1 retry) ────────
-    const MAX_SCRIPT_RETRIES = 10
-    let scriptResponse = await scriptProvider.generate(promptContext)
-    let scriptValidation: { approved: boolean; violations?: string[]; corrections?: string; overResolution?: boolean } | undefined
-
-    // Registrar custo da primeira geração
-    costLogService.log({
+    const result = await scriptGenerationStage.execute({
       outputId,
-      resource: 'script',
-      action: 'create',
-      provider: scriptResponse.costInfo.provider,
-      model: scriptResponse.costInfo.model,
-      cost: scriptResponse.costInfo.cost,
-      metadata: scriptResponse.costInfo.metadata,
-      detail: `Script generation - ${scriptResponse.wordCount} words, ${scriptResponse.scenes?.length || 0} scenes`
-    }).catch(() => { })
-
-    // Validar e retry se reprovado (apenas para teasers com narrativeRole)
-    // TEMPORÁRIO: validadores e loops de retry desativados globalmente.
-    if (!validatorsEnabled()) {
-      scriptLog.info('⏭️ Validação DESABILITADA temporariamente (bypass global).')
-    }
-    if (validatorsEnabled() && promptContext.narrativeRole && outlineData._monetizationMeta?.itemType === 'teaser') {
-      // Histórico acumulativo de feedbacks — garante que erros corrigidos não voltem
-      const validationHistory: string[] = []
-
-      for (let attempt = 0; attempt <= MAX_SCRIPT_RETRIES; attempt++) {
-        try {
-          scriptValidation = await validateScript(
-            scriptResponse.scenes || [],
-            {
-              itemType: 'teaser',
-              narrativeRole: promptContext.narrativeRole,
-              angleCategory: outlineData._monetizationMeta?.angleCategory,
-              shortFormatType: promptContext.shortFormatType,
-              targetDuration: promptContext.targetDuration || output.duration || undefined,
-              avoidPatterns: promptContext.avoidPatterns,
-              selectedHookLevel: (outlineData as any)._selectedHookLevel || undefined,
-              plannedOpenLoops: outlineData.openLoops?.filter((l: any) => l.closedAtBeat === null)
-            }
-          )
-
-          if (scriptValidation.approved) {
-            scriptLog.info(`✅ Script APROVADO pelo validador${attempt > 0 ? ` (após ${attempt} retry)` : ''}.`)
-            break
-          }
-
-          // Reprovado — tentar regenerar com feedback das violações
-          scriptLog.warn(`⚠️ Script REPROVADO (tentativa ${attempt + 1}/${MAX_SCRIPT_RETRIES + 1}): ${scriptValidation.violations?.join('; ')}`)
-          if (scriptValidation.overResolution) {
-            scriptLog.warn(`🚨 OVER-RESOLUTION: roteiro resolve demais para role "${promptContext.narrativeRole}"`)
-          }
-
-          if (attempt < MAX_SCRIPT_RETRIES) {
-            // Montar feedback desta tentativa
-            const currentFeedback = [
-              `⚠️ CORREÇÃO OBRIGATÓRIA (VALIDADOR REPROVOU O ROTEIRO — TENTATIVA ${attempt + 1}):`,
-              ...(scriptValidation.violations || []).map(v => `- VIOLAÇÃO: ${v}`),
-              scriptValidation.corrections ? `\nINSTRUÇÕES DE CORREÇÃO: ${scriptValidation.corrections}` : '',
-              scriptValidation.overResolution ? `\n🚨 O roteiro RESOLVE DEMAIS para a role "${promptContext.narrativeRole}". Reduza explicações, remova conclusões e deixe loops abertos.` : ''
-            ].filter(Boolean).join('\n')
-
-            // Acumular no histórico — o roteirista vê TODOS os feedbacks anteriores
-            validationHistory.push(currentFeedback)
-
-            const fullValidationFeedback = validationHistory.length > 1
-              ? `📋 HISTÓRICO DE CORREÇÕES (${validationHistory.length} tentativas reprovadas):\n${'─'.repeat(50)}\n${validationHistory.map((f, i) => `[Tentativa ${i + 1}]\n${f}`).join('\n\n')}\n${'─'.repeat(50)}\n\n🚨 NÃO repita NENHUM erro listado acima. Cada violação já corrigida que reaparecer é uma falha crítica.`
-              : currentFeedback
-
-            const retryContext = {
-              ...promptContext,
-              additionalContext: [promptContext.additionalContext || '', fullValidationFeedback].filter(Boolean).join('\n\n')
-            }
-
-            scriptLog.info(`🔄 Regenerando script com feedback do validador (histórico: ${validationHistory.length} tentativas)...`)
-            scriptResponse = await scriptProvider.generate(retryContext)
-
-            // Registrar custo do retry
-            costLogService.log({
-              outputId,
-              resource: 'script',
-              action: 'recreate',
-              provider: scriptResponse.costInfo.provider,
-              model: scriptResponse.costInfo.model,
-              cost: scriptResponse.costInfo.cost,
-              metadata: scriptResponse.costInfo.metadata,
-              detail: `Script retry (validator feedback) - ${scriptResponse.wordCount} words, ${scriptResponse.scenes?.length || 0} scenes`
-            }).catch(() => { })
-          }
-        } catch (validationError: any) {
-          scriptLog.warn(`⚠️ Erro na validação do script (não-bloqueante): ${validationError?.message || validationError}`)
-          break // Se a validação falhar, não tenta retry
-        }
-      }
-    }
-
-    // ─── AGENTE CINEASTA (FILMMAKER DIRECTOR) — PÓS-PROCESSAMENTO ───
-    // Entra aqui para polir a "Visão" do roteiro.
-    // Transforma descrições genéricas em prompts técnicos de cinema.
-    // Recebe Production Awareness (Style Anchor + Visual Identity) para evitar redundância
-    // e manter continuidade visual semântica entre cenas do mesmo ambiente.
-    if (scriptResponse.scenes && scriptResponse.scenes.length > 0) {
-      try {
-        scriptLog.info('🎬 Acionando o Agente Cineasta para direção de fotografia e movimento...')
-
-        // Determinar estilo base para o Cineasta
-        const baseStyleForDirector = promptContext.visualBaseStyle ||
-          "Cinematic 35mm photography, hyperrealistic dark mystery style"
-
-        // Montar Production Context para o filmmaker ter consciência do pipeline
-        const vs = output.visualStyle
-        const anchorParts: string[] = []
-        if (vs) {
-          if (vs.baseStyle) anchorParts.push(vs.baseStyle)
-          if (vs.lightingTags) anchorParts.push(vs.lightingTags)
-          if (vs.atmosphereTags) anchorParts.push(vs.atmosphereTags)
-          if (vs.compositionTags) anchorParts.push(vs.compositionTags)
-          if (vs.colorPalette) anchorParts.push(vs.colorPalette)
-          if (vs.qualityTags) anchorParts.push(vs.qualityTags)
-          if (vs.tags) anchorParts.push(vs.tags)
-        }
-
-        const productionCtx: ProductionContext = {
-          styleAnchorTags: anchorParts.length > 0 ? anchorParts.join(', ') : undefined,
-          visualIdentity: output.dossier?.visualIdentityContext || undefined,
-          storyOutline: outlineData,
-          customSceneReferences: customSceneRefDescriptions.length > 0 ? customSceneRefDescriptions : undefined
-        }
-
-        // Batching: dividir cenas em lotes para evitar truncamento de JSON
-        const FILMMAKER_BATCH_SIZE = 50
-        const allInputScenes = scriptResponse.scenes.map(s => ({
-          order: 0,
-          narration: s.narration,
-          currentVisual: s.visualDescription,
-          currentEnvironment: s.sceneEnvironment,
-          estimatedDuration: s.estimatedDuration || 5
-        }))
-
-        type FilmmakerResult = Awaited<ReturnType<typeof filmmakerDirector.refineScript>>
-        let allRefinedScenes: FilmmakerResult = []
-
-        if (allInputScenes.length <= FILMMAKER_BATCH_SIZE) {
-          // Cabe em uma única chamada
-          allRefinedScenes = await filmmakerDirector.refineScript(allInputScenes, baseStyleForDirector, undefined, productionCtx)
-        } else {
-          // Processar em batches sequenciais
-          scriptLog.info(`🎬 Cineasta: ${allInputScenes.length} cenas → ${Math.ceil(allInputScenes.length / FILMMAKER_BATCH_SIZE)} lotes de até ${FILMMAKER_BATCH_SIZE}.`)
-          for (let batchStart = 0; batchStart < allInputScenes.length; batchStart += FILMMAKER_BATCH_SIZE) {
-            const batch = allInputScenes.slice(batchStart, batchStart + FILMMAKER_BATCH_SIZE)
-            scriptLog.info(`🎬 Cineasta: lote ${Math.floor(batchStart / FILMMAKER_BATCH_SIZE) + 1} (${batch.length} cenas)...`)
-            const batchResult = await filmmakerDirector.refineScript(batch, baseStyleForDirector, undefined, productionCtx)
-            if (batchResult) {
-              allRefinedScenes = [...(allRefinedScenes || []), ...batchResult]
-            }
-          }
-        }
-
-        // Mesclar refinamentos de volta nas cenas originais
-        if (allRefinedScenes && allRefinedScenes.length === scriptResponse.scenes.length) {
-          scriptResponse.scenes = scriptResponse.scenes.map((original, i) => {
-            const refined = allRefinedScenes?.[i]
-            if (!refined) return original
-
-            return {
-              ...original,
-              visualDescription: refined.visualDescription || original.visualDescription,
-              motionDescription: refined.motionDescription || original.motionDescription,
-              sceneEnvironment: refined.sceneEnvironment || original.sceneEnvironment,
-              endVisualDescription: refined.endVisualDescription ?? original.endVisualDescription,
-              endImageReferenceWeight: refined.endImageReferenceWeight ?? original.endImageReferenceWeight
-            }
-          })
-          scriptLog.info(`✅ Cineasta refinou todas as ${scriptResponse.scenes.length} cenas com sucesso.`)
-        } else {
-          scriptLog.warn(`⚠️ Cineasta retornou número incorreto de cenas (${allRefinedScenes?.length} vs ${scriptResponse.scenes.length}). Ignorando refinamento para evitar desincronia.`)
-        }
-      } catch (directorError) {
-        scriptLog.error('❌ Erro crítico no Agente Cineasta (ignorando e salvando roteiro bruto):', directorError)
-      }
-    }
-
-    // Salvar roteiro
-    const script = await prisma.script.create({
-      data: {
-        outputId,
-        summary: scriptResponse.summary || '',
-        fullText: scriptResponse.fullText,
-        wordCount: scriptResponse.wordCount,
-        provider: scriptProvider.getName() as any,
-        modelUsed: scriptResponse.model,
-        promptUsed: JSON.stringify(promptContext),
-        backgroundMusicPrompt: scriptResponse.backgroundMusic?.prompt || null,
-        backgroundMusicVolume: scriptResponse.backgroundMusic?.volume || null
-      }
+      promptContext,
+      outlineData,
+      visualStyle: output.visualStyle,
+      visualIdentityContext: dossier.visualIdentityContext,
+      outputDuration: output.duration,
+      mode: 'generate',
     })
 
-    // Atualizar título do Output se a IA gerou um
-    if (scriptResponse.title) {
-      await prisma.output.update({
-        where: { id: outputId },
-        data: { title: scriptResponse.title.replace(/^"|"$/g, '') } // Remove aspas extras se houver
-      })
-    }
-
-    // Salvar cenas
-    if (scriptResponse.scenes) {
-      await prisma.scene.createMany({
-        data: scriptResponse.scenes.map((scene, index) => ({
-          outputId,
-          order: index,
-          narration: scene.narration?.trim(),
-          visualDescription: scene.visualDescription?.trim(),
-          endVisualDescription: scene.endVisualDescription?.trim() || null,
-          endImageReferenceWeight: scene.endImageReferenceWeight ?? null,
-          sceneEnvironment: scene.sceneEnvironment?.trim() || null,
-          motionDescription: scene.motionDescription?.trim() || null,
-          audioDescription: scene.audioDescription?.trim() || null,
-          audioDescriptionVolume: scene.audioDescriptionVolume ?? null,
-          characterRef: (scene as any).characterRef?.trim() || null,
-          estimatedDuration: scene.estimatedDuration || 5
-        }))
-      })
-    }
-
-    // Salvar background music tracks (YouTube Cinematic)
-    if (scriptResponse.backgroundMusicTracks && scriptResponse.backgroundMusicTracks.length > 0) {
-      await prisma.backgroundMusicTrack.createMany({
-        data: scriptResponse.backgroundMusicTracks.map(track => ({
-          scriptId: script.id,
-          prompt: track.prompt,
-          volume: track.volume,
-          startScene: track.startScene,
-          endScene: track.endScene
-        }))
-      })
-    }
-
-    return script
+    return { id: result.scriptId }
   }
 
-  /**
-   * Gera imagens para as cenas
-   */
+  // ---- Image Generation --------------------------------------------------
+
   public async generateImages(outputId: string) {
-    const log = createPipelineLogger({ stage: 'Images', outputId })
     const output = await this.loadOutputContext(outputId)
-    try {
-      const imageProvider = providerManager.getImageProvider()
-      log.info(`Provedor de imagens: ${imageProvider.getName()}.`)
 
-      // Validar pricing antes de gastar dinheiro
-      const imageModel = (imageProvider as any).model || 'luma/photon-flash'
-      validateMediaPricing(imageModel, imageProvider.getName())
-
-      const scenes = await prisma.scene.findMany({
-        where: { outputId },
-        orderBy: { order: 'asc' }
-      })
-
-      log.info(`${scenes.length} cenas para gerar imagens.`)
-
-      let restrictedCount = 0
-      let successCount = 0
-      let errorCount = 0
-
-      // =====================================================================
-      // 🎨 VISUAL STYLE ANCHOR (safety net para o modelo de imagem)
-      // O filmmaker agora tem Production Awareness e cuida da continuidade
-      // visual semântica entre cenas. Aqui mantemos apenas o Style Anchor
-      // como prefixo leve para estabilizar o modelo de geração de imagem.
-      // =====================================================================
-
-      const imgVs = output.visualStyle
-      const imgAnchorParts: string[] = []
-      if (imgVs) {
-        if (imgVs.baseStyle) imgAnchorParts.push(imgVs.baseStyle)
-        if (imgVs.lightingTags) imgAnchorParts.push(imgVs.lightingTags)
-        if (imgVs.atmosphereTags) imgAnchorParts.push(imgVs.atmosphereTags)
-        if (imgVs.compositionTags) imgAnchorParts.push(imgVs.compositionTags)
-        if (imgVs.colorPalette) imgAnchorParts.push(imgVs.colorPalette)
-        if (imgVs.qualityTags) imgAnchorParts.push(imgVs.qualityTags)
-        if (imgVs.tags) imgAnchorParts.push(imgVs.tags)
-      }
-      const styleAnchor = imgAnchorParts.length > 0
-        ? `[VISUAL STYLE ANCHOR — ${imgAnchorParts.join(', ')}]`
-        : ''
-      // negativeTags do estilo visual — enviadas como negative_prompt ao modelo de imagem
-      const styleNegativePrompt = imgVs?.negativeTags || undefined
-
-      if (styleAnchor) {
-        log.info(`🎨 Style Anchor: ${styleAnchor.slice(0, 100)}...`)
-      }
-
-      // ─── Custom Scenes: carregar imagens de referência para image-to-image ───
-      const customSceneImageMap = new Map<number, Buffer>() // sceneOrder (1-based) → imageBuffer
-      const customScenePromptMap = new Map<number, string>() // sceneOrder (1-based) → imagePrompt
-      const outlineForImages = output.storyOutline as any
-      const imgCustomScenes = outlineForImages?._customScenes as Array<{ order: number; narration: string; referenceImageId?: string | null; imagePrompt?: string | null }> | undefined
-      if (imgCustomScenes && imgCustomScenes.length > 0) {
-        // Coletar prompts de imagem (disponíveis mesmo sem imagem de referência)
-        for (const s of imgCustomScenes) {
-          if (s.imagePrompt) customScenePromptMap.set(s.order, s.imagePrompt)
-        }
-
-        const imageIds = imgCustomScenes
-          .filter(s => s.referenceImageId)
-          .map(s => ({ sceneOrder: s.order, imageId: s.referenceImageId! }))
-
-        if (imageIds.length > 0) {
-          const refImages = await prisma.dossierImage.findMany({
-            where: { id: { in: imageIds.map(i => i.imageId) } },
-            select: { id: true, imageData: true }
-          })
-
-          for (const { sceneOrder, imageId } of imageIds) {
-            const img = refImages.find(i => i.id === imageId)
-            if (img?.imageData) {
-              customSceneImageMap.set(sceneOrder, Buffer.from(img.imageData))
-            }
-          }
-
-          if (customSceneImageMap.size > 0) {
-            log.info(`🎬 ${customSceneImageMap.size} imagem(ns) de referência carregada(s) para cenas personalizadas.`)
-          }
-        }
-
-        if (customScenePromptMap.size > 0) {
-          log.info(`🎬 ${customScenePromptMap.size} prompt(s) de imagem do criador carregado(s).`)
-        }
-      }
-
-      // ─── Character References: carregar imagens de personagens para consistência visual ───
-      const characterRefMap = new Map<string, Buffer>()
-      const characterRefIds = [...new Set(
-        scenes.filter(s => s.characterRef).map(s => s.characterRef!)
-      )]
-      if (characterRefIds.length > 0) {
-        const refPersons = await prisma.dossierPerson.findMany({
-          where: { id: { in: characterRefIds }, referenceImage: { not: null } },
-          select: { id: true, referenceImage: true }
-        })
-        for (const p of refPersons) {
-          if (p.referenceImage) {
-            characterRefMap.set(p.id, Buffer.from(p.referenceImage))
-          }
-        }
-        log.info(`👤 ${characterRefMap.size}/${characterRefIds.length} referência(s) de personagem carregada(s).`)
-      }
-
-      // ── PROCESSAMENTO SEQUENCIAL COM CONTINUIDADE VISUAL ──
-      // Cenas são processadas uma a uma para permitir que a imagem gerada
-      // da cena anterior sirva como imageReference para a próxima (mesmo ambiente).
-      // Prioridade de referência: customRef > characterRef > previousSceneRef
-      const generatedImageMap = new Map<number, Buffer>()
-
-      for (let absoluteIndex = 0; absoluteIndex < scenes.length; absoluteIndex++) {
-        const scene = scenes[absoluteIndex]!
-        try {
-          log.step(`Cena ${absoluteIndex + 1}/${scenes.length}`, `sceneId=${scene.id}`)
-
-          const isPortrait = output.aspectRatio === '9:16'
-          const width = isPortrait ? 768 : 1344
-          const height = isPortrait ? 1344 : 768
-
-          // Montar prompt visual: Style Anchor + Visual Continuity (se mesmo ambiente) + visualDescription
-          let visualPrompt = scene.visualDescription
-          const prevScene = absoluteIndex > 0 ? scenes[absoluteIndex - 1] : undefined
-          const isSameEnv = prevScene
-            && scene.sceneEnvironment
-            && prevScene.sceneEnvironment
-            && scene.sceneEnvironment === prevScene.sceneEnvironment
-
-          if (styleAnchor) {
-            if (isSameEnv && prevScene) {
-              const continuityContext = prevScene.visualDescription.slice(0, 300)
-              visualPrompt = `${styleAnchor}\n[VISUAL CONTINUITY — same environment "${scene.sceneEnvironment}": ${continuityContext}]\n\n${visualPrompt}`
-              log.step(`Cena ${absoluteIndex + 1}`, `🔗 Continuity tag injected (env: ${scene.sceneEnvironment})`)
-            } else {
-              visualPrompt = `${styleAnchor}\n\n${visualPrompt}`
-            }
-            log.step(`Cena ${absoluteIndex + 1}`, `🎨 Anchor applied${scene.sceneEnvironment ? ` (env: ${scene.sceneEnvironment})` : ''}`)
-          }
-
-          // ── GERAÇÃO DE IMAGEM DA CENA ──
-          log.step(`Cena ${absoluteIndex + 1}/${scenes.length}`, `prompt: ${visualPrompt.slice(0, 80)}...`)
-
-          // Custom scene: image reference (image-to-image) + creator's image prompt
-          const sceneOrder = absoluteIndex + 1
-          const customRefBuffer = customSceneImageMap.get(sceneOrder)
-          const creatorImagePrompt = customScenePromptMap.get(sceneOrder)
-
-          if (creatorImagePrompt) {
-            visualPrompt = `${visualPrompt}\n\n[CREATOR IMAGE PROMPT REFERENCE: ${creatorImagePrompt}]`
-          }
-
-          // Character reference
-          const charRefBuffer = scene.characterRef
-            ? characterRefMap.get(scene.characterRef)
-            : undefined
-
-          // Previous scene image reference (continuidade visual entre cenas do mesmo ambiente)
-          const prevSceneImageBuffer = isSameEnv ? generatedImageMap.get(absoluteIndex - 1) : undefined
-
-          // Prioridade: customRef > characterRef > previousSceneRef
-          let imageRefConfig: { imageReference: Buffer; imageReferenceWeight: number } | undefined
-          if (customRefBuffer) {
-            imageRefConfig = { imageReference: customRefBuffer, imageReferenceWeight: 0.5 }
-            log.step(`Cena ${absoluteIndex + 1}`, `🎬 Referência visual do criador aplicada (weight: 0.5)`)
-          } else if (charRefBuffer) {
-            imageRefConfig = { imageReference: charRefBuffer, imageReferenceWeight: 0.5 }
-            log.step(`Cena ${absoluteIndex + 1}`, `👤 Referência de personagem aplicada (weight: 0.5, ref: ${scene.characterRef})`)
-          } else if (prevSceneImageBuffer) {
-            imageRefConfig = { imageReference: prevSceneImageBuffer, imageReferenceWeight: 0.4 }
-            log.step(`Cena ${absoluteIndex + 1}`, `🔗 Referência da cena anterior aplicada (weight: 0.4, env: ${scene.sceneEnvironment})`)
-          }
-
-          const imageRequest: ImageGenerationRequest = {
-            prompt: visualPrompt,
-            negativePrompt: styleNegativePrompt,
-            width,
-            height,
-            aspectRatio: output.aspectRatio || '16:9',
-            seed: output.seed?.value,
-            numVariants: 1,
-            ...(imageRefConfig || {})
-          }
-
-          const imageResponse = await imageProvider.generate(imageRequest)
-          const generatedImage = imageResponse.images[0]
-
-          if (generatedImage) {
-            // Armazenar imagem para referência da próxima cena
-            generatedImageMap.set(absoluteIndex, Buffer.from(generatedImage.buffer))
-
-            await prisma.sceneImage.create({
-              data: {
-                sceneId: scene.id,
-                role: 'start',
-                provider: imageProvider.getName() as any,
-                promptUsed: scene.visualDescription,
-                fileData: Buffer.from(generatedImage.buffer) as any,
-                mimeType: 'image/png',
-                originalSize: generatedImage.buffer.length,
-                width: generatedImage.width,
-                height: generatedImage.height,
-                isSelected: true,
-                variantIndex: 0
-              }
-            })
-
-            costLogService.log({
-              outputId,
-              resource: 'image',
-              action: 'create',
-              provider: imageResponse.costInfo.provider,
-              model: imageResponse.costInfo.model,
-              cost: imageResponse.costInfo.cost,
-              metadata: imageResponse.costInfo.metadata,
-              detail: `Scene ${absoluteIndex + 1} - image generation`
-            }).catch(() => { })
-
-            // ── END IMAGE (last_image keyframe) ──
-            if (scene.endVisualDescription) {
-              try {
-                let endVisualPrompt = scene.endVisualDescription
-                if (styleAnchor) endVisualPrompt = `${styleAnchor}\n\n${endVisualPrompt}`
-
-                const endImageRequest: ImageGenerationRequest = {
-                  prompt: endVisualPrompt,
-                  width,
-                  height,
-                  aspectRatio: output.aspectRatio || '16:9',
-                  seed: output.seed?.value,
-                  numVariants: 1,
-                  imageReference: Buffer.from(generatedImage.buffer),
-                  imageReferenceWeight: scene.endImageReferenceWeight ?? 0.7
-                }
-
-                const endImageResponse = await imageProvider.generate(endImageRequest)
-                const endGenerated = endImageResponse.images[0]
-
-                if (endGenerated) {
-                  await prisma.sceneImage.create({
-                    data: {
-                      sceneId: scene.id,
-                      role: 'end',
-                      provider: imageProvider.getName() as any,
-                      promptUsed: scene.endVisualDescription,
-                      fileData: Buffer.from(endGenerated.buffer) as any,
-                      mimeType: 'image/png',
-                      originalSize: endGenerated.buffer.length,
-                      width: endGenerated.width,
-                      height: endGenerated.height,
-                      isSelected: true,
-                      variantIndex: 0
-                    }
-                  })
-
-                  costLogService.log({
-                    outputId,
-                    resource: 'image',
-                    action: 'create',
-                    provider: endImageResponse.costInfo.provider,
-                    model: endImageResponse.costInfo.model,
-                    cost: endImageResponse.costInfo.cost,
-                    metadata: endImageResponse.costInfo.metadata,
-                    detail: `Scene ${absoluteIndex + 1} - end image (last_image keyframe)`
-                  }).catch(() => { })
-
-                  log.step(`Cena ${absoluteIndex + 1}`, `🎬 End image generated (ref weight: ${scene.endImageReferenceWeight ?? 0.7})`)
-                }
-              } catch (endErr: any) {
-                log.warn(`Cena ${absoluteIndex + 1} — end image failed (non-blocking): ${endErr?.message?.slice(0, 100)}`)
-              }
-            }
-          }
-
-          successCount++
-        } catch (error: any) {
-          const { ContentRestrictedError } = await import('../providers/image/replicate-image.provider')
-          const { GeminiContentFilteredError } = await import('../providers/image/gemini-image.provider')
-
-          if (error instanceof ContentRestrictedError || error instanceof GeminiContentFilteredError) {
-            restrictedCount++
-            log.warn(`Cena ${absoluteIndex + 1} RESTRITA pelo filtro de conteúdo: ${error.message.slice(0, 100)}`)
-
-            await prisma.scene.update({
-              where: { id: scene.id },
-              data: {
-                imageStatus: 'restricted',
-                imageRestrictionReason: error.message
-              }
-            })
-          } else {
-            errorCount++
-            log.error(`Cena ${absoluteIndex + 1} falhou (erro não-safety): ${error?.message?.slice(0, 100) || error}`)
-
-            await prisma.scene.update({
-              where: { id: scene.id },
-              data: {
-                imageStatus: 'error',
-                imageRestrictionReason: error?.message?.slice(0, 500) || 'Unknown error'
-              }
-            })
-          }
-        }
-      }
-
-      // Marcar cenas que geraram com sucesso
-      const generatedSceneIds = await prisma.sceneImage.findMany({
-        where: { scene: { outputId } },
-        select: { sceneId: true }
-      })
-      const generatedIds = new Set(generatedSceneIds.map(s => s.sceneId))
-      for (const scene of scenes) {
-        if (generatedIds.has(scene.id) && !['restricted', 'error'].includes(scene.imageStatus || '')) {
-          await prisma.scene.update({
-            where: { id: scene.id },
-            data: { imageStatus: 'generated' }
-          })
-        }
-      }
-
-      log.info(`Geração de imagens concluída: ${successCount} OK, ${restrictedCount} restritas, ${errorCount} erros.`)
-
-      if (restrictedCount > 0) {
-        log.warn(`⚠️ ${restrictedCount} cena(s) foram bloqueadas pelo filtro de conteúdo. O usuário pode revisar e regenerar na tela de checagem.`)
-      }
-    }
-    catch (error) {
-      log.error('Erro ao gerar imagens.', error)
-      throw error
-    }
+    await imageGenerationStage.execute({
+      outputId,
+      aspectRatio: output.aspectRatio,
+      seed: output.seed?.value,
+      visualStyle: output.visualStyle,
+      storyOutline: output.storyOutline,
+    })
   }
 
-  /**
-   * Gera música de fundo via Stable Audio 2.5 (Replicate)
-   * TikTok/Instagram: 1 música para todo o vídeo
-   * YouTube Cinematic: N tracks com timestamps
-   */
+  // ---- Background Music --------------------------------------------------
+
   public async generateBackgroundMusic(outputId: string) {
-    const log = createPipelineLogger({ stage: 'BGM', outputId })
     const output = await this.loadOutputContext(outputId)
-    log.info('Gerando música de fundo.')
 
-    // Buscar script com dados de música
-    const script = await prisma.script.findUnique({
-      where: { outputId },
-      include: { backgroundMusicTracks: true }
+    await musicGenerationStage.execute({
+      outputId,
+      outputDuration: output.duration,
     })
-
-    if (!script) {
-      throw new Error('[OutputPipeline] ❌ Script not found. Generate script first.')
-    }
-
-    // Verificar se já existe BGM gerado
-    const existingBgm = await prisma.audioTrack.findFirst({
-      where: { outputId, type: 'background_music' }
-    })
-
-    if (existingBgm) {
-      log.info('BGM já existe; pulando.')
-      return
-    }
-
-    const musicProvider = providerManager.getMusicProvider()
-
-    // Validar pricing antes de gastar dinheiro
-    const musicModel = (musicProvider as any).model || 'stability-ai/stable-audio-2.5'
-    validateMediaPricing(musicModel, musicProvider.getName())
-
-    // Calcular duração REAL a partir das narrações geradas (não estimada)
-    const narrationTracks = await prisma.audioTrack.findMany({
-      where: { outputId, type: 'scene_narration' },
-      select: { duration: true }
-    })
-
-    let totalNarrationDuration = 0
-    if (narrationTracks.length > 0) {
-      totalNarrationDuration = narrationTracks.reduce((acc, t) => acc + (t.duration || 5), 0)
-      log.info(`Duração real da narração: ${totalNarrationDuration.toFixed(2)}s (${narrationTracks.length} cenas).`)
-    }
-
-    // Usar duração real da narração, fallback para duração estimada do output
-    const videoDuration = totalNarrationDuration > 0
-      ? Math.ceil(totalNarrationDuration)
-      : (output.duration || 120)
-
-    log.info(`Duração alvo da música: ${videoDuration}s (baseada na narração).`)
-
-    // CASO 1: Música única para todo o vídeo (TikTok/Instagram)
-    if (script.backgroundMusicPrompt) {
-      const duration = Math.min(190, videoDuration) // Stable Audio max: 190s
-
-      log.step('Música única (vídeo todo)', `${duration}s — volume ${script.backgroundMusicVolume}dB`)
-      log.info(`Prompt BGM: "${(script.backgroundMusicPrompt || '').slice(0, 60)}..."`)
-
-      const request: MusicGenerationRequest = {
-        prompt: script.backgroundMusicPrompt,
-        duration
-      }
-
-      const musicResponse = await musicProvider.generate(request)
-
-      await prisma.audioTrack.create({
-        data: {
-          outputId,
-          type: 'background_music',
-          provider: musicProvider.getName().toUpperCase() as any,
-          fileData: Buffer.from(musicResponse.audioBuffer) as any,
-          mimeType: 'audio/mpeg',
-          originalSize: musicResponse.audioBuffer.length,
-          duration: musicResponse.duration
-        }
-      })
-
-      // Registrar custo da música (fire-and-forget) — usa costInfo do provider
-      costLogService.log({
-        outputId,
-        resource: 'bgm',
-        action: 'create',
-        provider: musicResponse.costInfo.provider,
-        model: musicResponse.costInfo.model,
-        cost: musicResponse.costInfo.cost,
-        metadata: musicResponse.costInfo.metadata,
-        detail: `Background music (full video) - ${duration}s audio`
-      }).catch(() => { })
-
-      log.info(`BGM gerada: ${(musicResponse.audioBuffer.length / 1024).toFixed(0)} KB.`)
-    }
-
-    // CASO 2: Múltiplas tracks por segmento de cenas (YouTube Cinematic)
-    else if (script.backgroundMusicTracks && script.backgroundMusicTracks.length > 0) {
-      log.info(`${script.backgroundMusicTracks.length} track(s) de BGM (por cena).`)
-
-      // Montar array com duração real de cada cena (da narração)
-      const sceneDurations = narrationTracks.map((t: any) => t.duration || 5)
-      const totalScenes = sceneDurations.length
-
-      for (const track of script.backgroundMusicTracks) {
-        const start = track.startScene || 0
-        const end = track.endScene !== null && track.endScene !== undefined ? track.endScene : totalScenes - 1
-
-        // Somar durações reais das cenas neste segmento
-        const segmentDuration = sceneDurations
-          .slice(start, end + 1)
-          .reduce((acc: number, d: number) => acc + d, 0)
-
-        const trackDuration = Math.min(190, Math.ceil(segmentDuration))
-
-        log.step(`Track cenas ${start}→${end}`, `${end - start + 1} cenas, ${trackDuration}s, ${track.volume}dB`)
-        log.info(`Prompt: "${(track.prompt || '').slice(0, 50)}..."`)
-
-        const request: MusicGenerationRequest = {
-          prompt: track.prompt,
-          duration: trackDuration
-        }
-
-        const musicResponse = await musicProvider.generate(request)
-
-        await prisma.audioTrack.create({
-          data: {
-            outputId,
-            type: 'background_music',
-            provider: musicProvider.getName().toUpperCase() as any,
-            fileData: Buffer.from(musicResponse.audioBuffer) as any,
-            mimeType: 'audio/mpeg',
-            originalSize: musicResponse.audioBuffer.length,
-            duration: musicResponse.duration
-          }
-        })
-
-        // Registrar custo da track (fire-and-forget) — usa costInfo do provider
-        costLogService.log({
-          outputId,
-          resource: 'bgm',
-          action: 'create',
-          provider: musicResponse.costInfo.provider,
-          model: musicResponse.costInfo.model,
-          cost: musicResponse.costInfo.cost,
-          metadata: musicResponse.costInfo.metadata,
-          detail: `BGM track scenes ${start}→${end} - ${trackDuration}s audio`
-        }).catch(() => { })
-
-        log.info(`Track gerada: ${(musicResponse.audioBuffer.length / 1024).toFixed(0)} KB.`)
-      }
-    } else {
-      log.warn('Nenhum prompt de BGM no script; pulando.')
-    }
   }
 
-  /**
-   * Gera áudio (narração) para cada cena
-   */
+  // ---- Audio (TTS Narration) ---------------------------------------------
+
   public async generateAudio(outputId: string) {
     const output = await this.loadOutputContext(outputId)
-    console.log(`[OutputPipeline] 🎤 generateAudio per scene for Output ${outputId}`)
 
-    const scenes = await prisma.scene.findMany({
-      where: { outputId },
-      orderBy: { order: 'asc' }
+    if (!output.voiceId) {
+      throw new Error('Voice ID is required. Please select a voice before generating output.')
+    }
+
+    await audioGenerationStage.execute({
+      outputId,
+      voiceId: output.voiceId,
+      language: output.language || undefined,
+      narrationLanguage: output.narrationLanguage || undefined,
+      targetWPM: output.targetWPM || undefined,
+      monetizationContext: output.monetizationContext,
+      duration: output.duration,
+      ttsProvider: output.ttsProvider,
     })
-
-    const ttsProvider = providerManager.getTTSProvider()
-
-    const narrativeRole = (output.monetizationContext as any)?.narrativeRole
-    const isHookOnly = narrativeRole === 'hook-only'
-    const hookOnlyTotalSeconds = isHookOnly ? resolveHookOnlyTotalDurationSeconds(output.duration) : undefined
-    const hookOnlyBudgets = isHookOnly ? computeHookOnlySceneBudgetsSeconds(hookOnlyTotalSeconds!) : undefined
-
-    // -------------------------------------------------------------------------
-    // Configuração de Modelo (Núcleo de IA)
-    // Consultar banco para saber qual modelo usar (v2, v2.5, v3, etc.)
-    // -------------------------------------------------------------------------
-    const ttsAssignment = await prisma.mediaAssignment.findUnique({
-      where: { taskId: 'tts-narration' }
-    })
-    const dbModelId = ttsAssignment?.model
-    if (dbModelId) {
-      console.log(`[OutputPipeline] 🤖 Usando modelo configurado no banco (tts-narration): ${dbModelId}`)
-    } else {
-      console.log(`[OutputPipeline] ⚠️ Nenhuma configuração de 'tts-narration' encontrada no banco. Usando fallback.`)
-    }
-
-    const CONCURRENCY_LIMIT = 5
-    const sceneChunks = []
-    for (let i = 0; i < scenes.length; i += CONCURRENCY_LIMIT) {
-      sceneChunks.push(scenes.slice(i, i + CONCURRENCY_LIMIT))
-    }
-
-    for (const chunk of sceneChunks) {
-
-      await Promise.all(chunk.map(async (scene) => {
-        if (!scene.narration) return
-
-        // Apagar áudio anterior se existir (sempre regenerar fresh)
-        const existingAudios = await prisma.audioTrack.findMany({
-          where: { sceneId: scene.id, type: 'scene_narration' }
-        })
-
-        if (existingAudios.length > 0) {
-          await prisma.audioTrack.deleteMany({
-            where: { sceneId: scene.id, type: 'scene_narration' }
-          })
-          console.log(`[OutputPipeline] 🗑️ Scene ${scene.order + 1}: ${existingAudios.length} áudio(s) anterior(es) apagado(s).`)
-        }
-
-        const targetWPM = output.targetWPM || 150 // legado (não é mais UX), ainda útil como default geral
-        const calculatedSpeedFromWPM = targetWPM / 150
-        const safeSpeedFromWPM = Math.max(0.7, Math.min(1.2, calculatedSpeedFromWPM))
-
-        // Validação: Voice ID é obrigatório
-        if (!output.voiceId) {
-          throw new Error('[OutputPipeline] ❌ Voice ID is required. Please select a voice before generating output.')
-        }
-
-        // ---------------------------------------------------------------------
-        // Hook-Only timing (16–22s) — controle interno por budgets + speed + tags v3
-        // Sem FFmpeg determinístico de silêncio: usamos apenas tags inline do Eleven v3.
-        // ---------------------------------------------------------------------
-        const sceneIndex = scene.order // 0-based
-        const targetBudgetSeconds = (isHookOnly && hookOnlyBudgets)
-          ? (hookOnlyBudgets[sceneIndex] ?? 5)
-          : 5
-
-        // Texto base enviado ao TTS: permitir tags inline v3 ([pause], [breathes], etc.),
-        // mas bloquear SSML <break> (queremos SOMENTE tags inline).
-        const narrationRawForTTS = stripSsmlBreakTags(scene.narration).trim()
-        // Texto para contagem de palavras: remove tags v3 inline (não devem contar como palavras)
-        const narrationForCounting = stripInlineAudioTags(scene.narration)
-        const wc = countWords(narrationForCounting)
-
-        let speed = isHookOnly
-          ? computeSpeedForBudget(wc, targetBudgetSeconds)
-          : safeSpeedFromWPM
-
-        // Hook-only: não desacelerar apenas para "preencher" o budget.
-        // Se a cena ficar curta, aceitamos encerrar mais cedo (opção A).
-        if (isHookOnly) {
-          speed = Math.max(speed, safeSpeedFromWPM)
-        }
-
-        // Hook-Only: sem injeção artificial de [pause] — a duração natural do áudio é respeitada.
-        const pauseCount = 0
-
-        const maxAttempts = isHookOnly ? 3 : 1
-        const toleranceSeconds = isHookOnly ? 0.35 : 999
-
-        let audioResponse: any | null = null
-        let realDuration = 0
-
-        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-          const ttsText = isHookOnly
-            ? appendPauseTagsForV3(narrationRawForTTS, pauseCount)
-            : narrationRawForTTS
-
-          if (isHookOnly) {
-            console.log(`[OutputPipeline] 🗣️ Scene ${scene.order + 1} hook-only attempt ${attempt}: budget=${targetBudgetSeconds.toFixed(2)}s speed=${speed.toFixed(2)} pauses=${pauseCount} words=${wc}`)
-          } else {
-            const estimatedAudioDuration = wc > 0 ? (wc / targetWPM) * 60 : 0
-            console.log(`[OutputPipeline] 🗣️ Generating audio for scene ${scene.order + 1}. WPM: ${targetWPM}, Speed: ${speed.toFixed(2)}x, Est. Duration: ${estimatedAudioDuration.toFixed(2)}s`)
-          }
-
-          console.log(`[OutputPipeline] 📝 Scene ${scene.order + 1} TTS TEXT (íntegra):\n────────────────────────────────────\n${ttsText}\n────────────────────────────────────`)
-
-          const request: TTSRequest = {
-            text: ttsText,
-            voiceId: output.voiceId,
-            language: output.narrationLanguage || 'pt-BR',
-            speed,
-            modelId: dbModelId || (isHookOnly ? 'eleven_v3' : undefined)
-          }
-
-          audioResponse = await ttsProvider.synthesize(request)
-
-          // Registrar custo por tentativa (hook-only pode ter retries)
-          costLogService.log({
-            outputId,
-            resource: 'narration',
-            action: 'create',
-            provider: audioResponse.costInfo.provider,
-            model: audioResponse.costInfo.model,
-            cost: audioResponse.costInfo.cost,
-            metadata: {
-              ...audioResponse.costInfo.metadata,
-              attempt,
-              speed,
-              pauseCount,
-              isHookOnly,
-              targetBudgetSeconds
-            },
-            detail: `Scene ${scene.order + 1} narration attempt ${attempt} - ${ttsText.length} chars`
-          }).catch(() => { })
-
-          if (!isHookOnly) {
-            realDuration = audioResponse.duration
-            break
-          }
-
-          // Medir duração REAL do MP3 (com pausas) para fitting.
-          realDuration = await this.probeAudioDuration(Buffer.from(audioResponse.audioBuffer)).catch(() => audioResponse.duration)
-          const diff = realDuration - targetBudgetSeconds
-
-          if (Math.abs(diff) <= toleranceSeconds || attempt === maxAttempts) {
-            break
-          }
-
-          // Se ficou curto, não tentar esticar desacelerando (opção A).
-          if (diff < 0) {
-            break
-          }
-
-          // Ajuste de speed com base na razão real/target (controle proporcional)
-          const ratio = realDuration / Math.max(0.1, targetBudgetSeconds)
-          speed = clamp(speed * ratio, 0.7, 1.2)
-
-          if (diff > 0) {
-            // longo demais: speed será ajustado na próxima iteração (ratio acima)
-          } else {
-            // curto demais: speed já foi ajustado via ratio
-          }
-        }
-
-        if (!audioResponse) return
-
-        await prisma.audioTrack.create({
-          data: {
-            outputId,
-            sceneId: scene.id,
-            type: 'scene_narration',
-            provider: ttsProvider.getName().toUpperCase() as any,
-            voiceId: output.voiceId,
-            fileData: Buffer.from(audioResponse.audioBuffer) as any,
-            mimeType: 'audio/mpeg',
-            originalSize: audioResponse.audioBuffer.length,
-            duration: realDuration || audioResponse.duration,
-            // Word-level timestamps do ElevenLabs /with-timestamps
-            alignment: audioResponse.wordTimings ? audioResponse.wordTimings as any : undefined
-          }
-        })
-      }))
-    }
-
-    // Registrar ttsProvider no output (se ainda não estiver salvo)
-    if (!output.ttsProvider) {
-      await prisma.output.update({
-        where: { id: outputId },
-        data: { ttsProvider: ttsProvider.getName().toUpperCase() }
-      })
-    }
   }
 
+  // ---- SFX ---------------------------------------------------------------
 
-  /**
-   * Extrai a duração real de um buffer MP3 usando ffprobe.
-   * Usado no fitting do Hook-Only (pausas inline v3 afetam a duração real).
-   */
-  private async probeAudioDuration(audioBuffer: Buffer): Promise<number> {
-    const tempPath = path.join(os.tmpdir(), `tts-probe-${Date.now()}-${Math.random().toString(36).slice(2)}.mp3`)
-
-    try {
-      await fs.writeFile(tempPath, audioBuffer)
-
-      const duration = await new Promise<number>((resolve, reject) => {
-        const proc = spawn(ffprobeInstaller.path, [
-          '-v', 'quiet',
-          '-print_format', 'json',
-          '-show_format',
-          tempPath
-        ])
-
-        let stdout = ''
-        let stderr = ''
-
-        proc.stdout.on('data', (data: Buffer) => { stdout += data.toString() })
-        proc.stderr.on('data', (data: Buffer) => { stderr += data.toString() })
-
-        proc.on('close', (code: number | null) => {
-          if (code !== 0) return reject(new Error(`ffprobe exit code ${code}: ${stderr}`))
-          try {
-            const parsed = JSON.parse(stdout)
-            const dur = parseFloat(parsed?.format?.duration)
-            if (isNaN(dur) || dur <= 0) return reject(new Error('ffprobe retornou duração inválida'))
-            resolve(dur)
-          } catch (e) {
-            reject(new Error(`Erro ao parsear saída do ffprobe: ${e}`))
-          }
-        })
-
-        proc.on('error', (err: Error) => reject(new Error(`ffprobe spawn error: ${err.message}`)))
-      })
-
-      return duration
-    } finally {
-      await fs.unlink(tempPath).catch(() => { })
-    }
-  }
-
-  /**
-   * Gera efeitos sonoros (SFX) para cada cena que tem audioDescription
-   * 
-   * Usa ElevenLabs Sound Effects API para gerar áudio a partir do prompt.
-   * A duração do SFX é calculada a partir da narração da cena (AudioTrack scene_narration).
-   * Salva como AudioTrack tipo 'scene_sfx'.
-   */
   public async generateSFX(outputId: string) {
-    const log = createPipelineLogger({ stage: 'SFX', outputId })
-    log.info('Iniciando geração de SFX por cena.')
-
-    const scenes = await prisma.scene.findMany({
-      where: { outputId },
-      orderBy: { order: 'asc' },
-      include: {
-        audioTracks: {
-          where: { type: { in: ['scene_narration', 'scene_sfx'] } }
-        }
-      }
-    })
-
-    // Filtrar cenas que têm audioDescription e não têm SFX já gerado
-    const scenesWithSFX = scenes.filter(scene => {
-      const hasPrompt = scene.audioDescription && scene.audioDescription.trim().length > 0
-      const alreadyHasSFX = scene.audioTracks.some(t => t.type === 'scene_sfx')
-      if (alreadyHasSFX) {
-        log.info(`Cena ${scene.order + 1}: SFX já existe, pulando.`)
-      }
-      return hasPrompt && !alreadyHasSFX
-    })
-
-    if (scenesWithSFX.length === 0) {
-      log.info('Nenhuma cena necessita de SFX (sem audioDescription ou já gerado).')
-      return
-    }
-
-    log.info(`${scenesWithSFX.length}/${scenes.length} cenas com SFX para gerar.`)
-
-    const sfxProvider = providerManager.getSFXProvider()
-
-    const CONCURRENCY_LIMIT = 3 // SFX é mais lento que TTS
-    const sceneChunks = []
-    for (let i = 0; i < scenesWithSFX.length; i += CONCURRENCY_LIMIT) {
-      sceneChunks.push(scenesWithSFX.slice(i, i + CONCURRENCY_LIMIT))
-    }
-
-    let successCount = 0
-    let errorCount = 0
-
-    for (const chunk of sceneChunks) {
-      const results = await Promise.allSettled(chunk.map(async (scene) => {
-        // Calcular duração do SFX = duração EXATA da narração
-        const narrationTrack = scene.audioTracks.find(t => t.type === 'scene_narration')
-        if (!narrationTrack?.duration) {
-          log.warn(`Cena ${scene.order + 1}: sem narração com duração, pulando SFX.`)
-          return
-        }
-        const narrationDuration = narrationTrack.duration
-        // ElevenLabs SFX aceita até 22s de duração_seconds — acima disso, solicitar o máximo
-        const sfxRequestDuration = Math.min(22, narrationDuration)
-
-        log.step(`Cena ${scene.order + 1}`, `"${scene.audioDescription!.slice(0, 60)}..." → ${narrationDuration.toFixed(1)}s (req=${sfxRequestDuration.toFixed(1)}s), vol=${scene.audioDescriptionVolume ?? -12}dB`)
-
-        const sfxResponse = await sfxProvider.generate({
-          prompt: scene.audioDescription!,
-          durationSeconds: sfxRequestDuration,
-          promptInfluence: 0.3
-        })
-
-        // Pós-processamento: ajustar duração exata com FFmpeg (cortar ou padear com silêncio)
-        let finalBuffer = sfxResponse.audioBuffer
-        try {
-          finalBuffer = await adjustSfxDuration(Buffer.from(sfxResponse.audioBuffer), narrationDuration)
-          log.info(`Cena ${scene.order + 1}: SFX ajustado para ${narrationDuration.toFixed(1)}s exatos.`)
-        } catch (ffmpegErr) {
-          log.warn(`Cena ${scene.order + 1}: Falha ao ajustar duração do SFX, usando original. ${ffmpegErr}`)
-        }
-
-        await prisma.audioTrack.create({
-          data: {
-            outputId,
-            sceneId: scene.id,
-            type: 'scene_sfx',
-            provider: sfxProvider.getName().toUpperCase() as any,
-            fileData: Buffer.from(finalBuffer) as any,
-            mimeType: 'audio/mpeg',
-            originalSize: finalBuffer.length,
-            duration: narrationDuration // Duração exata da narração
-          }
-        })
-
-        // Registrar custo (fire-and-forget)
-        costLogService.log({
-          outputId,
-          resource: 'sfx',
-          action: 'create',
-          provider: sfxResponse.costInfo.provider,
-          model: sfxResponse.costInfo.model,
-          cost: sfxResponse.costInfo.cost,
-          metadata: sfxResponse.costInfo.metadata,
-          detail: `Scene ${scene.order + 1} SFX - ${narrationDuration.toFixed(1)}s audio`
-        }).catch(() => { })
-      }))
-
-      for (const result of results) {
-        if (result.status === 'fulfilled') {
-          successCount++
-        } else {
-          errorCount++
-          log.error(`SFX falhou: ${result.reason?.message?.slice(0, 100) || result.reason}`)
-        }
-      }
-    }
-
-    log.info(`SFX concluído: ${successCount} OK, ${errorCount} erros de ${scenesWithSFX.length} cenas.`)
+    await sfxGenerationStage.execute({ outputId })
   }
 
-  /**
-   * Regenera toda a narração com uma nova voz
-   * 
-   * Fluxo:
-   *   1. Atualiza o voiceId no output
-   *   2. Deleta todos os AudioTracks de scene_narration existentes
-   *   3. Reseta a flag audioApproved
-   *   4. Gera novo áudio para todas as cenas com a nova voz
-   */
-  public async regenerateAudioWithVoice(outputId: string, newVoiceId: string) {
-    console.log(`[OutputPipeline] 🔄 Regenerando narração com nova voz: ${newVoiceId}`)
+  // ---- Motion (Image-to-Video) -------------------------------------------
 
-    // 1. Atualizar voiceId no output
-    const currentTtsProvider = providerManager.getTTSProvider().getName().toUpperCase()
+  public async generateMotion(outputId: string) {
+    const output = await this.loadOutputContext(outputId)
+
+    await motionGenerationStage.execute({
+      outputId,
+      aspectRatio: output.aspectRatio,
+    })
+  }
+
+  public async regenerateSceneMotion(sceneId: string) {
+    return motionGenerationStage.regenerateScene(sceneId)
+  }
+
+  // ---- Voice Change (delegates to audio stage) ---------------------------
+
+  public async regenerateAudioWithVoice(outputId: string, newVoiceId: string) {
+    console.log(`[OutputPipeline] Regenerating narration with new voice: ${newVoiceId}`)
+
+    const currentTtsProvider = (await import('../providers')).providerManager.getTTSProvider().getName().toUpperCase()
 
     await prisma.output.update({
       where: { id: outputId },
@@ -1469,7 +259,6 @@ export class OutputPipelineService {
         voiceId: newVoiceId,
         ttsProvider: currentTtsProvider,
         audioApproved: false,
-        // Se já tiver renderizado, resetar status pois o vídeo ficará desatualizado
         ...(await prisma.output.findUnique({ where: { id: outputId }, select: { status: true } })
           .then(o => o?.status === 'COMPLETED' ? {
             bgmApproved: false,
@@ -1478,225 +267,28 @@ export class OutputPipelineService {
       }
     })
 
-    // 2. Deletar TODOS os áudios de narração existentes
     const deleted = await prisma.audioTrack.deleteMany({
-      where: {
-        outputId,
-        type: 'scene_narration'
-      }
+      where: { outputId, type: 'scene_narration' }
     })
-    console.log(`[OutputPipeline] 🗑️ ${deleted.count} áudios de narração deletados`)
+    console.log(`[OutputPipeline] ${deleted.count} narration audio(s) deleted`)
 
-    // 3. Gerar novo áudio com a nova voz
     await this.generateAudio(outputId)
 
-    console.log(`[OutputPipeline] ✅ Narração regenerada com voz ${newVoiceId}`)
+    console.log(`[OutputPipeline] Narration regenerated with voice ${newVoiceId}`)
   }
 
-  /**
-   * Gera motion (image-to-video)
-   */
-  public async generateMotion(outputId: string) {
-    const output = await this.loadOutputContext(outputId)
-    const motionProvider = providerManager.getMotionProvider()
+  // ---- Correction Mode ---------------------------------------------------
 
-    const motionModel = (motionProvider as any).model || 'wan-video/wan-2.2-i2v-fast'
-    validateMediaPricing(motionModel, motionProvider.getName())
-    const scenes = await prisma.scene.findMany({
-      where: { outputId },
-      include: {
-        images: { where: { isSelected: true } },
-        audioTracks: { where: { type: 'scene_narration' } }
-      },
-      orderBy: { order: 'asc' }
-    })
-
-    const CONCURRENCY_LIMIT = 50 // Motion em batch de 50
-    const sceneChunks = []
-    for (let i = 0; i < scenes.length; i += CONCURRENCY_LIMIT) {
-      sceneChunks.push(scenes.slice(i, i + CONCURRENCY_LIMIT))
-    }
-
-    for (const chunk of sceneChunks) {
-      await Promise.all(chunk.map(async (scene) => {
-        // Buscar startImage (role='start' ou fallback sem role)
-        const startImage = scene.images.find(img => img.role === 'start') || scene.images[0]
-
-        if (!startImage?.fileData) return
-
-        // Buscar endImage (role='end') — usado como last_image no Wan 2.2
-        const endImage = scene.images.find(img => img.role === 'end')
-
-        // Motion prompt: prefere motionDescription (focado em movimento)
-        // Fallback: visualDescription (backward-compatible com roteiros antigos)
-        const motionPrompt = scene.motionDescription || scene.visualDescription
-
-        const durationSeconds = scene.audioTracks[0]?.duration ?? scene.estimatedDuration ?? 5
-        const request: MotionGenerationRequest = {
-          imageBuffer: Buffer.from(startImage.fileData!) as any,
-          endImageBuffer: endImage?.fileData ? Buffer.from(endImage.fileData) as any : undefined,
-          prompt: motionPrompt,
-          duration: durationSeconds,
-          aspectRatio: output.aspectRatio || '16:9'
-        }
-
-        if (endImage?.fileData) {
-          console.log(`[OutputPipeline] 🎬 Motion scene ${scene.order + 1} — last_image detected, using start+end frame conditioning`)
-        }
-
-        console.log(`[OutputPipeline] 🎬 Motion scene ${scene.order + 1} (duration: ${durationSeconds.toFixed(1)}s) prompt: ${motionPrompt.slice(0, 80)}...`)
-        const videoResponse = await motionProvider.generate(request)
-
-        await prisma.sceneVideo.create({
-          data: {
-            sceneId: scene.id,
-            provider: motionProvider.getName() as any,
-            promptUsed: motionPrompt,
-            fileData: Buffer.from(videoResponse.video.videoBuffer) as any,
-            mimeType: 'video/mp4',
-            originalSize: videoResponse.video.videoBuffer.length,
-            duration: videoResponse.video.duration || 5,
-            sourceImageId: startImage.id,
-            isSelected: true,
-            variantIndex: 0
-          }
-        })
-
-        // Registrar custo do motion (fire-and-forget) — usa costInfo do provider
-        costLogService.log({
-          outputId,
-          resource: 'motion',
-          action: 'create',
-          provider: videoResponse.costInfo.provider,
-          model: videoResponse.costInfo.model,
-          cost: videoResponse.costInfo.cost,
-          metadata: videoResponse.costInfo.metadata,
-          detail: `Scene ${scene.order + 1}/${scenes.length} - motion generation`
-        }).catch(() => { })
-      }))
-    }
-  }
-
-
-  /**
-   * Regenera motion (image-to-video) para UMA cena específica.
-   * Usado no fluxo de correções pós-renderização.
-   * 
-   * Fluxo:
-   *   1. Busca a cena e a imagem selecionada
-   *   2. Desmarca vídeos anteriores
-   *   3. Gera novo motion via provider
-   *   4. Salva novo SceneVideo como selecionado
-   */
-  public async regenerateSceneMotion(sceneId: string) {
-    console.log(`[OutputPipeline] 🔄 Regenerating motion for Scene ${sceneId}`)
-
-    // 1. Buscar cena com imagem selecionada e output pai
-    const scene = await prisma.scene.findUnique({
-      where: { id: sceneId },
-      include: {
-        images: { where: { isSelected: true } },
-        audioTracks: { where: { type: 'scene_narration' } },
-        output: { include: { seed: true } }
-      }
-    })
-
-    if (!scene) throw new Error('Cena não encontrada')
-    if (!scene.images[0]?.fileData) throw new Error('Cena não possui imagem selecionada para gerar motion')
-
-    const output = scene.output
-
-    // Identificar start image selecionada
-    const startImage = scene.images.find(img => img.role === 'start') || scene.images[0]
-
-    if (!startImage) throw new Error('Imagem inicial não encontrada')
-
-    // Buscar endImage (role='end') — usado como last_image no Wan 2.2
-    const endImage = scene.images.find(img => img.role === 'end')
-
-    // 2. Obter provider de motion
-    const motionProvider = providerManager.getMotionProvider()
-
-    // Validar pricing
-    const motionModel = (motionProvider as any).model || 'wan-video/wan-2.2-i2v-fast'
-    validateMediaPricing(motionModel, motionProvider.getName())
-
-    // 3. Desmarcar vídeos anteriores desta cena
-    await prisma.sceneVideo.updateMany({
-      where: { sceneId },
-      data: { isSelected: false }
-    })
-
-    // Motion prompt: prefere motionDescription (focado em movimento)
-    const motionPrompt = scene.motionDescription || scene.visualDescription
-
-    const durationSeconds = scene.audioTracks[0]?.duration ?? scene.estimatedDuration ?? 5
-    const request: MotionGenerationRequest = {
-      imageBuffer: Buffer.from(startImage.fileData!) as any,
-      endImageBuffer: endImage?.fileData ? Buffer.from(endImage.fileData) as any : undefined,
-      prompt: motionPrompt,
-      duration: durationSeconds,
-      aspectRatio: output.aspectRatio || '16:9'
-    }
-
-    if (endImage?.fileData) {
-      console.log(`[OutputPipeline] 🎬 Scene ${scene.order + 1} — last_image detected for regeneration`)
-    }
-
-    console.log(`[OutputPipeline] 🎬 Regenerating motion for scene ${scene.order + 1} (${sceneId}, duration: ${durationSeconds.toFixed(1)}s)`)
-    const videoResponse = await motionProvider.generate(request)
-
-    // 5. Salvar novo SceneVideo
-    const newVideo = await prisma.sceneVideo.create({
-      data: {
-        sceneId,
-        provider: motionProvider.getName() as any,
-        promptUsed: motionPrompt,
-        fileData: Buffer.from(videoResponse.video.videoBuffer) as any,
-        mimeType: 'video/mp4',
-        originalSize: videoResponse.video.videoBuffer.length,
-        duration: videoResponse.video.duration || 5,
-        sourceImageId: startImage.id,
-        isSelected: true,
-        variantIndex: 0
-      }
-    })
-
-    // 6. Registrar custo (fire-and-forget) — usa costInfo do provider
-    costLogService.log({
-      outputId: output.id,
-      resource: 'motion',
-      action: 'recreate',
-      provider: videoResponse.costInfo.provider,
-      model: videoResponse.costInfo.model,
-      cost: videoResponse.costInfo.cost,
-      metadata: videoResponse.costInfo.metadata,
-      detail: `Scene ${scene.order + 1} - motion regeneration (correction)`
-    }).catch(() => { })
-
-    console.log(`[OutputPipeline] ✅ Motion regenerated for Scene ${sceneId}`)
-
-    return newVideo
-  }
-
-  /**
-   * Entra em modo correção: reseta flags de aprovação (imagens e motion)
-   * para permitir edição pós-renderização.
-   * 
-   * Mantém: script, áudio, BGM (não precisam mudar)
-   * Reseta: imagesApproved, videosApproved, status → PENDING
-   */
   public async enterCorrectionMode(outputId: string) {
-    console.log(`[OutputPipeline] 🔧 Entering correction mode for Output ${outputId}`)
+    console.log(`[OutputPipeline] Entering correction mode for Output ${outputId}`)
 
     const output = await prisma.output.findUnique({ where: { id: outputId } })
-    if (!output) throw new Error('Output não encontrado')
+    if (!output) throw new Error('Output n\u00e3o encontrado')
 
     if (output.status !== 'COMPLETED' && output.status !== 'FAILED') {
-      throw new Error('Somente outputs com status COMPLETED ou FAILED podem entrar em modo correção')
+      throw new Error('Somente outputs com status COMPLETED ou FAILED podem entrar em modo corre\u00e7\u00e3o')
     }
 
-    // Resetar flags visuais mantendo script, áudio e BGM
     const updated = await prisma.output.update({
       where: { id: outputId },
       data: {
@@ -1706,95 +298,35 @@ export class OutputPipelineService {
       }
     })
 
-    await this.logExecution(outputId, 'correction', 'started', 'Entrou em modo correção - imagens e motion desbloqueados para edição')
+    await this.logExecution(outputId, 'correction', 'started', 'Entered correction mode')
 
     return updated
   }
 
-  /**
-   * Renderiza vídeo final usando o VideoPipelineService
-   */
+  // ---- Internal Helpers --------------------------------------------------
+
   private async renderVideo(outputId: string) {
     const log = createPipelineLogger({ stage: 'Pipeline', outputId })
-    log.info('Iniciando renderização final (FFmpeg).')
-    await this.logExecution(outputId, 'render', 'started', 'Iniciando renderização FFmpeg...')
+    log.info('Starting final render (FFmpeg).')
+    await this.logExecution(outputId, 'render', 'started', 'Iniciando renderiza\u00e7\u00e3o FFmpeg...')
 
     const result = await videoPipelineService.renderVideo(outputId)
 
     if (result.success) {
-      log.info('Vídeo renderizado e salvo no banco.')
-      await this.logExecution(outputId, 'render', 'completed', 'Vídeo renderizado e salvo no banco.')
+      log.info('Video rendered and saved.')
+      await this.logExecution(outputId, 'render', 'completed', 'Video rendered and saved.')
     } else {
-      log.error('Erro na renderização.', result.error)
-      await this.logExecution(outputId, 'render', 'failed', `Erro: ${result.error}`)
-      throw new Error(`Falha na renderização: ${result.error}`)
+      log.error('Render failed.', result.error)
+      await this.logExecution(outputId, 'render', 'failed', `Error: ${result.error}`)
+      throw new Error(`Render failed: ${result.error}`)
     }
   }
 
-  /**
-   * Atualiza status do output
-   */
-  private async updateStatus(outputId: string, status: any) {
-    await prisma.output.update({
-      where: { id: outputId },
-      data: { status }
-    })
-  }
-
-  /**
-   * Registra log de execução
-   */
   private async logExecution(outputId: string, step: string, status: string, message: string) {
     await prisma.pipelineExecution.create({
-      data: {
-        outputId,
-        step,
-        status,
-        message
-      }
+      data: { outputId, step, status, message }
     })
   }
 }
 
 export const outputPipelineService = new OutputPipelineService()
-
-// ─── Helper: Ajustar duração do SFX ─────────────────────────────
-
-/**
- * Ajusta a duração de um buffer de áudio para a duração exata desejada.
- * - Mais longo → corta
- * - Mais curto → padea com silêncio
- */
-async function adjustSfxDuration(audioBuffer: Buffer, targetDurationSeconds: number): Promise<Buffer> {
-  const tempDir = path.join(os.tmpdir(), 'sfx-adjust')
-  await fs.mkdir(tempDir, { recursive: true })
-
-  const id = crypto.randomUUID().slice(0, 8)
-  const inputPath = path.join(tempDir, `sfx-in-${id}.mp3`)
-  const outputPath = path.join(tempDir, `sfx-out-${id}.mp3`)
-
-  try {
-    await fs.writeFile(inputPath, audioBuffer)
-
-    await new Promise<void>((resolve, reject) => {
-      ffmpeg(inputPath)
-        .audioFilters([
-          `apad=whole_dur=${targetDurationSeconds}`,
-        ])
-        .duration(targetDurationSeconds)
-        .audioCodec('libmp3lame')
-        .audioBitrate('128k')
-        .audioChannels(2)
-        .audioFrequency(44100)
-        .output(outputPath)
-        .on('end', () => resolve())
-        .on('error', (err) => reject(err))
-        .run()
-    })
-
-    return await fs.readFile(outputPath)
-  } finally {
-    await fs.unlink(inputPath).catch(() => { })
-    await fs.unlink(outputPath).catch(() => { })
-  }
-}

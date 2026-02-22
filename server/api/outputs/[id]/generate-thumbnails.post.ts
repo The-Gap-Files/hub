@@ -14,16 +14,14 @@
 import { prisma } from '../../../utils/prisma'
 import { getThumbnailDimensions } from '../../../utils/thumbnail-prompt-builder'
 import { loadSkill } from '../../../utils/skill-loader'
-import { validateMediaPricing, PricingNotConfiguredError, calculateReplicateOutputCost, calculateLLMCost } from '../../../constants/pricing'
+import { validateMediaPricing, PricingNotConfiguredError, calculateLLMCost } from '../../../constants/pricing'
 import { costLogService } from '../../../services/cost-log.service'
 import { SystemMessage, HumanMessage } from '@langchain/core/messages'
-import Replicate from 'replicate'
 import { createLlmForTask, getAssignment } from '../../../services/llm/llm-factory'
 import type { LlmTaskId } from '../../../constants/providers/llm-registry'
 import { getMediaProviderForTask } from '../../../services/media/media-factory'
-
-// Modelo de imagem para thumbnails
-const THUMBNAIL_IMAGE_MODEL = 'luma/photon-flash'
+import { GeminiImageProvider } from '../../../services/providers/image/gemini-image.provider'
+import { ReplicateImageProvider } from '../../../services/providers/image/replicate-image.provider'
 
 interface ThumbnailPromptResult {
   imagePrompt: string
@@ -58,9 +56,20 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  // Resolver provider/modelo de imagem via Media Factory
+  const thumbnailMedia = await getMediaProviderForTask('thumbnail')
+  const imageProvider = thumbnailMedia.providerId   // 'replicate' | 'gemini'
+  const imageModel = thumbnailMedia.model           // ex: 'luma/photon-flash' ou 'imagen-4.0-fast-generate-001'
+
+  if (!thumbnailMedia.apiKey) {
+    throw createError({ statusCode: 500, message: 'API Key do provider de thumbnails não configurada. Configure via Settings → Providers.' })
+  }
+
+  console.log(`[Thumbnails] 🎯 Provider: ${imageProvider}/${imageModel}`)
+
   // Validar pricing
   try {
-    validateMediaPricing(THUMBNAIL_IMAGE_MODEL, 'replicate')
+    validateMediaPricing(imageModel, imageProvider)
   } catch (err: any) {
     if (err instanceof PricingNotConfiguredError) {
       throw createError({
@@ -184,42 +193,54 @@ Retorne APENAS um JSON array com 4 objetos:
   })
 
   // ═══════════════════════════════════════════════════
-  // PASSO 2: Gerar thumbnails via Photon Flash (com texto no prompt)
+  // PASSO 2: Gerar thumbnails via provider configurado
   // ═══════════════════════════════════════════════════
-  const thumbnailMedia = await getMediaProviderForTask('thumbnail')
-  if (!thumbnailMedia.apiKey) {
-    throw createError({ statusCode: 500, message: 'API Key do provider de thumbnails não configurada. Configure via Settings → Providers.' })
-  }
-  const replicate = new Replicate({ auth: thumbnailMedia.apiKey })
-
   const aspectRatio = mapAspectRatio(dims.aspectRatio)
 
   const candidates: { base64: string; prompt: string; hookText: string }[] = []
+  let totalImageCost = 0
 
   for (const [index, thumb] of thumbnailData.entries()) {
     try {
-      console.log(`[Thumbnails] 📸 [${index + 1}/4] Photon Flash: "${thumb.imagePrompt.slice(0, 70)}..."`)
+      console.log(`[Thumbnails] 📸 [${index + 1}/4] ${imageProvider}/${imageModel}: "${thumb.imagePrompt.slice(0, 70)}..."`)
 
-      const replicateOutput = await replicate.run(THUMBNAIL_IMAGE_MODEL as `${string}/${string}`, {
-        input: {
+      let imageBuffer: Buffer
+
+      if (imageProvider === 'gemini') {
+        // Gemini Imagen — retorna buffer base64 diretamente
+        const gemini = new GeminiImageProvider({ apiKey: thumbnailMedia.apiKey!, model: imageModel })
+        const result = await gemini.generate({
           prompt: thumb.imagePrompt,
-          aspect_ratio: aspectRatio
+          width: dims.width,
+          height: dims.height,
+          aspectRatio
+        })
+        if (!result.images.length) {
+          console.warn(`[Thumbnails] ⚠️ [${index + 1}/4] Gemini retornou 0 imagens. Pulando.`)
+          continue
         }
-      })
-
-      const imageUrl = extractOutputUrl(replicateOutput)
-
-      if (!imageUrl) {
-        console.warn(`[Thumbnails] ⚠️ [${index + 1}/4] Sem URL. Pulando.`)
-        continue
+        imageBuffer = result.images[0]!.buffer
+        if (result.costInfo) totalImageCost += result.costInfo.cost
+      } else {
+        // Replicate (Photon Flash, FLUX, etc.) — retorna URL que precisa ser baixada
+        const replicateProvider = new ReplicateImageProvider({
+          apiKey: thumbnailMedia.apiKey!,
+          model: imageModel,
+          inputSchema: thumbnailMedia.inputSchema ?? undefined
+        })
+        const result = await replicateProvider.generate({
+          prompt: thumb.imagePrompt,
+          width: dims.width,
+          height: dims.height,
+          aspectRatio
+        })
+        if (!result.images.length) {
+          console.warn(`[Thumbnails] ⚠️ [${index + 1}/4] Replicate retornou 0 imagens. Pulando.`)
+          continue
+        }
+        imageBuffer = result.images[0]!.buffer
+        if (result.costInfo) totalImageCost += result.costInfo.cost
       }
-
-      const imageResponse = await fetch(imageUrl)
-      if (!imageResponse.ok) {
-        console.warn(`[Thumbnails] ⚠️ [${index + 1}/4] Falha ao baixar: HTTP ${imageResponse.status}`)
-        continue
-      }
-      const imageBuffer = Buffer.from(new Uint8Array(await imageResponse.arrayBuffer()))
 
       candidates.push({
         base64: imageBuffer.toString('base64'),
@@ -255,18 +276,17 @@ Retorne APENAS um JSON array com 4 objetos:
   // PASSO 4: Registrar custos (fire-and-forget)
   // ═══════════════════════════════════════════════════
 
-  // 4a. Custo das imagens geradas (Replicate)
-  const imageCost = calculateReplicateOutputCost(THUMBNAIL_IMAGE_MODEL, candidates.length)
-  if (imageCost !== null) {
+  // 4a. Custo das imagens geradas (já acumulado durante a geração)
+  if (totalImageCost > 0) {
     costLogService.log({
       outputId: id,
       resource: 'thumbnail',
       action: 'create',
-      provider: 'REPLICATE',
-      model: THUMBNAIL_IMAGE_MODEL,
-      cost: imageCost,
-      metadata: { num_images: candidates.length, cost_per_image: imageCost / candidates.length, step: 'image_generation' },
-      detail: `${candidates.length} thumbnails via ${THUMBNAIL_IMAGE_MODEL}`
+      provider: imageProvider.toUpperCase(),
+      model: imageModel,
+      cost: totalImageCost,
+      metadata: { num_images: candidates.length, cost_per_image: totalImageCost / candidates.length, step: 'image_generation' },
+      detail: `${candidates.length} thumbnails via ${imageProvider}/${imageModel}`
     }).catch(() => { })
   }
 
@@ -292,9 +312,10 @@ Retorne APENAS um JSON array com 4 objetos:
   return {
     success: true,
     count: candidates.length,
-    model: THUMBNAIL_IMAGE_MODEL,
+    provider: imageProvider,
+    model: imageModel,
     hooks: candidates.map(c => c.hookText),
-    message: `${candidates.length} thumbnails geradas via Photon Flash com hook text integrado.`
+    message: `${candidates.length} thumbnails geradas via ${imageProvider}/${imageModel} com hook text integrado.`
   }
 })
 
@@ -302,18 +323,7 @@ Retorne APENAS um JSON array com 4 objetos:
 // UTILS
 // =============================================================================
 
-/** Extrai URL do output do Replicate (FileOutput, array, ou string) */
-function extractOutputUrl(output: any): string | null {
-  if (Array.isArray(output)) {
-    const first = output[0]
-    if (!first) return null
-    return typeof first === 'string' ? first : (first?.url?.() || String(first))
-  }
-  if (typeof output === 'string') return output
-  return output?.url?.() || null
-}
-
-/** Mapeia aspect ratio para formato aceito pelo Photon Flash */
+/** Mapeia aspect ratio para formato aceito pelos modelos de imagem */
 function mapAspectRatio(aspectRatio: string): string {
   const mapping: Record<string, string> = {
     '16:9': '16:9',

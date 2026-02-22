@@ -35,7 +35,10 @@ export type LlmTaskId =
   | 'social-kit'          // Kit de publicação para redes sociais
   | 'deep-research-prompt' // Gera prompt otimizado para Deep Research
   | 'dossier-investigator'  // Investiga uma semente e preenche metadados do dossiê
-  | 'filmmaker-director'    // Direção de fotografia e movimento (pós-roteiro)
+  | 'filmmaker-director'    // Direção de fotografia e movimento (pós-roteiro) — LEGACY orchestrator
+  | 'photographer'          // Fotógrafo — gera visualDescription (start image)
+  | 'choreographer'         // Coreógrafo — gera motionDescription (câmera)
+  | 'cinematographer'       // Cineasta — gera endVisualDescription + weight (end keyframe)
 
 export interface LlmModel {
   id: string
@@ -329,11 +332,41 @@ export const LLM_TASKS: Record<LlmTaskId, LlmTask> = {
   },
   'filmmaker-director': {
     id: 'filmmaker-director',
-    label: 'Diretor de Fotografia (Cineasta)',
-    description: 'Lê o roteiro e refina prompts visuais (start/end image) e coreografia de movimento. Pós-processamento criativo.',
+    label: 'Diretor de Fotografia (Legacy)',
+    description: 'Orquestrador legado — agora chama Fotógrafo + Coreógrafo + Cineasta internamente.',
     iconKey: 'clapperboard',
     requiresStructuredOutput: true,
     requiresLargeContext: true,
+    defaultProvider: 'gemini',
+    defaultModel: 'gemini-2.0-flash'
+  },
+  'photographer': {
+    id: 'photographer',
+    label: 'Fotógrafo (Visual Description)',
+    description: 'Gera descrições visuais cinematográficas (start image) com lente, DOF, luz, texturas e coerência temporal.',
+    iconKey: 'camera',
+    requiresStructuredOutput: true,
+    requiresLargeContext: true,
+    defaultProvider: 'gemini',
+    defaultModel: 'gemini-2.0-flash'
+  },
+  'choreographer': {
+    id: 'choreographer',
+    label: 'Coreógrafo (Motion Description)',
+    description: 'Gera coreografia de câmera calibrada à duração — vocabulário seguro para WanVideo, anti-monotonia.',
+    iconKey: 'move',
+    requiresStructuredOutput: true,
+    requiresLargeContext: false,
+    defaultProvider: 'gemini',
+    defaultModel: 'gemini-2.0-flash'
+  },
+  'cinematographer': {
+    id: 'cinematographer',
+    label: 'Cineasta (End Keyframe)',
+    description: 'Gera endVisualDescription e endImageReferenceWeight — keyframe final derivado do start + motion.',
+    iconKey: 'film',
+    requiresStructuredOutput: true,
+    requiresLargeContext: false,
     defaultProvider: 'gemini',
     defaultModel: 'gemini-2.0-flash'
   }

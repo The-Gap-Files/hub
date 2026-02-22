@@ -20,6 +20,9 @@ export type PipelineStage =
   | 'Captions'
   | 'AddCaptions'
   | 'Filmmaker'
+  | 'Photographer'
+  | 'Choreographer'
+  | 'Cinematographer'
   | 'API'
 
 function prefix(stage: PipelineStage, outputId?: string | null): string {

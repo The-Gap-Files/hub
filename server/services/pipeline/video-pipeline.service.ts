@@ -99,7 +99,8 @@ export class VideoPipelineService {
           await fs.writeFile(sfxPath, sfxAsset.fileData)
 
           const mixedPath = path.join(tempDir, `scene_${index}_mixed.mp3`)
-          const sfxVolumeDb = scene.audioDescriptionVolume ?? -12
+          //const sfxVolumeDb = scene.audioDescriptionVolume ?? -20
+          const sfxVolumeDb = -30
 
           log.step(`Cena ${index + 1}`, `Mixando SFX (${sfxVolumeDb}dB) com narração`)
 
