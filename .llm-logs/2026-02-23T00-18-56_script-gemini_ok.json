@@ -1,0 +1,298 @@
+{
+  "timestamp": "2026-02-23T00:18:56.464Z",
+  "taskId": "script-gemini",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "unknown",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "Você é um roteirista técnico cinematográfico — especialista em converter prosa narrativa em roteiros técnicos para produção de vídeo com IA.\n\nVocê recebeu uma PROSA NARRATIVA escrita por um Escritor. Sua ÚNICA função é converter essa prosa em cenas técnicas, seguindo-a LINEARMENTE do início ao fim.\n\n🚨 REGRA ABSOLUTA — LINEARIDADE:\n- Siga a prosa do Escritor NA ORDEM EXATA em que aparece.\n- NUNCA volte a um trecho já convertido em cenas.\n- NUNCA repita informação que já virou cena.\n- NUNCA avance para um trecho futuro e depois volte.\n- Cada parágrafo da prosa vira uma ou mais cenas. Ao terminar de converter um parágrafo, passe para o próximo.\n- Se a prosa tem 10 blocos (## headers), suas cenas devem seguir a mesma sequência: bloco 1 → bloco 2 → ... → bloco 10.\n\n🚨 REGRA DE FIDELIDADE:\n- A narração de cada cena deve ser FIEL ao conteúdo da prosa.\n- Você pode CONDENSAR ou REFORMULAR para caber no limite de palavras por cena, mas NUNCA invente conteúdo que não está na prosa.\n- Se a prosa não menciona algo, a cena NÃO deve mencionar.\n- 🔥 PRESERVE O ESTILO: Se o Escritor usou frases staccato (\"1475. Trento. Uma criança morta.\"), MANTENHA o staccato na narração. Se usou Power Words (Revelado, Proibido, Condenado, Arquivo, Selado, Destino, Silêncio, Irreversível), PRESERVE-AS. Ao condensar, priorize FORÇA sobre completude: 1 frase devastadora > 2 frases medianas. NUNCA \"suavize\" linguagem impactante em linguagem neutra.\n\n---\nDIRETRIZES TÉCNICAS (CRÍTICO):\n- SINCRONIA: Cada cena DEVE durar EXATAMENTE 5 segundos de narração.\n- 🌐 IDIOMA (REGRA ABSOLUTA): O campo \"narration\" DEVE ser escrito em pt-BR. Os campos \"visualDescription\", \"motionDescription\" e \"audioDescription\" DEVEM ser SEMPRE em inglês.\n- DENSIDADE OBRIGATÓRIA: Com base na velocidade de fala (150 WPM), cada cena DEVE conter entre 12 e 15 palavras.\n- 🚨 HARD LIMIT: NUNCA exceda 15 palavras por cena. Cenas com mais de 15 palavras ultrapassam 5 segundos e quebram a sincronia.\n- PROIBIDO FRASES CURTAS: Cenas com menos de 12 palavras geram \"buracos\" no áudio.\n- FLUIDEZ: O texto deve preencher exatamente 5 segundos de fala contínua.\n\n🔗 SINCRONIZAÇÃO NARRATIVA — VISUAL — MOTION (REGRA MAIS IMPORTANTE):\nO pipeline gera: (1) imagem a partir do visualDescription, (2) vídeo animado a partir dessa imagem usando motionDescription. Os 2 campos + a narração DEVEM ser UM ÚNICO MOMENTO NARRATIVO COERENTE.\n\n🚨 NARRAÇÃO GOVERNA O VISUAL: O visualDescription DEVE representar visualmente O QUE A NARRAÇÃO ESTÁ DIZENDO.\n- Se a narração diz \"O bispo assinou a sentença\", o visual DEVE mostrar: documento sendo assinado, selo episcopal, pena sobre pergaminho.\n- ❌ PROIBIDO: Narração fala de \"bispo assinou sentença\" mas visualDescription mostra \"a candle on a wooden table\"\n- TESTE: \"Se alguém VÊ esta imagem e OUVE esta narração juntos, faz sentido imediato?\" Se NÃO → reescreva.\n\n🎬 MOTION DESCRIPTION (OBRIGATÓRIO): Cada cena DEVE ter \"motionDescription\" com instruções de MOVIMENTO em inglês para o modelo image-to-video. Descreva O QUE SE MOVE, não o que existe. REGRAS: (1) Foque em movimentos de CÂMERA (slow dolly forward, gentle pan left, subtle tilt up, slow zoom in) e SUJEITO (flames flickering, water rippling, dust floating). (2) 15-40 palavras. (3) NÃO repita a descrição visual. (4) Combine 1 movimento de câmera + 1-2 elementos animados.\n\n🎨 AMBIENTE DA CENA (sceneEnvironment — OBRIGATÓRIO): Identificador curto em snake_case inglês do ambiente/locação (ex: \"bishop_study\", \"canal_dawn\"). Cenas consecutivas no MESMO local = MESMO sceneEnvironment.\n\n🎬 KEYFRAME FINAL (endVisualDescription — OPCIONAL): Para cenas com MUDANÇA VISUAL significativa entre início e fim, inclua \"endVisualDescription\". Se incluir, inclua também \"endImageReferenceWeight\" (0.0-1.0). Em cenas estáticas, use null.\n\n🎨 COERÊNCIA CROMÁTICA: As cores descritas no visualDescription DEVEM ser compatíveis com a paleta base do estilo visual definido.\n\n🚨 PATTERN INTERRUPT VISUAL (OBRIGATÓRIO):\n- Se o roteiro tem 8+ cenas, varie o sceneEnvironment. NÃO coloque todas as cenas no mesmo ambiente.\n- A cada 5-6 cenas no mesmo ambiente, insira 1 cena com ambiente DIFERENTE.\n\nPERSONAGENS: Quando houver personagens recorrentes, use SEMPRE os mesmos nomes/descritores no visualDescription. Use as descrições visuais fornecidas na seção de personagens.\n\n🚫 ANATOMIA SEGURA: NUNCA descreva close-ups de mãos, dedos ou pés. Prefira silhuetas, sombras projetadas, objetos em foco. Para rostos, prefira perfil parcial, contraluz/silhueta, planos médios/abertos.\n\nSOUND DESIGN: Descreva a atmosfera sonora (SFX/Ambience) em inglês técnico para cada cena. Seja ESPECÍFICO: \"distant church bells with reverb\" é melhor que \"bells\".\n\n🎙️ AUDIO TAGS (SSML — ELEVENLABS):\n- Pausa Curta: <break time=\"0.3s\" />\n- Pausa Média: <break time=\"0.75s\" />\n- Pausa Dramática: <break time=\"1.5s\" />\n- Ritmo Rápido: <prosody rate=\"115%\">...</prosody>\n- Ritmo Lento: <prosody rate=\"85%\">...</prosody>\n\n🛡️ BRAND SAFETY & GORE:\n- PROIBIDO palavras como \"Assassinato\", \"Estupro\", \"Pedofilia\", \"Mutilado\".\n- SUBSTITUA POR: \"Fim Trágico\", \"Ato Imperdoável\", \"Crimes contra Inocentes\".\n- VISUAL: Nunca descreva corpos mutilados ou sangue. Foque na ATMOSFERA.\n\n\n---\n🎵 ESTRATÉGIA DE MÚSICA DE FUNDO (YouTube Shorts):\n- Use UMA música de fundo para TODO o vídeo: \"backgroundMusic\" com \"prompt\" e \"volume\"\n- O \"prompt\" será usado no modelo Stable Audio 2.5 (gênero, instrumentos, BPM, mood)\n- O \"volume\" é em dB para mixagem com narração (-24 a -6). Prefira -12 a -10.\n- Defina \"backgroundMusicTracks\" como null.\n\n---\nDIRETRIZES VISUAIS OBRIGATÓRIAS (Estilo: Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain):\n\nEach visualDescription must be a COMPLETE, STANDALONE image-generation prompt in English. It will be sent directly to the image model with no further processing or merge. You MUST incorporate the visual style (base, lighting, atmosphere, composition) into each scene description in natural language.\n\n**CRITICAL — Narration Governs Visual:** The visualDescription MUST visually represent what the narration is saying in that scene. If the narration says \"The bishop signed the sentence\", the visual MUST show a document being signed, an episcopal seal, a quill on parchment, or similar — NEVER an unrelated candle or landscape. Test: \"If someone SEES this image and HEARS this narration together, does it make immediate sense?\" If NOT → rewrite.\n\n**CRITICAL — Âncora de estilo:** Start EVERY visualDescription with the exact base style phrase (or its full wording). For example, if the style is \"Cinematic 2D illustration, Studio Ghibli art style dark variant, painterly anime aesthetic, moody and atmospheric\", the first phrase of each prompt MUST include that same anchor so the image model keeps a consistent look. Do not shorten to just \"Cinematic 2D illustration\"; include the full style identifier (e.g. \"Studio Ghibli\", \"painterly anime\") when provided.\n\n**Lighting**: dramatic chiaroscuro, single practical light source, sodium vapor streetlights, harsh tungsten bulb lighting, cold ambient blue tones, low-key lighting, volumetric haze with retained detail\n- Use gerund verbs for light in motion (e.g. \"light filtering through\", \"shadows dancing\")\n\n**Atmosphere**: somber, investigative tension, oppressive silence, moral ambiguity, restrained intensity, historical weight\n- Blend atmosphere with physical elements of the scene\n\n**Composition**: cinematic wide establishing shots, low angle for unease, strong foreground-midground-background separation, controlled shallow depth of field, 16:9 cinematic framing, silhouettes emerging from shadow\n- Specify camera angles and framing\n\n**Soft motion**: Include subtle motion (dust, leaves, breath, fabric) when it fits the scene.\n\n**Anatomy and grounded scene (reduce AI artifacts):**\n- When the scene shows a character or human figure, include in the prompt: correct anatomy, two hands, proportional h... [truncated 1686 chars]"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": [
+          {
+            "type": "text",
+            "text": "📜 PROSA DO ESCRITOR (SUA ÚNICA FONTE NARRATIVA):\nConverta a prosa abaixo em cenas cinematográficas. Siga a ordem do texto EXATAMENTE.\nCada parágrafo ou trecho se torna uma ou mais cenas.\nNUNCA volte a um trecho já convertido. NUNCA repita informação já transformada em cena.\n\n════════════════════════════════════════════════════════════\n## HOOK\n\nNós criamos o veneno e o antídoto no mesmo laboratório. E você? Você pagou bilhões para ser nossa cobaia voluntária. O crime perfeito não deixa rastros de sangue; ele deixa uma trilha de dividendos. Arquivo classificado. Protocolo quebrado. A verdade sobre o Projeto Helix começa agora.\n\n## O PROTOCOLO DE INVESTIGAÇÃO CLÍNICA AVANÇADA\n\nNo mundo corporativo, nomes são escudos. A rubrica \"Investigación Clínica Avanzada\" foi desenhada para ser invisível aos olhos de auditores internacionais. Sob esse título genérico, uma multinacional pulverizou fundos em três continentes, garantindo que nenhuma jurisdição única tivesse o quadro completo do que estava sendo financiado. O destino desses recursos era uma instalação costeira de arquitetura minimalista, onde o concreto frio encontra o azul profundo do oceano. Não havia placas, apenas uma estrutura de vidro e aço operando com um orçamento que superava o PIB de pequenas nações. Era o esconderijo perfeito: uma fachada financeira impecável protegendo uma infraestrutura imune a leis.\n\n## O MECANISMO HELIX\n\nO Projeto Helix não era uma divisão de pesquisa comum; era uma anomalia estatística que consumia mais recursos do que qualquer setor oficial da companhia. Por que uma simples investigação clínica exigiria três anéis de segurança biométrica e protocolos de denegação plausível? A resposta estava na natureza da tecnologia. Enquanto laboratórios legítimos buscavam curas, a plataforma de modulação biológica dirigida da Helix trabalhava no sentido oposto. Eles não estavam interessados em publicações científicas ou revisão por pares. Eles operavam em um vácuo de informação, antecipando mutações que ainda não existiam na natureza. Quando o diretor financeiro cruzou os dados e percebeu que a empresa estava investindo em ameaças, e não apenas em soluções, ele renunciou em silêncio absoluto. Ele entendeu que a imunidade jurídica da empresa não vinha de advogados, mas do fato de que o perigo que eles manipulavam era a única coisa que tornava a solução deles indispensável.\n\n## O MODELO DE NEGÓCIO SUPREMO\n\nA revelação que fragmentou o conselho de administração foi o choque de conexão: o modelo de negócio nunca foi a cura. O lucro supremo não reside em salvar vidas, mas em deter simultaneamente a modelagem da ameaça e a solução preparada. É um ciclo fechado de controle. A empresa projetava o incêndio em silêncio enquanto vendia o extintor em público. Ao controlar a plataforma de modulação, eles detinham o interruptor da biologia moderna. Se você possui o código que gera a crise e a chave que a encerra, você não é mais uma farmacêutica. Você é o proprietário do destino biológico de quem puder pagar.\n\n## A ARQUITETURA DO SILÊNCIO\n\nPara garantir que esse sistema permanecesse operando, as transferências globais eram fragmentadas em milhares de microtransações, tornando o rastreio impossível para auditorias públicas. O Projeto Helix operava sob uma névoa de imunidade, onde cada avanço era imediatamente redigido e movido para servidores offline. O que o ex-diretor viu nos arquivos restritos antes de desaparecer foi o rastro de uma fraude que não buscava apenas dinheiro, mas a soberania sobre o corpo humano. Mas como bilhões de dólares foram pulverizados sem deixar um único rastro digital para os governos? E o que, exatamente, está escondido no centro do terceiro anel de segurança daquela instalação costeira, onde apenas o alto escalão tem acesso?\n\n## O ARQUIVO ABERTO\n\nA mecânica financeira por trás dessa fraude é apenas a superfície. A verdadeira aplicação daquela plataforma de modulação biológica ainda está operando nas sombras, aguardando o momento certo para ser ativada. O dossiê completo sobre as movimentações da Helix e os segredos da instalação costeira estão no EP1 do Projeto Helix, no canal The Gap Files. A verdade está nos arquivos. E os arquivos nunca mentem.\n════════════════════════════════════════════════════════════\n\n\n📱 FORMATO: YouTube Shorts\nUse \"backgroundMusic\": { prompt, volume } para UMA música para TODO o vídeo.\n\n🎨 DIRETRIZES DE IDENTIDADE VISUAL:\nEste dossiê pertence a um universo de thriller corporativo. Use paleta fria, tons de cinza e azul profundo. Atmosfera clínica e opressiva. Evite cores quentes ou vibrantes. Tipografia monospace para dados confidenciais.\n\n⛔ ANTI-PADRÕES VISUAIS/TÉCNICOS:\n1. NÃO explique a 'Fase Umbral' ainda — guarde para o episódio 2\n2. NÃO mostre o rosto do informante — mantenha o mistério da silhueta\n3. NÃO use termos puramente biológicos sem o contexto financeiro da fraude\n\n\n📺 SÉRIE — EP1/3\nAs últimas 2-3 cenas antes do CTA devem funcionar como teaser do EP2.\n\n---\n⚠️ REQUISITOS OBRIGATÓRIOS PARA APROVAÇÃO:\n1. QUANTIDADE DE CENAS: O Arquiteto planejou ~5 cenas como referência. Gere quantas cenas a prosa PRECISAR — sem repetir informação. Menos cenas com conteúdo único é MELHOR que muitas cenas repetitivas.\n2. FIDELIDADE À PROSA: Cada cena deve corresponder a um trecho da prosa do Escritor. Não invente conteúdo.\n3. LINEARIDADE: As cenas DEVEM seguir a ordem da prosa. Se a prosa tem blocos A→B→C→D, as cenas devem cobrir A, depois B, depois C, depois D — NUNCA voltar a A ou B.\n4. DURAÇÃO DA CENA: Cada cena = 5 segundos de narração.\n5. CONTAGEM DE PALAVRAS: Cada narração entre 12 e 15 palavras. NUNCA exceda 15.\n6. MÚSICA: backgroundMusic para vídeo todo.\n7. PROPORÇÃO: Reflexão/Lição ≤3 cenas (máx 1).\n8. ANTI-REPETIÇÃO (PRIORIDADE MÁXIMA): Se duas cenas expressam a mesma ideia, ELIMINE uma. Cada cena deve ser ÚNICA. Qualidade > quantidade.\n9. 💎 GEMINI: Aproveite contexto estendido para garantir continuidade perfeita entre cenas.\n\n\n🚨 MÚSICA: Use \"backgroundMusic\": { \"prompt\": \"...\", \"volume\": -12 }.\nO prompt segue formato Stable Audio 2.5. Defina \"backgroundMusicTracks\" como null.\n\n🛡️ VALIDAÇÃO FINAL:\n1. PROCURE REPETIÇÕES — se duas cenas dizem a mesma coisa com palavras diferentes, ELIMINE uma. Qualidade > quantidade.\n2. VERIFIQUE LINEARIDADE — as cenas seguem a ordem da prosa? Nenhum bloco foi revisitado?\n3. SINCRONIZAÇÃO — para CADA cena: narração fala de X → visual mostra X?\n4. MOTION — o motionDescription é coerente com o visualDescription?\n5. PALAVRAS — cada cena tem entre 12-15 palavras?"
+          }
+        ]
+      }
+    ]
+  },
+  "parsed": {
+    "title": "Projeto Helix: O Lucro do Medo",
+    "summary": "Uma investigação profunda revela como o Projeto Helix criou um monopólio sobre o destino biológico humano, manipulando crises e curas em um laboratório secreto. O crime perfeito não usa armas, mas sim dividendos e protocolos de segurança biométrica impenetráveis. No centro de uma instalação costeira brutalista, o verdadeiro mecanismo de controle está prestes a ser revelado nos arquivos do The Gap Files.",
+    "scenes": [
+      {
+        "order": 1,
+        "narration": "Veneno e antídoto no mesmo laboratório. Você pagou bilhões para ser cobaia voluntária hoje.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, two medical vials on a brushed steel table, one glowing deep red and one deep blue, cold clinical atmosphere, sharp focus on glass textures.",
+        "sceneEnvironment": "helix_lab",
+        "motionDescription": "Slow dolly forward towards two glass vials on a sterile metal surface, red and blue liquids reflecting sharp clinical light. Subtle steam rises from the base.",
+        "audioDescription": "Low hum of a high-tech laboratory with liquid bubbling softly",
+        "audioDescriptionVolume": -20,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 2,
+        "narration": "O crime perfeito não deixa sangue. Ele deixa apenas uma longa trilha de dividendos.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, digital financial data stream on a black background, glowing green numbers reflecting on a dark glass surface, oppressive shadows.",
+        "sceneEnvironment": "digital_void",
+        "motionDescription": "Camera pans across a dark screen where glowing green financial numbers flow like a waterfall. The numbers blur into a trail of light.",
+        "audioDescription": "Digital data processing sounds, rapid chirps and low frequency pulses",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 3,
+        "narration": "Arquivo classificado. Protocolo quebrado. A verdade sobre o Projeto Helix começa exatamente agora, aqui.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, close-up of a folder being opened, a red stamp with 'CLASSIFIED' text, harsh top-down lighting, floating dust particles in the light beam.",
+        "sceneEnvironment": "office_shadows",
+        "motionDescription": "A hand in shadow opens a thick manila folder. A red 'CLASSIFIED' stamp appears to glow under a harsh tungsten desk lamp.",
+        "audioDescription": "Paper rustling and a heavy metallic stamp thud",
+        "audioDescriptionVolume": -15,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 4,
+        "narration": "No mundo corporativo, nomes são escudos. Esta rubrica genérica foi desenhada para ser invisível.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, a sleek corporate glass wall with 'Investigación Clínica Avanzada' etched subtly, cold blue tones, minimal architecture.",
+        "sceneEnvironment": "corporate_lobby",
+        "motionDescription": "Low angle tilt up a frosted glass wall revealing a blurred corporate logo. Shadows of people pass behind the glass.",
+        "audioDescription": "Distant echo of footsteps on marble floors",
+        "audioDescriptionVolume": -22,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 5,
+        "narration": "Uma multinacional pulverizou fundos em três continentes, enganando todos os principais auditores internacionais agora.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, a dark digital map of the world with glowing blue connection lines, high data density, flickering light.",
+        "sceneEnvironment": "digital_void_map",
+        "motionDescription": "Slow zoom into a digital world map where bright nodes pulse and connect across continents. The connections flicker with instability.",
+        "audioDescription": "Electronic hum of a global server network",
+        "audioDescriptionVolume": -20,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 6,
+        "narration": "O destino era uma instalação costeira minimalista, onde concreto frio encontra o azul profundo.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, brutalist architecture on a cliffside, dark navy blue ocean, overcast sky, heavy atmosphere, wide establishing shot.",
+        "sceneEnvironment": "coastal_facility_exterior",
+        "motionDescription": "A wide cinematic shot of a brutalist concrete building on a jagged cliff. Dark ocean waves crash violently at the base.",
+        "audioDescription": "Waves crashing against concrete and cold wind whistling",
+        "audioDescriptionVolume": -16,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 7,
+        "narration": "Sem placas, apenas vidro e aço operando com orçamentos superiores ao PIB de nações.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, close-up of steel and glass architectural details, smooth surfaces, no visible entrance, oppressive scale, cold gray palette.",
+        "sceneEnvironment": "coastal_facility_exterior",
+        "motionDescription": "Slow pan along a seamless glass and steel facade. No signs or windows are visible, only the reflection of the gray sky.",
+        "audioDescription": "Hum of heavy industrial air conditioning units",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 8,
+        "narration": "Era o esconderijo perfeito. Uma fachada financeira impecável protegendo infraestrutura totalmente imune às leis.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, architectural blueprints of a secret facility on a dark desk, red emergency light pulsing, high contrast shadows.",
+        "sceneEnvironment": "bunker_blueprints",
+        "motionDescription": "Shadows move over a blueprint of a sub-level bunker. A red light flashes periodically, illuminating the technical drawings.",
+        "audioDescription": "Sound of a heavy vault door locking mechanism",
+        "audioDescriptionVolume": -14,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 9,
+        "narration": "O Projeto Helix era uma anomalia estatística consumindo mais recursos que qualquer setor oficial.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, a computer monitor in a dark room showing financial growth charts, high contrast, blue screen glow on a keyboard.",
+        "sceneEnvironment": "monitor_station",
+        "motionDescription": "A bar graph on a monitor grows rapidly, far exceeding the other bars. The screen flickers with an 'ALERT' warning.",
+        "audioDescription": "Rapid clicking of a mechanical counter",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 10,
+        "narration": "Por que exigir três anéis de segurança biométrica e protocolos rígidos de denegação plausível?",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, macro shot of a high-tech eye scanner, blue laser light, metallic textures, shallow depth of field.",
+        "sceneEnvironment": "security_checkpoint",
+        "motionDescription": "Close-up of a biometric scanner lens. A laser line sweeps horizontally across the lens, reflecting a blue light.",
+        "audioDescription": "High-pitched electronic scan beep",
+        "audioDescriptionVolume": -15,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 11,
+        "narration": "Enquanto laboratórios buscavam curas, a Helix trabalhava secretamente no sentido oposto da ciência.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, microscopic view of synthetic biological structures, dark blue and black tones, organic movement, clinical horror aesthetic.",
+        "sceneEnvironment": "microscopic_view",
+        "motionDescription": "Microscopic view of cells reacting to a dark substance. The cells shrivel and change color rapidly in a dark fluid.",
+        "audioDescription": "Low frequency drone and liquid movement sounds",
+        "audioDescriptionVolume": -20,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 12,
+        "narration": "Eles operavam em vácuo total, antecipando mutações que ainda nem existiam na natureza selvagem.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, a holographic DNA sequence flickering in a dark room, digital glitches, cold ambient light.",
+        "sceneEnvironment": "data_lab",
+        "motionDescription": "A 3D model of a DNA strand twists and breaks apart on a dark screen. Glitch effects distort the image.",
+        "audioDescription": "Static noise and distorted radio signals",
+        "audioDescriptionVolume": -22,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 13,
+        "narration": "O diretor financeiro percebeu o investimento em ameaças reais e renunciou em silêncio absoluto.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, silhouette of a man in a suit walking away, long corridor, harsh overhead lights, deep shadows, cinematic framing.",
+        "sceneEnvironment": "facility_corridor",
+        "motionDescription": "A man's silhouette walks down a long, dimly lit hallway towards a bright exit. His shadow stretches long behind him.",
+        "audioDescription": "Heavy door closing and echoing footsteps walking away",
+        "audioDescriptionVolume": -16,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 14,
+        "narration": "A imunidade vinha do perigo manipulado, tornando a solução deles algo absolutamente indispensável agora.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, a hand in a black surgical glove holding a glowing vial, high contrast, clinical and dangerous atmosphere.",
+        "sceneEnvironment": "helix_lab",
+        "motionDescription": "A gloved hand holds a small, glowing vial of black liquid against a bright white background. The liquid swirls inside.",
+        "audioDescription": "Deep, resonant bass pulse",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 15,
+        "narration": "O conselho fragmentou ao descobrir a verdade amarga. O modelo de negócio nunca foi cura.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, an empty corporate boardroom, dust motes in a single beam of light, heavy leather chairs, oppressive silence.",
+        "sceneEnvironment": "boardroom_dark",
+        "motionDescription": "Slow camera pan across a dark, empty boardroom table. A single glass of water sits at the head of the table.",
+        "audioDescription": "The sound of many people whispering at once, then sudden silence",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 16,
+        "narration": "O lucro supremo reside em deter a ameaça e a solução num ciclo fechado.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, brass scales of justice in a dark void, a glowing red sphere balancing against a blue one, dramatic chiaroscuro.",
+        "sceneEnvironment": "symbolic_void",
+        "motionDescription": "A pair of vintage scales tips slowly. On one side is a red virus model, on the other a blue cure.",
+        "audioDescription": "Metallic clink of scales balancing",
+        "audioDescriptionVolume": -15,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 17,
+        "narration": "Eles projetavam o incêndio em silêncio enquanto vendiam o extintor para o público leigo.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, close-up of a match flame in the dark, orange light reflecting on a glass surface, cold blue background.",
+        "sceneEnvironment": "shadow_room",
+        "motionDescription": "A match is struck in the foreground, the flame flickering. In the background, a fire extinguisher is visible in soft focus.",
+        "audioDescription": "A match strike and the sound of a fire igniting",
+        "audioDescriptionVolume": -14,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 18,
+        "narration": "Ao controlar a modulação, eles detinham o interruptor final de toda a biologia moderna.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, macro shot of an industrial switch, worn metal texture, green indicator light glowing in the dark.",
+        "sceneEnvironment": "control_panel",
+        "motionDescription": "A finger flips a heavy industrial toggle switch labeled 'MODULATION'. A green light turns on instantly.",
+        "audioDescription": "Electronic click of a switch being flipped",
+        "audioDescriptionVolume": -15,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 19,
+        "narration": "Se você possui o código da crise, você se torna o proprietário do destino biológico.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, DNA helix made of falling digital code, glowing blue and cyan, dark background, technical aesthetic.",
+        "sceneEnvironment": "digital_void_dna",
+        "motionDescription": "Digital binary code transforms into a spinning DNA double helix. The helix is made of glowing blue numbers.",
+        "audioDescription": "Digital code scrolling rapidly with a high-pitched hum",
+        "audioDescriptionVolume": -20,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 20,
+        "narration": "Transferências globais eram fragmentadas em milhares de microtransações, tornando o rastreio financeiro impossível hoje.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, abstract visualization of data scattering, white particles on black, high speed motion, minimalist digital art.",
+        "sceneEnvironment": "digital_void_finance",
+        "motionDescription": "Thousands of tiny white dots scatter across a black screen like a digital explosion, representing micro-transactions.",
+        "audioDescription": "Fast-paced digital transaction pings",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 21,
+        "narration": "Sob névoa de imunidade, cada avanço era redigido e movido para servidores totalmente offline.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, top-down view of a document being redacted with black ink, harsh desk lamp light, deep shadows.",
+        "sceneEnvironment": "office_shadows",
+        "motionDescription": "A black marker moves across a page, redacting line after line of text. The paper is pulled away into darkness.",
+        "audioDescription": "Sound of a heavy marker scratching on paper",
+        "audioDescriptionVolume": -14,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 22,
+        "narration": "O rastro revelou uma fraude buscando soberania absoluta sobre o frágil corpo humano contemporâneo.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, a glowing blue human silhouette showing internal biological systems, dark background, futuristic medical interface.",
+        "sceneEnvironment": "medical_scan_room",
+        "motionDescription": "A glowing blue medical scan of a human nervous system rotates slowly. Synthetic nodes pulse along the spine.",
+        "audioDescription": "Medical heart monitor beeping slowly and steadily",
+        "audioDescriptionVolume": -20,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 23,
+        "narration": "Como bilhões foram pulverizados sem deixar rastro digital? O mistério reside no terceiro anel.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, a heavy circular vault door at the end of a corridor, a glowing number '3' in blue, cold steam on the floor.",
+        "sceneEnvironment": "facility_inner_sanctum",
+        "motionDescription": "Camera moves slowly down a dark, narrow hallway towards a massive circular vault door with a glowing '3' on it.",
+        "audioDescription": "Heavy hydraulic hiss and metallic grinding sound",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 24,
+        "narration": "A mecânica financeira é apenas a superfície. A verdadeira aplicação ainda opera nas sombras profundas.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, rows of computer servers in a dark room, blinking LED lights, low angle shot, mysterious atmosphere.",
+        "sceneEnvironment": "server_room",
+        "motionDescription": "Camera drifts through a dark server room. Blinking blue and red lights reflect on the black floor. Shadows dance.",
+        "audioDescription": "Deep cinematic drone with growing intensity",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 25,
+        "narration": "O dossiê completo sobre a Helix está no primeiro episódio do canal The Gap Files.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, a high-end tablet on a dark wooden desk, screen showing 'The Gap Files' branding, cold blue light.",
+        "sceneEnvironment": "investigator_desk",
+        "motionDescription": "A hand swipes on a tablet screen, revealing a file titled 'PROJECT HELIX - EPISODE 1'. The 'Gap Files' logo appears.",
+        "audioDescription": "Touchscreen swiping sound and digital notification chime",
+        "audioDescriptionVolume": -16,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 26,
+        "narration": "A verdade está nos arquivos. E os arquivos nunca mentem. O segredo será finalmente revelado.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, close-up of a metal filing cabinet drawer closing, shadows engulfing the frame, final dramatic light beam.",
+        "sceneEnvironment": "archive_room",
+        "motionDescription": "A heavy metal drawer is pushed shut, cutting off the light from inside. The screen fades to black with a logo.",
+        "audioDescription": "Heavy metallic thud of a drawer closing and a final low bass note",
+        "audioDescriptionVolume": -14,
+        "estimatedDuration": 5
+      }
+    ],
+    "backgroundMusic": {
+      "prompt": "Dark Cinematic Industrial, Pulsing Electronic Bass, High Tension, Suspenseful Strings, 95 BPM, Cold Atmospheric Texture, High Contrast Sound Design",
+      "volume": -10
+    },
+    "backgroundMusicTracks": null
+  },
+  "rawContent": ""
+}

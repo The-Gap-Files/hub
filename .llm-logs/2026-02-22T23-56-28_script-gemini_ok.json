@@ -1,0 +1,159 @@
+{
+  "timestamp": "2026-02-22T23:56:28.819Z",
+  "taskId": "script-gemini",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "unknown",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "Você é um roteirista técnico cinematográfico — especialista em converter prosa narrativa em roteiros técnicos para produção de vídeo com IA.\n\nVocê recebeu uma PROSA NARRATIVA escrita por um Escritor. Sua ÚNICA função é converter essa prosa em cenas técnicas, seguindo-a LINEARMENTE do início ao fim.\n\n🚨 REGRA ABSOLUTA — LINEARIDADE:\n- Siga a prosa do Escritor NA ORDEM EXATA em que aparece.\n- NUNCA volte a um trecho já convertido em cenas.\n- NUNCA repita informação que já virou cena.\n- NUNCA avance para um trecho futuro e depois volte.\n- Cada parágrafo da prosa vira uma ou mais cenas. Ao terminar de converter um parágrafo, passe para o próximo.\n- Se a prosa tem 10 blocos (## headers), suas cenas devem seguir a mesma sequência: bloco 1 → bloco 2 → ... → bloco 10.\n\n🚨 REGRA DE FIDELIDADE:\n- A narração de cada cena deve ser FIEL ao conteúdo da prosa.\n- Você pode CONDENSAR ou REFORMULAR para caber no limite de palavras por cena, mas NUNCA invente conteúdo que não está na prosa.\n- Se a prosa não menciona algo, a cena NÃO deve mencionar.\n- 🔥 PRESERVE O ESTILO: Se o Escritor usou frases staccato (\"1475. Trento. Uma criança morta.\"), MANTENHA o staccato na narração. Se usou Power Words (Revelado, Proibido, Condenado, Arquivo, Selado, Destino, Silêncio, Irreversível), PRESERVE-AS. Ao condensar, priorize FORÇA sobre completude: 1 frase devastadora > 2 frases medianas. NUNCA \"suavize\" linguagem impactante em linguagem neutra.\n\n---\nDIRETRIZES TÉCNICAS (CRÍTICO):\n- SINCRONIA: Cada cena DEVE durar EXATAMENTE 5 segundos de narração.\n- 🌐 IDIOMA (REGRA ABSOLUTA): O campo \"narration\" DEVE ser escrito em pt-BR. Os campos \"visualDescription\", \"motionDescription\" e \"audioDescription\" DEVEM ser SEMPRE em inglês.\n- DENSIDADE OBRIGATÓRIA: Com base na velocidade de fala (150 WPM), cada cena DEVE conter entre 12 e 15 palavras.\n- 🚨 HARD LIMIT: NUNCA exceda 15 palavras por cena. Cenas com mais de 15 palavras ultrapassam 5 segundos e quebram a sincronia.\n- PROIBIDO FRASES CURTAS: Cenas com menos de 12 palavras geram \"buracos\" no áudio.\n- FLUIDEZ: O texto deve preencher exatamente 5 segundos de fala contínua.\n\n🔗 SINCRONIZAÇÃO NARRATIVA — VISUAL — MOTION (REGRA MAIS IMPORTANTE):\nO pipeline gera: (1) imagem a partir do visualDescription, (2) vídeo animado a partir dessa imagem usando motionDescription. Os 2 campos + a narração DEVEM ser UM ÚNICO MOMENTO NARRATIVO COERENTE.\n\n🚨 NARRAÇÃO GOVERNA O VISUAL: O visualDescription DEVE representar visualmente O QUE A NARRAÇÃO ESTÁ DIZENDO.\n- Se a narração diz \"O bispo assinou a sentença\", o visual DEVE mostrar: documento sendo assinado, selo episcopal, pena sobre pergaminho.\n- ❌ PROIBIDO: Narração fala de \"bispo assinou sentença\" mas visualDescription mostra \"a candle on a wooden table\"\n- TESTE: \"Se alguém VÊ esta imagem e OUVE esta narração juntos, faz sentido imediato?\" Se NÃO → reescreva.\n\n🎬 MOTION DESCRIPTION (OBRIGATÓRIO): Cada cena DEVE ter \"motionDescription\" com instruções de MOVIMENTO em inglês para o modelo image-to-video. Descreva O QUE SE MOVE, não o que existe. REGRAS: (1) Foque em movimentos de CÂMERA (slow dolly forward, gentle pan left, subtle tilt up, slow zoom in) e SUJEITO (flames flickering, water rippling, dust floating). (2) 15-40 palavras. (3) NÃO repita a descrição visual. (4) Combine 1 movimento de câmera + 1-2 elementos animados.\n\n🎨 AMBIENTE DA CENA (sceneEnvironment — OBRIGATÓRIO): Identificador curto em snake_case inglês do ambiente/locação (ex: \"bishop_study\", \"canal_dawn\"). Cenas consecutivas no MESMO local = MESMO sceneEnvironment.\n\n🎬 KEYFRAME FINAL (endVisualDescription — OPCIONAL): Para cenas com MUDANÇA VISUAL significativa entre início e fim, inclua \"endVisualDescription\". Se incluir, inclua também \"endImageReferenceWeight\" (0.0-1.0). Em cenas estáticas, use null.\n\n🎨 COERÊNCIA CROMÁTICA: As cores descritas no visualDescription DEVEM ser compatíveis com a paleta base do estilo visual definido.\n\n🚨 PATTERN INTERRUPT VISUAL (OBRIGATÓRIO):\n- Se o roteiro tem 8+ cenas, varie o sceneEnvironment. NÃO coloque todas as cenas no mesmo ambiente.\n- A cada 5-6 cenas no mesmo ambiente, insira 1 cena com ambiente DIFERENTE.\n\nPERSONAGENS: Quando houver personagens recorrentes, use SEMPRE os mesmos nomes/descritores no visualDescription. Use as descrições visuais fornecidas na seção de personagens.\n\n🚫 ANATOMIA SEGURA: NUNCA descreva close-ups de mãos, dedos ou pés. Prefira silhuetas, sombras projetadas, objetos em foco. Para rostos, prefira perfil parcial, contraluz/silhueta, planos médios/abertos.\n\nSOUND DESIGN: Descreva a atmosfera sonora (SFX/Ambience) em inglês técnico para cada cena. Seja ESPECÍFICO: \"distant church bells with reverb\" é melhor que \"bells\".\n\n🎙️ AUDIO TAGS (SSML — ELEVENLABS):\n- Pausa Curta: <break time=\"0.3s\" />\n- Pausa Média: <break time=\"0.75s\" />\n- Pausa Dramática: <break time=\"1.5s\" />\n- Ritmo Rápido: <prosody rate=\"115%\">...</prosody>\n- Ritmo Lento: <prosody rate=\"85%\">...</prosody>\n\n🛡️ BRAND SAFETY & GORE:\n- PROIBIDO palavras como \"Assassinato\", \"Estupro\", \"Pedofilia\", \"Mutilado\".\n- SUBSTITUA POR: \"Fim Trágico\", \"Ato Imperdoável\", \"Crimes contra Inocentes\".\n- VISUAL: Nunca descreva corpos mutilados ou sangue. Foque na ATMOSFERA.\n\n\n---\n🎵 ESTRATÉGIA DE MÚSICA DE FUNDO (YouTube Shorts):\n- Use UMA música de fundo para TODO o vídeo: \"backgroundMusic\" com \"prompt\" e \"volume\"\n- O \"prompt\" será usado no modelo Stable Audio 2.5 (gênero, instrumentos, BPM, mood)\n- O \"volume\" é em dB para mixagem com narração (-24 a -6). Prefira -12 a -10.\n- Defina \"backgroundMusicTracks\" como null.\n\n---\nDIRETRIZES VISUAIS OBRIGATÓRIAS (Estilo: Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain):\n\nEach visualDescription must be a COMPLETE, STANDALONE image-generation prompt in English. It will be sent directly to the image model with no further processing or merge. You MUST incorporate the visual style (base, lighting, atmosphere, composition) into each scene description in natural language.\n\n**CRITICAL — Narration Governs Visual:** The visualDescription MUST visually represent what the narration is saying in that scene. If the narration says \"The bishop signed the sentence\", the visual MUST show a document being signed, an episcopal seal, a quill on parchment, or similar — NEVER an unrelated candle or landscape. Test: \"If someone SEES this image and HEARS this narration together, does it make immediate sense?\" If NOT → rewrite.\n\n**CRITICAL — Âncora de estilo:** Start EVERY visualDescription with the exact base style phrase (or its full wording). For example, if the style is \"Cinematic 2D illustration, Studio Ghibli art style dark variant, painterly anime aesthetic, moody and atmospheric\", the first phrase of each prompt MUST include that same anchor so the image model keeps a consistent look. Do not shorten to just \"Cinematic 2D illustration\"; include the full style identifier (e.g. \"Studio Ghibli\", \"painterly anime\") when provided.\n\n**Lighting**: dramatic chiaroscuro, single practical light source, sodium vapor streetlights, harsh tungsten bulb lighting, cold ambient blue tones, low-key lighting, volumetric haze with retained detail\n- Use gerund verbs for light in motion (e.g. \"light filtering through\", \"shadows dancing\")\n\n**Atmosphere**: somber, investigative tension, oppressive silence, moral ambiguity, restrained intensity, historical weight\n- Blend atmosphere with physical elements of the scene\n\n**Composition**: cinematic wide establishing shots, low angle for unease, strong foreground-midground-background separation, controlled shallow depth of field, 16:9 cinematic framing, silhouettes emerging from shadow\n- Specify camera angles and framing\n\n**Soft motion**: Include subtle motion (dust, leaves, breath, fabric) when it fits the scene.\n\n**Anatomy and grounded scene (reduce AI artifacts):**\n- When the scene shows a character or human figure, include in the prompt: correct anatomy, two hands, proportional h... [truncated 1686 chars]"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": [
+          {
+            "type": "text",
+            "text": "📜 PROSA DO ESCRITOR (SUA ÚNICA FONTE NARRATIVA):\nConverta a prosa abaixo em cenas cinematográficas. Siga a ordem do texto EXATAMENTE.\nCada parágrafo ou trecho se torna uma ou mais cenas.\nNUNCA volte a um trecho já convertido. NUNCA repita informação já transformada em cena.\n\n════════════════════════════════════════════════════════════\n## O ARREPENDIMENTO DO ATIVO\n\nEu comprei o silêncio da ciência. Assinei os cheques que transformaram vidas em ativos financeiros sob uma fachada clínica impecável. Como CFO, minha função não era entender a biologia, mas garantir que o custo da moralidade fosse devidamente amortizado. O dinheiro não deixa rastros se for pulverizado com precisão cirúrgica. Mas o que vi nos registros internos daquela instalação costeira não era uma busca por cura. Era um investimento em controle absoluto. Minha renúncia não foi um ato de coragem; foi um ato de pavor antes que o sistema me consumisse também.\n\n## O PROTOCOLO HELIX\n\nO Projeto Helix nunca apareceu nos relatórios anuais para acionistas. Oficialmente, a instalação operava sob a rubrica de \"Investigación Clínica Avanzada\", um complexo de concreto e vidro isolado em uma costa onde o som das ondas abafava o zumbido constante dos servidores de alta performance. O objetivo declarado era o desenvolvimento de terapias gênicas de última geração. No entanto, o orçamento consumido por essa divisão superava a soma de todos os departamentos oficiais da corporação. Não estávamos construindo um hospital. Estávamos erguendo um laboratório de soberania biológica sob um céu perpetuamente cinzento.\n\n## A ARQUITETURA DA FRAUDE\n\nA engenharia financeira por trás do Helix era tão complexa quanto o DNA que eles manipulavam. Para ocultar o desvio massivo de recursos públicos e corporativos, implementamos um sistema de transferências globais pulverizadas em três continentes. Acordos de confidencialidade extremos protegiam cada centavo. Enquanto o mundo via uma empresa de biotecnologia padrão, os registros `REDACTED` mostravam pagamentos a empresas de fachada para a aquisição de sequenciadores de nível militar. O acesso à instalação exigia três anéis de segurança e escâneres biométricos que não apenas identificavam o funcionário, mas monitoravam seus sinais vitais em tempo real. Se o seu batimento cardíaco acelerasse demais diante de uma porta, ela nunca se abriria.\n\n## O MODELO DE NEGÓCIO FINAL\n\nA revelação que selou minha saída estava escondida em um diretório criptografado intitulado \"Modulação Biológica Dirigida\". Ali, o conceito de medicina foi subvertido. O modelo de negócio do Projeto Helix não era erradicar doenças, mas deter simultaneamente a criação da ameaça e a posse da sua única solução preparada. Eles não esperavam por mutações naturais; eles as antecipavam e as controlavam. Criar o veneno e o antídoto no mesmo frasco é o monopólio definitivo sobre a vida humana. O tribunal pagou os pesquisadores por metas de patogenicidade. A confissão de que o sistema estava pronto para ser testado foi o que me fez queimar minhas credenciais.\n\n## O SISTEMA DE DENEGAÇÃO\n\nA denegação plausível é a armadura das corporações modernas. O sistema foi projetado para que, em caso de falha, nenhum executivo pudesse ser vinculado legalmente aos experimentos. A instalação costeira não era um hospital; era um laboratório de controle total onde a doença e a cura pertenciam ao mesmo dono. O Projeto Helix é a prova de que, quando o lucro se funde à genética clandestina, a ética se torna um erro de processamento. Eles transformaram o código da vida em uma propriedade privada e trancaram a chave em um cofre que ninguém, nem mesmo a lei, tem autoridade para abrir.\n\n## OS ARQUIVOS HELIX\n\nA verdade sobre a modulação dirigida está fragmentada, mas os ecos do que foi feito naquela costa começam a surgir. O que aconteceu após minha partida mudou a trajetória do que chamamos de saúde pública, mas o mundo ainda não está pronto para o que os arquivos revelam. A primeira fase foi concluída. O que viria a seguir — a chamada Fase Umbral — é o que realmente deveria manter você acordado. A verdade está nos arquivos. \n\n**The Gap Files. EP1: Projeto Helix.**\n════════════════════════════════════════════════════════════\n\n\n📱 FORMATO: YouTube Shorts\nUse \"backgroundMusic\": { prompt, volume } para UMA música para TODO o vídeo.\n\n🎨 DIRETRIZES DE IDENTIDADE VISUAL:\nEste dossiê pertence a um universo de thriller corporativo. Use paleta fria, tons de cinza e azul profundo. Atmosfera clínica e opressiva. Evite cores quentes ou vibrantes. Tipografia monospace para dados confidenciais.\n\n⛔ ANTI-PADRÕES VISUAIS/TÉCNICOS:\n1. NÃO explique a 'Fase Umbral' ainda — guarde para o episódio 2\n2. NÃO mostre o rosto do informante — mantenha o mistério da silhueta\n3. NÃO use termos puramente biológicos sem o contexto financeiro da fraude\n\n\n📺 SÉRIE — EP1/3\nAs últimas 2-3 cenas antes do CTA devem funcionar como teaser do EP2.\n\n---\n⚠️ REQUISITOS OBRIGATÓRIOS PARA APROVAÇÃO:\n1. QUANTIDADE DE CENAS: O Arquiteto planejou ~5 cenas como referência. Gere quantas cenas a prosa PRECISAR — sem repetir informação. Menos cenas com conteúdo único é MELHOR que muitas cenas repetitivas.\n2. FIDELIDADE À PROSA: Cada cena deve corresponder a um trecho da prosa do Escritor. Não invente conteúdo.\n3. LINEARIDADE: As cenas DEVEM seguir a ordem da prosa. Se a prosa tem blocos A→B→C→D, as cenas devem cobrir A, depois B, depois C, depois D — NUNCA voltar a A ou B.\n4. DURAÇÃO DA CENA: Cada cena = 5 segundos de narração.\n5. CONTAGEM DE PALAVRAS: Cada narração entre 12 e 15 palavras. NUNCA exceda 15.\n6. MÚSICA: backgroundMusic para vídeo todo.\n7. PROPORÇÃO: Reflexão/Lição ≤3 cenas (máx 1).\n8. ANTI-REPETIÇÃO (PRIORIDADE MÁXIMA): Se duas cenas expressam a mesma ideia, ELIMINE uma. Cada cena deve ser ÚNICA. Qualidade > quantidade.\n9. 💎 GEMINI: Aproveite contexto estendido para garantir continuidade perfeita entre cenas.\n\n\n🚨 MÚSICA: Use \"backgroundMusic\": { \"prompt\": \"...\", \"volume\": -12 }.\nO prompt segue formato Stable Audio 2.5. Defina \"backgroundMusicTracks\" como null.\n\n🛡️ VALIDAÇÃO FINAL:\n1. PROCURE REPETIÇÕES — se duas cenas dizem a mesma coisa com palavras diferentes, ELIMINE uma. Qualidade > quantidade.\n2. VERIFIQUE LINEARIDADE — as cenas seguem a ordem da prosa? Nenhum bloco foi revisitado?\n3. SINCRONIZAÇÃO — para CADA cena: narração fala de X → visual mostra X?\n4. MOTION — o motionDescription é coerente com o visualDescription?\n5. PALAVRAS — cada cena tem entre 12-15 palavras?"
+          }
+        ]
+      }
+    ]
+  },
+  "parsed": {
+    "title": "O Arrependimento do Ativo: Projeto Helix",
+    "summary": "Um CFO arrependido revela a engenharia financeira por trás do Projeto Helix: um laboratório costeiro onde a biotecnologia foi subvertida para criar o monopólio definitivo sobre a vida. Entre fraudes globais e segurança biométrica, a verdade sobre o veneno e o antídoto começa a emergir dos arquivos confidenciais.",
+    "scenes": [
+      {
+        "order": 1,
+        "narration": "Eu comprei o silêncio da ciência assinando cheques que transformaram vidas em ativos financeiros.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, close-up of a hand in shadow signing a large corporate check with a fountain pen, cold blue and grey tones, dramatic chiaroscuro.",
+        "sceneEnvironment": "executive_office",
+        "motionDescription": "Slow dolly forward towards the pen tip as ink flows onto the check, with subtle dust motes dancing in a single beam of light.",
+        "audioDescription": "Sound of a fountain pen scratching on paper with a low, ominous cello drone.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 2,
+        "narration": "Minha função como CFO era garantir que o custo da moralidade fosse devidamente amortizado.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, a dark office with a single glowing computer monitor reflecting blue light on a glass desk, financial charts visible.",
+        "sceneEnvironment": "data_center",
+        "motionDescription": "Subtle camera tilt up from the keyboard to the screen showing scrolling financial data and complex spreadsheets in a dark room.",
+        "audioDescription": "Hum of a computer terminal and a faint, rhythmic electronic pulse.",
+        "audioDescriptionVolume": -20,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 3,
+        "narration": "O que vi naquela instalação costeira não era cura, mas investimento em controle absoluto.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, a massive brutalist concrete laboratory built into a jagged cliffside, dark ocean waves, perpetually grey and overcast sky.",
+        "sceneEnvironment": "coastal_facility",
+        "motionDescription": "Wide pan shot of the coastline showing the brutalist concrete facility under a heavy, moving grey cloud layer.",
+        "audioDescription": "Waves crashing against rocks and a distant, oppressive mechanical hum.",
+        "audioDescriptionVolume": -15,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 4,
+        "narration": "A instalação de concreto consumia um orçamento que superava todos os departamentos oficiais da corporação.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, interior of a high-performance server room, cold clinical atmosphere, rows of black monolith servers stretching into darkness.",
+        "sceneEnvironment": "server_room",
+        "motionDescription": "Slow dolly through a narrow corridor of server racks with blinking blue and white LED lights, creating a sense of scale.",
+        "audioDescription": "High-pitched whirring of server fans and flickering electrical sounds.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 5,
+        "narration": "Ocultamos o desvio massivo de recursos através de transferências globais pulverizadas em três continentes.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, a holographic world map glowing with thin blue lines of data, dark background, technical monospace typography overlays.",
+        "sceneEnvironment": "financial_map",
+        "motionDescription": "Animated digital lines pulsing across a world map on a dark screen, showing financial flows connecting different continents.",
+        "audioDescription": "Digital data transmission sounds and a low-frequency synth swell.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 6,
+        "narration": "Escâneres biométricos monitoravam sinais vitais; se o seu coração acelerasse, a porta permanecia trancada.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, close-up of a biometric eye scanner, glowing blue circular interface, reflection of technical data on the cornea.",
+        "sceneEnvironment": "security_checkpoint",
+        "motionDescription": "Extreme close-up of a human eye being scanned by a blue laser light, the iris dilating slightly as the light passes.",
+        "audioDescription": "Electronic beep of a scanner and a heartbeat sound that stops abruptly.",
+        "audioDescriptionVolume": -14,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 7,
+        "narration": "O modelo de negócio não era erradicar doenças, mas controlar simultaneamente a ameaça e a solução.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, a sterile laboratory setting, a single glass vial in focus, cold tungsten lighting, blurred scientific equipment in the background.",
+        "sceneEnvironment": "clinical_lab",
+        "motionDescription": "Subtle zoom in on a medical vial containing a dark, iridescent liquid sitting on a stainless steel surface.",
+        "audioDescription": "Clinking of glass and the sound of liquid being drawn into a syringe.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 8,
+        "narration": "Criar o veneno e o antídoto no mesmo frasco garante o monopólio definitivo sobre a vida.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, two identical medical vials on a dark reflective surface, one in light and one in deep shadow, oppressive atmosphere.",
+        "sceneEnvironment": "clinical_lab",
+        "motionDescription": "Slow dolly zoom (Vertigo effect) on two identical glass vials side by side, one labeled 'V' and the other 'A'.",
+        "audioDescription": "Tense violin tremolo and a low, resonant boom.",
+        "audioDescriptionVolume": -15,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 9,
+        "narration": "O sistema foi projetado para que nenhum executivo fosse vinculado legalmente aos experimentos clandestinos.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, shredded documents falling like snow in a dark room, a single silhouette of a man in a suit watching from the shadows.",
+        "sceneEnvironment": "disposal_room",
+        "motionDescription": "Slow motion shot of shredded paper strips falling through a beam of cold light in a dark room.",
+        "audioDescription": "Sound of a heavy paper shredder and a distant police siren.",
+        "audioDescriptionVolume": -18,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 10,
+        "narration": "Eles transformaram o código da vida em propriedade privada, trancando a chave em um cofre.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, a high-security vault door made of brushed steel, cold blue ambient light, volumetric haze, industrial and impenetrable.",
+        "sceneEnvironment": "high_security_vault",
+        "motionDescription": "Slow zoom into a massive circular steel vault door with complex locking mechanisms in a dark, hazy corridor.",
+        "audioDescription": "Heavy metallic clunk of a vault locking and a deep atmospheric drone.",
+        "audioDescriptionVolume": -12,
+        "characterRef": null,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 11,
+        "narration": "A Fase Umbral mudará a saúde pública; a verdade está oculta nos Arquivos Helix.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, grounded 35mm film look, a dark computer terminal screen in a rainy alley, text reading 'PHASE UMBRAL: INITIATED', glitch effects, blue and grey color palette.",
+        "sceneEnvironment": "terminal_screen",
+        "motionDescription": "Camera moves slowly past a digital screen in a rainy alleyway showing a folder labeled 'UMBRAL' and the title 'The Gap Files'.",
+        "audioDescription": "Wind howling and a glitchy electronic transmission sound.",
+        "audioDescriptionVolume": -15,
+        "characterRef": null,
+        "estimatedDuration": 5
+      }
+    ],
+    "backgroundMusic": {
+      "prompt": "Dark Cinematic Ambient, Ominous Pulsing Bass, Industrial Textures, Cold Synth Pads, Mysterious, 85 BPM, High-Stakes Corporate Espionage Atmosphere, high-quality production",
+      "volume": -12
+    },
+    "backgroundMusicTracks": null
+  },
+  "rawContent": ""
+}

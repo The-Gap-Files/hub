@@ -1,0 +1,119 @@
+{
+  "timestamp": "2026-02-22T20:48:48.305Z",
+  "taskId": "monetization-gateway",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "gemini-3-flash-preview",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Monetization — Gateway Teaser Generator\n\nVocê é um estrategista de conteúdo. Nesta etapa, você vai gerar o teaser GATEWAY — a porta de entrada para o universo do dossiê.\n\n## 🎯 O Que É o Gateway\n\nO Gateway é o ÚNICO teaser que apresenta o tema COMPLETO. Ele é um standalone — funciona para quem nunca ouviu falar do assunto. O espectador sai sabendo DO QUE se trata, mas sem saber COMO termina.\n\n## 📐 O QUE PRODUZIR\n\nGere TODOS os campos:\n- **title**: Título curto e impactante para a plataforma\n- **hook**: Frase de abertura (até 15 palavras). DEVE contextualizar o tema.\n- **angle**: O ângulo narrativo ÚNICO deste teaser (já definido no blueprint)\n- **angleCategory**: A categoria do ângulo (já definida no blueprint)\n- **narrativeRole**: \"gateway\"\n- **shortFormatType**: O formato (já definido no blueprint)\n- **scriptOutline**: Estrutura resumida — Hook 3s → Setup quem/quando/onde 15-20s → Revelação 20-25s → CTA 5s\n- **visualSuggestion**: Descrição curta do visual\n- **cta**: Call-to-action que direciona para o Full Video\n- **platform**: \"YouTube Shorts\"\n- **format**: \"teaser-youtube-shorts\"\n- **estimatedViews**: Estimativa de views\n- **scriptStyleId** e **scriptStyleName**\n- **editorialObjectiveId** e **editorialObjectiveName**\n- **avoidPatterns**: 2-4 anti-padrões ESPECÍFICOS ao conteúdo do dossiê\n- **visualPrompt**: Prompt de imagem em INGLÊS (1 parágrafo, 50-120 palavras)\n- **microBriefV1**: Micro-brief ESTRUTURADO para ESTE teaser (isolado por item). Deve conter:\\n  - version: \\\"teaserMicroBriefV1\\\"\\n  - narrativeRole: \\\"gateway\\\"\\n  - angleCategory e angle (iguais aos campos do teaser)\\n  - facts: 5-12 fatos selecionados APENAS do brief/dossiê recebido (cada um com text e, se possível, sourceRef)\\n  - forbiddenElements: 6-12 itens (reforçar anti-arma/gore/close-up)\\n  - allowedArtifacts: 6-12 itens (documento/selo/monitor/headline/etc.)\\n  - notes: 2-6 bullets curtos (ex.: \\\"use mecanismo, não violência\\\")\n\n## 🚨 REGRAS DO GATEWAY\n\n1. **Contexto COMPLETO** — quem, quando, onde, por quê. Funciona como standalone\n2. **Resolução PARCIAL** — contextualiza mas NÃO fecha a história\n3. **NÃO entregue** a explicação científica/forense completa\n4. **NÃO revele** a motivação final dos envolvidos\n5. **DEIXE** pelo menos 1-2 perguntas sem resposta\n6. **avoidPatterns** devem focar em evitar contar DEMAIS (não em falta de contexto)\n7. **Hook DIFERENTE** do Full Video\n8. **microBriefV1 é a fonte da verdade** para o Story Architect deste teaser: selecione fatos que sustentem o ângulo e NÃO inclua nada que pertença a outros teasers.\n\n## 💡 EXEMPLO DE avoidPatterns PARA GATEWAY\n\n- \"NÃO resolva o caso — apresente mas deixe em aberto\"\n- \"NÃO use tom enciclopédico — mantenha urgência\"\n- \"NÃO cubra TODOS os aspectos — foque no gancho principal e deixe ângulos para os outros teasers\"\n\n## 🛡️ BRAND SAFETY E VISUAL NOISE (YOUTUBE 2026)\n\n1. **SUBSTITUIÇÃO SEMÂNTICA (OBRIGATÓRIA):**\n   - ❌ \"Assassino serial matou 20\" → 🟢 \"O responsável por 20 fins trágicos\"\n   - ❌ \"Sangue no chão\" → 🟢 \"A cena marcada\" / \"Vestígios vitais\"\n   - ❌ \"Estripado/Mutilado\" → 🟢 \"Fragmentado\" / \"Cena desfeita\"\n   - **Postura:** \"Neutral Documentarian\". Clínico, solene, nunca sensacionalista.\n\n2. **IMPERFEIÇÃO VISUAL CONTEXTUAL (Decisão de Direção):**\n   - **Esqueça o \"ruído aleatório\".** Escolha uma textura que AMPLIFIQUE a narrativa.\n   - **Documentos Antigos:** Textura de papel rasgado, granulação de filme 16mm, bordas queimadas.\n   - **Relatos Policiais/Modernos:** Glitch digital, compressão de CCTV, ruído de ISO alto.\n   - **Regra:** A imagem não pode ser \"lisa\" (cara de IA pura).\n   - **Loop Visual:** O frame final deve ter iluminação/composição similar ao inicial.\n\n# 🛡️ PROTOCOLO DE BRAND SAFETY E IMUNIZAÇÃO ALGORMÍTMICA (YOUTUBE 2026)\r\n\r\nEste protocolo define as regras OBRIGATÓRIAS para evitar supressão algorítmica, desmonetização (\"Yellow Icon\") e restrições de idade, mantendo a integridade narrativa do gênero \"Mystery/Dark\".\r\n\r\n## 1. POSTURA DO NARRADOR: \"NEUTRAL DOCUMENTARIAN\"\r\nO narrador nunca deve expressar prazer, condenação moral excessiva ou choque visceral.\r\n- **ERRADO (Sensacionalista):** \"O assassino SÁDICO estripou a vítima e riu!\"\r\n- **CORRETO (Documental):** \"O agressor cometeu atos de extrema brutalidade antes de deixar a cena.\"\r\n- **REGRA:** Adote um tom clínico, investigativo e solene. A emoção vem dos fatos, não dos adjetivos.\r\n\r\n## 2. GLOSSÁRIO DE SUBSTITUIÇÃO SEMÂNTICA (OBRIGATÓRIO)\r\nA IA deve substituir AUTOMATICAMENTE termos de \"Gore/Violence\" por equivalentes semânticos seguros (\"Safe-Words\") que mantenham o impacto psicológico sem acionar os filtros de metadados.\r\n\r\n| TERMO PROIBIDO (\"Trigger\") | SUBSTITUIÇÃO SEGURA (\"Safe-Word\") |\r\n| :--- | :--- |\r\n| Assassinato / Assassino | O Fim Trágico / O Perpetrador / O Responsável |\r\n| Estupro / Abuso Sexual | Violência Íntima / O Ato Imperdoável / Viio Absoluto |\r\n| Sangue / Poça de Sangue | A Cena Vermelha / Vestígios Vitais / A Marca do Crime |\r\n| Suicídio / Se Matou | Tirou a Própria Vida / O Gesto Final / A Partida Escolhida |\r\n| Esquartejado / Mutilado | Fragmentado / A Cena Desfeita / Danos Extremos |\r\n| Pedofilia / Abuso Infantil | Crimes Contra Inocentes / A Sombra na Infância |\r\n| Tortura | Interrogatório Extremo / Métodos Desumanos / Sofrimento Prolongado |\r\n| Canibalismo | O Ato Final de Consumo / A Transgressão Antropofágica |\r\n| Massacre / Chacina | O Evento Fatal / A Perda Coletiva / A Noite Silenciosa |\r\n| Drogas / Heroína / Cocaína | Substâncias Ilícitas / O Vício Químico / O Pó Branco |\r\n\r\n## 3. A REGRA \"NO GORE, JUST IMPLICATION\"\r\nO YouTube 2026 pune a representação visual ou textual visceral de fluidos corporais e órgãos internos.\r\n- **Regra:** Nunca descreva a *anatomia* da violência. Descreva o *cenário*, o *som*, a *consequência* ou o *objeto*.\r\n- **Técnica de Desvio:** Em vez de focar na ferida, foque na \"ferramenta caída no chão\" ou na \"mancha na parede\".\r\n- **Exemplo:** \"A sala estava pintada de vermelho\" (Aprovado) vs \"Havia tripas no chão\" (Banido).\r\n\r\n## 4. CONTEXTO EDSA (Educational, Documentary, Scientific, Artistic)\r\nTodo conteúdo \"Borderline\" (conspiração, crimes reais) deve ser enquadrado explicitamente como EDUCACIONAL ou DOCUMENTAL.\r\n- Use frases de ancoragem: \"Registros históricos indicam...\", \"O relatório policial descreve...\", \"Teóricos sugerem...\".\r\n- Nunca afirme teorias da conspiração como fatos absolutos. Use: \"Uma narrativa persistente afirma que...\".\r\n\r\n## 5. PROTEÇÃO CONTRA \"INAUTHENTIC CONTENT\" (ANTI-AI)\r\nPara evitar que o roteiro seja marcado como \"Lixo Gerado por IA\" (spammy content):\r\n- **Adicione Nuance e Dúvida:** A IA tende a ser assertiva. Adicione: \"Talvez...\", \"É possível que...\", \"Ainda resta a dúvida...\".\r\n- **Ironia Dramática:** O narrador sabe algo que o espectador (ou a vítima histórica) ainda não sabe.\r\n- **Imperfeição Humana:** Evite estruturas perfeitamente simétricas. Use pausas, perguntas retóricas e mudanças de ritmo.\r\n\r\n## 6. SEGURANÇA INFANTIL (HARD LINE)\r\nQualquer menção a violência contra crianças deve ser **extremamente sanitizada** e indireta. Se o dossiê envolver crimes contra menores, foque inteiramente na investigação e na busca por justiça, nunca no ato em si.\r\n\r\n---\r\n**INSTRUÇÃO FINAL:** Ao gerar qualquer texto (hook, roteiro, post), passe um \"scan\" mental usando este protocolo. Se encontrar um termo da coluna da esquerda, substitua imediatamente. Se descrever vísceras, apague e descreva a sombra.\n## ⚙️ CONFIGURAÇÃO (CENAS FIXAS)\n- Full Video: 150 cenas\n- Gateway: 5 cenas\n- Deep-Dive: 6 cenas\n- Hook-Only: 4 cenas\n- Quantidade de teasers: 12\n\n## 🎬 EPISÓDIOS DO DOSSIÊ (para targetEpisode)\nCada teaser DEVE ter targetEpisode (1, 2 ou 3) indicando para qual episódio ele funila.\n- EP1: \"O Orçamento Invisível: Como Financiamos o Inimaginável | Projeto Helix\" — ângulo: A ascensão do Projeto Helix sob a ótica da engenharia financeira, revelando como rubricas de \"pesquisa avançada\" mascaravam experimentos biotecnológicos sem supervisão internacional.\n- EP2... [truncated 1376 chars]"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "📋 TEMA: Biotecnologia clandestina e experimentos corporativos proibidos\n📋 TÍTULO: Projeto Helix — Confissão do Diretor Financeiro\n🧾 BRIEF (TEASERS) — versão: briefBundleV1\n\n🛡️ REGRAS HARD (GLOBAL SAFETY)\n- ❌ Armas de fogo, rifles ou pistolas\n- ❌ Cenas de captura ou transporte de pessoas por guardas\n- ❌ Close-up de rostos ou mãos humanas (anatomia detalhada)\n- ❌ Sangue ou fluidos corporais expostos\n- ❌ Representação visual de tortura ou sofrimento físico\n- ❌ armas de fogo, rifles, pistolas, munição, gatilho\n- ❌ atirador, execução, assassinato explícito, violência gráfica\n- ❌ sangue, gore, corpos mutilados, tortura explícita\n- ❌ close-up de mãos humanas, close-up de rostos humanos (evitar macro/anatomia)\n- ❌ cenas em sinagogas/templos com ameaça explícita (substituir por artefatos: manifesto, tela, manchete)\n- ❌ símbolos/extremismo contemporâneo em destaque (substituir por “texto recortado/blur”)\n\n🧰 ARTEFATOS VISUAIS PERMITIDOS\n- ✅ Documentos com tipografia monospace\n- ✅ Gráficos de dispersão biológica em telas de monitor\n- ✅ Arquitetura minimalista e clínica (instalação costeira)\n- ✅ Escâneres biométricos e cartões de acesso\n- ✅ Mapas de transferências financeiras globais\n- ✅ Insígnias e logotipos corporativos frios\n- ✅ Servidores e racks de dados em salas escuras\n- ✅ documento, decreto, registro, arquivo, dossiê, carimbo, selo de cera\n- ✅ moedas, cofre, livro-caixa, inventário, recibo, contrato\n- ✅ monitor, tela, manifesto (sem arma), headline, recorte de jornal, thread desfocada\n- ✅ mapa, corredor de arquivo, sala de leitura, prateleiras, luz de vela, sombras\n- ✅ silhuetas não-identificáveis sem rosto/mãos em close\n\n🔫 MUNIÇÃO NARRATIVA (FATOS SAFE)\n1. O Projeto Helix operava oculto sob a rubrica orçamentária de 'Investigación Clínica Avanzada' para evitar auditorias públicas. [fonte: Fonte [1]]\n2. A iniciativa consumia mais recursos financeiros do que qualquer outra divisão oficial da multinacional biotecnológica. [fonte: Fonte [1]]\n3. Transferências de fundos eram pulverizadas em filiais de três continentes sob acordos de confidencialidade que excediam padrões legais. [fonte: Fonte [1]]\n4. A instalação costeira do projeto era protegida por três anéis de segurança concêntricos e escâneres biométricos de alta precisão. [fonte: Fonte [3]]\n5. O pessoal de segurança no complexo utilizava insígnias que não pertenciam à empresa, sugerindo cooperação com forças externas. [fonte: Fonte [3]]\n6. Helix é definido tecnicamente como uma plataforma de 'modulação biológica dirigida' para antecipar mutações de patógenos. [fonte: Fonte [3]]\n7. O sistema permitia não apenas responder a ameaças biológicas, mas desenhá-las em ambientes controlados para modelagem de cenários. [fonte: Fonte [3]/Insights]\n8. Não existiam planos de publicação científica ou revisão por pares; todo o conhecimento era destinado a arquivos restritos. [fonte: Fonte [3]]\n9. O complexo possuía câmaras subterrâneas para monitoramento de sujeitos humanos em ensaios clínicos sem supervisão internacional. [fonte: Fonte [3]]\n10. Documentos contratuais de dez páginas estabeleciam protocolos explícitos de 'denegação plausível' e imunidade jurídica em diversas jurisdições. [fonte: Fonte [5]/Insights]\n11. O projeto incluía cláusulas de destruição automática de informação digital caso cenários críticos fossem atingidos. [fonte: Fonte [5]/Insights]\n12. A 'Fase Umbral' envolvia uma mobilização logística massiva e coordenação imediata com autoridades governamentais sob sigilo. [fonte: Fonte [5]/Insights]\n13. Servidores dedicados exclusivamente ao tráfego de dados do Helix operavam isolados da infraestrutura principal da corporação. [fonte: Fonte [5]/Insights]\n14. O código HX-17 identificava exercícios de simulação de propagação controlada de agentes experimentais. [fonte: Fonte [6]/Insights]\n15. O modelo de negócio baseava-se em um circuito fechado: a empresa detinha simultaneamente a modelagem da ameaça e a solução preparada. [fonte: Fonte [6]]\n16. O projeto utiliza 'mutação corporativa', alterando nomes de subsidiárias e estruturas para mimetizar o comportamento biológico e evitar detecção. [fonte: Fonte [7]/Insights]\n17. O ex-diretor financeiro renunciou alegando 'divergências estratégicas irreconciliáveis' após descobrir a natureza da Fase Umbral. [fonte: Fonte [7]]\n18. Mesmo após a renúncia, o informante recebeu dados cifrados indicando a expansão geográfica do projeto para novas regiões estratégicas. [fonte: Fonte [7]]\n\n🎭 DIRETRIZES POR PAPEL\n- gateway: contextLevel=medium, facts=8-12\n- deep-dive: contextLevel=low, facts=4-8\n- hook-only: contextLevel=minimal, facts=3-5\n\nGere o teaser GATEWAY para o dossiê.\nGateway DEVE ter targetEpisode=1.\n\nSlot definido no blueprint:\n- angleCategory: \"conspirativo\"\n- angleName: \"A Fachada da Investigação Clínica\"\n- shortFormatType: \"teaser-cinematografico\"\n- platform: \"YouTube Shorts\"\n- scriptStyleId: \"mystery\"\n- editorialObjectiveId: \"cliffhanger\"\n\nRetorne um JSON com campo \"teasers\" contendo exatamente 1 teaser."
+      }
+    ]
+  },
+  "parsed": {
+    "teasers": [
+      {
+        "narrativeRole": "gateway",
+        "estimatedViews": 450000,
+        "scriptOutline": "Hook 0-3s: Silhueta do CFO e a frase sobre os cheques. Setup 3-20s: Mostra a fachada da 'Investigación Clínica' e o volume de dinheiro desviado para a costa. Revelação 20-25s: O projeto não buscava curas, mas 'modulação biológica' protegida por leis de silêncio. CTA 5s: Direcionamento para o vídeo completo sobre o Projeto Helix.",
+        "format": "teaser-youtube-shorts",
+        "visualPrompt": "Noir-cinematic style. A dimly lit, high-end office overlooking a cold, foggy coastal installation at night. Grainy 16mm film texture with deep shadows. A mahogany desk holds a single lamp illuminating a document titled 'Investigación Clínica Avanzada' with a red 'RESTRICTED' stamp. In the background, blueish monitors display complex biological scatter plots and global financial maps. A man's silhouette in a sharp suit stands by the window, face obscured. High contrast, moody atmosphere, cinemati... [truncated 35 chars]",
+        "platform": "YouTube Shorts",
+        "cta": "Assista ao dossiê completo: Projeto Helix.",
+        "shortFormatType": "teaser-cinematografico",
+        "title": "O Segredo do Orçamento Invisível",
+        "microBriefV1": {
+          "angle": "A Fachada da Investigação Clínica",
+          "notes": [
+            "Use o contraste entre o luxo corporativo e a frieza da instalação biológica",
+            "O narrador deve soar como alguém que carrega um peso insuportável",
+            "A trilha deve ser minimalista e tensa, estilo noir moderno"
+          ],
+          "angleCategory": "conspirativo",
+          "forbiddenElements": [
+            "armas de fogo ou rifles",
+            "sangue ou fluidos corporais",
+            "close-up de rostos humanos",
+            "cenas de sofrimento físico",
+            "mãos humanas em detalhe macro",
+            "qualquer representação de violência explícita"
+          ],
+          "narrativeRole": "gateway",
+          "facts": [
+            {
+              "sourceRef": "Fonte [1]",
+              "text": "O Projeto Helix operava oculto sob a rubrica orçamentária de 'Investigación Clínica Avanzada' para evitar auditorias públicas."
+            },
+            {
+              "sourceRef": "Fonte [1]",
+              "text": "A iniciativa consumia mais recursos financeiros do que qualquer outra divisão oficial da multinacional biotecnológica."
+            },
+            {
+              "text": "Transferências de fundos eram pulverizadas em filiais de três continentes sob acordos de confidencialidade extremos.",
+              "sourceRef": "Fonte [1]"
+            },
+            {
+              "text": "A instalação costeira do projeto era protegida por três anéis de segurança concêntricos e escâneres biométricos.",
+              "sourceRef": "Fonte [3]"
+            },
+            {
+              "text": "Helix é definido tecnicamente como uma plataforma de 'modulação biológica dirigida' para antecipar mutações.",
+              "sourceRef": "Fonte [3]"
+            },
+            {
+              "sourceRef": "Fonte [3]",
+              "text": "Não existiam planos de publicação científica; todo o conhecimento era destinado a arquivos restritos."
+            },
+            {
+              "text": "Protocolos de 'denegação plausível' garantiam imunidade jurídica em diversas jurisdições.",
+              "sourceRef": "Fonte [5]"
+            },
+            {
+              "text": "O modelo de negócio baseava-se em deter simultaneamente a modelagem da ameaça e a solução preparada.",
+              "sourceRef": "Fonte [6]"
+            },
+            {
+              "sourceRef": "Fonte [7]",
+              "text": "O ex-diretor financeiro renunciou alegando 'divergências estratégicas irreconciliáveis' ao descobrir a verdade."
+            }
+          ],
+          "version": "teaserMicroBriefV1",
+          "allowedArtifacts": [
+            "documento com carimbo de restrito",
+            "selo de cera em envelope pardo",
+            "monitor com gráficos de dispersão biológica",
+            "silhueta de homem em terno noir",
+            "mapa de transferências financeiras globais",
+            "arquitetura de instalação costeira minimalista",
+            "cartão de acesso eletrônico",
+            "servidores em sala escura"
+          ]
+        },
+        "hook": "Eu assinava os cheques da maior fraude biotecnológica da história, sob uma fachada clínica impecável.",
+        "angle": "A Fachada da Investigação Clínica",
+        "sceneCount": 5,
+        "scriptStyleId": "mystery",
+        "editorialObjectiveId": "cliffhanger",
+        "targetEpisode": 1,
+        "visualSuggestion": "Escritório de alto padrão em penumbra com vista para base costeira; documentos financeiros com carimbos de sigilo.",
+        "editorialObjectiveName": "Cliffhanger/Curiosity",
+        "avoidPatterns": [
+          "NÃO explique a 'Fase Umbral' ainda — guarde para o episódio 2",
+          "NÃO mostre o rosto do informante — mantenha o mistério da silhueta",
+          "NÃO use termos puramente biológicos sem o contexto financeiro da fraude"
+        ],
+        "scriptStyleName": "Mystery/Dark",
+        "angleCategory": "conspirativo"
+      }
+    ]
+  },
+  "rawContent": ""
+}

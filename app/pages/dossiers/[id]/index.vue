@@ -319,11 +319,35 @@
         <!-- Tab: Inteligência -->
         <Transition name="tab-fade" mode="out-in">
           <div v-if="activeTab === 'intelligence'" key="intelligence">
-            <DossierIntelligenceCenter 
-              :dossier-id="dossierId" 
-              :initial-notes="dossier.notes || []" 
+            <!-- Episode Brief Bundle regeneration -->
+            <div class="flex items-center gap-3 mb-6 p-4 bg-cyan-500/5 border border-cyan-500/15 rounded-xl">
+              <Brain :size="18" class="text-cyan-400 shrink-0" />
+              <div class="flex-1 min-w-0">
+                <p class="text-xs text-zinc-400">
+                  Regenera o brief de episódios (EP1/EP2/EP3) com base nas fontes atuais do dossiê.
+                  Necessário após alterar fontes ou corrigir a distribuição de fatos.
+                </p>
+              </div>
+              <button
+                @click="regenerateEpisodeBrief"
+                :disabled="regeneratingBrief"
+                class="shrink-0 px-4 py-2 bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 text-xs font-bold rounded-lg transition-all disabled:opacity-50 flex items-center gap-2"
+              >
+                <RotateCw :size="14" :class="regeneratingBrief ? 'animate-spin' : ''" />
+                {{ regeneratingBrief ? 'Gerando...' : 'Regenerar Episode Brief' }}
+              </button>
+              <Transition name="tab-fade">
+                <span v-if="briefRegenSuccess" class="text-emerald-400 text-xs font-bold whitespace-nowrap">
+                  ✓ Brief atualizado
+                </span>
+              </Transition>
+            </div>
+
+            <DossierIntelligenceCenter
+              :dossier-id="dossierId"
+              :initial-notes="dossier.notes || []"
               :initial-persons="dossier.persons || []"
-              @updated="loadDossier" 
+              @updated="loadDossier"
             />
           </div>
         </Transition>
@@ -351,12 +375,12 @@
 </template>
 
 <script setup lang="ts">
-import { 
+import {
   ArrowLeft, Zap, FileText, Database, Palette, AlertTriangle, Dna, Tv,
   LayoutDashboard, PlayCircle, TrendingUp, Brain, Clock, Maximize2, Minimize2,
   Link as LinkIcon,
   Target, Eye, EyeOff, Layers, BookOpen, GraduationCap, Heart, Flame, Swords,
-  HelpCircle
+  HelpCircle, RotateCw
 } from 'lucide-vue-next'
 import DossierSources from '~/components/dossier/DossierSources.vue'
 import DossierImages from '~/components/dossier/DossierImages.vue'
@@ -383,6 +407,10 @@ const visualSettingsForm = ref({
 })
 const visualStyles = ref<any[]>([])
 const allSeeds = ref<any[]>([])
+
+// Episode Brief regeneration
+const regeneratingBrief = ref(false)
+const briefRegenSuccess = ref(false)
 
 // Channel
 const showChannelPicker = ref(false)
@@ -598,6 +626,24 @@ async function updateDossierChannel() {
     showChannelPicker.value = false
   } catch (err: any) {
     alert(err?.data?.message || 'Erro ao atualizar canal')
+  }
+}
+
+async function regenerateEpisodeBrief() {
+  if (regeneratingBrief.value) return
+  regeneratingBrief.value = true
+  briefRegenSuccess.value = false
+  try {
+    await $fetch(`/api/dossiers/${dossierId}/generate-episode-brief-bundle`, {
+      method: 'POST',
+      body: { force: true },
+    })
+    briefRegenSuccess.value = true
+    setTimeout(() => { briefRegenSuccess.value = false }, 4000)
+  } catch (err: any) {
+    alert(err?.data?.message || 'Erro ao regenerar Episode Brief Bundle')
+  } finally {
+    regeneratingBrief.value = false
   }
 }
 </script>

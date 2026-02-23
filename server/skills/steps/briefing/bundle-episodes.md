@@ -53,30 +53,34 @@ Fatos de **contexto geral e background** que qualquer episódio pode mencionar s
 
 **NÃO inclua:** revelações, desfechos, traições, mortes, consequências
 
-### exclusiveFacts de EP1 (15–50 fatos)
+### exclusiveFacts de EP1 (30–80 fatos)
 Fatos do **começo da história**: origem, método, formação do conflito, as primeiras tensões.
 - Como tudo começou
 - Quem estava envolvido inicialmente e em que papel
 - O primeiro sinal de perigo ou irregularidade
 - A ascensão do conflito (sem revelar o ponto de inflexão)
+- **EXTRAIA O MÁXIMO de fatos das fontes** — cada detalhe concreto (data, nome, local, mecanismo, consequência) deve virar um fato separado
+- Quanto mais fatos detalhados, mais material o Escritor terá para criar cenas ricas e únicas
 
 **holdbackFacts de EP1** (3–20): Fatos de EP2 e EP3 que EP1 deve guardar (traições, desfechos, legado).
 
-### exclusiveFacts de EP2 (15–50 fatos)
+### exclusiveFacts de EP2 (30–80 fatos)
 Fatos da **virada e consequências imediatas**: a traição, o ponto de inflexão, o impacto direto.
 - O momento em que tudo mudou
 - Quem traiu ou revelou o que estava oculto
 - As consequências imediatas da virada
 - O estado da situação após a inflexão (ainda sem resolução final)
+- **EXTRAIA O MÁXIMO de fatos das fontes** — não resuma, desdobre cada evento em fatos granulares
 
 **holdbackFacts de EP2** (3–20): Fatos de EP3 que EP2 deve guardar (desfecho final, destino dos personagens, legado).
 
-### exclusiveFacts de EP3 (15–50 fatos)
+### exclusiveFacts de EP3 (30–80 fatos)
 Fatos do **desfecho e legado**: o que aconteceu depois, o destino dos personagens, a conexão com o presente.
 - Como a situação se resolveu (ou não)
 - O destino de cada personagem principal
 - O impacto de longo prazo (político, social, histórico)
 - A conexão com o presente (o que isso significa hoje)
+- **EXTRAIA O MÁXIMO de fatos das fontes** — cada detalhe do desfecho merece um fato separado
 
 **holdbackFacts de EP3**: Normalmente vazio — EP3 pode revelar tudo.
 
@@ -109,6 +113,33 @@ São **conclusões que este episódio NÃO pode entregar**:
 - **EP1**: `null` (não há episódio anterior)
 - **EP2**: 1 frase que conecta com EP1 (ex: "Após a revelação inicial do esquema em EP1, as consequências começam a emergir")
 - **EP3**: 1 frase que conecta com EP2 (ex: "Com a virada exposta em EP2, o desfecho final se aproxima")
+
+---
+
+## Como definir previouslyCoveredTopics (ANTI-REPETIÇÃO ENTRE EPISÓDIOS)
+
+🚨 **REGRA CRÍTICA**: Além de `holdbackFacts` (que protege o FUTURO — EP3 não vaza no EP2), cada episódio DEVE listar tópicos que episódios ANTERIORES já cobriram em detalhe. Isso impede que o roteirista re-descreva conteúdo que o espectador JÁ VIU.
+
+**O problema que este campo resolve:**
+Quando o EP2 menciona "Método Gemini" nos exclusiveFacts, o roteirista tende a EXPLICAR o que é esse método — re-descrevendo etapas, procedimentos e detalhes que pertencem ao EP1. O campo `previouslyCoveredTopics` instrui: "mencione por nome, mas NÃO re-descreva."
+
+**Como gerar:**
+
+- **EP1**: `[]` — array vazio (não há episódio anterior)
+- **EP2**: Liste 3–10 tópicos/procedimentos que o EP1 cobriu em detalhe. Exemplos:
+  - "O 'Método Gemini' (protocolo de 7 etapas de eliminação) — descrito em detalhe no EP1"
+  - "O Horror Hotel e o papel de Joey 'Drácula' Guglielmo — apresentado no EP1"
+  - "O esquema de roubo de automóveis internacionais para o Kuwait — coberto no EP1"
+  - "A formação da dupla Testa/Senter e o incidente da briga de bar em 1973 — EP1"
+- **EP3**: Liste tópicos que EP1 E EP2 já cobriram. Exemplos:
+  - Todos os itens de EP2 (EP1 já cobriu) +
+  - "O assassinato de Roy DeMeo e o candelabro — revelado no EP2"
+  - "A transferência para a família Lucchese sob Casso — narrada no EP2"
+  - "O julgamento RICO de 1988 e o incidente da cocaína — coberto no EP2"
+
+**Formato de cada item:** Frase curta (5–300 chars) descrevendo O QUE foi coberto e EM QUAL EP.
+
+**Regra para o roteirista:** O tópico pode ser REFERENCIADO por nome ("usando o Método Gemini"), mas PROIBIDO re-descrever etapas, procedimentos ou detalhes.
 
 ---
 
@@ -146,9 +177,9 @@ Campos obrigatórios:
 - `globalSafety.forbiddenElements`: mínimo 4 itens
 - `globalSafety.allowedArtifacts`: mínimo 4 itens
 - `sharedFacts`: mínimo 5 fatos
-- `episodes.ep1.exclusiveFacts`: mínimo 15 fatos (cada um com 2-4 linhas detalhadas)
-- `episodes.ep2.exclusiveFacts`: mínimo 15 fatos (cada um com 2-4 linhas detalhadas)
-- `episodes.ep3.exclusiveFacts`: mínimo 15 fatos (cada um com 2-4 linhas detalhadas)
+- `episodes.ep1.exclusiveFacts`: mínimo 30 fatos (cada um com 2-4 linhas detalhadas) — EXTRAIA O MÁXIMO das fontes
+- `episodes.ep2.exclusiveFacts`: mínimo 30 fatos (cada um com 2-4 linhas detalhadas) — EXTRAIA O MÁXIMO das fontes
+- `episodes.ep3.exclusiveFacts`: mínimo 30 fatos (cada um com 2-4 linhas detalhadas) — EXTRAIA O MÁXIMO das fontes
 - `episodes.ep1.holdbackFacts`: mínimo 0 fatos (mas geralmente 3+)
 - `episodes.ep2.holdbackFacts`: mínimo 0 fatos (mas geralmente 3+)
 - `episodes.ep1.suggestedOpenLoops`: mínimo 2 perguntas
@@ -159,6 +190,9 @@ Campos obrigatórios:
 - `episodes.ep1.previousEpisodeBridge`: `null`
 - `episodes.ep2.previousEpisodeBridge`: string (1 frase)
 - `episodes.ep3.previousEpisodeBridge`: string (1 frase)
+- `episodes.ep1.previouslyCoveredTopics`: `[]` (EP1 não tem episódio anterior)
+- `episodes.ep2.previouslyCoveredTopics`: 3–10 tópicos que EP1 já cobriu em detalhe
+- `episodes.ep3.previouslyCoveredTopics`: 5–15 tópicos que EP1 e EP2 já cobriram
 - `episodes.ep1.resolutionLevel`: `"none"`
 - `episodes.ep2.resolutionLevel`: `"partial"`
 - `episodes.ep3.resolutionLevel`: `"full"`

@@ -431,14 +431,14 @@
             :class="{ 'opacity-60 pointer-events-none': regeneratingTeaserIndex === Number(index) }"
           >
             <!-- Teaser Header -->
-            <div class="px-5 py-4 flex items-center justify-between border-b border-white/5 bg-white/[0.01]">
-              <div class="flex items-center gap-2">
+            <div class="px-5 py-3 flex items-start justify-between gap-3 border-b border-white/5 bg-white/[0.01]">
+              <div class="flex items-center gap-2 flex-shrink-0 pt-0.5">
                 <span class="w-6 h-6 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-300 text-xs font-black">
                   {{ Number(index) + 1 }}
                 </span>
                 <span class="mono-label text-xs text-zinc-500 uppercase">{{ teaser.platform }}</span>
               </div>
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-1.5 flex-wrap justify-end">
                 <NuxtLink
                   v-if="packageResult?.teaserOutputIds?.[Number(index)]"
                   :to="`/outputs/${packageResult.teaserOutputIds[Number(index)]}`"

@@ -515,6 +515,17 @@ function buildUserPrompt(request: StoryArchitectRequest): string {
         prompt += `  → REGRA: Mantenha o foco 100% no ângulo do episódio e trate qualquer bloco "EPISÓDIOS ANTERIORES (NÃO REPETIR)" presente em userNotes como RESTRIÇÃO DURA.\n`
         prompt += `  → Objetivo: explorar TERRITÓRIO NOVO e complementar, sem recontar as mesmas revelações.\n`
 
+        // Anti-elaboração para EP2+: não criar beats que re-descrevam conteúdo de EPs anteriores
+        if (mc.episodeNumber && mc.episodeNumber > 1) {
+          prompt += `\n- **🚨 REGRA ANTI-REPETIÇÃO ENTRE EPISÓDIOS (EP${mc.episodeNumber}):**\n`
+          prompt += `  → O brief contém uma seção "TÓPICOS JÁ COBERTOS EM EPISÓDIOS ANTERIORES". Esses tópicos NÃO devem virar beats.\n`
+          prompt += `  → NÃO crie risingBeats cujo conteúdo principal seja re-descrever um procedimento/método de episódios anteriores.\n`
+          prompt += `  → NÃO inclua tópicos anteriores em whatToReveal. Se necessário, referencie-os em 1 frase dentro de um beat sobre conteúdo NOVO.\n`
+          prompt += `  → NÃO use conhecimento de mundo para elaborar tópicos anteriores — planeje APENAS com base nos exclusiveFacts deste EP.\n`
+          prompt += `  → Se um exclusiveFact MENCIONA um método/procedimento por nome (ex: "aplicação do Método Gemini"), o beat deve focar na CONSEQUÊNCIA ou no CONTEXTO NOVO, não na mecânica do procedimento.\n`
+          prompt += `  → TESTE para cada beat: "Este beat traz informação NOVA ou re-descreve algo do EP${mc.episodeNumber - 1}?" Se re-descreve → CORTE ou reformule.\n`
+        }
+
         // CTA específico por número de episódio
         if (mc.episodeNumber) {
           const nextEp = mc.episodeNumber < 3 ? mc.episodeNumber + 1 : null

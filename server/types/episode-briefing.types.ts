@@ -27,7 +27,7 @@ export const EpisodeBriefSchema = z.object({
   // ex: "Origem + Ascensão", "Grande Virada", "Desfecho + Legado"
 
   /** Arco emocional esperado */
-  emotionalArc: z.string().min(5).max(200),
+  emotionalArc: z.string().min(5).max(1500),
   // ex: "suspense → tensão crescente → cliffhanger"
 
   /**
@@ -42,7 +42,7 @@ export const EpisodeBriefSchema = z.object({
    * Fatos EXCLUSIVOS deste episódio — o que este EP pode revelar.
    * São selecionados do dossier bruto e curados para o escopo narrativo deste EP.
    */
-  exclusiveFacts: z.array(BriefFactSchema).min(15).max(50),
+  exclusiveFacts: z.array(BriefFactSchema).min(30).max(80),
 
   /**
    * Fatos que este episódio DEVE GUARDAR para os próximos.
@@ -69,6 +69,14 @@ export const EpisodeBriefSchema = z.object({
    * null ou string vazia para EP1 (sem episódio anterior).
    */
   previousEpisodeBridge: z.string().max(300).nullable(),
+
+  /**
+   * Tópicos/procedimentos que episódios ANTERIORES já cobriram em detalhe.
+   * O Story Architect e o roteirista podem REFERENCIAR por nome, mas
+   * NÃO devem re-descrever ou elaborar estes tópicos.
+   * EP1 sempre tem array vazio (não há episódio anterior).
+   */
+  previouslyCoveredTopics: z.array(z.string().min(5).max(300)).min(0).max(20).default([]),
 })
 
 export type EpisodeBrief = z.infer<typeof EpisodeBriefSchema>
@@ -203,6 +211,18 @@ export function formatEpisodeBriefForPrompt(
   // Ganchos sugeridos
   lines.push(`\n🪝 GANCHOS ABERTOS SUGERIDOS (perguntas que este EP levanta mas NÃO fecha)`)
   ep.suggestedOpenLoops.forEach((loop, i) => lines.push(`${i + 1}. ${loop}`))
+
+  // Tópicos já cobertos por episódios anteriores (proteção contra re-descrição)
+  const coveredTopics = ep.previouslyCoveredTopics || []
+  if (coveredTopics.length > 0) {
+    lines.push(`\n⛔ TÓPICOS JÁ COBERTOS EM EPISÓDIOS ANTERIORES (NÃO RE-DESCREVER)`)
+    lines.push(`🚨 Os seguintes tópicos/procedimentos foram descritos em DETALHE em episódios anteriores.`)
+    lines.push(`Você pode REFERENCIAR por nome (ex: "usando o Método Gemini"), mas PROIBIDO:`)
+    lines.push(`- Re-descrever etapas, procedimentos ou detalhes que o espectador JÁ viu`)
+    lines.push(`- Elaborar ou expandir tópicos já cobertos usando conhecimento externo`)
+    lines.push(`- Incluir beats narrativos cujo conteúdo principal é um desses tópicos`)
+    coveredTopics.forEach((topic, i) => lines.push(`${i + 1}. ⏭️ ${topic}`))
+  }
 
   // Ponte com episódio anterior
   if (ep.previousEpisodeBridge) {

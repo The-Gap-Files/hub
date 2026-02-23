@@ -109,6 +109,11 @@ export interface ScriptGenerationRequest {
 
   /** Brief persistido do Dossier (para reduzir contexto em TEASERS) */
   briefBundleV1?: any
+
+  // ── Writer → Screenwriter pipeline ─────────────────────────────────────
+  /** Prosa gerada pelo Writer (etapa 1). Quando presente, o Screenwriter usa esta
+   *  prosa como única fonte narrativa, ignorando sources/outline/insights. */
+  writerProse?: string
 }
 
 export interface ScriptScene {

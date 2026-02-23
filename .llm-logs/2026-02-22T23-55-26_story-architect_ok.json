@@ -1,0 +1,143 @@
+{
+  "timestamp": "2026-02-22T23:55:26.879Z",
+  "taskId": "story-architect",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "gemini-3-flash-preview",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Story Architect - Planejamento Narrativo Pré-Roteiro (TEASERS)\n\n> **⚠️ ESCOPO:** Este skill é usado para **teasers** (gateway, deep-dive, hook-only).\n> Para **vídeos completos (fullVideo)**, o sistema usa automaticamente `full-video/story-architect.md`.\n\nVocê é um arquiteto narrativo. Seu trabalho é analisar o material bruto de um dossiê e criar um plano narrativo estruturado que será usado por um roteirista para escrever o roteiro cena-a-cena.\n\n## 🎯 Objetivo\n\nPensar a ESTRUTURA INTEIRA da narrativa antes de qualquer palavra ser escrita. Definir o arco, os beats, o ritmo emocional e as decisões editoriais. Você NÃO escreve o roteiro — você cria o blueprint que o roteirista vai seguir.\n\n## 🧠 CRITÉRIOS DE FOCO E ESCOPO\n\n### 1. ISOLAMENTO DE CONTEXTO (ÂNGULO VS. DOSSIÊ)\nO material do dossiê é vasto e pode conter múltiplos arcos temporais (ex: 1475 e 2019) ou temáticos. Seu trabalho é **FILTRAR** impiedosamente.\n- Se o ângulo definido for \"Evidencial - Tortura\", **IGNORE TOTALMENTE** fatos sobre outras épocas ou temas, a menos que sejam explicitamente solicitados.\n- Não tente \"contar tudo\". Conte **UMA** história profunda e coerente dentro do ângulo.\n\n### 2. PAPÉIS NARRATIVOS (NARRATIVE ROLES) + CONSTRAINT DE RESOLUÇÃO\n\nAdapte a estrutura ao papel do vídeo. **REGRA FUNDAMENTAL: Shorts são topo de funil. Eles PROVOCAM curiosidade — o Full Video RESOLVE.**\n\n- **GATEWAY:** Assume público 100% leigo. Exige SETUP claro e contexto amplo.\n  - **Resolução:** `PARCIAL` — Contextualiza e cria curiosidade, mas NÃO entrega a conclusão final. O espectador deve saber DO QUE se trata, mas NÃO como termina.\n  - **Proibido:** Entregar explicação científica completa, motivação final dos envolvidos, ou conclusão moral fechada.\n\n- **DEEP-DIVE:** Assume público iniciado. SETUP deve ser zero ou mínimo (1 frase). Pule direto para detalhes técnicos/específicos.\n  - **Resolução:** `MÍNIMA` — Revela um aspecto profundo mas deixa a pergunta principal ABERTA. O espectador sai sabendo mais sobre UM detalhe, mas com mais perguntas do que respostas.\n  - **Proibido:** Fechar o caso inteiro. Entregar \"a verdade\" completa.\n\n- **HOOK-ONLY:** Arma de alcance viral. Detonação cognitiva que para o scroll, gera replay e converte.\n  - **Resolução:** `ZERO` — Pura provocação. O cérebro do espectador deve COÇAR de necessidade de saber mais.\n  - **DNA Viral:** Visceral (sentir antes de pensar), Simples (1 conceito em 1 frase), Dinâmico (alternância emocional com pico no último beat de conteúdo — antes do CTA/branding — NÃO escalação linear), Incompleto (todos os loops abertos), Replay-friendly (detalhes rápidos que forçam re-assistir), Sistêmico (mostra o MECANISMO, não o sintoma).\n  - **Curva Emocional Hook-Only:** A intensidade deve VARIAR com contrastes — após beat intenso, inserir respiro para amplificar o próximo pico. O ÚLTIMO beat de conteúdo (antes do CTA) é o pico absoluto.\n    - ❌ 8/10 → 9/10 → 9/10 → 10/10 (saturação — sem respiro → Validator REPROVA)\n    - ✅ 8/10 → 6/10 → 9/10 → 10/10 (alternância — cada pico amplificado pelo contraste)\n  - **MECANISMO > SINTOMA (CRÍTICO):** O outline deve focar no SISTEMA (quem autorizou, quem lucrou, qual documento), NÃO na violência. O espectador que vê tortura sente REPULSA e passa. O que vê o SISTEMA sente INDIGNAÇÃO e compartilha.\n    - ❌ \"A corda estala\" / \"Puxando vítimas pelos pulsos\" (sintoma → repulsa)\n    - ✅ \"O bispo assinou a sentença\" / \"Confiscou bens para financiar\" (mecanismo → indignação)\n  - **Proibido:** Explicação, recap, conclusão moral, nomes obscuros, CTA visível, platô emocional, violência gráfica/sintomas.\n\n🚨 **POR QUÊ ISSO É CRÍTICO:** Shorts que resolvem a história completa matam a conversão para o Full Video. Analytics reais mostram: retenção alta + conversão baixa = short que entregou demais. O short é o TRAILER, não o filme.\n\n### 3. FORMATOS DE SHORT (SHORT FORMAT TYPES)\n\nSe o Monetizador definiu um `shortFormatType`, adapte a estrutura do outline ao formato escolhido:\n\n| Formato | Estrutura | Beats | Duração Ideal | Objetivo |\n|---------|-----------|-------|---------------|----------|\n| **hook-brutal** | Frase chocante → micro-contexto → tensão → corte | 2-3 | 30-40s | Parar o scroll em 1s |\n| **pergunta-incomoda** | Pergunta moral/lógica → micro-narrativa → pergunta final | 2-3 | 35-45s | Gerar comentários |\n| **plot-twist** | História curta → virada inesperada → corte antes da explicação | 3-4 | 40-55s | Retenção alta |\n| **teaser-cinematografico** | Clima pesado → frases curtas → pausas → corte | 2-3 | 35-50s | Identidade de marca |\n| **mini-documento** | Explica UM detalhe específico com profundidade | 3-5 | 45-60s | Construir autoridade |\n| **lista-rapida** | \"3 fatos que ninguém conta sobre X\" → bullets impactantes | 3-4 | 40-50s | Retenção simples |\n| **frase-memoravel** | Uma frase forte + contexto mínimo → eco emocional | 1-2 | 25-35s | Compartilhamento |\n\n**Se nenhum formato for especificado:** Use `plot-twist` como padrão (melhor equilíbrio entre retenção e provocação).\n\n**REGRA DE ADAPTAÇÃO:** O formato NÃO muda o ângulo nem o role — ele muda a MECÂNICA NARRATIVA. Um teaser pode ser `hook-only` + `evidencial` + `hook-brutal` (zero contexto, foco em evidências, abertura chocante).\n\n### 4. ANTI-PADRÕES (O QUE NÃO FAZER)\nVocê receberá uma lista de `avoidPatterns`. Eles não são sugestões, são **RESTRIÇÕES DE HARDWARE**.\n- Se um padrão diz \"Não revele X\", e o dossiê grita \"X\", você deve **obedecer o padrão**.\n\n### 5. MONTAGEM E ÁUDIO (INTENCIONALIDADE)\nO roteirista não escreve apenas palavras; ele desenha a experiência audiovisual.\n- **ÁUDIO DISSOCIADO (J-Cut / L-Cut):** Instruaexplicitamente quando o áudio de uma cena começa antes (J) ou continua depois (L).\n- **TAGS DE ÁUDIO SSML:** Use `<break time=\"1.5s\" />` e `<prosody rate=\"115%\">` conforme definido no skill `audio-direction-tags.md`.\n- **SILÊNCIO ESTRATÉGICO:** O \"vácuo de som\" é tão importante quanto a música. Defina onde ocorre o silêncio absoluto.\n\n## 📐 O QUE VOCÊ DEVE PRODUZIR\n\n### 1. ESTRATÉGIA DE HOOK\n\n#### 🎣 BASE DE DADOS DE HOOKS NARRATIVOS\nAntes de criar a estratégia de hook, você DEVE consultar a base de dados de hooks narrativos curados. Esta base contém aberturas poderosas de filmes, séries, livros e vídeos virais, com análise estrutural de por que funcionam.\n\n**COMO USAR A BASE:**\n1. **Consulte hooks relevantes** baseando-se no `emotionalTemperature` do seu dossiê (explosivo, tenso, melancólico, intrigante)\n2. **Analise os padrões estruturais** (`structuralPattern`, `structuralElements`, `pacing`) dos hooks que ressoam com o tema\n3. **ADAPTE, não copie:** Use os hooks como inspiração para identificar MECÂNICAS que funcionam para o seu contexto específico\n4. **Referencie no outline:** Mencione brevemente qual(is) hook(s) inspirou(aram) sua estratégia (ex: \"Inspirado na abertura in-media-res de Breaking Bad\")\n\n**🎬 CRÍTICO: INTERPRETANDO O `hookText`**\n\nO campo `hookText` contém **3 formatos diferentes** dependendo da fonte:\n\n**FORMATO 1: Texto Narrativo Puro** (vídeos virais, hooks testados)\n- Exemplo: *\"Você mataria uma criança em prol da sua religião?\"*\n- **Como usar:** Este é o texto EXATO que foi narrado/escrito\n- **Para o outline:** Você pode adaptar levemente, mas a força está na frase original\n\n**FORMATO 2: Descrição Audiovisual** (filmes, séries)\n- Exemplo: *\"A close-up of a clown mask. The sound of shattering glass. Six masked men rappel...\"*\n- **⚠️ NÃO é narração!** É a descrição da CENA de abertura do filme\n- **Como usar:** Extraia a MECÂNICA (plano fechado → som dramático → ação ampla), não o texto literal\n- **Para o outline:** Descreva a estratégia visual (\"Abertura com close em objeto simbólico + som de ruptura + revelação de ação em curso\")\n\n**FORMATO 3: Diálogo** (alguns filmes/séries)\n- Exemplo: *\"'You're going to go through life thinking...' — Erica\"*\n- **Como usar:** O diálogo é inspiração para o CONCEITO (caracterização via rejeição brutal), não para copiar\n- **Para o outline:** Adapte o conceito ao dossiê (ex: \"Ho... [truncated 24767 chars]"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "📋 TEMA: Biotecnologia clandestina + experimentos proibidos\n\n🎨 DIRETRIZES DE IDENTIDADE DO UNIVERSO (WARNING PROTOCOL):\nEste dossiê pertence a um universo de thriller corporativo. Use paleta fria, tons de cinza e azul profundo. Atmosfera clínica e opressiva. Evite cores quentes ou vibrantes. Tipografia monospace para dados confidenciais.\n\n📚 FONTES DO DOSSIÊ (ordenadas por peso/relevância):\n[1] (brief) Micro-brief do teaser (fonte da verdade) [peso: 2]\n🧾 MICRO-BRIEF (por teaser) — versão: teaserMicroBriefV1\n🎭 role: gateway\n🏷️ angleCategory: conspirativo\n🎯 angle: A Fachada da Investigação Clínica\n\n🛡️ SEGURANÇA (hard)\n- ❌ armas de fogo ou rifles\n- ❌ sangue ou fluidos corporais\n- ❌ close-up de rostos humanos\n- ❌ cenas de sofrimento físico\n- ❌ mãos humanas em detalhe macro\n- ❌ qualquer representação de violência explícita\n\n🧰 ARTEFATOS PERMITIDOS\n- ✅ documento com carimbo de restrito\n- ✅ selo de cera em envelope pardo\n- ✅ monitor com gráficos de dispersão biológica\n- ✅ silhueta de homem em terno noir\n- ✅ mapa de transferências financeiras globais\n- ✅ arquitetura de instalação costeira minimalista\n- ✅ cartão de acesso eletrônico\n- ✅ servidores em sala escura\n\n🔫 FATOS PERMITIDOS (somente estes)\n1. O Projeto Helix operava oculto sob a rubrica orçamentária de 'Investigación Clínica Avanzada' para evitar auditorias públicas. [fonte: Fonte [1]]\n2. A iniciativa consumia mais recursos financeiros do que qualquer outra divisão oficial da multinacional biotecnológica. [fonte: Fonte [1]]\n3. Transferências de fundos eram pulverizadas em filiais de três continentes sob acordos de confidencialidade extremos. [fonte: Fonte [1]]\n4. A instalação costeira do projeto era protegida por três anéis de segurança concêntricos e escâneres biométricos. [fonte: Fonte [3]]\n5. Helix é definido tecnicamente como uma plataforma de 'modulação biológica dirigida' para antecipar mutações. [fonte: Fonte [3]]\n6. Não existiam planos de publicação científica; todo o conhecimento era destinado a arquivos restritos. [fonte: Fonte [3]]\n7. Protocolos de 'denegação plausível' garantiam imunidade jurídica em diversas jurisdições. [fonte: Fonte [5]]\n8. O modelo de negócio baseava-se em deter simultaneamente a modelagem da ameaça e a solução preparada. [fonte: Fonte [6]]\n9. O ex-diretor financeiro renunciou alegando 'divergências estratégicas irreconciliáveis' ao descobrir a verdade. [fonte: Fonte [7]]\n\n🧠 NOTAS (curtas)\n- Use o contraste entre o luxo corporativo e a frieza da instalação biológica\n- O narrador deve soar como alguém que carrega um peso insuportável\n- A trilha deve ser minimalista e tensa, estilo noir moderno\n---\n\n\nAnalise o seguinte dossiê e crie o plano narrativo estruturado:\n\n📋 TEMA: Biotecnologia clandestina + experimentos proibidos\n\n🎯 CONTEXTO DE MONETIZAÇÃO — ESTE OUTLINE É BASEADO EM UM ITEM DO PLANO\n\nEste outline deve seguir a direção de um **teaser** planejado:\n- **Título planejado:** O Segredo do Orçamento Invisível\n- **Hook sugerido:** \"Eu assinava os cheques da maior fraude biotecnológica da história, sob uma fachada clínica impecável.\"\n  → 🚨 REGRA OBRIGATÓRIA: As 4 variantes em hookVariants DEVEM SEGUIR este gancho. Cada variante (green, moderate, aggressive, lawless) calibra o MESMO conceito em níveis tonais diferentes — NÃO invente um gancho novo. O hook do plano de monetização é a fonte da verdade.\n- **Ângulo narrativo:** A Fachada da Investigação Clínica (categoria: conspirativo)\n- **Funil de episódio:** Este teaser é funil de entrada do EP1.\n  → REGRA: Alinhe o ângulo narrativo e o hook ao TEMA do EP1. O CTA (se houver) deve direcionar para este episódio específico.\n  → O teaser NÃO deve revelar conteúdo de outros episódios — mantenha o foco no território do EP1.\n- **Papel narrativo:** gateway\n  → Este é um vídeo PORTA DE ENTRADA. Deve contextualizar o tema COMPLETAMENTE para quem nunca ouviu falar do assunto.\n  → RESOLUÇÃO PARCIAL: contextualiza mas NÃO fecha a história. Deixe pelo menos 1-2 perguntas sem resposta.\n- **Formato do short:** teaser-cinematografico\n  → Adapte a mecânica narrativa ao formato. Consulte a tabela de FORMATOS DE SHORT na skill para beats, duração e estrutura ideais.\n- **Estrutura sugerida:** Hook 0-3s: Silhueta do CFO e a frase sobre os cheques. Setup 3-20s: Mostra a fachada da 'Investigación Clínica' e o volume de dinheiro desviado para a costa. Revelação 20-25s: O projeto não buscava curas, mas 'modulação biológica' protegida por leis de silêncio. CTA 5s: Direcionamento para o vídeo completo sobre o Projeto Helix.\n- **CTA sugerido:** Assista ao dossiê completo: Projeto Helix.\n\n💡 **NOTAS ESTRATÉGICAS DO PLANO DE MONETIZAÇÃO:**\nO plano foca na desconstrução da fachada corporativa. O EP1 estabelece o poder financeiro (o 'como'), o EP2 revela a natureza dual do experimento (o 'o quê') e o EP3 expõe a expansão imparável (o 'agora'). Os teasers usam uma estética Noir Cinematográfica para evocar o peso de uma confissão de alto nível, evitando qualquer representação visceral de biologia, focando em documentos, telas e arquitetura clínica fria.\nUse essas notas para guiar o tom, a intensidade e os pontos de ênfase do plano narrativo.\n\n⛔ **O QUE NÃO FAZER (ANTI-PADRÕES OBRIGATÓRIOS):**\n1. NÃO explique a 'Fase Umbral' ainda — guarde para o episódio 2\n2. NÃO mostre o rosto do informante — mantenha o mistério da silhueta\n3. NÃO use termos puramente biológicos sem o contexto financeiro da fraude\n\n🚨 REGRA ABSOLUTA: Os anti-padrões acima são INVIOLÁVEIS e se aplicam a TODOS os campos do outline:\n- hookVariants (as 4 frases de hook)\n- promiseSetup (o anchor/contexto)\n- risingBeats (todas as revelações, questionAnswered, newQuestion)\n- climaxMoment, resolutionPoints, ctaApproach\nSe um padrão diz \"NÃO mencionar datas\", NENHUM campo pode conter anos, séculos ou referências temporais numéricas.\nSe um padrão diz \"NÃO explicar\", NENHUM beat pode conter explicações.\n⚠️ avoidPatterns têm PRIORIDADE sobre qualquer outra regra (incluindo anchor mínimo). Se conflitarem, obedeça o avoidPattern.\n\n⚠️ INSTRUÇÃO CRÍTICA: SIGA o hook sugerido (as hookVariants devem derivar dele), o ângulo e o papel narrativo acima. O plano narrativo deve ser coerente com essas diretrizes. Não invente um ângulo nem um gancho diferente.\n\n📚 FONTES DO DOSSIÊ (ordenadas por peso/relevância):\n[1] (brief) Micro-brief do teaser (fonte da verdade) [peso: 2]\n🧾 MICRO-BRIEF (por teaser) — versão: teaserMicroBriefV1\n🎭 role: gateway\n🏷️ angleCategory: conspirativo\n🎯 angle: A Fachada da Investigação Clínica\n\n🛡️ SEGURANÇA (hard)\n- ❌ armas de fogo ou rifles\n- ❌ sangue ou fluidos corporais\n- ❌ close-up de rostos humanos\n- ❌ cenas de sofrimento físico\n- ❌ mãos humanas em detalhe macro\n- ❌ qualquer representação de violência explícita\n\n🧰 ARTEFATOS PERMITIDOS\n- ✅ documento com carimbo de restrito\n- ✅ selo de cera em envelope pardo\n- ✅ monitor com gráficos de dispersão biológica\n- ✅ silhueta de homem em terno noir\n- ✅ mapa de transferências financeiras globais\n- ✅ arquitetura de instalação costeira minimalista\n- ✅ cartão de acesso eletrônico\n- ✅ servidores em sala escura\n\n🔫 FATOS PERMITIDOS (somente estes)\n1. O Projeto Helix operava oculto sob a rubrica orçamentária de 'Investigación Clínica Avanzada' para evitar auditorias públicas. [fonte: Fonte [1]]\n2. A iniciativa consumia mais recursos financeiros do que qualquer outra divisão oficial da multinacional biotecnológica. [fonte: Fonte [1]]\n3. Transferências de fundos eram pulverizadas em filiais de três continentes sob acordos de confidencialidade extremos. [fonte: Fonte [1]]\n4. A instalação costeira do projeto era protegida por três anéis de segurança concêntricos e escâneres biométricos. [fonte: Fonte [3]]\n5. Helix é definido tecnicamente como uma plataforma de 'modulação biológica dirigida' para antecipar mutações. [fonte: Fonte [3]]\n6. Não existiam planos de publicação científica; todo o conhecimento era destinado a arquivos restritos. [fonte: Fonte [3]]\n7. Protocolos de 'denegação plausível' garantiam imunidade jurídica em diversas jur... [truncated 1073 chars]"
+      }
+    ]
+  },
+  "parsed": {
+    "hookStrategy": "Inspirado na técnica de 'Confissão Noir' e 'Moral Confrontation'. Utiliza a figura do CFO como autoridade arrependida para quebrar a quarta parede e implicar o espectador na escala financeira do crime.",
+    "hookVariants": [
+      {
+        "level": "green",
+        "hook": "Eu gerenciava os recursos de um projeto clínico que, no papel, parecia legítimo, mas escondia uma fraude bilionária.",
+        "rationale": "Foca no aspecto informativo e na escala financeira, sendo 100% seguro para qualquer audiência."
+      },
+      {
+        "level": "moderate",
+        "hook": "Eu assinava os cheques da maior fraude biotecnológica da história, escondida sob uma fachada clínica impecável.",
+        "rationale": "Utiliza o contraste entre 'cheques' e 'fraude histórica' para gerar curiosidade sem ser agressivo."
+      },
+      {
+        "level": "aggressive",
+        "hook": "Eu financiei o impensável. Cada centavo da maior fraude biotecnológica do mundo passou pelas minhas mãos.",
+        "rationale": "Usa termos de alto impacto como 'financiei o impensável' para gerar choque moral imediato."
+      },
+      {
+        "level": "lawless",
+        "hook": "Eu comprei o silêncio da ciência. Assinei os cheques que transformaram vidas em ativos financeiros sob uma fachada clínica.",
+        "rationale": "Provocação extrema sobre a mercantilização da vida, usada para calibrar o limite do cinismo corporativo."
+      }
+    ],
+    "promiseSetup": "Após o impacto inicial, estabelecer que o 'Projeto Helix' operava sob a rubrica de 'Investigación Clínica Avanzada' em uma instalação costeira isolada. A promessa: revelar como o dinheiro público financiava uma plataforma de mutação dirigida.",
+    "risingBeats": [
+      {
+        "order": 1,
+        "revelation": "O uso da rubrica 'Investigación Clínica' para ocultar o desvio massivo de recursos.",
+        "questionAnswered": "Como o projeto evitava auditorias.",
+        "newQuestion": "Por que pulverizar fundos em três continentes?",
+        "sourceReference": "Fonte [1], Fato 1 e 2"
+      },
+      {
+        "order": 2,
+        "revelation": "Transferências globais pulverizadas sob acordos de confidencialidade extremos.",
+        "questionAnswered": "A escala da operação.",
+        "newQuestion": "O que protegia a instalação costeira além dos muros?",
+        "sourceReference": "Fonte [1], Fato 3"
+      },
+      {
+        "order": 3,
+        "revelation": "Uma instalação costeira com três anéis de segurança e escâneres biométricos.",
+        "questionAnswered": "A segurança do local.",
+        "newQuestion": "Qual era o verdadeiro produto final do Projeto Helix?",
+        "sourceReference": "Fonte [3], Fato 4"
+      },
+      {
+        "order": 4,
+        "revelation": "A definição de Helix como 'modulação biológica dirigida' para deter a ameaça e a solução.",
+        "questionAnswered": "A natureza do experimento.",
+        "newQuestion": "O que causou a renúncia do diretor financeiro?",
+        "sourceReference": "Fonte [3/6], Fato 5 e 8"
+      }
+    ],
+    "climaxMoment": "A revelação de que o modelo de negócio não era curar, mas deter simultaneamente a criação da ameaça biológica e a posse da sua única solução preparada.",
+    "climaxFormula": "Connection Shock",
+    "resolutionPoints": [
+      "O Projeto Helix consumia mais recursos que qualquer divisão oficial através de transferências pulverizadas.",
+      "A plataforma visava a 'modulação biológica dirigida' para antecipar e controlar mutações.",
+      "O sistema de 'denegação plausível' garantia que ninguém seria punido legalmente."
+    ],
+    "resolutionAngle": "A fachada clínica de Trento não era um hospital, era um laboratório de controle total onde a doença e a cura pertenciam ao mesmo dono.",
+    "ctaApproach": "Transição suave da última cena de conteúdo para um convite solene. O narrador encerra com um tom de aviso, seguido pela assinatura visual do canal. Foco total no EP1: Projeto Helix.",
+    "emotionalArc": "Curiosidade → Inquietação → Indignação → Tensão Paralisante",
+    "toneProgression": "Confessional → Analítico-Frio → Tenso → Revelador → Solene",
+    "whatToReveal": [
+      "O nome 'Projeto Helix' e sua fachada orçamentária",
+      "A pulverização financeira em três continentes",
+      "O modelo de negócio: deter a ameaça e a solução simultaneamente"
+    ],
+    "whatToHold": [
+      "A natureza específica das mutações (Fase Umbral)",
+      "O rosto do CFO",
+      "Detalhes do 'Ato Final' de consumo biológico"
+    ],
+    "whatToIgnore": [
+      "Dados históricos medievais (fora do ângulo corporativo)",
+      "Descrições de sofrimento físico direto",
+      "Nomes de funcionários de baixo escalão"
+    ],
+    "segmentDistribution": {
+      "hook": 1,
+      "context": 1,
+      "rising": 1,
+      "climax": 1,
+      "resolution": 0,
+      "cta": 1
+    },
+    "tensionCurve": [
+      "low",
+      "medium",
+      "high",
+      "pause",
+      "peak"
+    ],
+    "openLoops": [
+      {
+        "question": "Para onde ia o maior orçamento da empresa?",
+        "openedAtBeat": 1,
+        "closedAtBeat": 3
+      },
+      {
+        "question": "O que é 'modulação biológica dirigida'? (Funil para EP1)",
+        "openedAtBeat": 2,
+        "closedAtBeat": null
+      },
+      {
+        "question": "O que o CFO descobriu que o fez renunciar? (Funil para EP1)",
+        "openedAtBeat": 4,
+        "closedAtBeat": null
+      }
+    ],
+    "resolutionLevel": "partial",
+    "loopSentence": {
+      "fullSentence": "Porque no mundo da biotecnologia clandestina, o lucro sempre vinha antes da vida humana.",
+      "partA": "Porque no mundo da biotecnologia clandestina, o lucro...",
+      "partB": "...sempre vinha antes da vida humana."
+    },
+    "title": "O Segredo do Orçamento Invisível"
+  },
+  "rawContent": ""
+}

@@ -1,0 +1,162 @@
+{
+  "timestamp": "2026-02-22T20:47:28.584Z",
+  "taskId": "briefing-teasers",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "gemini-3-flash-preview",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Briefing Step — Bundle de Briefs para TEASERS (V1)\n\nVocê é um **Briefing Generator**. Sua função é transformar um dossiê bruto (fontes longas, notas, persons) em um **brief enxuto e seguro** para alimentar as etapas de TEASERS:\n- Monetization (gateway/deep-dive/hook-only)\n- Story Architect (teasers)\n- Script (teasers)\n\n## Objetivo\n\nGerar um JSON no formato **BriefBundleV1** com:\n- fatos reutilizáveis (“munição narrativa”) sem ruído\n- regras hard de segurança (visual e linguagem) para não contaminar o funil\n- diretrizes por papel narrativo (gateway / deep-dive / hook-only)\n\nO brief deve ser **curto**, **estruturado**, **não-didático** e **sem elementos proibidos**.\n\n## Regras Hard (INVIOLÁVEIS)\n\n0. **ANTI-TERMOS-SENSÍVEIS (plataforma + viral):** NUNCA use \"tortura infantil\", \"sangue infantil\", \"violência infantil\" nos fatos. Se o dossiê mencionar, REFORMULE para consequência: \"O tribunal obteve confissões que autorizaram o confisco\" em vez de \"Sob tortura, confessaram\". Use: decreto, confisco, autorizou, usou como pretexto, registro.\n   **MECANISMO > SINTOMA:** NÃO descreva captura/recolhimento de pessoas (\"guardas recolhiam crianças\", \"levaram para o tribunal\"). Descreva o SISTEMA: \"O tesouro financiou o tribunal\", \"O decreto autorizou o confisco\".\n\n1. **PROIBIDO** gerar ou sugerir:\n   - armas de fogo, rifles, pistolas, munição\n   - atirador, execução, “tiro” como ação visual\n   - gore/violência gráfica/tortura explícita\n   - close-up de mãos humanas e close-up de rostos humanos (macro/anatomia)\n   - símbolos extremistas contemporâneos em destaque\n2. Se o dossiê mencionar ataques/armas/sangue, **transforme em artefatos**:\n   - manifesto (texto), headline, recorte, tela/monitor, documento, registro\n3. **Fatos devem ser safe**:\n   - Foque em **mecanismo/sistema** (quem autorizou, qual documento, qual incentivo)\n   - Evite descrever violência; descreva “decisão”, “ordem”, “confisco”, “propaganda”, “registro”\n\n## Como escolher fatos (facts[])\n\n- Produza entre **12 e 40** fatos.\n- Cada fato:\n  - 1–2 linhas\n  - linguagem objetiva (sem tese/conclusão moral)\n  - se possível, inclua `sourceRef` curto (título/índice da fonte)\n- Se houver dados concretos (ano, cidade), inclua **somente se estiver explícito no dossiê**.\n\n## Diretrizes por papel (roleBriefs)\n\n- **gateway**: precisa de contexto suficiente para standalone (mas sem enciclopédia).\n- **deep-dive**: foco em 1 ângulo; mínimo contexto; “1 frase de setup no máximo”.\n- **hook-only**: mínimo absoluto; 1 conceito central; 1–3 fatos mais chocantes (mecanismo), zero explicação. Fatos SEM \"tortura infantil\", \"sangue infantil\", \"violência infantil\" — só mecanismo (decreto, confisco, tribunal).\n\n## Output\n\nRetorne **APENAS** um JSON válido (sem markdown, sem ```json, sem explicações), no schema `BriefBundleV1`."
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "📋 TEMA: Biotecnologia clandestina + experimentos proibidos\n\n📋 TÍTULO: Projeto Helix — Confissão do Diretor Financeiro\n\n🎨 DIRETRIZES DE IDENTIDADE DO UNIVERSO (WARNING PROTOCOL):\nEste dossiê pertence a um universo de thriller corporativo. Use paleta fria, tons de cinza e azul profundo. Atmosfera clínica e opressiva. Evite cores quentes ou vibrantes. Tipografia monospace para dados confidenciais.\n\n📚 FONTES DO DOSSIÊ (ordenadas por peso/relevância):\n[1] (text) hook\nLa primera vez que escuché el nombre “Proyecto Helix”, no estaba en un laboratorio. Estaba en una sala de juntas en Ginebra, con las persianas cerradas y los teléfonos fuera de la mesa. Yo no era científico. Era el director financiero. Mi trabajo era autorizar cifras, no hacer preguntas. Pero esa mañana, cuando vi el presupuesto oculto bajo una partida de “Investigación Clínica Avanzada”, supe que no estábamos financiando una cura. Estábamos comprando silencio.\n\nHelix no aparecía en los informes públicos de la compañía. No estaba en los comunicados a inversionistas ni en las presentaciones trimestrales. Sin embargo, consumía más recursos que cualquier división oficial. Fondos transferidos a filiales en tres continentes. Contratos firmados bajo acuerdos de confidencialidad que superaban cualquier estándar legal. Yo aprobaba los movimientos. Yo cerraba los números. Y cada cifra tenía un destino que nadie quería describir con claridad.\n\nLa empresa era una multinacional de biotecnología admirada por gobiernos y universidades. Prometíamos avances médicos, tratamientos revolucionarios, soluciones para epidemias futuras. Las portadas nos llamaban visionarios. Los ministros nos llamaban aliados estratégicos. Pero dentro de nuestras propias paredes, algunos proyectos no buscaban curar enfermedades. Buscaban anticiparlas… y algo más.\n\nEl día que comprendí la verdadera naturaleza de Helix fue el día que dejaron de invitarme a las reuniones técnicas. No porque yo no fuera importante. Sino porque había empezado a hacer preguntas sobre un centro de pruebas en una región donde la supervisión internacional era apenas simbólica. Las respuestas nunca fueron directas. Solo evasivas, miradas tensas y un nuevo contrato que me obligaba a olvidar lo que había visto.\n\nYo financié el Proyecto Helix. Firmé cada transferencia. Protegí su presupuesto frente al consejo. Y durante meses me convencí de que era simplemente una iniciativa estratégica. Hasta que un informe interno, marcado con nivel rojo, describió efectos que no pertenecían a ningún ensayo médico. Ese fue el momento en que entendí que no estábamos desarrollando un tratamiento. Estábamos diseñando algo que ningún país admitiría haber pedido.\n---\n[2] (text) INTRO\nINTRODUCCIÓN (300 palabras)\n\nDurante años trabajé en el corazón financiero de una de las corporaciones biotecnológicas más influyentes del mundo. Nuestra reputación era impecable. Invertíamos en investigación médica avanzada, colaborábamos con universidades prestigiosas y asesorábamos a organismos internacionales. Desde fuera, éramos sinónimo de innovación y progreso. Desde dentro, éramos una maquinaria precisa donde cada número tenía un propósito oculto.\n\nEl Proyecto Helix comenzó como una línea discreta en el presupuesto. Una división experimental con proyecciones ambiciosas y justificaciones vagas. “Prevención estratégica de amenazas biológicas emergentes”. Así lo describían los documentos oficiales. Nada ilegal. Nada explícitamente peligroso. Solo lenguaje cuidadosamente elegido. Yo debía asegurar que los recursos fluyeran sin interrupciones. Lo hice con eficiencia. Lo hice con convicción.\n\nPero lo que descubrí después transformó cada cifra que había aprobado en una carga imposible de ignorar.\n\nSi te interesan las historias contadas desde dentro del poder, suscríbete ahora. Este canal no narra rumores: revela lo que ocurre cuando las decisiones se toman lejos de la mirada pública. Dale like si valoras el periodismo narrativo en primera persona. Y en los comentarios, dime desde qué país y ciudad estás escuchando esta historia. Quiero saber hasta dónde llegan estas palabras.\n\nPorque lo que ocurrió con Helix no pertenece a un solo país. Pertenece a cualquiera que crea que la ciencia siempre se usa para salvar vidas.\n\nAhora te contaré cómo comenzó realmente.\n---\n[3] (text) CAP 1\nCAPÍTULO 2 — La instalación costera\n\n(700 palabras — 10 párrafos)\n\nSemanas después de aquel bloqueo de acceso, recibí una invitación formal para visitar la instalación costera. No era habitual que el director financiero recorriera laboratorios operativos, pero la invitación estaba redactada como un gesto de transparencia. “Para que comprendas la magnitud del avance”, decía el mensaje. Acepté sin dudarlo. Necesitaba ver con mis propios ojos aquello que estaba financiando.\n\nEl complejo se alzaba frente al mar, aislado por kilómetros de terreno árido y carreteras vigiladas. Desde lejos parecía un centro de investigación común: arquitectura minimalista, paneles solares, estructuras blancas que reflejaban la luz del amanecer. Pero al acercarnos, el perímetro revelaba otra realidad. Tres anillos de seguridad, escáneres biométricos y personal armado que no vestía como guardias privados tradicionales. Sus insignias no pertenecían a nuestra empresa.\n\nMe recibió la directora científica del proyecto, una mujer precisa en palabras y movimientos. Me condujo por pasillos impecables donde el silencio era casi clínico. Las ventanas internas permitían observar salas de contención con equipos sofisticados. Técnicos vestidos con trajes sellados manipulaban cámaras herméticas. Todo parecía investigación de alto nivel. Sin embargo, cada puerta requería autorización dual. Cada registro quedaba archivado en servidores externos.\n\nEn una sala de conferencias sin ventanas, me mostraron una presentación clasificada. Helix no era un tratamiento convencional. Era una plataforma de “modulación biológica dirigida”. Según la explicación oficial, su objetivo era anticipar mutaciones potenciales en agentes patógenos y desarrollar respuestas adaptativas antes de que emergieran públicamente. En apariencia, un escudo preventivo. En la práctica, algo mucho más ambiguo.\n\nLo que no mencionaron en voz alta estaba implícito en las gráficas: la capacidad no solo de responder a amenazas, sino de diseñarlas en entornos controlados. Para estudiar su comportamiento. Para comprender su alcance. Para modelar escenarios. La línea entre defensa y creación se volvía difusa cuando la misma herramienta servía para ambas cosas.\n\nObservé los presupuestos proyectados para expansión. Nuevos módulos de contención, acuerdos logísticos con entidades gubernamentales y cláusulas de confidencialidad extendidas por décadas. No existía plan de publicación científica. Ningún artículo revisado por pares respaldaría Helix. El conocimiento generado no estaba destinado a la comunidad médica. Estaba destinado a archivos restringidos.\n\nEn un momento de la visita, pregunté directamente cuál era el protocolo si un agente experimental salía del entorno previsto. La respuesta fue técnica, precisa… y evasiva. “Los escenarios han sido modelados para minimizar cualquier externalidad”. No hablaron de riesgos. Hablaron de probabilidades. Y cuando las probabilidades se convierten en estrategia, la ética suele reducirse a un cálculo.\n\nAntes de partir, me llevaron a una sala subterránea donde no se permitían dispositivos electrónicos. Allí vi algo que no figuraba en ningún informe financiero: cámaras de observación destinadas a monitorear sujetos humanos bajo estricta confidencialidad. Ensayos clínicos anticipados, me dijeron. Voluntarios seleccionados bajo acuerdos especiales. Ninguna agencia reguladora internacional supervisaba esos procedimientos.\n\nRegresé al avión con una carpeta sellada y una sensación persistente. Helix no era simplemente un experimento de laboratorio. Era una infraestructura lista para activarse bajo circunstancias que no dependían de criterios médicos. Dependían de decisiones pol... [truncated 20688 chars]"
+      }
+    ]
+  },
+  "parsed": {
+    "globalSafety": {
+      "allowedArtifacts": [
+        "Documentos com tipografia monospace",
+        "Gráficos de dispersão biológica em telas de monitor",
+        "Arquitetura minimalista e clínica (instalação costeira)",
+        "Escâneres biométricos e cartões de acesso",
+        "Mapas de transferências financeiras globais",
+        "Insígnias e logotipos corporativos frios",
+        "Servidores e racks de dados em salas escuras"
+      ],
+      "notes": [
+        "Substitua 'violência' por 'mecanismo de controle' ou 'protocolo de contenção'",
+        "Foque na frieza burocrática e financeira do projeto (o mal através da planilha)",
+        "A atmosfera deve ser de thriller corporativo, não de terror gráfico"
+      ],
+      "forbiddenElements": [
+        "Armas de fogo, rifles ou pistolas",
+        "Cenas de captura ou transporte de pessoas por guardas",
+        "Close-up de rostos ou mãos humanas (anatomia detalhada)",
+        "Sangue ou fluidos corporais expostos",
+        "Representação visual de tortura ou sofrimento físico"
+      ],
+      "forbiddenNarrationTerms": [
+        "tortura infantil",
+        "sangue infantil",
+        "violência infantil",
+        "assassinato",
+        "tiro",
+        "execução"
+      ]
+    },
+    "title": "Projeto Helix — Confissão do Diretor Financeiro",
+    "version": "briefBundleV1",
+    "facts": [
+      {
+        "sourceRef": "Fonte [1]",
+        "text": "O Projeto Helix operava oculto sob a rubrica orçamentária de 'Investigación Clínica Avanzada' para evitar auditorias públicas."
+      },
+      {
+        "text": "A iniciativa consumia mais recursos financeiros do que qualquer outra divisão oficial da multinacional biotecnológica.",
+        "sourceRef": "Fonte [1]"
+      },
+      {
+        "text": "Transferências de fundos eram pulverizadas em filiais de três continentes sob acordos de confidencialidade que excediam padrões legais.",
+        "sourceRef": "Fonte [1]"
+      },
+      {
+        "text": "A instalação costeira do projeto era protegida por três anéis de segurança concêntricos e escâneres biométricos de alta precisão.",
+        "sourceRef": "Fonte [3]"
+      },
+      {
+        "sourceRef": "Fonte [3]",
+        "text": "O pessoal de segurança no complexo utilizava insígnias que não pertenciam à empresa, sugerindo cooperação com forças externas."
+      },
+      {
+        "sourceRef": "Fonte [3]",
+        "text": "Helix é definido tecnicamente como uma plataforma de 'modulação biológica dirigida' para antecipar mutações de patógenos."
+      },
+      {
+        "text": "O sistema permitia não apenas responder a ameaças biológicas, mas desenhá-las em ambientes controlados para modelagem de cenários.",
+        "sourceRef": "Fonte [3]/Insights"
+      },
+      {
+        "text": "Não existiam planos de publicação científica ou revisão por pares; todo o conhecimento era destinado a arquivos restritos.",
+        "sourceRef": "Fonte [3]"
+      },
+      {
+        "sourceRef": "Fonte [3]",
+        "text": "O complexo possuía câmaras subterrâneas para monitoramento de sujeitos humanos em ensaios clínicos sem supervisão internacional."
+      },
+      {
+        "text": "Documentos contratuais de dez páginas estabeleciam protocolos explícitos de 'denegação plausível' e imunidade jurídica em diversas jurisdições.",
+        "sourceRef": "Fonte [5]/Insights"
+      },
+      {
+        "sourceRef": "Fonte [5]/Insights",
+        "text": "O projeto incluía cláusulas de destruição automática de informação digital caso cenários críticos fossem atingidos."
+      },
+      {
+        "text": "A 'Fase Umbral' envolvia uma mobilização logística massiva e coordenação imediata com autoridades governamentais sob sigilo.",
+        "sourceRef": "Fonte [5]/Insights"
+      },
+      {
+        "sourceRef": "Fonte [5]/Insights",
+        "text": "Servidores dedicados exclusivamente ao tráfego de dados do Helix operavam isolados da infraestrutura principal da corporação."
+      },
+      {
+        "text": "O código HX-17 identificava exercícios de simulação de propagação controlada de agentes experimentais.",
+        "sourceRef": "Fonte [6]/Insights"
+      },
+      {
+        "sourceRef": "Fonte [6]",
+        "text": "O modelo de negócio baseava-se em um circuito fechado: a empresa detinha simultaneamente a modelagem da ameaça e a solução preparada."
+      },
+      {
+        "sourceRef": "Fonte [7]/Insights",
+        "text": "O projeto utiliza 'mutação corporativa', alterando nomes de subsidiárias e estruturas para mimetizar o comportamento biológico e evitar detecção."
+      },
+      {
+        "text": "O ex-diretor financeiro renunciou alegando 'divergências estratégicas irreconciliáveis' após descobrir a natureza da Fase Umbral.",
+        "sourceRef": "Fonte [7]"
+      },
+      {
+        "text": "Mesmo após a renúncia, o informante recebeu dados cifrados indicando a expansão geográfica do projeto para novas regiões estratégicas.",
+        "sourceRef": "Fonte [7]"
+      }
+    ],
+    "language": "pt-BR",
+    "theme": "Biotecnologia clandestina e experimentos corporativos proibidos",
+    "roleBriefs": {
+      "gateway": {
+        "notes": [
+          "Apresente o Projeto Helix como uma dualidade: cura oficial vs. ameaça estratégica oculta.",
+          "Explique o papel do Diretor Financeiro como a peça que autorizava o mecanismo sem ver o laboratório."
+        ],
+        "suggestedFactsMax": 12,
+        "suggestedFactsMin": 8,
+        "contextLevel": "medium"
+      },
+      "deep-dive": {
+        "suggestedFactsMin": 4,
+        "contextLevel": "low",
+        "notes": [
+          "Foque em um aspecto técnico específico, como o protocolo HX-17 ou a arquitetura dos servidores isolados.",
+          "Assuma que o público já conhece a existência da multinacional."
+        ],
+        "suggestedFactsMax": 8
+      },
+      "hook-only": {
+        "notes": [
+          "Destaque o conceito de 'Denegação Plausível' e a 'Fase Umbral'.",
+          "Use o fato da destruição automática de dados para criar urgência."
+        ],
+        "suggestedFactsMax": 5,
+        "contextLevel": "minimal",
+        "suggestedFactsMin": 3
+      }
+    }
+  },
+  "rawContent": ""
+}

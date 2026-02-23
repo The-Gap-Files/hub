@@ -24,8 +24,11 @@ import { getScriptStyleById } from '../../../constants/storytelling/script-style
 import { validatorsEnabled } from '../../../utils/validators'
 import { buildProductionContext, type VisualStyleLike } from './_shared/build-production-context'
 import { runFilmmakerBatched } from './_shared/run-filmmaker-batched'
+import { callWriter } from './_shared/call-writer'
 import type { ScriptGenerationRequest } from '../../../types/ai-providers'
 import type { StoryOutline } from '../../story-architect.service'
+import { formatEpisodeBriefForPrompt } from '../../../types/episode-briefing.types'
+import { normalizeEpisodeBriefBundleV1 } from '../../../types/episode-briefing.types'
 
 const LOG = '[ScriptStage]'
 
@@ -88,22 +91,29 @@ class ScriptGenerationStage {
     // 2. Custom scenes: carregar imagens de referência do criador
     const customSceneRefDescriptions = await this.loadCustomSceneImages(promptContext, outlineData)
 
-    // 3. Filtrar fontes (teaser: limpa dossier; fullVideo: brief only)
-    this.applySourceFiltering(promptContext, outlineData)
+    // 3. Filtrar fontes (teaser: limpa dossier; fullVideo: brief only + injetar Episode Brief)
+    await this.applySourceFiltering(promptContext, outlineData, outputId)
 
-    // 4. Resolver script provider (hook-only vs genérico)
+    // 4. Writer → Screenwriter (pipeline de duas etapas)
+    //    Hook-only pula o Writer (são apenas 4-5 cenas, sem risco de reinício narrativo)
+    const isHookOnly = promptContext.narrativeRole === 'hook-only'
+    if (!isHookOnly) {
+      await this.runWriterStage(promptContext, outputId)
+    }
+
+    // 5. Resolver script provider (hook-only vs genérico)
     const scriptProvider = await this.resolveProvider(promptContext)
     const providerName = scriptProvider.getName()
 
-    // 5. Gerar + validar + retry
+    // 6. Gerar + validar + retry (Screenwriter quando writerProse presente)
     const { scriptResponse, validation } = await this.generateWithValidation(
       scriptProvider, promptContext, outlineData, outputId, input.outputDuration ?? null, mode
     )
 
-    // 6. Filmmaker Director (Cineasta) — pós-processamento
+    // 7. Filmmaker Director (Cineasta) — pós-processamento
     await this.applyFilmmaker(scriptResponse, input, outlineData, customSceneRefDescriptions)
 
-    // 7. Persistir no DB
+    // 8. Persistir no DB
     const scriptId = mode === 'generate'
       ? await this.persistGenerate(outputId, scriptResponse, providerName, promptContext)
       : await this.persistRegenerate(outputId, scriptResponse, providerName, promptContext)
@@ -115,6 +125,38 @@ class ScriptGenerationStage {
       validation,
       providerName,
     }
+  }
+
+  // ─── PRIVATE: Writer Stage (Etapa 1) ───────────────────────────
+
+  /**
+   * Executa o Writer para gerar prosa narrativa a partir do dossiê/outline.
+   * Injeta a prosa no promptContext.writerProse, o que faz o buildSystemPrompt/
+   * buildUserPrompt delegarem automaticamente para os prompts do Screenwriter.
+   *
+   * Também limpa imagens do promptContext (o Writer já as consumiu —
+   * o Screenwriter não precisa de imagens raw do dossiê).
+   */
+  private async runWriterStage(
+    promptContext: ScriptGenerationRequest,
+    outputId: string
+  ): Promise<void> {
+    console.log(`${LOG} ──────────────────────────────────────────`)
+    console.log(`${LOG} 📝 ETAPA 1/2: ESCRITOR (Writer)`)
+    console.log(`${LOG} ──────────────────────────────────────────`)
+
+    const writerResult = await callWriter(promptContext, outputId)
+
+    // Injetar prosa no context — isso ativa o modo Screenwriter nos prompts
+    promptContext.writerProse = writerResult.prose
+
+    // Limpar imagens: o Writer já as consumiu para contexto narrativo.
+    // O Screenwriter não precisa de imagens raw — ele trabalha com a prosa.
+    promptContext.images = []
+
+    console.log(`${LOG} ──────────────────────────────────────────`)
+    console.log(`${LOG} 🎬 ETAPA 2/2: ROTEIRISTA (Screenwriter)`)
+    console.log(`${LOG} ──────────────────────────────────────────`)
   }
 
   // ─── PRIVATE: Monetization Meta ──────────────────────────────────
@@ -212,10 +254,11 @@ class ScriptGenerationStage {
 
   // ─── PRIVATE: Source Filtering ───────────────────────────────────
 
-  private applySourceFiltering(
+  private async applySourceFiltering(
     promptContext: ScriptGenerationRequest,
-    outlineData: ScriptStageInput['outlineData']
-  ): void {
+    outlineData: ScriptStageInput['outlineData'],
+    outputId: string
+  ): Promise<void> {
     const meta = outlineData._monetizationMeta
 
     // Teasers: roteiro depende apenas do outline aprovado (sem dossier)
@@ -232,7 +275,40 @@ class ScriptGenerationStage {
 
     // Full Video: roteirista recebe apenas o brief curado (não o dossier bruto)
     if (meta?.itemType === 'fullVideo') {
-      const allSources = promptContext.sources || []
+      const episodeNumber = promptContext.episodeNumber || meta?.episodeNumber
+      let briefSource: { title: string; content: string; type: string; weight: number } | null = null
+
+      // Injetar Episode Brief como source para o Writer ter substância factual
+      if (episodeNumber) {
+        try {
+          const output = await prisma.output.findUnique({
+            where: { id: outputId },
+            select: { dossierId: true },
+          })
+          if (output?.dossierId) {
+            const dossier = await prisma.dossier.findUnique({
+              where: { id: output.dossierId },
+              select: { episodeBriefBundleV1: true },
+            })
+            if (dossier?.episodeBriefBundleV1) {
+              const bundle = normalizeEpisodeBriefBundleV1(dossier.episodeBriefBundleV1)
+              const briefContent = formatEpisodeBriefForPrompt(bundle, episodeNumber)
+              briefSource = {
+                title: `Brief EP${episodeNumber} (fonte da verdade — episodeBriefBundleV1)`,
+                content: briefContent,
+                type: 'brief',
+                weight: 2.0,
+              }
+              console.log(`${LOG} 📋 Episode Brief EP${episodeNumber} injetado como source para Writer`)
+            }
+          }
+        } catch (err) {
+          console.warn(`${LOG} ⚠️ Falha ao carregar Episode Brief para injeção no Writer:`, err)
+        }
+      }
+
+      // Filtrar sources: manter apenas briefs (inclui o que acabamos de injetar)
+      const allSources = [...(promptContext.sources || []), ...(briefSource ? [briefSource] : [])]
       promptContext.sources = allSources.filter((s: any) => s.type === 'brief')
       console.log(`${LOG} 📺 Full Video: fontes filtradas para brief only (${promptContext.sources.length}/${allSources.length})`)
     }

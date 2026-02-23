@@ -47,6 +47,14 @@ Quando `endVisualDescription` existe, o modelo de video (Wan 2.2) interpola entr
 ### 3.1 Continuidade Fisica
 Start e end DEVEM pertencer ao MESMO cenario, mesma hora do dia, mesma iluminacao, mesmos materiais. O end e o que a camera VE ao final do movimento.
 
+### 3.1a Continuidade de Cor (CRITICO)
+A temperatura de cor e a paleta do end DEVEM ser identicas ao start. Esta e uma das causas mais comuns de transicao bizarra no WanVideo.
+
+- **Warm start → warm end.** Se o start tem tons quentes (tungsteno, luz de vela, dourado), o end DEVE manter os mesmos tons quentes.
+- **Cool/neutral start → cool/neutral end.** Se o start e frio/neutro (luz de dia nublada, sombra azulada), o end DEVE manter a mesma temperatura.
+- **PROIBIDO:** Start com tons quentes + end com cast azulado (ou vice-versa). Isso causa color shift visivel durante a interpolacao.
+- **COMO GARANTIR:** Copie os descritores de iluminacao e cor do start para o end (ex: "same tungsten warmth", "same cold overcast daylight", "same amber candlelight"). Nunca omita a temperatura de cor no end.
+
 ### 3.2 O Motion EXPLICA a Transicao
 A `motionDescription` descreve COMO a camera vai do start ao end. Se nao consegue explicar a jornada em uma frase, a transicao e complexa demais → use null.
 
@@ -72,15 +80,42 @@ A `motionDescription` descreve COMO a camera vai do start ao end. Se nao consegu
 ### 3.5 Teste Mental (OBRIGATORIO para cada cena)
 > "Imagine que voce esta segurando a camera. Voce CONSEGUE fisicamente ir do start ao end com o movimento descrito, nessa duracao? Se nao → use null."
 
+### 3.6 Teste de Ancoragem (OBRIGATORIO — evita invencao de cena nova)
+Antes de escrever o endVisualDescription, responda:
+- "O cenario, iluminacao e periodo historico do end sao IDENTICOS ao start?" — Se nao → reescreva ou null.
+- "Pelo menos 70% dos elementos visuais do start ainda aparecem no end?" — Se nao → reescreva ou null.
+- "Um elemento NOVO que nao existe no start aparece no end?" — Se sim → remova-o ou null.
+- "A temperatura de cor do end e identica ao start (warm/cool/neutral)?" — Se nao → corrija os descritores de luz antes de finalizar.
+
+**Viés de null:** Na duvida, use null. Um end frame incoerente e PIOR que nenhum end frame — ele causa artefatos visuais no modelo de video.
+
 ---
 
-## 4. Regras de Escrita
+## 4. Tecnica de Construcao (OBRIGATORIO — siga esta ordem)
 
-1. **Mesmo universo visual:** Mantenha materiais, texturas, periodo historico, paleta.
-2. **Mude apenas o que o movimento justifica:** Push-in → close-up do MESMO cenario. Pan → o que esta ao lado.
-3. **Parametros tecnicos coerentes:** Lente e DOF devem ser coerentes com o start (lente pode mudar se push-in).
-4. **Densidade igual:** O endVisualDescription deve ter a mesma riqueza que o visualDescription (50-120 palavras).
-5. **NAO repita o start inteiro** — descreva apenas o que MUDA. Foque nos 30% diferentes.
+Para cada cena que PRECISA de endVisualDescription:
+
+**PASSO 1 — Copie o start como base:**
+Comece mentalmente com o `visualDescription` completo. Todos os elementos do start existem no end.
+
+**PASSO 2 — Aplique apenas o que o motion fisicamente muda:**
+| Movimento | O que muda no end | O que permanece |
+|-----------|------------------|-----------------|
+| Push-in | Enquadramento (mais perto), DOF (mais raso) | Cenario, iluminacao, materiais, sujeito |
+| Pull-back | Enquadramento (mais longe), novos elementos laterais aparecem | Sujeito central, iluminacao, epoca |
+| Pan L/R | Elementos adjacentes entram no quadro | Profundidade, iluminacao, periodo historico |
+| Rack focus | Plano focal (foreground↔background desfocado) | Tudo mais: mesmos elementos, mesmo quadro |
+| Tilt up/down | O que esta acima/abaixo entra no quadro | Iluminacao, materiais, espaco |
+
+**PASSO 3 — Escreva o end descrevendo o cenario completo do frame final:**
+- INCLUA os elementos do start que ainda estao visiveis (a maioria)
+- INCLUA o novo enquadramento/angulo que o motion gerou
+- NAO omita elementos centrais que continuam presentes
+- COPIE os descritores de cor e temperatura de luz do start (ex: "same tungsten warmth", "same cold blue daylight", "same amber glow") — nunca deixe o end sem referencia de cor explicita.
+
+**Regra de ouro:** O end deve ler como uma versao do start com enquadramento diferente — nao como uma cena nova. Mesma cor, mesmo ambiente, mesmo tempo.
+
+**Parametros tecnicos:** Lente e DOF devem ser coerentes com o start (lente pode mudar apenas em push-in extremo).
 
 ---
 
@@ -88,10 +123,24 @@ A `motionDescription` descreve COMO a camera vai do start ao end. Se nao consegu
 
 ### Push-in (Tensao):
 ```
-visualDescription: "35mm lens, medium shot, deep focus. Dark basement corridor, single tungsten bulb casting harsh downward shadows on heavy wooden door..."
+visualDescription: "35mm lens, medium shot, deep focus. Dark basement corridor, single tungsten bulb casting harsh downward shadows on heavy wooden door, cracked plaster walls, bare concrete floor, faint light under the door..."
 motionDescription: "Slow steady dolly in along the corridor toward the door over 6 seconds..."
-→ endVisualDescription: "50mm lens, medium close-up, shallow depth of field. Same basement door now filling the frame, scratched paint texture visible in detail, rusted handle catching the harsh tungsten light, keyhole center-frame, darkness beyond..."
+
+→ PASSO 1 (base = start): mesmo corredor, mesma lampada, mesmas paredes
+→ PASSO 2 (o que muda): enquadramento vai de medium shot para close-up da porta
+→ endVisualDescription: "50mm lens, medium close-up, shallow depth of field. Same basement corridor, same tungsten bulb now out of frame above, heavy wooden door filling the frame — scratched paint texture, rusted handle catching the harsh light, keyhole center-frame, faint light still visible beneath the door, cracked plaster wall visible at edges..."
 → endImageReferenceWeight: 0.65
+```
+
+### Pull-back (Isolamento):
+```
+visualDescription: "50mm lens, medium shot. Man sitting alone at a small table in dim diner, coffee cup in hand, neon sign reflected in window behind him..."
+motionDescription: "Very slow pull-back dolly out revealing the full diner interior over 7 seconds..."
+
+→ PASSO 1 (base = start): mesmo homem, mesma xicara, mesmo diner, mesmo reflexo de neon
+→ PASSO 2 (o que muda): enquadramento abre para wide shot, mais do diner aparece
+→ endVisualDescription: "28mm lens, wide shot, deep focus. Same dim diner interior now fully visible — man at the small table now smaller in frame, same coffee cup, same neon reflection in window, empty booths and counter stools visible on both sides, overhead fluorescent lights casting pale light on linoleum floor..."
+→ endImageReferenceWeight: 0.55
 ```
 
 ### Static (Silencio):

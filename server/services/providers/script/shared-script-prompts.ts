@@ -1,13 +1,17 @@
 /**
  * Shared Script Prompts — Single Source of Truth
- * 
+ *
  * Contém toda a lógica de construção de prompts e schemas Zod
  * que era duplicada nos 3 providers (OpenAI, Gemini, Anthropic).
- * 
+ *
  * Cada provider agora importa daqui e foca APENAS na parte de
  * conexão LangChain + SDK específico.
- * 
+ *
  * Fluxo: Provider.generate() → buildSystemPrompt() + buildUserPrompt() → LLM → parseScriptResponse()
+ *
+ * WRITER→SCREENWRITER: Quando request.writerProse está presente, os prompts são
+ * delegados para screenwriter-prompts.ts. Isso permite o pipeline de duas etapas
+ * sem modificar nenhum provider existente.
  */
 
 import { z } from 'zod'
@@ -19,6 +23,11 @@ import type {
 import { calculateLLMCost } from '../../../constants/pricing'
 import { buildVisualInstructionsForScript } from '../../../utils/wan-prompt-builder'
 import { formatPersonsForPrompt, formatNeuralInsightsForPrompt } from '../../../utils/format-intelligence-context'
+import {
+  buildScreenwriterSystemPrompt,
+  buildScreenwriterUserPrompt,
+  type ProviderHint as ScreenwriterProviderHint
+} from './screenwriter-prompts'
 
 // =============================================================================
 // ZOD SCHEMAS (Output Estruturado)
@@ -65,6 +74,11 @@ export type ScriptResponse = z.infer<typeof ScriptResponseSchema>
 // =============================================================================
 
 export function buildSystemPrompt(request: ScriptGenerationRequest): string {
+  // ── Writer→Screenwriter: delegar quando prosa do Writer está presente ──
+  if (request.writerProse) {
+    return buildScreenwriterSystemPrompt(request)
+  }
+
   let styleInstructions = request.scriptStyleInstructions || 'Adote um tom documental sério e investigativo.'
 
   let visualInstructions = ''
@@ -337,25 +351,21 @@ ${visualInstructions}`
 export type ProviderHint = 'openai' | 'gemini' | 'anthropic' | 'groq'
 
 export function buildUserPrompt(request: ScriptGenerationRequest, providerHint?: ProviderHint): string {
+  // ── Writer→Screenwriter: delegar quando prosa do Writer está presente ──
+  if (request.writerProse) {
+    return buildScreenwriterUserPrompt(request.writerProse, request, providerHint as ScreenwriterProviderHint)
+  }
+
   const targetWPM = request.targetWPM || 150
   const wordsPerScene = Math.round((targetWPM / 60) * 5) // 150 WPM = 12-13 palavras por 5s
   const minWords = wordsPerScene - 1
   const maxWords = wordsPerScene + 2 // Hard limit para não ultrapassar 5s
   const idealSceneCount = request.targetSceneCount ?? Math.ceil(request.targetDuration / 5)
-  const maxExtraScenes = 4 // margem para concluir a história e CTA sem cortar frase
-  const maxSceneCount = idealSceneCount + maxExtraScenes
 
   // Determinar formato do vídeo
   const videoFormat = request.format || request.outputType || 'full-youtube'
   const isShortFormat = videoFormat.includes('tiktok') || videoFormat.includes('reels') || videoFormat.includes('teaser') || videoFormat.includes('shorts')
   const isYouTubeCinematic = videoFormat.includes('youtube') || videoFormat.includes('full')
-
-  // Caminho B: para full video, o mínimo é 85% do idealSceneCount.
-  // O roteirista tem licença criativa para criar pontes ficcionais e dramatizações
-  // que sustentem a contagem de cenas — não deve parar por "falta de material factual".
-  const minSceneCount = isShortFormat
-    ? idealSceneCount // formatos curtos mantêm contagem fixa
-    : Math.max(40, Math.round(idealSceneCount * 0.85)) // full video: mínimo 40 ou 85% do plano
 
   let formatContext = ''
   if (isShortFormat) {
@@ -582,27 +592,25 @@ Máximo de 38 cenas por track (limite do modelo). Defina "backgroundMusic" como 
 
 ---
 ⚠️ REQUISITOS OBRIGATÓRIOS PARA APROVAÇÃO:
-1. QUANTIDADE DE CENAS: Gere entre ${minSceneCount} e ${maxSceneCount} cenas. O Arquiteto planejou ${idealSceneCount} cenas — mire nesse alvo. O mínimo absoluto é ${minSceneCount} cenas — gerar MENOS que isso é REPROVAÇÃO AUTOMÁTICA.
-2. LICENÇA CRIATIVA: Se os fatos do dossiê não preenchem ${minSceneCount} cenas sozinhos, você TEM LICENÇA para criar conteúdo ficcional que ENRIQUEÇA a narrativa: dramatizações de bastidores, diálogos imaginados entre personagens, reconstruções históricas plausíveis, pontes narrativas que conectem fatos do dossiê, contextualizações cinematográficas e reflexões do narrador. Use essa licença para SUSTENTAR a contagem de cenas com qualidade narrativa — nunca para repetir informação.
-3. ANTI-REPETIÇÃO (NÃO anti-padding): O problema a evitar é REPETIÇÃO de informação, não quantidade de cenas. Cenas ficcionais/dramáticas que expandem a história são BEM-VINDAS. Cenas que reafirmam o mesmo fato com palavras diferentes são PROIBIDAS.
+1. QUANTIDADE DE CENAS: O Arquiteto planejou ~${idealSceneCount} cenas como referência. Gere quantas cenas a narrativa PRECISAR para cobrir todo o conteúdo do dossiê sem repetição. Menos cenas com conteúdo único é MELHOR que muitas cenas com informação repetida. NÃO force uma contagem mínima — deixe o conteúdo ditar a quantidade.
+2. ANTI-REPETIÇÃO (PRIORIDADE MÁXIMA): Se duas cenas transmitem a mesma informação com palavras diferentes, ELIMINE uma. Cada cena DEVE trazer informação ou narrativa ÚNICA e INÉDITA. PREFERÍVEL: 50 cenas devastadoras > 150 cenas com repetição.
+3. LICENÇA CRIATIVA: Você TEM LICENÇA para criar conteúdo ficcional que ENRIQUEÇA a narrativa: dramatizações de bastidores, diálogos imaginados entre personagens, reconstruções históricas plausíveis, pontes narrativas. Use essa licença para QUALIDADE, nunca para INFLAR contagem.
 4. DURAÇÃO DA CENA: Cada cena tem slots fixos de 5 segundos.
 5. CONTAGEM DE PALAVRAS: Cada narração DEVE ter entre ${minWords} e ${maxWords} palavras (${targetWPM} WPM ÷ 60 × 5s = ${wordsPerScene} palavras ideais). 🚨 NUNCA exceda ${maxWords} palavras - isso faz o áudio ultrapassar 5 segundos e quebra a sincronia. NUNCA faça cenas com menos de ${minWords} palavras - isso gera silêncio.
 6. MÚSICA DE FUNDO: ${isShortFormat ? 'Use "backgroundMusic" { prompt, volume } para UMA música para TODO o vídeo. O prompt deve ser compatível com Stable Audio 2.5.' : 'Use "backgroundMusicTracks" com tracks { prompt, volume, startScene, endScene }. Calibre startScene/endScene com base no número REAL de cenas que você gerou — não no número planejado. A última track DEVE ter endScene: null.'}
 7. Se houver imagens anexas, use-as como referência visual primária.
-8. 📐 PROPORÇÃO NARRATIVA: A seção de REFLEXÃO/LIÇÃO (após o corpo factual + ponte temporal) deve ter no MÁXIMO ${maxReflectionScenes} cenas (15% ideal, ${maxReflectionCeiling} cenas = teto absoluto de 20%). Invista as cenas no CORPO FACTUAL e nas dramatizações ficcionais, não na reflexão.
-9. 🚫 CHECAGEM DE REPETIÇÃO: Antes de finalizar, releia TODAS as cenas. Se duas cenas expressam a mesma ideia com palavras diferentes, ELIMINE uma e substitua por conteúdo ficcional novo (dramatização, diálogo, reconstrução). Cada cena deve trazer informação ou narrativa ÚNICA e INÉDITA.${providerSpecificItems}
+8. 📐 PROPORÇÃO NARRATIVA: A seção de REFLEXÃO/LIÇÃO (após o corpo factual + ponte temporal) deve ter no MÁXIMO ${maxReflectionScenes} cenas (15% ideal, ${maxReflectionCeiling} cenas = teto absoluto de 20%). Invista as cenas no CORPO FACTUAL e nas dramatizações ficcionais, não na reflexão.${providerSpecificItems}
 ${guidelines}${musicWarning}
 
 🛡️ VALIDAÇÃO FINAL OBRIGATÓRIA:
 Antes de retornar o JSON, faça esta auditoria interna:
-1. CONTE as cenas totais — deve estar entre ${minSceneCount} e ${maxSceneCount}. Se está ABAIXO de ${minSceneCount}, ADICIONE cenas ficcionais (dramatizações, diálogos, reconstruções) até atingir o mínimo. Se uma cena repete informação de outra, SUBSTITUA por conteúdo ficcional novo.
+1. PROCURE REPETIÇÕES: Releia TODAS as cenas. Se duas cenas expressam a mesma ideia com palavras diferentes, ELIMINE uma. Qualidade > quantidade.
 2. CONTE as cenas de reflexão/lição (após o corpo factual) — deve ser ≤${maxReflectionCeiling} cenas.
-3. PROCURE repetições temáticas — se encontrar, ELIMINE e COMPACTE.
-4. A última cena de conteúdo deve terminar com frase completa.
-5. As últimas 1-2 cenas devem ser conclusão + CTA (seguir canal + The Gap Files).
-6. 🔗 SINCRONIZAÇÃO NARRAÇÃO ↔ VISUAL (CHECAR CENA POR CENA): Para CADA cena, a narração fala de X — o visualDescription MOSTRA X visualmente? Se a narração fala de "bispo assinou", o visual mostra assinatura/documento/selo? Se NÃO → REESCREVA o visualDescription.
-7. 🔗 MOTION ↔ VISUAL: O motionDescription descreve movimento coerente com o visualDescription? O motion anima elementos que existem na imagem? Se incompatível → REESCREVA.
-8. 📺 TRANSIÇÃO DE EPISÓDIO: Se episodeNumber < totalEpisodes, as últimas 2-3 cenas ANTES do CTA devem provocar o próximo episódio (teaser/gancho). Se não houver teaser → ADICIONE.`
+3. A última cena de conteúdo deve terminar com frase completa.
+4. As últimas 1-2 cenas devem ser conclusão + CTA (seguir canal + The Gap Files).
+5. 🔗 SINCRONIZAÇÃO NARRAÇÃO ↔ VISUAL (CHECAR CENA POR CENA): Para CADA cena, a narração fala de X — o visualDescription MOSTRA X visualmente? Se a narração fala de "bispo assinou", o visual mostra assinatura/documento/selo? Se NÃO → REESCREVA o visualDescription.
+6. 🔗 MOTION ↔ VISUAL: O motionDescription descreve movimento coerente com o visualDescription? O motion anima elementos que existem na imagem? Se incompatível → REESCREVA.
+7. 📺 TRANSIÇÃO DE EPISÓDIO: Se episodeNumber < totalEpisodes, as últimas 2-3 cenas ANTES do CTA devem provocar o próximo episódio (teaser/gancho). Se não houver teaser → ADICIONE.`
 }
 
 // =============================================================================
