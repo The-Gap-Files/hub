@@ -3939,6 +3939,7 @@ const selectedMonetizationItem = ref<{
   angle: string
   angleCategory: string
   narrativeRole?: string
+  shortFormatType?: string
   scriptOutline?: string
   cta?: string
   strategicNotes?: string
@@ -3947,6 +3948,9 @@ const selectedMonetizationItem = ref<{
   editorialObjectiveId?: string
   editorialObjectiveName?: string
   avoidPatterns?: string[]
+  sceneCount?: number
+  microBriefV1?: any
+  planId?: string
 } | null>(null)
 
 function hydrateSelectedMonetizationFromOutput() {
@@ -4009,6 +4013,7 @@ function selectMonetizationTeaser(teaser: any, index: number) {
     angle: teaser.angle,
     angleCategory: teaser.angleCategory,
     narrativeRole: teaser.narrativeRole,
+    shortFormatType: teaser.shortFormatType,
     scriptOutline: teaser.scriptOutline,
     cta: teaser.cta,
     strategicNotes: monetizationPlan.value?.planData?.strategicNotes || undefined,
@@ -4016,7 +4021,10 @@ function selectMonetizationTeaser(teaser: any, index: number) {
     scriptStyleName: teaser.scriptStyleName,
     editorialObjectiveId: teaser.editorialObjectiveId,
     editorialObjectiveName: teaser.editorialObjectiveName,
-    avoidPatterns: teaser.avoidPatterns
+    avoidPatterns: teaser.avoidPatterns,
+    sceneCount: teaser.sceneCount,
+    microBriefV1: teaser.microBriefV1,
+    planId: monetizationPlan.value?.id,
   }
 }
 

@@ -1,0 +1,167 @@
+{
+  "timestamp": "2026-02-24T02:10:37.867Z",
+  "taskId": "story-architect",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "gemini-3-flash-preview",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Story Architect — Full Video (Plano Narrativo para Vídeo Completo)\n\nVocê é um arquiteto narrativo especializado em vídeos longos investigativos (8-15 minutos).\nSeu trabalho é criar um plano narrativo de alta retenção para um **vídeo completo** —\ndiferente de um teaser, o full video precisa sustentar atenção por toda a duração,\nusando escalação progressiva, midpoints narrativos, e re-engagement hooks.\n\n## 🎬 Modo Série (EP1–EP3) — quando aplicável\n\nÀs vezes o full video é um **episódio** dentro de uma série (EP1, EP2, EP3). Isso é indicado por:\n- `monetizationContext.episodeNumber` **OU**\n- `monetizationContext.angleCategory` começando com `episode-`\n\nQuando estiver em modo série:\n- **NÃO recontar** os mesmos assuntos, revelações, hooks ou key points de episódios anteriores.\n- Se houver no dossiê/notas um bloco `EPISÓDIOS ANTERIORES (NÃO REPETIR)`, trate como **restrição dura**.\n- **Foque no território novo** do episódio, mas mantenha coerência com a premissa da série.\n\nObjetivo por episódio (guia):\n- **EP1**: contextualiza + estabelece universo + primeira grande virada.\n- **EP2**: complica + contradições + midpoint forte + novas evidências.\n- **EP3**: amarra + fecha arcos + implicações + conclusão satisfatória.\n\n## 🎯 Objetivo\n\nCriar o **blueprint completo** que um roteirista vai seguir para escrever o roteiro\ncena-a-cena de um vídeo investigativo/documental longo. Você NÃO escreve o roteiro —\nvocê projeta a ESTRUTURA que maximiza retenção.\n\n## 🎣 BASE DE DADOS DE HOOKS NARRATIVOS\n\nAntes de criar o outline, consulte a base de dados de hooks narrativos curados (`/api/narrative-hooks`). Esta base contém aberturas poderosas de documentários, séries investigativas e vídeos de alta retenção, com análise estrutural.\n\n**COMO USAR A BASE PARA FULL VIDEO:**\n1. **Foco no primeiro minuto:** Consulte hooks tipo `mystery_hook`, `world_building` ou `emotional_impact` que estabelecem mistério sustentado\n2. **Analise estruturas de 3 atos:** Como True Detective ou The Last of Us estabelecem presságio + contexto + ruptura?\n3. **Adapte para longevidade:** Hooks de vídeos virais detonam em 2s; hooks de séries plantam seeds que pagam depois\n4. **Referencie:** Mencione qual hook inspirou sua estratégia de abertura (ex: \"Inspirado na abertura de The Last of Us: presságio científico + jump temporal\")\n\n**🎬 INTERPRETANDO O `hookText`:**\nHooks de **séries/filmes** no banco contém descrições audiovisuais, não narração final:\n- Exemplo: *\"Wide shot: campos solares... um homem cultiva... algo está errado. Seus olhos.\"*\n- **Como usar:** Extraia a progressão (estabelecer mundo → zoom em detalhe → revelação perturbadora)\n- **Para o outline:** Traduza a MECÂNICA: \"Abertura contemplativa do cenário → aproximação gradual → detalhe que transforma paz em ameaça\"\n- Hooks de **vídeos virais testados** geralmente têm texto literal utilizável (ex: \"Você mataria uma criança...\")\n\n**DIFERENÇA CRÍTICA:** Em teasers, o hook é DETONAÇÃO. Em full videos, o hook é IMERSÃO — cria perguntas que só serão respondidas aos 8, 12, 15 minutos.\n\n## 📐 ESTRUTURA OBRIGATÓRIA: A Jornada Imersiva de 6 Passos (YouTube Dark 2026)\n\nEm vez de uma estrutura genérica, o vídeo completo DEVE seguir rigorosamente a **Jornada Imersiva** detalhada na pesquisa de retenção, mapeada para a estrutura de 3 atos:\n\n1.  **A Missão (0:00 - 1:00) | O Gancho Visceral**\n    *   **Objetivo:** Estabelecer o mistério central e a \"Aposta\" (O que está em jogo?).\n    *   **Técnica:** Ruptura imediata (0s) + Pergunta \"impossível\".\n    *   **Mid-Hook (30s):** Reafirmação da promessa para evitar abandono precoce.\n\n2.  **O Contexto (1:00 - 3:00) | Conexão Emocional**\n    *   **Objetivo:** Conectar o mistério a uma emoção universal ou fato histórico. \"Por que se importar *agora*?\"\n    *   **Atenção:** Evite \"Wikipedia dump\". Contexto deve ser tensão, não aula.\n\n3.  **O Plano / A Investigação (Inicio do Ato 2)**\n    *   **Objetivo:** Detalhar os passos que serão tomados. Cria expectativa de progresso.\n    *   **Dinâmica:** \"Vamos analisar as evidências X, Y e Z.\"\n\n4.  **A Progressão \"Roller Coaster\" (O Corpo Principal)**\n    *   **Objetivo:** Série de sucessos e fracassos. Cada pista leva a uma NOVA pergunta (Cliffhanger em Cadeia).\n    *   **Midpoint (50%):** A \"Virada\". Uma evidência muda tudo.\n    *   **Dark Moment (75%):** O beco sem saída. Parece que não haverá resposta.\n\n5.  **O Clímax (A Revelação)**\n    *   **Objetivo:** A teoria mais forte ou a revelação final.\n    *   **Audiovisual:** Máximo impacto. Use a \"Pilha Sonora\" completa aqui.\n\n6.  **A Reflexão (Conclusão)**\n    *   **Objetivo:** Conectar de volta ao espectador. O que isso diz sobre a natureza humana?\n    *   **CTA Orgânico:** Convite para a próxima jornada (Loop de Sessão).\n\n## 🧠 RETENÇÃO — Técnicas Obrigatórias (baseado em dados reais de YouTube Analytics)\n\n### 1. Pattern Interrupts (~a cada 30 segundos / 6 cenas)\nO espectador decide cada ~30 segundos se continua assistindo. Garanta que o outline\nprevê uma **mudança de estímulo** a cada bloco de 6 cenas:\n- Mudança de localização visual (exterior → interior → close-up de documento)\n- Shift narrativo (fato → pergunta → revelação → dado numérico)\n- Mudança tonal (factual → tenso → reflexivo)\n\n### 2. Re-engagement Hooks (~a cada 3 minutos / 36 cenas)\nCada bloco de ~3 minutos deve terminar com um mini-cliffhanger que puxa o espectador\npara o próximo bloco:\n- \"Mas o que ninguém sabia era que...\"\n- \"E então surgiu um detalhe que mudou tudo.\"\n- Perguntas retóricas que o espectador quer ver respondidas\n\n### 3. Subconscious Loops (Técnica MrBeast)\nAbrir threads narrativas antes de fechá-las. O cérebro precisa da closure:\n- Introduza um fato intrigante no começo do ato 2 → só resolva no ato 3\n- Mencione um documento/evidência → mostre seu conteúdo 2 minutos depois\n\n### 3.1 REGRA DE TRÊS PARA FORESHADOWING (YouTube Retention Research)\nPara cada revelação importante no vídeo, plante EXATAMENTE 3 pistas anteriores:\n- **Pista 1 (~15% do vídeo):** Menção casual, quase imperceptível. O espectador não nota conscientemente.\n- **Pista 2 (~40% do vídeo):** Detalhe que ganha contexto. O espectador atento começa a suspeitar.\n- **Pista 3 (~65% do vídeo):** Evidência direta que prepara a revelação. O espectador sente que \"algo vai acontecer\".\n- **Revelação (~80%):** Payoff. O espectador conecta as 3 pistas retroativamente.\n\nO outline DEVE indicar para cada beat de revelação: quais são as 3 pistas anteriores e em qual beat foram plantadas.\nIsso cria \"ah-ha moments\" que são o driver #1 de compartilhamento e rewatch.\n\n### 4. Stair-Stepping (Escalação Progressiva)\nCada beat DEVE ser mais intenso que o anterior. NÃO pode haver platô narrativo.\nA progressão ideal:\n```\nCurioso → Intrigado → Perplexo → Perturbado → Chocado → Resolvido (ou: Perturbado permanente)\n```\n\n### 5. Value Loop (Técnica Veritasium) — Para cada beat principal:\n1. **Contexto** — O que é (o fato)\n2. **Aplicação** — Como funciona (a mecânica)\n3. **Framing** — Por que importa (a implicação)\n\n### 6. MONTAGEM E ÁUDIO (INTENCIONALIDADE CINEMATOGRÁFICA)\nO roteirista não escreve apenas palavras; ele desenha a experiência audiovisual.\n- **ÁUDIO DISSOCIADO (J-Cut / L-Cut):** Instrua explicitamente quando o áudio de uma cena começa antes (J) ou continua depois (L).\n- **TAGS DE ÁUDIO SSML:** Use `<break time=\"1.5s\" />` e `<prosody rate=\"115%\">` conforme definido no skill `audio-direction-tags.md`.\n- **ENGENHARIA SONORA (Pilha de 5 Camadas):** Instrua o uso de:\n    1. **Sub-Bass (20-80Hz):** Pavor físico, \"Presença\".\n    2. **Média (80-500Hz):** Corpo, ambiente real.\n    3. **Alta (2kHz+):** Textura, metais, sussurros (arrepio).\n    4. **Sweetener:** Assinatura sonora única (ex: som invertido).\n    5. **Espacialidade:** Reverb para coesão.\n- **SILÊNCIO ESTRATÉGICO:** O \"vácuo de som\" antes de revelações visuais é OBRIGATÓRIO. Defina onde ocorre.\n\n### 7. BRAND SAFETY & GORE (CRÍTICO)\n- REPROVADO se usar termos: \"Assassinato\", \"Estupro\", \"Pedofilia\", \"Mutilado\", \"Tripas\".\n- REPROVADO se descrev... [truncated 13691 chars]"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "📋 TEMA: A frieza mecânica da dupla de assassinos mais letal de Nova York + o fim silencioso de uma era de brutalidade mafiosa.\n\n🎨 DIRETRIZES DE IDENTIDADE DO UNIVERSO (WARNING PROTOCOL):\nAtmosfera 'gritty' do Brooklyn nos anos 70 e 80. Foco visual no Gemini Lounge, luzes de neon refletindo em asfalto molhado e carros pretos. Paleta de cores desaturada com acentos em vermelho sangue e ambar de iluminação urbana. Evitar o glamour de 'O Poderoso Chefão'; priorizar a estética suja e industrial de 'Goodfellas' e a frieza do método de desmembramento.\n\n📚 FONTES DO DOSSIÊ (ordenadas por peso/relevância):\n[1] (brief) Brief EP2 (fonte da verdade — episodeBriefBundleV1) [peso: 2]\n📋 TEMA: A industrialização do assassinato e a frieza mecânica dos Gêmeos Gemini no declínio da brutalidade mafiosa de Nova York.\n📋 TÍTULO DO DOSSIER: Os Gêmeos Gemini: A Morte de Joey Testa e o Terror da Murder Machine\n🎬 EPISODE BRIEF — EP2 (versão: episodeBriefBundleV1)\n🎭 Função narrativa: Narrar a traição contra Roy DeMeo, a transição para a família Lucchese e a consolidação da dupla como executores de elite até o início do cerco jurídico.\n💫 Arco emocional: A traição suprema como rito de passagem corporativo e a transição para uma nova era de terror sob a família Lucchese.\n📊 Nível de resolução: partial\n\n🌐 FATOS DE BACKGROUND (todos os EPs podem usar)\n1. Joseph 'Joey' Testa e Anthony Senter eram conhecidos no submundo como os 'Gêmeos Gemini', operando no Brooklyn entre as décadas de 1970 e 1980. [fonte: Investigação Gemini [1]]\n2. A dupla atuou inicialmente como o núcleo letal da equipe de Roy DeMeo, afiliada à família Gambino, e posteriormente para a família Lucchese. [fonte: Investigação Gemini [1]]\n3. O Gemini Lounge, localizado na Flatlands Avenue, servia como a base de operações e local de encontro para a equipe de assassinos. [fonte: Investigação Gemini [1]]\n4. A equipe DeMeo é considerada uma das mais violentas da história do crime organizado, com estimativas de centenas de vítimas desaparecidas. [fonte: Investigação Gemini [1]]\n5. A parceria entre Testa e Senter era baseada em uma lealdade mútua fanática e uma simbiose comportamental desenvolvida desde a infância em Canarsie. [fonte: Investigação Profunda [2]]\n6. O termo 'Máquina de Matar' (Murder Machine) tornou-se o epíteto para a operação logística de extermínio conduzida pela equipe. [fonte: Investigação Gemini [1]]\n\n🔑 FATOS EXCLUSIVOS DO EP2 (somente estes podem ser revelados aqui)\n1. No início da década de 1980, Paul Castellano passou a ver a equipe DeMeo como uma ameaça existencial devido ao volume de assassinatos e investigações federais. [fonte: Investigação Gemini [1]]\n2. Castellano temia que Roy DeMeo cooperasse com o governo para evitar a prisão perpétua, decretando sua sentença de morte. [fonte: Investigação Gemini [1]]\n3. Frank DeCicco e Anthony Casso ofereceram aos Gêmeos Gemini a sobrevivência em troca da execução de seu próprio mentor, Roy DeMeo. [fonte: Investigação Gemini [1]]\n4. Em 10 de janeiro de 1983, DeMeo foi atraído para uma reunião na casa de Patrick Testa, onde se sentia seguro entre seus subordinados. [fonte: Investigação Gemini [1]]\n5. Testa e Senter abriram fogo contra DeMeo enquanto ele esperava por um café, atingindo-o múltiplas vezes na cabeça e no tronco. [fonte: Investigação Gemini [1]]\n6. O corpo de DeMeo foi abandonado no porta-malas de seu Cadillac no estacionamento de um clube de iatismo no Brooklyn. [fonte: Investigação Gemini [1]]\n7. Um detalhe macabro marcou a cena: um candelabro foi deixado sobre o corpo congelado de DeMeo dentro do porta-malas do veículo. [fonte: Investigação Gemini [1]]\n8. A execução de DeMeo foi um rito de passagem que provou à Comissão da Máfia que a lealdade da dupla era à instituição e não a indivíduos. [fonte: Investigação Profunda [2]]\n9. Após a morte de DeMeo, a dupla foi 'transferida' para a família Lucchese, uma manobra rara na política interna da Cosa Nostra. [fonte: Investigação Gemini [1]]\n10. Sob Anthony Casso, Senter e Testa tornaram-se ativos inestimáveis, proficientes em vigilância, sequestro e eliminação metódica. [fonte: Investigação Gemini [1]]\n11. Em 1986, a dupla foi encarregada de proteger Marat Balagula, líder da máfia russa que operava um esquema massivo de fraude fiscal de gasolina. [fonte: Investigação Gemini [1]]\n12. Vladimir Reznikov, um gângster russo rival, foi executado por Joseph Testa em plena luz do dia em frente ao clube Odessa em Brighton Beach. [fonte: Investigação Gemini [1]]\n13. O assassinato de Reznikov enviou uma mensagem de que a proteção da Máfia Italiana sobre os negócios russos era absoluta e letal. [fonte: Investigação Gemini [1]]\n14. Entre 1986 e 1989, os Gêmeos atuaram como a guarda pretoriana de Anthony Casso durante o período de purgas internas conhecido como 'Whack Jersey'. [fonte: Investigação Gemini [1]]\n15. Em meados de 1988, Senter e Testa foram oficialmente induzidos como membros 'feitos' da família Lucchese em uma cerimônia em Canarsie. [fonte: Investigação Gemini [1]]\n16. A transição para os Lucchese colocou a dupla no círculo interno de uma das lideranças mais paranoicas e violentas da história da máfia. [fonte: Investigação Profunda [2]]\n17. Testa foi utilizado como instrumento de terror durante o 'Caso das Janelas', um esquema de extorsão que controlava habitações públicas em Nova York. [fonte: Investigação Profunda [2]]\n18. A reputação da dupla era tão temida que até mesmo outros mafiosos endurecidos evitavam confrontos diretos com os Gêmeos. [fonte: Investigação Gemini [1]]\n19. A lealdade da dupla a Anthony Casso era baseada em uma simbiose de sobrevivência e poder financeiro. [fonte: Investigação Profunda [2]]\n20. A Operação Empire Boulevard, focada no roubo de carros, começou a fornecer as primeiras evidências sólidas contra a estrutura da equipe. [fonte: Investigação Gemini [1]]\n21. A análise forense do corpo de DeMeo indicou ferimentos defensivos nas mãos, sugerindo que ele percebeu a traição no último instante. [fonte: Investigação Profunda [2]]\n22. A família Gambino honrou o acordo de poupar a dupla, mas exigiu que eles fossem removidos de suas fileiras permanentemente. [fonte: Investigação Gemini [1]]\n23. O assassinato de Reznikov solidificou Testa como um ativo capaz de projetar o poder da Cosa Nostra contra ameaças estrangeiras emergentes. [fonte: Investigação Profunda [2]]\n24. Anthony Casso acreditava que poderia controlar os Gêmeos através de uma combinação de medo e recompensas financeiras massivas. [fonte: Investigação Gemini [1]]\n25. A indução oficial em 1988 representou o ápice da carreira criminal de dois ladrões de carros que se tornaram executores de elite. [fonte: Investigação Profunda [2]]\n26. A força-tarefa federal começou a focar na federalização de crimes através da Lei RICO para derrubar a estrutura dos Lucchese. [fonte: Investigação Gemini [1]]\n27. O uso de lonas plásticas e protocolos de limpeza continuou sendo a marca registrada da dupla mesmo após a mudança de família. [fonte: Investigação Profunda [2]]\n28. A paranoia de Anthony Casso resultou na ordem de eliminação sistemática de membros da própria família suspeitos de deslealdade. [fonte: Investigação Gemini [1]]\n29. A dupla manteve o controle sobre o território de Canarsie mesmo operando para uma família baseada em outras áreas de Nova York. [fonte: Investigação Profunda [2]]\n30. O volume de evidências circunstanciais acumuladas pela força-tarefa começou a criar rachaduras na omertà de associados periféricos. [fonte: Investigação Gemini [1]]\n\n🔒 FATOS BLOQUEADOS — guardar para episódios futuros (NÃO REVELAR NESTE EP)\n1. ❌ Senter e Testa foram presos por uso de cocaína dentro do tribunal durante o julgamento de 1988. [fonte: Investigação Gemini [1]]\n2. ❌ Patrick Testa foi assassinado em 1992 por ordem de Anthony Casso, o próprio chefe de Joseph. [fonte: Investigação Profunda [2]]\n3. ❌ Joseph Testa morreu de causas naturais em Nevada após ser solto por motivos médicos em 2024. [fonte: Investigação Gemini [1]]\n\n⛔... [truncated 20165 chars]"
+      }
+    ]
+  },
+  "parsed": {
+    "hookStrategy": "In Medias Res combinado com Paradox Moral: Começar no momento exato em que a ordem de execução do mentor é dada, forçando o espectador a processar a frieza corporativa da máfia.",
+    "hookVariants": [
+      {
+        "level": "green",
+        "hook": "No início dos anos 80, a máfia de Nova York enfrentou uma escolha: salvar seu executor mais produtivo ou eliminá-lo para sobreviver ao governo federal.",
+        "rationale": "Foca no aspecto histórico e organizacional da transição de poder, sendo totalmente seguro."
+      },
+      {
+        "level": "moderate",
+        "hook": "Quando a lealdade é testada pelo medo, até os filhos matam o pai. Os Gêmeos Gemini receberam uma oferta: a vida do chefe ou a deles.",
+        "rationale": "Usa a metáfora familiar para destacar a traição sem ser excessivamente gráfico."
+      },
+      {
+        "level": "aggressive",
+        "hook": "Joseph Testa e Anthony Senter provaram sua lealdade à Cosa Nostra da forma mais brutal: executando o homem que os ensinou a matar.",
+        "rationale": "Confronta o espectador com a natureza direta do crime e a quebra de vínculo entre mentor e pupilo."
+      },
+      {
+        "level": "lawless",
+        "hook": "Para os Gêmeos Gemini, Roy DeMeo não era mais um mentor; era um peso morto que precisava ser descartado para garantir seus novos cargos.",
+        "rationale": "Expressa a desumanização total e o pragmatismo sociopático da dupla."
+      }
+    ],
+    "promiseSetup": "Nos próximos minutos, vamos desvendar como a execução de Roy DeMeo não foi apenas um crime, mas uma manobra corporativa que mudou o eixo do crime organizado em Nova York.",
+    "risingBeats": [
+      {
+        "order": 1,
+        "revelation": "Paul Castellano decreta a morte de DeMeo por medo de uma cooperação federal; Frank DeCicco oferece a vida dos Gêmeos em troca da cabeça de seu mentor.",
+        "questionAnswered": "Por que Roy DeMeo se tornou um alvo da própria família?",
+        "newQuestion": "Como eles conseguirão atrair um homem tão paranoico quanto DeMeo para uma armadilha?",
+        "sourceReference": "Investigação Gemini [1] - Fatos 1, 2 e 3"
+      },
+      {
+        "order": 2,
+        "revelation": "Em 10 de janeiro de 1983, DeMeo é atraído à casa de Patrick Testa e executado pelos seus próprios pupilos enquanto esperava por um café. Um candelabro é deixado sobre seu corpo no porta-malas de um Cadillac.",
+        "questionAnswered": "Como foi o fim trágico de Roy DeMeo?",
+        "newQuestion": "O que a máfia fará com dois executores tão eficientes agora que o chefe deles está morto?",
+        "sourceReference": "Investigação Gemini [1] - Fatos 4, 5, 6 e 7"
+      },
+      {
+        "order": 3,
+        "revelation": "A dupla é transferida para a família Lucchese, tornando-se a guarda pretoriana de Anthony Casso e assumindo funções de vigilância e eliminação metódica.",
+        "questionAnswered": "Para onde os Gêmeos foram após a execução?",
+        "newQuestion": "Qual será o papel dos Gêmeos dentro da paranoia crescente de Anthony Casso?",
+        "sourceReference": "Investigação Gemini [1] - Fatos 9, 10 e 16"
+      },
+      {
+        "order": 4,
+        "revelation": "Testa e Senter protegem Marat Balagula e Joseph Testa executa Vladimir Reznikov em Brighton Beach para consolidar o domínio Lucchese sobre a fraude da gasolina.",
+        "questionAnswered": "Como os Gêmeos interagiram com a máfia russa?",
+        "newQuestion": "Até onde vai o alcance dos Gêmeos no controle de novos mercados criminosos?",
+        "sourceReference": "Investigação Gemini [1] - Fatos 11, 12 e 13"
+      },
+      {
+        "order": 5,
+        "revelation": "Em 1988, Senter e Testa são oficialmente induzidos como membros feitos da família Lucchese em uma cerimônia secreta em Canarsie.",
+        "questionAnswered": "Qual foi o auge da carreira criminal da dupla?",
+        "newQuestion": "A indução oficial será o suficiente para protegê-los da força-tarefa federal?",
+        "sourceReference": "Investigação Gemini [1] - Fato 15; Investigação Profunda [2] - Fato 25"
+      },
+      {
+        "order": 6,
+        "revelation": "A Operação Empire Boulevard começa a acumular evidências circunstanciais e a Lei RICO é preparada para federalizar os crimes da família Lucchese.",
+        "questionAnswered": "Como as autoridades começaram a cercar os Gêmeos?",
+        "newQuestion": "As evidências da Operação Empire Boulevard serão o fio que desvendará a Murder Machine?",
+        "sourceReference": "Investigação Gemini [1] - Fatos 20, 26 e 30"
+      }
+    ],
+    "climaxMoment": "A cerimônia de indução em Canarsie transforma os antigos ladrões de carros em 'homens de honra' da família Lucchese, consolidando sua transição de meros executores para pilares de uma estrutura que já estava sob cerco federal.",
+    "climaxFormula": "Connection Shock (A revelação de que a indução oficial como 'membros feitos' em 1988, o ápice de suas carreiras, foi o que os selou definitivamente ao destino paranoico de Anthony Casso e ao radar da Lei RICO).",
+    "resolutionPoints": [
+      "A morte de Roy DeMeo marcou o fim da era Gambino para a dupla e o início de sua fase mais letal.",
+      "A transição para a família Lucchese sob Anthony Casso transformou os Gêmeos em ferramentas de terror político e internacional.",
+      "O assassinato de Vladimir Reznikov provou que a proteção italiana sobre os negócios russos era absoluta.",
+      "A indução oficial em 1988 foi o triunfo final antes do colapso iminente pela Lei RICO."
+    ],
+    "resolutionAngle": "A ascensão dos Gêmeos aos cargos de 'membros feitos' foi, ironicamente, o que facilitou sua queda, provando que na máfia, o sucesso é apenas o prelúdio de uma sentença de prisão perpétua.",
+    "ctaApproach": "Bloco único final: Tease para o EP3 focado no colapso. \"Mas o império construído sobre o silêncio estava prestes a enfrentar uma força que nem mesmo os Gêmeos poderiam desmembrar. O fim da Murder Machine começa no próximo episódio.\"",
+    "emotionalArc": "Paranoia (Castellano) → Tensão Extrema (A Traição) → Frieza (A Execução) → Ambição (Transição Lucchese) → Pavor Latente (Cerco RICO).",
+    "toneProgression": "Investigativo → Tenso → Frio/Clínico → Triunfante → Pressagiador.",
+    "whatToReveal": [
+      "A oferta de Frank DeCicco e Anthony Casso aos Gêmeos.",
+      "A execução de Roy DeMeo na casa de Patrick Testa.",
+      "O detalhe do candelabro no porta-malas do Cadillac.",
+      "A transferência inédita para a família Lucchese.",
+      "A proteção de Marat Balagula e a execução de Vladimir Reznikov.",
+      "A cerimônia de indução de 1988.",
+      "O início da Operação Empire Boulevard."
+    ],
+    "whatToHold": [
+      "O desfecho do julgamento de 1989.",
+      "O assassinato de Patrick Testa em 1992.",
+      "A morte de Joseph Testa em Nevada."
+    ],
+    "whatToIgnore": [
+      "Detalhes técnicos do 'Método Gemini' (já cobertos no EP1).",
+      "A infância em Canarsie (já coberto no EP1).",
+      "O erro com Dominick Ragucci (já coberto no EP1)."
+    ],
+    "segmentDistribution": {
+      "hook": 7,
+      "context": 23,
+      "rising": 93,
+      "climax": 15,
+      "resolution": 11,
+      "cta": 1
+    },
+    "tensionCurve": [
+      "low",
+      "medium",
+      "high",
+      "pause",
+      "peak",
+      "medium",
+      "high",
+      "peak",
+      "pause",
+      "high"
+    ],
+    "openLoops": [
+      {
+        "question": "Os Gêmeos Gemini teriam coragem de trair o homem que os transformou em lendas do submundo?",
+        "openedAtBeat": 1,
+        "closedAtBeat": 3
+      },
+      {
+        "question": "A transferência sem precedentes para a família Lucchese garantirá a proteção que eles buscam ou os colocará em um perigo ainda maior?",
+        "openedAtBeat": 4,
+        "closedAtBeat": null
+      },
+      {
+        "question": "Como a Operação Empire Boulevard conseguirá conectar ladrões de carros a uma rede de extermínio industrial?",
+        "openedAtBeat": 6,
+        "closedAtBeat": null
+      }
+    ],
+    "resolutionLevel": "partial",
+    "loopSentence": {
+      "fullSentence": "A lealdade deles não era a um homem, mas a um sistema que exige o sacrifício do próprio pai.",
+      "partA": "A lealdade deles não era a um homem...",
+      "partB": "...mas a um sistema que exige o sacrifício do próprio pai."
+    },
+    "title": "A Traição Suprema | O Fim de Roy DeMeo e a Ascensão dos Gêmeos Gemini"
+  },
+  "rawContent": ""
+}

@@ -4,8 +4,9 @@ import type { ProductionContext } from '../../../filmmaker-director.service'
 const LOG = '[FilmmakerBatch]'
 
 /**
- * Executa o Filmmaker Director (Cineasta) com batching + merge.
+ * Executa o Filmmaker Director (Fotógrafo + Coreógrafo) com batching + merge.
  * Muta `scenes` in-place com os campos refinados.
+ * Note: Cineasta (end keyframe) está desativado — start-frame only.
  *
  * Centraliza a lógica que estava duplicada em:
  * - output-pipeline.service.ts (generateScript)
@@ -66,12 +67,9 @@ export async function runFilmmakerBatched(
       scene.visualDescription = refined.visualDescription || scene.visualDescription
       scene.motionDescription = refined.motionDescription || scene.motionDescription
       scene.sceneEnvironment = refined.sceneEnvironment || scene.sceneEnvironment
-      if (refined.endVisualDescription !== undefined) {
-        scene.endVisualDescription = refined.endVisualDescription ?? scene.endVisualDescription
-      }
-      if (refined.endImageReferenceWeight !== undefined) {
-        scene.endImageReferenceWeight = refined.endImageReferenceWeight ?? scene.endImageReferenceWeight
-      }
+      // End keyframe fields always null (Cineasta disabled)
+      scene.endVisualDescription = null
+      scene.endImageReferenceWeight = null
     }
     console.log(`${LOG} ✅ Cineasta refinou todas as ${scenes.length} cenas com sucesso.`)
   } else {

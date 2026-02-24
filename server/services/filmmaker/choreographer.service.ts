@@ -170,18 +170,38 @@ ESTILO VISUAL BASE DO PROJETO:
       ? this.buildSceneAnnotations(production.storyOutline, scenes.length)
       : null
 
-    const userPrompt = `CENAS PARA COREOGRAFAR (visualDescription já definido pelo Fotógrafo — é FIXO):
+    // Build theme/narrative context block if available
+    const contextParts: string[] = []
+    if (production?.theme) {
+      contextParts.push(`TEMA DO VÍDEO: "${production.theme}"`)
+    }
+    if (production?.storyOutline?.emotionalArc) {
+      contextParts.push(`ARCO EMOCIONAL: "${production.storyOutline.emotionalArc}"`)
+    }
+    if (production?.storyOutline?.toneProgression) {
+      contextParts.push(`PROGRESSÃO DE TOM: "${production.storyOutline.toneProgression}"`)
+    }
+    const contextBlock = contextParts.length > 0
+      ? `\n───────────────────────────────────────────\nCONTEXTO NARRATIVO:\n${contextParts.join('\n')}\n───────────────────────────────────────────\n`
+      : ''
+
+    const userPrompt = `${contextBlock}CENAS PARA COREOGRAFAR (visualDescription já definido pelo Fotógrafo — é FIXO):
 
 ${JSON.stringify(
   scenes.map((s, i) => {
     const ann = annotations?.[i]
-    return {
+    const entry: Record<string, any> = {
       order: i,
       ...(ann ? { narrativeSegment: ann.segment, tensionLevel: ann.tensionLevel } : {}),
       narration: s.narration,
       visualDescription: s.visualDescription || s.currentVisual || '',
-      durationSeconds: s.estimatedDuration
+      durationSeconds: s.estimatedDuration,
     }
+    // Include screenwriter's original motion as reference (if available)
+    if (s.currentMotion) {
+      entry.screenwriterMotion = s.currentMotion
+    }
+    return entry
   }),
   null,
   2
@@ -194,6 +214,8 @@ REGRAS CRÍTICAS:
 - Referencie elementos ESPECÍFICOS do visualDescription no motion (ex: "push-in toward the payphone visible in foreground")
 - NÃO altere o visualDescription — ele é fixo.
 - Calibre à duração: 3-4s = static/breathing; 5-6s = push-in curto; 7-7.5s = dolly completo.
+- Se a cena tem "screenwriterMotion", use como REFERÊNCIA da intenção narrativa do roteirista. Preserve a intenção (ex: se ele pediu "pull-back" para isolamento, mantenha pull-back), mas REFINE com vocabulário WanVideo-safe, calibração de duração e elementos específicos do visualDescription.
+- Pense no ARCO CINEMATOGRÁFICO: considere as cenas adjacentes ao planejar cada movimento. Evite transições abruptas (ex: push-in → push-in → push-in). Crie ritmo visual variado que acompanhe a tensão narrativa.
 
 Retorne APENAS um JSON válido:
 {

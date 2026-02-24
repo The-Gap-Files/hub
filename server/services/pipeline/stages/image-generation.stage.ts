@@ -149,12 +149,9 @@ class ImageGenerationStage {
               detail: `Scene ${idx + 1} - image generation`,
             }).catch(() => {})
 
-            // ─── End image (last_image keyframe) ────────────────
-            if (scene.endVisualDescription) {
-              await this.generateEndImage(
-                scene, generatedImage, styleAnchor, input, imageProvider, outputId, idx, log,
-              )
-            }
+            // ─── End image (last_image keyframe) — DISABLED ──────
+            // End keyframe generation disabled — start-frame only
+            // produces more consistent motion with fewer artifacts.
           }
 
           successCount++

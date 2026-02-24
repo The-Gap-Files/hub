@@ -1,0 +1,137 @@
+{
+  "timestamp": "2026-02-24T11:26:28.755Z",
+  "taskId": "analyze-insights",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "gemini-3.1-pro-preview",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "Você é um analista de inteligência editorial especializado em extrair insights profundos, curiosidades surpreendentes, dados de pesquisa estruturados e PESSOAS-CHAVE de material bruto.\n\nSua função é analisar o dossiê fornecido (fontes do dossiê + notas existentes) e retornar:\n1. Uma lista de descobertas divididas em três categorias (items)\n2. Uma lista de pessoas-chave identificadas no material (persons)\n\n## INSIGHT NEURAL (noteType: \"insight\")\n- Conexões não-óbvias entre informações do material\n- Padrões narrativos que podem ser explorados\n- Ângulos editoriais únicos e diferenciados\n- Contradições internas que geram tensão narrativa\n- Relações causais implícitas no material\n\n## CURIOSIDADE (noteType: \"curiosity\")  \n- Fatos surpreendentes ou pouco conhecidos\n- Dados estatísticos impactantes\n- Detalhes sensoriais ou humanos que enriquecem a narrativa\n- Elementos que geram engajamento e retenção do público\n- Pontos que provocam reflexão ou debate\n\n## DADO DE PESQUISA (noteType: \"research\")\n- Fatos verificáveis e objetivos (nomes, datas, locais)\n- Estatísticas e números concretos mencionados no material\n- Referências documentais ou bibliográficas\n- Linhas do tempo e sequências cronológicas\n- Dados que servem como base factual para roteiros e scripts\n\n## PESSOAS-CHAVE (persons)\nIdentifique todas as pessoas relevantes mencionadas no material:\n- **name**: Nome completo como aparece no material\n- **role**: Papel narrativo (investigador, vítima, suspeito, testemunha, cientista, líder, político, jornalista, etc.)\n- **description**: Quem é esta pessoa e por que é relevante no contexto (1-2 frases)\n- **visualDescription**: Descrição visual da pessoa NA ÉPOCA DOS EVENTOS NARRADOS no dossiê (CRÍTICO: NÃO como a pessoa é hoje). A imagem gerada será usada em cenas do vídeo que retratam os eventos da história. Se os fatos ocorreram nos anos 70 e a pessoa tinha 20 anos na época, descreva alguém de 20 anos com visual e vestimenta dos anos 70. Se a pessoa morreu recentemente com 70 anos mas os crimes foram nos anos 70, a visualDescription deve ser do jovem de 20 anos. SEMPRE em inglês. Inclua: aparência física, idade NA ÉPOCA, vestimenta TÍPICA DA ÉPOCA, expressão. Ex: \"Young caucasian man, early 20s, shaggy brown hair, denim jacket, defiant expression, 1970s style\"\n- **aliases**: Lista de apelidos, codinomes ou outros nomes conhecidos\n- **relevance**: \"primary\" (protagonista/figura central), \"secondary\" (papel importante mas não central), \"mentioned\" (citado brevemente)\n\n## REGRAS:\n- Gere entre 6 e 15 itens no total\n- Balance entre as três categorias (priorize o que o material oferece)\n- Gere pelo menos 2 itens de cada categoria quando possível\n- Cada item deve ser autocontido e compreensível isoladamente\n- Escreva em português brasileiro\n- Seja específico — evite generalidades vagas\n- NÃO repita informações que já existam nas notas existentes do dossiê\n- NÃO repita pessoas que já foram extraídas anteriormente\n- Priorize descobertas que agreguem valor à produção de conteúdo\n- Para visualDescription: (1) SEMPRE em INGLÊS (será usada como prompt para modelo de imagem), (2) descreva a pessoa NA ÉPOCA DOS EVENTOS do dossiê, NÃO como é hoje, (3) seja específico o suficiente para que um modelo de IA consiga gerar a pessoa consistentemente entre cenas"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "Analise o seguinte dossiê e extraia insights neurais, curiosidades e dados de pesquisa:\n\n📋 TEMA: A transformação de um imigrante pobre em líder do cartel mais violento do mundo e a caçada implacável que terminou em 2026.\n\n📚 FONTES DO DOSSIÊ:\n[1] (text) A Ascensão, Paramilitarização e Queda de Nemesio Oseguera Cervantes (\"El Mencho\") e a Reconfiguração do Cártel Jalisco Nueva Generación\n# **Relatório de Inteligência Geopolítica e Criminal: A Ascensão, Paramilitarização e Queda de Nemesio Oseguera Cervantes (\"El Mencho\") e a Reconfiguração do Cártel Jalisco Nueva Generación**\n\nA arquitetura da segurança hemisférica e o equilíbrio de poder no ecossistema do narcotráfico global sofreram uma fratura tectônica e irreversível no dia 22 de fevereiro de 2026\\. A morte de Nemesio Rubén Oseguera Cervantes, o arquiteto do terror criminal globalmente conhecido como \"El Mencho\", durante uma operação militar de alta complexidade no município de Tapalpa, encerrou um dos capítulos mais sangrentos e disruptivos da história do crime organizado latino-americano.1 Sob a sua liderança autocrática, o Cártel Jalisco Nueva Generación (CJNG) transcendeu a taxonomia tradicional de uma gangue de contrabando transfronteiriço para se estabelecer como uma insurgência paramilitar de escala transnacional, dotada de capacidades financeiras, logísticas e bélicas que frequentemente rivalizavam ou superavam as do próprio Estado mexicano.3\n\nEste relatório de inteligência exaustivo tem como objetivo dissecar, com precisão forense e profundidade analítica, a metamorfose criminal de Oseguera Cervantes. A investigação delineia a sua evolução improvável, desde as raízes na pobreza agrícola das plantações de abacate de Michoacán, passando pela sua experiência no sistema prisional dos Estados Unidos e nas fileiras da polícia municipal mexicana, até a consolidação de um império do crime diversificado.4 O documento examina minuciosamente a engenharia financeira do clã \"Los Cuinis\", a institucionalização da extorsão agrícola do \"Ouro Verde\", a adoção pioneira de táticas de terrorismo narco com o recrutamento de mercenários estrangeiros, e, finalmente, os eventos cinéticos e as falhas de contrainteligência que culminaram em sua eliminação tática em 2026\\. Além disso, o relatório projeta os cenários iminentes de sucessão que ameaçam mergulhar a região em uma nova e incontrolável espiral de fragmentação armada.\n\n## **Perfil Investigativo: O Homem por trás do Mito (Psicologia e Saúde)**\n\nA compreensão da doutrina operacional do CJNG exige a desconstrução primária da figura de seu fundador. Diferente de seus contemporâneos no panteão do narcotráfico mexicano — notoriamente Joaquín \"El Chapo\" Guzmán, cuja propensão ao exibicionismo, à narcocultura ostensiva e ao reconhecimento público precipitou sua queda —, Nemesio Oseguera Cervantes cultivou uma liderança fundamentada na invisibilidade patológica, na disciplina espartana e no uso instrumental e maximizado do terror psicológico. A sua psicologia de comando não era orientada pelo desejo de aclamação, mas pela necessidade absoluta de controle territorial e dissuasão através da barbárie calculada.\n\nNascido em 17 de julho de 1966 na comunidade rural isolada de Culotitlán, no município de Aguililla, no coração do estado de Michoacán, a infância de El Mencho foi forjada na extrema pobreza e na dinâmica extrativista da agricultura mexicana.4 O abandono da educação formal ainda na quinta série do ensino fundamental para ingressar no trabalho braçal nos campos de cultivo de abacate incutiu nele uma compreensão visceral e pragmática das cadeias logísticas agrícolas — um conhecimento que, décadas mais tarde, ele subverteria para criar a mais sofisticada rede de extorsão agroindustrial do país.4 Aos quatorze anos, a transição do cultivo legal para a vigilância de plantações clandestinas de maconha nas montanhas de Tierra Caliente marcou sua iniciação precoce na economia ilícita, desenvolvendo sua capacidade de navegação em terrenos hostis e de evasão, habilidades que definiriam sua sobrevivência por mais de seis décadas.4\n\nO perfil psicológico de El Mencho, segundo análises comportamentais derivadas de desertores e inteligência de sinais, apontava para um indivíduo com traços de paranoia operacional aguda, desprovido de limites morais na aplicação da violência e com uma exigência draconiana de lealdade. O uso da violência extrema pelo CJNG — caracterizado por decapitações públicas, execuções em massa, vídeos de propaganda exibindo contingentes paramilitares uniformizados e a imposição de terrorismo urbano — não era um subproduto do caos, mas uma estratégia deliberada de branding corporativo criminal desenhada por Oseguera Cervantes.4 O terror era a principal moeda de troca do cartel, utilizada para subjugar populações, intimidar corporações policiais e sinalizar uma postura de negação de área impenetrável ao governo federal.\n\nContudo, a vulnerabilidade que, em última análise, ditaria o ritmo de suas operações na última década não advinha de falhas em sua rede de segurança, mas de um colapso em sua própria fisiologia. Avaliações de inteligência consolidadas ao longo de 2025 confirmaram os rumores persistentes de que Oseguera Cervantes sofria de insuficiência renal crônica em estágio terminal.6 Esta condição debilitante implicava que seus rins operavam com menos de quinze por cento da capacidade normal, provocando um acúmulo sistêmico de toxinas e retenção extrema de líquidos no organismo, exigindo sessões frequentes e ininterruptas de hemodiálise para a manutenção de sua vida.6\n\nEsta realidade médica transformou o homem mais procurado do hemisfério ocidental em um prisioneiro do seu próprio aparato de segurança. A doença impôs um contingenciamento logístico severo, limitando drasticamente a sua mobilidade a uma zona de exclusão altamente fortificada na região montanhosa de Jalisco.6 Ao contrário de outros barões da droga que podiam fugir através de fronteiras internacionais ao primeiro sinal de pressão governamental, El Mencho estava ancorado à sua necessidade por suporte vital. A inteligência militar mexicana (SEDENA) e norte-americana (DEA) passaram a monitorar não apenas o fluxo de precursores químicos e armas, mas a movimentação anômala de equipamentos médicos especializados, insumos farmacêuticos e médicos nefrologistas cooptados em direção à \"sierra\".6\n\nA necessidade constante de tratamento gerou narrativas folclóricas (\"narcocultura\") que as agências de inteligência precisaram dissipar ativamente. Durante o ano de 2020, consolidou-se o mito de que o líder do CJNG havia financiado e construído um hospital clandestino de alta tecnologia, equipado com centros cirúrgicos avançados, nas localidades de Villa Purificación ou El Alcíhuatl, em Jalisco, para uso exclusivo próprio e de seu círculo de confiança.6 Investigações de campo rigorosas e pronunciamentos de autoridades municipais desmentiram categoricamente essa estrutura utópica. As instalações atribuídas ao cartel não passavam de obras inacabadas e pequenos sanatórios rústicos, com dimensões que lembravam consultórios médicos de bairro, totalmente incapazes de fornecer a infraestrutura asséptica necessária para terapias renais de longo prazo.6 A realidade era significativamente mais crua: El Mencho recebia tratamentos complexos em abrigos improvisados, cabanas montanhosas fortificadas, dependendo de uma rede frágil de pelo menos duas pessoas de seu círculo íntimo encarregadas exclusivamente de gerenciar seus medicamentos, dieta e a entrada furtiva de profissionais de saúde no perímetro de segurança.6 Esta dependência contínua de fatores externos para a sua sobrevivência biológica semeou as falhas de contrainteligência que culminaram na sua eventual localização e morte.\n\n## **Linha do Tempo: Da Expulsão dos Estados Unidos à Liderança Global**\n\nA ascensão de Nemesio Oseguera Cervantes não seguiu o roteiro tradicional dos antigos patriarcas do narcotráfico. A sua trajetória é uma anotação sombria sobre as fa... [truncated 502547 chars]"
+      }
+    ]
+  },
+  "parsed": {
+    "items": [
+      {
+        "content": "A ironia do sistema prisional e institucional: A prisão de El Mencho no Texas, nos anos 90, não serviu como reabilitação, mas como uma 'pós-graduação' onde ele mapeou vulnerabilidades da lei americana. Posteriormente, sua passagem pela polícia mexicana permitiu que ele aprendesse a precificar subornos e dominar as táticas do Estado, usando a própria estrutura governamental como incubadora de seu império.",
+        "noteType": "insight"
+      },
+      {
+        "content": "A biologia como calcanhar de Aquiles: A queda do líder intocável não foi resultado direto de uma falha em seu exército paramilitar, mas de sua insuficiência renal crônica. A dependência de máquinas de hemodiálise o ancorou a um local fixo nas montanhas, criando uma cadeia logística médica frágil que, no fim, propiciou a traição que levou à sua morte.",
+        "noteType": "insight"
+      },
+      {
+        "content": "A mudança no paradigma da guerra às drogas: O CJNG transformou os antigos 'sicários' de rua em operadores de uma Empresa Militar Privada. O uso de drones com explosivos C4, veículos blindados 'Monstruos' com engenharia de guerra e armamento antiaéreo forçou o governo mexicano a abandonar o policiamento padrão e entrar em uma guerra assimétrica em 3D.",
+        "noteType": "insight"
+      },
+      {
+        "content": "A extorsão do 'Ouro Verde': O cartel não dependia apenas de drogas. Eles taxavam o agronegócio legítimo em Michoacán, cobrando até 4 pesos por cada quilo de limão e abacate cortado. O consumo de guacamole nos Estados Unidos indiretamente financiava as operações paramilitares do cartel.",
+        "noteType": "curiosity"
+      },
+      {
+        "content": "O mito do hospital de luxo na selva: A narcocultura espalhou o boato de que El Mencho havia construído um hospital clandestino de alta tecnologia para tratar seus rins. A realidade era muito mais crua: ele recebia hemodiálise em cabanas rústicas e abrigos improvisados, totalmente desprovidos de infraestrutura asséptica adequada.",
+        "noteType": "curiosity"
+      },
+      {
+        "content": "O recrutamento enganoso de mercenários de elite: Veteranos das Forças Especiais da Colômbia e 'Kaibiles' da Guatemala eram atraídos para o México por meio de falsas ofertas de emprego no WhatsApp para empresas de segurança privada, com salários de 46 mil pesos. Ao chegarem, descobriam que haviam sido recrutados para treinar esquadrões de extermínio.",
+        "noteType": "curiosity"
+      },
+      {
+        "content": "Linha do tempo da Operação Tapalpa: Em 22 de fevereiro de 2026, a SEDENA, apoiada pela inteligência americana (JIATF-CC), realizou o ataque final em Jalisco. A localização foi entregue por uma parceira amorosa de El Mencho. O líder do cartel morreu de choque hipovolêmico a bordo do helicóptero de evacuação médica militar após ser baleado na fuga.",
+        "noteType": "research"
+      },
+      {
+        "content": "A Operação Python e o estrangulamento financeiro: Deflagrada pela DEA e pelo DOJ em março de 2020, esta operação resultou em mais de 600 prisões táticas simultâneas em cidades como Los Angeles, Chicago e Nova York, gerando cerca de 350 indiciamentos formais focados na logística do CJNG nos EUA.",
+        "noteType": "research"
+      },
+      {
+        "content": "A arquitetura financeira dos 'Los Cuinis': Liderada por Abigael e Rosalinda González Valencia, esta facção operava exclusivamente como o 'banco de investimentos' do CJNG. Eles lavavam dinheiro através de empresas de fachada (como a ABR Management), comprando hotéis de luxo, shoppings e clínicas em Puerto Vallarta e Guadalajara.",
+        "noteType": "research"
+      },
+      {
+        "content": "Os candidatos à guerra de sucessão pós-2026: A morte de El Mencho polarizou o cartel entre Juan Carlos Valencia González ('El 03'), que defende uma hegemonia tático-militar brutal, e Audias Flores Silva ('El Jardinero'), que prefere a gestão burocrática, diplomacia corrupta e um esquema de 'federação' criminal.",
+        "noteType": "research"
+      }
+    ],
+    "persons": [
+      {
+        "name": "Nemesio Rubén Oseguera Cervantes",
+        "description": "Fundador e líder máximo do Cártel Jalisco Nueva Generación (CJNG). Transformou o grupo em uma força paramilitar transnacional antes de morrer em uma operação militar em 2026.",
+        "relevance": "primary",
+        "aliases": [
+          "El Mencho",
+          "Rubén Ávila",
+          "José López Prieto",
+          "Miguel Valadez"
+        ],
+        "role": "Líder do Cartel",
+        "visualDescription": "Middle-aged Hispanic man, early 50s, hardened and deeply paranoid expression, short dark hair, wearing tactical outdoor clothing or a simple button-down shirt, rural mountain background, 2010s era."
+      },
+      {
+        "name": "Rosalinda González Valencia",
+        "description": "Esposa de El Mencho e figura central na dinastia financeira 'Los Cuinis'. Foi a principal gestora do conglomerado contábil e logístico de lavagem de dinheiro do cartel.",
+        "relevance": "secondary",
+        "aliases": [],
+        "role": "Gestora Financeira",
+        "visualDescription": "Hispanic woman, late 40s, elegant and wealthy appearance, wearing expensive but understated designer clothing, confident and calculating expression, 2010s style."
+      },
+      {
+        "name": "Abigael González Valencia",
+        "description": "Cunhado de El Mencho e líder do clã 'Los Cuinis'. Foi o principal arquiteto da lavagem de dinheiro global do CJNG até sua prisão em 2015.",
+        "relevance": "secondary",
+        "aliases": [],
+        "role": "Arquiteto Financeiro",
+        "visualDescription": "Hispanic man, late 40s, sophisticated and business-like appearance, wearing a tailored suit, looking like a wealthy executive rather than a cartel member, 2010s style."
+      },
+      {
+        "name": "Juan Carlos Valencia González",
+        "description": "Enteado de El Mencho e filho de Rosalinda. Representa a ala puramente tática e militar do cartel, sendo o principal candidato à sucessão através da legitimidade de sangue.",
+        "relevance": "secondary",
+        "aliases": [
+          "El 03",
+          "El R3",
+          "El Plumas"
+        ],
+        "role": "Comandante Paramilitar",
+        "visualDescription": "Young Hispanic man, early 30s, aggressive and militaristic appearance, wearing tactical combat gear and body armor, holding an assault rifle, intense and ruthless expression, 2020s era."
+      },
+      {
+        "name": "Audias Flores Silva",
+        "description": "Mestre da gestão burocrática e territorial do CJNG. Rivaliza pela sucessão do cartel focando em corrupção, roubo de combustível e extorsão em vez de violência ostensiva.",
+        "relevance": "secondary",
+        "aliases": [
+          "El Jardinero"
+        ],
+        "role": "Gestor Estratégico",
+        "visualDescription": "Hispanic man, 40s, pragmatic and calculating expression, wearing a mix of rural and business casual clothing, holding a ledger or a smartphone, 2020s era."
+      },
+      {
+        "name": "Ignacio Coronel",
+        "description": "Líder do Cartel de Sinaloa em Jalisco para quem El Mencho trabalhou inicialmente. Sua morte em 2010 criou o vácuo de poder que permitiu a fundação do CJNG.",
+        "relevance": "mentioned",
+        "aliases": [
+          "Nacho Coronel"
+        ],
+        "role": "Ex-Líder de Cartel Rival",
+        "visualDescription": "Older Hispanic man, late 50s, classic old-school cartel boss appearance, wearing a cowboy hat, leather boots, and rancher clothing, imposing presence, 2000s era."
+      },
+      {
+        "name": "Kyle Mori",
+        "description": "Agente da DEA que supervisionou a busca e as investigações contra Nemesio Oseguera Cervantes até o ano de 2025.",
+        "relevance": "mentioned",
+        "aliases": [],
+        "role": "Agente da DEA",
+        "visualDescription": "Caucasian man, early 40s, tired but determined expression, wearing an FBI/DEA style windbreaker jacket over a polo shirt, holding investigation files, 2020s era."
+      }
+    ]
+  },
+  "rawContent": "{\n  \"items\": [\n    {\n      \"content\": \"A ironia do sistema prisional e institucional: A prisão de El Mencho no Texas, nos anos 90, não serviu como reabilitação, mas como uma 'pós-graduação' onde ele mapeou vulnerabilidades da lei americana. Posteriormente, sua passagem pela polícia mexicana permitiu que ele aprendesse a precificar subornos e dominar as táticas do Estado, usando a própria estrutura governamental como incubadora de seu império.\",\n      \"noteType\": \"insight\"\n    },\n    {\n      \"content\": \"A biologia como calcanhar de Aquiles: A queda do líder intocável não foi resultado direto de uma falha em seu exército paramilitar, mas de sua insuficiência renal crônica. A dependência de máquinas de hemodiálise o ancorou a um local fixo nas montanhas, criando uma cadeia logística médica frágil que, no fim, propiciou a traição que levou à sua morte.\",\n      \"noteType\": \"insight\"\n    },\n    {\n      \"content\": \"A mudança no paradigma da guerra às drogas: O CJNG transformou os antigos 'sicários' de rua em operadores de uma Empresa Militar Privada. O uso de drones com explosivos C4, veículos blindados 'Monstruos' com engenharia de guerra e armamento antiaéreo forçou o governo mexicano a abandonar o policiamento padrão e entrar em uma guerra assimétrica em 3D.\",\n      \"noteType\": \"insight\"\n    },\n    {\n      \"content\": \"A extorsão do 'Ouro Verde': O cartel não dependia apenas de drogas. Eles taxavam o agronegócio legítimo em Michoacán, cobrando até 4 pesos por cada quilo de limão e abacate cortado. O consumo de guacamole nos Estados Unidos indiretamente financiava as operações paramilitares do cartel.\",\n      \"noteType\": \"curiosity\"\n    },\n    {\n      \"content\": \"O mito do hospital de luxo na selva: A narcocultura espalhou o boato de que El Mencho havia construído um hospital clandestino de alta tecnologia para tratar seus rins. A realidade era muito mais crua: ele recebia hemodiálise em cabanas rústicas e abrigos improvisados, totalmente desprovidos de infraestrutura asséptica adequada.\",\n      \"noteType\": \"curiosity\"\n    },\n    {\n      \"content\": \"O recrutamento enganoso de mercenários de elite: Veteranos das Forças Especiais da Colômbia e 'Kaibiles' da Guatemala eram atraídos para o México por meio de falsas ofertas de emprego no WhatsApp para empresas de segurança privada, com salários de 46 mil pesos. Ao chegarem, descobriam que haviam sido recrutados para treinar esquadrões de extermínio.\",\n      \"noteType\": \"curiosity\"\n    },\n    {\n      \"content\": \"Linha do tempo da Operação Tapalpa: Em 22 de fevereiro de 2026, a SEDENA, apoiada pela inteligência americana (JIATF-CC), realizou o ataque final em Jalisco. A localização foi entregue por uma parceira amorosa de El Mencho. O líder do cartel morreu de choque hipovolêmico a bordo do helicóptero de evacuação médica militar após ser baleado na fuga.\",\n      \"noteType\": \"research\"\n    },\n    {\n      \"content\": \"A Operação Python e o estrangulamento financeiro: Deflagrada pela DEA e pelo DOJ em março de 2020, esta operação resultou em mais de 600 prisões táticas simultâneas em cidades como Los Angeles, Chicago e Nova York, gerando cerca de 350 indiciamentos formais focados na logística do CJNG nos EUA.\",\n      \"noteType\": \"research\"\n    },\n    {\n      \"content\": \"A arquitetura financeira dos 'Los Cuinis': Liderada por Abigael e Rosalinda González Valencia, esta facção operava exclusivamente como o 'banco de investimentos' do CJNG. Eles lavavam dinheiro através de empresas de fachada (como a ABR Management), comprando hotéis de luxo, shoppings e clínicas em Puerto Vallarta e Guadalajara.\",\n      \"noteType\": \"research\"\n    },\n    {\n      \"content\": \"Os candidatos à guerra de sucessão pós-2026: A morte de El Mencho polarizou o cartel entre Juan Carlos Valencia González ('El 03'), que defende uma hegemonia tático-militar brutal, e Audias Flores Silva ('El Jardinero'), que prefere a gestão burocrática, diplomacia corrupta e um esquema de 'federação' criminal.\",\n      \"noteType\": \"research\"\n    }\n  ],\n  \"persons\": [\n    {\n      \"name\": \"Nemesio Rubén Oseguera Cervantes\",\n      \"description\": \"Fundador e líder máximo do Cártel Jalisco Nueva Generación (CJNG). Transformou o grupo em uma força paramilitar transnacional antes de morrer em uma operação militar em 2026.\",\n      \"relevance\": \"primary\",\n      \"aliases\": [\n        \"El Mencho\",\n        \"Rubén Ávila\",\n        \"José López Prieto\",\n        \"Miguel Valadez\"\n      ],\n      \"role\": \"Líder do Cartel\",\n      \"visualDescription\": \"Middle-aged Hispanic man, early 50s, hardened and deeply paranoid expression, short dark hair, wearing tactical outdoor clothing or a simple button-down shirt, rural mountain background, 2010s era.\"\n    },\n    {\n      \"name\": \"Rosalinda González Valencia\",\n      \"description\": \"Esposa de El Mencho e figura central na dinastia financeira 'Los Cuinis'. Foi a principal gestora do conglomerado contábil e logístico de lavagem de dinheiro do cartel.\",\n      \"relevance\": \"secondary\",\n      \"aliases\": [],"
+}

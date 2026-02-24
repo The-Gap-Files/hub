@@ -1,0 +1,285 @@
+{
+  "timestamp": "2026-02-24T11:34:39.983Z",
+  "taskId": "monetization-hook-only",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "gemini-3-flash-preview",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Monetization — Hook-Only Teasers Generator\n\nVocê é um estrategista de conteúdo viral. Nesta etapa, você vai gerar os teasers HOOK-ONLY — arma de alcance viral, detonação cognitiva que para o scroll, gera replay e converte.\n\n## 🎯 O Que São Hook-Only\n\nHook-Only é uma **arma viral de 16-22 segundos**. Não é um resumo. Não é um mini-documentário. Não é uma aula.\n\n### DNA do Hook-Only:\n- **Visceral** — O público SENTE antes de PENSAR. Se pensou antes de sentir, deslizou.\n- **Simples** — 1 conceito central resumível em 1 frase mental. Sem colagem de fatos.\n- **Dinâmico** — Alternância emocional: Cena 1 (Ruptura/Loop-B) → Cena 2 (Respiro) → Cena 3 (Replay bait/impacto) → Cena 4 (Pico/Loop-A).\n- **Sistêmico** — Mostra o MECANISMO (quem autorizou, quem lucrou), não o sintoma (violência). Indignação > repulsa.\n- **Incompleto** — ZERO resolução, ZERO explicação, TODOS os loops abertos.\n- **Replay-friendly** — Detalhes rápidos que forçam \"pera, o que foi isso?\"\n- **Loop Infinito (Loop-A/Loop-B)** — Escreva de trás pra frente. A frase final (Cena 4) é incompleta e só faz sentido quando o vídeo reinicia na Cena 1.\n- **Safe** — Postura \"Neutral Documentarian\". Gore explícito = desmonetização. Use substituição semântica.\n\n## 📐 CONTEXTO RECEBIDO\n\nVocê recebe:\n- O dossiê completo\n- O teaser Gateway já gerado\n- Os teasers Deep-Dive já gerados\n- TODOS os hooks já usados (para NÃO repetir)\n- A lista de ângulos e formatos definidos no blueprint para cada hook-only\n\n## 📐 O QUE PRODUZIR\n\nPara CADA hook-only definido no blueprint, gere:\n- **title**: Máximo 8-10 palavras. Tensão + curiosidade + clareza. Sem nomes obscuros, sem subtítulos com dois-pontos.\n  - ❌ \"O mito sangrento que atravessou séculos: de Trento a Poway\" (14 palavras, denso)\n  - ✅ \"A mesma mentira. 500 anos depois.\" (6 palavras, pura tensão)\n  - ✅ \"Um menino morto e uma mentira eterna.\" (7 palavras, impacto)\n- **hook**: Frase que causa RUPTURA COGNITIVA em 2 segundos (até 15 palavras). Sem construção, sem contextualização. O espectador SENTE antes de pensar. DIFERENTE de tudo anterior.\n- **angle**: Descrição do ângulo (já definido no blueprint)\n- **angleCategory**: A categoria (já definida no blueprint)\n- **narrativeRole**: \"hook-only\"\n- **shortFormatType**: O formato (já definido no blueprint)\n- **scriptOutline**: Loop-B (final da frase do loop) → Respiro (contexto sistêmico) → Replay bait/impacto → Loop-A (começo da frase do loop, SUSPENSA).\n- **visualSuggestion**: Descrição curta do visual\n- **loopSentence**: Objeto com `fullSentence`, `partA` e `partB` definindo a mecânica do loop.\n- **cta**: **NENHUM**. Campo deve ser vazio ou null. O loop é a retenção.\n- **platform**: \"YouTube Shorts\"\n- **format**: \"teaser-youtube-shorts\"\n- **estimatedViews**: Estimativa de views\n- **scriptStyleId** e **scriptStyleName**\n- **editorialObjectiveId** e **editorialObjectiveName**\n- **avoidPatterns**: 2-4 anti-padrões específicos (veja regras abaixo)\n- **visualPrompt**: Prompt de imagem em INGLÊS (1 parágrafo)\n- **microBriefV1**: Micro-brief ESTRUTURADO para ESTE teaser (isolado por item). Deve conter:\\n  - version: \\\"teaserMicroBriefV1\\\"\\n  - narrativeRole: \\\"hook-only\\\"\\n  - angleCategory e angle (iguais aos campos do teaser)\\n  - facts: 5-12 fatos selecionados APENAS do brief/dossiê recebido (cada um com text e, se possível, sourceRef)\\n  - forbiddenElements: 6-12 itens (reforçar anti-arma/gore/close-up)\\n  - allowedArtifacts: 6-12 itens (documento/selo/monitor/headline/etc.)\\n  - notes: 2-6 bullets curtos (ex.: \\\"mecanismo > sintoma\\\", \\\"zero resolução\\\")\\n\\n🚨 IMPORTANTE: este microBriefV1 será o ÚNICO contexto que o Story Architect verá para este hook-only. Então selecione fatos que permitam um outline forte sem precisar de outros dados.\n\n## 🚨 REGRAS DOS HOOK-ONLY\n\n1. **RUPTURA EM 2 SEGUNDOS** — A primeira frase DEVE causar ruptura cognitiva. Nada de construção antes do choque. Se o público pensa antes de sentir, ele desliza.\n   - **MICRO-REGRA (TIMING)**: a primeira frase (até o primeiro ponto/pausa forte) deve ser pronunciável em **~1,5s**.\n     - Heurística: **3-5 palavras (ideal)**, **máx. 6**. Sem vírgula na primeira pancada.\n2. **1 CONCEITO CENTRAL** — O teaser INTEIRO gira em torno de UMA ideia resumível em 1 frase mental. Se exige conectar 3+ entidades/épocas/nomes para entender, está denso demais para consumo rápido.\n3. **ALTERNÂNCIA DINÂMICA (NÃO ESCALAÇÃO LINEAR)** — A intensidade deve VARIAR com contrastes: após beat intenso, inserir respiro para amplificar o próximo pico. O ÚLTIMO beat (corte seco — sem CTA) é o pico absoluto. ❌ 8→9→9→10 (saturação). ✅ 8→6→9→10 (alternância).\n3.5. **MECANISMO > SINTOMA (CRÍTICO)** — Foque no SISTEMA (quem autorizou, quem lucrou), NÃO na violência. ❌ \"A corda estala\" (repulsa → swipe). ✅ \"O bispo assinou a sentença\" (mecanismo → indignação → compartilha).\n   - **ANTI-TERMOS-SENSÍVEIS:** NUNCA use \"tortura infantil\", \"sangue infantil\", \"violência infantil\" em title, hook ou microBriefV1.facts. Se o brief tiver, REFORMULE para mecanismo (decreto, confisco, tribunal assinou, usou como pretexto). Títulos: ❌ \"O Decreto que Selou Sangue Infantil\". ✅ \"O Decreto que Autorizou o Confisco\".\n4. **NOMES UNIVERSAIS** — Nomes históricos obscuros quebram fluxo cognitivo. Use função (\"o bispo\", \"o juiz\", \"o atirador\"), não nomes próprios (Hinderbach, Tiberino). Exceção: nomes universalmente conhecidos (Hitler, Einstein, Napoleão).\n5. **RESOLUÇÃO ZERO** — Nenhuma explicação, recap, conclusão moral ou reflexão filosófica. TODOS os loops ficam abertos.\n6. **ZERO CTA** — O público NÃO pode perceber que acabou. Corte seco no meio da frase (Loop-A). Sem branding, sem \"The Gap Files.\".\n7. **REPLAY BAIT** — Pelo menos 1 beat com detalhe visual/narrativo rápido demais para absorver. Força re-assistir. Replay é sinal forte para o algoritmo.\n8. **Cada hook DEVE ser TOTALMENTE DIFERENTE** dos outros — formato E conteúdo\n9. **avoidPatterns** devem focar em eliminar contexto, explicação, nomes obscuros e CTA visível\n10. **microBriefV1 é a fonte da verdade** para o Story Architect deste hook-only: NÃO inclua fatos que pertencem a outros hook-onlys/deep-dives/gateway. Selecione apenas os fatos necessários para este ângulo e mantenha-os simples.\n11. **microBriefV1.facts:** Se um fato do brief contiver \"tortura infantil\", \"sangue infantil\", \"violência infantil\", REFORMULE antes de incluir: use consequência (confisco, decreto, autorizou) em vez do método (tortura, sangue).\n12. **microBriefV1.facts — MECANISMO > SINTOMA:** NÃO inclua fatos que descrevam captura/recolhimento de pessoas (\"guardas recolhiam crianças\", \"levaram para o tribunal\"). Inclua fatos do SISTEMA: \"O tesouro financiou o tribunal\", \"O decreto autorizou o confisco\", \"O bispo assinou a sentença\".\n\n## 🛡️ BRAND SAFETY E VISUAL NOISE (YOUTUBE 2026)\n\n1. **SUBSTITUIÇÃO SEMÂNTICA (OBRIGATÓRIA):**\n   - ❌ \"Assassino serial matou 20\" → 🟢 \"O responsável por 20 fins trágicos\"\n   - ❌ \"Sangue no chão\" → 🟢 \"A cena marcada\" / \"Vestígios vitais\"\n   - ❌ \"Estripado/Mutilado\" → 🟢 \"Fragmentado\" / \"Cena desfeita\"\n   - **Postura:** \"Neutral Documentarian\". Clínico, solene, nunca sensacionalista.\n\n2. **IMPERFEIÇÃO VISUAL CONTEXTUAL (Decisão de Direção):**\n   - **Esqueça o \"ruído aleatório\".** Escolha uma textura que AMPLIFIQUE a narrativa.\n   - **Documentos Antigos:** Textura de papel rasgado, granulação de filme 16mm, bordas queimadas.\n   - **Relatos Policiais/Modernos:** Glitch digital, compressão de CCTV, ruído de ISO alto (câmera noturna).\n   - **Memórias/Relatos:** Desfoque nas bordas (tilt-shift), aberração cromática leve.\n   - **Regra:** A imagem não pode ser \"lisa\" (cara de IA pura). Ela deve parecer um registro físico ou digital real.\n   - **Loop Visual:** O frame final deve ter iluminação/composição similar ao inicial para loop invisível.\n\n## 💡 EXEMPLOS DE HOOKS PODEROSOS (RUPTURA COGNITIVA)\n\n- \"A Igreja declarou ele santo… e depois RETIROU a santidade.\"\n- \"3 famílias lucraram com a morte dele. Ninguém foi preso.\"\n- \"O DNA não bate. A confissã... [truncated 8444 chars]"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "📋 TEMA: A ascensão paramilitar e queda biológica de El Mencho, líder do CJNG.\n📋 TÍTULO: El Mencho: O Ascensão Sangrenta e o Fim do Senhor dos Abacates\n🧾 BRIEF (TEASERS) — versão: briefBundleV1\n\n🛡️ REGRAS HARD (GLOBAL SAFETY)\n- ❌ armas de fogo\n- ❌ tiros\n- ❌ execuções visuais\n- ❌ sangue explícito\n- ❌ close-up de rostos humanos\n- ❌ violência gráfica\n- ❌ armas de fogo, rifles, pistolas, munição, gatilho\n- ❌ atirador, execução, assassinato explícito, violência gráfica\n- ❌ sangue, gore, corpos mutilados, tortura explícita\n- ❌ close-up de mãos humanas, close-up de rostos humanos (evitar macro/anatomia)\n- ❌ cenas em sinagogas/templos com ameaça explícita (substituir por artefatos: manifesto, tela, manchete)\n- ❌ símbolos/extremismo contemporâneo em destaque (substituir por “texto recortado/blur”)\n\n🧰 ARTEFATOS VISUAIS PERMITIDOS\n- ✅ Documentos de inteligência\n- ✅ Mapas de satélite\n- ✅ Manchetes de jornais de 2026\n- ✅ Registros policiais antigos\n- ✅ Diagramas de engenharia de veículos blindados\n- ✅ documento, decreto, registro, arquivo, dossiê, carimbo, selo de cera\n- ✅ moedas, cofre, livro-caixa, inventário, recibo, contrato\n- ✅ monitor, tela, manifesto (sem arma), headline, recorte de jornal, thread desfocada\n- ✅ mapa, corredor de arquivo, sala de leitura, prateleiras, luz de vela, sombras\n- ✅ silhuetas não-identificáveis sem rosto/mãos em close\n\n🔫 MUNIÇÃO NARRATIVA (FATOS SAFE)\n1. Nemesio Oseguera Cervantes nasceu em 1966, em Michoacán, iniciando sua vida laboral em plantações de abacate antes de ingressar na economia ilícita. [fonte: [1]]\n2. Durante os anos 90, o sistema prisional do Texas serviu como incubadora de contatos e compreensão das vulnerabilidades da justiça penal norte-americana para o futuro líder. [fonte: [1]]\n3. Oseguera Cervantes atuou como policial municipal em Jalisco, onde mapeou procedimentos operacionais de segurança e estruturou redes de corrupção institucional. [fonte: [1]]\n4. A fundação do Cártel Jalisco Nueva Generación (CJNG) ocorreu após um vácuo de poder gerado pela morte de lideranças regionais em 2010. [fonte: [1]]\n5. O clã 'Los Cuinis' operou como o braço financeiro do cartel, utilizando empresas de fachada e investimentos imobiliários para lavagem de capitais. [fonte: [1]]\n6. O cartel institucionalizou a extorsão no agronegócio, taxando a produção de limões e abacates em regiões estratégicas como Michoacán. [fonte: [1]]\n7. O CJNG investiu na criação de veículos de combate blindados artesanais, conhecidos como 'Monstruos', projetados com engenharia focada na guerra de desgaste. [fonte: [1]]\n8. A organização foi pioneira no México no uso de drones adaptados com mecanismos para liberação de explosivos plásticos. [fonte: [1]]\n9. Relatórios de inteligência documentaram o recrutamento de ex-militares estrangeiros, atraídos por falsas ofertas de emprego, para treinamento de esquadrões especializados. [fonte: [1]]\n10. O controle de portos estratégicos no Pacífico garantiu o fluxo de precursores químicos vindos da Ásia para a produção industrial de drogas sintéticas. [fonte: [1]]\n11. A insuficiência renal crônica terminal de Oseguera Cervantes limitou sua mobilidade a zonas fortificadas e abrigos improvisados nas montanhas de Jalisco. [fonte: [1]]\n12. A dependência de tratamentos médicos e hemodiálise em locais rústicos criou falhas na contrainteligência que facilitaram a localização do líder. [fonte: [1]]\n13. A Operação Python, deflagrada em 2020, resultou em centenas de prisões táticas e indiciamentos focados na decapitação financeira do cartel nos EUA. [fonte: [1]]\n14. A localização final do líder em 2026 foi obtida através de informações fornecidas por uma pessoa de seu círculo íntimo. [fonte: [1]]\n15. A Operação Tapalpa, realizada em fevereiro de 2026, utilizou inteligência internacional coordenada para o cerco e neutralização do alvo. [fonte: [1]]\n16. O registro oficial indica que a morte do líder ocorreu em decorrência de ferimentos e choque hipovolêmico durante uma evacuação médica aérea. [fonte: [1]]\n17. Após a morte do líder, o cartel enfrentou uma disputa interna entre alas focadas em hegemonia militar e gestão burocrática territorial. [fonte: [1]]\n18. A estrutura financeira do cartel incluiu a aquisição de complexos hoteleiros de luxo e centros comerciais para blindar o capital da organização. [fonte: [1]]\n19. O uso de armamento de uso exclusivo militar, incluindo sistemas de lançamento de foguetes, forçou o Estado a engajar-se em guerra assimétrica. [fonte: [1]]\n20. A morte de El Mencho em 2026 provocou uma campanha de táticas de guerrilha urbana e bloqueios em mais de 16 estados do México. [fonte: [1]]\n\n🎭 DIRETRIZES POR PAPEL\n- gateway: contextLevel=medium, facts=10-15\n- deep-dive: contextLevel=low, facts=5-10\n- hook-only: contextLevel=minimal, facts=1-3\n\nGere 4 teasers HOOK-ONLY para o dossiê.\n\nSlots definidos no blueprint:\n1. angleCategory=\"psicologico\", angleName=\"A Mente do Policial que Virou Alvo Número 1\", shortFormatType=\"pergunta-incomoda\", platform=\"YouTube Shorts\", scriptStyleId=\"narrative\", editorialObjectiveId=\"emotional-impact\"\n2. angleCategory=\"conspirativo\", angleName=\"A Traição Final: O Círculo Íntimo em 2026\", shortFormatType=\"hook-brutal\", platform=\"YouTube Shorts\", scriptStyleId=\"mystery\", editorialObjectiveId=\"cliffhanger\"\n3. angleCategory=\"conexao-temporal\", angleName=\"A Incubadora do Texas: Onde Tudo Começou\", shortFormatType=\"frase-memoravel\", platform=\"YouTube Shorts\", scriptStyleId=\"mystery\", editorialObjectiveId=\"mystery-layers\"\n4. angleCategory=\"etico\", angleName=\"O Dilema da Diálise: O Líder Refém do Próprio Corpo\", shortFormatType=\"pergunta-incomoda\", platform=\"YouTube Shorts\", scriptStyleId=\"narrative\", editorialObjectiveId=\"emotional-impact\"\n\nOBRIGATÓRIO: Cada teaser deve ter targetEpisode (1, 2 ou 3). Hook-only prioriza EP2 e EP3. Distribua equilibradamente.\n\nRetorne um JSON com campo \"teasers\" contendo exatamente 4 teasers."
+      }
+    ]
+  },
+  "parsed": {
+    "teasers": [
+      {
+        "scriptStyleName": "Narrativo Cinematográfico",
+        "title": "O Policial que Traiu o Distintivo",
+        "hook": "Ele jurou proteger o sistema.",
+        "editorialObjectiveName": "Impacto Emocional e Tensão",
+        "cta": null,
+        "scriptStyleId": "narrative",
+        "narrativeRole": "hook-only",
+        "scriptOutline": "Loop-B: ...antes de se tornar o sistema. // Respiro: Um oficial municipal que mapeou cada falha oficial para construir seu próprio império. // Replay bait: O documento de inteligência que mostra a transição exata de protetor a perpetrador. // Loop-A: Ele jurou proteger o sistema...",
+        "microBriefV1": {
+          "notes": [
+            "foco no mecanismo de traição institucional",
+            "zero resolução",
+            "estilo noir clínico"
+          ],
+          "forbiddenElements": [
+            "armas de fogo",
+            "algemas em close-up",
+            "viaturas modernas com sirene ligada",
+            "rosto do El Mencho",
+            "sangue explícito"
+          ],
+          "allowedArtifacts": [
+            "distintivo policial antigo",
+            "mapa de Jalisco com marcações",
+            "documento com carimbo oficial",
+            "silhueta de uniforme em sombras",
+            "monitor com dados de rede de corrupção",
+            "selo de cera em envelope pardo"
+          ],
+          "angleCategory": "psicologico",
+          "narrativeRole": "hook-only",
+          "facts": [
+            {
+              "text": "O futuro líder atuou como policial municipal em Jalisco antes de fundar a organização."
+            },
+            {
+              "text": "Ele utilizou o conhecimento interno da polícia para mapear procedimentos operacionais de segurança."
+            },
+            {
+              "text": "A estrutura do cartel foi desenhada para subverter as instituições por dentro, usando redes de corrupção."
+            },
+            {
+              "text": "Sua mente estratégica transformou uma força de segurança em uma arquitetura de controle territorial."
+            }
+          ],
+          "version": "teaserMicroBriefV1",
+          "angle": "A Mente do Policial que Virou Alvo Número 1"
+        },
+        "avoidPatterns": [
+          "NÃO use nomes próprios como Nemesio ou Cervantes",
+          "NÃO explique o cargo dele em detalhes — use apenas a função de autoridade",
+          "NÃO use CTA ou encerramento narrativo"
+        ],
+        "sceneCount": 4,
+        "angle": "A Mente do Policial que Virou Alvo Número 1",
+        "visualPrompt": "Cinematic noir style, a dusty old police badge lying on a dark wooden table next to a marked map of Jalisco, dramatic shadows, 16mm film grain, high contrast, mysterious atmosphere.",
+        "format": "teaser-youtube-shorts",
+        "targetEpisode": 1,
+        "visualSuggestion": "Distintivo policial antigo sob luz lateral dramática e sombras profundas.",
+        "platform": "YouTube Shorts",
+        "editorialObjectiveId": "emotional-impact",
+        "angleCategory": "psicologico",
+        "shortFormatType": "pergunta-incomoda",
+        "estimatedViews": 850000
+      },
+      {
+        "sceneCount": 4,
+        "angle": "A Traição Final: O Círculo Íntimo em 2026",
+        "visualPrompt": "Noir cinematic shot, a luxury gold watch with a cracked glass lying on a dark floor, a spilled red liquid nearby (resembling wine), dim warm lighting, heavy atmosphere of betrayal.",
+        "targetEpisode": 3,
+        "format": "teaser-youtube-shorts",
+        "visualSuggestion": "Relógio de luxo quebrado no chão sob luz de vela trêmula.",
+        "platform": "YouTube Shorts",
+        "editorialObjectiveId": "cliffhanger",
+        "angleCategory": "conspirativo",
+        "shortFormatType": "hook-brutal",
+        "estimatedViews": 1200000,
+        "scriptStyleName": "Mistério Investigativo",
+        "editorialObjectiveName": "Cliffhanger e Retenção de Loop",
+        "hook": "O círculo íntimo entregou tudo.",
+        "title": "A Traição de 2026",
+        "cta": null,
+        "scriptStyleId": "mystery",
+        "narrativeRole": "hook-only",
+        "scriptOutline": "Loop-B: ...o preço da lealdade expirou. // Respiro: Em fevereiro de 2026, a localização que o mundo buscava veio de quem ele mais confiava. // Replay bait: Um flash rápido de um relógio de luxo quebrado ao lado de um mapa de satélite. // Loop-A: O círculo íntimo entregou tudo...",
+        "microBriefV1": {
+          "allowedArtifacts": [
+            "relógio de luxo quebrado no chão",
+            "transcrição de áudio com ondas sonoras",
+            "mapa de calor de satélite de 2026",
+            "taça de vinho derramada sobre documento",
+            "sombra de alguém sussurrando ao telefone",
+            "relatório de inteligência internacional de 2026"
+          ],
+          "forbiddenElements": [
+            "helicópteros militares em combate",
+            "tiros ou explosões visuais",
+            "corpos ou macas médicas explícitas",
+            "close-up de mãos trocando dinheiro"
+          ],
+          "notes": [
+            "indignação sobre a lealdade quebrada",
+            "foco no erro humano e não na força militar",
+            "corte seco no auge da tensão"
+          ],
+          "angle": "A Traição Final: O Círculo Íntimo em 2026",
+          "version": "teaserMicroBriefV1",
+          "narrativeRole": "hook-only",
+          "facts": [
+            {
+              "text": "A localização final do líder em 2026 foi obtida através de informações de seu círculo mais próximo."
+            },
+            {
+              "text": "A Operação Tapalpa utilizou inteligência internacional coordenada para o cerco final."
+            },
+            {
+              "text": "O registro oficial indica que o evento fatal ocorreu durante uma evacuação médica aérea."
+            },
+            {
+              "text": "A traição íntima foi o gatilho para a queda da maior máquina de guerra do continente."
+            }
+          ],
+          "angleCategory": "conspirativo"
+        },
+        "avoidPatterns": [
+          "NÃO mencione a Operação Tapalpa pelo nome no título",
+          "NÃO explique quem traiu — mantenha o mistério sobre a identidade",
+          "NÃO use palavras como 'assassinato' ou 'morte' — use 'evento fatal'"
+        ]
+      },
+      {
+        "platform": "YouTube Shorts",
+        "angleCategory": "conexao-temporal",
+        "editorialObjectiveId": "mystery-layers",
+        "shortFormatType": "frase-memoravel",
+        "estimatedViews": 950000,
+        "visualPrompt": "Gritty 16mm film style, shadows of prison bars projected onto a cold concrete wall, an old 'DEPORTED' stamp on a yellowed document, flickering light, dark and oppressive mood.",
+        "angle": "A Incubadora do Texas: Onde Tudo Começou",
+        "sceneCount": 4,
+        "format": "teaser-youtube-shorts",
+        "targetEpisode": 1,
+        "visualSuggestion": "Sombra de grades de cela sobre um documento com carimbo 'DEPORTADO'.",
+        "narrativeRole": "hook-only",
+        "microBriefV1": {
+          "facts": [
+            {
+              "text": "Durante os anos 90, o sistema prisional do Texas serviu como incubadora de contatos para o futuro líder."
+            },
+            {
+              "text": "Lá, ele mapeou as vulnerabilidades da justiça penal norte-americana."
+            },
+            {
+              "text": "A experiência no sistema de contenção moldou sua visão sobre como burlar fronteiras."
+            },
+            {
+              "text": "O que parecia um fim de linha foi, na verdade, a universidade do crime para o CJNG."
+            }
+          ],
+          "narrativeRole": "hook-only",
+          "angleCategory": "conexao-temporal",
+          "version": "teaserMicroBriefV1",
+          "angle": "A Incubadora do Texas: Onde Tudo Começou",
+          "notes": [
+            "ironia sobre o sistema que deveria punir e acabou treinando",
+            "estilo visual granulado de câmera de segurança antiga"
+          ],
+          "allowedArtifacts": [
+            "carimbo de 'DEPORTADO' em papel envelhecido",
+            "grades de cela projetando sombras longas",
+            "arquivo de identificação dos anos 90 sem rosto",
+            "moeda americana antiga sobre mesa de metal",
+            "corredor de arquivo escuro e infinito",
+            "fichário de metal com etiqueta de 1992"
+          ],
+          "forbiddenElements": [
+            "presidiários brigando",
+            "close-up de tatuagens de gangue",
+            "armas de guardas prisionais",
+            "violência física explícita"
+          ]
+        },
+        "scriptOutline": "Loop-B: ...a justiça americana foi a professora. // Respiro: Nos anos 90, uma cela no Texas não foi uma punição, foi uma incubadora de contatos e estratégias. // Replay bait: O carimbo de deportação que selou o destino de milhões anos depois. // Loop-A: O Texas ensinou o caminho...",
+        "avoidPatterns": [
+          "NÃO use datas específicas como 1966 ou 1990 no hook",
+          "NÃO descreva a vida nas plantações de abacate — foque na prisão",
+          "NÃO use a palavra 'cadeia' — use 'incubadora' ou 'sistema de contenção'"
+        ],
+        "scriptStyleName": "Mistério Investigativo",
+        "title": "A Escola do Crime no Texas",
+        "editorialObjectiveName": "Camadas de Mistério e Contexto Histórico",
+        "hook": "O Texas ensinou o caminho.",
+        "cta": null,
+        "scriptStyleId": "mystery"
+      },
+      {
+        "editorialObjectiveId": "emotional-impact",
+        "angleCategory": "etico",
+        "platform": "YouTube Shorts",
+        "estimatedViews": 1100000,
+        "shortFormatType": "pergunta-incomoda",
+        "sceneCount": 4,
+        "visualPrompt": "Cinematic noir, a heart rate monitor in a dark, makeshift room, the green line flickering, through a window the misty mountains of Jalisco are visible at night, cold and clinical atmosphere.",
+        "angle": "O Dilema da Diálise: O Líder Refém do Próprio Corpo",
+        "visualSuggestion": "Monitor médico brilhando no escuro com montanhas ao fundo.",
+        "targetEpisode": 2,
+        "format": "teaser-youtube-shorts",
+        "narrativeRole": "hook-only",
+        "avoidPatterns": [
+          "NÃO use termos médicos complexos como 'choque hipovolêmico' no hook",
+          "NÃO mostre agulhas ou procedimentos médicos invasivos",
+          "NÃO use a palavra 'doença' — use 'falência biológica' ou 'prisão interna'"
+        ],
+        "scriptOutline": "Loop-B: ...onde o sangue parou de correr. // Respiro: O líder da máquina de guerra mais letal do México, refém de uma máquina de diálise em um esconderijo rústico. // Replay bait: O monitor médico oscilando enquanto a neblina cobre as montanhas de Jalisco. // Loop-A: O corpo dele era a prisão...",
+        "microBriefV1": {
+          "version": "teaserMicroBriefV1",
+          "angle": "O Dilema da Diálise: O Líder Refém do Próprio Corpo",
+          "facts": [
+            {
+              "text": "A insuficiência renal crônica terminal limitou a mobilidade do líder a abrigos improvisados."
+            },
+            {
+              "text": "Ele dependia de tratamentos de hemodiálise em locais rústicos nas montanhas de Jalisco."
+            },
+            {
+              "text": "A logística para manter o líder vivo criou falhas críticas na contrainteligência do cartel."
+            },
+            {
+              "text": "O homem mais procurado do mundo estava acorrentado a uma máquina para continuar respirando."
+            }
+          ],
+          "narrativeRole": "hook-only",
+          "angleCategory": "etico",
+          "notes": [
+            "contraste entre poder paramilitar e fragilidade biológica",
+            "mecanismo: a saúde como o elo mais fraco da segurança"
+          ],
+          "allowedArtifacts": [
+            "monitor médico com linha de pulso oscilante",
+            "bolsa de soro pendurada em galho de árvore (improviso)",
+            "montanhas de Jalisco sob neblina densa",
+            "equipamento de diálise rústico em sala escura",
+            "mapa de esconderijos em zonas de difícil acesso",
+            "relatório médico com termos de falência renal riscados"
+          ],
+          "forbiddenElements": [
+            "agulhas em close-up",
+            "sangue em tubos de diálise",
+            "expressão de dor no rosto do alvo",
+            "médicos em uniformes modernos e limpos"
+          ]
+        },
+        "editorialObjectiveName": "Impacto Emocional e Tensão Biológica",
+        "hook": "O corpo dele era a prisão.",
+        "title": "O Refém da Própria Biologia",
+        "scriptStyleName": "Narrativo Cinematográfico",
+        "scriptStyleId": "narrative",
+        "cta": null
+      }
+    ]
+  },
+  "rawContent": ""
+}

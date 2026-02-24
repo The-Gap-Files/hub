@@ -38,7 +38,7 @@ export class FilmmakerDirectorService {
 
     if (!scenes || scenes.length === 0) return []
 
-    log.info(`🎬 Pipeline de 3 agentes para ${scenes.length} cenas...`)
+    log.info(`🎬 Pipeline de 2 agentes para ${scenes.length} cenas (Cineasta desativado)...`)
 
     // ── 1. Fotógrafo → visualDescription ──────────────────────────
     log.info(`📸 [1/3] Fotógrafo...`)
@@ -80,36 +80,24 @@ export class FilmmakerDirectorService {
       }
     }
 
-    log.info(`🎬 [2/3] Coreógrafo: ${choreResults.length} movimentos gerados.`)
+    log.info(`🎬 [2/2] Coreógrafo: ${choreResults.length} movimentos gerados.`)
 
-    // ── 3. Cineasta → endVisualDescription + weight ───────────────
-    log.info(`🎥 [3/3] Cineasta...`)
-    const cinemaResults = await this.cinematographer.refine(
-      workingScenes.map((s, i) => ({
-        order: s.order,
-        narration: s.narration,
-        visualDescription: s.visualDescription,
-        motionDescription: (s as any).motionDescription || 'Static cinematic shot.',
-        estimatedDuration: s.estimatedDuration,
-      }))
-    )
-
-    log.info(`🎥 [3/3] Cineasta: ${cinemaResults.length} keyframes gerados.`)
+    // ── 3. Cineasta (DESATIVADO) ────────────────────────────────
+    // End keyframe generation disabled — single start-frame only
+    // produces more consistent motion with fewer artifacts.
+    // The Cinematographer agent call is skipped to save LLM cost.
 
     // ── 4. Combinar resultados finais ─────────────────────────────
-    const combined: RefinedScene[] = workingScenes.map((s, idx) => {
-      const cinema = cinemaResults.find(c => c.order === idx) || cinemaResults[idx]
-      return {
-        order: s.order,
-        visualDescription: s.visualDescription,
-        motionDescription: (s as any).motionDescription || 'Static cinematic shot.',
-        sceneEnvironment: s.sceneEnvironment,
-        endVisualDescription: cinema?.endVisualDescription ?? null,
-        endImageReferenceWeight: cinema?.endImageReferenceWeight ?? null,
-      }
-    })
+    const combined: RefinedScene[] = workingScenes.map((s) => ({
+      order: s.order,
+      visualDescription: s.visualDescription,
+      motionDescription: (s as any).motionDescription || 'Static cinematic shot.',
+      sceneEnvironment: s.sceneEnvironment,
+      endVisualDescription: null,
+      endImageReferenceWeight: null,
+    }))
 
-    log.info(`✅ Pipeline completo: ${combined.length} cenas refinadas por 3 agentes.`)
+    log.info(`✅ Pipeline completo: ${combined.length} cenas refinadas por 2 agentes (Fotógrafo + Coreógrafo).`)
 
     return combined
   }

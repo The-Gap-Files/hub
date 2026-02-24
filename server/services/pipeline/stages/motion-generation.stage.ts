@@ -35,10 +35,6 @@ function findStartImage(images: Array<{ id: string; role: string | null; fileDat
   return images.find(img => img.role === 'start') || images[0]
 }
 
-function findEndImage(images: Array<{ id: string; role: string | null; fileData: Buffer | null }>) {
-  return images.find(img => img.role === 'end')
-}
-
 function resolveMotionPrompt(scene: { motionDescription: string | null; visualDescription: string }) {
   return scene.motionDescription || scene.visualDescription
 }
@@ -49,14 +45,13 @@ function resolveDuration(audioTracks: Array<{ duration: number | null }>, estima
 
 function buildMotionRequest(
   startImage: { fileData: Buffer | null },
-  endImage: { fileData: Buffer | null } | undefined,
   prompt: string,
   duration: number,
   aspectRatio: string
 ): MotionGenerationRequest {
   return {
     imageBuffer: Buffer.from(startImage.fileData!) as any,
-    endImageBuffer: endImage?.fileData ? Buffer.from(endImage.fileData) as any : undefined,
+    // End image disabled — single start-frame only produces more consistent results
     prompt,
     duration,
     aspectRatio,
@@ -155,7 +150,6 @@ class MotionGenerationStage {
     const startImage = findStartImage(scene.images as any)
     if (!startImage) throw new Error('Start image not found')
 
-    const endImage = findEndImage(scene.images as any)
     const output = scene.output
 
     // 2. Resolve motion provider and validate pricing
@@ -169,16 +163,12 @@ class MotionGenerationStage {
       data: { isSelected: false },
     })
 
-    // 4. Build request and generate motion
+    // 4. Build request and generate motion (start-frame only)
     const motionPrompt = resolveMotionPrompt(scene as any)
     const durationSeconds = resolveDuration(scene.audioTracks as any, scene.estimatedDuration)
     const aspectRatio = output.aspectRatio || DEFAULT_ASPECT_RATIO
 
-    const request = buildMotionRequest(startImage as any, endImage as any, motionPrompt, durationSeconds, aspectRatio)
-
-    if (endImage?.fileData) {
-      console.log(`${LOG} Scene ${scene.order + 1} - last_image detected for regeneration`)
-    }
+    const request = buildMotionRequest(startImage as any, motionPrompt, durationSeconds, aspectRatio)
 
     console.log(`${LOG} Regenerating motion for scene ${scene.order + 1} (${sceneId}, duration: ${durationSeconds.toFixed(1)}s)`)
     const videoResponse = await motionProvider.generate(request)
@@ -211,15 +201,10 @@ class MotionGenerationStage {
     const startImage = findStartImage(scene.images)
     if (!startImage?.fileData) return
 
-    const endImage = findEndImage(scene.images)
     const motionPrompt = resolveMotionPrompt(scene)
     const durationSeconds = resolveDuration(scene.audioTracks, scene.estimatedDuration)
 
-    const request = buildMotionRequest(startImage as any, endImage as any, motionPrompt, durationSeconds, aspectRatio)
-
-    if (endImage?.fileData) {
-      console.log(`${LOG} Motion scene ${scene.order + 1} - last_image detected, using start+end frame conditioning`)
-    }
+    const request = buildMotionRequest(startImage as any, motionPrompt, durationSeconds, aspectRatio)
 
     console.log(`${LOG} Motion scene ${scene.order + 1} (duration: ${durationSeconds.toFixed(1)}s) prompt: ${motionPrompt.slice(0, 80)}...`)
     const videoResponse = await motionProvider.generate(request)

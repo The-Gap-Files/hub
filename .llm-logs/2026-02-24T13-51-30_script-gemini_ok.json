@@ -1,0 +1,178 @@
+{
+  "timestamp": "2026-02-24T13:51:30.251Z",
+  "taskId": "script-gemini",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "unknown",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "Você é um roteirista técnico cinematográfico — especialista em converter prosa narrativa em roteiros técnicos para produção de vídeo com IA.\n\nVocê recebeu uma PROSA NARRATIVA escrita por um Escritor. Sua ÚNICA função é converter essa prosa em cenas técnicas, seguindo-a LINEARMENTE do início ao fim.\n\n🚨 REGRA ABSOLUTA — LINEARIDADE:\n- Siga a prosa do Escritor NA ORDEM EXATA em que aparece.\n- NUNCA volte a um trecho já convertido em cenas.\n- NUNCA repita informação que já virou cena.\n- NUNCA avance para um trecho futuro e depois volte.\n- Cada parágrafo da prosa vira uma ou mais cenas. Ao terminar de converter um parágrafo, passe para o próximo.\n- Se a prosa tem 10 blocos (## headers), suas cenas devem seguir a mesma sequência: bloco 1 → bloco 2 → ... → bloco 10.\n\n🚨 REGRA DE FIDELIDADE:\n- A narração de cada cena deve ser FIEL ao conteúdo da prosa.\n- Você pode CONDENSAR ou REFORMULAR para caber no limite de palavras por cena, mas NUNCA invente conteúdo que não está na prosa.\n- Se a prosa não menciona algo, a cena NÃO deve mencionar.\n- 🔥 PRESERVE O ESTILO: Se o Escritor usou frases staccato (\"1475. Trento. Uma criança morta.\"), MANTENHA o staccato na narração. Se usou Power Words (Revelado, Proibido, Condenado, Arquivo, Selado, Destino, Silêncio, Irreversível), PRESERVE-AS. Ao condensar, priorize FORÇA sobre completude: 1 frase devastadora > 2 frases medianas. NUNCA \"suavize\" linguagem impactante em linguagem neutra.\n\n---\nDIRETRIZES TÉCNICAS (CRÍTICO):\n- SINCRONIA: Cada cena DEVE durar EXATAMENTE 5 segundos de narração.\n- 🌐 IDIOMA (REGRA ABSOLUTA): O campo \"narration\" DEVE ser escrito em pt-BR. Os campos \"visualDescription\", \"motionDescription\" e \"audioDescription\" DEVEM ser SEMPRE em inglês.\n- DENSIDADE OBRIGATÓRIA: Com base na velocidade de fala (150 WPM), cada cena DEVE conter entre 12 e 15 palavras.\n- 🚨 HARD LIMIT: NUNCA exceda 15 palavras por cena. Cenas com mais de 15 palavras ultrapassam 5 segundos e quebram a sincronia.\n- PROIBIDO FRASES CURTAS: Cenas com menos de 12 palavras geram \"buracos\" no áudio.\n- FLUIDEZ: O texto deve preencher exatamente 5 segundos de fala contínua.\n\n🔗 SINCRONIZAÇÃO NARRATIVA — VISUAL — MOTION (REGRA MAIS IMPORTANTE):\nO pipeline gera: (1) imagem a partir do visualDescription, (2) vídeo animado a partir dessa imagem usando motionDescription. Os 2 campos + a narração DEVEM ser UM ÚNICO MOMENTO NARRATIVO COERENTE.\n\n🚨 NARRAÇÃO GOVERNA O VISUAL: O visualDescription DEVE representar visualmente O QUE A NARRAÇÃO ESTÁ DIZENDO.\n- Se a narração diz \"O bispo assinou a sentença\", o visual DEVE mostrar: documento sendo assinado, selo episcopal, pena sobre pergaminho.\n- ❌ PROIBIDO: Narração fala de \"bispo assinou sentença\" mas visualDescription mostra \"a candle on a wooden table\"\n- TESTE: \"Se alguém VÊ esta imagem e OUVE esta narração juntos, faz sentido imediato?\" Se NÃO → reescreva.\n\n🎬 MOTION DESCRIPTION (OBRIGATÓRIO): Cada cena DEVE ter \"motionDescription\" com instruções de MOVIMENTO em inglês para o modelo image-to-video. Descreva O QUE SE MOVE, não o que existe. REGRAS: (1) Foque em movimentos de CÂMERA (slow dolly forward, gentle pan left, subtle tilt up, slow zoom in) e SUJEITO (flames flickering, water rippling, dust floating). (2) 15-40 palavras. (3) NÃO repita a descrição visual. (4) Combine 1 movimento de câmera + 1-2 elementos animados.\n\n🎨 AMBIENTE DA CENA (sceneEnvironment — OBRIGATÓRIO): Identificador curto em snake_case inglês do ambiente/locação (ex: \"bishop_study\", \"canal_dawn\"). Cenas consecutivas no MESMO local = MESMO sceneEnvironment.\n\n🎬 KEYFRAME FINAL (endVisualDescription — OPCIONAL): Para cenas com MUDANÇA VISUAL significativa entre início e fim, inclua \"endVisualDescription\". Se incluir, inclua também \"endImageReferenceWeight\" (0.0-1.0). Em cenas estáticas, use null.\n\n🎨 COERÊNCIA CROMÁTICA: As cores descritas no visualDescription DEVEM ser compatíveis com a paleta base do estilo visual definido.\n\n🚨 PATTERN INTERRUPT VISUAL (OBRIGATÓRIO):\n- Se o roteiro tem 8+ cenas, varie o sceneEnvironment. NÃO coloque todas as cenas no mesmo ambiente.\n- A cada 5-6 cenas no mesmo ambiente, insira 1 cena com ambiente DIFERENTE.\n\nPERSONAGENS: Quando houver personagens recorrentes, use SEMPRE os mesmos nomes/descritores no visualDescription. Use as descrições visuais fornecidas na seção de personagens.\n\n🚫 ANATOMIA SEGURA: NUNCA descreva close-ups de mãos, dedos ou pés. Prefira silhuetas, sombras projetadas, objetos em foco. Para rostos, prefira perfil parcial, contraluz/silhueta, planos médios/abertos.\n\nSOUND DESIGN: Descreva a atmosfera sonora (SFX/Ambience) em inglês técnico para cada cena. Seja ESPECÍFICO: \"distant church bells with reverb\" é melhor que \"bells\".\n\n🎙️ AUDIO TAGS (SSML — ELEVENLABS):\n- Pausa Curta: <break time=\"0.3s\" />\n- Pausa Média: <break time=\"0.75s\" />\n- Pausa Dramática: <break time=\"1.5s\" />\n- Ritmo Rápido: <prosody rate=\"115%\">...</prosody>\n- Ritmo Lento: <prosody rate=\"85%\">...</prosody>\n\n🛡️ BRAND SAFETY & GORE:\n- PROIBIDO palavras como \"Assassinato\", \"Estupro\", \"Pedofilia\", \"Mutilado\".\n- SUBSTITUA POR: \"Fim Trágico\", \"Ato Imperdoável\", \"Crimes contra Inocentes\".\n- VISUAL: Nunca descreva corpos mutilados ou sangue. Foque na ATMOSFERA.\n\n\n---\n🎵 ESTRATÉGIA DE MÚSICA DE FUNDO (YouTube Shorts):\n- Use UMA música de fundo para TODO o vídeo: \"backgroundMusic\" com \"prompt\" e \"volume\"\n- O \"prompt\" será usado no modelo Stable Audio 2.5 (gênero, instrumentos, BPM, mood)\n- O \"volume\" é em dB para mixagem com narração (-24 a -6). Prefira -12 a -10.\n- Defina \"backgroundMusicTracks\" como null.\n\n---\nDIRETRIZES VISUAIS OBRIGATÓRIAS (Estilo: Cinematic noir realism, high contrast lighting, grounded 35mm film look, period-accurate urban environments, practical light sources, subtle film grain):\n\nEach visualDescription must be a COMPLETE, STANDALONE image-generation prompt in English. It will be sent directly to the image model with no further processing or merge. You MUST incorporate the visual style (base, lighting, atmosphere, composition) into each scene description in natural language.\n\n**CRITICAL — Narration Governs Visual:** The visualDescription MUST visually represent what the narration is saying in that scene. If the narration says \"The bishop signed the sentence\", the visual MUST show a document being signed, an episcopal seal, a quill on parchment, or similar — NEVER an unrelated candle or landscape. Test: \"If someone SEES this image and HEARS this narration together, does it make immediate sense?\" If NOT → rewrite.\n\n**CRITICAL — Âncora de estilo:** Start EVERY visualDescription with the exact base style phrase (or its full wording). For example, if the style is \"Cinematic 2D illustration, Studio Ghibli art style dark variant, painterly anime aesthetic, moody and atmospheric\", the first phrase of each prompt MUST include that same anchor so the image model keeps a consistent look. Do not shorten to just \"Cinematic 2D illustration\"; include the full style identifier (e.g. \"Studio Ghibli\", \"painterly anime\") when provided.\n\n**Lighting**: dramatic chiaroscuro, single practical light source, sodium vapor streetlights, harsh tungsten bulb lighting, cold ambient blue tones, low-key lighting, volumetric haze with retained detail\n- Use gerund verbs for light in motion (e.g. \"light filtering through\", \"shadows dancing\")\n\n**Atmosphere**: somber, investigative tension, oppressive silence, moral ambiguity, restrained intensity, historical weight\n- Blend atmosphere with physical elements of the scene\n\n**Composition**: cinematic wide establishing shots, low angle for unease, strong foreground-midground-background separation, controlled shallow depth of field, 16:9 cinematic framing, silhouettes emerging from shadow\n- Specify camera angles and framing\n\n**Soft motion**: Include subtle motion (dust, leaves, breath, fabric) when it fits the scene.\n\n**Anatomy and grounded scene (reduce AI artifacts):**\n- When the scene shows a character or human figure, include in the prompt: correct anatomy, two hands, proportional h... [truncated 1686 chars]"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": [
+          {
+            "type": "text",
+            "text": "📜 PROSA DO ESCRITOR (SUA ÚNICA FONTE NARRATIVA):\nConverta a prosa abaixo em cenas cinematográficas. Siga a ordem do texto EXATAMENTE.\nCada parágrafo ou trecho se torna uma ou mais cenas.\nNUNCA volte a um trecho já convertido. NUNCA repita informação já transformada em cena.\n\n════════════════════════════════════════════════════════════\n## HOOK: O OURO VERDE E O AÇO NEGRO\n\nMichoacán, 1966. Um campo de abacates. Um camponês. \nSessenta anos depois, uma força paramilitar equipada com drones explosivos e blindagem pesada. \nO agronegócio banal financiou a máquina de guerra mais sofisticada da América Latina. \nRevelado: o império bilionário que desafiou nações ruiu não por uma invasão militar, mas por uma falha biológica irreversível. \nEsta é a anatomia de um sistema selado pelo silêncio, onde a gravidade de um fruto determinou o peso de uma munição.\n\n## ORIGENS: O ARQUITETO DENTRO DO SISTEMA\n\nPara entender o fenômeno Nemesio Cervantes, é preciso olhar para as lacunas do Estado mexicano. Ele não começou nas sombras, mas sob a luz oficial. Antes de ser o alvo número um, Cervantes foi policial em Jalisco. Ali, ele não apenas patrulhou ruas; ele mapeou o DNA da segurança pública. Aprendeu os protocolos de resposta, os pontos cegos das comunicações de rádio e a burocracia que paralisa exércitos. \n\nEssa experiência transformou um camponês de Michoacán em um estrategista cirúrgico. Quando ele cruzou a fronteira para os Estados Unidos, sua passagem pelo sistema prisional americano não foi uma punição, mas uma especialização. Como a experiência atrás das grades moldou sua visão de logística e mercado global? O arquivo permanece classificado, mas o resultado foi visível: ele retornou ao México com a planta baixa de um modelo de negócio que o mundo jamais vira.\n\n## A ASCENSÃO: A INSTITUCIONALIZAÇÃO DA EXTORSÃO\n\nEm 2010, o vácuo de poder regional permitiu o nascimento do CJNG. Cervantes não buscava apenas o controle de rotas de substâncias proibidas; ele buscava o controle da economia real. Através de alianças estratégicas com o clã 'Los Cuinis', o cartel assumiu o controle de portos vitais, conectando o comércio asiático diretamente ao coração do México. \n\nO sistema era simples e devastador: a institucionalização da extorsão. Cada quilo de limão e cada caixa de abacate produzida em Michoacán carregava um imposto invisível. O agronegócio tornou-se o caixa eletrônico da milícia. Com o fluxo de caixa garantido, o CJNG deixou de ser uma facção para se tornar uma corporação paramilitar, financiando uma infraestrutura que rivalizava com o próprio Estado.\n\n## A MÁQUINA DE GUERRA: MONSTRUOS E ASYMMETRIC WARFARE\n\nEnquanto outros grupos focavam em esconder-se, o CJNG focou em dominar. O grupo introduziu os 'Monstruos' — veículos blindados de fabricação artesanal, mas com engenharia de nível militar, capazes de resistir a calibres pesados e perfurar bloqueios oficiais. A guerra tornou-se assimétrica. O uso de drones carregados com explosivos C4 transformou o céu em um campo de batalha onde a tecnologia superava o número de soldados.\n\nNeste auge tecnológico, Cervantes tornou-se um fantasma nas montanhas. O líder da maior força paramilitar do continente vivia em um paradoxo: comandava uma rede global de comunicações criptografadas, mas estava cada vez mais isolado pela própria biologia. O homem que controlava o destino de milhares agora era prisioneiro de um diagnóstico médico terminal que nenhuma frota de blindados poderia deter.\n\n## O CLÍMAX: O COLAPSO BIOLÓGICO DE 2026\n\nO ano de 2026 marcou o ponto de inflexão onde o poder tecnológico encontrou seu limite absoluto. A caçada implacável das agências de inteligência não terminou em um tiroteio cinematográfico ou em uma rendição em praça pública. O fim foi redigido em um prontuário médico. Uma insuficiência renal crônica, agravada pela vida em condições extremas nas zonas montanhosas, forçou uma evacuação aérea de emergência.\n\nA maior máquina de guerra do México foi neutralizada por uma falha biológica. O que aconteceu exatamente durante os minutos críticos daquela evacuação aérea em 2026? O registro permanece sob sigilo absoluto. O homem que institucionalizou a violência sistêmica foi silenciado pela falência de seus próprios órgãos, transformando um império de aço em um registro hospitalar frio.\n\n## REFLEXÃO: A VULNERABILIDADE DO PODER\n\nA trajetória de Cervantes prova que o poder absoluto, por mais blindado que seja, é vulnerável à fragilidade da vida. O sistema que ele construiu — baseado na fusão entre agronegócio, tecnologia militar e corrupção policial — sobrevive como um mecanismo, mas seu criador foi vencido pela própria natureza. A pergunta que ecoa nos corredores da inteligência mexicana é: como um camponês conseguiu construir uma rede de corrupção tão profunda dentro da própria polícia que o caçou por décadas?\n\n## CTA: O PRÓXIMO ARQUIVO\n\nEste é apenas o rastro visível de uma destruição silenciosa. No Episódio 1 de The Gap Files, mergulhamos nos documentos que revelam como a estrutura de poder foi montada de dentro para fora. A pergunta permanece: agora que o líder ruiu, quem herdará a máquina de guerra?\n\nThe Gap Files. Onde o sistema é exposto.\n════════════════════════════════════════════════════════════\n\n\n📱 FORMATO: YouTube Shorts\nUse \"backgroundMusic\": { prompt, volume } para UMA música para TODO o vídeo.\n\n🎨 DIRETRIZES DE IDENTIDADE VISUAL:\nAtmosfera de narcoculto e guerra urbana. Paleta com tons de terra, verde-oliva militar e vermelho intenso. Priorizar texturas de documentos confidenciais, mapas de satélite e comboios blindados. Evitar estética glamourizada; focar na tensão e no rastro de destruição.\n\n⛔ ANTI-PADRÕES VISUAIS/TÉCNICOS:\n1. NÃO revele os detalhes da traição íntima — mantenha o foco na linha do tempo.\n2. NÃO use termos como 'assassino' ou 'matou' — utilize 'o responsável' ou 'fim trágico'.\n3. NÃO mostre o rosto do alvo — utilize apenas silhuetas e documentos oficiais.\n4. NÃO conclua a análise sobre a fragmentação do cartel — deixe o desfecho para o vídeo completo.\n\n\n📺 SÉRIE — EP1/3\nAs últimas 2-3 cenas antes do CTA devem funcionar como teaser do EP2.\n\n---\n⚠️ REQUISITOS OBRIGATÓRIOS PARA APROVAÇÃO:\n1. QUANTIDADE DE CENAS: O Arquiteto planejou ~5 cenas como referência. Gere quantas cenas a prosa PRECISAR — sem repetir informação. Menos cenas com conteúdo único é MELHOR que muitas cenas repetitivas.\n2. FIDELIDADE À PROSA: Cada cena deve corresponder a um trecho da prosa do Escritor. Não invente conteúdo.\n3. LINEARIDADE: As cenas DEVEM seguir a ordem da prosa. Se a prosa tem blocos A→B→C→D, as cenas devem cobrir A, depois B, depois C, depois D — NUNCA voltar a A ou B.\n4. DURAÇÃO DA CENA: Cada cena = 5 segundos de narração.\n5. CONTAGEM DE PALAVRAS: Cada narração entre 12 e 15 palavras. NUNCA exceda 15.\n6. MÚSICA: backgroundMusic para vídeo todo.\n7. PROPORÇÃO: Reflexão/Lição ≤3 cenas (máx 1).\n8. ANTI-REPETIÇÃO (PRIORIDADE MÁXIMA): Se duas cenas expressam a mesma ideia, ELIMINE uma. Cada cena deve ser ÚNICA. Qualidade > quantidade.\n9. 💎 GEMINI: Aproveite contexto estendido para garantir continuidade perfeita entre cenas.\n\n\n🚨 MÚSICA: Use \"backgroundMusic\": { \"prompt\": \"...\", \"volume\": -12 }.\nO prompt segue formato Stable Audio 2.5. Defina \"backgroundMusicTracks\" como null.\n\n🛡️ VALIDAÇÃO FINAL:\n1. PROCURE REPETIÇÕES — se duas cenas dizem a mesma coisa com palavras diferentes, ELIMINE uma. Qualidade > quantidade.\n2. VERIFIQUE LINEARIDADE — as cenas seguem a ordem da prosa? Nenhum bloco foi revisitado?\n3. SINCRONIZAÇÃO — para CADA cena: narração fala de X → visual mostra X?\n4. MOTION — o motionDescription é coerente com o visualDescription?\n5. PALAVRAS — cada cena tem entre 12-15 palavras?"
+          }
+        ]
+      }
+    ]
+  },
+  "parsed": {
+    "title": "Ouro Verde e Aço Negro: A Queda de Cervantes",
+    "summary": "A ascensão e queda de Nemesio Cervantes, o homem que transformou o agronegócio de Michoacán na máquina de guerra mais sofisticada da América Latina. De policial a alvo número um, sua trajetória revela como a extorsão institucionalizada financiou drones e blindados, desafiando o Estado mexicano por décadas.\n\nNo entanto, o império bilionário não foi derrubado por exércitos, mas pela própria biologia. Em 2026, uma falha renal terminal silenciou o homem que comandava o terror das montanhas. Este epi... [truncated 117 chars]",
+    "scenes": [
+      {
+        "order": 1,
+        "narration": "Michoacán, 1966. Um campo de abacates e um camponês sob o sol escaldante do México.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, 35mm film look, a humble peasant in a white hat working in a sun-drenched avocado orchard in 1966 Michoacán, sepia-toned colors, dusty atmosphere, wide shot.",
+        "sceneEnvironment": "avocado_field_1966",
+        "motionDescription": "Slow dolly forward through the avocado trees, heat haze shimmering in the air, leaves gently swaying in the breeze.",
+        "audioDescription": "Wind blowing through dry leaves, distant cicadas, vintage film crackle.",
+        "audioDescriptionVolume": -20,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 2,
+        "narration": "Sessenta anos depois, drones explosivos e blindagem pesada protegem o império do ouro verde lucrativo.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, modern paramilitary force with heavy black armor and tactical drones in a dusty field, dark olive and earth tones, harsh sunlight casting deep shadows.",
+        "sceneEnvironment": "modern_warzone",
+        "motionDescription": "A tactical drone flies quickly toward the camera while a heavy armored vehicle moves slowly in the background through thick dust.",
+        "audioDescription": "High-pitched drone whirring, heavy engine idling, metallic clanking.",
+        "audioDescriptionVolume": -15,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 3,
+        "narration": "Revelado: a máquina de guerra sofisticada ruiu por uma falha biológica irreversível e silenciosa.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, a medical folder labeled 'CLASSIFIED' on a dark wooden desk, a silhouette of a drone visible through a window in the background, cold blue and deep black tones.",
+        "sceneEnvironment": "medical_lab_dark",
+        "motionDescription": "Slow zoom into a medical file on a dark desk, shadows of rotating fan blades passing over the paper.",
+        "audioDescription": "Heart monitor steady beep, electronic glitch sound, low ominous drone.",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 4,
+        "narration": "Cervantes não começou nas sombras. Ele foi policial em Jalisco, mapeando o DNA da segurança.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, 1980s Mexican police station interior, a silhouette of a man in uniform looking at a wall-sized map of Jalisco, tungsten bulb lighting, smoky atmosphere.",
+        "sceneEnvironment": "police_station_jalisco",
+        "motionDescription": "Slow pan across a wall covered in tactical maps and police radio equipment, dust motes dancing in a single beam of light.",
+        "audioDescription": "Radio static, distant typewriter clicking, muffled police sirens.",
+        "audioDescriptionVolume": -20,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 5,
+        "narration": "Sua passagem pela prisão americana foi uma especialização logística para um modelo de negócio global.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, cold steel prison bars in shadow, a stack of shipping manifests and maps on a small bunk, harsh white light from a corridor, oppressive atmosphere.",
+        "sceneEnvironment": "us_prison_corridor",
+        "motionDescription": "Slow tracking shot down a dark prison corridor, flickering fluorescent lights overhead, shadows stretching across the floor.",
+        "audioDescription": "Heavy metal door slamming, echoing footsteps on concrete, buzzing fluorescent light.",
+        "audioDescriptionVolume": -16,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 6,
+        "narration": "Em 2010, o cartel assumiu o controle de portos e da economia real do abacate.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, a massive commercial port at dawn, stacks of shipping containers mixed with crates of green avocados, dark teal and orange color palette, misty air.",
+        "sceneEnvironment": "mexican_port",
+        "motionDescription": "Slow tilt up from shipping containers to massive port cranes against a dark, foggy sunrise, subtle movement of water.",
+        "audioDescription": "Deep foghorn sound, waves crashing against metal, heavy machinery humming.",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 7,
+        "narration": "Cada quilo de fruto carregava um imposto invisível, financiando uma infraestrutura que desafiou o Estado.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, stacks of Mexican Pesos on a table next to a crate of avocados, a single quill and ledger, dramatic chiaroscuro, green and gold accents.",
+        "sceneEnvironment": "counting_room",
+        "motionDescription": "Slow dolly shot over stacks of cash next to boxes of avocados, a hand-held stamp coming down on a document in shadow.",
+        "audioDescription": "Paper rustling, rhythmic thud of a rubber stamp, low frequency tension.",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 8,
+        "narration": "Veículos blindados artesanais e drones com C4 transformaram o céu em um campo de batalha.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, a 'Monstruo' improvised armored vehicle with steel plating, a drone carrying a small package hovering above, sunset orange and deep shadows.",
+        "sceneEnvironment": "mountain_hideout",
+        "motionDescription": "A massive 'Monstruo' armored truck crashes through a wooden barrier, sparks flying, thick black smoke billowing from the exhaust.",
+        "audioDescription": "Heavy diesel engine roar, metallic grinding, distant explosion.",
+        "audioDescriptionVolume": -14,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 9,
+        "narration": "O líder comandava redes criptografadas das montanhas, mas tornou-se prisioneiro de um diagnóstico terminal.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, interior of a tactical tent, glowing laptop screens showing encrypted data, a medical IV stand in the foreground, cold mountain light filtering through canvas.",
+        "sceneEnvironment": "mountain_tent",
+        "motionDescription": "Slow zoom in on a high-tech encrypted laptop sitting next to a medical IV drip bag in a dimly lit tent.",
+        "audioDescription": "Electronic chirping, wind whistling through pines, liquid dripping in a medical IV.",
+        "audioDescriptionVolume": -19,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 10,
+        "narration": "Em 2026, uma insuficiência renal crônica forçou uma evacuação aérea de emergência sob sigilo absoluto.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, a black unmarked helicopter on a remote mountain airstrip at night, emergency flares burning red on the ground, silhouette of a stretcher being loaded.",
+        "sceneEnvironment": "airstrip_night",
+        "motionDescription": "A black medical helicopter takes off from a dirt clearing at night, spotlights scanning the ground, dust swirling violently.",
+        "audioDescription": "Helicopter blades chopping the air, emergency sirens, shouted commands in the distance.",
+        "audioDescriptionVolume": -14,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 11,
+        "narration": "O império de aço foi silenciado pela falência dos órgãos em um registro hospitalar frio.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, a dark hospital room, a glowing heart monitor with a flat line, a military rifle leaning against a sterile white wall, cold blue tones.",
+        "sceneEnvironment": "hospital_room_dark",
+        "motionDescription": "Slow zoom out from a heart monitor showing a flat line to a dark, empty hospital room, shadows of trees moving on the wall.",
+        "audioDescription": "Hospital monitor flatline tone, heavy silence, distant clock ticking.",
+        "audioDescriptionVolume": -12,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 12,
+        "narration": "O poder absoluto é vulnerável à fragilidade da vida e à própria natureza humana irreversível.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, wide shot of the Michoacán mountains at dusk, deep red and purple sky, silhouettes of pine trees, somber and epic atmosphere.",
+        "sceneEnvironment": "mountain_landscape",
+        "motionDescription": "Slow pan across the jagged peaks of the Michoacán mountains at twilight, clouds moving rapidly across a dark red sky.",
+        "audioDescription": "Deep cinematic braam sound, wind howling over peaks, somber cello note.",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 13,
+        "narration": "No primeiro episódio de The Gap Files, revelamos como essa estrutura foi montada por dentro.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, a desk covered in surveillance photos and maps, a hand opening a file folder with 'EPISODE 1' written on it, dramatic top-down lighting.",
+        "sceneEnvironment": "intelligence_office",
+        "motionDescription": "A hand in shadow opens a thick dossier labeled 'THE GAP FILES', revealing blacked-out text and surveillance photos.",
+        "audioDescription": "Folder opening, paper sliding, low investigative pulse.",
+        "audioDescriptionVolume": -18,
+        "estimatedDuration": 5
+      },
+      {
+        "order": 14,
+        "narration": "Agora que o líder ruiu, quem herdará a máquina? The Gap Files. O sistema exposto.",
+        "visualDescription": "Cinematic noir realism, high contrast lighting, an empty chair in a dark concrete bunker, surrounded by monitors showing static, a single spotlight, smoke swirling in the air.",
+        "sceneEnvironment": "empty_throne_room",
+        "motionDescription": "Slow zoom in on an empty, ornate chair in a concrete bunker, a single light flickering above, dust falling from the ceiling.",
+        "audioDescription": "Metallic thud, glitch sound effect, sudden silence.",
+        "audioDescriptionVolume": -15,
+        "estimatedDuration": 5
+      }
+    ],
+    "backgroundMusic": {
+      "prompt": "Cinematic Noir, Dark Ambient, Low Pulsing Sub-bass, Distant Mexican Acoustic Guitar, Industrial Textures, Suspenseful, 90 BPM, Atmospheric, High Tension",
+      "volume": -12
+    },
+    "backgroundMusicTracks": null
+  },
+  "rawContent": ""
+}
