@@ -25,12 +25,6 @@ export default defineEventHandler(async (event) => {
       aspectRatio: true,
       platform: true,
       status: true,
-      scriptApproved: true,
-      imagesApproved: true,
-      audioApproved: true,
-      videosApproved: true,
-      renderApproved: true,
-      bgmApproved: true,
       enableMotion: true,
       errorMessage: true,
       createdAt: true,
@@ -38,13 +32,13 @@ export default defineEventHandler(async (event) => {
       completedAt: true,
 
       // Campos computados ou relações leves
-      outputMimeType: true,
-      outputSize: true,
       scriptStyleId: true,
       visualStyleId: true,
       classificationId: true,
       script: { select: { id: true } },
       costLogs: { select: { cost: true } },
+      stageGates: { select: { stage: true, status: true } },
+      renderProduct: { select: { mimeType: true, fileSize: true } },
       relationsTo: {
         select: {
           id: true,
@@ -71,19 +65,29 @@ export default defineEventHandler(async (event) => {
     const classification = output.classificationId ? getClassificationById(output.classificationId) : undefined
     const scriptStyle = output.scriptStyleId ? getScriptStyleById(output.scriptStyleId) : undefined
     const visualStyle = output.visualStyleId ? getVisualStyleById(output.visualStyleId) : undefined
-    const { script, costLogs, ...rest } = output
+    const { script, costLogs, stageGates, renderProduct, relationsFrom, relationsTo, ...rest } = output
     const totalCost = (costLogs || []).reduce((sum: number, log: { cost: number }) => sum + log.cost, 0)
+
+    // Build stageGates map
+    const gatesMap: Record<string, string> = {}
+    for (const gate of (stageGates || [])) {
+      gatesMap[gate.stage] = gate.status
+    }
+
     return {
       ...rest,
       totalCost,
       hasScript: !!script,
       hasVideo: output.status === 'COMPLETED' || output.status === 'RENDERED',
+      outputMimeType: renderProduct?.mimeType || null,
+      outputSize: renderProduct?.fileSize || null,
+      stageGates: gatesMap,
       classification: classification ? { id: classification.id, label: classification.label } : undefined,
       scriptStyle: scriptStyle ? { id: scriptStyle.id, name: scriptStyle.name } : undefined,
       visualStyle: visualStyle ? { id: visualStyle.id, name: visualStyle.name } : undefined,
       relatedOutputs: [
-        ...output.relationsFrom.map((r: any) => ({ ...r.mainOutput, relationType: r.relationType })),
-        ...output.relationsTo.map((r: any) => ({ ...r.relatedOutput, relationType: r.relationType }))
+        ...relationsFrom.map((r: any) => ({ ...r.mainOutput, relationType: r.relationType })),
+        ...relationsTo.map((r: any) => ({ ...r.relatedOutput, relationType: r.relationType }))
       ]
     }
   })

@@ -100,15 +100,19 @@ describe('POST /api/outputs/[id]/generate-outline', () => {
         voiceId: 'v',
         speechConfiguredAt: new Date(),
         targetWPM: 150,
-        monetizationContext: {
-          itemType: 'teaser',
-          title: 'T',
-          hook: 'H',
-          angle: 'A',
-          angleCategory: 'C',
-          narrativeRole: 'hook-only',
-          microBriefV1: buildMicroBrief(),
-          sceneCount: 4
+        monetizationData: {
+          create: {
+            contextData: {
+              itemType: 'teaser',
+              title: 'T',
+              hook: 'H',
+              angle: 'A',
+              angleCategory: 'C',
+              narrativeRole: 'hook-only',
+              microBriefV1: buildMicroBrief(),
+              sceneCount: 4
+            }
+          }
         }
       } as any
     })

@@ -1,0 +1,186 @@
+{
+  "timestamp": "2026-02-26T02:52:20.637Z",
+  "taskId": "monetization-blueprint",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "gemini-3-flash-preview",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Monetization Blueprint — Planejamento Estratégico\n\nVocê é um estrategista de conteúdo especializado em monetização de vídeos **100% para YouTube**: **3 Full Videos (EP1–EP3, YouTube)** + Shorts (YouTube Shorts). Nesta etapa, você vai criar o **ESQUELETO** do plano de monetização — a distribuição estratégica de papéis, ângulos e formatos.\n\n## 🎯 Objetivo\n\nAnalisar o dossiê e produzir um BLUEPRINT ESTRATÉGICO contendo:\n1. Título do plano\n2. Estilo visual único para todo o plano\n3. Distribuição de ângulos narrativos (1 por teaser, sem duplicatas)\n4. Distribuição de papéis narrativos (gateway/deep-dive/hook-only)\n5. Formatos de short para cada teaser (respeitando compatibilidade role×format)\n6. Direção criativa por item (scriptStyleId, editorialObjectiveId)\n7. Receita estimada e notas estratégicas\n\n## 🚨 REGRAS CRÍTICAS DO BLUEPRINT\n\n### Distribuição de Roles\n- **Gateway:** EXATAMENTE 1, SEMPRE o primeiro item do array\n- **Deep-Dive:** ~50-60% dos teasers restantes\n- **Hook-Only:** ~30-45% dos teasers restantes\n\n### Ângulos Narrativos\n- Cada teaser DEVE ter um `angleCategory` DIFERENTE de todos os outros\n- NÃO repita ângulos — se são 15 teasers, use 15 ângulos diferentes\n- Use apenas ângulos RELEVANTES para o dossiê\n\n### Compatibilidade Role × Format (OBRIGATÓRIO)\nRespeite esta tabela rigorosamente:\n\n| Role | Formatos PERMITIDOS | Formatos PROIBIDOS |\n|------|--------------------|-------------------|\n| **gateway** | plot-twist, teaser-cinematografico, lista-rapida | hook-brutal, frase-memoravel |\n| **deep-dive** | plot-twist, mini-documento, pergunta-incomoda, teaser-cinematografico | frase-memoravel |\n| **hook-only** | hook-brutal, frase-memoravel, pergunta-incomoda | mini-documento, lista-rapida |\n\n### Diversidade de Formatos\n- Use pelo menos 3 formatos diferentes\n- Máximo 50% dos teasers com o mesmo formato\n\n## 📐 O QUE PRODUZIR\n\nPara CADA teaser, defina:\n- `angleCategory`: Ângulo narrativo (do catálogo)\n- `angleName`: Nome descritivo do ângulo aplicado ao dossiê\n- `narrativeRole`: gateway, deep-dive ou hook-only\n- `shortFormatType`: Formato do short (compatível com o role)\n- `platform`: **YouTube Shorts** (obrigatório; não escolha outra plataforma)\n- `scriptStyleId` + `scriptStyleName`: Estilo de roteiro\n- `editorialObjectiveId` + `editorialObjectiveName`: Objetivo editorial\n\nPara os Full Videos (3 episódios):\n- Você DEVE retornar `fullVideos` como um array com EXATAMENTE 3 slots (EP1, EP2, EP3)\n- Cada slot deve ter:\n  - `angle`: Ângulo narrativo principal do episódio (NÃO repetir entre episódios)\n  - `scriptStyleId` + `scriptStyleName`: Estilo de roteiro\n  - `editorialObjectiveId` + `editorialObjectiveName`: Objetivo editorial\n- Os ângulos dos episódios não devem sobrepor os ângulos dos teasers (evite repetir o mesmo território narrativo)\n\n## 🔒 DIVISÃO NARRATIVA DOS EPISÓDIOS (OBRIGATÓRIO)\n\nOs 3 episódios devem seguir uma **progressão narrativa clara**, onde cada EP é DONO de um território exclusivo da história:\n\n| EP | Função Narrativa | Território Exclusivo | Termina com... |\n|----|-----------------|---------------------|----------------|\n| **EP1** | **Contextualização + Ascensão** | Origem, formação, método, primeiros eventos | TENSÃO crescente — o conflito se forma, mas NÃO se resolve |\n| **EP2** | **Grande Virada** | Traição, política, consequências imediatas, ponto de inflexão | IMPACTO da virada — a situação mudou irreversivelmente |\n| **EP3** | **Desfecho + Legado** | Resolução final, morte/libertação, legado, conexão com o presente | RESOLUÇÃO — arcos fechados, reflexão |\n\n### Regras de divisão:\n1. **EP1 NÃO pode antecipar o desfecho** — se alguém morre, é preso, ou um local se transforma, isso pertence ao EP2 ou EP3. EP1 só mostra a ASCENSÃO e a formação do conflito.\n2. **EP2 NÃO pode revelar o legado final** — EP2 mostra a virada/traição e suas consequências imediatas, mas o impacto de longo prazo é exclusivo do EP3.\n3. **O ângulo de cada EP deve refletir sua função narrativa** — ex: EP1 pode ser \"paradoxal\" ou \"humano\" (origem), EP2 pode ser \"geopolítico\" ou \"político\" (poder/traição), EP3 pode ser \"conexão-temporal\" ou \"evidencial\" (legado).\n4. **Cada EP deve ter um ângulo narrativo que NÃO seja intercambiável** — se você consegue trocar o ângulo de EP1 com EP3, algo está errado.\n\n## 💡 PENSAMENTO ESTRATÉGICO\n\nAntes de definir os ângulos, pense:\n1. Quais aspectos do dossiê são MAIS controversos? → hook-only\n2. Quais exigem contexto para impactar? → gateway ou deep-dive\n3. Quais têm potencial viral natural? → hook-brutal ou pergunta-incomoda\n4. Quais são ricos em detalhes? → mini-documento ou lista-rapida\n\nPara os episódios, pense:\n1. Qual é a **linha do tempo natural** da história? → Use-a para dividir EP1/EP2/EP3\n2. Onde está a **maior virada/traição**? → Esse é o clímax do EP2\n3. Qual é o **desfecho surpreendente ou irônico**? → Isso é o payload do EP3\n4. EP1 deve fazer o espectador **querer saber mais**, não **já saber tudo**\n\n## ⚠️ NÃO GERE NESTA ETAPA\n\n- NÃO gere títulos dos teasers (serão gerados na etapa seguinte)\n- NÃO gere hooks (serão gerados na etapa seguinte)\n- NÃO gere scriptOutline (será gerado na etapa seguinte)\n- NÃO gere visualPrompt (será gerado na etapa seguinte)\n- NÃO gere avoidPatterns (serão gerados na etapa seguinte)\n- NÃO gere CTA (será gerado na etapa seguinte)\n\nEsta etapa é APENAS sobre ESTRATÉGIA — a execução criativa vem depois.\n\n# 🛡️ PROTOCOLO DE BRAND SAFETY E IMUNIZAÇÃO ALGORMÍTMICA (YOUTUBE 2026)\r\n\r\nEste protocolo define as regras OBRIGATÓRIAS para evitar supressão algorítmica, desmonetização (\"Yellow Icon\") e restrições de idade, mantendo a integridade narrativa do gênero \"Mystery/Dark\".\r\n\r\n## 1. POSTURA DO NARRADOR: \"NEUTRAL DOCUMENTARIAN\"\r\nO narrador nunca deve expressar prazer, condenação moral excessiva ou choque visceral.\r\n- **ERRADO (Sensacionalista):** \"O assassino SÁDICO estripou a vítima e riu!\"\r\n- **CORRETO (Documental):** \"O agressor cometeu atos de extrema brutalidade antes de deixar a cena.\"\r\n- **REGRA:** Adote um tom clínico, investigativo e solene. A emoção vem dos fatos, não dos adjetivos.\r\n\r\n## 2. GLOSSÁRIO DE SUBSTITUIÇÃO SEMÂNTICA (OBRIGATÓRIO)\r\nA IA deve substituir AUTOMATICAMENTE termos de \"Gore/Violence\" por equivalentes semânticos seguros (\"Safe-Words\") que mantenham o impacto psicológico sem acionar os filtros de metadados.\r\n\r\n| TERMO PROIBIDO (\"Trigger\") | SUBSTITUIÇÃO SEGURA (\"Safe-Word\") |\r\n| :--- | :--- |\r\n| Assassinato / Assassino | O Fim Trágico / O Perpetrador / O Responsável |\r\n| Estupro / Abuso Sexual | Violência Íntima / O Ato Imperdoável / Viio Absoluto |\r\n| Sangue / Poça de Sangue | A Cena Vermelha / Vestígios Vitais / A Marca do Crime |\r\n| Suicídio / Se Matou | Tirou a Própria Vida / O Gesto Final / A Partida Escolhida |\r\n| Esquartejado / Mutilado | Fragmentado / A Cena Desfeita / Danos Extremos |\r\n| Pedofilia / Abuso Infantil | Crimes Contra Inocentes / A Sombra na Infância |\r\n| Tortura | Interrogatório Extremo / Métodos Desumanos / Sofrimento Prolongado |\r\n| Canibalismo | O Ato Final de Consumo / A Transgressão Antropofágica |\r\n| Massacre / Chacina | O Evento Fatal / A Perda Coletiva / A Noite Silenciosa |\r\n| Drogas / Heroína / Cocaína | Substâncias Ilícitas / O Vício Químico / O Pó Branco |\r\n\r\n## 3. A REGRA \"NO GORE, JUST IMPLICATION\"\r\nO YouTube 2026 pune a representação visual ou textual visceral de fluidos corporais e órgãos internos.\r\n- **Regra:** Nunca descreva a *anatomia* da violência. Descreva o *cenário*, o *som*, a *consequência* ou o *objeto*.\r\n- **Técnica de Desvio:** Em vez de focar na ferida, foque na \"ferramenta caída no chão\" ou na \"mancha na parede\".\r\n- **Exemplo:** \"A sala estava pintada de vermelho\" (Aprovado) vs \"Havia tripas no chão\" (Banido).\r\n\r\n## 4. CONTEXTO EDSA (Educational, Documentary, Scientific, Artistic)\r\nTodo conteúdo \"Borderline\" (conspiração, crimes reais) deve ser enquadrado explicitamente como EDUCACIONAL ou DOCUMENTAL.\r\n- Use frases de ancoragem: \"Registros históricos indicam...\", \"O relatório policial descreve...\", \"Teóric... [truncated 14003 chars]"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "📋 TEMA: A ascensão paramilitar e queda biológica de El Mencho, líder do CJNG.\n📋 TÍTULO: El Mencho: O Ascensão Sangrenta e o Fim do Senhor dos Abacates\n🧾 BRIEF (TEASERS) — versão: briefBundleV1\n\n🛡️ REGRAS HARD (GLOBAL SAFETY)\n- ❌ armas de fogo explícitas\n- ❌ tiros em progresso\n- ❌ execuções visualizadas\n- ❌ sangue ou gore\n- ❌ close-up de rostos ou mãos humanas\n- ❌ armas de fogo, rifles, pistolas, munição, gatilho\n- ❌ atirador, execução, assassinato explícito, violência gráfica\n- ❌ sangue, gore, corpos mutilados, tortura explícita\n- ❌ close-up de mãos humanas, close-up de rostos humanos (evitar macro/anatomia)\n- ❌ cenas em sinagogas/templos com ameaça explícita (substituir por artefatos: manifesto, tela, manchete)\n- ❌ símbolos/extremismo contemporâneo em destaque (substituir por “texto recortado/blur”)\n\n🧰 ARTEFATOS VISUAIS PERMITIDOS\n- ✅ documentos confidenciais\n- ✅ mapas de satélite\n- ✅ headlines de jornais\n- ✅ registros médicos\n- ✅ relatórios de inteligência\n- ✅ veículos blindados (distância)\n- ✅ transcrições de rádio\n- ✅ documento, decreto, registro, arquivo, dossiê, carimbo, selo de cera\n- ✅ moedas, cofre, livro-caixa, inventário, recibo, contrato\n- ✅ monitor, tela, manifesto (sem arma), headline, recorte de jornal, thread desfocada\n- ✅ mapa, corredor de arquivo, sala de leitura, prateleiras, luz de vela, sombras\n- ✅ silhuetas não-identificáveis sem rosto/mãos em close\n\n🔫 MUNIÇÃO NARRATIVA (FATOS SAFE)\n1. Nemesio Oseguera Cervantes nasceu em 1966 em Michoacán, iniciando sua trajetória como trabalhador braçal em plantações de abacate. [fonte: [1]]\n2. Na década de 90, o futuro líder cumpriu três anos de pena em uma prisão federal no Texas por tráfico de heroína, mapeando vulnerabilidades do sistema judiciário americano. [fonte: [1]]\n3. Após ser deportado em 1996, ele ingressou na polícia municipal de Jalisco, utilizando o cargo para aprender táticas de patrulha e comunicações de rádio do Estado. [fonte: [1]]\n4. A fundação do Cártel Jalisco Nueva Generación (CJNG) ocorreu após um vácuo de poder gerado pela morte de um líder do Cartel de Sinaloa em 2010. [fonte: [1]]\n5. O cartel institucionalizou a extorsão agrícola em Michoacán, cobrando taxas de proteção de até 4 pesos por quilo de limão e abacate produzidos. [fonte: [1]]\n6. A engenharia financeira do grupo era operada pelo clã 'Los Cuinis', que lavava capitais através de redes hoteleiras e centros comerciais de luxo. [fonte: [1]]\n7. O CJNG recrutou veteranos de forças especiais estrangeiras por meio de ofertas enganosas de emprego para segurança privada via aplicativos de mensagens. [fonte: [1]]\n8. A organização foi pioneira no uso de drones adaptados com mecanismos para liberação de explosivos plásticos contra forças de segurança. [fonte: [1]]\n9. Veículos de combate blindados artesanais, conhecidos como 'Monstruos', foram projetados com engenharia focada em resistir a munições de calibre militar. [fonte: [1]]\n10. O líder do cartel sofria de insuficiência renal crônica terminal, operando com menos de 15% da capacidade renal nos seus últimos anos. [fonte: [1]]\n11. A dependência de hemodiálise forçou a criação de uma rede logística médica precária em abrigos improvisados nas montanhas de Jalisco. [fonte: [1]]\n12. Em março de 2020, a Operação Python resultou em mais de 600 prisões táticas e 350 indiciamentos contra a hierarquia de distribuição do cartel nos EUA. [fonte: [1]]\n13. A localização exata do complexo logístico do líder foi entregue às autoridades por uma parceira amorosa do círculo íntimo no início de 2026. [fonte: [1]]\n14. A Operação Tapalpa, em 22 de fevereiro de 2026, envolveu esquadrões de elite e apoio de inteligência internacional para cercar o perímetro montanhoso. [fonte: [1]]\n15. O líder do CJNG faleceu a bordo de uma aeronave de evacuação médica militar devido a um choque hipovolêmico após ser atingido durante a tentativa de fuga. [fonte: [1]]\n16. A morte do fundador desencadeou ataques coordenados e bloqueios em 16 estados do México como protocolo de retaliação da organização. [fonte: [1]]\n17. A sucessão do cartel em 2026 polarizou o grupo entre uma ala focada em hegemonia militar e outra voltada para a gestão burocrática e territorial. [fonte: [1]]\n18. O clã 'Los Cuinis' utilizava empresas de fachada, como a ABR Management, para blindar o patrimônio do cartel contra apreensões internacionais. [fonte: [1]]\n19. O cartel assegurou o controle de portos estratégicos no Pacífico para gerenciar o fluxo de precursores químicos importados da Ásia. [fonte: [1]]\n20. Relatórios de inteligência indicam que o cartel operava como uma Empresa Militar Privada clandestina, importando táticas de guerra assimétrica. [fonte: [1]]\n\n🎭 DIRETRIZES POR PAPEL\n- gateway: contextLevel=medium, facts=8-15\n- deep-dive: contextLevel=low, facts=5-10\n- hook-only: contextLevel=minimal, facts=3-5\n\nCrie o blueprint estratégico para o dossiê acima. Gere 12 slots de teasers com ângulos, roles e formatos."
+      }
+    ]
+  },
+  "parsed": {
+    "teaserSlots": [
+      {
+        "shortFormatType": "lista-rapida",
+        "editorialObjectiveId": "explainer",
+        "editorialObjectiveName": "Explainer Didático",
+        "platform": "YouTube Shorts",
+        "angleName": "A Linha do Tempo do Senhor dos Abacates",
+        "narrativeRole": "gateway",
+        "scriptStyleName": "Educacional",
+        "scriptStyleId": "educational",
+        "angleCategory": "cronologico"
+      },
+      {
+        "angleCategory": "economico",
+        "scriptStyleId": "documentary",
+        "scriptStyleName": "Documentário Profissional",
+        "narrativeRole": "deep-dive",
+        "angleName": "O Imposto do Limão: A Extorsão Agrícola",
+        "platform": "YouTube Shorts",
+        "editorialObjectiveName": "Análise Profunda",
+        "editorialObjectiveId": "deep-analysis",
+        "shortFormatType": "mini-documento"
+      },
+      {
+        "editorialObjectiveName": "Verdade Oculta",
+        "editorialObjectiveId": "hidden-truth",
+        "shortFormatType": "plot-twist",
+        "platform": "YouTube Shorts",
+        "narrativeRole": "deep-dive",
+        "scriptStyleId": "mystery",
+        "scriptStyleName": "Mistério Real - The Gap Files",
+        "angleName": "De Patrulheiro a Alvo Internacional",
+        "angleCategory": "politico"
+      },
+      {
+        "angleCategory": "tecnologico",
+        "angleName": "Guerra de Drones nas Montanhas de Jalisco",
+        "scriptStyleName": "Mistério Real - The Gap Files",
+        "scriptStyleId": "mystery",
+        "narrativeRole": "hook-only",
+        "platform": "YouTube Shorts",
+        "shortFormatType": "hook-brutal",
+        "editorialObjectiveId": "viral-hook",
+        "editorialObjectiveName": "Gancho Viral"
+      },
+      {
+        "narrativeRole": "deep-dive",
+        "scriptStyleId": "documentary",
+        "scriptStyleName": "Documentário Profissional",
+        "angleName": "A Engenharia Invisível do Clã Los Cuinis",
+        "angleCategory": "psicologico",
+        "editorialObjectiveName": "Camadas de Mistério",
+        "shortFormatType": "pergunta-incomoda",
+        "editorialObjectiveId": "mystery-layers",
+        "platform": "YouTube Shorts"
+      },
+      {
+        "editorialObjectiveId": "deep-analysis",
+        "shortFormatType": "mini-documento",
+        "editorialObjectiveName": "Análise Profunda",
+        "platform": "YouTube Shorts",
+        "angleName": "O Inimigo Interno: 15% de Função Renal",
+        "scriptStyleId": "educational",
+        "scriptStyleName": "Educacional",
+        "narrativeRole": "deep-dive",
+        "angleCategory": "cientifico"
+      },
+      {
+        "angleName": "A Traição do Círculo Íntimo em 2026",
+        "narrativeRole": "hook-only",
+        "scriptStyleName": "Narrativo Épico",
+        "scriptStyleId": "narrative",
+        "angleCategory": "conspirativo",
+        "editorialObjectiveId": "cliffhanger",
+        "shortFormatType": "frase-memoravel",
+        "editorialObjectiveName": "Cliffhanger Estratégico",
+        "platform": "YouTube Shorts"
+      },
+      {
+        "angleCategory": "geopolitico",
+        "narrativeRole": "deep-dive",
+        "scriptStyleId": "documentary",
+        "scriptStyleName": "Documentário Profissional",
+        "angleName": "A Rota da Ásia: Portos e Precursores",
+        "platform": "YouTube Shorts",
+        "editorialObjectiveName": "Análise Profunda",
+        "editorialObjectiveId": "deep-analysis",
+        "shortFormatType": "teaser-cinematografico"
+      },
+      {
+        "angleCategory": "paradoxal",
+        "angleName": "O Trágico Fim a Bordo da Evacuação Médica",
+        "scriptStyleName": "Narrativo Épico",
+        "scriptStyleId": "narrative",
+        "narrativeRole": "hook-only",
+        "platform": "YouTube Shorts",
+        "editorialObjectiveId": "emotional-impact",
+        "shortFormatType": "pergunta-incomoda",
+        "editorialObjectiveName": "Impacto Emocional"
+      },
+      {
+        "platform": "YouTube Shorts",
+        "editorialObjectiveName": "Verdade Oculta",
+        "editorialObjectiveId": "hidden-truth",
+        "shortFormatType": "plot-twist",
+        "angleCategory": "revisionista",
+        "scriptStyleId": "mystery",
+        "scriptStyleName": "Mistério Real - The Gap Files",
+        "narrativeRole": "deep-dive",
+        "angleName": "Operação Tapalpa: O Que os Relatórios Omitiram"
+      },
+      {
+        "platform": "YouTube Shorts",
+        "editorialObjectiveName": "Polêmica Controlada",
+        "shortFormatType": "pergunta-incomoda",
+        "editorialObjectiveId": "controversy",
+        "angleCategory": "etico",
+        "narrativeRole": "deep-dive",
+        "scriptStyleName": "Educacional",
+        "scriptStyleId": "educational",
+        "angleName": "O Preço Oculto do Abacate na Sua Mesa"
+      },
+      {
+        "platform": "YouTube Shorts",
+        "editorialObjectiveName": "Gancho Viral",
+        "editorialObjectiveId": "viral-hook",
+        "shortFormatType": "hook-brutal",
+        "angleCategory": "conexao-temporal",
+        "scriptStyleId": "mystery",
+        "scriptStyleName": "Mistério Real - The Gap Files",
+        "narrativeRole": "hook-only",
+        "angleName": "A Guerra de Sucessão: O México Pós-Mencho"
+      }
+    ],
+    "estimatedTotalRevenue": "R$ 45.000,00 - R$ 75.000,00 (Baseado em CPM de True Crime/Geopolítica + Retenção Alta)",
+    "visualStyleName": "Noir Cinematográfico",
+    "fullVideos": [
+      {
+        "editorialObjectiveId": "hidden-truth",
+        "scriptStyleId": "documentary",
+        "scriptStyleName": "Documentário Profissional",
+        "angle": "paradoxal",
+        "editorialObjectiveName": "Verdade Oculta"
+      },
+      {
+        "scriptStyleId": "mystery",
+        "scriptStyleName": "Mistério Real - The Gap Files",
+        "editorialObjectiveName": "Análise Profunda",
+        "angle": "geopolitico",
+        "editorialObjectiveId": "deep-analysis"
+      },
+      {
+        "editorialObjectiveId": "full-reveal",
+        "angle": "evidencial",
+        "editorialObjectiveName": "Revelação Total",
+        "scriptStyleName": "Narrativo Épico",
+        "scriptStyleId": "narrative"
+      }
+    ],
+    "visualStyleId": "noir-cinematic",
+    "planTitle": "El Mencho: O Império do Abacate e a Queda Biológica",
+    "strategicNotes": "O plano foca na dualidade entre o poder paramilitar (tecnologia de drones e blindados) e a fragilidade biológica (insuficiência renal). A narrativa de 2026 é tratada com tom documental clínico para evitar sensacionalismo. O uso do estilo 'Noir Cinematográfico' garante a imunização visual contra restrições de idade, focando em artefatos e sombras em vez de violência explícita. A distribuição de papéis prioriza o 'Deep-Dive' para converter curiosidade em retenção de longo formato."
+  },
+  "rawContent": ""
+}

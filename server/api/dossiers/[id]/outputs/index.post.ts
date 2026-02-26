@@ -124,7 +124,7 @@ export default defineEventHandler(async (event): Promise<CreateOutputsResponse> 
           scriptStyleId: outputData.scriptStyleId ?? undefined,
           visualStyleId: outputData.visualStyleId ?? undefined,
           seedId: outputData.seedId,
-          status: 'PENDING'
+          status: 'DRAFT'
         }
       })
     )
@@ -145,12 +145,7 @@ export default defineEventHandler(async (event): Promise<CreateOutputsResponse> 
       platform: output.platform || undefined,
       enableMotion: output.enableMotion,
       status: output.status,
-      scriptApproved: output.scriptApproved,
-      imagesApproved: output.imagesApproved,
-      bgmApproved: output.bgmApproved,
-      audioApproved: output.audioApproved,
-      videosApproved: output.videosApproved,
-      renderApproved: output.renderApproved,
+      stageGates: [],
       hasBgm: false,
       errorMessage: output.errorMessage || undefined,
       createdAt: output.createdAt,

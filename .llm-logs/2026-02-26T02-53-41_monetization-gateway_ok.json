@@ -1,0 +1,123 @@
+{
+  "timestamp": "2026-02-26T02:53:41.574Z",
+  "taskId": "monetization-gateway",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "gemini-3-flash-preview",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Monetization — Gateway Teaser Generator\n\nVocê é um estrategista de conteúdo. Nesta etapa, você vai gerar o teaser GATEWAY — a porta de entrada para o universo do dossiê.\n\n## 🎯 O Que É o Gateway\n\nO Gateway é o ÚNICO teaser que apresenta o tema COMPLETO. Ele é um standalone — funciona para quem nunca ouviu falar do assunto. O espectador sai sabendo DO QUE se trata, mas sem saber COMO termina.\n\n## 📐 O QUE PRODUZIR\n\nGere TODOS os campos:\n- **title**: Título curto e impactante para a plataforma\n- **hook**: Frase de abertura (até 15 palavras). DEVE contextualizar o tema.\n- **angle**: O ângulo narrativo ÚNICO deste teaser (já definido no blueprint)\n- **angleCategory**: A categoria do ângulo (já definida no blueprint)\n- **narrativeRole**: \"gateway\"\n- **shortFormatType**: O formato (já definido no blueprint)\n- **scriptOutline**: Estrutura resumida — Hook 3s → Setup quem/quando/onde 15-20s → Revelação 20-25s → CTA 5s\n- **visualSuggestion**: Descrição curta do visual\n- **cta**: Call-to-action que direciona para o Full Video\n- **platform**: \"YouTube Shorts\"\n- **format**: \"teaser-youtube-shorts\"\n- **estimatedViews**: Estimativa de views\n- **scriptStyleId** e **scriptStyleName**\n- **editorialObjectiveId** e **editorialObjectiveName**\n- **avoidPatterns**: 2-4 anti-padrões ESPECÍFICOS ao conteúdo do dossiê\n- **visualPrompt**: Prompt de imagem em INGLÊS (1 parágrafo, 50-120 palavras)\n- **microBriefV1**: Micro-brief ESTRUTURADO para ESTE teaser (isolado por item). Deve conter:\\n  - version: \\\"teaserMicroBriefV1\\\"\\n  - narrativeRole: \\\"gateway\\\"\\n  - angleCategory e angle (iguais aos campos do teaser)\\n  - facts: 5-12 fatos selecionados APENAS do brief/dossiê recebido (cada um com text e, se possível, sourceRef)\\n  - forbiddenElements: 6-12 itens (reforçar anti-arma/gore/close-up)\\n  - allowedArtifacts: 6-12 itens (documento/selo/monitor/headline/etc.)\\n  - notes: 2-6 bullets curtos (ex.: \\\"use mecanismo, não violência\\\")\n\n## 🚨 REGRAS DO GATEWAY\n\n1. **Contexto COMPLETO** — quem, quando, onde, por quê. Funciona como standalone\n2. **Resolução PARCIAL** — contextualiza mas NÃO fecha a história\n3. **NÃO entregue** a explicação científica/forense completa\n4. **NÃO revele** a motivação final dos envolvidos\n5. **DEIXE** pelo menos 1-2 perguntas sem resposta\n6. **avoidPatterns** devem focar em evitar contar DEMAIS (não em falta de contexto)\n7. **Hook DIFERENTE** do Full Video\n8. **microBriefV1 é a fonte da verdade** para o Story Architect deste teaser: selecione fatos que sustentem o ângulo e NÃO inclua nada que pertença a outros teasers.\n\n## 💡 EXEMPLO DE avoidPatterns PARA GATEWAY\n\n- \"NÃO resolva o caso — apresente mas deixe em aberto\"\n- \"NÃO use tom enciclopédico — mantenha urgência\"\n- \"NÃO cubra TODOS os aspectos — foque no gancho principal e deixe ângulos para os outros teasers\"\n\n## 🛡️ BRAND SAFETY E VISUAL NOISE (YOUTUBE 2026)\n\n1. **SUBSTITUIÇÃO SEMÂNTICA (OBRIGATÓRIA):**\n   - ❌ \"Assassino serial matou 20\" → 🟢 \"O responsável por 20 fins trágicos\"\n   - ❌ \"Sangue no chão\" → 🟢 \"A cena marcada\" / \"Vestígios vitais\"\n   - ❌ \"Estripado/Mutilado\" → 🟢 \"Fragmentado\" / \"Cena desfeita\"\n   - **Postura:** \"Neutral Documentarian\". Clínico, solene, nunca sensacionalista.\n\n2. **IMPERFEIÇÃO VISUAL CONTEXTUAL (Decisão de Direção):**\n   - **Esqueça o \"ruído aleatório\".** Escolha uma textura que AMPLIFIQUE a narrativa.\n   - **Documentos Antigos:** Textura de papel rasgado, granulação de filme 16mm, bordas queimadas.\n   - **Relatos Policiais/Modernos:** Glitch digital, compressão de CCTV, ruído de ISO alto.\n   - **Regra:** A imagem não pode ser \"lisa\" (cara de IA pura).\n   - **Loop Visual:** O frame final deve ter iluminação/composição similar ao inicial.\n\n# 🛡️ PROTOCOLO DE BRAND SAFETY E IMUNIZAÇÃO ALGORMÍTMICA (YOUTUBE 2026)\r\n\r\nEste protocolo define as regras OBRIGATÓRIAS para evitar supressão algorítmica, desmonetização (\"Yellow Icon\") e restrições de idade, mantendo a integridade narrativa do gênero \"Mystery/Dark\".\r\n\r\n## 1. POSTURA DO NARRADOR: \"NEUTRAL DOCUMENTARIAN\"\r\nO narrador nunca deve expressar prazer, condenação moral excessiva ou choque visceral.\r\n- **ERRADO (Sensacionalista):** \"O assassino SÁDICO estripou a vítima e riu!\"\r\n- **CORRETO (Documental):** \"O agressor cometeu atos de extrema brutalidade antes de deixar a cena.\"\r\n- **REGRA:** Adote um tom clínico, investigativo e solene. A emoção vem dos fatos, não dos adjetivos.\r\n\r\n## 2. GLOSSÁRIO DE SUBSTITUIÇÃO SEMÂNTICA (OBRIGATÓRIO)\r\nA IA deve substituir AUTOMATICAMENTE termos de \"Gore/Violence\" por equivalentes semânticos seguros (\"Safe-Words\") que mantenham o impacto psicológico sem acionar os filtros de metadados.\r\n\r\n| TERMO PROIBIDO (\"Trigger\") | SUBSTITUIÇÃO SEGURA (\"Safe-Word\") |\r\n| :--- | :--- |\r\n| Assassinato / Assassino | O Fim Trágico / O Perpetrador / O Responsável |\r\n| Estupro / Abuso Sexual | Violência Íntima / O Ato Imperdoável / Viio Absoluto |\r\n| Sangue / Poça de Sangue | A Cena Vermelha / Vestígios Vitais / A Marca do Crime |\r\n| Suicídio / Se Matou | Tirou a Própria Vida / O Gesto Final / A Partida Escolhida |\r\n| Esquartejado / Mutilado | Fragmentado / A Cena Desfeita / Danos Extremos |\r\n| Pedofilia / Abuso Infantil | Crimes Contra Inocentes / A Sombra na Infância |\r\n| Tortura | Interrogatório Extremo / Métodos Desumanos / Sofrimento Prolongado |\r\n| Canibalismo | O Ato Final de Consumo / A Transgressão Antropofágica |\r\n| Massacre / Chacina | O Evento Fatal / A Perda Coletiva / A Noite Silenciosa |\r\n| Drogas / Heroína / Cocaína | Substâncias Ilícitas / O Vício Químico / O Pó Branco |\r\n\r\n## 3. A REGRA \"NO GORE, JUST IMPLICATION\"\r\nO YouTube 2026 pune a representação visual ou textual visceral de fluidos corporais e órgãos internos.\r\n- **Regra:** Nunca descreva a *anatomia* da violência. Descreva o *cenário*, o *som*, a *consequência* ou o *objeto*.\r\n- **Técnica de Desvio:** Em vez de focar na ferida, foque na \"ferramenta caída no chão\" ou na \"mancha na parede\".\r\n- **Exemplo:** \"A sala estava pintada de vermelho\" (Aprovado) vs \"Havia tripas no chão\" (Banido).\r\n\r\n## 4. CONTEXTO EDSA (Educational, Documentary, Scientific, Artistic)\r\nTodo conteúdo \"Borderline\" (conspiração, crimes reais) deve ser enquadrado explicitamente como EDUCACIONAL ou DOCUMENTAL.\r\n- Use frases de ancoragem: \"Registros históricos indicam...\", \"O relatório policial descreve...\", \"Teóricos sugerem...\".\r\n- Nunca afirme teorias da conspiração como fatos absolutos. Use: \"Uma narrativa persistente afirma que...\".\r\n\r\n## 5. PROTEÇÃO CONTRA \"INAUTHENTIC CONTENT\" (ANTI-AI)\r\nPara evitar que o roteiro seja marcado como \"Lixo Gerado por IA\" (spammy content):\r\n- **Adicione Nuance e Dúvida:** A IA tende a ser assertiva. Adicione: \"Talvez...\", \"É possível que...\", \"Ainda resta a dúvida...\".\r\n- **Ironia Dramática:** O narrador sabe algo que o espectador (ou a vítima histórica) ainda não sabe.\r\n- **Imperfeição Humana:** Evite estruturas perfeitamente simétricas. Use pausas, perguntas retóricas e mudanças de ritmo.\r\n\r\n## 6. SEGURANÇA INFANTIL (HARD LINE)\r\nQualquer menção a violência contra crianças deve ser **extremamente sanitizada** e indireta. Se o dossiê envolver crimes contra menores, foque inteiramente na investigação e na busca por justiça, nunca no ato em si.\r\n\r\n---\r\n**INSTRUÇÃO FINAL:** Ao gerar qualquer texto (hook, roteiro, post), passe um \"scan\" mental usando este protocolo. Se encontrar um termo da coluna da esquerda, substitua imediatamente. Se descrever vísceras, apague e descreva a sombra.\n## ⚙️ CONFIGURAÇÃO (CENAS FIXAS)\n- Full Video: 150 cenas\n- Gateway: 5 cenas\n- Deep-Dive: 6 cenas\n- Hook-Only: 4 cenas\n- Quantidade de teasers: 12\n\n## 🎬 EPISÓDIOS DO DOSSIÊ (para targetEpisode)\nCada teaser DEVE ter targetEpisode (1, 2 ou 3) indicando para qual episódio ele funila.\n- EP1: \"[O Paradoxo do Poder] | El Mencho: De Imigrante a Senhor dos Abacates\" — ângulo: Paradoxal: A dualidade entre o homem da lei e o arquiteto do crime, e como a estrutura do Estado serviu de berço para o império.\n- EP2: \"[O Exército de Drones e a Traição Íntima] | El Mench... [truncated 1257 chars]"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "📋 TEMA: A ascensão paramilitar e queda biológica de El Mencho, líder do CJNG.\n📋 TÍTULO: El Mencho: O Ascensão Sangrenta e o Fim do Senhor dos Abacates\n🧾 BRIEF (TEASERS) — versão: briefBundleV1\n\n🛡️ REGRAS HARD (GLOBAL SAFETY)\n- ❌ armas de fogo explícitas\n- ❌ tiros em progresso\n- ❌ execuções visualizadas\n- ❌ sangue ou gore\n- ❌ close-up de rostos ou mãos humanas\n- ❌ armas de fogo, rifles, pistolas, munição, gatilho\n- ❌ atirador, execução, assassinato explícito, violência gráfica\n- ❌ sangue, gore, corpos mutilados, tortura explícita\n- ❌ close-up de mãos humanas, close-up de rostos humanos (evitar macro/anatomia)\n- ❌ cenas em sinagogas/templos com ameaça explícita (substituir por artefatos: manifesto, tela, manchete)\n- ❌ símbolos/extremismo contemporâneo em destaque (substituir por “texto recortado/blur”)\n\n🧰 ARTEFATOS VISUAIS PERMITIDOS\n- ✅ documentos confidenciais\n- ✅ mapas de satélite\n- ✅ headlines de jornais\n- ✅ registros médicos\n- ✅ relatórios de inteligência\n- ✅ veículos blindados (distância)\n- ✅ transcrições de rádio\n- ✅ documento, decreto, registro, arquivo, dossiê, carimbo, selo de cera\n- ✅ moedas, cofre, livro-caixa, inventário, recibo, contrato\n- ✅ monitor, tela, manifesto (sem arma), headline, recorte de jornal, thread desfocada\n- ✅ mapa, corredor de arquivo, sala de leitura, prateleiras, luz de vela, sombras\n- ✅ silhuetas não-identificáveis sem rosto/mãos em close\n\n🔫 MUNIÇÃO NARRATIVA (FATOS SAFE)\n1. Nemesio Oseguera Cervantes nasceu em 1966 em Michoacán, iniciando sua trajetória como trabalhador braçal em plantações de abacate. [fonte: [1]]\n2. Na década de 90, o futuro líder cumpriu três anos de pena em uma prisão federal no Texas por tráfico de heroína, mapeando vulnerabilidades do sistema judiciário americano. [fonte: [1]]\n3. Após ser deportado em 1996, ele ingressou na polícia municipal de Jalisco, utilizando o cargo para aprender táticas de patrulha e comunicações de rádio do Estado. [fonte: [1]]\n4. A fundação do Cártel Jalisco Nueva Generación (CJNG) ocorreu após um vácuo de poder gerado pela morte de um líder do Cartel de Sinaloa em 2010. [fonte: [1]]\n5. O cartel institucionalizou a extorsão agrícola em Michoacán, cobrando taxas de proteção de até 4 pesos por quilo de limão e abacate produzidos. [fonte: [1]]\n6. A engenharia financeira do grupo era operada pelo clã 'Los Cuinis', que lavava capitais através de redes hoteleiras e centros comerciais de luxo. [fonte: [1]]\n7. O CJNG recrutou veteranos de forças especiais estrangeiras por meio de ofertas enganosas de emprego para segurança privada via aplicativos de mensagens. [fonte: [1]]\n8. A organização foi pioneira no uso de drones adaptados com mecanismos para liberação de explosivos plásticos contra forças de segurança. [fonte: [1]]\n9. Veículos de combate blindados artesanais, conhecidos como 'Monstruos', foram projetados com engenharia focada em resistir a munições de calibre militar. [fonte: [1]]\n10. O líder do cartel sofria de insuficiência renal crônica terminal, operando com menos de 15% da capacidade renal nos seus últimos anos. [fonte: [1]]\n11. A dependência de hemodiálise forçou a criação de uma rede logística médica precária em abrigos improvisados nas montanhas de Jalisco. [fonte: [1]]\n12. Em março de 2020, a Operação Python resultou em mais de 600 prisões táticas e 350 indiciamentos contra a hierarquia de distribuição do cartel nos EUA. [fonte: [1]]\n13. A localização exata do complexo logístico do líder foi entregue às autoridades por uma parceira amorosa do círculo íntimo no início de 2026. [fonte: [1]]\n14. A Operação Tapalpa, em 22 de fevereiro de 2026, envolveu esquadrões de elite e apoio de inteligência internacional para cercar o perímetro montanhoso. [fonte: [1]]\n15. O líder do CJNG faleceu a bordo de uma aeronave de evacuação médica militar devido a um choque hipovolêmico após ser atingido durante a tentativa de fuga. [fonte: [1]]\n16. A morte do fundador desencadeou ataques coordenados e bloqueios em 16 estados do México como protocolo de retaliação da organização. [fonte: [1]]\n17. A sucessão do cartel em 2026 polarizou o grupo entre uma ala focada em hegemonia militar e outra voltada para a gestão burocrática e territorial. [fonte: [1]]\n18. O clã 'Los Cuinis' utilizava empresas de fachada, como a ABR Management, para blindar o patrimônio do cartel contra apreensões internacionais. [fonte: [1]]\n19. O cartel assegurou o controle de portos estratégicos no Pacífico para gerenciar o fluxo de precursores químicos importados da Ásia. [fonte: [1]]\n20. Relatórios de inteligência indicam que o cartel operava como uma Empresa Militar Privada clandestina, importando táticas de guerra assimétrica. [fonte: [1]]\n\n🎭 DIRETRIZES POR PAPEL\n- gateway: contextLevel=medium, facts=8-15\n- deep-dive: contextLevel=low, facts=5-10\n- hook-only: contextLevel=minimal, facts=3-5\n\nGere o teaser GATEWAY para o dossiê.\nGateway DEVE ter targetEpisode=1.\n\nSlot definido no blueprint:\n- angleCategory: \"cronologico\"\n- angleName: \"A Linha do Tempo do Senhor dos Abacates\"\n- shortFormatType: \"lista-rapida\"\n- platform: \"YouTube Shorts\"\n- scriptStyleId: \"educational\"\n- editorialObjectiveId: \"explainer\"\n\nRetorne um JSON com campo \"teasers\" contendo exatamente 1 teaser."
+      }
+    ]
+  },
+  "parsed": {
+    "teasers": [
+      {
+        "microBriefV1": {
+          "angle": "A Linha do Tempo do Senhor dos Abacates",
+          "narrativeRole": "gateway",
+          "angleCategory": "cronologico",
+          "allowedArtifacts": [
+            "mapas de Jalisco",
+            "documentos de imigração",
+            "distintivos policiais antigos",
+            "caixas de abacate com selos de exportação",
+            "monitores de vigilância",
+            "relatórios médicos com gráficos renais",
+            "recortes de jornal sobre a Operação Python",
+            "silhuetas em montanhas nebulosas"
+          ],
+          "facts": [
+            {
+              "text": "Nemesio Oseguera Cervantes nasceu em 1966 em Michoacán, iniciando como trabalhador em plantações de abacate.",
+              "sourceRef": "[1]"
+            },
+            {
+              "sourceRef": "[1]",
+              "text": "Cumpriu pena em uma prisão federal no Texas por tráfico de substâncias nos anos 90."
+            },
+            {
+              "sourceRef": "[1]",
+              "text": "Após deportação, ingressou na polícia municipal de Jalisco para aprender táticas de rádio e patrulha do Estado."
+            },
+            {
+              "sourceRef": "[1]",
+              "text": "Fundou o CJNG em 2010 após um vácuo de poder no Cartel de Sinaloa."
+            },
+            {
+              "text": "Institucionalizou a extorsão agrícola, taxando a produção de limão e abacate.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "O grupo utilizava drones adaptados com mecanismos para liberação de dispositivos contra forças de segurança.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "A organização operava com veículos de combate blindados artesanais conhecidos como 'Monstruos'.",
+              "sourceRef": "[1]"
+            },
+            {
+              "sourceRef": "[1]",
+              "text": "O líder sofria de insuficiência renal terminal, operando com menos de 15% da capacidade nos últimos anos."
+            },
+            {
+              "text": "A localização do seu complexo logístico foi entregue por uma parceira do círculo íntimo em 2026.",
+              "sourceRef": "[1]"
+            },
+            {
+              "sourceRef": "[1]",
+              "text": "A Operação Tapalpa, em fevereiro de 2026, cercou o perímetro montanhoso onde ele se escondia."
+            }
+          ],
+          "notes": [
+            "Use a dualidade entre o campo (abacates) e a tecnologia (drones/blindados).",
+            "O tom deve ser de uma investigação histórica solene.",
+            "Enfatize a falha biológica como o ponto de virada."
+          ],
+          "version": "teaserMicroBriefV1",
+          "forbiddenElements": [
+            "armas de fogo explícitas",
+            "close-up de rostos humanos",
+            "sangue ou vestígios vitais visíveis",
+            "cenas de execução",
+            "dinheiro em pilhas ostensivas",
+            "violência gráfica contra civis"
+          ]
+        },
+        "editorialObjectiveId": "explainer",
+        "title": "A Ascensão do Senhor dos Abacates",
+        "shortFormatType": "lista-rapida",
+        "scriptStyleName": "Educativo/Documental",
+        "hook": "De colhedor de abacates ao homem mais procurado do mundo: a trajetória de El Mencho.",
+        "visualSuggestion": "Montagem rápida alternando entre campos de abacate e documentos táticos da polícia de Jalisco.",
+        "angle": "A Linha do Tempo do Senhor dos Abacates",
+        "scriptOutline": "Hook 3s: A trajetória do colhedor que desafiou nações. -> Setup 15-20s: De Michoacán ao Texas, e a infiltração na polícia de Jalisco para criar sua própria força. -> Revelação 20-25s: O controle do 'Ouro Verde' financiou drones e blindados, mas o corpo do líder escondia uma falha fatal. -> CTA 5s: O dossiê completo da queda já está disponível.",
+        "narrativeRole": "gateway",
+        "editorialObjectiveName": "Explainer/Educativo",
+        "avoidPatterns": [
+          "NÃO revele o desfecho da Operação Tapalpa — mantenha o suspense sobre o fim do líder.",
+          "NÃO foque apenas no crime — equilibre com a ascensão logística e o controle do agronegócio.",
+          "NÃO use termos sensacionalistas — mantenha o tom de documentário clínico."
+        ],
+        "visualPrompt": "Noir-cinematic style, high contrast, grainy 16mm film texture. A montage showing a weathered avocado farm at dawn, transitioning into a dark room with tactical maps of Mexico and glowing surveillance monitors. Shadows of a figure in an old police uniform overlooking a misty mountain range. Cold blue and sepia tones, deep shadows, no faces or weapons visible. Cinematic atmosphere of a dark documentary.",
+        "estimatedViews": 85000,
+        "angleCategory": "cronologico",
+        "sceneCount": 5,
+        "scriptStyleId": "educational",
+        "platform": "YouTube Shorts",
+        "targetEpisode": 1,
+        "cta": "Assista ao dossiê completo sobre a ascensão e queda do CJNG no link abaixo.",
+        "format": "teaser-youtube-shorts"
+      }
+    ]
+  },
+  "rawContent": ""
+}

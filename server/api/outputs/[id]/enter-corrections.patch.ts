@@ -16,8 +16,6 @@ export default defineEventHandler(async (event) => {
       output: {
         id: output.id,
         status: output.status,
-        imagesApproved: output.imagesApproved,
-        videosApproved: output.videosApproved
       }
     }
   } catch (err: any) {

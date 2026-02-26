@@ -12,7 +12,6 @@
 
 import { PhotographerService } from './filmmaker/photographer.service'
 import { ChoreographerService } from './filmmaker/choreographer.service'
-import { CinematographerService } from './filmmaker/cinematographer.service'
 import { createPipelineLogger } from '../utils/pipeline-logger'
 
 // Re-export types for backwards compatibility
@@ -22,7 +21,6 @@ import type { SceneInput, ProductionContext, RefinedScene } from './filmmaker/fi
 export class FilmmakerDirectorService {
   private photographer = new PhotographerService()
   private choreographer = new ChoreographerService()
-  private cinematographer = new CinematographerService()
 
   /**
    * Refina as cenas aplicando os 3 agentes em sequência.
@@ -82,19 +80,12 @@ export class FilmmakerDirectorService {
 
     log.info(`🎬 [2/2] Coreógrafo: ${choreResults.length} movimentos gerados.`)
 
-    // ── 3. Cineasta (DESATIVADO) ────────────────────────────────
-    // End keyframe generation disabled — single start-frame only
-    // produces more consistent motion with fewer artifacts.
-    // The Cinematographer agent call is skipped to save LLM cost.
-
-    // ── 4. Combinar resultados finais ─────────────────────────────
+    // ── 3. Combinar resultados finais ─────────────────────────────
     const combined: RefinedScene[] = workingScenes.map((s) => ({
       order: s.order,
       visualDescription: s.visualDescription,
       motionDescription: (s as any).motionDescription || 'Static cinematic shot.',
       sceneEnvironment: s.sceneEnvironment,
-      endVisualDescription: null,
-      endImageReferenceWeight: null,
     }))
 
     log.info(`✅ Pipeline completo: ${combined.length} cenas refinadas por 2 agentes (Fotógrafo + Coreógrafo).`)

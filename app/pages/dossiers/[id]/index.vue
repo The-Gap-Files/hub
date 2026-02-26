@@ -319,36 +319,13 @@
         <!-- Tab: Inteligência -->
         <Transition name="tab-fade" mode="out-in">
           <div v-if="activeTab === 'intelligence'" key="intelligence">
-            <!-- Episode Brief Bundle regeneration -->
-            <div class="flex items-center gap-3 mb-6 p-4 bg-cyan-500/5 border border-cyan-500/15 rounded-xl">
-              <Brain :size="18" class="text-cyan-400 shrink-0" />
-              <div class="flex-1 min-w-0">
-                <p class="text-xs text-zinc-400">
-                  Regenera o brief de episódios (EP1/EP2/EP3) com base nas fontes atuais do dossiê.
-                  Necessário após alterar fontes ou corrigir a distribuição de fatos.
-                </p>
-              </div>
-              <button
-                @click="regenerateEpisodeBrief"
-                :disabled="regeneratingBrief"
-                class="shrink-0 px-4 py-2 bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 text-xs font-bold rounded-lg transition-all disabled:opacity-50 flex items-center gap-2"
-              >
-                <RotateCw :size="14" :class="regeneratingBrief ? 'animate-spin' : ''" />
-                {{ regeneratingBrief ? 'Gerando...' : 'Regenerar Episode Brief' }}
-              </button>
-              <Transition name="tab-fade">
-                <span v-if="briefRegenSuccess" class="text-emerald-400 text-xs font-bold whitespace-nowrap">
-                  ✓ Brief atualizado
-                </span>
-              </Transition>
-            </div>
-
             <DossierIntelligenceCenter
               :dossier-id="dossierId"
               :initial-notes="dossier.notes || []"
               :initial-persons="dossier.persons || []"
               @updated="loadDossier"
             />
+
           </div>
         </Transition>
 
@@ -356,6 +333,13 @@
         <Transition name="tab-fade" mode="out-in">
           <div v-if="activeTab === 'monetization'" key="monetization">
             <DossierMonetization :dossier-id="dossierId" />
+          </div>
+        </Transition>
+
+        <!-- Tab: Escritor Chefe -->
+        <Transition name="tab-fade" mode="out-in">
+          <div v-if="activeTab === 'escritor-chefe'" key="escritor-chefe">
+            <DossierEscritorChefe :dossier-id="dossierId" />
           </div>
         </Transition>
 
@@ -387,6 +371,7 @@ import DossierImages from '~/components/dossier/DossierImages.vue'
 import DossierIntelligenceCenter from '~/components/dossier/DossierIntelligenceCenter.vue'
 import DossierOutputs from '~/components/dossier/DossierOutputs.vue'
 import DossierMonetization from '~/components/dossier/DossierMonetization.vue'
+import DossierEscritorChefe from '~/components/dossier/DossierEscritorChefe.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -408,10 +393,6 @@ const visualSettingsForm = ref({
 const visualStyles = ref<any[]>([])
 const allSeeds = ref<any[]>([])
 
-// Episode Brief regeneration
-const regeneratingBrief = ref(false)
-const briefRegenSuccess = ref(false)
-
 // Channel
 const showChannelPicker = ref(false)
 const selectedChannelId = ref('')
@@ -431,17 +412,23 @@ const workspaceTabs = computed(() => [
     icon: Brain, 
     count: (dossier.value?.notes?.length || 0) + (dossier.value?.persons?.length || 0)
   },
-  { 
-    id: 'monetization', 
-    name: 'Monetização', 
-    icon: TrendingUp, 
-    count: 0 
+  {
+    id: 'escritor-chefe',
+    name: 'Escritor Chefe',
+    icon: BookOpen,
+    count: 0
   },
-  { 
-    id: 'outputs', 
-    name: 'Produção', 
-    icon: PlayCircle, 
-    count: dossier.value?.outputsCount || 0 
+  {
+    id: 'monetization',
+    name: 'Monetização',
+    icon: TrendingUp,
+    count: 0
+  },
+  {
+    id: 'outputs',
+    name: 'Produção',
+    icon: PlayCircle,
+    count: dossier.value?.outputsCount || 0
   }
 ])
 
@@ -629,23 +616,6 @@ async function updateDossierChannel() {
   }
 }
 
-async function regenerateEpisodeBrief() {
-  if (regeneratingBrief.value) return
-  regeneratingBrief.value = true
-  briefRegenSuccess.value = false
-  try {
-    await $fetch(`/api/dossiers/${dossierId}/generate-episode-brief-bundle`, {
-      method: 'POST',
-      body: { force: true },
-    })
-    briefRegenSuccess.value = true
-    setTimeout(() => { briefRegenSuccess.value = false }, 4000)
-  } catch (err: any) {
-    alert(err?.data?.message || 'Erro ao regenerar Episode Brief Bundle')
-  } finally {
-    regeneratingBrief.value = false
-  }
-}
 </script>
 
 <style>

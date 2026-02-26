@@ -10,49 +10,47 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'ID do Output é obrigatório' })
   }
 
-  // Buscar output no banco (sem carregar outputData ainda — pode ser enorme)
-  const output = await prisma.output.findUnique({
-    where: { id },
+  // Read from RenderProduct
+  const renderProduct = await prisma.renderProduct.findUnique({
+    where: { outputId: id },
     select: {
-      outputData: true,
-      outputMimeType: true,
-      outputSize: true,
-      outputPath: true
+      videoData: true,
+      videoStoragePath: true,
+      mimeType: true,
+      fileSize: true,
     }
   })
 
-  if (!output) {
-    throw createError({ statusCode: 404, message: 'Output não encontrado' })
+  if (!renderProduct) {
+    throw createError({ statusCode: 404, message: 'Vídeo não encontrado' })
   }
 
   // Estratégia híbrida: disco ou banco
-  if (output.outputPath) {
-    // Vídeo armazenado em disco (arquivo grande)
+  if (renderProduct.videoStoragePath) {
     try {
-      const stats = await fs.stat(output.outputPath)
+      const stats = await fs.stat(renderProduct.videoStoragePath)
 
       setResponseHeaders(event, {
-        'Content-Type': output.outputMimeType || 'video/mp4',
+        'Content-Type': renderProduct.mimeType || 'video/mp4',
         'Content-Length': stats.size.toString(),
         'Accept-Ranges': 'bytes'
       })
 
-      const stream = createReadStream(output.outputPath)
+      const stream = createReadStream(renderProduct.videoStoragePath)
       return sendStream(event, stream)
     } catch {
       throw createError({ statusCode: 404, message: 'Arquivo de vídeo não encontrado em disco' })
     }
   }
 
-  if (output.outputData) {
-    // Vídeo armazenado no PostgreSQL (BYTEA)
+  if (renderProduct.videoData) {
     setResponseHeaders(event, {
-      'Content-Type': output.outputMimeType || 'video/mp4',
-      'Content-Length': output.outputData.length.toString(),
+      'Content-Type': renderProduct.mimeType || 'video/mp4',
+      'Content-Length': renderProduct.videoData.length.toString(),
       'Accept-Ranges': 'bytes'
     })
 
-    return output.outputData
+    return renderProduct.videoData
   }
 
   throw createError({ statusCode: 404, message: 'Vídeo não encontrado (nem em disco nem no banco)' })

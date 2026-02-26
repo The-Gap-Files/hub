@@ -40,6 +40,15 @@ const RisingBeatSchema = z.object({
   sourceReference: z.string().describe('Onde no material do dossiê está a evidência para este beat')
 })
 
+const MiniClimaxBeatSchema = z.object({
+  atScene: z.number().describe('Número aproximado da cena onde este mini-clímax ocorre'),
+  revelation: z.string().describe('O que é revelado (1 frase)'),
+  retentionMechanic: z.enum(['payoff', 'escalation', 'reframe', 'question_plant']).describe(
+    'Como esta revelação sustenta retenção: payoff (fecha loop), escalation (eleva aposta), reframe (recontextualiza), question_plant (planta nova pergunta)'
+  ),
+  curiosityGapPlanted: z.string().describe('Nova pergunta aberta após este mini-clímax')
+})
+
 const SegmentDistributionSchema = z.object({
   hook: z.number().describe('Número de cenas para o HOOK (cada cena = 5s)'),
   context: z.number().describe('Número de cenas para CONTEXT/SETUP'),
@@ -121,6 +130,46 @@ const StoryOutlineSchema = z.object({
   title: z.string().optional().describe(
     'Título VIRAL do vídeo: máximo 8-10 palavras, tensão + curiosidade. ' +
     'Obrigatório para hook-only. Opcional para outros roles.'
+  ),
+
+  // ── Viral-First: Promise + Shock Beat ──────────────────────────
+  oneSentencePromise: z.string().describe(
+    'A promessa do vídeo em UMA frase (máximo 15 palavras). ' +
+    'Aparece como texto na tela no 1º segundo. Deve responder "por que assistir?" instantaneamente. ' +
+    'Ex: "A mentira que a Igreja manteve por 500 anos", "O documento que ninguém deveria ter encontrado"'
+  ),
+  shockContrastBeat: z.object({
+    type: z.enum(['before_after', 'truth_myth', 'absurd_number', 'consequence', 'reversal']).describe(
+      'Tipo de contraste: before_after (antes/depois), truth_myth (verdade vs mito), ' +
+      'absurd_number (número chocante), consequence (consequência inesperada), reversal (inversão de expectativa)'
+    ),
+    description: z.string().describe(
+      'O contraste forte nos primeiros 5 segundos do vídeo. ' +
+      'Ex (before_after): "Uma cidade medieval pacífica → um julgamento que mudou a história". ' +
+      'Ex (absurd_number): "13 confissões idênticas. Sob a mesma tortura. Mesmo texto."'
+    )
+  }).describe(
+    'Contraste forte planejado para os primeiros 5 segundos. ' +
+    'O cérebro reage a CONTRASTES (antes/depois, verdade/mito, número absurdo). ' +
+    'Deve estar no hook ou logo após, para "parar o scroll" imediatamente.'
+  ),
+
+  // ── Retention Engineering (Full Video) ──────────────────────────
+  primaryCuriosityGap: z.string().optional().describe(
+    'Pergunta-mestra que sustenta todo o vídeo (máx 15 palavras, interrogativa). ' +
+    'Nunca respondida antes do clímax. Reaberta nos re-engagement hooks como eco implícito. ' +
+    'Ex: "Quem autorizou o silêncio por 500 anos?"'
+  ),
+  miniClimaxBeats: z.array(MiniClimaxBeatSchema).optional().describe(
+    'Lista de 2-4 micro-revelações distribuídas entre re-engagement hooks para evitar dead zones.'
+  ),
+  expectedRetentionCurve: z.object({
+    hookRate: z.number().min(0).max(100).describe('% esperada de audiência que passa dos 30s (alvo >65)'),
+    midpointRetention: z.number().min(0).max(100).describe('% esperada no midpoint ~50% do vídeo (alvo >40)'),
+    climaxRetention: z.number().min(0).max(100).describe('% esperada no clímax (alvo >30)'),
+    rationale: z.string().describe('Por que esses números são plausíveis dado o hook escolhido')
+  }).optional().describe(
+    'Curva de retenção esperada — usado pelo Retention QA como linha de base para calibrar scores.'
   )
 })
 
@@ -888,7 +937,16 @@ ${outline.openLoops.filter(l => l.closedAtBeat === null).map(loop => `• "${loo
 ━━ NÍVEL DE RESOLUÇÃO: ZERO ━━
 🚨 RESOLUÇÃO ZERO — Pura provocação. NENHUMA explicação, recap ou conclusão. Corte seco.
 
-🚨 Este outline é MUNIÇÃO + DIRETIVAS. O hookStrategy, loopSentence e título do Arquiteto são OBRIGATÓRIOS. Os beats são matéria-prima para selecionar.`
+🚨 Este outline é MUNIÇÃO + DIRETIVAS. O hookStrategy, loopSentence e título do Arquiteto são OBRIGATÓRIOS. Os beats são matéria-prima para selecionar.
+${outline.oneSentencePromise ? `
+━━ 📢 PROMESSA DO VÍDEO (ON-SCREEN TEXT — CENA 1) ━━
+"${outline.oneSentencePromise}"
+⚠️ Esta frase DEVE aparecer como onScreenText na primeira cena.` : ''}
+${outline.shockContrastBeat ? `
+━━ ⚡ CONTRASTE DE CHOQUE (PRIMEIROS 5s) ━━
+Tipo: ${outline.shockContrastBeat.type.toUpperCase()}
+"${outline.shockContrastBeat.description}"
+⚠️ Este contraste DEVE estar presente nas primeiras 1-2 cenas.` : ''}`
   }
 
   // ══════════════════════════════════════════════════════════════════
@@ -938,6 +996,29 @@ ${outline.resolutionLevel ? `
 ━━ NÍVEL DE RESOLUÇÃO: ${outline.resolutionLevel.toUpperCase()} ━━
 ${outline.resolutionLevel === 'none' ? '🚨 RESOLUÇÃO ZERO — Pura provocação. NENHUMA explicação, recap ou conclusão. Corte seco.' : ''}${outline.resolutionLevel === 'partial' ? '🚨 RESOLUÇÃO PARCIAL — Contextualiza mas NÃO fecha. Deixe perguntas sem resposta.' : ''}${outline.resolutionLevel === 'full' ? 'Resolução completa — história fechada com todas as respostas.' : ''}` : ''}
 
-📐 BLUEPRINT DE REFERÊNCIA: A estrutura e ordem dos beats acima são o esqueleto narrativo — siga-os obrigatoriamente. A distribuição de cenas por segmento é o ALVO — mire nela. Se os fatos do dossiê não preenchem todas as cenas de um segmento, use LICENÇA CRIATIVA: crie dramatizações, diálogos ficcionais entre personagens, reconstruções históricas plausíveis e pontes narrativas para sustentar a contagem. O mínimo absoluto de cenas é INEGOCIÁVEL.`
+📐 BLUEPRINT DE REFERÊNCIA: A estrutura e ordem dos beats acima são o esqueleto narrativo — siga-os obrigatoriamente. A distribuição de cenas por segmento é o ALVO — mire nela. Se os fatos do dossiê não preenchem todas as cenas de um segmento, use LICENÇA CRIATIVA: crie dramatizações, diálogos ficcionais entre personagens, reconstruções históricas plausíveis e pontes narrativas para sustentar a contagem. O mínimo absoluto de cenas é INEGOCIÁVEL.
+${outline.oneSentencePromise ? `
+━━ 📢 PROMESSA DO VÍDEO (ON-SCREEN TEXT — CENA 1) ━━
+"${outline.oneSentencePromise}"
+⚠️ Esta frase DEVE aparecer como onScreenText na primeira cena.` : ''}
+${outline.shockContrastBeat ? `
+━━ ⚡ CONTRASTE DE CHOQUE (PRIMEIROS 5s) ━━
+Tipo: ${outline.shockContrastBeat.type.toUpperCase()}
+"${outline.shockContrastBeat.description}"
+⚠️ Este contraste DEVE estar presente nas primeiras 1-2 cenas.` : ''}
+${outline.primaryCuriosityGap ? `
+━━ 🎯 CURIOSIDADE-MESTRA (SUSTENTE DO MINUTO 0 AO CLÍMAX) ━━
+"${outline.primaryCuriosityGap}"
+⚠️ Esta pergunta deve estar implícita em cada re-engagement hook. Nunca responda antes do clímax.` : ''}
+${outline.miniClimaxBeats && outline.miniClimaxBeats.length > 0 ? `
+━━ ⚡ MINI-CLÍMAX BEATS (anti-dead-zone) ━━
+${outline.miniClimaxBeats.map(b => `• Cena ~${b.atScene}: ${b.revelation} [${b.retentionMechanic}] → abre: "${b.curiosityGapPlanted}"`).join('\n')}
+⚠️ Estes micro-payoffs devem aparecer no roteiro nas cenas indicadas para evitar zonas mortas.` : ''}
+${outline.expectedRetentionCurve ? `
+━━ 📊 CURVA DE RETENÇÃO ESPERADA (REFERÊNCIA DO ARQUITETO) ━━
+Hook rate esperado: ${outline.expectedRetentionCurve.hookRate}% (alvo: >65%)
+Midpoint: ${outline.expectedRetentionCurve.midpointRetention}% | Clímax: ${outline.expectedRetentionCurve.climaxRetention}%
+Justificativa: ${outline.expectedRetentionCurve.rationale}
+⚠️ O roteirista deve honrar esses números entregando o que o plano prometeu.` : ''}`
 }
 

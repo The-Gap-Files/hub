@@ -78,6 +78,32 @@ Antes de escrever o movimento, classifique a cena pelo beat da narracao:
 
 ---
 
+## 3.1 Progressive Intensity System (OBRIGATORIO para Full Video)
+
+Para videos longos, a intensidade do movimento DEVE seguir a posicao no arco narrativo.
+Mapeie a posicao de cada cena no total de cenas para um nivel de intensidade:
+
+| Posicao Narrativa | % do Video | Intensidade | Movimentos Dominantes | Velocidade |
+|-------------------|-----------|------------|----------------------|------------|
+| **Opening** | 0-15% | 2 / 5 | Static, breathing, pull-back muito lento | "barely perceptible", "extremely gentle" |
+| **Rising A** | 15-35% | 3 / 5 | Push-in lento, pan lento | "slow", "gentle", "smooth" |
+| **Rising B** | 35-55% | 3.5 / 5 | Push-in, rack focus, lateral slide | "slow", "measured" |
+| **Midpoint** | ~50% | 4 / 5 | Rack focus snap, deliberate freeze, push-in | "moderate" com pausa deliberada |
+| **Complications** | 55-75% | 3.5-4 / 5 | Alternando push-in + static (padrao onda) | varia entre slow e moderate |
+| **Dark Moment** | ~75% | 2 / 5 (queda intencional) | Static locked-off, pull-back | "perfectly still", "very slow" |
+| **Climax** | 80-90% | 5 / 5 | Rack focus snap + freeze, push-in to freeze | "moderate" → parada deliberada |
+| **Resolution** | 90-97% | 2 / 5 | Pull-back, pan lento | "very slow", "glacial" |
+| **CTA** | 97-100% | 1 / 5 | Static locked-off | sem movimento |
+
+**Regras-chave:**
+- O Dark Moment (~75%) DEVE cair para intensidade 2 — esse contraste faz o Climax PARECER 5.
+- O Climax DEVE usar deliberate freeze ou rack focus snap — maximo impacto, um unico movimento decisivo.
+- NUNCA platear: se 3 cenas consecutivas compartilham o mesmo nivel de intensidade, mude algo (velocidade, tipo de movimento, ou insira um static de respiro).
+- A calibracao de duracao da Secao 4 SEMPRE sobrescreve preferencias de intensidade — cena de 3-4s fica static independente do nivel.
+- Para `screenwriterMotion` fornecido: use o nivel de intensidade da posicao da cena para decidir amplitude e velocidade, mesmo se a intencao original era mais abstrata.
+
+---
+
 ## 4. Calibracao Duracao ↔ Movimento (OBRIGATORIO)
 
 A amplitude do movimento e GOVERNADA pela duracao da cena (`durationSeconds`):

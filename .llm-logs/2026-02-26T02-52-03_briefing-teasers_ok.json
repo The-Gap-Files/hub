@@ -1,0 +1,169 @@
+{
+  "timestamp": "2026-02-26T02:52:03.568Z",
+  "taskId": "briefing-teasers",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "gemini-3-flash-preview",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Briefing Step — Bundle de Briefs para TEASERS (V1)\n\nVocê é um **Briefing Generator**. Sua função é transformar um dossiê bruto (fontes longas, notas, persons) em um **brief enxuto e seguro** para alimentar as etapas de TEASERS:\n- Monetization (gateway/deep-dive/hook-only)\n- Story Architect (teasers)\n- Script (teasers)\n\n## Objetivo\n\nGerar um JSON no formato **BriefBundleV1** com:\n- fatos reutilizáveis (“munição narrativa”) sem ruído\n- regras hard de segurança (visual e linguagem) para não contaminar o funil\n- diretrizes por papel narrativo (gateway / deep-dive / hook-only)\n\nO brief deve ser **curto**, **estruturado**, **não-didático** e **sem elementos proibidos**.\n\n## Regras Hard (INVIOLÁVEIS)\n\n0. **ANTI-TERMOS-SENSÍVEIS (plataforma + viral):** NUNCA use \"tortura infantil\", \"sangue infantil\", \"violência infantil\" nos fatos. Se o dossiê mencionar, REFORMULE para consequência: \"O tribunal obteve confissões que autorizaram o confisco\" em vez de \"Sob tortura, confessaram\". Use: decreto, confisco, autorizou, usou como pretexto, registro.\n   **MECANISMO > SINTOMA:** NÃO descreva captura/recolhimento de pessoas (\"guardas recolhiam crianças\", \"levaram para o tribunal\"). Descreva o SISTEMA: \"O tesouro financiou o tribunal\", \"O decreto autorizou o confisco\".\n\n1. **PROIBIDO** gerar ou sugerir:\n   - armas de fogo, rifles, pistolas, munição\n   - atirador, execução, “tiro” como ação visual\n   - gore/violência gráfica/tortura explícita\n   - close-up de mãos humanas e close-up de rostos humanos (macro/anatomia)\n   - símbolos extremistas contemporâneos em destaque\n2. Se o dossiê mencionar ataques/armas/sangue, **transforme em artefatos**:\n   - manifesto (texto), headline, recorte, tela/monitor, documento, registro\n3. **Fatos devem ser safe**:\n   - Foque em **mecanismo/sistema** (quem autorizou, qual documento, qual incentivo)\n   - Evite descrever violência; descreva “decisão”, “ordem”, “confisco”, “propaganda”, “registro”\n\n## Como escolher fatos (facts[])\n\n- Produza entre **12 e 40** fatos.\n- Cada fato:\n  - 1–2 linhas\n  - linguagem objetiva (sem tese/conclusão moral)\n  - se possível, inclua `sourceRef` curto (título/índice da fonte)\n- Se houver dados concretos (ano, cidade), inclua **somente se estiver explícito no dossiê**.\n\n## Diretrizes por papel (roleBriefs)\n\n- **gateway**: precisa de contexto suficiente para standalone (mas sem enciclopédia).\n- **deep-dive**: foco em 1 ângulo; mínimo contexto; “1 frase de setup no máximo”.\n- **hook-only**: mínimo absoluto; 1 conceito central; 1–3 fatos mais chocantes (mecanismo), zero explicação. Fatos SEM \"tortura infantil\", \"sangue infantil\", \"violência infantil\" — só mecanismo (decreto, confisco, tribunal).\n\n## Output\n\nRetorne **APENAS** um JSON válido (sem markdown, sem ```json, sem explicações), no schema `BriefBundleV1`."
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "📋 TEMA: A transformação de um imigrante pobre em líder do cartel mais violento do mundo e a caçada implacável que terminou em 2026.\n\n📋 TÍTULO: El Mencho: O Ascensão Sangrenta e o Fim do 'Senhor dos Abacates'\n\n🎨 DIRETRIZES DE IDENTIDADE DO UNIVERSO (WARNING PROTOCOL):\nAtmosfera de narcoculto e guerra urbana. Paleta com tons de terra, verde-oliva militar e vermelho intenso. Priorizar texturas de documentos confidenciais, mapas de satélite e comboios blindados. Evitar estética glamourizada; focar na tensão e no rastro de destruição.\n\n📚 FONTES DO DOSSIÊ (ordenadas por peso/relevância):\n[1] (text) A Ascensão, Paramilitarização e Queda de Nemesio Oseguera Cervantes (\"El Mencho\") e a Reconfiguração do Cártel Jalisco Nueva Generación\n# **Relatório de Inteligência Geopolítica e Criminal: A Ascensão, Paramilitarização e Queda de Nemesio Oseguera Cervantes (\"El Mencho\") e a Reconfiguração do Cártel Jalisco Nueva Generación**\n\nA arquitetura da segurança hemisférica e o equilíbrio de poder no ecossistema do narcotráfico global sofreram uma fratura tectônica e irreversível no dia 22 de fevereiro de 2026\\. A morte de Nemesio Rubén Oseguera Cervantes, o arquiteto do terror criminal globalmente conhecido como \"El Mencho\", durante uma operação militar de alta complexidade no município de Tapalpa, encerrou um dos capítulos mais sangrentos e disruptivos da história do crime organizado latino-americano.1 Sob a sua liderança autocrática, o Cártel Jalisco Nueva Generación (CJNG) transcendeu a taxonomia tradicional de uma gangue de contrabando transfronteiriço para se estabelecer como uma insurgência paramilitar de escala transnacional, dotada de capacidades financeiras, logísticas e bélicas que frequentemente rivalizavam ou superavam as do próprio Estado mexicano.3\n\nEste relatório de inteligência exaustivo tem como objetivo dissecar, com precisão forense e profundidade analítica, a metamorfose criminal de Oseguera Cervantes. A investigação delineia a sua evolução improvável, desde as raízes na pobreza agrícola das plantações de abacate de Michoacán, passando pela sua experiência no sistema prisional dos Estados Unidos e nas fileiras da polícia municipal mexicana, até a consolidação de um império do crime diversificado.4 O documento examina minuciosamente a engenharia financeira do clã \"Los Cuinis\", a institucionalização da extorsão agrícola do \"Ouro Verde\", a adoção pioneira de táticas de terrorismo narco com o recrutamento de mercenários estrangeiros, e, finalmente, os eventos cinéticos e as falhas de contrainteligência que culminaram em sua eliminação tática em 2026\\. Além disso, o relatório projeta os cenários iminentes de sucessão que ameaçam mergulhar a região em uma nova e incontrolável espiral de fragmentação armada.\n\n## **Perfil Investigativo: O Homem por trás do Mito (Psicologia e Saúde)**\n\nA compreensão da doutrina operacional do CJNG exige a desconstrução primária da figura de seu fundador. Diferente de seus contemporâneos no panteão do narcotráfico mexicano — notoriamente Joaquín \"El Chapo\" Guzmán, cuja propensão ao exibicionismo, à narcocultura ostensiva e ao reconhecimento público precipitou sua queda —, Nemesio Oseguera Cervantes cultivou uma liderança fundamentada na invisibilidade patológica, na disciplina espartana e no uso instrumental e maximizado do terror psicológico. A sua psicologia de comando não era orientada pelo desejo de aclamação, mas pela necessidade absoluta de controle territorial e dissuasão através da barbárie calculada.\n\nNascido em 17 de julho de 1966 na comunidade rural isolada de Culotitlán, no município de Aguililla, no coração do estado de Michoacán, a infância de El Mencho foi forjada na extrema pobreza e na dinâmica extrativista da agricultura mexicana.4 O abandono da educação formal ainda na quinta série do ensino fundamental para ingressar no trabalho braçal nos campos de cultivo de abacate incutiu nele uma compreensão visceral e pragmática das cadeias logísticas agrícolas — um conhecimento que, décadas mais tarde, ele subverteria para criar a mais sofisticada rede de extorsão agroindustrial do país.4 Aos quatorze anos, a transição do cultivo legal para a vigilância de plantações clandestinas de maconha nas montanhas de Tierra Caliente marcou sua iniciação precoce na economia ilícita, desenvolvendo sua capacidade de navegação em terrenos hostis e de evasão, habilidades que definiriam sua sobrevivência por mais de seis décadas.4\n\nO perfil psicológico de El Mencho, segundo análises comportamentais derivadas de desertores e inteligência de sinais, apontava para um indivíduo com traços de paranoia operacional aguda, desprovido de limites morais na aplicação da violência e com uma exigência draconiana de lealdade. O uso da violência extrema pelo CJNG — caracterizado por decapitações públicas, execuções em massa, vídeos de propaganda exibindo contingentes paramilitares uniformizados e a imposição de terrorismo urbano — não era um subproduto do caos, mas uma estratégia deliberada de branding corporativo criminal desenhada por Oseguera Cervantes.4 O terror era a principal moeda de troca do cartel, utilizada para subjugar populações, intimidar corporações policiais e sinalizar uma postura de negação de área impenetrável ao governo federal.\n\nContudo, a vulnerabilidade que, em última análise, ditaria o ritmo de suas operações na última década não advinha de falhas em sua rede de segurança, mas de um colapso em sua própria fisiologia. Avaliações de inteligência consolidadas ao longo de 2025 confirmaram os rumores persistentes de que Oseguera Cervantes sofria de insuficiência renal crônica em estágio terminal.6 Esta condição debilitante implicava que seus rins operavam com menos de quinze por cento da capacidade normal, provocando um acúmulo sistêmico de toxinas e retenção extrema de líquidos no organismo, exigindo sessões frequentes e ininterruptas de hemodiálise para a manutenção de sua vida.6\n\nEsta realidade médica transformou o homem mais procurado do hemisfério ocidental em um prisioneiro do seu próprio aparato de segurança. A doença impôs um contingenciamento logístico severo, limitando drasticamente a sua mobilidade a uma zona de exclusão altamente fortificada na região montanhosa de Jalisco.6 Ao contrário de outros barões da droga que podiam fugir através de fronteiras internacionais ao primeiro sinal de pressão governamental, El Mencho estava ancorado à sua necessidade por suporte vital. A inteligência militar mexicana (SEDENA) e norte-americana (DEA) passaram a monitorar não apenas o fluxo de precursores químicos e armas, mas a movimentação anômala de equipamentos médicos especializados, insumos farmacêuticos e médicos nefrologistas cooptados em direção à \"sierra\".6\n\nA necessidade constante de tratamento gerou narrativas folclóricas (\"narcocultura\") que as agências de inteligência precisaram dissipar ativamente. Durante o ano de 2020, consolidou-se o mito de que o líder do CJNG havia financiado e construído um hospital clandestino de alta tecnologia, equipado com centros cirúrgicos avançados, nas localidades de Villa Purificación ou El Alcíhuatl, em Jalisco, para uso exclusivo próprio e de seu círculo de confiança.6 Investigações de campo rigorosas e pronunciamentos de autoridades municipais desmentiram categoricamente essa estrutura utópica. As instalações atribuídas ao cartel não passavam de obras inacabadas e pequenos sanatórios rústicos, com dimensões que lembravam consultórios médicos de bairro, totalmente incapazes de fornecer a infraestrutura asséptica necessária para terapias renais de longo prazo.6 A realidade era significativamente mais crua: El Mencho recebia tratamentos complexos em abrigos improvisados, cabanas montanhosas fortificadas, dependendo de uma rede frágil de pelo menos duas pessoas de seu círculo íntimo encarregadas exclusivamente de gerenciar seus medicamentos, dieta e a entrada furtiva de profissionais de saúde no perímetro de segurança.6 Esta dependência contínua de fatores externos para a sua sobrev... [truncated 523606 chars]"
+      }
+    ]
+  },
+  "parsed": {
+    "globalSafety": {
+      "allowedArtifacts": [
+        "documentos confidenciais",
+        "mapas de satélite",
+        "headlines de jornais",
+        "registros médicos",
+        "relatórios de inteligência",
+        "veículos blindados (distância)",
+        "transcrições de rádio"
+      ],
+      "notes": [
+        "Transformar confrontos armados em 'operações cinéticas' ou 'eventos táticos'",
+        "Focar na falência renal como o mecanismo biológico que permitiu a localização do alvo",
+        "Representar a economia do cartel através de documentos de confisco e registros de exportação de abacate"
+      ],
+      "forbiddenElements": [
+        "armas de fogo explícitas",
+        "tiros em progresso",
+        "execuções visualizadas",
+        "sangue ou gore",
+        "close-up de rostos ou mãos humanas"
+      ],
+      "forbiddenNarrationTerms": [
+        "tortura infantil",
+        "sangue infantil",
+        "violência infantil",
+        "atirador",
+        "execução gráfica"
+      ]
+    },
+    "roleBriefs": {
+      "gateway": {
+        "suggestedFactsMax": 15,
+        "notes": [
+          "Narrar a ascensão completa: de imigrante e policial a líder do maior cartel do mundo",
+          "Concluir com a operação militar de 2026 e o vácuo de poder resultante"
+        ],
+        "contextLevel": "medium",
+        "suggestedFactsMin": 8
+      },
+      "deep-dive": {
+        "suggestedFactsMax": 10,
+        "notes": [
+          "Focar na transformação do cartel em uma força paramilitar tecnológica (drones e blindados)",
+          "Explorar o recrutamento de mercenários de elite via ofertas enganosas"
+        ],
+        "suggestedFactsMin": 5,
+        "contextLevel": "low"
+      },
+      "hook-only": {
+        "contextLevel": "minimal",
+        "suggestedFactsMin": 3,
+        "notes": [
+          "Focar no paradoxo do 'Senhor dos Abacates' que financiava drones com C4 através do agronegócio",
+          "Destacar a morte por choque hipovolêmico em um helicóptero militar após traição interna"
+        ],
+        "suggestedFactsMax": 5
+      }
+    },
+    "theme": "A ascensão paramilitar e queda biológica de El Mencho, líder do CJNG.",
+    "language": "pt-BR",
+    "version": "briefBundleV1",
+    "title": "El Mencho: O Ascensão Sangrenta e o Fim do Senhor dos Abacates",
+    "facts": [
+      {
+        "text": "Nemesio Oseguera Cervantes nasceu em 1966 em Michoacán, iniciando sua trajetória como trabalhador braçal em plantações de abacate.",
+        "sourceRef": "[1]"
+      },
+      {
+        "text": "Na década de 90, o futuro líder cumpriu três anos de pena em uma prisão federal no Texas por tráfico de heroína, mapeando vulnerabilidades do sistema judiciário americano.",
+        "sourceRef": "[1]"
+      },
+      {
+        "text": "Após ser deportado em 1996, ele ingressou na polícia municipal de Jalisco, utilizando o cargo para aprender táticas de patrulha e comunicações de rádio do Estado.",
+        "sourceRef": "[1]"
+      },
+      {
+        "text": "A fundação do Cártel Jalisco Nueva Generación (CJNG) ocorreu após um vácuo de poder gerado pela morte de um líder do Cartel de Sinaloa em 2010.",
+        "sourceRef": "[1]"
+      },
+      {
+        "text": "O cartel institucionalizou a extorsão agrícola em Michoacán, cobrando taxas de proteção de até 4 pesos por quilo de limão e abacate produzidos.",
+        "sourceRef": "[1]"
+      },
+      {
+        "text": "A engenharia financeira do grupo era operada pelo clã 'Los Cuinis', que lavava capitais através de redes hoteleiras e centros comerciais de luxo.",
+        "sourceRef": "[1]"
+      },
+      {
+        "text": "O CJNG recrutou veteranos de forças especiais estrangeiras por meio de ofertas enganosas de emprego para segurança privada via aplicativos de mensagens.",
+        "sourceRef": "[1]"
+      },
+      {
+        "sourceRef": "[1]",
+        "text": "A organização foi pioneira no uso de drones adaptados com mecanismos para liberação de explosivos plásticos contra forças de segurança."
+      },
+      {
+        "sourceRef": "[1]",
+        "text": "Veículos de combate blindados artesanais, conhecidos como 'Monstruos', foram projetados com engenharia focada em resistir a munições de calibre militar."
+      },
+      {
+        "sourceRef": "[1]",
+        "text": "O líder do cartel sofria de insuficiência renal crônica terminal, operando com menos de 15% da capacidade renal nos seus últimos anos."
+      },
+      {
+        "text": "A dependência de hemodiálise forçou a criação de uma rede logística médica precária em abrigos improvisados nas montanhas de Jalisco.",
+        "sourceRef": "[1]"
+      },
+      {
+        "sourceRef": "[1]",
+        "text": "Em março de 2020, a Operação Python resultou em mais de 600 prisões táticas e 350 indiciamentos contra a hierarquia de distribuição do cartel nos EUA."
+      },
+      {
+        "sourceRef": "[1]",
+        "text": "A localização exata do complexo logístico do líder foi entregue às autoridades por uma parceira amorosa do círculo íntimo no início de 2026."
+      },
+      {
+        "sourceRef": "[1]",
+        "text": "A Operação Tapalpa, em 22 de fevereiro de 2026, envolveu esquadrões de elite e apoio de inteligência internacional para cercar o perímetro montanhoso."
+      },
+      {
+        "text": "O líder do CJNG faleceu a bordo de uma aeronave de evacuação médica militar devido a um choque hipovolêmico após ser atingido durante a tentativa de fuga.",
+        "sourceRef": "[1]"
+      },
+      {
+        "sourceRef": "[1]",
+        "text": "A morte do fundador desencadeou ataques coordenados e bloqueios em 16 estados do México como protocolo de retaliação da organização."
+      },
+      {
+        "text": "A sucessão do cartel em 2026 polarizou o grupo entre uma ala focada em hegemonia militar e outra voltada para a gestão burocrática e territorial.",
+        "sourceRef": "[1]"
+      },
+      {
+        "text": "O clã 'Los Cuinis' utilizava empresas de fachada, como a ABR Management, para blindar o patrimônio do cartel contra apreensões internacionais.",
+        "sourceRef": "[1]"
+      },
+      {
+        "text": "O cartel assegurou o controle de portos estratégicos no Pacífico para gerenciar o fluxo de precursores químicos importados da Ásia.",
+        "sourceRef": "[1]"
+      },
+      {
+        "text": "Relatórios de inteligência indicam que o cartel operava como uma Empresa Militar Privada clandestina, importando táticas de guerra assimétrica.",
+        "sourceRef": "[1]"
+      }
+    ]
+  },
+  "rawContent": ""
+}

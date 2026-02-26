@@ -3,7 +3,6 @@
  * Permite ao usuário gerar novas opções e escolher outra.
  */
 
-import { Prisma } from '@prisma/client'
 import { prisma } from '../../../utils/prisma'
 
 export default defineEventHandler(async (event) => {
@@ -17,12 +16,8 @@ export default defineEventHandler(async (event) => {
 
   if (!output) throw createError({ statusCode: 404, message: 'Output não encontrado' })
 
-  await prisma.output.update({
-    where: { id },
-    data: {
-      thumbnailData: null,
-      thumbnailCandidates: Prisma.DbNull
-    }
+  await prisma.thumbnailProduct.deleteMany({
+    where: { outputId: id }
   })
 
   return { success: true, message: 'Thumbnail removida. Você pode gerar novas opções.' }

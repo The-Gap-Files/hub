@@ -27,8 +27,8 @@ import { runFilmmakerBatched } from './_shared/run-filmmaker-batched'
 import { callWriter } from './_shared/call-writer'
 import type { ScriptGenerationRequest } from '../../../types/ai-providers'
 import type { StoryOutline } from '../../story-architect.service'
-import { formatEpisodeBriefForPrompt } from '../../../types/episode-briefing.types'
-import { normalizeEpisodeBriefBundleV1 } from '../../../types/episode-briefing.types'
+import { formatEpisodeBriefForPrompt, normalizeEpisodeBriefBundleV1 } from '../../../types/episode-briefing.types'
+import { normalizeEscritorChefeBundleV1, formatEpisodeProseForPrompt } from '../../../types/escritor-chefe.types'
 
 const LOG = '[ScriptStage]'
 
@@ -96,9 +96,12 @@ class ScriptGenerationStage {
 
     // 4. Writer → Screenwriter (pipeline de duas etapas)
     //    Hook-only pula o Writer (são apenas 4-5 cenas, sem risco de reinício narrativo)
+    //    Se writerProse já existe (gerado e aprovado separadamente), pular Writer
     const isHookOnly = promptContext.narrativeRole === 'hook-only'
-    if (!isHookOnly) {
+    if (!isHookOnly && !promptContext.writerProse) {
       await this.runWriterStage(promptContext, outputId)
+    } else if (promptContext.writerProse) {
+      console.log(`${LOG} 📝 Writer prose já existe (${promptContext.writerProse.split(/\s+/).length} palavras) — pulando para Screenwriter`)
     }
 
     // 5. Resolver script provider (hook-only vs genérico)
@@ -161,7 +164,7 @@ class ScriptGenerationStage {
 
   // ─── PRIVATE: Monetization Meta ──────────────────────────────────
 
-  private enrichFromMonetizationMeta(
+  public enrichFromMonetizationMeta(
     promptContext: ScriptGenerationRequest,
     outlineData: ScriptStageInput['outlineData']
   ): void {
@@ -254,7 +257,7 @@ class ScriptGenerationStage {
 
   // ─── PRIVATE: Source Filtering ───────────────────────────────────
 
-  private async applySourceFiltering(
+  public async applySourceFiltering(
     promptContext: ScriptGenerationRequest,
     outlineData: ScriptStageInput['outlineData'],
     outputId: string
@@ -278,7 +281,7 @@ class ScriptGenerationStage {
       const episodeNumber = promptContext.episodeNumber || meta?.episodeNumber
       let briefSource: { title: string; content: string; type: string; weight: number } | null = null
 
-      // Injetar Episode Brief como source para o Writer ter substância factual
+      // Prioridade: Escritor Chefe (prosa) > Episode Brief (facts estruturados)
       if (episodeNumber) {
         try {
           const output = await prisma.output.findUnique({
@@ -288,9 +291,22 @@ class ScriptGenerationStage {
           if (output?.dossierId) {
             const dossier = await prisma.dossier.findUnique({
               where: { id: output.dossierId },
-              select: { episodeBriefBundleV1: true },
+              select: { escritorChefeBundleV1: true, episodeBriefBundleV1: true },
             })
-            if (dossier?.episodeBriefBundleV1) {
+
+            if (dossier?.escritorChefeBundleV1) {
+              // Escritor Chefe disponível — usar prosa como fonte da verdade
+              const escritorBundle = normalizeEscritorChefeBundleV1(dossier.escritorChefeBundleV1)
+              const proseContent = formatEpisodeProseForPrompt(escritorBundle, episodeNumber)
+              briefSource = {
+                title: `Prosa EP${episodeNumber} — Escritor Chefe (fonte da verdade)`,
+                content: proseContent,
+                type: 'brief',
+                weight: 2.0,
+              }
+              console.log(`${LOG} 📖 Escritor Chefe EP${episodeNumber} injetado como source para Writer`)
+            } else if (dossier?.episodeBriefBundleV1) {
+              // Fallback: Episode Brief (facts estruturados)
               const bundle = normalizeEpisodeBriefBundleV1(dossier.episodeBriefBundleV1)
               const briefContent = formatEpisodeBriefForPrompt(bundle, episodeNumber)
               briefSource = {
@@ -299,15 +315,16 @@ class ScriptGenerationStage {
                 type: 'brief',
                 weight: 2.0,
               }
-              console.log(`${LOG} 📋 Episode Brief EP${episodeNumber} injetado como source para Writer`)
+              console.log(`${LOG} 📋 Episode Brief EP${episodeNumber} injetado como source para Writer (fallback)`)
             }
           }
         } catch (err) {
-          console.warn(`${LOG} ⚠️ Falha ao carregar Episode Brief para injeção no Writer:`, err)
+          console.warn(`${LOG} ⚠️ Falha ao carregar Brief/Prosa para injeção no Writer:`, err)
         }
       }
 
       // Filtrar sources: manter apenas briefs (inclui o que acabamos de injetar)
+      // Writer/Screenwriter NUNCA recebem o dossier bruto — apenas o brief curado
       const allSources = [...(promptContext.sources || []), ...(briefSource ? [briefSource] : [])]
       promptContext.sources = allSources.filter((s: any) => s.type === 'brief')
       console.log(`${LOG} 📺 Full Video: fontes filtradas para brief only (${promptContext.sources.length}/${allSources.length})`)
@@ -455,18 +472,24 @@ class ScriptGenerationStage {
     providerName: string,
     promptContext: ScriptGenerationRequest
   ): Promise<string> {
-    const script = await prisma.script.create({
-      data: {
-        outputId,
-        summary: scriptResponse.summary || '',
-        fullText: scriptResponse.fullText,
-        wordCount: scriptResponse.wordCount,
-        provider: providerName as any,
-        modelUsed: scriptResponse.model,
-        promptUsed: JSON.stringify(promptContext),
-        backgroundMusicPrompt: scriptResponse.backgroundMusic?.prompt || null,
-        backgroundMusicVolume: scriptResponse.backgroundMusic?.volume || null,
-      },
+    const scriptData = {
+      summary: scriptResponse.summary || '',
+      fullText: scriptResponse.fullText,
+      wordCount: scriptResponse.wordCount,
+      provider: providerName as any,
+      modelUsed: scriptResponse.model,
+      promptUsed: JSON.stringify(promptContext),
+      writerProse: promptContext.writerProse || null,
+      backgroundMusicPrompt: scriptResponse.backgroundMusic?.prompt || null,
+      backgroundMusicVolume: scriptResponse.backgroundMusic?.volume || null,
+    }
+
+    // Upsert to handle cases where a script already exists for this output
+    // (e.g. writer prose stub, pipeline retry after partial failure, concurrent calls)
+    const script = await prisma.script.upsert({
+      where: { outputId },
+      create: { outputId, ...scriptData },
+      update: { ...scriptData, updatedAt: new Date() },
     })
 
     // Update output title if AI generated one
@@ -477,6 +500,10 @@ class ScriptGenerationStage {
       })
     }
 
+    // Clean up old scenes and tracks in case of re-run
+    await prisma.scene.deleteMany({ where: { outputId } })
+    await prisma.backgroundMusicTrack.deleteMany({ where: { scriptId: script.id } })
+
     // Create scenes
     if (scriptResponse.scenes) {
       await prisma.scene.createMany({
@@ -485,14 +512,17 @@ class ScriptGenerationStage {
           order: index,
           narration: scene.narration?.trim(),
           visualDescription: scene.visualDescription?.trim(),
-          endVisualDescription: scene.endVisualDescription?.trim() || null,
-          endImageReferenceWeight: scene.endImageReferenceWeight ?? null,
           sceneEnvironment: scene.sceneEnvironment?.trim() || null,
           motionDescription: scene.motionDescription?.trim() || null,
           audioDescription: scene.audioDescription?.trim() || null,
           audioDescriptionVolume: scene.audioDescriptionVolume ?? null,
           characterRef: scene.characterRef?.trim() || null,
           estimatedDuration: scene.estimatedDuration || 5,
+          // Viral-first fields
+          onScreenText: scene.onScreenText?.trim() || null,
+          patternInterruptType: scene.patternInterruptType?.trim() || null,
+          brollPriority: scene.brollPriority ?? 1,
+          riskFlags: scene.riskFlags ?? [],
         })),
       })
     }
@@ -537,6 +567,7 @@ class ScriptGenerationStage {
             provider: providerName as any,
             modelUsed: scriptResponse.model,
             promptUsed: JSON.stringify(promptContext),
+            writerProse: promptContext.writerProse || null,
             backgroundMusicPrompt: scriptResponse.backgroundMusic?.prompt || null,
             backgroundMusicVolume: scriptResponse.backgroundMusic?.volume || null,
             updatedAt: new Date(),
@@ -556,6 +587,7 @@ class ScriptGenerationStage {
             provider: providerName as any,
             modelUsed: scriptResponse.model,
             promptUsed: JSON.stringify(promptContext),
+            writerProse: promptContext.writerProse || null,
             backgroundMusicPrompt: scriptResponse.backgroundMusic?.prompt || null,
             backgroundMusicVolume: scriptResponse.backgroundMusic?.volume || null,
           },
@@ -566,7 +598,7 @@ class ScriptGenerationStage {
       // Delete old scenes
       await tx.scene.deleteMany({ where: { outputId } })
 
-      // Create new scenes (with ALL fields, including endVisualDescription, characterRef)
+      // Create new scenes
       if (scriptResponse.scenes) {
         await tx.scene.createMany({
           data: scriptResponse.scenes.map((scene: any, index: number) => ({
@@ -574,14 +606,17 @@ class ScriptGenerationStage {
             order: index,
             narration: scene.narration?.trim(),
             visualDescription: scene.visualDescription?.trim(),
-            endVisualDescription: scene.endVisualDescription?.trim() || null,
-            endImageReferenceWeight: scene.endImageReferenceWeight ?? null,
             sceneEnvironment: scene.sceneEnvironment?.trim() || null,
             motionDescription: scene.motionDescription?.trim() || null,
             audioDescription: scene.audioDescription?.trim() || null,
             audioDescriptionVolume: scene.audioDescriptionVolume ?? null,
             characterRef: scene.characterRef?.trim() || null,
             estimatedDuration: scene.estimatedDuration || 5,
+            // Viral-first fields
+            onScreenText: scene.onScreenText?.trim() || null,
+            patternInterruptType: scene.patternInterruptType?.trim() || null,
+            brollPriority: scene.brollPriority ?? 1,
+            riskFlags: scene.riskFlags ?? [],
           })),
         })
       }
@@ -607,14 +642,21 @@ class ScriptGenerationStage {
         })
       }
 
-      // Reset approvals (scenes changed → images/motion need re-generation)
+      // Reset ALL downstream stage gates (scenes changed → everything needs re-generation)
+      await tx.stageGate.updateMany({
+        where: {
+          outputId,
+          stage: { in: ['SCRIPT', 'RETENTION_QA', 'IMAGES', 'BGM', 'SFX', 'AUDIO', 'MUSIC_EVENTS', 'MOTION', 'RENDER'] },
+        },
+        data: { status: 'NOT_STARTED', feedback: null, reviewedAt: null },
+      })
+
+      // Delete RetentionQAProduct (stale after script change)
+      await tx.retentionQAProduct.deleteMany({ where: { outputId } })
+
       await tx.output.update({
         where: { id: outputId },
-        data: {
-          scriptApproved: false,
-          imagesApproved: false,
-          status: 'GENERATING',
-        },
+        data: { status: 'IN_PROGRESS' },
       })
     }, { timeout: 30000 })
 

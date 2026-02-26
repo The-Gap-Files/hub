@@ -30,7 +30,7 @@
       >
         <!-- Render Preview Interface -->
         <div class="aspect-video bg-black flex items-center justify-center relative group-hover:scale-105 transition-transform duration-1000">
-          <NuxtLink v-if="output.status === 'PENDING' || output.status === 'PROCESSING'" 
+          <NuxtLink v-if="output.status === 'DRAFT' || output.status === 'IN_PROGRESS'"
                :to="`/outputs/${output.id}`"
                class="absolute inset-0 bg-primary/5 flex flex-col items-center justify-center space-y-4 backdrop-blur-[2px] cursor-pointer hover:bg-primary/10 transition-colors">
             <div class="relative">
@@ -138,7 +138,7 @@
               </button>
             </template>
             <!-- Estado para Script Próximo Estágio (Aguardando Aprovação) -->
-            <template v-else-if="!output.scriptApproved && output.status !== 'FAILED'">
+            <template v-else-if="!isGateApproved(output, 'SCRIPT') && output.status !== 'FAILED'">
               <div class="col-span-2">
                  <div class="py-3 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-black uppercase tracking-widest text-center flex items-center justify-center mb-3">
                     <ScrollText :size="12" class="mr-2" />
@@ -176,7 +176,7 @@
             </template>
 
             <!-- Clonar roteiro: novo output no mesmo dossier com script + cenas copiados -->
-            <div v-if="output.hasScript || output.scriptApproved" class="col-span-2 pt-2 border-t border-white/5">
+            <div v-if="output.hasScript || isGateApproved(output, 'SCRIPT')" class="col-span-2 pt-2 border-t border-white/5">
               <button 
                 type="button"
                 class="w-full py-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:border-primary/30 hover:text-primary text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all disabled:opacity-50"
@@ -222,6 +222,16 @@ const props = defineProps<{
 const outputs = ref<any[]>([])
 const loading = ref(true)
 
+function isGateApproved(o: any, stage: string): boolean {
+  if (!o?.stageGates) return false
+  const gate = Array.isArray(o.stageGates)
+    ? o.stageGates.find((g: any) => g.stage === stage)
+    : o.stageGates[stage]
+  if (!gate) return false
+  const status = typeof gate === 'string' ? gate : gate.status
+  return status === 'APPROVED'
+}
+
 const totalCost = computed(() => {
   return (outputs.value || []).reduce((sum, o) => sum + (Number(o.totalCost) || 0), 0)
 })
@@ -260,8 +270,8 @@ function getStatusClass(status: string) {
     case 'COMPLETED': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
     case 'FAILED': return 'bg-red-500/20 text-red-400 border-red-500/30'
     case 'CANCELLED': return 'bg-orange-500/20 text-orange-400 border-orange-500/30'
-    case 'PROCESSING': return 'bg-blue-500/20 text-blue-400 border-blue-500/30 animate-pulse'
-    case 'PENDING': return 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30'
+    case 'IN_PROGRESS': return 'bg-blue-500/20 text-blue-400 border-blue-500/30 animate-pulse'
+    case 'DRAFT': return 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30'
     default: return 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30'
   }
 }
@@ -285,7 +295,7 @@ async function retryOutput(output: any) {
 }
 
 async function cloneOutput(output: any) {
-  if (!output.hasScript && !output.scriptApproved) return
+  if (!output.hasScript && !isGateApproved(output, 'SCRIPT')) return
   if (!confirm('Clonar o roteiro deste output? Será criado um novo output neste dossier com o mesmo roteiro e cenas. Imagens e áudio serão gerados depois.')) return
 
   cloningId.value = output.id
@@ -307,7 +317,7 @@ async function cloneOutput(output: any) {
 function startPolling() {
   stopPolling()
   pollTimer = setInterval(() => {
-    const hasProcessing = outputs.value.some(o => o.status === 'PENDING' || o.status === 'PROCESSING')
+    const hasProcessing = outputs.value.some(o => o.status === 'DRAFT' || o.status === 'IN_PROGRESS')
     if (hasProcessing) {
       loadOutputs()
     } else {

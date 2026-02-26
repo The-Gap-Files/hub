@@ -10,7 +10,6 @@
  * O plano é retornado para aprovação manual — NÃO cria outputs automaticamente.
  */
 
-import { Prisma } from '@prisma/client'
 import { prisma } from '../../../utils/prisma'
 import { generateMonetizationPlanV2 } from '../../../services/monetization-planner-v2.service'
 import { validateMonetizationPlan } from '../../../services/monetization-validator.service'
@@ -95,9 +94,11 @@ export default defineEventHandler(async (event) => {
     }
     for (const plan of activePlans) {
       outputWhereOr.push({
-        monetizationContext: {
-          path: ['planId'],
-          equals: plan.id
+        monetizationData: {
+          contextData: {
+            path: ['planId'],
+            equals: plan.id
+          }
         }
       })
     }
@@ -117,7 +118,7 @@ export default defineEventHandler(async (event) => {
 
     const completedStatuses = new Set(['COMPLETED', 'RENDERED'])
     const completedCount = linkedOutputs.filter(o => completedStatuses.has(o.status)).length
-    const pendingCount = linkedOutputs.filter(o => o.status === 'PENDING' || o.status === 'GENERATING').length
+    const pendingCount = linkedOutputs.filter(o => o.status === 'DRAFT' || o.status === 'IN_PROGRESS').length
 
     if (linkedOutputs.length > 0 && !confirmRegeneration) {
       throw createError({
@@ -133,19 +134,16 @@ export default defineEventHandler(async (event) => {
         prisma.output.updateMany({
           where: {
             id: { in: linkedIds },
-            status: { in: ['PENDING', 'GENERATING'] }
+            status: { in: ['DRAFT', 'IN_PROGRESS'] }
           },
           data: {
             status: 'CANCELLED',
             errorMessage: 'Cancelado automaticamente após regeneração da monetização.'
           }
         }),
-        prisma.output.updateMany({
+        prisma.monetizationProduct.deleteMany({
           where: {
-            id: { in: linkedIds }
-          },
-          data: {
-            monetizationContext: Prisma.DbNull
+            outputId: { in: linkedIds }
           }
         }),
         prisma.outputRelation.deleteMany({
@@ -294,7 +292,7 @@ export default defineEventHandler(async (event) => {
         sceneConfig
       },
       stageTimings: result.stageTimings,
-      createdAt: savedPlan.createdAt
+      createdAt: savedPlan.createdAt,
     }
   } catch (error: any) {
     console.error('[SuggestMonetization] ❌ Erro:', error)

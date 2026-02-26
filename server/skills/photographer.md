@@ -94,6 +94,41 @@ Hard rule: nunca repita o mesmo tipo de fonte de luz em mais de 2 cenas consecut
 
 ---
 
+## 4.5 Monetization-Safe Blocklist (OBRIGATORIO — YouTube AdSense Protection)
+
+O scanner de imagens do YouTube detecta conteudo visual INDEPENDENTE da narracao.
+Para cada visualDescription, passe por esta checklist mental:
+
+### NUNCA DESCREVA (hard demonetization triggers):
+- **Armas em acao**: arma disparando, faca cortando, corda como ligadura. Em vez disso: "an old wooden desk with papers and a sealed envelope" ou "a dark silhouette against a brick wall".
+- **Danos corporais visiveis**: feridas, sangue, ossos, hematomas, pele machucada. Use a sombra, a consequencia, a cena depois. "An overturned chair, a cracked mirror, scattered papers on a wet floor."
+- **Corpos sexualizados**: pele exposta alem de rosto e maos. Figuras historicas em trajes de epoca apenas.
+- **Criancas em perigo**: close-ups de rosto em contexto de medo. Use props simbolicos: um sapato pequeno, um livro rasgado, uma marca de mao em vidro empoeirado.
+- **Drogas em foco**: parafernalia, frascos abertos, conteudo visivel de pilulas.
+
+### SEMPRE SEGURO (greenlist — use estes):
+- Documentos, selos, cera, pergaminhos, maquinas de escrever, arquivos, ficharios
+- Espacos institucionais vazios (tribunais, escritorios, corredores, salas de interrogatorio)
+- Arquitetura de epoca, skylines urbanos, mapas, graficos, diagramas
+- Elementos naturais: neblina, agua, chama de vela, fumaca, chuva
+- Objetos simbolicos: chaves, cadeados, relogios, livros, vidro, espelhos
+- Silhuetas e sombras de formas humanas (nunca anatomia detalhada)
+- Evidencias forenses: marcadores no pavimento, fita amarela, portas escuras com luz ao fundo
+- Vestigios: roupas dobradas, cadeira vazia, caligrafia em papel envelhecido
+
+### Alternativas seguras por contexto:
+| Contexto perigoso | Alternativa segura |
+|--------------------|--------------------|
+| Cena de violencia | "dim institutional corridor with shadows on tiled floor" |
+| Cena de crime | "forensic evidence markers on empty pavement at dawn" |
+| Sofrimento | "empty hospital chair under cold fluorescent light" |
+| Arma | "a sealed evidence bag on a metal shelf, harsh overhead light" |
+| Perseguicao | "empty rain-slicked alley, distant sodium vapor glow, no figures" |
+
+**Regra-teste:** Se a visualDescription passaria num slideshow de escola → monetizacao segura. Se nao → reescrever.
+
+---
+
 ## 5. Coerencia Temporal (Period Accuracy) — CRITICO
 
 Se o TEMPORAL CONTEXT do Production Awareness menciona epoca/decada/ano, TODAS as escolhas visuais DEVEM ser period-accurate.

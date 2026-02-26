@@ -49,6 +49,10 @@ export function buildScreenwriterSystemPrompt(request: ScriptGenerationRequest):
     })
   }
 
+  if (request.visualScreenwriterHints) {
+    visualInstructions += `\n\n[STYLE-SPECIFIC SCREENWRITER INSTRUCTIONS]\n${request.visualScreenwriterHints}`
+  }
+
   const targetWPM = request.targetWPM || 150
   const wordsPerScene = Math.round((targetWPM / 60) * 5)
   const maxWordsHard = wordsPerScene + 2
@@ -101,12 +105,67 @@ Você recebeu uma PROSA NARRATIVA escrita por um Escritor. Sua ÚNICA função �
 
 ---
 DIRETRIZES TÉCNICAS (CRÍTICO):
-- SINCRONIA: Cada cena DEVE durar EXATAMENTE 5 segundos de narração.
 - 🌐 IDIOMA (REGRA ABSOLUTA): O campo "narration" DEVE ser escrito em ${request.language || 'pt-BR'}. Os campos "visualDescription", "motionDescription" e "audioDescription" DEVEM ser SEMPRE em inglês.
-- DENSIDADE OBRIGATÓRIA: Com base na velocidade de fala (${targetWPM} WPM), cada cena DEVE conter entre ${wordsPerScene - 1} e ${maxWordsHard} palavras.
-- 🚨 HARD LIMIT: NUNCA exceda ${maxWordsHard} palavras por cena. Cenas com mais de ${maxWordsHard} palavras ultrapassam 5 segundos e quebram a sincronia.
-- PROIBIDO FRASES CURTAS: Cenas com menos de ${wordsPerScene - 1} palavras geram "buracos" no áudio.
-- FLUIDEZ: O texto deve preencher exatamente 5 segundos de fala contínua.
+- 🚨 HARD LIMIT: NUNCA exceda ${maxWordsHard} palavras por cena. Cenas com mais de ${maxWordsHard} palavras ultrapassam 5 segundos e quebram a sincronia de áudio.
+
+🎙️ DOIS TIPOS DE CENA — ESCOLHA POR INTENÇÃO DRAMÁTICA:
+
+• CENA DENSA (padrão narrativo): ${wordsPerScene - 1}–${maxWordsHard} palavras. Preenche os 5 segundos com narração fluida. Use para contexto, revelação elaborada, descrição de ação.
+
+• CENA STACCATO (impacto / tensão / pontuação dramática): 4–8 palavras. O silêncio é intencional — cria tensão. O ÁUDIO gerado pelo ElevenLabs (fala + breaks) define a duração da cena no vídeo, então o TOTAL de fala + breaks DEVE somar ~5 segundos.
+
+  FÓRMULA: palavras_faladas × (60/${targetWPM}) + soma_dos_breaks ≈ 5 segundos
+  A ${targetWPM} WPM, cada palavra dura ~${(60 / targetWPM).toFixed(2)}s. Portanto:
+  - 4 palavras ≈ ${(4 * 60 / targetWPM).toFixed(1)}s de fala → adicione ~${(5 - 4 * 60 / targetWPM).toFixed(1)}s em breaks
+  - 6 palavras ≈ ${(6 * 60 / targetWPM).toFixed(1)}s de fala → adicione ~${(5 - 6 * 60 / targetWPM).toFixed(1)}s em breaks
+  - 8 palavras ≈ ${(8 * 60 / targetWPM).toFixed(1)}s de fala → adicione ~${(5 - 8 * 60 / targetWPM).toFixed(1)}s em breaks
+
+  EXEMPLOS CORRETOS (áudio total ≈ 5s cada):
+  - "1966.<break time="1.0s"/> Terra seca.<break time="1.0s"/> Estado ausente.<break time="1.2s"/>"
+  - "Silêncio vira estratégia.<break time="3.5s"/>"
+  - "O jogo muda.<break time="3.7s"/>"
+  - "Ele ocupa.<break time="1.5s"/> Nasce o CJNG.<break time="1.5s"/>"
+  - "Mensagem entregue.<break time="1.5s"/> Nova ordem instalada.<break time="1.2s"/>"
+
+REGRAS DE EQUILÍBRIO (obrigatório):
+- Máximo 3 cenas staccato CONSECUTIVAS — depois volta para cena densa.
+- Cenas staccato SEM breaks suficientes são PROIBIDAS — a cena durará menos de 5 segundos, quebrando a sincronia do vídeo.
+
+🎯 HOOK SEGMENT OPTIMIZATION (Primeiros 30 segundos — OBRIGATÓRIO):
+As primeiras 6 cenas (cenas 0-5) são a zona de retenção crítica onde o YouTube Analytics mede o "hook rate" (abandono nos primeiros 30s).
+
+REGRAS ESPECIAIS para cenas 0-5:
+- CENAS 0-2 (primeiros 10s): brollPriority=2 OBRIGATÓRIO. patternInterruptType deve ser "hard_cut" ou "smash_cut". onScreenText OBRIGATÓRIO na cena 0.
+- CENAS 3-5 (segundos 10-30): Cada narração deve terminar com frase aberta ou dado surpreendente — NUNCA com frase conclusiva. Se a narração tem tom expositivo, corte-a no meio da revelação.
+- CENA 5 (segundo 25-30): Re-engagement hook obrigatório — a narração deve plantar a promessa do restante do vídeo ("e o que ninguém ainda sabe é que...").
+- riskFlags ["slow", "expository"] nas cenas 0-5 são FALHA CRÍTICA — reescreva a narração antes de sinalizar.
+
+🚫 HOOK ANTI-ABSTRAÇÃO (cenas 0-3 — REGRA ABSOLUTA):
+Nos primeiros 15 segundos, o cérebro do espectador quer: conflito concreto + ameaça clara + consequência direta.
+❌ PROIBIDO nas cenas 0-3: frases filosóficas ou universais ("A história humana é...", "O ciclo eterno de...", "A natureza do poder...", "Desde o início dos tempos...").
+✅ SUBSTITUA por: dado específico + personagem + situação concreta.
+Exemplo ruim: "A história humana é um ciclo eterno de culpa e redenção."
+Exemplo bom: "Uma cabana. Uma máquina de hemodiálise. O senhor do crime mais procurado do mundo — e ninguém sabia onde ele estava."
+
+🎚️ RITMO E VARIAÇÃO NARRATIVA (ANTI-UNIFORMIDADE — OBRIGATÓRIO):
+O MAIOR erro narrativo é o "ritmo plano": narração que começa forte, continua forte, e continua forte — sem picos, sem vales, sem respiração. Isso mata retenção.
+
+PROIBIÇÕES DE CADÊNCIA:
+❌ PROIBIDO: 3 cenas seguidas com o mesmo padrão sujeito+verbo ("Ele entendeu...", "Ele transformou...", "Ele mapeou...", "Ele observou..."). Varie a estrutura.
+❌ PROIBIDO: tom analítico/institucional por mais de 4 cenas consecutivas. Quebre com emoção ou dado chocante.
+❌ PROIBIDO: mais de 3 cenas seguidas sem pergunta, cliffhanger ou dado surpreendente.
+
+TÉCNICAS DE VARIAÇÃO (use pelo menos 1 a cada 6-8 cenas):
+✅ FRASE STACCATO: 2–6 palavras. Sem verbo. Impacto puro. Ex: "Quinze anos. Prisão. Escola do crime." — use SSML <break time="0.3s" /> entre fragmentos.
+✅ PERGUNTA DIRETA: plante open loop. Ex: "Mas quem financiou tudo isso?"
+✅ INVERSÃO COTIDIANA: conecte o abstrato ao concreto do dia-a-dia. Ex: Em vez de "financia operações criminosas" → "O abacate que chega à sua mesa... financia uma guerra."
+✅ CHOQUE NUMÉRICO: dado específico que quebra expectativa. Ex: "Não dezenas. Setecentas toneladas por ano."
+✅ CORTE ABRUPTO: término que força continuidade. Ex: "E então... ninguém voltou." (cena termina aqui — próxima cena expande)
+
+ESTRUTURA DE ONDAS (obrigatório em roteiros com 30+ cenas):
+- A cada 10–15 cenas: 1–2 cenas de "respiração" (ritmo mais lento, revelação emocional, micro-payoff).
+- A cada 4–6 cenas: 1 pergunta retórica ou micro-cliffhanger na narração.
+- Distribua 2–3 "CHOQUES NARRATIVOS" ao longo do vídeo: revelação inesperada que muda a perspectiva do espectador sobre o que já viu.
 
 🔗 SINCRONIZAÇÃO NARRATIVA — VISUAL — MOTION (REGRA MAIS IMPORTANTE):
 O pipeline gera: (1) imagem a partir do visualDescription, (2) vídeo animado a partir dessa imagem usando motionDescription. Os 2 campos + a narração DEVEM ser UM ÚNICO MOMENTO NARRATIVO COERENTE.
@@ -119,8 +178,6 @@ O pipeline gera: (1) imagem a partir do visualDescription, (2) vídeo animado a 
 🎬 MOTION DESCRIPTION (OBRIGATÓRIO): Cada cena DEVE ter "motionDescription" com instruções de MOVIMENTO em inglês para o modelo image-to-video. Descreva O QUE SE MOVE, não o que existe. REGRAS: (1) Foque em movimentos de CÂMERA (slow dolly forward, gentle pan left, subtle tilt up, slow zoom in) e SUJEITO (flames flickering, water rippling, dust floating). (2) 15-40 palavras. (3) NÃO repita a descrição visual. (4) Combine 1 movimento de câmera + 1-2 elementos animados.
 
 🎨 AMBIENTE DA CENA (sceneEnvironment — OBRIGATÓRIO): Identificador curto em snake_case inglês do ambiente/locação (ex: "bishop_study", "canal_dawn"). Cenas consecutivas no MESMO local = MESMO sceneEnvironment.
-
-🎬 KEYFRAME FINAL (endVisualDescription — OPCIONAL): Para cenas com MUDANÇA VISUAL significativa entre início e fim, inclua "endVisualDescription". Se incluir, inclua também "endImageReferenceWeight" (0.0-1.0). Em cenas estáticas, use null.
 
 🎨 COERÊNCIA CROMÁTICA: As cores descritas no visualDescription DEVEM ser compatíveis com a paleta base do estilo visual definido.
 
@@ -146,6 +203,34 @@ SOUND DESIGN: Descreva a atmosfera sonora (SFX/Ambience) em inglês técnico par
 - SUBSTITUA POR: "Fim Trágico", "Ato Imperdoável", "Crimes contra Inocentes".
 - VISUAL: Nunca descreva corpos mutilados ou sangue. Foque na ATMOSFERA.
 
+📊 CAMPOS VIRAL-FIRST (RETENÇÃO — OBRIGATÓRIO):
+Cada cena DEVE incluir estes campos para alimentar o pipeline de retenção:
+
+- **onScreenText** (opcional, máx 120 chars): Texto overlay queimado na tela durante a cena. Use para:
+  • Dados impactantes: "3 milhões de mortos", "1475"
+  • Perguntas retóricas: "Coincidência?", "Quem autorizou?"
+  • Frases-tese compartilháveis: "A mesma mentira, 500 anos depois"
+  • Língua: mesma da narração. null = sem overlay.
+  • REGRA: pelo menos 1 a cada 4-5 cenas. Hook (cena 0) SEMPRE deve ter.
+
+- **patternInterruptType** (opcional): Tipo de interrupção visual nesta cena.
+  Opções: zoom, whip_pan, hard_cut, smash_cut, glitch, freeze, rack_focus, speed_ramp
+  • Use a cada 3-5 cenas para quebrar monotonia visual.
+  • Hook: prefira hard_cut ou smash_cut. Clímax: zoom ou speed_ramp.
+  • null = transição padrão (sem interrupt).
+
+- **brollPriority** (obrigatório, 0-2): Prioridade visual da cena.
+  • 0 = simples (b-roll genérico, modelo rápido)
+  • 1 = padrão (qualidade normal) — DEFAULT
+  • 2 = hero shot (hook, clímax, virada — modelo premium)
+  • Cenas 0-1 (hook) e cena de clímax DEVEM ser 2.
+
+- **riskFlags** (obrigatório, array): Auto-avaliação de risco editorial.
+  Opções: slow, expository, confusing, low_energy, redundant
+  • Cenas sem risco = [] (array vazio).
+  • Se uma cena é necessária mas "fria" (contextualização), marque ["expository"].
+  • Isso permite que o Retention QA priorize revisão nas cenas sinalizadas.
+
 ${musicInstructions}
 
 ---
@@ -165,7 +250,29 @@ export function buildScreenwriterUserPrompt(
   const wordsPerScene = Math.round((targetWPM / 60) * 5)
   const minWords = wordsPerScene - 1
   const maxWords = wordsPerScene + 2
-  const idealSceneCount = request.targetSceneCount ?? Math.ceil(request.targetDuration / 5)
+  const durationBased = request.targetSceneCount ?? Math.ceil(request.targetDuration / 5)
+
+  // Quando a prosa do Writer está presente, derivar o alvo de cenas a partir do
+  // número real de parágrafos — a prosa pode ser maior que o targetDuration prevê.
+  // Conta linhas individuais com conteúdo substancial (>20 chars, não-header).
+  // A prosa usa \n simples entre parágrafos dentro de cada bloco ##, então
+  // split(/\n\n+/) só encontrava ~12 grupos; linha-por-linha encontra os ~60-85 reais.
+  // Cada parágrafo gera em média 2 cenas (regra de 3: 60 parágrafos → 120 cenas).
+  // Nunca abaixo do valor baseado em duração.
+  const proseParagraphCount = writerProse
+    .split('\n')
+    .filter(line => {
+      const t = line.trim()
+      return t.length > 20 && !t.startsWith('#') && !t.startsWith('═')
+    })
+    .length
+  const proseBasedCount = Math.ceil(proseParagraphCount * 2.0)
+  const idealSceneCount = Math.max(durationBased, proseBasedCount)
+
+  // Contar blocos ## para instrução per-bloco (LLM tende a gerar ~5-6 cenas/bloco
+  // independente do total — instrução por bloco é mais concreta e obedecida)
+  const proseSectionCount = Math.max(1, (writerProse.match(/^## /gm) || []).length)
+  const minScenesPerSection = Math.ceil(idealSceneCount / proseSectionCount)
 
   const videoFormat = request.format || request.outputType || 'full-youtube'
   const isShortFormat = videoFormat.includes('tiktok') || videoFormat.includes('reels') || videoFormat.includes('teaser') || videoFormat.includes('shorts')
@@ -181,9 +288,17 @@ Use "backgroundMusicTracks" com tracks { prompt, volume, startScene, endScene }.
   }
 
   // Build the prompt
-  let prompt = `📜 PROSA DO ESCRITOR (SUA ÚNICA FONTE NARRATIVA):
+  let prompt = `🎯 CONTRATO DE PRODUÇÃO — LEIA ANTES DA PROSA:
+Objetivo: ${Math.round(request.targetDuration / 60)} minutos de vídeo = MÍNIMO ${idealSceneCount} cenas.
+Esta prosa tem ${proseSectionCount} blocos narrativos (##). Você DEVE gerar MÍNIMO ${minScenesPerSection} cenas por bloco.
+REGRA DE EXPANSÃO: cada parágrafo → 2 cenas. Parágrafos longos → 3 cenas. NUNCA 1 parágrafo = 1 cena.
+Se qualquer bloco tiver menos de ${Math.max(6, minScenesPerSection - 3)} cenas, você FALHOU naquele bloco.
+Total mínimo: ${idealSceneCount} cenas (${proseSectionCount} blocos × ${minScenesPerSection} cenas/bloco).
+NÃO condense. NÃO pule. EXPANDA — cada detalhe da prosa merece sua própria cena.
+
+📜 PROSA DO ESCRITOR (SUA ÚNICA FONTE NARRATIVA):
 Converta a prosa abaixo em cenas cinematográficas. Siga a ordem do texto EXATAMENTE.
-Cada parágrafo ou trecho se torna uma ou mais cenas.
+Cada parágrafo ou trecho se torna UMA OU MAIS cenas (mínimo 2 por parágrafo).
 NUNCA volte a um trecho já convertido. NUNCA repita informação já transformada em cena.
 
 ${'═'.repeat(60)}
@@ -254,22 +369,22 @@ Calibre startScene/endScene com base no número REAL de cenas que você gerou.
 
 ---
 ⚠️ REQUISITOS OBRIGATÓRIOS PARA APROVAÇÃO:
-1. QUANTIDADE DE CENAS: O Arquiteto planejou ~${idealSceneCount} cenas como referência. Gere quantas cenas a prosa PRECISAR — sem repetir informação. Menos cenas com conteúdo único é MELHOR que muitas cenas repetitivas.
+1. COBERTURA TOTAL DA PROSA (PRIORIDADE MÁXIMA): Converta TODA a prosa do Escritor em cenas — cada parágrafo deve virar 1–3 cenas. NÃO resuma, NÃO pule parágrafos, NÃO comprima 3 parágrafos em 1 cena. A referência é ~${idealSceneCount} cenas (${proseParagraphCount} parágrafos × 1–2 cenas/parágrafo). Se a prosa exigir MAIS cenas para cobrir tudo, GERE MAIS — nunca sacrifique conteúdo para atingir um número fixo.
 2. FIDELIDADE À PROSA: Cada cena deve corresponder a um trecho da prosa do Escritor. Não invente conteúdo.
 3. LINEARIDADE: As cenas DEVEM seguir a ordem da prosa. Se a prosa tem blocos A→B→C→D, as cenas devem cobrir A, depois B, depois C, depois D — NUNCA voltar a A ou B.
 4. DURAÇÃO DA CENA: Cada cena = 5 segundos de narração.
-5. CONTAGEM DE PALAVRAS: Cada narração entre ${minWords} e ${maxWords} palavras. NUNCA exceda ${maxWords}.
+5. CONTAGEM DE PALAVRAS: HARD LIMIT ${maxWords} palavras/cena. Cenas densas: ${minWords}–${maxWords} palavras. Cenas staccato: 4–8 palavras COM break SSML obrigatório. Média geral do roteiro ≥ ${minWords - 1} palavras/cena.
 6. MÚSICA: ${isShortFormat ? 'backgroundMusic para vídeo todo.' : 'backgroundMusicTracks por segmento narrativo.'}
 7. PROPORÇÃO: Reflexão/Lição ≤${maxReflectionScenes} cenas (máx ${maxReflectionCeiling}).
-8. ANTI-REPETIÇÃO (PRIORIDADE MÁXIMA): Se duas cenas expressam a mesma ideia, ELIMINE uma. Cada cena deve ser ÚNICA. Qualidade > quantidade.${providerSpecificItems}
+8. ANTI-REPETIÇÃO: Se duas cenas expressam a mesma ideia EXATA, ELIMINE uma. Mas cenas com ângulos diferentes sobre o mesmo tema são VÁLIDAS (ex: fato → consequência → reação).${providerSpecificItems}
 ${musicWarning}
 
 🛡️ VALIDAÇÃO FINAL:
-1. PROCURE REPETIÇÕES — se duas cenas dizem a mesma coisa com palavras diferentes, ELIMINE uma. Qualidade > quantidade.
+1. PROCURE REPETIÇÕES EXATAS — se duas cenas dizem a mesma coisa com palavras diferentes, ELIMINE uma. Cenas com ângulos complementares (causa → efeito) NÃO são repetição.
 2. VERIFIQUE LINEARIDADE — as cenas seguem a ordem da prosa? Nenhum bloco foi revisitado?
 3. SINCRONIZAÇÃO — para CADA cena: narração fala de X → visual mostra X?
 4. MOTION — o motionDescription é coerente com o visualDescription?
-5. PALAVRAS — cada cena tem entre ${minWords}-${maxWords} palavras?`
+5. PALAVRAS — cada cena tem 4–${maxWords} palavras? Cenas staccato (4–8) têm break SSML? Média geral ≥ ${minWords - 1} palavras/cena?`
 
   return prompt
 }

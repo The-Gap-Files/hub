@@ -1,0 +1,116 @@
+{
+  "timestamp": "2026-02-26T13:09:12.398Z",
+  "taskId": "monetization-schedule",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "gemini-3-flash-preview",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Monetization — Publication Schedule Generator\r\n\r\nVocê é um estrategista de publicação de conteúdo. Nesta etapa, você vai criar o cronograma de publicação ideal para maximizar alcance e engajamento.\r\n\r\n## 🎯 Contexto\r\n\r\nVocê recebe:\r\n- O Full Video e todos os teasers já gerados\r\n- As plataformas de cada teaser\r\n- A quantidade total de itens\r\n\r\n## 📐 O QUE PRODUZIR\r\n\r\nUm array de `publicationSchedule` com:\r\n- **dayOfWeek**: Dia da semana (ex: \"Segunda\", \"Terça\")\r\n- **content**: O que publicar (ex: \"Full Video no YouTube\", \"Teaser 1 (Gateway) - YouTube Shorts\")\r\n- **platform**: Plataforma alvo\r\n- **notes**: Notas sobre timing (opcional)\r\n\r\n## 🚨 REGRAS\r\n\r\n1. **Full Video PRIMEIRO** — sempre publicado antes dos teasers\r\n2. **1 teaser por dia** (ou 2 se >10 teasers)\r\n3. **Plataforma fixa (YouTube-first)**:\r\n   - Full Video: **YouTube**\r\n   - Teasers: **YouTube Shorts**\r\n4. **Gateway logo após o Full Video** — é a porta de entrada (primeiro Short do pacote)\r\n5. **Hook-only no final** — são os \"lembretes virais\" (alta repetição e replay)\r\n6. **Para 10+ teasers**, distribuir em 2 semanas\r\n7. **Evitar fins de semana** para o Full Video (melhor performance seg-qui)"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "\n\nCrie o cronograma de publicação para:\n\nFull Video EP1: \"O Colhedor de Abacates que Desafiou o Mundo | El Mencho: A Ascensão (EP 1)\" (YouTube)\nFull Video EP2: \"A Máquina de Bilhões e a Traição Silenciosa | El Mencho: O Império (EP 2)\" (YouTube)\nFull Video EP3: \"A Traição Final e o Colapso do Império | El Mencho: O Desfecho (EP 3)\" (YouTube)\nTeaser 1 [gateway]: \"O Colhedor que Virou Fantasma\" (YouTube Shorts)\nTeaser 2 [deep-dive]: \"Engenharia da Insurgência\" (YouTube Shorts)\nTeaser 3 [deep-dive]: \"O Infiltrado no Sistema\" (YouTube Shorts)\nTeaser 4 [deep-dive]: \"O Erro do Círculo Íntimo\" (YouTube Shorts)\nTeaser 5 [deep-dive]: \"A Rota do Pacífico\" (YouTube Shorts)\nTeaser 6 [deep-dive]: \"O Dia do Silêncio\" (YouTube Shorts)\nTeaser 7 [deep-dive]: \"O Fim de um Mito\" (YouTube Shorts)\nTeaser 8 [deep-dive]: \"A Armadilha Digital\" (YouTube Shorts)\nTeaser 9 [hook-only]: \"O Colhedor de Milhões\" (YouTube Shorts)\nTeaser 10 [hook-only]: \"A Fortuna Não Salvou o Rei\" (YouTube Shorts)\nTeaser 11 [hook-only]: \"O Imposto do Ouro Verde\" (YouTube Shorts)\nTeaser 12 [hook-only]: \"O Dia que o México Parou\" (YouTube Shorts)\n\nRetorne um JSON com campo \"schedule\" contendo o cronograma."
+      }
+    ]
+  },
+  "parsed": {
+    "schedule": [
+      {
+        "platform": "YouTube",
+        "notes": "Lançamento oficial da série. Melhor horário: entre 10h e 12h.",
+        "content": "Full Video EP1: \"O Colhedor de Abacates que Desafiou o Mundo | El Mencho: A Ascensão (EP 1)\"",
+        "dayOfWeek": "Segunda-feira (Semana 1)"
+      },
+      {
+        "platform": "YouTube Shorts",
+        "content": "Teaser 1 [gateway]: \"O Colhedor que Virou Fantasma\"",
+        "notes": "Porta de entrada para o EP1. Linkar o vídeo completo nos comentários/descrição.",
+        "dayOfWeek": "Terça-feira (Semana 1)"
+      },
+      {
+        "platform": "YouTube",
+        "content": "Full Video EP2: \"A Máquina de Bilhões e a Traição Silenciosa | El Mencho: O Império (EP 2)\"",
+        "notes": "Lançamento do segundo episódio para manter o momentum.",
+        "dayOfWeek": "Quarta-feira (Semana 1)"
+      },
+      {
+        "notes": "Primeiro teaser do dia. Foco em retenção técnica.",
+        "content": "Teaser 2 [deep-dive]: \"Engenharia da Insurgência\"",
+        "dayOfWeek": "Quinta-feira (Semana 1)",
+        "platform": "YouTube Shorts"
+      },
+      {
+        "platform": "YouTube Shorts",
+        "notes": "Segundo teaser do dia (estratégia para >10 itens). Publicar 6h após o primeiro.",
+        "content": "Teaser 3 [deep-dive]: \"O Infiltrado no Sistema\"",
+        "dayOfWeek": "Quinta-feira (Semana 1)"
+      },
+      {
+        "platform": "YouTube Shorts",
+        "content": "Teaser 4 [deep-dive]: \"O Erro do Círculo Íntimo\"",
+        "notes": "Primeiro teaser do dia. Gancho emocional/traição.",
+        "dayOfWeek": "Sexta-feira (Semana 1)"
+      },
+      {
+        "content": "Teaser 5 [deep-dive]: \"A Rota do Pacífico\"",
+        "notes": "Segundo teaser do dia. Foco em curiosidade geográfica/logística.",
+        "dayOfWeek": "Sexta-feira (Semana 1)",
+        "platform": "YouTube Shorts"
+      },
+      {
+        "platform": "YouTube",
+        "content": "Full Video EP3: \"A Traição Final e o Colapso do Império | El Mencho: O Desfecho (EP 3)\"",
+        "notes": "Grande final da série. Evitar publicação no final de semana anterior.",
+        "dayOfWeek": "Segunda-feira (Semana 2)"
+      },
+      {
+        "platform": "YouTube Shorts",
+        "dayOfWeek": "Terça-feira (Semana 2)",
+        "notes": "Primeiro teaser do dia. Foco no mistério do desfecho.",
+        "content": "Teaser 6 [deep-dive]: \"O Dia do Silêncio\""
+      },
+      {
+        "platform": "YouTube Shorts",
+        "dayOfWeek": "Terça-feira (Semana 2)",
+        "notes": "Segundo teaser do dia. Conclusão da narrativa principal.",
+        "content": "Teaser 7 [deep-dive]: \"O Fim de um Mito\""
+      },
+      {
+        "dayOfWeek": "Quarta-feira (Semana 2)",
+        "content": "Teaser 8 [deep-dive]: \"A Armadilha Digital\"",
+        "notes": "Último deep-dive. Detalhes técnicos da captura/queda.",
+        "platform": "YouTube Shorts"
+      },
+      {
+        "platform": "YouTube Shorts",
+        "content": "Teaser 9 [hook-only]: \"O Colhedor de Milhões\"",
+        "notes": "Início da fase de 'Lembretes Virais'. Alta velocidade e loop.",
+        "dayOfWeek": "Quinta-feira (Semana 2)"
+      },
+      {
+        "platform": "YouTube Shorts",
+        "dayOfWeek": "Sexta-feira (Semana 2)",
+        "content": "Teaser 10 [hook-only]: \"A Fortuna Não Salvou o Rei\"",
+        "notes": "Hook focado em moral da história/impacto. Ideal para compartilhamento."
+      },
+      {
+        "platform": "YouTube Shorts",
+        "dayOfWeek": "Sábado (Semana 2)",
+        "notes": "Conteúdo de curiosidade rápida para o final de semana.",
+        "content": "Teaser 11 [hook-only]: \"O Imposto do Ouro Verde\""
+      },
+      {
+        "platform": "YouTube Shorts",
+        "dayOfWeek": "Domingo (Semana 2)",
+        "notes": "Hook de alto impacto histórico para fechar o ciclo de tráfego.",
+        "content": "Teaser 12 [hook-only]: \"O Dia que o México Parou\""
+      }
+    ]
+  },
+  "rawContent": ""
+}

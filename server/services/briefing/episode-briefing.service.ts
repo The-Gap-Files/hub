@@ -146,6 +146,14 @@ export async function getOrCreateEpisodeBriefBundleV1ForDossier(
     '- EP2 deve ter resolutionLevel: "partial"',
     '- EP3 deve ter resolutionLevel: "full"',
     '- ep1.previousEpisodeBridge deve ser null',
+    '',
+    '🚨 VOLUME OBRIGATÓRIO DE FATOS (CRÍTICO):',
+    '- Cada episódio DEVE ter NO MÍNIMO 30 exclusiveFacts (idealmente 40-50)',
+    '- Cada fato deve ter 2-4 linhas detalhadas com nomes, datas, locais, mecanismos',
+    '- DESDOBRE eventos compostos em fatos separados (1 evento com 3 etapas = 3 fatos)',
+    '- EXPLORE consequências: cada fato gera 1-2 fatos adicionais (reações, impacto, desdobramentos)',
+    '- 15-16 fatos por episódio é INSUFICIENTE — gera vídeos curtos demais',
+    '- O Escritor precisa destes fatos como matéria-prima para criar ~150 cenas por episódio',
   ].join('\n')
 
   const cacheResult = buildCacheableMessages({

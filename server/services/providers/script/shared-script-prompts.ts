@@ -41,10 +41,14 @@ export const ScriptSceneSchema = z.object({
   motionDescription: z.string().nullable().describe('Instruções de MOVIMENTO para o modelo image-to-video (SEMPRE EM INGLÊS). Descreva movimentos de câmera (dolly, pan, tilt) e elementos animados (chamas, água, vento, poeira) que devem animar a imagem. NÃO repita o que já está na imagem — foque no que se MOVE. 15-40 palavras.'),
   audioDescription: z.string().nullable().describe('Atmosfera sonora e SFX em inglês técnico. Descreva sons de ambiente (rain, wind, crowd murmur), impactos (door slam, thunder crack), e atmosfera (eerie drone, tension strings). Seja ESPECÍFICO: "distant church bells with reverb" é melhor que "bells".'),
   audioDescriptionVolume: z.number().min(-24).max(-12).default(-18).describe('Volume do SFX em dB para mixagem com a narração. Range: -24 (quase inaudível) a -12 (máximo permitido). Default: -18 (equilíbrio). Sons de ambiente: -24 a -20. Impactos dramáticos: -15 a -12.'),
-  endVisualDescription: z.string().nullable().optional().describe('(OPCIONAL) Descrição visual do FINAL da cena — keyframe de destino para o modelo de vídeo (SEMPRE EM INGLÊS). Se presente, o pipeline gera uma segunda imagem usada como last_image no modelo I2V, melhorando transições e reduzindo drift visual. Use quando: (1) a cena tem MUDANÇA VISUAL significativa entre início e fim (ex: porta que abre, luz que muda, personagem que se move para outro ponto), (2) o movimento de câmera revela algo novo no final, (3) você quer forçar um loop perfeito (endVisual = visualDescription). NÃO use em cenas estáticas ou com movimento sutil — nesses casos, null é melhor.'),
-  endImageReferenceWeight: z.number().min(0).max(1).nullable().optional().describe('(OPCIONAL) Peso da imagem START como referência visual para gerar a imagem END (0.0-1.0). Controla quanto a imagem de início influencia o visual do final. 0.8 = mudança sutil (mesmo enquadramento, pequena variação). 0.5 = mudança moderada (novo ângulo, nova luz). 0.3 = mudança drástica (novo ambiente revelado). Default: 0.7 se endVisualDescription estiver presente.'),
   characterRef: z.string().nullable().optional().describe('(OPCIONAL) ID da pessoa-chave (DossierPerson) cujo rosto/aparência deve ser mantido nesta cena via imagem de referência. Use APENAS quando a cena mostra claramente essa pessoa como foco visual principal. Se a cena é de ambiente, objeto, multidão ou paisagem, use null. O ID vem da seção ELENCO DE PERSONAGENS (campo [ID:]). Use apenas IDs marcados com [REF_IMG] — os demais não têm imagem de referência gerada.'),
-  estimatedDuration: z.number().default(5).describe('Duração estimada em segundos (entre 5 e 6 segundos)')
+  estimatedDuration: z.number().default(5).describe('Duração estimada em segundos (entre 5 e 6 segundos)'),
+
+  // --- Viral-first fields (retenção + edit blueprint) ---
+  onScreenText: z.string().max(120).nullable().optional().describe('(OPCIONAL) Texto curto de overlay (até 10 palavras) que será queimado na tela durante esta cena. Use para: dados impactantes ("3 milhões de mortos"), perguntas retóricas ("Coincidência?"), frases-tese compartilháveis. Língua: mesma da narração. null = sem texto overlay.'),
+  patternInterruptType: z.enum(['zoom', 'whip_pan', 'hard_cut', 'smash_cut', 'glitch', 'freeze', 'rack_focus', 'speed_ramp']).nullable().optional().describe('(OPCIONAL) Tipo de pattern interrupt visual nesta cena. Use a cada 3-5 cenas para quebrar monotonia e reter atenção. zoom = push-in rápido, whip_pan = pan agressivo, hard_cut = corte seco, smash_cut = corte de contraste, glitch = distorção digital, freeze = frame congelado, rack_focus = mudança de foco, speed_ramp = aceleração/desaceleração. null = corte padrão.'),
+  brollPriority: z.number().min(0).max(2).default(1).describe('Prioridade visual da cena: 0 = simples (b-roll genérico, modelo rápido), 1 = padrão (qualidade normal), 2 = hero shot (hook, clímax, virada narrativa — merece modelo premium e mais atenção). Cenas de hook (1-2 primeiras) e clímax devem ser 2.'),
+  riskFlags: z.array(z.enum(['slow', 'expository', 'confusing', 'low_energy', 'redundant'])).default([]).describe('Flags de risco editorial: slow = ritmo lento/parado, expository = explicação sem emoção, confusing = difícil de acompanhar, low_energy = sem tensão ou curiosidade, redundant = repete informação anterior. Cenas sem risco = array vazio [].')
 })
 
 export const BackgroundMusicTrackSchema = z.object({
@@ -100,6 +104,10 @@ export function buildSystemPrompt(request: ScriptGenerationRequest): string {
       compositionTags: 'Cinematic wide shots, extreme close-ups on textures',
       generalTags: '4k, highly detailed, realistic textures, grainy film look'
     })
+  }
+
+  if (request.visualScreenwriterHints) {
+    visualInstructions += `\n\n[STYLE-SPECIFIC SCREENWRITER INSTRUCTIONS]\n${request.visualScreenwriterHints}`
   }
 
   const targetWPM = request.targetWPM || 150
@@ -314,7 +322,6 @@ DIRETRIZES TÉCNICAS (CRÍTICO):
   - "Slow push-in on the document, smoke wisps rising from cooling wax"
 
 - 🎨 AMBIENTE DA CENA (sceneEnvironment — OBRIGATÓRIO): Cada cena DEVE ter um campo "sceneEnvironment" com um identificador curto em snake_case (inglês) do ambiente/locação. Exemplos: "bishop_study", "canal_dawn", "courtroom_trento", "ocean_surface". REGRAS: (1) Cenas consecutivas que ocorrem no MESMO local devem ter o MESMO sceneEnvironment. (2) Quando a narrativa muda de local, o sceneEnvironment DEVE mudar. (3) Isso é usado automaticamente pelo pipeline para injetar continuidade visual entre cenas — NÃO inclua prefixos de estilo no visualDescription, eles serão adicionados pelo sistema.
-- 🎬 KEYFRAME FINAL (endVisualDescription — OPCIONAL): Para cenas com MUDANÇA VISUAL significativa entre início e fim, inclua "endVisualDescription" descrevendo como o quadro FINAL da cena deve ser. O pipeline gera uma segunda imagem usada como last_image no modelo de vídeo, melhorando drasticamente a qualidade das transições e reduzindo drift/distorção. QUANDO USAR: (1) Câmera revela algo novo no final (push-in que chega a um close-up); (2) Mudança de iluminação (luz acende, sol nasce); (3) Personagem muda posição significativamente; (4) Loop viral (endVisualDescription = visualDescription para criar ciclo infinito). QUANDO NÃO USAR: Cenas estáticas, breathing camera sutil, locked-off shots — nestas, null é melhor pois o modelo gera movimento mais natural sem constraining. Se incluir endVisualDescription, inclua também "endImageReferenceWeight" (0.0-1.0): 0.8 = mudança sutil, 0.5 = moderada, 0.3 = drástica. Default: 0.7.
 - 🎨 COERÊNCIA CROMÁTICA (CRÍTICO): As cores descritas no visualDescription de cada cena DEVEM ser compatíveis com a paleta base do estilo visual definido. Se o estilo é amber/noir, não descreva céus violeta ou vegetação verde vibrante — use tons compatíveis (amber-grey sky, muted dark tones). As cores naturais do ambiente devem ALINHAR-SE com a paleta do estilo, não competir com ela.
 - PERSONAGENS: Quando houver personagens recorrentes na narrativa, use SEMPRE os nomes (ou um descritor consistente, ex.: "the detective", "Maria") no visualDescription em todas as cenas em que aparecem. Isso reduz variação entre cenas e ajuda a manter coerência visual (ex.: "John standing by the window" em vez de "a man by the window").
 - CONSISTÊNCIA VISUAL DE PERSONAGENS: Quando o dossiê fornecer visualDescription para personagens-chave, incorpore EXATAMENTE esses descritores visuais no visualDescription de cada cena onde o personagem aparece. Isso garante que o modelo de imagem mantenha a mesma aparência entre cenas.
@@ -337,6 +344,17 @@ Use tags de controle de áudio para dar vida à narração. A IA lê rápido dem
 - PROIBIDO: Palavras como "Assassinato", "Estupro", "Pedofilia", "Mutilado", "Tripas", "Poça de Sangue".
 - SUBSTITUA POR: "Fim Trágico", "Ato Imperdoável", "Crimes contra Inocentes", "Cena Marcada", "Fragmentado".
 - VISUAL: Nunca descreva corpos mutilados ou sangue. Foque na ATMOSFERA (sombras, documentos, objetos pessoais deixados para trás).
+
+📊 CAMPOS VIRAL-FIRST (RETENÇÃO — OBRIGATÓRIO):
+Cada cena DEVE incluir estes campos para alimentar o pipeline de retenção:
+
+- **onScreenText** (opcional, máx 120 chars): Texto overlay queimado na tela. Use para dados impactantes ("3 milhões de mortos"), perguntas retóricas ("Coincidência?"), frases-tese compartilháveis. Língua: mesma da narração. null = sem overlay. Pelo menos 1 a cada 4-5 cenas. Hook (cena 0) SEMPRE deve ter.
+
+- **patternInterruptType** (opcional): Tipo de interrupção visual. Opções: zoom, whip_pan, hard_cut, smash_cut, glitch, freeze, rack_focus, speed_ramp. Use a cada 3-5 cenas. Hook: hard_cut/smash_cut. Clímax: zoom/speed_ramp. null = transição padrão.
+
+- **brollPriority** (obrigatório, 0-2): 0 = simples (modelo rápido), 1 = padrão (DEFAULT), 2 = hero shot (hook, clímax, virada — modelo premium). Cenas 0-1 e clímax DEVEM ser 2.
+
+- **riskFlags** (obrigatório, array): Auto-avaliação de risco. Opções: slow, expository, confusing, low_energy, redundant. Cenas sem risco = []. Marque cenas "frias" com ["expository"].
 
 ${musicInstructions}
 
@@ -737,13 +755,16 @@ export function parseScriptResponse(
     order: scene.order ?? index + 1,
     narration: scene.narration,
     visualDescription: scene.visualDescription,
-    endVisualDescription: scene.endVisualDescription ?? undefined,
-    endImageReferenceWeight: scene.endImageReferenceWeight ?? undefined,
     sceneEnvironment: scene.sceneEnvironment ?? undefined,
     motionDescription: scene.motionDescription ?? undefined,
     audioDescription: scene.audioDescription ?? undefined,
     characterRef: scene.characterRef ?? undefined,
-    estimatedDuration: scene.estimatedDuration ?? 5
+    estimatedDuration: scene.estimatedDuration ?? 5,
+    // Viral-first fields
+    onScreenText: scene.onScreenText ?? undefined,
+    patternInterruptType: scene.patternInterruptType ?? undefined,
+    brollPriority: scene.brollPriority ?? 1,
+    riskFlags: scene.riskFlags ?? []
   }))
 
   // ── Detecção e purge de degeneração (duplicatas, "Fim. Fim. Fim.") ────────

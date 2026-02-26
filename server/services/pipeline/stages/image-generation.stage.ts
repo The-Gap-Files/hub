@@ -111,7 +111,13 @@ class ImageGenerationStage {
             visualPrompt = `${visualPrompt}\n\n[CREATOR IMAGE PROMPT REFERENCE: ${creatorImagePrompt}]`
           }
 
-          log.step(`Scene ${idx + 1}/${scenes.length}`, `prompt: ${visualPrompt.slice(0, 80)}...`)
+          // Quality tiering: hero scenes get premium prompt enhancement
+          const brollPriority = scene.brollPriority ?? 1
+          if (brollPriority >= 4) {
+            visualPrompt = `[HERO SHOT — MAXIMUM QUALITY] ${visualPrompt}, masterpiece composition, cinematic lighting, extremely detailed, professional photography`
+          }
+
+          log.step(`Scene ${idx + 1}/${scenes.length}`, `tier=${brollPriority >= 4 ? 'HERO' : brollPriority <= 1 ? 'simple' : 'standard'} prompt: ${visualPrompt.slice(0, 80)}...`)
 
           // Resolve image reference with priority: customRef > characterRef > previousSceneRef
           const imageRefConfig = this.resolveImageReference(
@@ -381,80 +387,8 @@ class ImageGenerationStage {
         width: generatedImage.width,
         height: generatedImage.height,
         isSelected: true,
-        variantIndex: 0,
       },
     })
-  }
-
-  // ─── PRIVATE: End Image Generation ───────────────────────────────
-
-  private async generateEndImage(
-    scene: { id: string; endVisualDescription: string | null; endImageReferenceWeight: number | null },
-    startImage: { buffer: Buffer },
-    styleAnchor: string,
-    input: ImageStageInput,
-    imageProvider: ReturnType<typeof providerManager.getImageProvider>,
-    outputId: string,
-    idx: number,
-    log: ReturnType<typeof createPipelineLogger>,
-  ): Promise<void> {
-    if (!scene.endVisualDescription) return
-
-    try {
-      let endVisualPrompt = scene.endVisualDescription
-      if (styleAnchor) {
-        endVisualPrompt = `${styleAnchor}\n\n${endVisualPrompt}`
-      }
-
-      const { width, height } = this.resolveImageDimensions(input.aspectRatio)
-
-      const endImageRequest: ImageGenerationRequest = {
-        prompt: endVisualPrompt,
-        width,
-        height,
-        aspectRatio: input.aspectRatio || '16:9',
-        seed: input.seed ?? undefined,
-        numVariants: 1,
-        imageReference: Buffer.from(startImage.buffer),
-        imageReferenceWeight: scene.endImageReferenceWeight ?? 0.7,
-      }
-
-      const endImageResponse = await imageProvider.generate(endImageRequest)
-      const endGenerated = endImageResponse.images[0]
-
-      if (endGenerated) {
-        await prisma.sceneImage.create({
-          data: {
-            sceneId: scene.id,
-            role: 'end',
-            provider: imageProvider.getName() as any,
-            promptUsed: scene.endVisualDescription,
-            fileData: Buffer.from(endGenerated.buffer) as any,
-            mimeType: 'image/png',
-            originalSize: endGenerated.buffer.length,
-            width: endGenerated.width,
-            height: endGenerated.height,
-            isSelected: true,
-            variantIndex: 0,
-          },
-        })
-
-        costLogService.log({
-          outputId,
-          resource: 'image',
-          action: 'create',
-          provider: endImageResponse.costInfo.provider,
-          model: endImageResponse.costInfo.model,
-          cost: endImageResponse.costInfo.cost,
-          metadata: endImageResponse.costInfo.metadata,
-          detail: `Scene ${idx + 1} - end image (last_image keyframe)`,
-        }).catch(() => {})
-
-        log.step(`Scene ${idx + 1}`, `End image generated (ref weight: ${scene.endImageReferenceWeight ?? 0.7})`)
-      }
-    } catch (endErr: any) {
-      log.warn(`Scene ${idx + 1} end image failed (non-blocking): ${endErr?.message?.slice(0, 100)}`)
-    }
   }
 
   // ─── PRIVATE: Content Restriction Detection ──────────────────────

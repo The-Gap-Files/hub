@@ -1,0 +1,306 @@
+{
+  "timestamp": "2026-02-26T02:54:41.484Z",
+  "taskId": "monetization-hook-only",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "gemini-3-flash-preview",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Monetization — Hook-Only Teasers Generator\n\nVocê é um estrategista de conteúdo viral. Nesta etapa, você vai gerar os teasers HOOK-ONLY — arma de alcance viral, detonação cognitiva que para o scroll, gera replay e converte.\n\n## 🎯 O Que São Hook-Only\n\nHook-Only é uma **arma viral de 16-22 segundos**. Não é um resumo. Não é um mini-documentário. Não é uma aula.\n\n### DNA do Hook-Only:\n- **Visceral** — O público SENTE antes de PENSAR. Se pensou antes de sentir, deslizou.\n- **Simples** — 1 conceito central resumível em 1 frase mental. Sem colagem de fatos.\n- **Dinâmico** — Alternância emocional: Cena 1 (Ruptura/Loop-B) → Cena 2 (Respiro) → Cena 3 (Replay bait/impacto) → Cena 4 (Pico/Loop-A).\n- **Sistêmico** — Mostra o MECANISMO (quem autorizou, quem lucrou), não o sintoma (violência). Indignação > repulsa.\n- **Incompleto** — ZERO resolução, ZERO explicação, TODOS os loops abertos.\n- **Replay-friendly** — Detalhes rápidos que forçam \"pera, o que foi isso?\"\n- **Loop Infinito (Loop-A/Loop-B)** — Escreva de trás pra frente. A frase final (Cena 4) é incompleta e só faz sentido quando o vídeo reinicia na Cena 1.\n- **Safe** — Postura \"Neutral Documentarian\". Gore explícito = desmonetização. Use substituição semântica.\n\n## 📐 CONTEXTO RECEBIDO\n\nVocê recebe:\n- O dossiê completo\n- O teaser Gateway já gerado\n- Os teasers Deep-Dive já gerados\n- TODOS os hooks já usados (para NÃO repetir)\n- A lista de ângulos e formatos definidos no blueprint para cada hook-only\n\n## 📐 O QUE PRODUZIR\n\nPara CADA hook-only definido no blueprint, gere:\n- **title**: Máximo 8-10 palavras. Tensão + curiosidade + clareza. Sem nomes obscuros, sem subtítulos com dois-pontos.\n  - ❌ \"O mito sangrento que atravessou séculos: de Trento a Poway\" (14 palavras, denso)\n  - ✅ \"A mesma mentira. 500 anos depois.\" (6 palavras, pura tensão)\n  - ✅ \"Um menino morto e uma mentira eterna.\" (7 palavras, impacto)\n- **hook**: Frase que causa RUPTURA COGNITIVA em 2 segundos (até 15 palavras). Sem construção, sem contextualização. O espectador SENTE antes de pensar. DIFERENTE de tudo anterior.\n- **angle**: Descrição do ângulo (já definido no blueprint)\n- **angleCategory**: A categoria (já definida no blueprint)\n- **narrativeRole**: \"hook-only\"\n- **shortFormatType**: O formato (já definido no blueprint)\n- **scriptOutline**: Loop-B (final da frase do loop) → Respiro (contexto sistêmico) → Replay bait/impacto → Loop-A (começo da frase do loop, SUSPENSA).\n- **visualSuggestion**: Descrição curta do visual\n- **loopSentence**: Objeto com `fullSentence`, `partA` e `partB` definindo a mecânica do loop.\n- **cta**: **NENHUM**. Campo deve ser vazio ou null. O loop é a retenção.\n- **platform**: \"YouTube Shorts\"\n- **format**: \"teaser-youtube-shorts\"\n- **estimatedViews**: Estimativa de views\n- **scriptStyleId** e **scriptStyleName**\n- **editorialObjectiveId** e **editorialObjectiveName**\n- **avoidPatterns**: 2-4 anti-padrões específicos (veja regras abaixo)\n- **visualPrompt**: Prompt de imagem em INGLÊS (1 parágrafo)\n- **microBriefV1**: Micro-brief ESTRUTURADO para ESTE teaser (isolado por item). Deve conter:\\n  - version: \\\"teaserMicroBriefV1\\\"\\n  - narrativeRole: \\\"hook-only\\\"\\n  - angleCategory e angle (iguais aos campos do teaser)\\n  - facts: 5-12 fatos selecionados APENAS do brief/dossiê recebido (cada um com text e, se possível, sourceRef)\\n  - forbiddenElements: 6-12 itens (reforçar anti-arma/gore/close-up)\\n  - allowedArtifacts: 6-12 itens (documento/selo/monitor/headline/etc.)\\n  - notes: 2-6 bullets curtos (ex.: \\\"mecanismo > sintoma\\\", \\\"zero resolução\\\")\\n\\n🚨 IMPORTANTE: este microBriefV1 será o ÚNICO contexto que o Story Architect verá para este hook-only. Então selecione fatos que permitam um outline forte sem precisar de outros dados.\n\n## 🚨 REGRAS DOS HOOK-ONLY\n\n1. **RUPTURA EM 2 SEGUNDOS** — A primeira frase DEVE causar ruptura cognitiva. Nada de construção antes do choque. Se o público pensa antes de sentir, ele desliza.\n   - **MICRO-REGRA (TIMING)**: a primeira frase (até o primeiro ponto/pausa forte) deve ser pronunciável em **~1,5s**.\n     - Heurística: **3-5 palavras (ideal)**, **máx. 6**. Sem vírgula na primeira pancada.\n2. **1 CONCEITO CENTRAL** — O teaser INTEIRO gira em torno de UMA ideia resumível em 1 frase mental. Se exige conectar 3+ entidades/épocas/nomes para entender, está denso demais para consumo rápido.\n3. **ALTERNÂNCIA DINÂMICA (NÃO ESCALAÇÃO LINEAR)** — A intensidade deve VARIAR com contrastes: após beat intenso, inserir respiro para amplificar o próximo pico. O ÚLTIMO beat (corte seco — sem CTA) é o pico absoluto. ❌ 8→9→9→10 (saturação). ✅ 8→6→9→10 (alternância).\n3.5. **MECANISMO > SINTOMA (CRÍTICO)** — Foque no SISTEMA (quem autorizou, quem lucrou), NÃO na violência. ❌ \"A corda estala\" (repulsa → swipe). ✅ \"O bispo assinou a sentença\" (mecanismo → indignação → compartilha).\n   - **ANTI-TERMOS-SENSÍVEIS:** NUNCA use \"tortura infantil\", \"sangue infantil\", \"violência infantil\" em title, hook ou microBriefV1.facts. Se o brief tiver, REFORMULE para mecanismo (decreto, confisco, tribunal assinou, usou como pretexto). Títulos: ❌ \"O Decreto que Selou Sangue Infantil\". ✅ \"O Decreto que Autorizou o Confisco\".\n4. **NOMES UNIVERSAIS** — Nomes históricos obscuros quebram fluxo cognitivo. Use função (\"o bispo\", \"o juiz\", \"o atirador\"), não nomes próprios (Hinderbach, Tiberino). Exceção: nomes universalmente conhecidos (Hitler, Einstein, Napoleão).\n5. **RESOLUÇÃO ZERO** — Nenhuma explicação, recap, conclusão moral ou reflexão filosófica. TODOS os loops ficam abertos.\n6. **ZERO CTA** — O público NÃO pode perceber que acabou. Corte seco no meio da frase (Loop-A). Sem branding, sem \"The Gap Files.\".\n7. **REPLAY BAIT** — Pelo menos 1 beat com detalhe visual/narrativo rápido demais para absorver. Força re-assistir. Replay é sinal forte para o algoritmo.\n8. **Cada hook DEVE ser TOTALMENTE DIFERENTE** dos outros — formato E conteúdo\n9. **avoidPatterns** devem focar em eliminar contexto, explicação, nomes obscuros e CTA visível\n10. **microBriefV1 é a fonte da verdade** para o Story Architect deste hook-only: NÃO inclua fatos que pertencem a outros hook-onlys/deep-dives/gateway. Selecione apenas os fatos necessários para este ângulo e mantenha-os simples.\n11. **microBriefV1.facts:** Se um fato do brief contiver \"tortura infantil\", \"sangue infantil\", \"violência infantil\", REFORMULE antes de incluir: use consequência (confisco, decreto, autorizou) em vez do método (tortura, sangue).\n12. **microBriefV1.facts — MECANISMO > SINTOMA:** NÃO inclua fatos que descrevam captura/recolhimento de pessoas (\"guardas recolhiam crianças\", \"levaram para o tribunal\"). Inclua fatos do SISTEMA: \"O tesouro financiou o tribunal\", \"O decreto autorizou o confisco\", \"O bispo assinou a sentença\".\n\n## 🛡️ BRAND SAFETY E VISUAL NOISE (YOUTUBE 2026)\n\n1. **SUBSTITUIÇÃO SEMÂNTICA (OBRIGATÓRIA):**\n   - ❌ \"Assassino serial matou 20\" → 🟢 \"O responsável por 20 fins trágicos\"\n   - ❌ \"Sangue no chão\" → 🟢 \"A cena marcada\" / \"Vestígios vitais\"\n   - ❌ \"Estripado/Mutilado\" → 🟢 \"Fragmentado\" / \"Cena desfeita\"\n   - **Postura:** \"Neutral Documentarian\". Clínico, solene, nunca sensacionalista.\n\n2. **IMPERFEIÇÃO VISUAL CONTEXTUAL (Decisão de Direção):**\n   - **Esqueça o \"ruído aleatório\".** Escolha uma textura que AMPLIFIQUE a narrativa.\n   - **Documentos Antigos:** Textura de papel rasgado, granulação de filme 16mm, bordas queimadas.\n   - **Relatos Policiais/Modernos:** Glitch digital, compressão de CCTV, ruído de ISO alto (câmera noturna).\n   - **Memórias/Relatos:** Desfoque nas bordas (tilt-shift), aberração cromática leve.\n   - **Regra:** A imagem não pode ser \"lisa\" (cara de IA pura). Ela deve parecer um registro físico ou digital real.\n   - **Loop Visual:** O frame final deve ter iluminação/composição similar ao inicial para loop invisível.\n\n## 💡 EXEMPLOS DE HOOKS PODEROSOS (RUPTURA COGNITIVA)\n\n- \"A Igreja declarou ele santo… e depois RETIROU a santidade.\"\n- \"3 famílias lucraram com a morte dele. Ninguém foi preso.\"\n- \"O DNA não bate. A confissã... [truncated 8255 chars]"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "📋 TEMA: A ascensão paramilitar e queda biológica de El Mencho, líder do CJNG.\n📋 TÍTULO: El Mencho: O Ascensão Sangrenta e o Fim do Senhor dos Abacates\n🧾 BRIEF (TEASERS) — versão: briefBundleV1\n\n🛡️ REGRAS HARD (GLOBAL SAFETY)\n- ❌ armas de fogo explícitas\n- ❌ tiros em progresso\n- ❌ execuções visualizadas\n- ❌ sangue ou gore\n- ❌ close-up de rostos ou mãos humanas\n- ❌ armas de fogo, rifles, pistolas, munição, gatilho\n- ❌ atirador, execução, assassinato explícito, violência gráfica\n- ❌ sangue, gore, corpos mutilados, tortura explícita\n- ❌ close-up de mãos humanas, close-up de rostos humanos (evitar macro/anatomia)\n- ❌ cenas em sinagogas/templos com ameaça explícita (substituir por artefatos: manifesto, tela, manchete)\n- ❌ símbolos/extremismo contemporâneo em destaque (substituir por “texto recortado/blur”)\n\n🧰 ARTEFATOS VISUAIS PERMITIDOS\n- ✅ documentos confidenciais\n- ✅ mapas de satélite\n- ✅ headlines de jornais\n- ✅ registros médicos\n- ✅ relatórios de inteligência\n- ✅ veículos blindados (distância)\n- ✅ transcrições de rádio\n- ✅ documento, decreto, registro, arquivo, dossiê, carimbo, selo de cera\n- ✅ moedas, cofre, livro-caixa, inventário, recibo, contrato\n- ✅ monitor, tela, manifesto (sem arma), headline, recorte de jornal, thread desfocada\n- ✅ mapa, corredor de arquivo, sala de leitura, prateleiras, luz de vela, sombras\n- ✅ silhuetas não-identificáveis sem rosto/mãos em close\n\n🔫 MUNIÇÃO NARRATIVA (FATOS SAFE)\n1. Nemesio Oseguera Cervantes nasceu em 1966 em Michoacán, iniciando sua trajetória como trabalhador braçal em plantações de abacate. [fonte: [1]]\n2. Na década de 90, o futuro líder cumpriu três anos de pena em uma prisão federal no Texas por tráfico de heroína, mapeando vulnerabilidades do sistema judiciário americano. [fonte: [1]]\n3. Após ser deportado em 1996, ele ingressou na polícia municipal de Jalisco, utilizando o cargo para aprender táticas de patrulha e comunicações de rádio do Estado. [fonte: [1]]\n4. A fundação do Cártel Jalisco Nueva Generación (CJNG) ocorreu após um vácuo de poder gerado pela morte de um líder do Cartel de Sinaloa em 2010. [fonte: [1]]\n5. O cartel institucionalizou a extorsão agrícola em Michoacán, cobrando taxas de proteção de até 4 pesos por quilo de limão e abacate produzidos. [fonte: [1]]\n6. A engenharia financeira do grupo era operada pelo clã 'Los Cuinis', que lavava capitais através de redes hoteleiras e centros comerciais de luxo. [fonte: [1]]\n7. O CJNG recrutou veteranos de forças especiais estrangeiras por meio de ofertas enganosas de emprego para segurança privada via aplicativos de mensagens. [fonte: [1]]\n8. A organização foi pioneira no uso de drones adaptados com mecanismos para liberação de explosivos plásticos contra forças de segurança. [fonte: [1]]\n9. Veículos de combate blindados artesanais, conhecidos como 'Monstruos', foram projetados com engenharia focada em resistir a munições de calibre militar. [fonte: [1]]\n10. O líder do cartel sofria de insuficiência renal crônica terminal, operando com menos de 15% da capacidade renal nos seus últimos anos. [fonte: [1]]\n11. A dependência de hemodiálise forçou a criação de uma rede logística médica precária em abrigos improvisados nas montanhas de Jalisco. [fonte: [1]]\n12. Em março de 2020, a Operação Python resultou em mais de 600 prisões táticas e 350 indiciamentos contra a hierarquia de distribuição do cartel nos EUA. [fonte: [1]]\n13. A localização exata do complexo logístico do líder foi entregue às autoridades por uma parceira amorosa do círculo íntimo no início de 2026. [fonte: [1]]\n14. A Operação Tapalpa, em 22 de fevereiro de 2026, envolveu esquadrões de elite e apoio de inteligência internacional para cercar o perímetro montanhoso. [fonte: [1]]\n15. O líder do CJNG faleceu a bordo de uma aeronave de evacuação médica militar devido a um choque hipovolêmico após ser atingido durante a tentativa de fuga. [fonte: [1]]\n16. A morte do fundador desencadeou ataques coordenados e bloqueios em 16 estados do México como protocolo de retaliação da organização. [fonte: [1]]\n17. A sucessão do cartel em 2026 polarizou o grupo entre uma ala focada em hegemonia militar e outra voltada para a gestão burocrática e territorial. [fonte: [1]]\n18. O clã 'Los Cuinis' utilizava empresas de fachada, como a ABR Management, para blindar o patrimônio do cartel contra apreensões internacionais. [fonte: [1]]\n19. O cartel assegurou o controle de portos estratégicos no Pacífico para gerenciar o fluxo de precursores químicos importados da Ásia. [fonte: [1]]\n20. Relatórios de inteligência indicam que o cartel operava como uma Empresa Militar Privada clandestina, importando táticas de guerra assimétrica. [fonte: [1]]\n\n🎭 DIRETRIZES POR PAPEL\n- gateway: contextLevel=medium, facts=8-15\n- deep-dive: contextLevel=low, facts=5-10\n- hook-only: contextLevel=minimal, facts=3-5\n\nGere 4 teasers HOOK-ONLY para o dossiê.\n\nSlots definidos no blueprint:\n1. angleCategory=\"tecnologico\", angleName=\"Guerra de Drones nas Montanhas de Jalisco\", shortFormatType=\"hook-brutal\", platform=\"YouTube Shorts\", scriptStyleId=\"mystery\", editorialObjectiveId=\"viral-hook\"\n2. angleCategory=\"conspirativo\", angleName=\"A Traição do Círculo Íntimo em 2026\", shortFormatType=\"frase-memoravel\", platform=\"YouTube Shorts\", scriptStyleId=\"narrative\", editorialObjectiveId=\"cliffhanger\"\n3. angleCategory=\"paradoxal\", angleName=\"O Trágico Fim a Bordo da Evacuação Médica\", shortFormatType=\"pergunta-incomoda\", platform=\"YouTube Shorts\", scriptStyleId=\"narrative\", editorialObjectiveId=\"emotional-impact\"\n4. angleCategory=\"conexao-temporal\", angleName=\"A Guerra de Sucessão: O México Pós-Mencho\", shortFormatType=\"hook-brutal\", platform=\"YouTube Shorts\", scriptStyleId=\"mystery\", editorialObjectiveId=\"viral-hook\"\n\nOBRIGATÓRIO: Cada teaser deve ter targetEpisode (1, 2 ou 3). Hook-only prioriza EP2 e EP3. Distribua equilibradamente.\n\nRetorne um JSON com campo \"teasers\" contendo exatamente 4 teasers."
+      }
+    ]
+  },
+  "parsed": {
+    "teasers": [
+      {
+        "hook": "O céu do México não pertence mais aos pássaros.",
+        "scriptStyleName": "Mystery/Dark Investigativo",
+        "angle": "Guerra de Drones nas Montanhas de Jalisco",
+        "narrativeRole": "hook-only",
+        "angleCategory": "tecnologico",
+        "title": "O Céu Tem Novos Donos",
+        "estimatedViews": 850000,
+        "platform": "YouTube Shorts",
+        "scriptOutline": "Loop-B (quem controla o céu...) → Respiro (Drones pairando sobre as montanhas de Jalisco, luzes piscando) → Replay bait (Rápida sucessão de telas térmicas identificando alvos) → Loop-A (O céu do México não pertence mais aos pássaros...)",
+        "avoidPatterns": [
+          "NÃO use termos como 'bombardeio' ou 'explosão' — use 'mecanismo de liberação' ou 'evento tático'",
+          "NÃO mostre o operador do drone — foque na silhueta da máquina contra o céu",
+          "NÃO explique o funcionamento técnico — foque no medo sistêmico de quem é vigiado"
+        ],
+        "editorialObjectiveName": "Viral Hook & Retention",
+        "visualPrompt": "Noir cinematic shot of a commercial drone hovering against a dark, twilight sky over jagged Mexican mountains. High contrast, grainy 16mm film texture, ominous atmosphere, no people visible.",
+        "sceneCount": 4,
+        "targetEpisode": 2,
+        "scriptStyleId": "mystery",
+        "format": "teaser-youtube-shorts",
+        "cta": null,
+        "editorialObjectiveId": "viral-hook",
+        "visualSuggestion": "Silhueta de drone contra o crepúsculo nas montanhas.",
+        "shortFormatType": "hook-brutal",
+        "microBriefV1": {
+          "allowedArtifacts": [
+            "drone comercial modificado",
+            "silhueta de montanha ao entardecer",
+            "estática de monitor de vídeo",
+            "mapa térmico infravermelho",
+            "transcrição de rádio militar",
+            "sinal de GPS oscilando"
+          ],
+          "narrativeRole": "hook-only",
+          "angleCategory": "tecnologico",
+          "facts": [
+            {
+              "sourceRef": "[1]",
+              "text": "A organização foi pioneira no uso de drones adaptados com mecanismos para liberação de explosivos plásticos."
+            },
+            {
+              "sourceRef": "[1]",
+              "text": "O grupo recrutou veteranos de forças especiais estrangeiras para treinar táticas de guerra assimétrica."
+            },
+            {
+              "text": "Relatórios indicam que o cartel operava como uma Empresa Militar Privada clandestina.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "As montanhas de Jalisco serviam de base para o lançamento de ataques coordenados por via aérea.",
+              "sourceRef": "[1]"
+            }
+          ],
+          "forbiddenElements": [
+            "rosto do operador",
+            "detonação explícita",
+            "sangue no solo",
+            "armas de fogo manuais",
+            "close de mãos no controle remoto"
+          ],
+          "angle": "Guerra de Drones nas Montanhas de Jalisco",
+          "notes": [
+            "Foco no mecanismo: a tecnologia que substituiu o soldado tradicional.",
+            "Atmosfera de vigilância constante.",
+            "O loop deve reforçar que o perigo é invisível e persistente."
+          ],
+          "version": "teaserMicroBriefV1"
+        }
+      },
+      {
+        "editorialObjectiveId": "cliffhanger",
+        "visualPrompt": "Cinematic close-up of a smartphone screen in a dark room, displaying a blurred encrypted message with GPS coordinates. Shallow depth of field, dust motes in the air, cold blue lighting, noir aesthetic.",
+        "sceneCount": 4,
+        "targetEpisode": 3,
+        "scriptStyleId": "narrative",
+        "format": "teaser-youtube-shorts",
+        "cta": null,
+        "visualSuggestion": "Celular brilhando no escuro com coordenadas de GPS.",
+        "shortFormatType": "frase-memoravel",
+        "microBriefV1": {
+          "version": "teaserMicroBriefV1",
+          "notes": [
+            "Mecanismo: a vulnerabilidade emocional superando a segurança paramilitar.",
+            "Zero resolução: o vídeo corta antes de dizer quem foi.",
+            "O loop deve sugerir que ninguém é confiável."
+          ],
+          "allowedArtifacts": [
+            "celular com tela trincada e mensagem de texto",
+            "sombra de uma mulher em um corredor escuro",
+            "relatório de inteligência com tarjas pretas",
+            "mapa de satélite com um ponto vermelho pulsando",
+            "registro de chamadas criptografadas",
+            "selo de confidencialidade rasgado"
+          ],
+          "angleCategory": "conspirativo",
+          "facts": [
+            {
+              "sourceRef": "[1]",
+              "text": "A localização exata do complexo logístico foi entregue por uma parceira amorosa do círculo íntimo."
+            },
+            {
+              "text": "A Operação Tapalpa em 2026 utilizou inteligência internacional para cercar o perímetro.",
+              "sourceRef": "[1]"
+            },
+            {
+              "sourceRef": "[1]",
+              "text": "O líder vivia em abrigos improvisados nas montanhas devido à sua condição de saúde."
+            },
+            {
+              "sourceRef": "[1]",
+              "text": "A traição ocorreu no início de 2026, selando o destino da organização."
+            }
+          ],
+          "narrativeRole": "hook-only",
+          "forbiddenElements": [
+            "beijo explícito",
+            "rosto da informante",
+            "dinheiro em espécie sendo trocado",
+            "violência contra a mulher",
+            "armas sendo sacadas"
+          ],
+          "angle": "A Traição do Círculo Íntimo em 2026"
+        },
+        "angle": "A Traição do Círculo Íntimo em 2026",
+        "narrativeRole": "hook-only",
+        "angleCategory": "conspirativo",
+        "hook": "O segredo mais caro do mundo foi vendido por uma confidência íntima.",
+        "scriptStyleName": "Narrativo Imersivo",
+        "editorialObjectiveName": "High Curiosity/Cliffhanger",
+        "estimatedViews": 920000,
+        "title": "O Preço da Lealdade",
+        "platform": "YouTube Shorts",
+        "scriptOutline": "Loop-B (...porque a lealdade tem preço.) → Respiro (Sombra de uma figura feminina observando um comboio militar ao longe) → Replay bait (Flash de um documento com a coordenada exata de Tapalpa) → Loop-A (O segredo mais caro do mundo foi vendido por uma confidência íntima...)",
+        "avoidPatterns": [
+          "NÃO use nomes próprios da parceira — use 'o círculo íntimo' ou 'confidência amorosa'",
+          "NÃO mostre o ato da traição — mostre o rastro digital e a consequência sistêmica",
+          "NÃO dê um final feliz — a traição é apenas o início do fim"
+        ]
+      },
+      {
+        "avoidPatterns": [
+          "NÃO use a palavra 'morreu' — use 'o fim trágico' ou 'o último suspiro'",
+          "NÃO mostre o corpo — foque nos aparelhos médicos e na aeronave em movimento",
+          "NÃO use tom de celebração — mantenha a neutralidade documental sobre o desfecho"
+        ],
+        "scriptOutline": "Loop-B (...onde o destino se fecha.) → Respiro (Visão trêmula do interior de um helicóptero médico, luzes de emergência pulsando) → Replay bait (Monitor cardíaco parando exatamente no momento do corte) → Loop-A (O homem que derrubava helicópteros teve seu fim a bordo de um...)",
+        "platform": "YouTube Shorts",
+        "estimatedViews": 780000,
+        "title": "A Ironia do Destino Final",
+        "editorialObjectiveName": "Emotional Impact/Irony",
+        "hook": "O homem que derrubava helicópteros teve seu fim a bordo de um.",
+        "scriptStyleName": "Narrativo Imersivo",
+        "angleCategory": "paradoxal",
+        "narrativeRole": "hook-only",
+        "angle": "O Trágico Fim a Bordo da Evacuação Médica",
+        "microBriefV1": {
+          "notes": [
+            "A ironia do destino: morrer no veículo que ele costumava destruir.",
+            "Foco no colapso biológico encontrando o colapso tático.",
+            "O loop deve ser seco e clínico."
+          ],
+          "version": "teaserMicroBriefV1",
+          "angle": "O Trágico Fim a Bordo da Evacuação Médica",
+          "forbiddenElements": [
+            "corpo visível",
+            "sangue jorrando",
+            "médicos em pânico (close-up)",
+            "armas de fogo dentro da aeronave",
+            "gritos audíveis"
+          ],
+          "narrativeRole": "hook-only",
+          "facts": [
+            {
+              "text": "O líder faleceu a bordo de uma aeronave de evacuação médica militar em 2026.",
+              "sourceRef": "[1]"
+            },
+            {
+              "sourceRef": "[1]",
+              "text": "A causa foi um choque hipovolêmico após ser atingido durante a tentativa de fuga."
+            },
+            {
+              "text": "Ele sofria de insuficiência renal crônica terminal, operando com 15% da capacidade.",
+              "sourceRef": "[1]"
+            },
+            {
+              "text": "A Operação Tapalpa envolveu esquadrões de elite para o cerco final.",
+              "sourceRef": "[1]"
+            }
+          ],
+          "angleCategory": "paradoxal",
+          "allowedArtifacts": [
+            "monitor cardíaco com linha reta (flatline)",
+            "interior de helicóptero militar com luzes vermelhas de emergência",
+            "máscara de oxigênio caída no chão da aeronave",
+            "relatório médico indicando choque hipovolêmico",
+            "bolsa de soro balançando com a turbulência",
+            "mancha escura em um lençol branco hospitalar"
+          ]
+        },
+        "shortFormatType": "pergunta-incomoda",
+        "visualSuggestion": "Interior de helicóptero médico com luzes vermelhas.",
+        "cta": null,
+        "format": "teaser-youtube-shorts",
+        "scriptStyleId": "narrative",
+        "targetEpisode": 3,
+        "sceneCount": 4,
+        "visualPrompt": "POV inside a military medical evacuation helicopter at night. Red emergency lights flickering, medical equipment vibrating, blurry view of the dark landscape through the open door. Noir cinematic style, high grain.",
+        "editorialObjectiveId": "emotional-impact"
+      },
+      {
+        "hook": "O império não morreu com ele. Ele apenas se multiplicou.",
+        "scriptStyleName": "Mystery/Dark Investigativo",
+        "angle": "A Guerra de Sucessão: O México Pós-Mencho",
+        "narrativeRole": "hook-only",
+        "angleCategory": "conexao-temporal",
+        "title": "A Hidra de Jalisco",
+        "estimatedViews": 1100000,
+        "platform": "YouTube Shorts",
+        "scriptOutline": "Loop-B (...porque na sucessão, o caos é a regra.) → Respiro (Um mapa do México sendo riscado e dividido por diferentes cores de caneta) → Replay bait (Rápida sucessão de logotipos de empresas de fachada sendo carimbados como 'Suspeito') → Loop-A (O império não morreu com ele. Ele apenas se multiplicou...)",
+        "avoidPatterns": [
+          "NÃO use termos de gangues — use 'ala militar' e 'gestão burocrática'",
+          "NÃO mostre confrontos urbanos — mostre o mapa se fragmentando e documentos sendo destruídos",
+          "NÃO prometa paz — o foco é o vácuo de poder e o caos sistêmico"
+        ],
+        "editorialObjectiveName": "Viral Hook & Retention",
+        "visualPrompt": "Top-down view of a wooden desk with a large map of Mexico. Dark shadows, a hand (only silhouette) drawing sharp division lines with a red marker. Stacks of old documents and a wax seal stamp nearby. Noir lighting.",
+        "sceneCount": 4,
+        "targetEpisode": 3,
+        "scriptStyleId": "mystery",
+        "format": "teaser-youtube-shorts",
+        "cta": null,
+        "editorialObjectiveId": "viral-hook",
+        "visualSuggestion": "Mapa do México sendo dividido por linhas de cores diferentes.",
+        "shortFormatType": "hook-brutal",
+        "microBriefV1": {
+          "version": "teaserMicroBriefV1",
+          "notes": [
+            "Mecanismo: a hidra que ganha duas cabeças quando uma é cortada.",
+            "Foco na divisão administrativa e militar do espólio.",
+            "O loop deve sugerir um ciclo interminável de conflito."
+          ],
+          "allowedArtifacts": [
+            "mapa do México sendo dividido por linhas vermelhas e azuis",
+            "fragmentadora de papel destruindo registros financeiros",
+            "logotipos de empresas de fachada (ABR Management) desfocados",
+            "manchete de jornal sobre bloqueios em 16 estados",
+            "dois selos de cera diferentes em um mesmo documento oficial",
+            "monitor com gráficos de mercado negro em queda livre"
+          ],
+          "angle": "A Guerra de Sucessão: O México Pós-Mencho",
+          "forbiddenElements": [
+            "bandeiras de cartéis reais",
+            "cenas de quebra-quebra urbano",
+            "rostos de sucessores identificáveis",
+            "armas de fogo ou explosões explícitas",
+            "fogo real em close-up"
+          ],
+          "angleCategory": "conexao-temporal",
+          "facts": [
+            {
+              "sourceRef": "[1]",
+              "text": "A morte do fundador desencadeou ataques coordenados e bloqueios em 16 estados."
+            },
+            {
+              "text": "A sucessão polarizou o grupo entre uma ala militar e uma ala burocrática.",
+              "sourceRef": "[1]"
+            },
+            {
+              "sourceRef": "[1]",
+              "text": "O clã 'Los Cuinis' tentava blindar o patrimônio através de empresas de fachada."
+            },
+            {
+              "text": "O vácuo de poder fragmentou o império do 'Ouro Verde' em novas facções.",
+              "sourceRef": "[1]"
+            }
+          ],
+          "narrativeRole": "hook-only"
+        }
+      }
+    ]
+  },
+  "rawContent": ""
+}

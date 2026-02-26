@@ -28,6 +28,11 @@ export function buildWriterSystemPrompt(request: ScriptGenerationRequest): strin
     ? 'Português do Brasil (pt-BR)'
     : (request.language || 'Português do Brasil (pt-BR)')
 
+  const idealSceneCount = request.targetSceneCount ?? Math.ceil((request.targetDuration || 300) / 5)
+  // Each scene ≈ 1 paragraph of narration. Writer prose is denser than final narration,
+  // so we target ~75% of scene count as minimum paragraph count.
+  const minParagraphs = Math.max(20, Math.round(idealSceneCount * 0.75))
+
   return `${styleInstructions}
 
 ---
@@ -47,6 +52,14 @@ Sua prosa DEVE seguir estas proporções:
 | 📢 CTA (Encerramento) | ≤5% do texto | Compulsão por continuar + fechamento. |
 
 🚨 REGRA DE PROPORÇÃO MÁXIMA: A seção de REFLEXÃO/LIÇÃO NUNCA deve ultrapassar 20% do texto total. Reflexão longa = queda de retenção.
+
+🚨 REGRA DE FIDELIDADE ÀS FONTES (REGRA ABSOLUTA — MAIS IMPORTANTE):
+Você escreve EXCLUSIVAMENTE com base nas fontes fornecidas neste prompt.
+❌ PROIBIDO inserir fatos, personagens, eventos, datas, nomes ou referências que NÃO estejam nas fontes.
+❌ PROIBIDO usar seu conhecimento de treinamento para "enriquecer" a narrativa com analogias históricas, comparações ou paralelos externos.
+❌ PROIBIDO criar conexões com outros casos, crimes ou personagens históricos que não estejam nas fontes.
+✅ Se a informação não está nas fontes fornecidas, ela NÃO EXISTE para este vídeo.
+✅ Ao incluir qualquer fato, verifique mentalmente: "de qual fonte vem isso?" Se não souber responder, NÃO inclua.
 
 🚨 REGRA ANTI-REPETIÇÃO ESTRUTURAL (CRÍTICO):
 
@@ -68,7 +81,7 @@ NÍVEL 3 — Paráfrase: Detecção de reformulação
 - Se 2 parágrafos transmitem a MESMA informação com palavras diferentes, elimine um.
 - TESTE: "Se eu deletar este parágrafo, o leitor perde alguma informação?" Se NÃO → deletar.
 
-PREFERÍVEL: 5 parágrafos devastadores > 25 parágrafos repetitivos.
+PREFERÍVEL: parágrafos densos e únicos > parágrafos repetitivos. Mas NÃO reduza escopo para evitar repetição — cubra TODO o material disponível.
 
 🚨 REGRA DE HOOK CONCEITUAL (CRÍTICO):
 - O bloco HOOK DEVE causar PERPLEXIDADE, nunca REPULSA.
@@ -142,9 +155,46 @@ ESPECIFICIDADE = CREDIBILIDADE:
 - Inclua pelo menos 1 "frase-tese" que funciona como quote compartilhável.
 - Inclua pelo menos 1 fato surpreendente com NÚMERO CONCRETO (credibilidade = compartilhamento).
 
+🎙️ CONTENT TONE MODE (OBRIGATÓRIO — Proteção de RPM):
+O tom do conteúdo determina a categoria de anúncios e o CPM/RPM do vídeo.
+
+MODO PADRÃO (quando nenhum modo é especificado): **INVESTIGATIVO**
+- Postura: "Active Investigator" — quem investiga ao vivo, não quem já sabe tudo
+- Voz: descoberta progressiva, dúvida controlada, evidências que falam por si
+- RPM: ALTO — conteúdo educacional/investigativo tem melhor categoria de anúncio
+- Linguagem: qualificadores explícitos ("as evidências sugerem", "segundo os registros disponíveis")
+- NUNCA afirme 100% de certeza sobre fatos disputados. Prefira "conectar pontos" a "declarar verdades"
+
+MODO PSICOLÓGICO (quando o tema envolve motivação humana, decisão, mente):
+- Postura: análise de comportamento, mecanismos psicológicos, "por que alguém faz isso?"
+- Voz: clínica mas empática, distância analítica
+- Linguagem: termos psicológicos acessíveis ("o mecanismo da racionalização", "dissonância cognitiva")
+
+MODO HISTÓRICO (quando o tema é evento de época, contexto histórico dominante):
+- Postura: contexto e consequência no tempo longo, "o que isso revela sobre sistemas?"
+- Voz: solenidade documentarista, perspectiva ampla
+- Linguagem: datas precisas como âncoras, nomes com função ("o bispo de Trento, Hinderbach")
+
+SELEÇÃO AUTOMÁTICA: Se o dossierCategory for 'true-crime' ou 'conspiração' → INVESTIGATIVO. Se for 'psicologia' → PSICOLÓGICO. Se for 'história' → HISTÓRICO. Fallback → INVESTIGATIVO.
+REGRA: O modo NUNCA é declarado explicitamente na prosa. O modo governa a POSTURA da voz, não o vocabulário.
+
 🛡️ BRAND SAFETY:
 - PROIBIDO: "Assassinato", "Estupro", "Pedofilia", "Mutilado", "Tripas", "Poça de Sangue".
 - SUBSTITUA POR: "Fim Trágico", "Ato Imperdoável", "Crimes contra Inocentes", "Fragmentado".
+
+📖 MODO ESCRITOR CHEFE (quando a fonte é prosa narrativa — CRÍTICO):
+Se a fonte fornecida é uma "Prosa EP — Escritor Chefe", sua função é EXPANDIR AGRESSIVAMENTE essa prosa, NUNCA resumir.
+- A prosa do Escritor Chefe é a FONTE DA VERDADE — todos os fatos, nomes, datas e detalhes vieram do dossiê curado
+- Sua função: TRIPLICAR o volume da prosa original. Onde o Escritor Chefe escreveu 5000 palavras, você deve produzir 12000-15000.
+- Para CADA parágrafo do Escritor Chefe, escreva 3-5 parágrafos expandidos:
+  * Parágrafo 1: O fato/evento com detalhes expandidos (quem, quando, onde, como)
+  * Parágrafo 2: Contexto e circunstâncias (o que acontecia ao redor, motivações dos atores)
+  * Parágrafo 3: Consequências imediatas (reações, impacto, desdobramentos)
+  * Parágrafo 4-5: Impacto a longo prazo, conexões com outros eventos, reflexões
+- NUNCA corte conteúdo — se a prosa tem um detalhe, ele é RELEVANTE e deve ser EXPANDIDO na sua versão
+- Use as técnicas narrativas (staccato, power words, frase-tese) para ELEVAR a prosa, não para substituí-la
+- REGRA DE OURO: Cada ## header do Escritor Chefe deve gerar MÚLTIPLOS ## headers na sua versão. Subdivida e aprofunde.
+- Se a prosa do Escritor Chefe tem 10 blocos (## headers), sua versão deve ter 25-40 blocos
 
 ---
 📝 FORMATO DE SAÍDA (OBRIGATÓRIO):
@@ -152,6 +202,20 @@ ESPECIFICIDADE = CREDIBILIDADE:
 Divida sua narrativa em BLOCOS usando headers Markdown (##). Cada bloco representa uma fase ou segmento narrativo.
 
 Use os beats/seções do plano narrativo (outline) fornecido como guia para os nomes dos blocos.
+
+📏 CALIBRAÇÃO DE VOLUME (CRÍTICO — NÃO IGNORE):
+Sua prosa será convertida em um roteiro de ~${idealSceneCount} cenas (~5 segundos cada).
+Cada parágrafo denso seu vira 1–3 cenas. Para atingir o alvo, você DEVE produzir NO MÍNIMO ${minParagraphs} parágrafos de prosa narrativa substancial.
+
+🚨 ALERTA: ${idealSceneCount} cenas = ~${Math.round(idealSceneCount * 5 / 60)} minutos de vídeo. Se você escrever 50 parágrafos para um alvo de ${minParagraphs}, o vídeo terá apenas 1/3 do conteúdo necessário. O espectador ficará com um vídeo curto e raso.
+
+⚠️ SE VOCÊ PRODUZIR MENOS QUE ${minParagraphs} PARÁGRAFOS: Isso significa que você está RESUMINDO o material ao invés de narrá-lo. Volte e TRIPLIQUE seu output:
+- Cada evento do dossiê merece 5-8 parágrafos: o fato, o contexto, as consequências imediatas, as reações dos atores, o impacto social, o legado, conexões com outros eventos
+- Explore TODOS os personagens secundários — motivações, papel no evento, destino
+- Contextualize cada momento no cenário geopolítico/histórico
+- Explore sub-histórias paralelas: o que acontecia com outros atores enquanto o evento principal se desenrolava
+- Adicione contrastes e contradições: versão oficial vs evidências, discurso público vs ação real
+- NÃO repita — EXPANDA em direções diferentes (consequências, reações, desdobramentos)
 
 REGRAS:
 1. Cada bloco tem um header claro (ex: ## HOOK, ## ORIGENS, ## A INVESTIGAÇÃO, etc.)
@@ -173,6 +237,9 @@ export function buildWriterUserPrompt(request: ScriptGenerationRequest): string 
   const langLabel = request.language === 'pt-BR' || request.language === 'pt'
     ? 'Português do Brasil (pt-BR)'
     : (request.language || 'Português do Brasil (pt-BR)')
+
+  const idealSceneCount = request.targetSceneCount ?? Math.ceil((request.targetDuration || 300) / 5)
+  const minParagraphs = Math.max(20, Math.round(idealSceneCount * 0.75))
 
   let prompt = `Escreva a narrativa completa em ${langLabel} sobre o tema: "${request.theme}".
 
@@ -199,7 +266,9 @@ Produza prosa cinematográfica dividida em blocos temáticos (## headers). A nar
 
     const totalContentLength = sortedSources.reduce((acc, s) => acc + (s.content?.length || 0), 0)
     if (totalContentLength > 5000) {
-      prompt += `\n⚠️ MATERIAL DENSO DETECTADO: Identifique os 5-7 BEATS NARRATIVOS mais impactantes (contradições, revelações, dados surpreendentes, conexões temporais) e construa a narrativa em torno deles. Fatos secundários podem ser condensados ou omitidos se não servem à narrativa.`
+      const idealCount = request.targetSceneCount ?? Math.ceil((request.targetDuration || 300) / 5)
+      const minBeats = Math.max(5, Math.round(idealCount / 15))
+      prompt += `\n⚠️ MATERIAL DENSO DETECTADO: Identifique pelo menos ${minBeats} BEATS NARRATIVOS impactantes (contradições, revelações, dados surpreendentes, conexões temporais) e construa a narrativa em torno deles. Explore cada beat com profundidade proporcional à sua importância — NÃO resuma em 1 parágrafo o que merece 5.`
     }
 
     sortedSources.forEach((source, index) => {
@@ -316,15 +385,20 @@ Nada de construção antes do choque — ruptura imediata.`
 
 ---
 🛡️ CHECAGEM FINAL ANTES DE ENTREGAR:
-1. Releia toda a prosa. Se dois parágrafos dizem a mesma coisa com palavras diferentes, ELIMINE um.
-2. A narrativa cobre TODOS os beats do outline? Se não, adicione os que faltam.
-3. A narrativa avança LINEARMENTE sem voltar a assuntos já cobertos? Se voltou, reorganize.
-4. Cada bloco (##) tem substância narrativa suficiente?
-5. A proporção está correta? REFLEXÃO ≤15-20% do total. CORPO FACTUAL = 55-65%.
-6. O HOOK usa staccato ou frases curtas de impacto? Se não → reescreva.
-7. Há pelo menos 3 Power Words nos primeiros 15% do texto? Se não → injete.
-8. Há 1-2 frases-tese compartilháveis? Se não → crie.
-9. A voz está fiel à identidade definida no início (investigador, documentarista, bardo)? Se não → reescreva na voz certa.`
+1. VOLUME (MAIS IMPORTANTE): Conte seus parágrafos. Produziu pelo menos ${minParagraphs}? Se NÃO → você está produzindo MENOS DE METADE do necessário. PARE e expanda AGRESSIVAMENTE:
+   - Pegue cada bloco (##) e divida em 2-3 sub-blocos com mais profundidade
+   - Para cada evento mencionado em 1 parágrafo, escreva 5: o fato, o contexto, as consequências, as reações, o legado
+   - Explore TODOS os personagens secundários
+   - Adicione contexto histórico/geopolítico para cada momento
+2. Releia toda a prosa. Se dois parágrafos dizem a mesma coisa com palavras diferentes, ELIMINE um.
+3. A narrativa cobre TODOS os beats do outline? Se não, adicione os que faltam.
+4. A narrativa avança LINEARMENTE sem voltar a assuntos já cobertos? Se voltou, reorganize.
+5. Cada bloco (##) tem substância narrativa suficiente?
+6. A proporção está correta? REFLEXÃO ≤15-20% do total. CORPO FACTUAL = 55-65%.
+7. O HOOK usa staccato ou frases curtas de impacto? Se não → reescreva.
+8. Há pelo menos 3 Power Words nos primeiros 15% do texto? Se não → injete.
+9. Há 1-2 frases-tese compartilháveis? Se não → crie.
+10. A voz está fiel à identidade definida no início (investigador, documentarista, bardo)? Se não → reescreva na voz certa.`
 
   return prompt
 }

@@ -172,12 +172,12 @@ describe('POST /api/dossiers/[id]/create-youtube-package', () => {
 
     const outputs = await prisma.output.findMany({
       where: { id: { in: res.teaserOutputIds } },
-      select: { id: true, monetizationContext: true }
+      select: { id: true, monetizationData: { select: { contextData: true } } }
     })
 
     // Validar que cada teaser tem microBriefV1 persistido
     for (const o of outputs) {
-      const mc: any = o.monetizationContext
+      const mc: any = o.monetizationData?.contextData
       expect(mc?.itemType).toBe('teaser')
       expect(mc?.microBriefV1).toBeTruthy()
       expect(mc?.microBriefV1?.version).toBe('teaserMicroBriefV1')

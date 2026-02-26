@@ -49,8 +49,6 @@ export default defineEventHandler(async (event) => {
       id: true,
       voiceId: true,
       targetWPM: true,
-      scriptApproved: true,
-      imagesApproved: true,
       status: true,
       _count: { select: { scenes: true } }
     }

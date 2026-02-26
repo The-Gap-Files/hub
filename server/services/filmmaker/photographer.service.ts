@@ -93,6 +93,11 @@ Tema: "${production.theme}"${temporalHint ? `\nPeríodo detectado: ${temporalHin
 → Foque em parâmetros COMPLEMENTARES: lente, distância focal, DOF, origem da luz, texturas.`)
     }
 
+    if (production.photographerHints) {
+      sections.push(`[STYLE-SPECIFIC PHOTOGRAPHER INSTRUCTIONS — adapte sua abordagem a este estilo]
+${production.photographerHints}`)
+    }
+
     if (production.visualIdentity) {
       sections.push(`[VISUAL IDENTITY — diretrizes do universo/dossiê]
 "${production.visualIdentity}"

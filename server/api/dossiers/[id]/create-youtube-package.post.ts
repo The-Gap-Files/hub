@@ -130,9 +130,9 @@ export default defineEventHandler(async (event): Promise<PackageCreateResponse> 
     const outputs = await prisma.output.findMany({
       where: {
         dossierId,
-        monetizationContext: { path: ['planId'], equals: plan.id }
+        monetizationData: { contextData: { path: ['planId'], equals: plan.id } }
       },
-      select: { id: true, outputType: true, format: true, duration: true, createdAt: true, monetizationContext: true }
+      select: { id: true, outputType: true, format: true, duration: true, createdAt: true, monetizationData: { select: { contextData: true } } }
     })
 
     const fulls = outputs
@@ -141,8 +141,8 @@ export default defineEventHandler(async (event): Promise<PackageCreateResponse> 
     const teaserOutputs = outputs
       .filter(o => o.outputType === 'VIDEO_TEASER' && o.format === 'teaser-youtube-shorts')
       .sort((a, b) => {
-        const ai = Number((a.monetizationContext as any)?.teaserIndex ?? 0)
-        const bi = Number((b.monetizationContext as any)?.teaserIndex ?? 0)
+        const ai = Number((a.monetizationData?.contextData as any)?.teaserIndex ?? 0)
+        const bi = Number((b.monetizationData?.contextData as any)?.teaserIndex ?? 0)
         return ai - bi
       })
 
@@ -232,8 +232,13 @@ export default defineEventHandler(async (event): Promise<PackageCreateResponse> 
           scriptStyleId,
           visualStyleId,
           seedId,
-          status: 'PENDING',
-          monetizationContext: {
+          status: 'DRAFT',
+        }
+      })
+      await tx.monetizationProduct.create({
+        data: {
+          outputId: created.id,
+          contextData: {
             itemType: 'fullVideo',
             planId: plan.id,
             episodeNumber,
@@ -280,8 +285,13 @@ export default defineEventHandler(async (event): Promise<PackageCreateResponse> 
           scriptStyleId: teaserScriptStyleId,
           visualStyleId: teaserVisualStyleId,
           seedId,
-          status: 'PENDING',
-          monetizationContext: {
+          status: 'DRAFT',
+        }
+      })
+      await tx.monetizationProduct.create({
+        data: {
+          outputId: created.id,
+          contextData: {
             itemType: 'teaser',
             planId: plan.id,
             teaserIndex: i,

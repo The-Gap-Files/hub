@@ -26,27 +26,31 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: `Formato inválido: ${format}. Use 'srt' ou 'vtt'.` })
   }
 
-  // Buscar output com cenas, áudios e dados do vídeo para probing
-  const output = await prisma.output.findUnique({
-    where: { id: outputId },
-    select: {
-      title: true,
-      outputPath: true,
-      outputData: true,
-      scenes: {
-        orderBy: { order: 'asc' },
-        select: {
-          order: true,
-          narration: true,
-          audioTracks: {
-            where: { type: 'scene_narration' },
-            select: { duration: true, fileData: true, alignment: true },
-            take: 1
+  // Buscar output com cenas e áudios + RenderProduct para probing
+  const [output, renderProduct] = await Promise.all([
+    prisma.output.findUnique({
+      where: { id: outputId },
+      select: {
+        title: true,
+        scenes: {
+          orderBy: { order: 'asc' },
+          select: {
+            order: true,
+            narration: true,
+            audioTracks: {
+              where: { type: 'scene_narration' },
+              select: { duration: true, fileData: true, alignment: true },
+              take: 1
+            }
           }
         }
       }
-    }
-  })
+    }),
+    prisma.renderProduct.findUnique({
+      where: { outputId },
+      select: { videoStoragePath: true, videoData: true }
+    }),
+  ])
 
   if (!output) throw createError({ statusCode: 404, message: 'Output not found' })
   if (!output.scenes?.length) throw createError({ statusCode: 404, message: 'No scenes found' })
@@ -80,13 +84,13 @@ export default defineEventHandler(async (event) => {
   let actualVideoDuration: number | undefined
 
   try {
-    if (output.outputPath) {
+    if (renderProduct?.videoStoragePath) {
       // Vídeo em disco — proba diretamente (eficiente)
-      actualVideoDuration = await captionService.probeVideoDuration({ path: output.outputPath })
-    } else if (output.outputData) {
+      actualVideoDuration = await captionService.probeVideoDuration({ path: renderProduct.videoStoragePath })
+    } else if (renderProduct?.videoData) {
       // Vídeo no banco — proba via buffer temp
       actualVideoDuration = await captionService.probeVideoDuration({
-        buffer: Buffer.from(output.outputData)
+        buffer: Buffer.from(renderProduct.videoData)
       })
     }
   } catch (err) {

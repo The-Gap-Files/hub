@@ -12,7 +12,6 @@ import os from 'node:os'
 import ffmpeg from 'fluent-ffmpeg'
 import ffmpegInstaller from '@ffmpeg-installer/ffmpeg'
 import ffprobeInstaller from '@ffprobe-installer/ffprobe'
-import { Prisma } from '@prisma/client'
 import { prisma } from '../../utils/prisma'
 import { createPipelineLogger } from '../../utils/pipeline-logger'
 import { CaptionService, type SceneCaptionData } from '../caption.service'
@@ -62,9 +61,12 @@ export class VideoPipelineService {
       if (!output) throw new Error('Output não encontrado')
       if (!output.scenes || output.scenes.length === 0) throw new Error('Nenhuma cena encontrada para renderizar')
 
-      const narrativeRole = (output.monetizationContext && typeof output.monetizationContext === 'object')
-        ? (output.monetizationContext as any).narrativeRole
-        : undefined
+      // Read monetization context from MonetizationProduct
+      const monetizationProduct = await prisma.monetizationProduct.findUnique({
+        where: { outputId },
+        select: { contextData: true },
+      })
+      const narrativeRole = (monetizationProduct?.contextData as any)?.narrativeRole
       const isHookOnly = narrativeRole === 'hook-only'
 
       const isVertical = output.aspectRatio === '9:16'
@@ -221,8 +223,12 @@ export class VideoPipelineService {
         }
       })
 
-      // Extrair render options para uso no BGM e pós-produção
-      const opts = output.renderOptions as { includeLogo?: boolean; includeCaptions?: boolean; captionStyleId?: string | null; volumeOverride?: { global?: number; perTrack?: Record<number, number> } } | null
+      // Read render options from RenderProduct
+      const existingRenderProduct = await prisma.renderProduct.findUnique({
+        where: { outputId },
+        select: { renderOptions: true },
+      })
+      const opts = existingRenderProduct?.renderOptions as { includeLogo?: boolean; includeCaptions?: boolean; includeStingers?: boolean; captionStyleId?: string | null; volumeOverride?: { global?: number; perTrack?: Record<number, number> } } | null
 
       if (bgmAudioTracks.length > 0) {
         const volumeOverride = opts?.volumeOverride ?? null
@@ -279,6 +285,51 @@ export class VideoPipelineService {
       } else {
         log.info('Sem BGM; usando vídeo concatenado como final.')
         await fs.copyFile(concatenatedPath, finalPath)
+      }
+
+      // 5b. Mixar Music Events (stingers, risers, drops) — posicionados por offsetMs
+      const shouldIncludeStingers = opts?.includeStingers !== false
+      const musicEventTracks = shouldIncludeStingers
+        ? await prisma.audioTrack.findMany({
+            where: { outputId, type: 'music_event' },
+            orderBy: { offsetMs: 'asc' }
+          })
+        : []
+
+      if (!shouldIncludeStingers) {
+        log.info('Stingers desativados pelo usuário — pulando mixagem de music events.')
+      }
+
+      if (musicEventTracks.length > 0) {
+        log.info(`Mixando ${musicEventTracks.length} music event(s) (stingers/risers/drops).`)
+
+        const stingerTracksToMix: { path: string; delayMs: number; volumeDb?: number }[] = []
+
+        for (const [index, track] of musicEventTracks.entries()) {
+          if (!track.fileData || track.offsetMs == null) continue
+
+          const stingerPath = path.join(tempDir, `stinger_${index}.mp3`)
+          await fs.writeFile(stingerPath, track.fileData)
+
+          stingerTracksToMix.push({
+            path: stingerPath,
+            delayMs: track.offsetMs,
+            volumeDb: -8 // Stingers are punchy — louder than BGM, softer than narration
+          })
+
+          log.step(`Stinger ${index}`, `offset=${track.offsetMs}ms, dur=${track.duration?.toFixed(2) ?? '?'}s`)
+        }
+
+        if (stingerTracksToMix.length > 0) {
+          const preStingerPath = path.join(tempDir, 'pre_stinger.mp4')
+          await fs.rename(finalPath, preStingerPath)
+
+          await this.mixMultipleTracks(preStingerPath, stingerTracksToMix, finalPath, -8)
+          log.info('Music events mixados com sucesso.')
+
+          // Cleanup intermediary
+          await fs.unlink(preStingerPath).catch(() => {})
+        }
       }
 
       log.info(`Vídeo final gerado em disco (temp): ${finalPath}.`)
@@ -344,17 +395,28 @@ export class VideoPipelineService {
           const sizeMB = (finalSize / 1024 / 1024).toFixed(1)
           log.info(`Salvando vídeo no PostgreSQL (${sizeMB} MB) — única gravação.`)
 
+          await prisma.renderProduct.upsert({
+            where: { outputId },
+            create: {
+              outputId,
+              videoData: videoBuffer,
+              mimeType: 'video/mp4',
+              fileSize: finalSize,
+              renderOptions: opts || undefined,
+            },
+            update: {
+              videoData: videoBuffer,
+              videoStoragePath: null,
+              mimeType: 'video/mp4',
+              fileSize: finalSize,
+              renderOptions: opts || undefined,
+              renderedAt: new Date(),
+            },
+          })
+
           await prisma.output.update({
             where: { id: outputId },
-            data: {
-              outputData: videoBuffer,
-              outputMimeType: 'video/mp4',
-              outputSize: finalSize,
-              outputPath: null,
-              status: 'RENDERED',
-              completedAt: null,
-              renderOptions: Prisma.DbNull
-            }
+            data: { status: 'RENDERED', completedAt: null },
           })
 
           await fs.unlink(finalPath).catch(() => { })
@@ -362,17 +424,28 @@ export class VideoPipelineService {
         } catch (dbError) {
           log.error('Falha ao salvar no DB (limite memória); usando fallback em disco.', dbError)
           await fs.writeFile(finalPath, videoBuffer).catch(() => { })
+          await prisma.renderProduct.upsert({
+            where: { outputId },
+            create: {
+              outputId,
+              videoStoragePath: finalPath,
+              mimeType: 'video/mp4',
+              fileSize: finalSize,
+              renderOptions: opts || undefined,
+            },
+            update: {
+              videoData: null,
+              videoStoragePath: finalPath,
+              mimeType: 'video/mp4',
+              fileSize: finalSize,
+              renderOptions: opts || undefined,
+              renderedAt: new Date(),
+            },
+          })
+
           await prisma.output.update({
             where: { id: outputId },
-            data: {
-              outputData: null,
-              outputMimeType: 'video/mp4',
-              outputSize: finalSize,
-              outputPath: finalPath,
-              status: 'RENDERED',
-              completedAt: null,
-              renderOptions: Prisma.DbNull
-            }
+            data: { status: 'RENDERED', completedAt: null },
           })
           log.info(`Vídeo salvo em disco (fallback): ${finalPath}.`)
         }
@@ -445,17 +518,27 @@ export class VideoPipelineService {
         if (finalStats.size <= MAX_DB_SIZE) {
           log.info(`[OnDisk] Pós-processado (${finalSizeMB} MB) cabe no banco; salvando.`)
           const videoBuffer = await fs.readFile(processedPath)
+          await prisma.renderProduct.upsert({
+            where: { outputId },
+            create: {
+              outputId,
+              videoData: videoBuffer,
+              mimeType: 'video/mp4',
+              fileSize: finalStats.size,
+              renderOptions: opts || undefined,
+            },
+            update: {
+              videoData: videoBuffer,
+              videoStoragePath: null,
+              mimeType: 'video/mp4',
+              fileSize: finalStats.size,
+              renderOptions: opts || undefined,
+              renderedAt: new Date(),
+            },
+          })
           await prisma.output.update({
             where: { id: outputId },
-            data: {
-              outputData: videoBuffer,
-              outputMimeType: 'video/mp4',
-              outputSize: finalStats.size,
-              outputPath: null,
-              status: 'RENDERED',
-              completedAt: null,
-              renderOptions: Prisma.DbNull
-            }
+            data: { status: 'RENDERED', completedAt: null },
           })
           // Limpar arquivos de disco
           await fs.unlink(finalPath).catch(() => { })
@@ -469,17 +552,27 @@ export class VideoPipelineService {
             })
           }
           log.info(`[OnDisk] Vídeo grande (${finalSizeMB} MB) salvo em disco com legendas/logo: ${finalPath}`)
+          await prisma.renderProduct.upsert({
+            where: { outputId },
+            create: {
+              outputId,
+              videoStoragePath: finalPath,
+              mimeType: 'video/mp4',
+              fileSize: finalStats.size,
+              renderOptions: opts || undefined,
+            },
+            update: {
+              videoData: null,
+              videoStoragePath: finalPath,
+              mimeType: 'video/mp4',
+              fileSize: finalStats.size,
+              renderOptions: opts || undefined,
+              renderedAt: new Date(),
+            },
+          })
           await prisma.output.update({
             where: { id: outputId },
-            data: {
-              outputData: null,
-              outputMimeType: 'video/mp4',
-              outputSize: finalStats.size,
-              outputPath: finalPath,
-              status: 'RENDERED',
-              completedAt: null,
-              renderOptions: Prisma.DbNull
-            }
+            data: { status: 'RENDERED', completedAt: null },
           })
         }
       }

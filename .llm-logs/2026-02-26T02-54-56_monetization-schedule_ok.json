@@ -1,0 +1,116 @@
+{
+  "timestamp": "2026-02-26T02:54:56.657Z",
+  "taskId": "monetization-schedule",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "gemini-3-flash-preview",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Monetization — Publication Schedule Generator\r\n\r\nVocê é um estrategista de publicação de conteúdo. Nesta etapa, você vai criar o cronograma de publicação ideal para maximizar alcance e engajamento.\r\n\r\n## 🎯 Contexto\r\n\r\nVocê recebe:\r\n- O Full Video e todos os teasers já gerados\r\n- As plataformas de cada teaser\r\n- A quantidade total de itens\r\n\r\n## 📐 O QUE PRODUZIR\r\n\r\nUm array de `publicationSchedule` com:\r\n- **dayOfWeek**: Dia da semana (ex: \"Segunda\", \"Terça\")\r\n- **content**: O que publicar (ex: \"Full Video no YouTube\", \"Teaser 1 (Gateway) - YouTube Shorts\")\r\n- **platform**: Plataforma alvo\r\n- **notes**: Notas sobre timing (opcional)\r\n\r\n## 🚨 REGRAS\r\n\r\n1. **Full Video PRIMEIRO** — sempre publicado antes dos teasers\r\n2. **1 teaser por dia** (ou 2 se >10 teasers)\r\n3. **Plataforma fixa (YouTube-first)**:\r\n   - Full Video: **YouTube**\r\n   - Teasers: **YouTube Shorts**\r\n4. **Gateway logo após o Full Video** — é a porta de entrada (primeiro Short do pacote)\r\n5. **Hook-only no final** — são os \"lembretes virais\" (alta repetição e replay)\r\n6. **Para 10+ teasers**, distribuir em 2 semanas\r\n7. **Evitar fins de semana** para o Full Video (melhor performance seg-qui)"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "\n\nCrie o cronograma de publicação para:\n\nFull Video EP1: \"[O Paradoxo do Poder] | El Mencho: De Imigrante a Senhor dos Abacates\" (YouTube)\nFull Video EP2: \"[O Exército de Drones e a Traição Íntima] | El Mencho: O Império do Ouro Verde\" (YouTube)\nFull Video EP3: \"[O Veredito Final] | El Mencho: O Desfecho da Caçada ao Senhor dos Abacates\" (YouTube)\nTeaser 1 [gateway]: \"A Ascensão do Senhor dos Abacates\" (YouTube Shorts)\nTeaser 2 [deep-dive]: \"O Imposto do Ouro Verde\" (YouTube Shorts)\nTeaser 3 [deep-dive]: \"O Infiltrado de Jalisco\" (YouTube Shorts)\nTeaser 4 [deep-dive]: \"A Mente dos Cuinis\" (YouTube Shorts)\nTeaser 5 [deep-dive]: \"O Limite dos 15%\" (YouTube Shorts)\nTeaser 6 [deep-dive]: \"Conexão Pacífico\" (YouTube Shorts)\nTeaser 7 [deep-dive]: \"O Código Tapalpa\" (YouTube Shorts)\nTeaser 8 [deep-dive]: \"O Custo do Abacate\" (YouTube Shorts)\nTeaser 9 [hook-only]: \"O Céu Tem Novos Donos\" (YouTube Shorts)\nTeaser 10 [hook-only]: \"O Preço da Lealdade\" (YouTube Shorts)\nTeaser 11 [hook-only]: \"A Ironia do Destino Final\" (YouTube Shorts)\nTeaser 12 [hook-only]: \"A Hidra de Jalisco\" (YouTube Shorts)\n\nRetorne um JSON com campo \"schedule\" contendo o cronograma."
+      }
+    ]
+  },
+  "parsed": {
+    "schedule": [
+      {
+        "notes": "Lançamento principal para estabelecer autoridade no tema.",
+        "dayOfWeek": "Segunda (Semana 1)",
+        "content": "Full Video EP1: \"[O Paradoxo do Poder] | El Mencho: De Imigrante a Senhor dos Abacates\"",
+        "platform": "YouTube"
+      },
+      {
+        "notes": "Porta de entrada para converter tráfego rápido para o EP1.",
+        "dayOfWeek": "Terça (Semana 1)",
+        "content": "Teaser 1 [gateway]: \"A Ascensão do Senhor dos Abacates\"",
+        "platform": "YouTube Shorts"
+      },
+      {
+        "platform": "YouTube Shorts",
+        "dayOfWeek": "Quarta (Semana 1)",
+        "content": "Teaser 2 [deep-dive]: \"O Imposto do Ouro Verde\"",
+        "notes": "Aprofundamento em um tópico específico do EP1."
+      },
+      {
+        "notes": "Segundo teaser do dia para manter o momentum.",
+        "content": "Teaser 3 [deep-dive]: \"O Infiltrado de Jalisco\"",
+        "dayOfWeek": "Quarta (Semana 1)",
+        "platform": "YouTube Shorts"
+      },
+      {
+        "dayOfWeek": "Quinta (Semana 1)",
+        "content": "Teaser 4 [deep-dive]: \"A Mente dos Cuinis\"",
+        "platform": "YouTube Shorts",
+        "notes": "Curiosidade sobre os aliados de El Mencho."
+      },
+      {
+        "notes": "Lançamento do segundo episódio antes do final de semana.",
+        "platform": "YouTube",
+        "content": "Full Video EP2: \"[O Exército de Drones e a Traição Íntima] | El Mencho: O Império do Ouro Verde\"",
+        "dayOfWeek": "Sexta (Semana 1)"
+      },
+      {
+        "notes": "Retomada da semana com detalhe tático do EP2.",
+        "platform": "YouTube Shorts",
+        "dayOfWeek": "Segunda (Semana 2)",
+        "content": "Teaser 5 [deep-dive]: \"O Limite dos 15%\""
+      },
+      {
+        "platform": "YouTube Shorts",
+        "dayOfWeek": "Segunda (Semana 2)",
+        "content": "Teaser 6 [deep-dive]: \"Conexão Pacífico\"",
+        "notes": "Expansão da narrativa geográfica."
+      },
+      {
+        "notes": "Foco em um evento específico de tensão.",
+        "platform": "YouTube Shorts",
+        "dayOfWeek": "Terça (Semana 2)",
+        "content": "Teaser 7 [deep-dive]: \"O Código Tapalpa\""
+      },
+      {
+        "notes": "Conexão com a realidade econômica do espectador.",
+        "platform": "YouTube Shorts",
+        "dayOfWeek": "Terça (Semana 2)",
+        "content": "Teaser 8 [deep-dive]: \"O Custo do Abacate\""
+      },
+      {
+        "notes": "Conclusão da série documental.",
+        "platform": "YouTube",
+        "content": "Full Video EP3: \"[O Veredito Final] | El Mencho: O Desfecho da Caçada ao Senhor dos Abacates\"",
+        "dayOfWeek": "Quarta (Semana 2)"
+      },
+      {
+        "notes": "Hook viral focado em retenção e replay.",
+        "platform": "YouTube Shorts",
+        "dayOfWeek": "Quinta (Semana 2)",
+        "content": "Teaser 9 [hook-only]: \"O Céu Tem Novos Donos\""
+      },
+      {
+        "platform": "YouTube Shorts",
+        "dayOfWeek": "Quinta (Semana 2)",
+        "content": "Teaser 10 [hook-only]: \"O Preço da Lealdade\"",
+        "notes": "Impacto emocional para gerar comentários."
+      },
+      {
+        "dayOfWeek": "Sexta (Semana 2)",
+        "content": "Teaser 11 [hook-only]: \"A Ironia do Destino Final\"",
+        "platform": "YouTube Shorts",
+        "notes": "Resumo impactante do desfecho."
+      },
+      {
+        "platform": "YouTube Shorts",
+        "dayOfWeek": "Sexta (Semana 2)",
+        "content": "Teaser 12 [hook-only]: \"A Hidra de Jalisco\"",
+        "notes": "Gancho final para manter o canal relevante após a série."
+      }
+    ]
+  },
+  "rawContent": ""
+}

@@ -288,6 +288,38 @@ Liste EXPLICITAMENTE onde ficam os 3-4 re-engagement hooks no vídeo:
 - ~9 min: Pre-climax hook
 (Ajuste os timings à duração real do vídeo)
 
+### 12.5 RETENÇÃO PROATIVA — Campos Obrigatórios de Engenharia de Retenção
+
+Para full video, o outline DEVE incluir estes campos de retenção mensurável (além dos existentes):
+
+#### `primaryCuriosityGap`
+A pergunta-mestra que sustenta TODO o vídeo. O espectador NUNCA deve esquecer esta pergunta entre o minuto 0 e o clímax.
+- Formato: 1 frase interrogativa, máximo 15 palavras
+- Exemplos: "Quem autorizou o silêncio por 500 anos?", "Por que o sistema protegeu o responsável?"
+- REGRA: Esta pergunta deve ser reaberta (como eco implícito, não repetição literal) nos re-engagement hooks a cada 3 minutos
+
+#### `miniClimaxBeats`
+Lista de 2-4 micro-revelações distribuídas entre os re-engagement hooks para evitar dead zones. Cada mini-clímax impede que o espectador sinta que "nada acontece" entre os grandes beats.
+
+Para cada miniClimax:
+- `atScene`: número aproximado da cena (baseado na distribuição de cenas)
+- `revelation`: O que é revelado (1 frase)
+- `retentionMechanic`: Como esta revelação sustenta retenção:
+  - `payoff` — fecha um loop anterior (satisfação parcial)
+  - `escalation` — eleva a aposta ("e fica pior")
+  - `reframe` — recontextualiza o que veio antes ("não era o que parecia")
+  - `question_plant` — planta nova pergunta que precisa de resposta
+- `curiosityGapPlanted`: A nova pergunta aberta após este mini-clímax
+
+#### `expectedRetentionCurve`
+Previsão do comportamento da audiência — calibração para o Retention QA downstream:
+- `hookRate`: % esperada de audiência que passa dos primeiros 30s (alvo: >65%)
+- `midpointRetention`: % esperada no midpoint ~50% do vídeo (alvo: >40%)
+- `climaxRetention`: % esperada no clímax (alvo: >30%)
+- `rationale`: 1 frase justificando por que esses números são plausíveis dado o hook escolhido
+
+REGRA: Estes campos são consumidos pelo Retention QA para calibrar seus scores. Se o hookRate esperado era 70% mas o Retention QA dá score < 7 para as primeiras cenas, o roteiro não entregou o que o outline prometia.
+
 ### 13. DISTRIBUIÇÃO DE TEMPO
 Para full video, a distribuição muda vs. teaser:
 
@@ -315,6 +347,9 @@ Antes de finalizar o outline, verifique se TODOS os campos obrigatórios estão 
 - [ ] **hookVariants** — Contém EXATAMENTE 4 variantes (green, moderate, aggressive, lawless)
 - [ ] **risingBeats** — Identifica qual beat é o MIDPOINT (~50%) e qual é All Is Lost (~75%)
 - [ ] **tensionCurve** — Escalação progressiva sem platôs
+- [ ] **primaryCuriosityGap** — Pergunta-mestra do vídeo (máx 15 palavras, interrogativa)
+- [ ] **miniClimaxBeats** — 2-4 micro-revelações com retentionMechanic e curiosityGapPlanted
+- [ ] **expectedRetentionCurve** — hookRate, midpointRetention, climaxRetention + rationale
 
 **❌ Se qualquer campo obrigatório estiver vazio ou genérico, o outline será REJEITADO pelo validador.**
 

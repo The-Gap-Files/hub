@@ -14,8 +14,14 @@
 import { createLlmForTask } from '../llm/llm-factory'
 import { HumanMessage, SystemMessage } from '@langchain/core/messages'
 import { createPipelineLogger } from '../../utils/pipeline-logger'
-import type { CinematographerOutput } from './filmmaker.types'
 import fs from 'node:fs/promises'
+
+/** @deprecated Cinematographer is disabled — start-frame only produces better results. */
+interface CinematographerOutput {
+  order: number
+  endVisualDescription: string | null
+  endImageReferenceWeight: number | null
+}
 import path from 'node:path'
 
 const LOG_STAGE = 'Cinematographer'

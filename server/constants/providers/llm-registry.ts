@@ -35,6 +35,7 @@ export type LlmTaskId =
   | 'social-kit'          // Kit de publicação para redes sociais
   | 'deep-research-prompt' // Gera prompt otimizado para Deep Research
   | 'dossier-investigator'  // Investiga uma semente e preenche metadados do dossiê
+  | 'retention-qa'           // Análise de retenção viral do roteiro (Stage 2.5)
   | 'filmmaker-director'    // Direção de fotografia e movimento (pós-roteiro) — LEGACY orchestrator
   | 'photographer'          // Fotógrafo — gera visualDescription (start image)
   | 'choreographer'         // Coreógrafo — gera motionDescription (câmera)
@@ -212,10 +213,10 @@ export const LLM_TASKS: Record<LlmTaskId, LlmTask> = {
   },
   'briefing-episodes': {
     id: 'briefing-episodes',
-    label: 'Brief (Episódios)',
-    description: 'Gera brief distribuído para episódios completos (EP1/EP2/EP3), definindo fatos exclusivos, holdbacks e open loops por episódio.',
-    iconKey: 'film',
-    requiresStructuredOutput: true,
+    label: 'Escritor Chefe (Episódios)',
+    description: 'Gera prosa narrativa densa por episódio (EP1/EP2/EP3) a partir do dossiê. Geração sequencial: EP1 → EP2 → EP3 com controle de holdbacks.',
+    iconKey: 'book-open',
+    requiresStructuredOutput: false,
     requiresLargeContext: true,
     defaultProvider: 'anthropic',
     defaultModel: 'claude-sonnet-4-20250514'
@@ -329,6 +330,16 @@ export const LLM_TASKS: Record<LlmTaskId, LlmTask> = {
     requiresLargeContext: false,
     defaultProvider: 'gemini',
     defaultModel: 'gemini-2.0-flash'
+  },
+  'retention-qa': {
+    id: 'retention-qa',
+    label: 'Retention QA',
+    description: 'Analisa retenção viral do roteiro cena-a-cena: scores, risk flags, edit blueprint, pattern interrupts e scene priority.',
+    iconKey: 'bar-chart',
+    requiresStructuredOutput: true,
+    requiresLargeContext: true,
+    defaultProvider: 'anthropic',
+    defaultModel: 'claude-sonnet-4-20250514'
   },
   'filmmaker-director': {
     id: 'filmmaker-director',

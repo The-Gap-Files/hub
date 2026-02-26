@@ -164,10 +164,11 @@ Retorne APENAS um JSON válido com esta estrutura (sem markdown, sem \`\`\`):
     })
   }
 
-  // Salvar no banco
-  await prisma.output.update({
-    where: { id },
-    data: { socialKit: socialKit as any }
+  // Salvar no SocialKitProduct
+  await prisma.socialKitProduct.upsert({
+    where: { outputId: id },
+    create: { outputId: id, kitData: socialKit as any },
+    update: { kitData: socialKit as any },
   })
 
   // Registrar custo (fire-and-forget)

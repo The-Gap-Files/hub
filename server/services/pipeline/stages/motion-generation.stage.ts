@@ -75,7 +75,6 @@ function buildSceneVideoData(
     duration: videoResponse.video.duration || DEFAULT_DURATION,
     sourceImageId,
     isSelected: true,
-    variantIndex: 0,
   }
 }
 
@@ -201,12 +200,18 @@ class MotionGenerationStage {
     const startImage = findStartImage(scene.images)
     if (!startImage?.fileData) return
 
-    const motionPrompt = resolveMotionPrompt(scene)
+    let motionPrompt = resolveMotionPrompt(scene)
     const durationSeconds = resolveDuration(scene.audioTracks, scene.estimatedDuration)
+
+    // Quality tiering: hero scenes get enhanced motion prompts
+    const brollPriority = scene.brollPriority ?? 1
+    if (brollPriority >= 4) {
+      motionPrompt = `[HERO SHOT] ${motionPrompt}, smooth cinematic camera movement, professional cinematography`
+    }
 
     const request = buildMotionRequest(startImage as any, motionPrompt, durationSeconds, aspectRatio)
 
-    console.log(`${LOG} Motion scene ${scene.order + 1} (duration: ${durationSeconds.toFixed(1)}s) prompt: ${motionPrompt.slice(0, 80)}...`)
+    console.log(`${LOG} Motion scene ${scene.order + 1} tier=${brollPriority >= 4 ? 'HERO' : brollPriority <= 1 ? 'simple' : 'standard'} (duration: ${durationSeconds.toFixed(1)}s) prompt: ${motionPrompt.slice(0, 80)}...`)
     const videoResponse = await motionProvider.generate(request)
 
     // Save SceneVideo

@@ -23,14 +23,20 @@ export default defineEventHandler(async (event) => {
 
   const existing = await prisma.output.findUnique({
     where: { id },
-    select: { id: true, seedId: true, monetizationContext: true }
+    select: { id: true, seedId: true }
   })
   if (!existing) throw createError({ statusCode: 404, message: 'Output not found' })
 
-  const data: any = {}
-  const currentMonetizationContext = (existing.monetizationContext && typeof existing.monetizationContext === 'object')
-    ? (existing.monetizationContext as any)
+  // Load current monetization from product table
+  const monetizationProduct = await prisma.monetizationProduct.findUnique({
+    where: { outputId: id },
+    select: { contextData: true }
+  })
+  const currentMonetizationContext = (monetizationProduct?.contextData && typeof monetizationProduct.contextData === 'object')
+    ? (monetizationProduct.contextData as any)
     : {}
+
+  const data: any = {}
   let nextMonetizationContext: any | null = null
 
   // ── Constantes (validadas contra catálogo) ─────────────────────
@@ -106,14 +112,18 @@ export default defineEventHandler(async (event) => {
     }
   }
 
+  // Save monetization to product table if changed
   if (nextMonetizationContext) {
-    data.monetizationContext = nextMonetizationContext
+    await prisma.monetizationProduct.upsert({
+      where: { outputId: id },
+      create: { outputId: id, contextData: nextMonetizationContext },
+      update: { contextData: nextMonetizationContext },
+    })
   }
 
-  const updated = await prisma.output.update({
-    where: { id },
-    data
-  })
+  const updated = Object.keys(data).length > 0
+    ? await prisma.output.update({ where: { id }, data })
+    : await prisma.output.findUnique({ where: { id } })
 
   return { success: true, data: updated }
 })

@@ -5,19 +5,17 @@ import { getRecommendedStyle, CAPTION_STYLES, type CaptionStyleId } from '../../
 
 /**
  * POST /api/outputs/[id]/add-captions
- * 
+ *
  * Adiciona legendas ao vídeo renderizado usando os dados das cenas.
- * 
- * NOVO FLUXO (sem Whisper):
- *   O texto vem do campo `narration` de cada cena.
- *   O timing vem da duração real do áudio (AudioTrack.duration / ffprobe).
- *   Eliminamos transcrição redundante → mais rápido, mais preciso, zero dependências externas.
- * 
+ *
+ * Reads video from RenderProduct.videoData.
+ * Writes captioned video to RenderProduct.captionedVideoData.
+ *
  * Body (opcional):
  *   - styleId: CaptionStyleId  → Estilo da legenda (default: recomendado por aspect ratio)
  *   - force: boolean           → Reprocessar mesmo se já tem legendas
  *   - logoOnly: boolean        → Apenas overlay da logo (sem legendas); ignora cenas
- *   - replaceMaster: boolean   → Se true, substitui outputData pelo vídeo com legendas/logo (vídeo “normal” vira a versão final)
+ *   - replaceMaster: boolean   → Se true, substitui videoData pelo vídeo com legendas/logo
  */
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
@@ -32,28 +30,47 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event).catch(() => ({}))
   const logoOnly = !!body?.logoOnly
 
+  // Load render product for video data
+  const renderProduct = await prisma.renderProduct.findUnique({
+    where: { outputId: id },
+    select: {
+      videoData: true,
+      captionedVideoData: true,
+    }
+  })
+
+  if (!renderProduct || !renderProduct.videoData) {
+    throw createError({
+      statusCode: 400,
+      message: 'O vídeo precisa estar renderizado (videoData no RenderProduct) antes de adicionar legendas ou logo.'
+    })
+  }
+
+  const videoData = renderProduct.videoData
+
+  // Load output metadata
   const output = await prisma.output.findUnique({
     where: { id },
     select: {
       id: true,
       status: true,
-      outputData: true,
-      captionedVideoData: true,
       aspectRatio: true,
       platform: true,
-      scenes: logoOnly ? undefined : {
-        orderBy: { order: 'asc' },
-        select: {
-          id: true,
-          order: true,
-          narration: true,
-          audioTracks: {
-            where: { type: 'scene_narration' },
-            select: { duration: true, fileData: true, alignment: true },
-            take: 1
+      ...(logoOnly ? {} : {
+        scenes: {
+          orderBy: { order: 'asc' as const },
+          select: {
+            id: true,
+            order: true,
+            narration: true,
+            audioTracks: {
+              where: { type: 'scene_narration' },
+              select: { duration: true, fileData: true, alignment: true },
+              take: 1
+            }
           }
         }
-      }
+      })
     }
   })
 
@@ -64,15 +81,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  if ((output.status !== 'COMPLETED' && output.status !== 'RENDERED') || !output.outputData) {
-    throw createError({
-      statusCode: 400,
-      message: 'O vídeo precisa estar renderizado (outputData no banco) antes de adicionar legendas ou logo.'
-    })
-  }
-  const videoData = output.outputData
-
-  if (!logoOnly && output.captionedVideoData && !body?.force) {
+  if (!logoOnly && renderProduct.captionedVideoData && !body?.force) {
     throw createError({
       statusCode: 409,
       message: 'Este vídeo já possui legendas. Use force=true para reprocessar.'
@@ -89,18 +98,16 @@ export default defineEventHandler(async (event) => {
       const captionService = new CaptionService()
       const videoBuffer = Buffer.from(videoData)
       const resultBuffer = await captionService.applyLogoOnly(videoBuffer)
-      const captionedUint8Array = new Uint8Array(resultBuffer)
-      await prisma.output.update({
-        where: { id },
+      const captionedBuffer = Buffer.from(resultBuffer)
+
+      await prisma.renderProduct.update({
+        where: { outputId: id },
         data: {
-          captionedVideoData: captionedUint8Array,
-          captionedVideoSize: captionedUint8Array.length,
-          ...(replaceMaster && {
-            outputData: captionedUint8Array,
-            outputSize: captionedUint8Array.length
-          })
+          captionedVideoData: captionedBuffer,
+          ...(replaceMaster && { videoData: captionedBuffer, fileSize: captionedBuffer.length })
         }
       })
+
       const sizeMB = (resultBuffer.length / 1024 / 1024).toFixed(2)
       log.info(`Logo aplicada (logoOnly): ${sizeMB} MB. ${replaceMaster ? 'Master substituído.' : ''}`)
       return {
@@ -119,7 +126,8 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  if (!output.scenes || output.scenes.length === 0) {
+  const scenes = (output as any).scenes
+  if (!scenes || scenes.length === 0) {
     throw createError({
       statusCode: 400,
       message: 'Output não possui cenas. Gere o script primeiro.'
@@ -151,15 +159,13 @@ export default defineEventHandler(async (event) => {
     })
 
     // Construir dados das cenas para o serviço de legendas
-    // Prioridade de timing: wordTimings (ElevenLabs) > ffprobe (duração real) > estimativa
     type SceneWithTracks = { order: number; narration: string; audioTracks: Array<{ duration: number; fileData: Buffer | null; alignment: unknown }> }
-    const scenesWithTracks = output.scenes as unknown as SceneWithTracks[]
+    const scenesWithTracks = scenes as unknown as SceneWithTracks[]
     const sceneCaptionData: SceneCaptionData[] = scenesWithTracks
       .filter(scene => scene.narration && scene.audioTracks[0])
       .map(scene => {
         const track = scene.audioTracks[0]!
 
-        // Word timings do ElevenLabs /with-timestamps (precisão perfeita)
         const wordTimings = Array.isArray(track.alignment)
           ? (track.alignment as { word: string; startTime: number; endTime: number }[])
           : undefined
@@ -188,11 +194,11 @@ export default defineEventHandler(async (event) => {
 
     log.info(`${sceneCaptionData.length} cenas com narração + áudio.`)
 
-    // Carregar vídeo do banco
+    // Carregar vídeo
     const videoBuffer = Buffer.from(videoData)
     log.info(`Vídeo carregado: ${(videoBuffer.length / 1024 / 1024).toFixed(2)} MB.`)
 
-    // Gerar legendas (sem Whisper!)
+    // Gerar legendas
     const captionService = new CaptionService()
     const result = await captionService.addCaptionsFromScenes(
       videoBuffer,
@@ -200,19 +206,15 @@ export default defineEventHandler(async (event) => {
       { styleId }
     )
 
-    // Salvar no banco
-    const captionedUint8Array = new Uint8Array(result.captionedBuffer)
+    // Salvar no RenderProduct
+    const captionedBuffer = Buffer.from(result.captionedBuffer)
     log.info('Salvando vídeo legendado no banco.')
 
-    await prisma.output.update({
-      where: { id },
+    await prisma.renderProduct.update({
+      where: { outputId: id },
       data: {
-        captionedVideoData: captionedUint8Array,
-        captionedVideoSize: captionedUint8Array.length,
-        ...(replaceMaster && {
-          outputData: captionedUint8Array,
-          outputSize: captionedUint8Array.length
-        })
+        captionedVideoData: captionedBuffer,
+        ...(replaceMaster && { videoData: captionedBuffer, fileSize: captionedBuffer.length })
       }
     })
 
@@ -235,7 +237,6 @@ export default defineEventHandler(async (event) => {
   } catch (error) {
     log.error('Erro ao processar legendas.', error)
 
-    // Se for um createError, re-throw sem embrulhar
     if ((error as any).statusCode) throw error
 
     throw createError({

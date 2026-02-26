@@ -13,6 +13,8 @@ export interface VisualStyleLike {
   colorPalette?: string
   qualityTags?: string
   tags?: string
+  photographerHints?: string
+  screenwriterHints?: string
 }
 
 /**
@@ -47,6 +49,7 @@ export function buildProductionContext(opts: {
   const anchorParts = buildStyleAnchorParts(opts.visualStyle)
   return {
     styleAnchorTags: anchorParts.length > 0 ? anchorParts.join(', ') : undefined,
+    photographerHints: opts.visualStyle?.photographerHints || undefined,
     visualIdentity: opts.visualIdentity || undefined,
     storyOutline: opts.storyOutline,
     customSceneReferences: opts.customSceneReferences,

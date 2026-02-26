@@ -18,14 +18,14 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'index deve ser um número >= 0' })
   }
 
-  const output = await prisma.output.findUnique({
-    where: { id },
-    select: { thumbnailCandidates: true }
+  const product = await prisma.thumbnailProduct.findUnique({
+    where: { outputId: id },
+    select: { candidates: true }
   })
 
-  if (!output) throw createError({ statusCode: 404, message: 'Output não encontrado' })
+  if (!product) throw createError({ statusCode: 404, message: 'Thumbnails não encontradas. Gere thumbnails primeiro.' })
 
-  const candidates = output.thumbnailCandidates as Array<{ base64: string; prompt: string }> | null
+  const candidates = product.candidates as Array<{ base64: string; prompt: string }> | null
   if (!Array.isArray(candidates) || index >= candidates.length) {
     throw createError({
       statusCode: 422,
@@ -37,11 +37,11 @@ export default defineEventHandler(async (event) => {
   if (!chosen) throw createError({ statusCode: 422, message: 'Candidata inválida' })
   const thumbnailBuffer = Buffer.from(chosen.base64, 'base64')
 
-  await prisma.output.update({
-    where: { id },
+  await prisma.thumbnailProduct.update({
+    where: { outputId: id },
     data: {
-      thumbnailData: thumbnailBuffer,
-      thumbnailCandidates: Prisma.DbNull
+      selectedData: thumbnailBuffer,
+      candidates: Prisma.JsonNull,
     }
   })
 

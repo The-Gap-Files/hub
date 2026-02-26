@@ -175,8 +175,7 @@ export default defineEventHandler(async (event) => {
           originalSize: generated.buffer.length,
           width: generated.width,
           height: generated.height,
-          isSelected: true,
-          variantIndex: 0
+          isSelected: true
         }
       })
 

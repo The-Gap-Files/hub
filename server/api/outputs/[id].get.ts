@@ -15,7 +15,6 @@ export default defineEventHandler(async (event): Promise<OutputWithRelationsResp
     })
   }
 
-  // Buscar output com relações
   const output: any = await prisma.output.findUnique({
     where: { id },
     include: {
@@ -26,6 +25,62 @@ export default defineEventHandler(async (event): Promise<OutputWithRelationsResp
           theme: true
         }
       },
+      // Stage gates (replaces 9 approval booleans)
+      stageGates: {
+        select: {
+          stage: true,
+          status: true,
+          feedback: true,
+          executedAt: true,
+          reviewedAt: true
+        }
+      },
+      // Product tables
+      storyOutlineData: {
+        select: {
+          outlineData: true,
+          provider: true,
+          model: true
+        }
+      },
+      retentionQAData: {
+        select: {
+          overallScore: true,
+          summary: true,
+          analysisData: true,
+          provider: true,
+          model: true
+        }
+      },
+      monetizationData: {
+        select: {
+          contextData: true
+        }
+      },
+      socialKitData: {
+        select: {
+          kitData: true
+        }
+      },
+      thumbnailProduct: {
+        select: {
+          candidates: true,
+          selectedStoragePath: true,
+          selectedAt: true
+        }
+      },
+      renderProduct: {
+        select: {
+          videoStoragePath: true,
+          mimeType: true,
+          fileSize: true,
+          captionedStoragePath: true,
+          captionedFileSize: true,
+          renderOptions: true,
+          renderedAt: true
+        }
+      },
+      // Content
       script: {
         include: {
           backgroundMusicTracks: true
@@ -40,6 +95,7 @@ export default defineEventHandler(async (event): Promise<OutputWithRelationsResp
           mimeType: true,
           originalSize: true,
           duration: true,
+          offsetMs: true,
           createdAt: true
         }
       },
@@ -56,7 +112,6 @@ export default defineEventHandler(async (event): Promise<OutputWithRelationsResp
               width: true,
               height: true,
               isSelected: true,
-              variantIndex: true,
               role: true,
               createdAt: true
             }
@@ -70,7 +125,6 @@ export default defineEventHandler(async (event): Promise<OutputWithRelationsResp
               originalSize: true,
               duration: true,
               isSelected: true,
-              variantIndex: true,
               createdAt: true
             }
           },
@@ -114,14 +168,10 @@ export default defineEventHandler(async (event): Promise<OutputWithRelationsResp
     })
   }
 
-  const thumbnailCandidates = output.thumbnailCandidates as Array<{ base64: string; prompt: string }> | null
-  const hasThumbnail = !!output.thumbnailData
-
-  const monetizationContext = (output.monetizationContext && typeof output.monetizationContext === 'object')
-    ? output.monetizationContext
-    : null
-  const editorialObjectiveId = typeof (monetizationContext as any)?.editorialObjectiveId === 'string'
-    ? (monetizationContext as any).editorialObjectiveId
+  // Derive editorialObjective from monetizationData
+  const monetizationContext = output.monetizationData?.contextData
+  const editorialObjectiveId = typeof monetizationContext?.editorialObjectiveId === 'string'
+    ? monetizationContext.editorialObjectiveId
     : undefined
   const editorialObjective = editorialObjectiveId ? getEditorialObjectiveById(editorialObjectiveId) : undefined
 
@@ -142,25 +192,11 @@ export default defineEventHandler(async (event): Promise<OutputWithRelationsResp
     ttsProvider: output.ttsProvider || undefined,
     enableMotion: output.enableMotion,
     status: output.status,
-    storyOutlineApproved: output.storyOutlineApproved,
-    scriptApproved: output.scriptApproved,
-    imagesApproved: output.imagesApproved,
-    bgmApproved: output.bgmApproved,
-    audioApproved: output.audioApproved,
-    videosApproved: output.videosApproved,
-    renderApproved: output.renderApproved,
     hasBgm: output.audioTracks?.some((a: any) => a.type === 'background_music') || false,
     errorMessage: output.errorMessage || undefined,
     createdAt: output.createdAt,
     updatedAt: output.updatedAt,
     completedAt: output.completedAt || undefined,
-    hasVideo: !!output.outputData || !!output.outputPath,
-    isStoredOnDisk: !!output.outputPath && !output.outputData,
-    outputMimeType: output.outputMimeType || undefined,
-    outputSize: output.outputSize || 0,
-    hasCaptionedVideo: !!output.captionedVideoData,
-    captionedVideoSize: output.captionedVideoSize || 0,
-    storyOutline: output.storyOutline || undefined,
     objective: output.objective || undefined,
     mustInclude: output.mustInclude || undefined,
     mustExclude: output.mustExclude || undefined,
@@ -169,9 +205,21 @@ export default defineEventHandler(async (event): Promise<OutputWithRelationsResp
     visualStyleId: output.visualStyleId || undefined,
     seedId: output.seedId || undefined,
     seedValue: output.seed?.value ?? undefined,
-    monetizationContext,
     editorialObjectiveId,
     editorialObjective: editorialObjective ? { id: editorialObjective.id, name: editorialObjective.name, category: editorialObjective.category } : undefined,
+
+    // Stage gates
+    stageGates: output.stageGates || [],
+
+    // Product tables
+    storyOutlineData: output.storyOutlineData || null,
+    retentionQAData: output.retentionQAData || null,
+    monetizationData: output.monetizationData || null,
+    socialKitData: output.socialKitData || null,
+    thumbnailProduct: output.thumbnailProduct || null,
+    renderProduct: output.renderProduct || null,
+
+    // Relations
     dossier: output.dossier,
     scriptStyle: output.scriptStyleId ? getScriptStyleById(output.scriptStyleId) : undefined,
     visualStyle: output.visualStyleId ? getVisualStyleById(output.visualStyleId) : undefined,
@@ -187,8 +235,5 @@ export default defineEventHandler(async (event): Promise<OutputWithRelationsResp
       outputType: rel.relatedOutput.outputType,
       relationType: rel.relationType
     })) || [],
-    thumbnailCandidates: Array.isArray(thumbnailCandidates) ? thumbnailCandidates : null,
-    hasThumbnail,
-    socialKit: output.socialKit || null
   }
 })

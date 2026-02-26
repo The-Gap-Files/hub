@@ -10,51 +10,58 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'ID do Output é obrigatório' })
   }
 
-  // Buscar output no banco
+  // Get title for filename
   const output = await prisma.output.findUnique({
     where: { id },
-    select: {
-      outputData: true,
-      outputMimeType: true,
-      outputPath: true,
-      title: true
-    }
+    select: { title: true }
   })
 
   if (!output) {
     throw createError({ statusCode: 404, message: 'Output não encontrado' })
   }
 
+  // Read from RenderProduct
+  const renderProduct = await prisma.renderProduct.findUnique({
+    where: { outputId: id },
+    select: {
+      videoData: true,
+      videoStoragePath: true,
+      mimeType: true,
+    }
+  })
+
+  if (!renderProduct) {
+    throw createError({ statusCode: 404, message: 'Vídeo não encontrado' })
+  }
+
   const fileName = `${output.title || 'video'}.mp4`
 
   // Estratégia híbrida: disco ou banco
-  if (output.outputPath) {
-    // Vídeo armazenado em disco (arquivo grande)
+  if (renderProduct.videoStoragePath) {
     try {
-      const stats = await fs.stat(output.outputPath)
+      const stats = await fs.stat(renderProduct.videoStoragePath)
 
       setResponseHeaders(event, {
-        'Content-Type': output.outputMimeType || 'video/mp4',
+        'Content-Type': renderProduct.mimeType || 'video/mp4',
         'Content-Disposition': `attachment; filename="${fileName}"`,
         'Content-Length': stats.size.toString()
       })
 
-      const stream = createReadStream(output.outputPath)
+      const stream = createReadStream(renderProduct.videoStoragePath)
       return sendStream(event, stream)
     } catch {
       throw createError({ statusCode: 404, message: 'Arquivo de vídeo não encontrado em disco' })
     }
   }
 
-  if (output.outputData) {
-    // Vídeo armazenado no PostgreSQL (BYTEA)
+  if (renderProduct.videoData) {
     setResponseHeaders(event, {
-      'Content-Type': output.outputMimeType || 'video/mp4',
+      'Content-Type': renderProduct.mimeType || 'video/mp4',
       'Content-Disposition': `attachment; filename="${fileName}"`,
-      'Content-Length': output.outputData.length.toString()
+      'Content-Length': renderProduct.videoData.length.toString()
     })
 
-    return output.outputData
+    return renderProduct.videoData
   }
 
   throw createError({ statusCode: 404, message: 'Vídeo não encontrado (nem em disco nem no banco)' })

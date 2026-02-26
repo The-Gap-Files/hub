@@ -10,6 +10,8 @@ import type { StoryOutline } from '../story-architect.service'
 export interface ProductionContext {
   /** Style tags already applied as anchor (e.g. "cinematic noir, high contrast") */
   styleAnchorTags?: string
+  /** Style-specific instructions for the Photographer agent */
+  photographerHints?: string
   /** Dossier visual identity (e.g. "1970s urban realism, period-accurate interiors") */
   visualIdentity?: string
   /** Story Architect outline — calibrates intensity per narrative segment */
@@ -49,19 +51,11 @@ export interface ChoreographerOutput {
   motionDescription: string
 }
 
-export interface CinematographerOutput {
-  order: number
-  endVisualDescription: string | null
-  endImageReferenceWeight: number | null
-}
-
-// ─── Combined output (backwards-compatible with old RefinedScene) ─
+// ─── Combined output ────────────────────────────────────────────
 
 export interface RefinedScene {
   order: number
   visualDescription: string
   motionDescription: string
   sceneEnvironment?: string
-  endVisualDescription?: string | null
-  endImageReferenceWeight?: number | null
 }

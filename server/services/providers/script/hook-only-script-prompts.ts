@@ -46,6 +46,10 @@ export function buildHookOnlySystemPrompt(request: ScriptGenerationRequest): str
     })
   }
 
+  if (request.visualScreenwriterHints) {
+    visualInstructions += `\n\n[STYLE-SPECIFIC SCREENWRITER INSTRUCTIONS]\n${request.visualScreenwriterHints}`
+  }
+
   const targetWPM = request.targetWPM || 150
   const wordsPerScene = Math.round((targetWPM / 60) * 5)
   const maxWordsHard = wordsPerScene + 2

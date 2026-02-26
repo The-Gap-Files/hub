@@ -1,0 +1,298 @@
+{
+  "timestamp": "2026-02-26T13:08:57.540Z",
+  "taskId": "monetization-hook-only",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "gemini-3-flash-preview",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Monetization — Hook-Only Teasers Generator\n\nVocê é um estrategista de conteúdo viral. Nesta etapa, você vai gerar os teasers HOOK-ONLY — arma de alcance viral, detonação cognitiva que para o scroll, gera replay e converte.\n\n## 🎯 O Que São Hook-Only\n\nHook-Only é uma **arma viral de 16-22 segundos**. Não é um resumo. Não é um mini-documentário. Não é uma aula.\n\n### DNA do Hook-Only:\n- **Visceral** — O público SENTE antes de PENSAR. Se pensou antes de sentir, deslizou.\n- **Simples** — 1 conceito central resumível em 1 frase mental. Sem colagem de fatos.\n- **Dinâmico** — Alternância emocional: Cena 1 (Ruptura/Loop-B) → Cena 2 (Respiro) → Cena 3 (Replay bait/impacto) → Cena 4 (Pico/Loop-A).\n- **Sistêmico** — Mostra o MECANISMO (quem autorizou, quem lucrou), não o sintoma (violência). Indignação > repulsa.\n- **Incompleto** — ZERO resolução, ZERO explicação, TODOS os loops abertos.\n- **Replay-friendly** — Detalhes rápidos que forçam \"pera, o que foi isso?\"\n- **Loop Infinito (Loop-A/Loop-B)** — Escreva de trás pra frente. A frase final (Cena 4) é incompleta e só faz sentido quando o vídeo reinicia na Cena 1.\n- **Safe** — Postura \"Neutral Documentarian\". Gore explícito = desmonetização. Use substituição semântica.\n\n## 📐 CONTEXTO RECEBIDO\n\nVocê recebe:\n- O dossiê completo\n- O teaser Gateway já gerado\n- Os teasers Deep-Dive já gerados\n- TODOS os hooks já usados (para NÃO repetir)\n- A lista de ângulos e formatos definidos no blueprint para cada hook-only\n\n## 📐 O QUE PRODUZIR\n\nPara CADA hook-only definido no blueprint, gere:\n- **title**: Máximo 8-10 palavras. Tensão + curiosidade + clareza. Sem nomes obscuros, sem subtítulos com dois-pontos.\n  - ❌ \"O mito sangrento que atravessou séculos: de Trento a Poway\" (14 palavras, denso)\n  - ✅ \"A mesma mentira. 500 anos depois.\" (6 palavras, pura tensão)\n  - ✅ \"Um menino morto e uma mentira eterna.\" (7 palavras, impacto)\n- **hook**: Frase que causa RUPTURA COGNITIVA em 2 segundos (até 15 palavras). Sem construção, sem contextualização. O espectador SENTE antes de pensar. DIFERENTE de tudo anterior.\n- **angle**: Descrição do ângulo (já definido no blueprint)\n- **angleCategory**: A categoria (já definida no blueprint)\n- **narrativeRole**: \"hook-only\"\n- **shortFormatType**: O formato (já definido no blueprint)\n- **scriptOutline**: Loop-B (final da frase do loop) → Respiro (contexto sistêmico) → Replay bait/impacto → Loop-A (começo da frase do loop, SUSPENSA).\n- **visualSuggestion**: Descrição curta do visual\n- **loopSentence**: Objeto com `fullSentence`, `partA` e `partB` definindo a mecânica do loop.\n- **cta**: **NENHUM**. Campo deve ser vazio ou null. O loop é a retenção.\n- **platform**: \"YouTube Shorts\"\n- **format**: \"teaser-youtube-shorts\"\n- **estimatedViews**: Estimativa de views\n- **scriptStyleId** e **scriptStyleName**\n- **editorialObjectiveId** e **editorialObjectiveName**\n- **avoidPatterns**: 2-4 anti-padrões específicos (veja regras abaixo)\n- **visualPrompt**: Prompt de imagem em INGLÊS (1 parágrafo)\n- **microBriefV1**: Micro-brief ESTRUTURADO para ESTE teaser (isolado por item). Deve conter:\\n  - version: \\\"teaserMicroBriefV1\\\"\\n  - narrativeRole: \\\"hook-only\\\"\\n  - angleCategory e angle (iguais aos campos do teaser)\\n  - facts: 5-12 fatos selecionados APENAS do brief/dossiê recebido (cada um com text e, se possível, sourceRef)\\n  - forbiddenElements: 6-12 itens (reforçar anti-arma/gore/close-up)\\n  - allowedArtifacts: 6-12 itens (documento/selo/monitor/headline/etc.)\\n  - notes: 2-6 bullets curtos (ex.: \\\"mecanismo > sintoma\\\", \\\"zero resolução\\\")\\n\\n🚨 IMPORTANTE: este microBriefV1 será o ÚNICO contexto que o Story Architect verá para este hook-only. Então selecione fatos que permitam um outline forte sem precisar de outros dados.\n\n## 🚨 REGRAS DOS HOOK-ONLY\n\n1. **RUPTURA EM 2 SEGUNDOS** — A primeira frase DEVE causar ruptura cognitiva. Nada de construção antes do choque. Se o público pensa antes de sentir, ele desliza.\n   - **MICRO-REGRA (TIMING)**: a primeira frase (até o primeiro ponto/pausa forte) deve ser pronunciável em **~1,5s**.\n     - Heurística: **3-5 palavras (ideal)**, **máx. 6**. Sem vírgula na primeira pancada.\n2. **1 CONCEITO CENTRAL** — O teaser INTEIRO gira em torno de UMA ideia resumível em 1 frase mental. Se exige conectar 3+ entidades/épocas/nomes para entender, está denso demais para consumo rápido.\n3. **ALTERNÂNCIA DINÂMICA (NÃO ESCALAÇÃO LINEAR)** — A intensidade deve VARIAR com contrastes: após beat intenso, inserir respiro para amplificar o próximo pico. O ÚLTIMO beat (corte seco — sem CTA) é o pico absoluto. ❌ 8→9→9→10 (saturação). ✅ 8→6→9→10 (alternância).\n3.5. **MECANISMO > SINTOMA (CRÍTICO)** — Foque no SISTEMA (quem autorizou, quem lucrou), NÃO na violência. ❌ \"A corda estala\" (repulsa → swipe). ✅ \"O bispo assinou a sentença\" (mecanismo → indignação → compartilha).\n   - **ANTI-TERMOS-SENSÍVEIS:** NUNCA use \"tortura infantil\", \"sangue infantil\", \"violência infantil\" em title, hook ou microBriefV1.facts. Se o brief tiver, REFORMULE para mecanismo (decreto, confisco, tribunal assinou, usou como pretexto). Títulos: ❌ \"O Decreto que Selou Sangue Infantil\". ✅ \"O Decreto que Autorizou o Confisco\".\n4. **NOMES UNIVERSAIS** — Nomes históricos obscuros quebram fluxo cognitivo. Use função (\"o bispo\", \"o juiz\", \"o atirador\"), não nomes próprios (Hinderbach, Tiberino). Exceção: nomes universalmente conhecidos (Hitler, Einstein, Napoleão).\n5. **RESOLUÇÃO ZERO** — Nenhuma explicação, recap, conclusão moral ou reflexão filosófica. TODOS os loops ficam abertos.\n6. **ZERO CTA** — O público NÃO pode perceber que acabou. Corte seco no meio da frase (Loop-A). Sem branding, sem \"The Gap Files.\".\n7. **REPLAY BAIT** — Pelo menos 1 beat com detalhe visual/narrativo rápido demais para absorver. Força re-assistir. Replay é sinal forte para o algoritmo.\n8. **Cada hook DEVE ser TOTALMENTE DIFERENTE** dos outros — formato E conteúdo\n9. **avoidPatterns** devem focar em eliminar contexto, explicação, nomes obscuros e CTA visível\n10. **microBriefV1 é a fonte da verdade** para o Story Architect deste hook-only: NÃO inclua fatos que pertencem a outros hook-onlys/deep-dives/gateway. Selecione apenas os fatos necessários para este ângulo e mantenha-os simples.\n11. **microBriefV1.facts:** Se um fato do brief contiver \"tortura infantil\", \"sangue infantil\", \"violência infantil\", REFORMULE antes de incluir: use consequência (confisco, decreto, autorizou) em vez do método (tortura, sangue).\n12. **microBriefV1.facts — MECANISMO > SINTOMA:** NÃO inclua fatos que descrevam captura/recolhimento de pessoas (\"guardas recolhiam crianças\", \"levaram para o tribunal\"). Inclua fatos do SISTEMA: \"O tesouro financiou o tribunal\", \"O decreto autorizou o confisco\", \"O bispo assinou a sentença\".\n\n## 🛡️ BRAND SAFETY E VISUAL NOISE (YOUTUBE 2026)\n\n1. **SUBSTITUIÇÃO SEMÂNTICA (OBRIGATÓRIA):**\n   - ❌ \"Assassino serial matou 20\" → 🟢 \"O responsável por 20 fins trágicos\"\n   - ❌ \"Sangue no chão\" → 🟢 \"A cena marcada\" / \"Vestígios vitais\"\n   - ❌ \"Estripado/Mutilado\" → 🟢 \"Fragmentado\" / \"Cena desfeita\"\n   - **Postura:** \"Neutral Documentarian\". Clínico, solene, nunca sensacionalista.\n\n2. **IMPERFEIÇÃO VISUAL CONTEXTUAL (Decisão de Direção):**\n   - **Esqueça o \"ruído aleatório\".** Escolha uma textura que AMPLIFIQUE a narrativa.\n   - **Documentos Antigos:** Textura de papel rasgado, granulação de filme 16mm, bordas queimadas.\n   - **Relatos Policiais/Modernos:** Glitch digital, compressão de CCTV, ruído de ISO alto (câmera noturna).\n   - **Memórias/Relatos:** Desfoque nas bordas (tilt-shift), aberração cromática leve.\n   - **Regra:** A imagem não pode ser \"lisa\" (cara de IA pura). Ela deve parecer um registro físico ou digital real.\n   - **Loop Visual:** O frame final deve ter iluminação/composição similar ao inicial para loop invisível.\n\n## 💡 EXEMPLOS DE HOOKS PODEROSOS (RUPTURA COGNITIVA)\n\n- \"A Igreja declarou ele santo… e depois RETIROU a santidade.\"\n- \"3 famílias lucraram com a morte dele. Ninguém foi preso.\"\n- \"O DNA não bate. A confissã... [truncated 8736 chars]"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "📋 TEMA: A ascensão paramilitar e queda clínica de El Mencho, líder do CJNG.\n📋 TÍTULO: El Mencho: O Império do Ouro Verde e a Operação Tapalpa\n🧾 BRIEF (TEASERS) — versão: briefBundleV1\n\n🛡️ REGRAS HARD (GLOBAL SAFETY)\n- ❌ armas de fogo\n- ❌ execuções visuais\n- ❌ sangue explícito\n- ❌ close-up de rostos humanos\n- ❌ violência gráfica\n- ❌ armas de fogo, rifles, pistolas, munição, gatilho\n- ❌ atirador, execução, assassinato explícito, violência gráfica\n- ❌ sangue, gore, corpos mutilados, tortura explícita\n- ❌ close-up de mãos humanas, close-up de rostos humanos (evitar macro/anatomia)\n- ❌ cenas em sinagogas/templos com ameaça explícita (substituir por artefatos: manifesto, tela, manchete)\n- ❌ símbolos/extremismo contemporâneo em destaque (substituir por “texto recortado/blur”)\n\n🧰 ARTEFATOS VISUAIS PERMITIDOS\n- ✅ relatórios de inteligência\n- ✅ registros de óbito\n- ✅ documentos contábeis\n- ✅ mapas de satélite\n- ✅ manchetes de jornal\n- ✅ arquivos de recrutamento\n- ✅ documento, decreto, registro, arquivo, dossiê, carimbo, selo de cera\n- ✅ moedas, cofre, livro-caixa, inventário, recibo, contrato\n- ✅ monitor, tela, manifesto (sem arma), headline, recorte de jornal, thread desfocada\n- ✅ mapa, corredor de arquivo, sala de leitura, prateleiras, luz de vela, sombras\n- ✅ silhuetas não-identificáveis sem rosto/mãos em close\n\n🔫 MUNIÇÃO NARRATIVA (FATOS SAFE)\n1. Nemesio Oseguera Cervantes nasceu em 1966 em Michoacán, iniciando sua trajetória laboral na colheita de abacates. [fonte: [1]]\n2. O período de encarceramento no Texas nos anos 90 serviu como mapeamento das vulnerabilidades do sistema judiciário norte-americano. [fonte: [1]]\n3. O ingresso nas forças policiais municipais de Jalisco permitiu o domínio de frequências de rádio e protocolos de patrulha estatal. [fonte: [1]]\n4. A união matrimonial com Rosalinda González Valencia fundiu a capacidade tática de Oseguera com o capital financeiro do clã Los Cuinis. [fonte: [1]]\n5. A fundação do Cártel Jalisco Nueva Generación (CJNG) ocorreu após o vácuo de poder gerado pela morte de Ignacio Coronel em 2010. [fonte: [1]]\n6. O cartel institucionalizou o 'derecho de piso', uma taxa de extorsão sobre a malha produtiva de abacate e limão. [fonte: [1]]\n7. Registros indicam a taxação compulsória de até quatro pesos por cada quilo de fruta colhida em municípios estratégicos. [fonte: [1]]\n8. O grupo utilizou empresas de segurança de fachada para recrutar ex-militares estrangeiros via ofertas enganosas em aplicativos de mensagem. [fonte: [1]]\n9. Relatórios de inteligência documentaram o recrutamento de veteranos das forças especiais da Colômbia e da Guatemala. [fonte: [1]]\n10. O cartel foi pioneiro no uso de drones adaptados com mecanismos para liberação de explosivos plásticos C4. [fonte: [1]]\n11. A engenharia automotiva clandestina do grupo produziu os 'Monstruos', veículos blindados com chapas de aço inclinadas e aríetes. [fonte: [1]]\n12. O controle de portos no Pacífico garantiu a importação de precursores químicos da Ásia para a síntese industrial de fentanil. [fonte: [1]]\n13. A facção Los Cuinis operava como banco de investimentos, lavando capital em complexos hoteleiros e centros comerciais. [fonte: [1]]\n14. O diagnóstico de insuficiência renal crônica terminal em 2025 ancorou o líder a uma zona fortificada na serra de Jalisco. [fonte: [1]]\n15. Investigações desmentiram o mito de um hospital de luxo na selva, revelando tratamentos em cabanas rústicas sem assepsia. [fonte: [1]]\n16. A localização do refúgio final em Tapalpa foi entregue às autoridades por uma colaboradora próxima do círculo íntimo. [fonte: [1]]\n17. A Operação Tapalpa, em fevereiro de 2026, foi uma ação coordenada entre a SEDENA e a inteligência interagencial dos EUA. [fonte: [1]]\n18. O registro oficial aponta que o líder morreu de choque hipovolêmico a bordo de uma aeronave de evacuação médica militar. [fonte: [1]]\n19. A morte do fundador desencadeou o 'Código Vermelho', paralisando o transporte e serviços em 16 estados mexicanos. [fonte: [1]]\n20. A estrutura sucessória de 2026 dividiu o cartel entre a hegemonia tático-militar e a gestão burocrática territorial. [fonte: [1]]\n\n🎭 DIRETRIZES POR PAPEL\n- gateway: contextLevel=medium, facts=12-20\n- deep-dive: contextLevel=low, facts=8-15\n- hook-only: contextLevel=minimal, facts=3-5\n\nGere 4 teasers HOOK-ONLY para o dossiê.\n\nSlots definidos no blueprint:\n1. angleCategory=\"paradoxal\", angleName=\"O Colhedor que Desafiou Nações\", shortFormatType=\"hook-brutal\", platform=\"YouTube Shorts\", scriptStyleId=\"mystery\", editorialObjectiveId=\"mystery-layers\"\n2. angleCategory=\"psicologico\", angleName=\"O Mito do Hospital vs A Realidade da Cabana\", shortFormatType=\"frase-memoravel\", platform=\"YouTube Shorts\", scriptStyleId=\"narrative\", editorialObjectiveId=\"emotional-impact\"\n3. angleCategory=\"etico\", angleName=\"O Preço do Quilo: A Extorsão do Ouro Verde\", shortFormatType=\"pergunta-incomoda\", platform=\"YouTube Shorts\", scriptStyleId=\"documentary\", editorialObjectiveId=\"controversy\"\n4. angleCategory=\"cultural\", angleName=\"O Legado de Sombra na Terra do Abacate\", shortFormatType=\"hook-brutal\", platform=\"YouTube Shorts\", scriptStyleId=\"narrative\", editorialObjectiveId=\"deep-analysis\"\n\nOBRIGATÓRIO: Cada teaser deve ter targetEpisode (1, 2 ou 3). Hook-only prioriza EP2 e EP3. Distribua equilibradamente.\n\nRetorne um JSON com campo \"teasers\" contendo exatamente 4 teasers."
+      }
+    ]
+  },
+  "parsed": {
+    "teasers": [
+      {
+        "cta": null,
+        "angle": "A metamorfose paradoxal de um trabalhador rural em um arquiteto da insurgência paramilitar.",
+        "scriptOutline": "Loop-B (começou com um simples colhedor) -> Respiro (O contraste entre o campo e o comando paramilitar) -> Replay bait (A cifra da recompensa piscando em um documento oficial) -> Loop-A (O mundo esqueceu que o império...).",
+        "visualSuggestion": "Contraste entre uma caixa de madeira rústica e um monitor de vigilância de alta tecnologia.",
+        "avoidPatterns": [
+          "NÃO explique a trajetória cronológica — foque apenas no contraste extremo",
+          "NÃO use o nome real do líder no título — mantenha o mistério do cargo",
+          "NÃO inclua nenhuma conclusão moral ou encerramento narrativo"
+        ],
+        "editorialObjectiveName": "Mystery Layers",
+        "format": "teaser-youtube-shorts",
+        "editorialObjectiveId": "mystery-layers",
+        "microBriefV1": {
+          "angleCategory": "paradoxal",
+          "narrativeRole": "hook-only",
+          "forbiddenElements": [
+            "rosto do líder",
+            "armas de fogo",
+            "sangue explícito",
+            "cenas de prisão",
+            "close-up de mãos colhendo fruta"
+          ],
+          "allowedArtifacts": [
+            "recibo de pagamento antigo",
+            "mapa de calor de Jalisco",
+            "caixa de madeira de abacates",
+            "documento de recompensa oficial",
+            "textura de filme 16mm",
+            "sombra de helicóptero no solo"
+          ],
+          "notes": [
+            "O contraste deve ser visceral: miséria vs. poder absoluto.",
+            "O loop deve ser invisível, fundindo o fim da frase com o início."
+          ],
+          "facts": [
+            {
+              "text": "Nemesio Oseguera nasceu em 1966 e iniciou sua vida laboral na colheita de abacates."
+            },
+            {
+              "text": "O mundo oferece recompensas de milhões de dólares por informações que levem ao seu paradeiro."
+            },
+            {
+              "text": "Ele utilizou o conhecimento das plantações para mapear rotas de fuga na serra."
+            },
+            {
+              "text": "A estrutura que ele criou desafiou exércitos convencionais com tecnologia de drones."
+            },
+            {
+              "text": "O império foi construído sobre a taxação de produtos agrícolas básicos."
+            }
+          ],
+          "version": "teaserMicroBriefV1",
+          "angle": "A metamorfose paradoxal de um trabalhador rural em um arquiteto da insurgência paramilitar."
+        },
+        "narrativeRole": "hook-only",
+        "title": "O Colhedor de Milhões",
+        "hook": "Ele colhia abacates por centavos. Hoje, o mundo oferece milhões pela sua cabeça.",
+        "angleCategory": "paradoxal",
+        "scriptStyleName": "Mystery/Noir",
+        "shortFormatType": "hook-brutal",
+        "estimatedViews": 950000,
+        "visualPrompt": "Noir cinematic style, macro shot of a single dusty avocado on a wooden crate, transitioning into a high-tech digital map of Mexico with glowing red nodes, grainy 16mm film texture, moody lighting.",
+        "sceneCount": 4,
+        "platform": "YouTube Shorts",
+        "targetEpisode": 1,
+        "scriptStyleId": "mystery"
+      },
+      {
+        "avoidPatterns": [
+          "NÃO descreva a doença de forma médica detalhada — use 'falência do corpo'",
+          "NÃO mostre hospitais modernos — o foco é a precariedade da cabana",
+          "NÃO use trilha sonora heróica — use ruído ambiente tenso e fúnebre"
+        ],
+        "angle": "O colapso do mito da riqueza frente à precariedade do fim clínico em uma cabana rústica.",
+        "cta": null,
+        "scriptOutline": "Loop-B (mais do que uma cabana rústica) -> Respiro (A falha do corpo que nenhum bilhão conseguiu consertar) -> Replay bait (O carimbo de 'ÓBITO' sobre um mapa de uma mansão) -> Loop-A (A maior fortuna do mundo não comprou...).",
+        "visualSuggestion": "Sobreposição de uma planta de mansão luxuosa sendo 'apagada' pela imagem de uma cabana pobre.",
+        "editorialObjectiveName": "Emotional Impact",
+        "microBriefV1": {
+          "notes": [
+            "Focar na ironia: o homem mais rico do crime não tinha um hospital real.",
+            "O ambiente deve parecer claustrofóbico e úmido."
+          ],
+          "allowedArtifacts": [
+            "cabana de madeira escura",
+            "suporte de soro improvisado",
+            "relatório de óbito carimbado",
+            "planta baixa de hospital de luxo (riscada)",
+            "floresta densa com neblina",
+            "monitor cardíaco com glitch"
+          ],
+          "narrativeRole": "hook-only",
+          "forbiddenElements": [
+            "corpo no caixão",
+            "médicos operando",
+            "agulhas em close-up",
+            "rosto do doente",
+            "dinheiro físico voando"
+          ],
+          "angleCategory": "psicologico",
+          "facts": [
+            {
+              "text": "O diagnóstico de insuficiência renal terminal confinou o líder a uma zona fortificada."
+            },
+            {
+              "text": "Investigações revelaram que ele recebia tratamento em cabanas rústicas, não hospitais de luxo."
+            },
+            {
+              "text": "A localização final em Tapalpa foi entregue por alguém de seu círculo íntimo."
+            },
+            {
+              "text": "Ele morreu de choque hipovolêmico durante uma tentativa de evacuação médica."
+            },
+            {
+              "text": "A fortuna do clã Los Cuinis não foi capaz de garantir um ambiente estéril para o líder."
+            }
+          ],
+          "version": "teaserMicroBriefV1",
+          "angle": "O colapso do mito da riqueza frente à precariedade do fim clínico em uma cabana rústica."
+        },
+        "editorialObjectiveId": "emotional-impact",
+        "format": "teaser-youtube-shorts",
+        "narrativeRole": "hook-only",
+        "title": "A Fortuna Não Salvou o Rei",
+        "hook": "Bilhões no banco, mas ele morreu em uma cabana de madeira sem assepsia.",
+        "angleCategory": "psicologico",
+        "sceneCount": 4,
+        "estimatedViews": 820000,
+        "visualPrompt": "Noir cinematic style, blueprint of a luxury hospital fading into a dark, dusty interior of a mountain cabin, medical IV drip stand next to a rough wooden wall, moody lighting, dust motes dancing in a single beam of light.",
+        "platform": "YouTube Shorts",
+        "shortFormatType": "frase-memoravel",
+        "scriptStyleName": "Narrative/Cinematic",
+        "targetEpisode": 3,
+        "scriptStyleId": "narrative"
+      },
+      {
+        "targetEpisode": 2,
+        "scriptStyleId": "documentary",
+        "shortFormatType": "pergunta-incomoda",
+        "scriptStyleName": "Documentary/Investigative",
+        "sceneCount": 4,
+        "estimatedViews": 780000,
+        "visualPrompt": "Noir cinematic style, close-up of a grocery store receipt with '4 pesos' highlighted in red, transitioning to a silhouette of a massive armored truck with steel plates in the fog, glitchy CCTV overlay.",
+        "platform": "YouTube Shorts",
+        "angleCategory": "etico",
+        "hook": "Cada quilo de abacate no seu mercado financia um exército invisível.",
+        "narrativeRole": "hook-only",
+        "title": "O Imposto do Ouro Verde",
+        "editorialObjectiveId": "controversy",
+        "format": "teaser-youtube-shorts",
+        "microBriefV1": {
+          "version": "teaserMicroBriefV1",
+          "facts": [
+            {
+              "text": "O cartel institucionalizou o 'derecho de piso' sobre a produção de abacate e limão."
+            },
+            {
+              "text": "Registros indicam a taxação de quatro pesos por cada quilo de fruta colhida."
+            },
+            {
+              "text": "O capital financia veículos blindados artesanais conhecidos como 'Monstruos'."
+            },
+            {
+              "text": "Empresas de segurança de fachada são usadas para recrutar veteranos estrangeiros."
+            },
+            {
+              "text": "O controle dos portos garante a entrada de componentes para a indústria sintética."
+            }
+          ],
+          "angle": "A economia invisível por trás do consumo cotidiano e o financiamento de exércitos privados.",
+          "angleCategory": "etico",
+          "narrativeRole": "hook-only",
+          "forbiddenElements": [
+            "pessoas fazendo compras",
+            "violência contra agricultores",
+            "armas de fogo reais",
+            "logotipos de supermercados reais",
+            "dinheiro com sangue"
+          ],
+          "allowedArtifacts": [
+            "etiqueta de preço de supermercado",
+            "moedas de 4 pesos caindo",
+            "silhueta de veículo blindado 'Monstruo'",
+            "recibo de balança comercial",
+            "drone com luzes vermelhas no céu noturno",
+            "mapa de rotas comerciais do Pacífico"
+          ],
+          "notes": [
+            "Conecte o cotidiano (comida) com a estrutura paramilitar (guerra).",
+            "O visual deve ser limpo no início e 'sujo/industrial' no final."
+          ]
+        },
+        "editorialObjectiveName": "Controversy/Debate",
+        "cta": null,
+        "angle": "A economia invisível por trás do consumo cotidiano e o financiamento de exércitos privados.",
+        "scriptOutline": "Loop-B (o imposto de um exército invisível) -> Respiro (A taxa de quatro pesos que move uma engrenagem de bilhões) -> Replay bait (O vulto de um 'Monstruo' blindado passando na neblina) -> Loop-A (Cada quilo que você compra carrega...).",
+        "visualSuggestion": "Uma balança de supermercado pesando um abacate, mas o visor mostra o peso de um veículo blindado.",
+        "avoidPatterns": [
+          "NÃO culpe o consumidor diretamente — use a pergunta como gatilho de curiosidade",
+          "NÃO mostre o produto final sendo consumido — foque no 'imposto' e na 'máquina'",
+          "NÃO use termos como 'extorsão' no hook — use 'financia um exército'"
+        ]
+      },
+      {
+        "title": "O Dia que o México Parou",
+        "narrativeRole": "hook-only",
+        "microBriefV1": {
+          "angle": "A demonstração de poder sistêmico através da paralisia coordenada de múltiplos estados.",
+          "version": "teaserMicroBriefV1",
+          "facts": [
+            {
+              "text": "A morte do fundador desencadeou o 'Código Vermelho' em 2026."
+            },
+            {
+              "text": "O protocolo paralisou o transporte e serviços em 16 estados mexicanos simultaneamente."
+            },
+            {
+              "text": "A estrutura do grupo dividiu-se entre gestão burocrática e hegemonia militar."
+            },
+            {
+              "text": "O sistema de comunicação do grupo domina frequências estatais de rádio."
+            },
+            {
+              "text": "A paralisia provou que a máquina funciona mesmo sem o seu criador."
+            }
+          ],
+          "angleCategory": "cultural",
+          "forbiddenElements": [
+            "explosões explícitas",
+            "pessoas correndo gritando",
+            "carros pegando fogo",
+            "bandeiras nacionais em destaque",
+            "rosto do líder morto"
+          ],
+          "narrativeRole": "hook-only",
+          "allowedArtifacts": [
+            "mapa do México ficando vermelho",
+            "rodovia vazia ao entardecer",
+            "obturador de loja fechando (som e imagem)",
+            "relógio digital marcando a hora exata da paralisia",
+            "televisores com estática em série",
+            "documento de 'Código Vermelho' com selo de urgência"
+          ],
+          "notes": [
+            "O foco é a eficiência assustadora do sistema, não o caos.",
+            "O silêncio visual deve ser mais impactante que o ruído."
+          ]
+        },
+        "editorialObjectiveId": "deep-analysis",
+        "format": "teaser-youtube-shorts",
+        "editorialObjectiveName": "Deep Analysis",
+        "avoidPatterns": [
+          "NÃO mostre pânico nas ruas — mostre o vazio e o silêncio absoluto",
+          "NÃO use nomes de políticos — foque no 'Código Vermelho' como entidade",
+          "NÃO explique o que é o Código Vermelho — deixe o espectador deduzir pelo impacto"
+        ],
+        "scriptOutline": "Loop-B (paralisou dezesseis estados em segundos) -> Respiro (O trono está vazio, mas a ordem foi executada sem falhas) -> Replay bait (Um mapa onde as luzes das cidades se apagam em sequência) -> Loop-A (O trono está vazio, mas a ordem...).",
+        "visualSuggestion": "Uma sequência de persianas de metal de lojas fechando rapidamente, uma após a outra, em silêncio absoluto.",
+        "angle": "A demonstração de poder sistêmico através da paralisia coordenada de múltiplos estados.",
+        "cta": null,
+        "scriptStyleId": "narrative",
+        "targetEpisode": 3,
+        "platform": "YouTube Shorts",
+        "sceneCount": 4,
+        "estimatedViews": 890000,
+        "visualPrompt": "Noir cinematic style, a digital map of Mexico rapidly turning deep red from the center outwards, empty highways at dusk with long shadows, flickering streetlights, analog noise and chromatic aberration, cold blue and red color palette.",
+        "shortFormatType": "hook-brutal",
+        "scriptStyleName": "Narrative/Cinematic",
+        "angleCategory": "cultural",
+        "hook": "O líder se foi, mas o Código Vermelho paralisou dezesseis estados em minutos."
+      }
+    ]
+  },
+  "rawContent": ""
+}

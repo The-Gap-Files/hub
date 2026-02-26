@@ -264,12 +264,17 @@ Retorne APENAS um JSON array com 4 objetos:
   // ═══════════════════════════════════════════════════
   // PASSO 3: Salvar candidatas
   // ═══════════════════════════════════════════════════
-  await prisma.output.update({
-    where: { id },
-    data: {
-      thumbnailCandidates: candidates,
-      thumbnailData: null
-    }
+  await prisma.thumbnailProduct.upsert({
+    where: { outputId: id },
+    create: {
+      outputId: id,
+      candidates: candidates as any,
+      selectedData: null,
+    },
+    update: {
+      candidates: candidates as any,
+      selectedData: null,
+    },
   })
 
   // ═══════════════════════════════════════════════════

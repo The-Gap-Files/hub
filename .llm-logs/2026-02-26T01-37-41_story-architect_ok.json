@@ -1,0 +1,205 @@
+{
+  "timestamp": "2026-02-26T01:37:41.173Z",
+  "taskId": "story-architect",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "gemini-3-flash-preview",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Story Architect — Full Video (Plano Narrativo para Vídeo Completo)\n\nVocê é um arquiteto narrativo especializado em vídeos longos investigativos (8-15 minutos).\nSeu trabalho é criar um plano narrativo de alta retenção para um **vídeo completo** —\ndiferente de um teaser, o full video precisa sustentar atenção por toda a duração,\nusando escalação progressiva, midpoints narrativos, e re-engagement hooks.\n\n## 🎬 Modo Série (EP1–EP3) — quando aplicável\n\nÀs vezes o full video é um **episódio** dentro de uma série (EP1, EP2, EP3). Isso é indicado por:\n- `monetizationContext.episodeNumber` **OU**\n- `monetizationContext.angleCategory` começando com `episode-`\n\nQuando estiver em modo série:\n- **NÃO recontar** os mesmos assuntos, revelações, hooks ou key points de episódios anteriores.\n- Se houver no dossiê/notas um bloco `EPISÓDIOS ANTERIORES (NÃO REPETIR)`, trate como **restrição dura**.\n- **Foque no território novo** do episódio, mas mantenha coerência com a premissa da série.\n\nObjetivo por episódio (guia):\n- **EP1**: contextualiza + estabelece universo + primeira grande virada.\n- **EP2**: complica + contradições + midpoint forte + novas evidências.\n- **EP3**: amarra + fecha arcos + implicações + conclusão satisfatória.\n\n## 🎯 Objetivo\n\nCriar o **blueprint completo** que um roteirista vai seguir para escrever o roteiro\ncena-a-cena de um vídeo investigativo/documental longo. Você NÃO escreve o roteiro —\nvocê projeta a ESTRUTURA que maximiza retenção.\n\n## 🎣 BASE DE DADOS DE HOOKS NARRATIVOS\n\nAntes de criar o outline, consulte a base de dados de hooks narrativos curados (`/api/narrative-hooks`). Esta base contém aberturas poderosas de documentários, séries investigativas e vídeos de alta retenção, com análise estrutural.\n\n**COMO USAR A BASE PARA FULL VIDEO:**\n1. **Foco no primeiro minuto:** Consulte hooks tipo `mystery_hook`, `world_building` ou `emotional_impact` que estabelecem mistério sustentado\n2. **Analise estruturas de 3 atos:** Como True Detective ou The Last of Us estabelecem presságio + contexto + ruptura?\n3. **Adapte para longevidade:** Hooks de vídeos virais detonam em 2s; hooks de séries plantam seeds que pagam depois\n4. **Referencie:** Mencione qual hook inspirou sua estratégia de abertura (ex: \"Inspirado na abertura de The Last of Us: presságio científico + jump temporal\")\n\n**🎬 INTERPRETANDO O `hookText`:**\nHooks de **séries/filmes** no banco contém descrições audiovisuais, não narração final:\n- Exemplo: *\"Wide shot: campos solares... um homem cultiva... algo está errado. Seus olhos.\"*\n- **Como usar:** Extraia a progressão (estabelecer mundo → zoom em detalhe → revelação perturbadora)\n- **Para o outline:** Traduza a MECÂNICA: \"Abertura contemplativa do cenário → aproximação gradual → detalhe que transforma paz em ameaça\"\n- Hooks de **vídeos virais testados** geralmente têm texto literal utilizável (ex: \"Você mataria uma criança...\")\n\n**DIFERENÇA CRÍTICA:** Em teasers, o hook é DETONAÇÃO. Em full videos, o hook é IMERSÃO — cria perguntas que só serão respondidas aos 8, 12, 15 minutos.\n\n## 📐 ESTRUTURA OBRIGATÓRIA: A Jornada Imersiva de 6 Passos (YouTube Dark 2026)\n\nEm vez de uma estrutura genérica, o vídeo completo DEVE seguir rigorosamente a **Jornada Imersiva** detalhada na pesquisa de retenção, mapeada para a estrutura de 3 atos:\n\n1.  **A Missão (0:00 - 1:00) | O Gancho Visceral**\n    *   **Objetivo:** Estabelecer o mistério central e a \"Aposta\" (O que está em jogo?).\n    *   **Técnica:** Ruptura imediata (0s) + Pergunta \"impossível\".\n    *   **Mid-Hook (30s):** Reafirmação da promessa para evitar abandono precoce.\n\n2.  **O Contexto (1:00 - 3:00) | Conexão Emocional**\n    *   **Objetivo:** Conectar o mistério a uma emoção universal ou fato histórico. \"Por que se importar *agora*?\"\n    *   **Atenção:** Evite \"Wikipedia dump\". Contexto deve ser tensão, não aula.\n\n3.  **O Plano / A Investigação (Inicio do Ato 2)**\n    *   **Objetivo:** Detalhar os passos que serão tomados. Cria expectativa de progresso.\n    *   **Dinâmica:** \"Vamos analisar as evidências X, Y e Z.\"\n\n4.  **A Progressão \"Roller Coaster\" (O Corpo Principal)**\n    *   **Objetivo:** Série de sucessos e fracassos. Cada pista leva a uma NOVA pergunta (Cliffhanger em Cadeia).\n    *   **Midpoint (50%):** A \"Virada\". Uma evidência muda tudo.\n    *   **Dark Moment (75%):** O beco sem saída. Parece que não haverá resposta.\n\n5.  **O Clímax (A Revelação)**\n    *   **Objetivo:** A teoria mais forte ou a revelação final.\n    *   **Audiovisual:** Máximo impacto. Use a \"Pilha Sonora\" completa aqui.\n\n6.  **A Reflexão (Conclusão)**\n    *   **Objetivo:** Conectar de volta ao espectador. O que isso diz sobre a natureza humana?\n    *   **CTA Orgânico:** Convite para a próxima jornada (Loop de Sessão).\n\n## 🧠 RETENÇÃO — Técnicas Obrigatórias (baseado em dados reais de YouTube Analytics)\n\n### 1. Pattern Interrupts (~a cada 30 segundos / 6 cenas)\nO espectador decide cada ~30 segundos se continua assistindo. Garanta que o outline\nprevê uma **mudança de estímulo** a cada bloco de 6 cenas:\n- Mudança de localização visual (exterior → interior → close-up de documento)\n- Shift narrativo (fato → pergunta → revelação → dado numérico)\n- Mudança tonal (factual → tenso → reflexivo)\n\n### 2. Re-engagement Hooks (~a cada 3 minutos / 36 cenas)\nCada bloco de ~3 minutos deve terminar com um mini-cliffhanger que puxa o espectador\npara o próximo bloco:\n- \"Mas o que ninguém sabia era que...\"\n- \"E então surgiu um detalhe que mudou tudo.\"\n- Perguntas retóricas que o espectador quer ver respondidas\n\n### 3. Subconscious Loops (Técnica MrBeast)\nAbrir threads narrativas antes de fechá-las. O cérebro precisa da closure:\n- Introduza um fato intrigante no começo do ato 2 → só resolva no ato 3\n- Mencione um documento/evidência → mostre seu conteúdo 2 minutos depois\n\n### 3.1 REGRA DE TRÊS PARA FORESHADOWING (YouTube Retention Research)\nPara cada revelação importante no vídeo, plante EXATAMENTE 3 pistas anteriores:\n- **Pista 1 (~15% do vídeo):** Menção casual, quase imperceptível. O espectador não nota conscientemente.\n- **Pista 2 (~40% do vídeo):** Detalhe que ganha contexto. O espectador atento começa a suspeitar.\n- **Pista 3 (~65% do vídeo):** Evidência direta que prepara a revelação. O espectador sente que \"algo vai acontecer\".\n- **Revelação (~80%):** Payoff. O espectador conecta as 3 pistas retroativamente.\n\nO outline DEVE indicar para cada beat de revelação: quais são as 3 pistas anteriores e em qual beat foram plantadas.\nIsso cria \"ah-ha moments\" que são o driver #1 de compartilhamento e rewatch.\n\n### 4. Stair-Stepping (Escalação Progressiva)\nCada beat DEVE ser mais intenso que o anterior. NÃO pode haver platô narrativo.\nA progressão ideal:\n```\nCurioso → Intrigado → Perplexo → Perturbado → Chocado → Resolvido (ou: Perturbado permanente)\n```\n\n### 5. Value Loop (Técnica Veritasium) — Para cada beat principal:\n1. **Contexto** — O que é (o fato)\n2. **Aplicação** — Como funciona (a mecânica)\n3. **Framing** — Por que importa (a implicação)\n\n### 6. MONTAGEM E ÁUDIO (INTENCIONALIDADE CINEMATOGRÁFICA)\nO roteirista não escreve apenas palavras; ele desenha a experiência audiovisual.\n- **ÁUDIO DISSOCIADO (J-Cut / L-Cut):** Instrua explicitamente quando o áudio de uma cena começa antes (J) ou continua depois (L).\n- **TAGS DE ÁUDIO SSML:** Use `<break time=\"1.5s\" />` e `<prosody rate=\"115%\">` conforme definido no skill `audio-direction-tags.md`.\n- **ENGENHARIA SONORA (Pilha de 5 Camadas):** Instrua o uso de:\n    1. **Sub-Bass (20-80Hz):** Pavor físico, \"Presença\".\n    2. **Média (80-500Hz):** Corpo, ambiente real.\n    3. **Alta (2kHz+):** Textura, metais, sussurros (arrepio).\n    4. **Sweetener:** Assinatura sonora única (ex: som invertido).\n    5. **Espacialidade:** Reverb para coesão.\n- **SILÊNCIO ESTRATÉGICO:** O \"vácuo de som\" antes de revelações visuais é OBRIGATÓRIO. Defina onde ocorre.\n\n### 7. BRAND SAFETY & GORE (CRÍTICO)\n- REPROVADO se usar termos: \"Assassinato\", \"Estupro\", \"Pedofilia\", \"Mutilado\", \"Tripas\".\n- REPROVADO se descrev... [truncated 15939 chars]"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "📋 TEMA: A transformação de um imigrante pobre em líder do cartel mais violento do mundo e a caçada implacável que terminou em 2026.\n\n🎨 DIRETRIZES DE IDENTIDADE DO UNIVERSO (WARNING PROTOCOL):\nAtmosfera de narcoculto e guerra urbana. Paleta com tons de terra, verde-oliva militar e vermelho intenso. Priorizar texturas de documentos confidenciais, mapas de satélite e comboios blindados. Evitar estética glamourizada; focar na tensão e no rastro de destruição.\n\n📚 FONTES DO DOSSIÊ (ordenadas por peso/relevância):\n[1] (brief) Prosa EP1 — Escritor Chefe (fonte da verdade) [peso: 2]\n📋 TEMA: A transformação de um imigrante pobre em líder do cartel mais violento do mundo e a caçada implacável que terminou em 2026.\n📋 TÍTULO DO DOSSIER: El Mencho: O Ascensão Sangrenta e o Fim do 'Senhor dos Abacates'\n🎬 PROSA EP1 — Escritor Chefe (v1)\n🎭 Função narrativa: A metamorfose de Nemesio Oseguera: de trabalhador rural e policial municipal ao comando de uma insurgência transnacional, usando as falhas das instituições como sua maior incubadora.\n💫 Arco emocional: Curiosidade -> Perplexidade -> Tensão Crescente\n📊 Nível de resolução: none\n📊 Volume: ~5185 palavras\n\n🌐 CONTEXTO COMPARTILHADO (background para todos os EPs)\nTema: A transformação de um imigrante pobre em líder do cartel mais violento do mundo e a caçada implacável que terminou em 2026.\nTítulo: El Mencho: O Ascensão Sangrenta e o Fim do 'Senhor dos Abacates'\nUniverso visual: Atmosfera de narcoculto e guerra urbana. Paleta com tons de terra, verde-oliva militar e vermelho intenso. Priorizar texturas de documentos confidenciais, mapas de satélite e comboios blindados. Evitar estética glamourizada; focar na tensão e no rastro de destruição.\n\nPersonagens principais:\n- Nemesio Rubén Oseguera Cervantes (Líder do Cartel): Fundador e líder máximo do Cártel Jalisco Nueva Generación (CJNG). Transformou o grupo em uma força paramilitar transnacional antes de morrer em uma operação militar em 2026.\n- Rosalinda González Valencia (Gestora Financeira): Esposa de El Mencho e figura central na dinastia financeira 'Los Cuinis'. Foi a principal gestora do conglomerado contábil e logístico de lavagem de dinheiro do cartel.\n- Abigael González Valencia (Arquiteto Financeiro): Cunhado de El Mencho e líder do clã 'Los Cuinis'. Foi o principal arquiteto da lavagem de dinheiro global do CJNG até sua prisão em 2015.\n- Juan Carlos Valencia González (Comandante Paramilitar): Enteado de El Mencho e filho de Rosalinda. Representa a ala puramente tática e militar do cartel, sendo o principal candidato à sucessão através da legitimidade de sangue.\n- Audias Flores Silva (Gestor Estratégico): Mestre da gestão burocrática e territorial do CJNG. Rivaliza pela sucessão do cartel focando em corrupção, roubo de combustível e extorsão em vez de violência ostensiva.\n- Ignacio Coronel (Ex-Líder de Cartel Rival): Líder do Cartel de Sinaloa em Jalisco para quem El Mencho trabalhou inicialmente. Sua morte em 2010 criou o vácuo de poder que permitiu a fundação do CJNG.\n- Kyle Mori (Agente da DEA): Agente da DEA que supervisionou a busca e as investigações contra Nemesio Oseguera Cervantes até o ano de 2025.\n\n📖 PROSA NARRATIVA DO EP1 (fonte da verdade — use como base)\n## O Arado e a Armadura: A Gênese de um Império Paramilitar\n\nComo pode um camponês que vigiava plantações clandestinas aos quatorze anos de idade, em uma das regiões mais esquecidas do México, tornar-se o arquiteto da insurgência transnacional mais letal do século XXI? A resposta não reside apenas na biografia de Nemesio Rubén Oseguera Cervantes, mas nas rachaduras profundas de um Estado que serviu, ironicamente, como a incubadora perfeita para o seu crescimento. A trajetória de \"El Mencho\" é a crônica de uma metamorfose: a transformação do trabalho braçal nos campos de abacate de Michoacán em uma rede de extorsão agroindustrial bilionária, e a evolução de um policial municipal infiltrado em um comandante supremo de uma força paramilitar que desafiaria a soberania hemisférica. \n\nNascido em 17 de julho de 1966, na comunidade rural de Culotitlán, no município de Aguililla, a infância de Nemesio foi forjada na extrema pobreza e na dinâmica extrativista da agricultura mexicana. O abandono da educação formal ainda na quinta série do ensino fundamental para ingressar no trabalho braçal nos campos de cultivo de abacate incutiu nele uma compreensão visceral e pragmática das cadeias logísticas agrícolas — um conhecimento que, décadas mais tarde, ele subverteria para criar a mais sofisticada rede de extorsão agroindustrial do país. Aos quatorze anos, a transição do cultivo legal para a vigilância de plantações clandestinas de maconha nas montanhas de Tierra Caliente marcou sua iniciação precoce na economia ilícita, desenvolvendo sua capacidade de navegação em terrenos hostis e de evasão, habilidades que definiriam sua sobrevivência por décadas.\n\nO contraste é absoluto e perturbador. O menino que caminhava descalço pela poeira de Michoacán, carregando cestos de limão para ganhar o sustento diário, é o mesmo homem que, anos depois, ditaria o preço de cada quilo de fruta produzido no estado sob pena de morte. Esta não é apenas uma história sobre o tráfico de drogas; é um estudo sobre como o vácuo institucional e o colapso da autoridade central permitem que um indivíduo com traços de paranoia operacional aguda e disciplina espartana construa um exército privado. El Mencho não buscava a aclamação pública ou o exibicionismo de outros barões da droga; ele cultivou uma liderança fundamentada na invisibilidade patológica e no uso instrumental e maximizado do terror psicológico.\n\nA metamorfose de Nemesio Oseguera Cervantes é o reflexo de um México que falhou em integrar suas periferias rurais. Em Culotitlán, a lei era um conceito abstrato, enquanto a fome era uma realidade diária. Ao observar os clãs locais, como o Cártel del Milenio, o jovem Nemesio percebeu que o poder real não estava nos livros escolares que ele abandonou, mas no controle territorial e na imposição da vontade através da força. Cada dia passado sob o sol escaldante das plantações de abacate era uma lição de logística que ele guardaria para o futuro, transformando o \"Ouro Verde\" na base financeira de sua futura insurgência.\n\n## As Raízes em Michoacán: O Aprendizado no \"Ouro Verde\"\n\nA macrorregião de Tierra Caliente, que abrange o estado de Michoacán e parte de Jalisco, é globalmente conhecida por sua agricultura pujante, alimentando a insaciável demanda internacional por abacates e cítricos. No entanto, para Nemesio Oseguera Cervantes, esses campos não eram apenas fontes de alimento, mas o primeiro elo de uma cadeia de exploração que ele dominaria completamente. O trabalho braçal nos pomares incutiu nele uma compreensão visceral das rotas de transporte, dos tempos de colheita e, principalmente, da vulnerabilidade dos produtores rurais. Ele viu como o Estado estava ausente, deixando agricultores e empacotadores à mercê de quem tivesse a maior arma.\n\nA economia do \"Ouro Verde\" tornou-se, sob a visão predatória de El Mencho, um sistema de tributação forçada. Décadas depois de sua infância nos campos, ele retornaria a Michoacán não como trabalhador, mas como o senhor absoluto da região, instituindo o \"derecho de piso\" de forma institucionalizada e rigorosa. Em municípios estratégicos como Apatzingán e Buenavista, o assédio do cartel passou a parasitar toda a malha produtiva. Relatos detalham que produtores de limão foram forçados a pagar taxas que chegavam a quatro pesos por cada quilo de fruta cortada. O impacto social foi devastador: agricultores que se recusavam a pagar viam seus caminhões carregados serem incendiados em praça pública, enquanto outros desapareciam sumariamente, deixando para trás famílias destruídas e uma economia local em frangalhos.\n\nO controle férreo sobre a agricultura converteu a produção legítima em uma das principais artérias de liquidez para sustentar os exércitos privados de El Mencho. O mecanismo de subjugação era... [truncated 71997 chars]"
+      }
+    ]
+  },
+  "parsed": {
+    "hookStrategy": "In medias res + Contradição Temporal: Apresenta o paradoxo do menino descalço que se torna o homem que dita o preço da economia nacional através do terror.",
+    "hookVariants": [
+      {
+        "level": "green",
+        "hook": "Como um camponês pobre que vigiava plantações aos 14 anos usou as falhas do Estado para erguer o cartel mais violento do mundo?",
+        "rationale": "Focado na curiosidade biográfica e na falha institucional, 100% seguro."
+      },
+      {
+        "level": "moderate",
+        "hook": "O menino que colhia limões descalço tornou-se o homem que dita o preço de cada fruta sob pena de morte. Como o Estado criou esse monstro?",
+        "rationale": "Usa o contraste de classe e a responsabilidade estatal para gerar tensão."
+      },
+      {
+        "level": "aggressive",
+        "hook": "Ele usou a farda da polícia para mapear o sistema e destruí-lo por dentro. Descubra como um infiltrado criou a insurgência mais letal do século.",
+        "rationale": "Enfatiza a traição institucional e a agressividade tática do perpetrador."
+      },
+      {
+        "level": "lawless",
+        "hook": "A Igreja e o Estado falharam com ele, então ele criou sua própria lei sangrenta. O rastro de destruição do homem que humilhou o México.",
+        "rationale": "Tom provocativo extremo sobre o colapso das instituições e a soberania."
+      }
+    ],
+    "promiseSetup": "Nos próximos minutos, vamos mapear como a extrema pobreza, uma farda policial e uma biologia traidora definiram a ascensão e o isolamento de Nemesio Oseguera Cervantes.",
+    "risingBeats": [
+      {
+        "order": 1,
+        "revelation": "Nascido na pobreza extrema de Michoacán, ele aprendeu logística agrícola vigiando plantações clandestinas aos 14 anos.",
+        "questionAnswered": "Como foi o início da vida de El Mencho?",
+        "newQuestion": "O que ele aprendeu atrás das grades que seus rivais ignoravam?",
+        "sourceReference": "Prosa EP1 - O Arado e a Armadura"
+      },
+      {
+        "order": 2,
+        "revelation": "No Texas, ele mapeou as falhas da lei americana e fez networking com o submundo global.",
+        "questionAnswered": "O que aconteceu durante sua prisão nos EUA?",
+        "newQuestion": "Como um ex-detento conseguiu entrar para a polícia mexicana?",
+        "sourceReference": "Prosa EP1 - A Pós-Graduação no Texas"
+      },
+      {
+        "order": 3,
+        "revelation": "Como policial municipal em Jalisco, ele aprendeu os códigos de rádio e a precificar o suborno de oficiais.",
+        "questionAnswered": "Como ele usou a farda como incubadora?",
+        "newQuestion": "Como essa inteligência policial permitiu que ele criasse um império financeiro?",
+        "sourceReference": "Prosa EP1 - O Infiltrado"
+      },
+      {
+        "order": 4,
+        "revelation": "O casamento com Rosalinda González uniu o poder de fogo de El Mencho à engenharia financeira do clã Los Cuinis.",
+        "questionAnswered": "Qual foi o papel da aliança dinástica?",
+        "newQuestion": "O que acontece quando o braço armado decide se emancipar dos seus mestres?",
+        "sourceReference": "Prosa EP1 - A Aliança Dinástica"
+      },
+      {
+        "order": 5,
+        "revelation": "Através dos 'Mata Zetas', ele usou o vácuo de Nacho Coronel para iniciar uma limpeza social e tomar o território.",
+        "questionAnswered": "Como o CJNG surgiu oficialmente?",
+        "newQuestion": "Como sicários comuns se tornaram operadores paramilitares de elite? (MIDPOINT)",
+        "sourceReference": "Prosa EP1 - O Vácuo de Poder"
+      },
+      {
+        "order": 6,
+        "revelation": "O cartel construiu 'Monstruos' blindados e usou drones explosivos para anular a superioridade do Estado.",
+        "questionAnswered": "Qual a extensão da militarização do cartel?",
+        "newQuestion": "De onde vêm os precursores químicos para sua nova linha de produção?",
+        "sourceReference": "Prosa EP1 - Militarização"
+      },
+      {
+        "order": 7,
+        "revelation": "Recrutaram mercenários colombianos e Kaibiles da Guatemala para treinar esquadrões de extermínio.",
+        "questionAnswered": "Como o cartel se tornou uma empresa militar internacional?",
+        "newQuestion": "Por que o homem mais procurado do mundo se tornou um fantasma invisível?",
+        "sourceReference": "Prosa EP1 - Mercenários Internacionais"
+      },
+      {
+        "order": 8,
+        "revelation": "Apostaram no fentanil industrial, transformando o tráfico em uma indústria química de guerra global.",
+        "questionAnswered": "Como o CJNG dominou o mercado de drogas sintéticas?",
+        "newQuestion": "Qual o segredo médico que o exército não consegue esconder? (CLÍMAX)",
+        "sourceReference": "Prosa EP1 - A Linha de Produção do Veneno"
+      }
+    ],
+    "climaxMoment": "A revelação de que o 'fantasma' invisível e invencível do crime organizado está, na verdade, prisioneiro de sua própria biologia, dependendo de máquinas de hemodiálise clandestinas nas montanhas para sobreviver.",
+    "climaxFormula": "Connection Shock",
+    "resolutionPoints": [
+      "A transformação da economia do 'Ouro Verde' em um sistema de extorsão industrial.",
+      "A infiltração estratégica nas forças policiais para neutralizar a resposta estatal.",
+      "A transição das drogas tradicionais para a produção industrial de fentanil sintético.",
+      "O uso de mercenários internacionais para criar uma empresa militar privada do crime."
+    ],
+    "resolutionAngle": "A soberania de uma nação foi desafiada por um império construído nas rachaduras do próprio Estado, mas que acabou vulnerável à fragilidade de um único órgão humano.",
+    "ctaApproach": "EP1 → Tease do EP2: \"Mas como esse exército foi financiado? No próximo episódio, revelamos a engenharia financeira dos Los Cuinis, o clã que transformou o sangue em bilhões de dólares lícitos.\"",
+    "emotionalArc": "Curiosidade → Perplexidade → Tensão Crescente → Indignação → Melancolia Irônica",
+    "toneProgression": "Solene → Investigativo → Tenso → Revelador → Melancólico",
+    "whatToReveal": [
+      "A infância como vigia de plantações aos 14 anos.",
+      "A 'pós-graduação' criminal no presídio de Big Spring, Texas.",
+      "A infiltração tática como policial municipal em Tomatlán.",
+      "O uso de drones explosivos e veículos 'Monstruos'.",
+      "A insuficiência renal crônica como o calcanhar de Aquiles biológico."
+    ],
+    "whatToHold": [
+      "Detalhes da operação militar final de 2026 (reservado para EP3)",
+      "A estrutura específica de lavagem de dinheiro dos Los Cuinis (reservado para EP2)",
+      "Nomes de políticos específicos corrompidos por Audias Flores (reservado para EP2)"
+    ],
+    "whatToIgnore": [
+      "Anatomia visceral de cenas de crime (Gore)",
+      "Descrições gráficas de tortura dos Zetas",
+      "Imagens de arquivo que identifiquem rostos de vítimas civis"
+    ],
+    "segmentDistribution": {
+      "hook": 7,
+      "context": 23,
+      "rising": 91,
+      "climax": 15,
+      "resolution": 13,
+      "cta": 1
+    },
+    "tensionCurve": [
+      "low",
+      "medium",
+      "high",
+      "pause",
+      "peak",
+      "medium",
+      "high",
+      "pause",
+      "peak"
+    ],
+    "openLoops": [
+      {
+        "question": "Como a fortuna financeira dos Los Cuinis protegeu o império de El Mencho? (Link EP2)",
+        "openedAtBeat": 4,
+        "closedAtBeat": null
+      },
+      {
+        "question": "Qual é o calcanhar de Aquiles do homem que se tornou um fantasma invisível?",
+        "openedAtBeat": 1,
+        "closedAtBeat": 8
+      }
+    ],
+    "resolutionLevel": "partial",
+    "loopSentence": {
+      "fullSentence": "E o segredo guardado nas montanhas era que o homem mais temido do mundo estava morrendo por dentro.",
+      "partA": "E o segredo guardado nas montanhas era que o homem mais temido do mundo...",
+      "partB": "...estava morrendo por dentro."
+    },
+    "title": "O Policial que Criou um Império de Terror | A Ascensão de El Mencho",
+    "oneSentencePromise": "A metamorfose de um camponês no líder da insurgência mais letal do século XXI.",
+    "shockContrastBeat": {
+      "type": "before_after",
+      "description": "Um menino descalço colhendo limões em Michoacán → Um senhor da guerra ditando o preço da fruta sob pena de morte em todo o estado."
+    },
+    "primaryCuriosityGap": "Como o sistema desenhado para pará-lo tornou-se a ferramenta para torná-lo invencível?",
+    "miniClimaxBeats": [
+      {
+        "atScene": 30,
+        "revelation": "A prisão no Texas não foi uma punição, mas uma pós-graduação em logística criminal.",
+        "retentionMechanic": "payoff",
+        "curiosityGapPlanted": "Como ele usou o que aprendeu na prisão para dominar a polícia mexicana?"
+      },
+      {
+        "atScene": 75,
+        "revelation": "Os 'Mata Zetas' despejaram 35 corpos em Veracruz para anunciar uma nova e mais violenta ordem.",
+        "retentionMechanic": "escalation",
+        "curiosityGapPlanted": "O que acontece quando esse grupo decide que não quer mais ser apenas um braço armado?"
+      },
+      {
+        "atScene": 110,
+        "revelation": "O cartel importou veteranos de elite da Colômbia para treinar sicários como operadores paramilitares.",
+        "retentionMechanic": "question_plant",
+        "curiosityGapPlanted": "Qual é a fraqueza oculta que nem o exército mais poderoso pode proteger?"
+      }
+    ],
+    "expectedRetentionCurve": {
+      "hookRate": 72,
+      "midpointRetention": 48,
+      "climaxRetention": 38,
+      "rationale": "O hook utiliza um contraste biográfico forte (camponês vs senhor da guerra) e a estrutura de série documental (EP1) mantém a curiosidade sobre a origem do 'fantasma'. O midpoint de Veracruz garante o re-engagement necessário."
+    }
+  },
+  "rawContent": ""
+}

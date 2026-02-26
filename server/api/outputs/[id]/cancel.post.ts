@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
     const output = await prisma.output.update({
       where: { id },
       data: {
-        status: 'PENDING',
+        status: 'DRAFT',
         updatedAt: new Date()
       },
       select: { id: true, status: true, updatedAt: true }

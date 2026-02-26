@@ -19,8 +19,6 @@ export async function runFilmmakerBatched(
     sceneEnvironment?: string
     motionDescription?: string
     estimatedDuration?: number
-    endVisualDescription?: string | null
-    endImageReferenceWeight?: number | null
     [key: string]: any
   }>,
   baseStyle: string,
@@ -67,9 +65,6 @@ export async function runFilmmakerBatched(
       scene.visualDescription = refined.visualDescription || scene.visualDescription
       scene.motionDescription = refined.motionDescription || scene.motionDescription
       scene.sceneEnvironment = refined.sceneEnvironment || scene.sceneEnvironment
-      // End keyframe fields always null (Cineasta disabled)
-      scene.endVisualDescription = null
-      scene.endImageReferenceWeight = null
     }
     console.log(`${LOG} ✅ Cineasta refinou todas as ${scenes.length} cenas com sucesso.`)
   } else {

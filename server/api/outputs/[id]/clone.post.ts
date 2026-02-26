@@ -1,7 +1,6 @@
 import { prisma } from '../../../utils/prisma'
-import type { CloneOutputResponse, OutputResponse } from '../../../types/output.types'
 
-export default defineEventHandler(async (event): Promise<CloneOutputResponse> => {
+export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
 
   if (!id) {
@@ -21,7 +20,8 @@ export default defineEventHandler(async (event): Promise<CloneOutputResponse> =>
       },
       scenes: {
         orderBy: { order: 'asc' }
-      }
+      },
+      storyOutlineData: true,
     }
   })
 
@@ -62,16 +62,35 @@ export default defineEventHandler(async (event): Promise<CloneOutputResponse> =>
         scriptStyleId: source.scriptStyleId,
         visualStyleId: source.visualStyleId,
         seedId: source.seedId,
-        status: 'PENDING',
-        scriptApproved: true,
-        imagesApproved: false,
-        bgmApproved: false,
-        audioApproved: false,
-        videosApproved: false,
-        renderApproved: false,
-        ...(source.storyOutline != null ? { storyOutline: source.storyOutline } : {})
+        status: 'DRAFT',
       }
     })
+
+    // Copy StoryOutlineProduct if exists
+    if (source.storyOutlineData) {
+      await tx.storyOutlineProduct.create({
+        data: {
+          outputId: created.id,
+          outlineData: source.storyOutlineData.outlineData ?? {},
+          provider: source.storyOutlineData.provider,
+          model: source.storyOutlineData.model,
+        }
+      })
+    }
+
+    // Create StageGates for approved stages up to SCRIPT
+    const approvedStages = ['STORY_OUTLINE', 'WRITER', 'SCRIPT'] as const
+    for (const stage of approvedStages) {
+      await tx.stageGate.create({
+        data: {
+          outputId: created.id,
+          stage,
+          status: 'APPROVED',
+          executedAt: new Date(),
+          reviewedAt: new Date(),
+        }
+      })
+    }
 
     await tx.script.create({
       data: {
@@ -126,28 +145,20 @@ export default defineEventHandler(async (event): Promise<CloneOutputResponse> =>
     return created
   })
 
-  const response: OutputResponse = {
-    id: newOutput.id,
-    dossierId: newOutput.dossierId,
-    outputType: newOutput.outputType,
-    format: newOutput.format,
-    title: newOutput.title ?? undefined,
-    duration: newOutput.duration ?? undefined,
-    aspectRatio: newOutput.aspectRatio ?? undefined,
-    platform: newOutput.platform ?? undefined,
-    status: newOutput.status,
-    scriptApproved: newOutput.scriptApproved,
-    imagesApproved: newOutput.imagesApproved,
-    bgmApproved: newOutput.bgmApproved,
-    audioApproved: newOutput.audioApproved,
-    videosApproved: newOutput.videosApproved,
-    renderApproved: newOutput.renderApproved,
-    hasBgm: false,
-    enableMotion: newOutput.enableMotion,
-    createdAt: newOutput.createdAt,
-    updatedAt: newOutput.updatedAt,
-    completedAt: newOutput.completedAt ?? undefined
+  return {
+    output: {
+      id: newOutput.id,
+      dossierId: newOutput.dossierId,
+      outputType: newOutput.outputType,
+      format: newOutput.format,
+      title: newOutput.title ?? undefined,
+      duration: newOutput.duration ?? undefined,
+      aspectRatio: newOutput.aspectRatio ?? undefined,
+      platform: newOutput.platform ?? undefined,
+      status: newOutput.status,
+      enableMotion: newOutput.enableMotion,
+      createdAt: newOutput.createdAt,
+      updatedAt: newOutput.updatedAt,
+    }
   }
-
-  return { output: response }
 })

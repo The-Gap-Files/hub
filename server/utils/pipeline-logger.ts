@@ -23,6 +23,8 @@ export type PipelineStage =
   | 'Photographer'
   | 'Choreographer'
   | 'Cinematographer'
+  | 'RetentionQA'
+  | 'MusicEvents'
   | 'API'
 
 function prefix(stage: PipelineStage, outputId?: string | null): string {

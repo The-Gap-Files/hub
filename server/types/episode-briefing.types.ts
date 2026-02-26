@@ -42,7 +42,7 @@ export const EpisodeBriefSchema = z.object({
    * Fatos EXCLUSIVOS deste episódio — o que este EP pode revelar.
    * São selecionados do dossier bruto e curados para o escopo narrativo deste EP.
    */
-  exclusiveFacts: z.array(BriefFactSchema).min(30).max(80),
+  exclusiveFacts: z.array(BriefFactSchema).min(15).max(80),
 
   /**
    * Fatos que este episódio DEVE GUARDAR para os próximos.

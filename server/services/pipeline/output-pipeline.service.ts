@@ -9,6 +9,7 @@
  */
 
 import type { ScriptGenerationRequest } from '../../types/ai-providers'
+import type { PipelineStage, StageStatus } from '@prisma/client'
 import { prisma } from '../../utils/prisma'
 import { getVisualStyleById } from '../../constants/cinematography/visual-styles'
 import { getScriptStyleById } from '../../constants/storytelling/script-styles'
@@ -26,6 +27,8 @@ import { musicGenerationStage } from './stages/music-generation.stage'
 import { audioGenerationStage } from './stages/audio-generation.stage'
 import { sfxGenerationStage } from './stages/sfx-generation.stage'
 import { motionGenerationStage } from './stages/motion-generation.stage'
+import { retentionQAStage } from './stages/retention-qa.stage'
+import { musicEventsStage } from './stages/music-events.stage'
 
 // --------------------------------------------------------------------------
 
@@ -37,27 +40,33 @@ export interface OutputPipelineResult {
   error?: string
 }
 
+/** Helper: check if a stage is approved in the gates map */
+function isStageApproved(gates: Map<PipelineStage, StageStatus>, stage: PipelineStage): boolean {
+  return gates.get(stage) === 'APPROVED'
+}
+
 export class OutputPipelineService {
   /**
    * Full pipeline execution (render only — all stages must be pre-approved).
    */
   async execute(outputId: string): Promise<OutputPipelineResult> {
     const log = createPipelineLogger({ stage: 'Pipeline', outputId })
-    log.info('Render solicitado; validando aprova\u00e7\u00f5es.')
+    log.info('Render solicitado; validando aprovações.')
     try {
       const output = await this.loadOutputContext(outputId)
+      const gates = output._gatesMap
 
-      log.info('Aprova\u00e7\u00f5es', {
-        script: output.scriptApproved,
-        images: output.imagesApproved,
-        audio: output.audioApproved,
-        motion: output.videosApproved
+      log.info('Aprovações (StageGate)', {
+        script: gates.get('SCRIPT'),
+        images: gates.get('IMAGES'),
+        audio: gates.get('AUDIO'),
+        motion: gates.get('MOTION')
       })
 
-      if (!output.scriptApproved) throw new Error('Aprova\u00e7\u00e3o pendente: Roteiro')
-      if (!output.imagesApproved) throw new Error('Aprova\u00e7\u00e3o pendente: Imagens (Visual)')
-      if (!output.audioApproved) throw new Error('Aprova\u00e7\u00e3o pendente: \u00c1udio (Narra\u00e7\u00e3o)')
-      if (!output.videosApproved) throw new Error('Aprova\u00e7\u00e3o pendente: Motion (V\u00eddeos)')
+      if (!isStageApproved(gates, 'SCRIPT')) throw new Error('Aprovação pendente: Roteiro')
+      if (!isStageApproved(gates, 'IMAGES')) throw new Error('Aprovação pendente: Imagens (Visual)')
+      if (!isStageApproved(gates, 'AUDIO')) throw new Error('Aprovação pendente: Áudio (Narração)')
+      if (!isStageApproved(gates, 'MOTION')) throw new Error('Aprovação pendente: Motion (Vídeos)')
 
       await this.logExecution(outputId, 'render', 'started', 'Renderizando Master...')
       await this.renderVideo(outputId)
@@ -78,7 +87,8 @@ export class OutputPipelineService {
   }
 
   /**
-   * Loads the full output context with dossier, styles, and classification.
+   * Loads the full output context with dossier, styles, classification, stage gates, and products.
+   * Returns enriched output with _gatesMap for quick lookups.
    */
   public async loadOutputContext(outputId: string) {
     const output = await prisma.output.findUnique({
@@ -92,17 +102,27 @@ export class OutputPipelineService {
             persons: { orderBy: { order: 'asc' } }
           }
         },
-        seed: true
+        seed: true,
+        stageGates: true,
+        storyOutlineData: true,
+        monetizationData: true,
+        retentionQAData: true,
       }
     })
 
-    if (!output) throw new Error('Output n\u00e3o encontrado')
+    if (!output) throw new Error('Output não encontrado')
 
     const scriptStyle = output.scriptStyleId ? getScriptStyleById(output.scriptStyleId) : undefined
     const visualStyle = output.visualStyleId ? getVisualStyleById(output.visualStyleId) : undefined
     const classification = output.classificationId ? getClassificationById(output.classificationId) : undefined
 
-    return { ...output, scriptStyle, visualStyle, classification }
+    // Build gates map for quick lookups
+    const _gatesMap = new Map<PipelineStage, StageStatus>()
+    for (const gate of output.stageGates) {
+      _gatesMap.set(gate.stage, gate.status)
+    }
+
+    return { ...output, scriptStyle, visualStyle, classification, _gatesMap }
   }
 
   // ---- Script Generation -------------------------------------------------
@@ -110,15 +130,30 @@ export class OutputPipelineService {
   public async generateScript(outputId: string) {
     const output = await this.loadOutputContext(outputId)
     const dossier = output.dossier
+    const gates = output._gatesMap
 
-    if (!output.storyOutline) {
-      throw new Error('Plano narrativo n\u00e3o gerado. Gere o plano (Story Architect) na etapa anterior.')
+    // Read outline from StoryOutlineProduct
+    const outlineProduct = output.storyOutlineData
+    if (!outlineProduct?.outlineData) {
+      throw new Error('Plano narrativo não gerado. Gere o plano (Story Architect) na etapa anterior.')
     }
-    if (!output.storyOutlineApproved) {
-      throw new Error('Plano narrativo pendente de aprova\u00e7\u00e3o. Aprove antes de gerar o roteiro.')
+    if (!isStageApproved(gates, 'STORY_OUTLINE')) {
+      throw new Error('Plano narrativo pendente de aprovação. Aprove antes de gerar o roteiro.')
     }
 
-    const outlineData = output.storyOutline as StoryOutline & { _monetizationMeta?: any, _customScenes?: any[], _selectedHookLevel?: string }
+    // Load approved writer prose (if exists)
+    const existingScript = await prisma.script.findUnique({
+      where: { outputId },
+      select: { writerProse: true },
+    })
+    const approvedWriterProse = isStageApproved(gates, 'WRITER') && existingScript?.writerProse
+      ? existingScript.writerProse
+      : undefined
+
+    const outlineData = outlineProduct.outlineData as StoryOutline & { _monetizationMeta?: any, _customScenes?: any[], _selectedHookLevel?: string }
+
+    // Read monetization from MonetizationProduct
+    const monetizationContext = output.monetizationData?.contextData as any
 
     const promptContext: ScriptGenerationRequest = {
       theme: dossier.theme,
@@ -138,10 +173,10 @@ export class OutputPipelineService {
       musicGuidance: output.classificationId ? getClassificationById(output.classificationId)?.musicGuidance : undefined,
       musicMood: output.classificationId ? getClassificationById(output.classificationId)?.musicMood : undefined,
       visualGuidance: output.classificationId ? getClassificationById(output.classificationId)?.visualGuidance : undefined,
-      targetDuration: (output.monetizationContext as any)?.sceneCount
-        ? (output.monetizationContext as any).sceneCount * 5
+      targetDuration: monetizationContext?.sceneCount
+        ? monetizationContext.sceneCount * 5
         : (output.duration || 300),
-      targetSceneCount: (output.monetizationContext as any)?.sceneCount,
+      targetSceneCount: monetizationContext?.sceneCount,
       targetWPM: output.targetWPM || 150,
       outputType: output.outputType,
       format: output.format,
@@ -156,14 +191,20 @@ export class OutputPipelineService {
       visualColorPalette: output.visualStyle?.colorPalette || undefined,
       visualQualityTags: output.visualStyle?.qualityTags || undefined,
       visualGeneralTags: output.visualStyle?.tags || undefined,
+      visualScreenwriterHints: output.visualStyle?.screenwriterHints || undefined,
       additionalContext: output.objective
-        ? `\ud83c\udfaf OBJETIVO EDITORIAL (CR\u00cdTICO - GOVERNA TODA A NARRATIVA):\n${output.objective}`
+        ? `🎯 OBJETIVO EDITORIAL (CRÍTICO - GOVERNA TODA A NARRATIVA):\n${output.objective}`
         : undefined,
       mustInclude: output.mustInclude || undefined,
       mustExclude: output.mustExclude || undefined,
       persons: mapPersonsFromPrisma(dossier.persons),
       neuralInsights: mapNeuralInsightsFromNotes(dossier.notes),
       storyOutline: formatOutlineForPrompt(outlineData),
+    }
+
+    // Inject approved writer prose
+    if (approvedWriterProse) {
+      promptContext.writerProse = approvedWriterProse
     }
 
     const result = await scriptGenerationStage.execute({
@@ -179,6 +220,12 @@ export class OutputPipelineService {
     return { id: result.scriptId }
   }
 
+  // ---- Retention QA (Stage 2.5) -------------------------------------------
+
+  public async generateRetentionQA(outputId: string) {
+    await retentionQAStage.execute({ outputId })
+  }
+
   // ---- Image Generation --------------------------------------------------
 
   public async generateImages(outputId: string) {
@@ -189,7 +236,7 @@ export class OutputPipelineService {
       aspectRatio: output.aspectRatio,
       seed: output.seed?.value,
       visualStyle: output.visualStyle,
-      storyOutline: output.storyOutline,
+      storyOutline: output.storyOutlineData?.outlineData,
     })
   }
 
@@ -213,13 +260,15 @@ export class OutputPipelineService {
       throw new Error('Voice ID is required. Please select a voice before generating output.')
     }
 
+    const monetizationContext = output.monetizationData?.contextData
+
     await audioGenerationStage.execute({
       outputId,
       voiceId: output.voiceId,
       language: output.language || undefined,
       narrationLanguage: output.narrationLanguage || undefined,
       targetWPM: output.targetWPM || undefined,
-      monetizationContext: output.monetizationContext,
+      monetizationContext,
       duration: output.duration,
       ttsProvider: output.ttsProvider,
     })
@@ -229,6 +278,12 @@ export class OutputPipelineService {
 
   public async generateSFX(outputId: string) {
     await sfxGenerationStage.execute({ outputId })
+  }
+
+  // ---- Music Events (Stingers/Risers/Drops) ------------------------------
+
+  public async generateMusicEvents(outputId: string) {
+    await musicEventsStage.execute({ outputId })
   }
 
   // ---- Motion (Image-to-Video) -------------------------------------------
@@ -253,18 +308,26 @@ export class OutputPipelineService {
 
     const currentTtsProvider = (await import('../providers')).providerManager.getTTSProvider().getName().toUpperCase()
 
+    // Update voice config
     await prisma.output.update({
       where: { id: outputId },
       data: {
         voiceId: newVoiceId,
         ttsProvider: currentTtsProvider,
-        audioApproved: false,
-        ...(await prisma.output.findUnique({ where: { id: outputId }, select: { status: true } })
-          .then(o => o?.status === 'COMPLETED' ? {
-            bgmApproved: false,
-            videosApproved: false
-          } : {}))
       }
+    })
+
+    // Reset downstream stage gates (AUDIO, MOTION, RENDER)
+    await prisma.stageGate.updateMany({
+      where: {
+        outputId,
+        stage: { in: ['AUDIO', 'MOTION', 'RENDER'] },
+      },
+      data: {
+        status: 'NOT_STARTED',
+        feedback: null,
+        reviewedAt: null,
+      },
     })
 
     const deleted = await prisma.audioTrack.deleteMany({
@@ -283,19 +346,29 @@ export class OutputPipelineService {
     console.log(`[OutputPipeline] Entering correction mode for Output ${outputId}`)
 
     const output = await prisma.output.findUnique({ where: { id: outputId } })
-    if (!output) throw new Error('Output n\u00e3o encontrado')
+    if (!output) throw new Error('Output não encontrado')
 
     if (output.status !== 'COMPLETED' && output.status !== 'FAILED') {
-      throw new Error('Somente outputs com status COMPLETED ou FAILED podem entrar em modo corre\u00e7\u00e3o')
+      throw new Error('Somente outputs com status COMPLETED ou FAILED podem entrar em modo correção')
     }
 
+    // Reset output status
     const updated = await prisma.output.update({
       where: { id: outputId },
+      data: { status: 'DRAFT' }
+    })
+
+    // Reset IMAGES, MOTION stage gates to NOT_STARTED
+    await prisma.stageGate.updateMany({
+      where: {
+        outputId,
+        stage: { in: ['IMAGES', 'MOTION', 'RENDER'] },
+      },
       data: {
-        status: 'PENDING',
-        imagesApproved: false,
-        videosApproved: false
-      }
+        status: 'NOT_STARTED',
+        feedback: null,
+        reviewedAt: null,
+      },
     })
 
     await this.logExecution(outputId, 'correction', 'started', 'Entered correction mode')
@@ -308,7 +381,7 @@ export class OutputPipelineService {
   private async renderVideo(outputId: string) {
     const log = createPipelineLogger({ stage: 'Pipeline', outputId })
     log.info('Starting final render (FFmpeg).')
-    await this.logExecution(outputId, 'render', 'started', 'Iniciando renderiza\u00e7\u00e3o FFmpeg...')
+    await this.logExecution(outputId, 'render', 'started', 'Iniciando renderização FFmpeg...')
 
     const result = await videoPipelineService.renderVideo(outputId)
 

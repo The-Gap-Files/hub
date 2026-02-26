@@ -174,7 +174,7 @@ export default defineEventHandler(async (event) => {
       updatedSchedule: result.updatedSchedule || null,
       cost,
       usage: result.usage,
-      provider: result.provider
+      provider: result.provider,
     }
   } catch (error: any) {
     console.error('[RegenerateItem] ❌ Erro:', error)

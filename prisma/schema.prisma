@@ -46,6 +46,12 @@ model Dossier {
   episodeBriefBundleV1Hash      String?            @db.VarChar(64)
   /// Última atualização do episode brief persistido
   episodeBriefBundleV1UpdatedAt DateTime?
+  /// Prosa narrativa por episódio gerada pelo Escritor Chefe (substitui episode brief)
+  escritorChefeBundleV1          Json?
+  /// Hash determinístico do dossiê canônico (invalida prosa quando dossier muda)
+  escritorChefeBundleV1Hash      String?            @db.VarChar(64)
+  /// Última atualização da prosa do Escritor Chefe
+  escritorChefeBundleV1UpdatedAt DateTime?
   tags                   String[]
   isProcessed            Boolean            @default(false)
   visualIdentityContext  String?            @db.VarChar(500) // Contexto visual do dossier
@@ -146,67 +152,107 @@ model DossierPerson {
   @@map("dossier_persons")
 }
 
+// =============================================================================
+// PIPELINE ENUMS
+// =============================================================================
+
+/// Estágios do pipeline — ordenados por sequência de execução
+enum PipelineStage {
+  STORY_OUTLINE
+  WRITER
+  SCRIPT
+  RETENTION_QA
+  IMAGES
+  BGM
+  SFX
+  AUDIO
+  MUSIC_EVENTS
+  MOTION
+  RENDER
+}
+
+/// Status de cada estágio
+enum StageStatus {
+  NOT_STARTED
+  GENERATING
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  SKIPPED
+  FAILED
+}
+
+// =============================================================================
+// OUTPUT — Config + Identidade (campos de produção, sem estado de workflow)
+// =============================================================================
+
 /// Output gerado a partir de um dossiê (vídeo, thread, post, etc.)
+/// Contém apenas configuração e identidade. Estado de workflow fica em StageGate.
+/// Produtos gerados ficam em tabelas dedicadas (StoryOutlineProduct, RenderProduct, etc.)
 model Output {
-  id                   String              @id @default(uuid())
-  outputType           OutputType
-  format               String              @db.VarChar(50)
-  title                String?             @db.VarChar(255)
-  duration             Int?
-  aspectRatio          String?             @db.VarChar(10)
-  platform             String?             @db.VarChar(50)
-  targetWPM            Int                 @default(150)
-  language             String              @default("pt-BR") @db.VarChar(10)
-  narrationLanguage    String              @default("pt-BR") @db.VarChar(10)
-  voiceId              String?             @db.VarChar(100)
-  /// Marca que o usuário já configurou voz + velocidade (pré-requisito para Story Architect)
-  speechConfiguredAt   DateTime?
-  ttsProvider          String?             @db.VarChar(50) /// Provider TTS usado (ex: ELEVENLABS, REPLICATE)
-  enableMotion         Boolean             @default(false)
-  objective            String? // Objetivo editorial: diretriz narrativa que governa a geração do roteiro
-  mustInclude          String?
-  mustExclude          String?
-  classificationId     String?             @db.VarChar(50) // Tema/tonalidade (intelligence-classifications). Pai: define script e visual recomendados.
-  scriptStyleId        String?
-  visualStyleId        String?
-  seedId               String?
-  status               OutputStatus        @default(PENDING)
-  scriptApproved       Boolean             @default(false)
-  imagesApproved       Boolean             @default(false)
-  bgmApproved          Boolean             @default(false)
-  audioApproved        Boolean             @default(false)
-  videosApproved       Boolean             @default(false)
-  renderApproved       Boolean             @default(false)
-  outputData           Bytes?
-  outputMimeType       String?             @db.VarChar(50)
-  outputSize           Int?
-  captionedVideoData   Bytes?
-  captionedVideoSize   Int?
-  thumbnailPath        String?             @db.VarChar(500)
-  thumbnailData        Bytes?
-  thumbnailCandidates  Json?
-  socialKit            Json? // Kit de publicação: títulos, descrições e hashtags por plataforma
-  outputPath           String?             @db.VarChar(500)
-  errorMessage         String?
-  pipelineLog          Json?
-  /// Opções para esta renderização: legendas/logo aplicados no pipeline antes de salvar (uma gravação)
-  renderOptions        Json? // { includeLogo?: boolean, includeCaptions?: boolean, captionStyleId?: string | null }
-  storyOutline         Json? // Story Architect: plano narrativo estruturado (etapa isolada)
-  storyOutlineApproved Boolean             @default(false) // Validação obrigatória antes de gerar roteiro
-  monetizationContext  Json? // Contexto de monetização persistido: { itemType, narrativeRole, angleCategory, avoidPatterns, ... }
-  createdAt            DateTime            @default(now())
-  updatedAt            DateTime            @updatedAt
-  completedAt          DateTime?
-  dossierId            String
-  audioTracks          AudioTrack[]
-  relationsFrom        OutputRelation[]    @relation("MainOutput")
-  relationsTo          OutputRelation[]    @relation("RelatedOutput")
-  dossier              Dossier             @relation(fields: [dossierId], references: [id], onDelete: Cascade)
-  seed                 Seed?               @relation("OutputSeed", fields: [seedId], references: [id], onDelete: SetNull)
-  executions           PipelineExecution[]
-  scenes               Scene[]
-  script               Script?
-  costLogs             CostLog[]
+  id                 String              @id @default(uuid())
+  outputType         OutputType
+  format             String              @db.VarChar(50)
+  title              String?             @db.VarChar(255)
+
+  // ── Parâmetros de produção ──
+  duration           Int?
+  aspectRatio        String?             @db.VarChar(10)
+  platform           String?             @db.VarChar(50)
+  targetWPM          Int                 @default(150)
+  language           String              @default("pt-BR") @db.VarChar(10)
+  narrationLanguage  String              @default("pt-BR") @db.VarChar(10)
+  enableMotion       Boolean             @default(false)
+
+  // ── Voz (mutável — usuário pode trocar mid-pipeline) ──
+  voiceId            String?             @db.VarChar(100)
+  speechConfiguredAt DateTime?           /// Marca que o usuário já configurou voz + velocidade
+  ttsProvider        String?             @db.VarChar(50) /// Provider TTS usado (ex: ELEVENLABS, REPLICATE)
+
+  // ── Diretivas editoriais ──
+  objective          String? // Objetivo editorial: diretriz narrativa
+  mustInclude        String?
+  mustExclude        String?
+
+  // ── Referências de estilo (slugs → constantes) ──
+  classificationId   String?             @db.VarChar(50)
+  scriptStyleId      String?
+  visualStyleId      String?
+  seedId             String?
+
+  // ── Status denormalizado (para queries rápidas de listagem) ──
+  status             OutputStatus        @default(DRAFT)
+  errorMessage       String?
+  completedAt        DateTime?
+
+  // ── Timestamps ──
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  dossierId          String
+
+  // ── Relations: workflow ──
+  stageGates         StageGate[]
+
+  // ── Relations: produtos de cada stage ──
+  storyOutlineData   StoryOutlineProduct?
+  retentionQAData    RetentionQAProduct?
+  monetizationData   MonetizationProduct?
+  socialKitData      SocialKitProduct?
+  thumbnailProduct   ThumbnailProduct?
+  renderProduct      RenderProduct?
+
+  // ── Relations: conteúdo ──
+  script             Script?
+  scenes             Scene[]
+  audioTracks        AudioTrack[]
+
+  // ── Relations: estruturais ──
+  dossier            Dossier             @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+  seed               Seed?               @relation("OutputSeed", fields: [seedId], references: [id], onDelete: SetNull)
+  relationsFrom      OutputRelation[]    @relation("MainOutput")
+  relationsTo        OutputRelation[]    @relation("RelatedOutput")
+  executions         PipelineExecution[]
+  costLogs           CostLog[]
 
   @@index([dossierId])
   @@index([classificationId])
@@ -216,6 +262,127 @@ model Output {
   @@index([createdAt])
   @@map("outputs")
 }
+
+// =============================================================================
+// STAGE GATE — Máquina de Estados Explícita (substitui 9 booleans)
+// =============================================================================
+
+/// Rastreia o status de aprovação de cada estágio do pipeline.
+/// Uma linha por (output, stage). Criada quando o stage é executado pela primeira vez.
+model StageGate {
+  id         String        @id @default(uuid())
+  outputId   String
+  stage      PipelineStage
+  status     StageStatus   @default(NOT_STARTED)
+  feedback   String?       /// Feedback do usuário ao rejeitar/refazer
+  executedAt DateTime?     /// Quando o stage foi executado pela última vez
+  reviewedAt DateTime?     /// Quando o usuário aprovou/rejeitou
+  output     Output        @relation(fields: [outputId], references: [id], onDelete: Cascade)
+
+  @@unique([outputId, stage])
+  @@index([outputId])
+  @@index([stage, status])
+  @@map("stage_gates")
+}
+
+// =============================================================================
+// PRODUCT TABLES — Cada stage escreve no seu domínio
+// =============================================================================
+
+/// Produto do Story Architect — plano narrativo estruturado
+model StoryOutlineProduct {
+  id          String   @id @default(uuid())
+  outputId    String   @unique
+  outlineData Json     /// JSON completo do outline (beats, arcos, hooks, openLoops, customScenes, selectedHookLevel)
+  provider    String   @db.VarChar(30)
+  model       String?  @db.VarChar(100)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  output      Output   @relation(fields: [outputId], references: [id], onDelete: Cascade)
+
+  @@map("story_outline_products")
+}
+
+/// Produto do Retention QA — análise de retenção e edit blueprint
+model RetentionQAProduct {
+  id           String   @id @default(uuid())
+  outputId     String   @unique
+  overallScore Float    /// Score geral de retenção (0-100)
+  summary      String   /// Resumo da análise
+  analysisData Json     /// { sceneAnalysis[], editBlueprint, retentionCurve }
+  provider     String   @db.VarChar(30)
+  model        String?  @db.VarChar(100)
+  analyzedAt   DateTime @default(now())
+  output       Output   @relation(fields: [outputId], references: [id], onDelete: Cascade)
+
+  @@map("retention_qa_products")
+}
+
+/// Produto do Monetizador — contexto de monetização persistido
+model MonetizationProduct {
+  id          String   @id @default(uuid())
+  outputId    String   @unique
+  contextData Json     /// { itemType, narrativeRole, angleCategory, avoidPatterns, sceneCount, ... }
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  output      Output   @relation(fields: [outputId], references: [id], onDelete: Cascade)
+
+  @@map("monetization_products")
+}
+
+/// Produto do Social Kit — títulos, descrições e hashtags por plataforma
+model SocialKitProduct {
+  id          String   @id @default(uuid())
+  outputId    String   @unique
+  kitData     Json     /// { youtube, youtubeShorts, tiktok, instagram, seoTags }
+  generatedAt DateTime @default(now())
+  output      Output   @relation(fields: [outputId], references: [id], onDelete: Cascade)
+
+  @@map("social_kit_products")
+}
+
+/// Produto de Thumbnails — candidatas e thumbnail selecionada
+model ThumbnailProduct {
+  id                  String    @id @default(uuid())
+  outputId            String    @unique
+  candidates          Json?     /// Array<{ base64, prompt, hookText }>
+  selectedData        Bytes?    /// Thumbnail selecionada (PNG)
+  selectedStoragePath String?   @db.VarChar(500) /// Path em object storage
+  selectedAt          DateTime?
+  createdAt           DateTime  @default(now())
+  output              Output    @relation(fields: [outputId], references: [id], onDelete: Cascade)
+
+  @@map("thumbnail_products")
+}
+
+/// Produto do Render — vídeo final renderizado
+model RenderProduct {
+  id                   String   @id @default(uuid())
+  outputId             String   @unique
+
+  // ── Vídeo master ──
+  videoData            Bytes?              /// Video bytes (para arquivos pequenos)
+  videoStoragePath     String?  @db.VarChar(500) /// Path no disco/object storage (para arquivos grandes)
+  mimeType             String?  @db.VarChar(50)
+  fileSize             Int?
+
+  // ── Versão com legendas ──
+  captionedVideoData   Bytes?
+  captionedStoragePath String?  @db.VarChar(500)
+  captionedFileSize    Int?
+
+  // ── Opções de renderização usadas ──
+  renderOptions        Json?    /// { includeLogo, includeCaptions, captionStyleId, volumeOverride }
+
+  renderedAt           DateTime @default(now())
+  output               Output   @relation(fields: [outputId], references: [id], onDelete: Cascade)
+
+  @@map("render_products")
+}
+
+// =============================================================================
+// CONTENT MODELS (Script, Scene, Media)
+// =============================================================================
 
 /// Relação entre outputs (ex: teaser → full)
 model OutputRelation {
@@ -242,6 +409,7 @@ model Script {
   provider              AIProvider
   modelUsed             String?                @db.VarChar(100)
   promptUsed            String?
+  writerProse           String? // Prosa narrativa gerada pelo Writer (etapa 1 do pipeline Escritor/Roteirista)
   backgroundMusicPrompt String? // Prompt Stable Audio 2.5 para música única (TikTok/Instagram)
   backgroundMusicVolume Float? // Volume em dB para mixagem (-24 a -6)
   createdAt             DateTime               @default(now())
@@ -259,18 +427,23 @@ model Scene {
   order                  Int
   narration              String
   visualDescription      String
-  endVisualDescription   String? /// Descrição visual do FINAL da cena (keyframe final para motion i2v). Se presente, gera uma segunda imagem (role=end) usada como last_image no Wan 2.2.
-  endImageReferenceWeight Float? /// Peso (0.0-1.0) da imagem START como referência visual para gerar a END image. Decidido pelo roteirista. Ex: 0.8 (sutil), 0.5 (moderado), 0.3 (drástico).
   audioDescription       String?
-  audioDescriptionVolume Float? /// Volume do SFX em dB (-24 a -6, null = default -12). Definido pelo roteirista, editável na UI.
+  audioDescriptionVolume Float? /// Volume do SFX em dB (-24 a -6, null = default -12)
   startTime              Float?
   endTime                Float?
   estimatedDuration      Float        @default(5)
-  sceneEnvironment       String?      @db.VarChar(100) /// Identificador de ambiente (ex: "bishop_study", "canal") para agrupamento de continuidade visual
-  motionDescription      String? /// Instruções de movimento para i2v (câmera, sujeito, atmosfera dinâmica). Usado no pipeline de motion em vez de visualDescription.
-  characterRef           String? /// ID do DossierPerson para referência visual de personagem nesta cena
+  sceneEnvironment       String?      @db.VarChar(100) /// Identificador de ambiente para continuidade visual
+  motionDescription      String? /// Instruções de movimento para i2v
+  characterRef           String? /// ID do DossierPerson para referência visual
+
+  // --- Viral-first fields (Retention QA + Edit Blueprint) ---
+  onScreenText           String?      @db.VarChar(120) /// Texto overlay queimado no render
+  patternInterruptType   String?      @db.VarChar(50) /// zoom|whip_pan|hard_cut|smash_cut|glitch|freeze|rack_focus|speed_ramp
+  brollPriority          Int          @default(1) /// 0=simples, 1=padrão, 2=hero shot
+  riskFlags              String[] /// ["slow","expository","confusing","low_energy","redundant"]
+
   imageStatus            String       @default("pending") @db.VarChar(20) /// pending | generated | restricted | error
-  imageRestrictionReason String? /// Razão da restrição pelo filtro de conteúdo
+  imageRestrictionReason String?
   createdAt              DateTime     @default(now())
   updatedAt              DateTime     @updatedAt
   images                 SceneImage[]
@@ -303,16 +476,16 @@ model BackgroundMusicTrack {
 model SceneImage {
   id           String     @id @default(uuid())
   sceneId      String
-  role         String     @default("start") @db.VarChar(10) /// "start" = imagem de início da cena, "end" = imagem de final (keyframe para motion last_image)
+  role         String     @default("start") @db.VarChar(10) /// "start" = imagem de início da cena
   provider     AIProvider
   promptUsed   String
   fileData     Bytes?
+  storagePath  String?    @db.VarChar(500) /// Path em object storage (futuro)
   mimeType     String?    @db.VarChar(50)
   originalSize Int?
   width        Int?
   height       Int?
   isSelected   Boolean    @default(false)
-  variantIndex Int        @default(0)
   createdAt    DateTime   @default(now())
   scene        Scene      @relation(fields: [sceneId], references: [id], onDelete: Cascade)
 
@@ -327,12 +500,12 @@ model SceneVideo {
   provider      AIProvider
   promptUsed    String?
   fileData      Bytes?
+  storagePath   String?    @db.VarChar(500) /// Path em object storage (futuro)
   mimeType      String?    @db.VarChar(50)
   originalSize  Int?
   duration      Float?
   sourceImageId String?
   isSelected    Boolean    @default(false)
-  variantIndex  Int        @default(0)
   createdAt     DateTime   @default(now())
   scene         Scene      @relation(fields: [sceneId], references: [id], onDelete: Cascade)
 
@@ -349,9 +522,11 @@ model AudioTrack {
   provider     AIProvider
   voiceId      String?    @db.VarChar(100)
   fileData     Bytes?
+  storagePath  String?    @db.VarChar(500) /// Path em object storage (futuro)
   mimeType     String?    @db.VarChar(50)
   originalSize Int?
   duration     Float?
+  offsetMs     Int?       /// Offset em ms do início do vídeo (para stingers/music events posicionados)
   alignment    Json? /// Word-level timestamps do ElevenLabs: [{word, startTime, endTime}]
   createdAt    DateTime   @default(now())
   output       Output     @relation(fields: [outputId], references: [id], onDelete: Cascade)
@@ -361,6 +536,10 @@ model AudioTrack {
   @@index([sceneId])
   @@map("audio_tracks")
 }
+
+// =============================================================================
+// INFRASTRUCTURE (Config, Seeds, Costs, Logs)
+// =============================================================================
 
 /// Configuração de provedores de IA
 model ProviderConfig {
@@ -393,10 +572,6 @@ model PipelineExecution {
   @@map("pipeline_executions")
 }
 
-/// NOTA: VisualStyle e ScriptStyle foram migrados para constantes em
-/// server/constants/visual-styles.ts e server/constants/script-styles.ts
-/// Os campos scriptStyleId e visualStyleId agora armazenam slugs de string.
-
 /// Seeds para geração de imagens/vídeos (receitas visuais)
 model Seed {
   id                  String       @id @default(uuid())
@@ -412,21 +587,19 @@ model Seed {
   @@map("seeds")
 }
 
-/// Amostra visual gerada com uma seed — registro universal de qualquer imagem
-/// produzida pelo sistema (style preview, pipeline de cenas, thumbnail, etc.)
-/// Permite consultar todas as imagens de uma seed na gestão de seeds.
+/// Amostra visual gerada com uma seed
 model SeedSample {
   id          String   @id @default(uuid())
   seedId      String
-  dossierId   String? /// Contexto opcional: dossiê de onde veio a geração
+  dossierId   String?
   source      String   @db.VarChar(50) /// "style-preview" | "scene-image" | "thumbnail" | "test"
-  prompt      String /// Prompt usado na geração
-  base64      String /// Imagem em base64 (sem prefixo data:...)
+  prompt      String
+  base64      String
   mimeType    String   @default("image/png") @db.VarChar(30)
-  provider    String   @db.VarChar(30) /// "REPLICATE"
-  model       String?  @db.VarChar(100) /// ex: "luma/photon-flash"
-  aspectRatio String?  @db.VarChar(10) /// "16:9", "9:16", "1:1"
-  metadata    Json? /// Dados extras: visualStyleId, itemKey, predictTime, etc.
+  provider    String   @db.VarChar(30)
+  model       String?  @db.VarChar(100)
+  aspectRatio String?  @db.VarChar(10)
+  metadata    Json?
   createdAt   DateTime @default(now())
   seed        Seed     @relation("SeedSamples", fields: [seedId], references: [id], onDelete: Cascade)
   dossier     Dossier? @relation("DossierSeedSamples", fields: [dossierId], references: [id], onDelete: SetNull)
@@ -438,19 +611,18 @@ model SeedSample {
   @@map("seed_samples")
 }
 
-/// Log de custos de API - append-only ledger desacoplado dos artefatos
-/// Cada registro pertence a um output (pipeline de vídeo) OU a um dossier (ex: análise neural).
+/// Log de custos de API - append-only ledger
 model CostLog {
   id        String   @id @default(uuid())
-  outputId  String? /// null quando o custo é de recurso do dossier (ex: insights)
-  dossierId String? /// preenchido para custos no nível do dossier (análise neural)
-  resource  String   @db.VarChar(50) /// "outline" | "script" | "image" | "narration" | "bgm" | "motion" | "insights"
-  action    String   @db.VarChar(20) /// "create" | "recreate"
-  provider  String   @db.VarChar(30) /// "REPLICATE" | "ELEVENLABS" | "OPENAI" | "ANTHROPIC"
-  model     String?  @db.VarChar(100) /// ex: "black-forest-labs/flux-schnell"
-  cost      Float /// Custo em USD
-  metadata  Json? /// Dados de cálculo: predict_time, characters, tokens, etc
-  detail    String?  @db.VarChar(255) /// Descrição legível
+  outputId  String?
+  dossierId String?
+  resource  String   @db.VarChar(50)
+  action    String   @db.VarChar(20)
+  provider  String   @db.VarChar(30)
+  model     String?  @db.VarChar(100)
+  cost      Float
+  metadata  Json?
+  detail    String?  @db.VarChar(255)
   createdAt DateTime @default(now())
   output    Output?  @relation(fields: [outputId], references: [id], onDelete: Restrict)
   dossier   Dossier? @relation(fields: [dossierId], references: [id], onDelete: Restrict)
@@ -463,20 +635,19 @@ model CostLog {
 }
 
 /// Plano de monetização gerado pela IA (Document-First Strategy)
-/// Armazena o JSON completo do plano para exibição posterior sem regenerar.
 model MonetizationPlan {
   id                String   @id @default(uuid())
   dossierId         String
-  planData          Json /// JSON completo do plano: fullVideo, teasers[], publicationSchedule[], etc.
-  teaserDuration    Int /// Duração configurada dos teasers (35, 55 ou 115 segundos)
-  fullVideoDuration Int /// Duração configurada do full video (300, 600 ou 900 segundos)
-  teaserCount       Int      @default(0) /// Quantidade de teasers no plano
-  provider          String   @db.VarChar(30) /// "OPENAI" | "ANTHROPIC"
-  model             String?  @db.VarChar(100) /// ex: "claude-sonnet-4-20250514"
+  planData          Json
+  teaserDuration    Int
+  fullVideoDuration Int
+  teaserCount       Int      @default(0)
+  provider          String   @db.VarChar(30)
+  model             String?  @db.VarChar(100)
   inputTokens       Int      @default(0)
   outputTokens      Int      @default(0)
-  cost              Float    @default(0) /// Custo em USD da geração
-  isActive          Boolean  @default(true) /// false = substituído por um plano mais novo
+  cost              Float    @default(0)
+  isActive          Boolean  @default(true)
   createdAt         DateTime @default(now())
   dossier           Dossier  @relation(fields: [dossierId], references: [id], onDelete: Cascade)
 
@@ -487,21 +658,19 @@ model MonetizationPlan {
 }
 
 /// Provider de IA configurável (LLM ou Mídia)
-/// Gerenciado pela UI em /settings/providers — API keys ficam aqui, não no .env
 model LlmProvider {
-  id          String   @id @db.VarChar(30) /// Ex: "openai", "anthropic", "replicate", "elevenlabs"
-  name        String   @db.VarChar(50) /// Ex: "OpenAI", "Replicate"
+  id          String   @id @db.VarChar(30)
+  name        String   @db.VarChar(50)
   description String?  @db.Text
-  apiKey      String?  @db.Text /// API Key (criptografar em prod)
-  baseUrl     String?  @db.VarChar(200) /// Base URL customizada
+  apiKey      String?  @db.Text
+  baseUrl     String?  @db.VarChar(200)
   iconKey     String   @default("brain") @db.VarChar(30)
-  category    String   @default("llm") @db.VarChar(20) /// "llm" | "media" — separa LLMs de providers de mídia
+  category    String   @default("llm") @db.VarChar(20)
   isActive    Boolean  @default(true)
-  extraConfig Json? /// Config extra (ex: endpointId para RunPod, voiceId para ElevenLabs)
+  extraConfig Json?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  models LlmModel[]
+  models      LlmModel[]
 
   @@map("llm_providers")
 }
@@ -509,52 +678,52 @@ model LlmProvider {
 /// Modelo de LLM disponível dentro de um provider
 model LlmModel {
   id                       String   @id @default(uuid())
-  modelId                  String   @db.VarChar(100) /// ID na API (ex: "gpt-4o", "claude-sonnet-4-20250514")
-  name                     String   @db.VarChar(100) /// Nome legível (ex: "GPT-4o")
+  modelId                  String   @db.VarChar(100)
+  name                     String   @db.VarChar(100)
   providerId               String   @db.VarChar(30)
   contextWindow            Int      @default(128000)
-  costTier                 Int      @default(2) /// 1-5 (1=barato, 5=caro)
+  costTier                 Int      @default(2)
   supportsStructuredOutput Boolean  @default(true)
   supportsVision           Boolean  @default(false)
   isActive                 Boolean  @default(true)
-  inputSchema              Json? /// Schema de input do modelo — define como montar o payload para a API
+  inputSchema              Json?
   createdAt                DateTime @default(now())
   updatedAt                DateTime @updatedAt
-
-  provider LlmProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  provider                 LlmProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
 
   @@unique([providerId, modelId])
   @@map("llm_models")
 }
 
-/// Assignment de provider/modelo de IA por task — persistido no banco.
-/// Cada task (script, analysis, story-architect, etc.) tem UMA linha nesta tabela.
-/// Quando não existe registro, o sistema usa os defaults do LLM Registry.
+/// Assignment de provider/modelo de IA por task
 model LlmAssignment {
   id          String   @id @default(uuid())
-  taskId      String   @unique @db.VarChar(50) /// Ex: "script", "analysis", "monetization"
-  provider    String   @db.VarChar(30) /// Ex: "openai", "anthropic", "groq"
-  model       String   @db.VarChar(100) /// Ex: "gpt-4o", "claude-sonnet-4-20250514"
-  temperature Float    @default(0.7) /// 0.0 a 2.0
+  taskId      String   @unique @db.VarChar(50)
+  provider    String   @db.VarChar(30)
+  model       String   @db.VarChar(100)
+  temperature Float    @default(0.7)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@map("llm_assignments")
 }
 
-/// Assignment de provider/modelo de MÍDIA por task (imagem, TTS, motion, música).
-/// Mesma lógica do LlmAssignment mas para providers de mídia (Replicate, ElevenLabs, RunPod).
+/// Assignment de provider/modelo de MÍDIA por task
 model MediaAssignment {
   id          String   @id @default(uuid())
-  taskId      String   @unique @db.VarChar(50) /// Ex: "image-generation", "tts-narration", "motion-video", "background-music", "thumbnail"
-  provider    String   @db.VarChar(30) /// Ex: "replicate", "elevenlabs", "runpod"
-  model       String   @db.VarChar(150) /// Ex: "luma/photon-flash", "eleven_multilingual_v2"
-  extraConfig Json? /// Config extra por task (ex: voiceId, endpointId, seed, steps)
+  taskId      String   @unique @db.VarChar(50)
+  provider    String   @db.VarChar(30)
+  model       String   @db.VarChar(150)
+  extraConfig Json?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@map("media_assignments")
 }
+
+// =============================================================================
+// ENUMS
+// =============================================================================
 
 /// Tipo de provedor de IA usado
 enum AIProvider {
@@ -569,7 +738,7 @@ enum AIProvider {
   REPLICATE
 }
 
-/// Tipo de output gerado a partir de um documento
+/// Tipo de output gerado
 enum OutputType {
   VIDEO_TEASER
   VIDEO_FULL
@@ -582,26 +751,30 @@ enum OutputType {
 
 /// Status de geração do output
 enum OutputStatus {
-  PENDING
-  GENERATING
+  DRAFT
+  IN_PROGRESS
   RENDERED
   COMPLETED
   FAILED
   CANCELLED
 }
 
-/// Notícia capturada pelo Radar de Inteligência (persistida para não perder quando RSS expirar)
+// =============================================================================
+// CONTENT MODELS (News, Hooks)
+// =============================================================================
+
+/// Notícia capturada pelo Radar de Inteligência
 model NewsItem {
   id          String    @id @default(uuid())
   title       String
-  link        String    @unique // URL da notícia — deduplicação natural
+  link        String    @unique
   summary     String?
-  source      String    @db.VarChar(100) // Nome do feed (ex: "CrimeReads")
-  category    String    @db.VarChar(50) // paranormal, science, true-crime, serial-killer, geopolitics, etc.
+  source      String    @db.VarChar(100)
+  category    String    @db.VarChar(50)
   author      String?   @db.VarChar(200)
-  publishedAt DateTime? // Data de publicação original (do RSS)
-  fetchedAt   DateTime  @default(now()) // Quando foi capturada pelo sistema
-  dismissed   Boolean   @default(false) // Para filtrar sinais já descartados
+  publishedAt DateTime?
+  fetchedAt   DateTime  @default(now())
+  dismissed   Boolean   @default(false)
 
   @@index([category])
   @@index([fetchedAt])
@@ -609,23 +782,22 @@ model NewsItem {
 }
 
 /// Hook narrativo curado para inspirar aberturas poderosas
-/// Base de dados para o narrative-architect consultar e adaptar ao dossiê
 model NarrativeHook {
   id                   String   @id @default(uuid())
-  type                 String   @db.VarChar(50) // "action_opening" | "mystery_hook" | "intriguing_dialogue" | "emotional_impact" | "world_building" | "tension_opening"
-  sourceType           String   @db.VarChar(50) // "book" | "movie" | "series" | "viral_short" | "other"
-  sourceTitle          String   @db.VarChar(255) // Nome da obra/vídeo
-  genres               String[] // ["thriller", "drama", "sci-fi", ...]
-  hookText             String   @db.Text // O hook original
-  duration             String   @db.VarChar(20) // "curto" | "médio" | "longo" (tempo narrativo)
-  emotionalTemperature String   @db.VarChar(50) // "explosivo" | "tenso" | "melancólico" | "intrigante" | ...
-  tags                 String[] // ["isolamento", "ação", "mistério", "plot twist", ...]
-  structuralPattern    String? // (opcional) Ex: "3 frases curtas + revelação"
-  structuralElements   String[] // (opcional) ["conflito imediato", "pergunta sem resposta", ...]
-  pacing               String?  @db.VarChar(20) // (opcional) "rápido" | "moderado" | "lento"
-  whyItWorks           String?  @db.Text // (opcional) Análise breve do porquê funciona
-  usageCount           Int      @default(0) // Quantas vezes foi usado/consultado
-  isActive             Boolean  @default(true) // Para desativar hooks que não funcionaram bem
+  type                 String   @db.VarChar(50)
+  sourceType           String   @db.VarChar(50)
+  sourceTitle          String   @db.VarChar(255)
+  genres               String[]
+  hookText             String   @db.Text
+  duration             String   @db.VarChar(20)
+  emotionalTemperature String   @db.VarChar(50)
+  tags                 String[]
+  structuralPattern    String?
+  structuralElements   String[]
+  pacing               String?  @db.VarChar(20)
+  whyItWorks           String?  @db.Text
+  usageCount           Int      @default(0)
+  isActive             Boolean  @default(true)
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 

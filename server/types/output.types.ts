@@ -1,4 +1,4 @@
-import type { Output, OutputType, OutputStatus } from '@prisma/client'
+import type { OutputType, OutputStatus, PipelineStage, StageStatus } from '@prisma/client'
 
 // =============================================================================
 // DTOs - CREATE
@@ -36,6 +36,61 @@ export interface CreateOutputRelationDTO {
 }
 
 // =============================================================================
+// Stage Gate DTO
+// =============================================================================
+
+export interface StageGateDTO {
+  stage: PipelineStage
+  status: StageStatus
+  feedback?: string | null
+  executedAt?: Date | null
+  reviewedAt?: Date | null
+}
+
+// =============================================================================
+// Product DTOs
+// =============================================================================
+
+export interface StoryOutlineProductDTO {
+  outlineData: any
+  provider: string
+  model?: string | null
+}
+
+export interface RetentionQAProductDTO {
+  overallScore: number
+  summary: string
+  analysisData: any
+  provider: string
+  model?: string | null
+}
+
+export interface MonetizationProductDTO {
+  contextData: any
+}
+
+export interface SocialKitProductDTO {
+  kitData: any
+}
+
+export interface ThumbnailProductDTO {
+  candidates?: any | null
+  selectedData?: Buffer | null
+  selectedStoragePath?: string | null
+  selectedAt?: Date | null
+}
+
+export interface RenderProductDTO {
+  videoStoragePath?: string | null
+  mimeType?: string | null
+  fileSize?: number | null
+  captionedStoragePath?: string | null
+  captionedFileSize?: number | null
+  renderOptions?: any | null
+  renderedAt?: Date
+}
+
+// =============================================================================
 // DTOs - RESPONSE
 // =============================================================================
 
@@ -52,7 +107,6 @@ export interface OutputResponse {
   language?: string
   narrationLanguage?: string
   voiceId?: string
-  /** Indica que voz + velocidade já foram configuradas (pré-requisito para Story Architect). */
   speechConfiguredAt?: Date
   ttsProvider?: string
   objective?: string
@@ -63,7 +117,6 @@ export interface OutputResponse {
   visualStyleId?: string
   seedId?: string
   seedValue?: number
-  monetizationContext?: any
   editorialObjectiveId?: string
   editorialObjective?: {
     id: string
@@ -71,26 +124,15 @@ export interface OutputResponse {
     category: string
   }
   status: OutputStatus
-  storyOutlineApproved?: boolean
-  scriptApproved: boolean
-  imagesApproved: boolean
-  bgmApproved: boolean
-  audioApproved: boolean
-  videosApproved: boolean
-  renderApproved: boolean
+  enableMotion: boolean
   hasBgm: boolean
   errorMessage?: string
   createdAt: Date
   updatedAt: Date
   completedAt?: Date
-  hasVideo?: boolean
-  isStoredOnDisk?: boolean
-  outputMimeType?: string
-  outputSize?: number
-  hasCaptionedVideo?: boolean
-  captionedVideoSize?: number
-  enableMotion: boolean
-  storyOutline?: any // Story Architect: plano narrativo estruturado
+
+  // Stage gates (replaces 9 approval booleans)
+  stageGates: StageGateDTO[]
 }
 
 export interface OutputWithRelationsResponse extends OutputResponse {
@@ -119,9 +161,14 @@ export interface OutputWithRelationsResponse extends OutputResponse {
     outputType: OutputType
     relationType: string
   }[]
-  thumbnailCandidates?: Array<{ base64: string; prompt: string }> | null
-  hasThumbnail?: boolean
-  socialKit?: any
+
+  // Product tables (replaces inline JSONs/blobs)
+  storyOutlineData?: StoryOutlineProductDTO | null
+  retentionQAData?: RetentionQAProductDTO | null
+  monetizationData?: MonetizationProductDTO | null
+  socialKitData?: SocialKitProductDTO | null
+  thumbnailProduct?: ThumbnailProductDTO | null
+  renderProduct?: RenderProductDTO | null
 }
 
 export interface CreateOutputsResponse {
@@ -133,4 +180,3 @@ export interface CreateOutputsResponse {
 export interface CloneOutputResponse {
   output: OutputResponse
 }
-

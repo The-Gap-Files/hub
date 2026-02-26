@@ -43,7 +43,7 @@ export async function callWriter(
 
   // Create LLM (text mode — no structured output)
   const model = await createLlmForTask('script', {
-    maxTokens: 32768, // Writer output is prose text, smaller than scene JSON
+    maxTokens: 64000, // Max safe across all providers (Anthropic cap = 64K; Gemini/Groq = 65536)
     temperature: assignment.temperature ?? 0.5
   })
 

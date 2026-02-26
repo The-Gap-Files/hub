@@ -53,34 +53,41 @@ Fatos de **contexto geral e background** que qualquer episódio pode mencionar s
 
 **NÃO inclua:** revelações, desfechos, traições, mortes, consequências
 
-### exclusiveFacts de EP1 (30–80 fatos)
+### exclusiveFacts de EP1 (MÍNIMO 30, máximo 80)
+🚨 **REGRA DE VOLUME**: 30 fatos é o MÍNIMO ABSOLUTO. Cada episódio precisa de fatos suficientes para gerar ~150 cenas de vídeo. Com menos de 30 fatos, o Escritor não tem material para produzir prosa suficiente e o vídeo fica curto demais.
+
 Fatos do **começo da história**: origem, método, formação do conflito, as primeiras tensões.
 - Como tudo começou
 - Quem estava envolvido inicialmente e em que papel
 - O primeiro sinal de perigo ou irregularidade
 - A ascensão do conflito (sem revelar o ponto de inflexão)
 - **EXTRAIA O MÁXIMO de fatos das fontes** — cada detalhe concreto (data, nome, local, mecanismo, consequência) deve virar um fato separado
-- Quanto mais fatos detalhados, mais material o Escritor terá para criar cenas ricas e únicas
+- **DESDOBRE fatos compostos**: se uma fonte descreve um evento com 3 sub-etapas, crie 3 fatos separados (um para cada etapa)
+- **EXPLORE consequências**: cada fato principal deve gerar 1-2 fatos adicionais sobre reações, impacto ou desdobramentos
 
 **holdbackFacts de EP1** (3–20): Fatos de EP2 e EP3 que EP1 deve guardar (traições, desfechos, legado).
 
-### exclusiveFacts de EP2 (30–80 fatos)
+### exclusiveFacts de EP2 (MÍNIMO 30, máximo 80)
+🚨 **REGRA DE VOLUME**: 30 fatos é o MÍNIMO ABSOLUTO. Desdobre cada evento em fatos granulares.
+
 Fatos da **virada e consequências imediatas**: a traição, o ponto de inflexão, o impacto direto.
 - O momento em que tudo mudou
 - Quem traiu ou revelou o que estava oculto
 - As consequências imediatas da virada
 - O estado da situação após a inflexão (ainda sem resolução final)
-- **EXTRAIA O MÁXIMO de fatos das fontes** — não resuma, desdobre cada evento em fatos granulares
+- **DESDOBRE fatos compostos** e **EXPLORE consequências** (mesma regra do EP1)
 
 **holdbackFacts de EP2** (3–20): Fatos de EP3 que EP2 deve guardar (desfecho final, destino dos personagens, legado).
 
-### exclusiveFacts de EP3 (30–80 fatos)
+### exclusiveFacts de EP3 (MÍNIMO 30, máximo 80)
+🚨 **REGRA DE VOLUME**: 30 fatos é o MÍNIMO ABSOLUTO. Cada detalhe do desfecho merece um fato separado.
+
 Fatos do **desfecho e legado**: o que aconteceu depois, o destino dos personagens, a conexão com o presente.
 - Como a situação se resolveu (ou não)
 - O destino de cada personagem principal
 - O impacto de longo prazo (político, social, histórico)
 - A conexão com o presente (o que isso significa hoje)
-- **EXTRAIA O MÁXIMO de fatos das fontes** — cada detalhe do desfecho merece um fato separado
+- **DESDOBRE fatos compostos** e **EXPLORE consequências** (mesma regra do EP1)
 
 **holdbackFacts de EP3**: Normalmente vazio — EP3 pode revelar tudo.
 
@@ -177,9 +184,9 @@ Campos obrigatórios:
 - `globalSafety.forbiddenElements`: mínimo 4 itens
 - `globalSafety.allowedArtifacts`: mínimo 4 itens
 - `sharedFacts`: mínimo 5 fatos
-- `episodes.ep1.exclusiveFacts`: mínimo 30 fatos (cada um com 2-4 linhas detalhadas) — EXTRAIA O MÁXIMO das fontes
-- `episodes.ep2.exclusiveFacts`: mínimo 30 fatos (cada um com 2-4 linhas detalhadas) — EXTRAIA O MÁXIMO das fontes
-- `episodes.ep3.exclusiveFacts`: mínimo 30 fatos (cada um com 2-4 linhas detalhadas) — EXTRAIA O MÁXIMO das fontes
+- `episodes.ep1.exclusiveFacts`: MÍNIMO 30 fatos (cada um com 2-4 linhas detalhadas) — EXTRAIA O MÁXIMO das fontes, desdobre eventos compostos
+- `episodes.ep2.exclusiveFacts`: MÍNIMO 30 fatos (cada um com 2-4 linhas detalhadas) — EXTRAIA O MÁXIMO das fontes, desdobre eventos compostos
+- `episodes.ep3.exclusiveFacts`: MÍNIMO 30 fatos (cada um com 2-4 linhas detalhadas) — EXTRAIA O MÁXIMO das fontes, desdobre eventos compostos
 - `episodes.ep1.holdbackFacts`: mínimo 0 fatos (mas geralmente 3+)
 - `episodes.ep2.holdbackFacts`: mínimo 0 fatos (mas geralmente 3+)
 - `episodes.ep1.suggestedOpenLoops`: mínimo 2 perguntas

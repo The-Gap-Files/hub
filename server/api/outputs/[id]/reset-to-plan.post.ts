@@ -1,5 +1,4 @@
 import { prisma } from '../../../utils/prisma'
-import { Prisma } from '@prisma/client'
 
 /**
  * POST /api/outputs/[id]/reset-to-plan
@@ -8,9 +7,8 @@ import { Prisma } from '@prisma/client'
  * preservando configurações base do output (voz, WPM, idioma, estilos, etc.).
  *
  * Limpa apenas artefatos/estados de pipeline:
- * - storyOutline + aprovações
+ * - StageGates + product tables
  * - script + cenas + mídias geradas
- * - render/thumbnails/social kit
  * - status de execução
  */
 export default defineEventHandler(async (event) => {
@@ -41,45 +39,28 @@ export default defineEventHandler(async (event) => {
       where: { outputId: id }
     })
 
-    // 3) Resetar output para início do pipeline (Plano)
+    // 3) Limpar product tables
+    await tx.stageGate.deleteMany({ where: { outputId: id } })
+    await tx.storyOutlineProduct.deleteMany({ where: { outputId: id } })
+    await tx.retentionQAProduct.deleteMany({ where: { outputId: id } })
+    await tx.monetizationProduct.deleteMany({ where: { outputId: id } })
+    await tx.socialKitProduct.deleteMany({ where: { outputId: id } })
+    await tx.thumbnailProduct.deleteMany({ where: { outputId: id } })
+    await tx.renderProduct.deleteMany({ where: { outputId: id } })
+
+    // 4) Resetar output para início do pipeline
     await tx.output.update({
       where: { id },
       data: {
-        // Volta ao Story Architect
-        storyOutline: Prisma.DbNull,
-        storyOutlineApproved: false,
-
-        // Reset de aprovações de etapas
-        scriptApproved: false,
-        imagesApproved: false,
-        audioApproved: false,
-        bgmApproved: false,
-        videosApproved: false,
-        renderApproved: false,
-
-        // Limpa artefatos finais/extras
-        outputData: null,
-        outputMimeType: null,
-        outputSize: null,
-        outputPath: null,
-        captionedVideoData: null,
-        captionedVideoSize: null,
-        thumbnailPath: null,
-        thumbnailData: null,
-        thumbnailCandidates: Prisma.DbNull,
-        socialKit: Prisma.DbNull,
-
-        // Estado operacional
-        status: 'PENDING',
+        status: 'DRAFT',
         completedAt: null,
         errorMessage: null
       }
     })
-  })
+  }, { timeout: 30000 })
 
   return {
     success: true,
     message: 'Output resetado para a etapa Plano. Gere o Story Architect novamente.'
   }
 })
-

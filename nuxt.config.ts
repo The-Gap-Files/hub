@@ -78,7 +78,7 @@ export default defineNuxtConfig({
   // TypeScript
   typescript: {
     strict: true,
-    typeCheck: true
+    typeCheck: false // vue-tsc runs separately via IDE / build step
   },
 
   // Dev tools
