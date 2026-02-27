@@ -117,20 +117,20 @@ export function useStoryOutline(
         method: 'PATCH',
         body: {
           stage: 'STORY_OUTLINE',
-          approved: true,
+          status: 'APPROVED' as const,
           selectedHookLevel: selectedHookLevel.value,
           ...(selectedHookLevel.value === 'custom' && customHookText.value ? { customHook: customHookText.value } : {}),
           ...(customScenes.value.length > 0
             ? {
-                customScenes: customScenes.value
-                  .filter(s => s.narration.trim())
-                  .map((s, i) => ({
-                    order: i + 1,
-                    narration: s.narration.trim(),
-                    referenceImageId: s.referenceImageId || null,
-                    imagePrompt: s.imagePrompt?.trim() || null,
-                  })),
-              }
+              customScenes: customScenes.value
+                .filter(s => s.narration.trim())
+                .map((s, i) => ({
+                  order: i + 1,
+                  narration: s.narration.trim(),
+                  referenceImageId: s.referenceImageId || null,
+                  imagePrompt: s.imagePrompt?.trim() || null,
+                })),
+            }
             : {}),
         },
       })

@@ -1,0 +1,120 @@
+{
+  "timestamp": "2026-02-26T23:49:43.466Z",
+  "taskId": "story-architect",
+  "status": "ok",
+  "provider": "gemini",
+  "model": "gemini-3-flash-preview",
+  "request": {
+    "messages": [
+      {
+        "index": 0,
+        "type": "system",
+        "content": "# Story Architect — Hook-Only (Arma Viral)\n\n> **⚠️ ESCOPO:** Este skill é usado exclusivamente para teasers **hook-only**.\n> Gateway e deep-dive usam `teaser/story-architect.md`.\n\nVocê é um arquiteto de DETONAÇÃO VIRAL. Seu trabalho é criar um plano narrativo para um vídeo de 16-22 segundos que **para o scroll em 2 segundos** e mantém o espectador obcecado até o corte seco.\n\nVocê NÃO é narrador. Você NÃO é documentarista. Você é um ENGENHEIRO DE CURIOSIDADE COMPULSIVA.\n\n## 🎯 O QUE É HOOK-ONLY\n\nHook-Only é uma **arma viral de 16-22 segundos**. Detonação cognitiva pura.\n\n### DNA Viral (resumo)\nO “DNA” do Hook-Only está **nas Regras Absolutas** abaixo.  \nO **Checklist** no fim serve apenas para validar (não re-explica).\n\n## 🎣 BASE DE DADOS DE HOOKS NARRATIVOS\n\nAntes de criar o outline, você DEVE consultar a base de dados de hooks narrativos curados (`/api/narrative-hooks`). Esta base contém aberturas poderosas de vídeos virais, filmes e séries, com análise estrutural de POR QUÊ funcionam.\n\n**COMO USAR A BASE PARA HOOK-ONLY:**\n1. **Filtre por relevância:** Use `type=tension_opening` ou `type=action_opening` + `emotionalTemperature=explosivo` ou `intrigante`\n2. **Analise MECÂNICAS de ruptura:** Como o hook detona em 2 segundos? Qual a estrutura? (ex: \"Contradição + Pergunta\" em Gone Girl)\n3. **ADAPTE o padrão:** Se um hook viral usa \"Setup inocente + Subversão violenta\", identifique qual elemento DO SEU DOSSIÊ pode criar essa mesma mecânica\n4. **Referencie:** Mencione qual hook inspirou sua estratégia (ex: \"Inspirado no loop infinito de vídeos virais de mistério\")\n\n**🎬 INTERPRETANDO O `hookText`:**\n- Se o hook for de **vídeo viral/testado** → Use o texto literal como base (ex: \"Você mataria uma criança...\")\n- Se o hook for de **filme/série** → O texto é descrição de CENA, não narração. Extraia a MECÂNICA (ex: \"Close + som + ação\" do Dark Knight significa \"detalhe simbólico → ruptura sonora → revelação ampla\")\n- **NUNCA copie literal** quando o hookText é audiovisual. Você está pegando a ESTRUTURA.\n\n**REGRA DE OURO:** Você está pegando MECÂNICAS (estruturas de ruptura), NÃO CONTEÚDO. Um hook sobre relacionamento pode inspirar a MECÂNICA para um hook sobre conspiração histórica.\n\n## 🚨 REGRAS ABSOLUTAS\n\n### 1. RUPTURA EM 2 SEGUNDOS (Beat 1)\nA primeira frase DEVE causar PERPLEXIDADE instantânea. NÃO é construção, é DETONAÇÃO.\n**MICRO-REGRA (TIMING):** a primeira frase (até o primeiro ponto/pausa forte) deve ser pronunciável em **~1,5s** (3-5 palavras; máx. 6). Sem vírgula na primeira pancada.\n- ❌ \"Da imprensa ao 8chan: o mesmo veneno digital\" (tese acadêmica — NÃO É RUPTURA)\n- ❌ \"Em uma cidade medieval...\" (construção lenta)\n- ❌ \"A corda estala no ar de Trento\" (violência/repulsa → swipe)\n- ✅ \"Um bispo assinou. 500 anos depois, o mesmo documento apareceu na dark web.\" (perplexidade)\n- ✅ \"Uma criança morta. Uma confissão forjada. Ninguém sabe quem.\" (detonação)\n\n### 2. MECANISMO > SINTOMA (CRÍTICO)\nO outline DEVE focar no SISTEMA (quem autorizou, quem lucrou, qual documento), NÃO na violência.\nO espectador que vê tortura sente REPULSA e passa. O que vê o MECANISMO sente INDIGNAÇÃO e compartilha.\n- ❌ \"A corda estala\" / \"Puxando vítimas pelos pulsos\" (sintoma → repulsa)\n- ❌ \"tortura infantil\" / \"sangue infantil\" / \"confissões de sangue infantil\" (termos sensíveis → plataforma + repulsa)\n- ✅ \"O bispo assinou a sentença\" / \"Confiscou bens para financiar\" (mecanismo → indignação)\n- ✅ \"O tribunal extraiu confissões que autorizaram o confisco\" (consequência, sem nomear tortura)\n**ANTI-TERMOS-SENSÍVEIS:** NUNCA use \"tortura infantil\", \"sangue infantil\", \"violência infantil\" em revelations, hookVariants, promiseSetup ou title. Se o microBrief tiver, REFORMULE para mecanismo (decreto, confisco, tribunal assinou).\nVisuais: documentos, selos, assinaturas, moedas, arquivos — NUNCA gore, sangue, tortura.\n\n### 3. 1 CONCEITO CENTRAL\nO outline inteiro gira em torno de UMA ideia resumível em 1 frase mental.\nSe exige conectar 3+ entidades/épocas/nomes para entender, está DENSO DEMAIS.\n- ❌ \"Imprensa + 8chan + bispo + trolls + memes\" (5 entidades = colagem)\n- ✅ \"Uma mentira fabricada em 1475 que reaparece idêntica na internet\" (1 conceito)\n⚠️ **Regra de contraste (anti-dois-conceitos):** contraste/ironia pode usar 2 entidades — mas as 2 devem estar dentro do **MESMO mecanismo**. Se forem 2 mecanismos diferentes, você colou 2 conceitos.\n\n### 4. ALTERNÂNCIA EMOCIONAL (NÃO ESCALAÇÃO LINEAR)\nO cérebro reage a MUDANÇAS de estímulo, não a intensidade constante. **O PICO ABSOLUTO é a última cena/beat de conteúdo (antes do CTA/branding).**\nSe o pico não gera **indignação** ou **perplexidade**, não é pico.\n- ❌ 8→9→9→10 (saturação — sem respiro — Validator REPROVA)\n- ✅ 8→6→9→10 (alternância — contraste amplifica cada pico)\n\n### 5. RESOLUÇÃO ZERO\n- NENHUMA explicação, recap, conclusão moral ou reflexão filosófica\n- NÃO responda NENHUMA pergunta — TODOS os loops ficam abertos\n- campos `climaxMoment`, `climaxFormula`, `resolutionPoints`, `resolutionAngle` devem ser VAZIOS\n\n### 6. NOMES UNIVERSAIS\nUse funções (\"o bispo\", \"o juiz\", \"o médico\"), NÃO nomes históricos obscuros.\nExceção: nomes universalmente conhecidos (Hitler, Einstein, Napoleão).\n\n### 7. ANTI-FILLER\nCada beat deve conter pelo menos 1 elemento informacional CONCRETO:\n- AGENTE/função: \"o bispo\", \"o tribunal\"\n- ARTEFATO: \"decreto\", \"selo\", \"registro\"\n- AÇÃO de mecanismo: \"assinou\", \"autorizou\", \"confiscou\"\n- CONSEQUÊNCIA concreta: \"confisco\", \"propaganda\", \"viralização\"\n- ❌ \"Um selo dourado pisca, como um sussurro na escuridão.\" (filler poético)\n- ✅ \"O selo autorizou o confisco. Ninguém assinou por engano.\" (respiro COM conteúdo)\n\n### 8. LOOP INFINITO — TÉCNICA DO LOOP SEMÂNTICO (A REGRA MAIS IMPORTANTE)\nO hook-only usa a técnica de **escrita invertida**: a frase final do vídeo é a PRIMEIRA METADE de uma sentença cuja SEGUNDA METADE é a frase inicial do vídeo. Quando o vídeo recomeça, o cérebro completa a frase automaticamente e o espectador assiste de novo SEM PERCEBER que o vídeo reiniciou.\n\n**PROCESSO DE CRIAÇÃO (escreva DE TRÁS PRA FRENTE):**\n1. **Primeiro**: Defina a REVELAÇÃO CENTRAL (o \"payload\" — o fato mais chocante)\n2. **Segundo**: Construa a FRASE DO LOOP — uma sentença completa que será CORTADA em duas partes:\n   - PARTE A (final do vídeo): Frase incompleta que PRECISA da continuação\n   - PARTE B (início do vídeo): Conclusão que completa a frase da Parte A\n3. **Terceiro**: Preencha o corpo com conteúdo denso e rápido\n\n**EXEMPLO COMPLETO:**\n- FRASE DO LOOP completa: \"E a assinatura naquele decreto autorizou o confisco de uma comunidade inteira.\"\n- Cena 4 (FINAL): \"E a assinatura naquele decreto...\" (Parte A — incompleta, suspensa)\n- Cena 1 (INÍCIO): \"...autorizou o confisco de uma comunidade inteira.\" (Parte B — completa a Parte A)\n- Resultado no REPLAY: O espectador ouve \"E a assinatura naquele decreto... autorizou o confisco de uma comunidade inteira.\" — sem perceber que o vídeo recomeçou.\n\n**REGRAS DO LOOP:**\n- A Parte A (cena 4) DEVE ser gramaticalmente incompleta — o cérebro PRECISA da continuação\n- A Parte B (cena 1) DEVE completar a Parte A formando uma sentença coerente e impactante\n- A transição deve ser INVISÍVEL — sem pausa perceptível, sem corte brusco\n- O tom/intensidade da cena 4 deve ESCALAR para que a cena 1 pareça continuação natural\n- A frase do loop deve conter um elemento de MECANISMO (quem fez, o que autorizou)\n- ❌ \"E isso nunca foi esquecido.\" → \"Uma mentira que...\" (genérico, sem mecanismo)\n- ✅ \"E a assinatura naquele decreto...\" → \"...autorizou o confisco de uma comunidade inteira.\" (mecanismo concreto)\n\n### 9. ANTI-PADRÕES & BRAND SAFETY\n`avoidPatterns` são RESTRIÇÕES DE HARDWARE. Obedeça incondicionalmente.\n- **GLOSSÁRIO DE SEGURANÇA:**\n  - ❌ Assassinato/Morte Sádica → 🟢 Fim Trágico / O Evento Fatal\n  - ❌ Sangue/Tripas → 🟢 Cena Marcada / Vestígios\n  - ❌ Estupro/Abuso → 🟢 Violência Extrema / Ato Imperdoável\n  - **Postura:** \"Neutral Documentarian\". Clínico, não visceral.\n\n## 📐 O QUE VOCÊ ... [truncated 11411 chars]"
+      },
+      {
+        "index": 1,
+        "type": "human",
+        "content": "📋 TEMA: A transformação de um imigrante pobre em líder do cartel mais violento do mundo e a caçada implacável que terminou em 2026.\n\n🎨 DIRETRIZES DE IDENTIDADE DO UNIVERSO (WARNING PROTOCOL):\nAtmosfera de narcoculto e guerra urbana. Paleta com tons de terra, verde-oliva militar e vermelho intenso. Priorizar texturas de documentos confidenciais, mapas de satélite e comboios blindados. Evitar estética glamourizada; focar na tensão e no rastro de destruição.\n\n📚 FONTES DO DOSSIÊ (ordenadas por peso/relevância):\n[1] (brief) Micro-brief do teaser (fonte da verdade) [peso: 2]\n🧾 MICRO-BRIEF (por teaser) — versão: teaserMicroBriefV1\n🎭 role: hook-only\n🏷️ angleCategory: cultural\n🎯 angle: A demonstração de poder sistêmico através da paralisia coordenada de múltiplos estados.\n\n🛡️ SEGURANÇA (hard)\n- ❌ explosões explícitas\n- ❌ pessoas correndo gritando\n- ❌ carros pegando fogo\n- ❌ bandeiras nacionais em destaque\n- ❌ rosto do líder morto\n\n🧰 ARTEFATOS PERMITIDOS\n- ✅ mapa do México ficando vermelho\n- ✅ rodovia vazia ao entardecer\n- ✅ obturador de loja fechando (som e imagem)\n- ✅ relógio digital marcando a hora exata da paralisia\n- ✅ televisores com estática em série\n- ✅ documento de 'Código Vermelho' com selo de urgência\n\n🔫 FATOS PERMITIDOS (somente estes)\n1. A morte do fundador desencadeou o 'Código Vermelho' em 2026.\n2. O protocolo paralisou o transporte e serviços em 16 estados mexicanos simultaneamente.\n3. A estrutura do grupo dividiu-se entre gestão burocrática e hegemonia militar.\n4. O sistema de comunicação do grupo domina frequências estatais de rádio.\n5. A paralisia provou que a máquina funciona mesmo sem o seu criador.\n\n🧠 NOTAS (curtas)\n- O foco é a eficiência assustadora do sistema, não o caos.\n- O silêncio visual deve ser mais impactante que o ruído.\n---\n\n\nAnalise o seguinte dossiê e crie o plano narrativo estruturado:\n\n📋 TEMA: A transformação de um imigrante pobre em líder do cartel mais violento do mundo e a caçada implacável que terminou em 2026.\n\n🎯 CONTEXTO DE MONETIZAÇÃO — ESTE OUTLINE É BASEADO EM UM ITEM DO PLANO\n\nEste outline deve seguir a direção de um **teaser** planejado:\n- **Título planejado:** O Dia que o México Parou\n- **Hook sugerido:** \"O líder se foi, mas o Código Vermelho paralisou dezesseis estados em minutos.\"\n  → 🚨 REGRA OBRIGATÓRIA: As 4 variantes em hookVariants DEVEM SEGUIR este gancho. Cada variante (green, moderate, aggressive, lawless) calibra o MESMO conceito em níveis tonais diferentes — NÃO invente um gancho novo. O hook do plano de monetização é a fonte da verdade.\n- **Ângulo narrativo:** A demonstração de poder sistêmico através da paralisia coordenada de múltiplos estados. (categoria: cultural)\n- **Funil de episódio:** Este teaser é funil de entrada do EP3.\n  → REGRA: Alinhe o ângulo narrativo e o hook ao TEMA do EP3. O CTA (se houver) deve direcionar para este episódio específico.\n  → O teaser NÃO deve revelar conteúdo de outros episódios — mantenha o foco no território do EP3.\n- **Papel narrativo:** hook-only\n  → Este é um HOOK-ONLY — arma de alcance viral. Detonação cognitiva de 16-22 segundos.\n  → RUPTURA EM 2 SEGUNDOS: O primeiro beat DEVE causar ruptura cognitiva. Nada de construção antes do choque. Se o público pensa antes de sentir, ele desliza.\n  → MICRO-REGRA (TIMING): A primeira frase deve ser pronunciável em ~1,5s (3-5 palavras; máx. 6). Sem vírgula na primeira pancada.\n  → 1 CONCEITO CENTRAL: O outline INTEIRO gira em torno de UMA ideia resumível em 1 frase mental. Se exige conectar 3+ entidades para entender, está denso demais.\n  → ALTERNÂNCIA DINÂMICA (NÃO ESCALAÇÃO LINEAR): A intensidade deve VARIAR com contrastes — após beat intenso, inserir respiro para amplificar o próximo pico. O ÚLTIMO beat (corte seco — sem CTA) é o pico absoluto. NÃO faça escalação linear pura (8→9→9→10 = saturação → REPROVADO). FAÇA alternância (8→6→9→10 = cada pico amplificado pelo contraste → APROVADO).\n  → MECANISMO > SINTOMA (CRÍTICO): Foque no SISTEMA (quem autorizou, quem lucrou, qual documento), NÃO na violência. ❌ \"A corda estala\" (sintoma → repulsa). ✅ \"O bispo assinou a sentença\" (mecanismo → indignação).\n  → NOMES UNIVERSAIS: Nomes obscuros quebram fluxo cognitivo. Use função (\"o bispo\", \"o juiz\"), não nomes históricos (Hinderbach, Tiberino). Exceção: nomes universalmente conhecidos.\n  → RESOLUÇÃO ZERO: Pura provocação. Nenhuma explicação, recap, conclusão moral ou reflexão filosófica. TODOS os loops ficam abertos.\n  → ZERO CTA/BRANDING: O público NÃO pode perceber que acabou. Corte seco no pico. Sem \"The Gap Files.\", sem \"assista\", \"siga\", \"inscreva-se\".\n  → REPLAY BAIT: Pelo menos 1 beat com detalhe visual/narrativo rápido demais para absorver totalmente. Força re-assistir.\n  → Para risingBeats: o campo \"questionAnswered\" DEVE ser \"Não respondida\" — hook-only NÃO responde perguntas.\n  → HOOKVARIANTS = RUPTURA CONCEITUAL, NÃO CONSTRUÇÃO:\n    - PROIBIDO nas variantes: \"Um pregador grita\", \"Um padre declara\", \"ecoa nas ruas\", \"A pregação enlouquece...\", \"Um sermão incendiário ecoa\" — isso é cena, não ruptura.\n    - FORMATO CORRETO: conceito + consequência em frases curtas (ex: \"Um sermão incendiou a cidade e nasceu um monstro.\"). O espectador SENTE antes de PENSAR.\n    - Cada variante calibra o MESMO conceito em níveis tonais (green/moderate/aggressive/lawless).\n- **Formato do short:** hook-brutal\n  → Adapte a mecânica narrativa ao formato. Consulte a tabela de FORMATOS DE SHORT na skill para beats, duração e estrutura ideais.\n- **Estrutura sugerida:** Loop-B (paralisou dezesseis estados em segundos) -> Respiro (O trono está vazio, mas a ordem foi executada sem falhas) -> Replay bait (Um mapa onde as luzes das cidades se apagam em sequência) -> Loop-A (O trono está vazio, mas a ordem...).\n\n💡 **NOTAS ESTRATÉGICAS DO PLANO DE MONETIZAÇÃO:**\nO plano foca na desconstrução do mito do 'Senhor dos Montes' através de uma abordagem clínica e documental. A estratégia de monetização utiliza o contraste entre a riqueza do 'ouro verde' (abacates) e a precariedade do fim do líder em uma cabana rústica. Para garantir Brand Safety, substituímos termos bélicos por descrições de logística e inteligência, focando em artefatos como relatórios e mapas. O EP1 estabelece a base, o EP2 expõe a máquina financeira e o EP3 detalha a queda técnica e biológica.\nUse essas notas para guiar o tom, a intensidade e os pontos de ênfase do plano narrativo.\n\n⛔ **O QUE NÃO FAZER (ANTI-PADRÕES OBRIGATÓRIOS):**\n1. NÃO mostre pânico nas ruas — mostre o vazio e o silêncio absoluto\n2. NÃO use nomes de políticos — foque no 'Código Vermelho' como entidade\n3. NÃO explique o que é o Código Vermelho — deixe o espectador deduzir pelo impacto\n\n🚨 REGRA ABSOLUTA: Os anti-padrões acima são INVIOLÁVEIS e se aplicam a TODOS os campos do outline:\n- hookVariants (as 4 frases de hook)\n- promiseSetup (o anchor/contexto)\n- risingBeats (todas as revelações, questionAnswered, newQuestion)\n- climaxMoment, resolutionPoints, ctaApproach\nSe um padrão diz \"NÃO mencionar datas\", NENHUM campo pode conter anos, séculos ou referências temporais numéricas.\nSe um padrão diz \"NÃO explicar\", NENHUM beat pode conter explicações.\n⚠️ avoidPatterns têm PRIORIDADE sobre qualquer outra regra (incluindo anchor mínimo). Se conflitarem, obedeça o avoidPattern.\n\n📊 **REGRA DE DISTRIBUIÇÃO – HOOK-ONLY:** context=0, resolution=0, cta=1. Todas as cenas vão para hook + rising. O último beat de rising é o pico absoluto. CTA = corte seco + branding.\n\n⚠️ INSTRUÇÃO CRÍTICA: SIGA o hook sugerido (as hookVariants devem derivar dele), o ângulo e o papel narrativo acima. O plano narrativo deve ser coerente com essas diretrizes. Não invente um ângulo nem um gancho diferente.\n\n🎯 **REGRA DE FOCO NARRATIVO (CRÍTICA):**\nEste teaser tem ângulo \"A demonstração de poder sistêmico através da paralisia coordenada de múltiplos estados.\" (cultural). TODOS os beats, o clímax e a resolução devem estar 100% DENTRO deste ângulo.\n- NÃO faça \"saltos temporais\" para eventos de outros ângulos/teasers do dossiê.\n- NÃO tra... [truncated 2320 chars]"
+      }
+    ]
+  },
+  "parsed": {
+    "hookStrategy": "Ruptura por Contradição de Poder: O líder morre (fraqueza), mas o sistema escala (força). Foco no mecanismo automático de controle.",
+    "hookVariants": [
+      {
+        "level": "green",
+        "hook": "Em 2026, um protocolo automático paralisou dezesseis estados mexicanos em poucos minutos.",
+        "rationale": "Factual e informativo, focado na escala do evento sem adjetivos agressivos."
+      },
+      {
+        "level": "moderate",
+        "hook": "O líder morreu, mas o Código Vermelho paralisou dezesseis estados em minutos.",
+        "rationale": "Introduz a tensão entre a perda do criador e a persistência da máquina."
+      },
+      {
+        "level": "aggressive",
+        "hook": "O trono está vazio, mas o Código Vermelho paralisou dezesseis estados em minutos.",
+        "rationale": "Usa a metáfora do trono para enfatizar a autonomia assustadora do sistema."
+      },
+      {
+        "level": "lawless",
+        "hook": "A máquina sobreviveu ao criador: dezesseis estados paralisados pelo Código Vermelho em minutos.",
+        "rationale": "Foca na desumanização do poder, tratando o cartel como uma entidade biológica autônoma."
+      }
+    ],
+    "promiseSetup": "A morte do fundador não encerrou a guerra; ela ativou um mecanismo de silêncio coordenado.",
+    "risingBeats": [
+      {
+        "order": 1,
+        "revelation": "A estrutura dividiu-se em gestão burocrática e hegemonia militar, permitindo vida própria ao grupo.",
+        "questionAnswered": "Não respondida",
+        "newQuestion": "Como a burocracia do crime se tornou independente do líder?",
+        "sourceReference": "Dossiê Fato 3"
+      },
+      {
+        "order": 2,
+        "revelation": "O sistema de comunicação do grupo domina frequências estatais de rádio em tempo real.",
+        "questionAnswered": "Não respondida",
+        "newQuestion": "O governo ainda tem controle sobre suas próprias comunicações?",
+        "sourceReference": "Dossiê Fato 4"
+      }
+    ],
+    "climaxMoment": "",
+    "climaxFormula": "",
+    "resolutionPoints": [],
+    "resolutionAngle": "",
+    "ctaApproach": "SEM CTA — o Loop Infinito é o mecanismo de retenção. A última cena é a Parte A do loop (frase incompleta). Sem branding, sem convite.",
+    "emotionalArc": "",
+    "toneProgression": "",
+    "whatToReveal": [],
+    "whatToHold": [],
+    "whatToIgnore": [],
+    "segmentDistribution": {
+      "hook": 1,
+      "context": 0,
+      "rising": 2,
+      "climax": 0,
+      "resolution": 0,
+      "cta": 1
+    },
+    "tensionCurve": [
+      "high",
+      "pause",
+      "high",
+      "peak"
+    ],
+    "openLoops": [
+      {
+        "question": "Quem programou a autonomia do Código Vermelho?",
+        "openedAtBeat": 1,
+        "closedAtBeat": null
+      },
+      {
+        "question": "Como o sistema domina frequências estatais sem intervenção humana?",
+        "openedAtBeat": 3,
+        "closedAtBeat": null
+      }
+    ],
+    "resolutionLevel": "none",
+    "loopSentence": {
+      "fullSentence": "O trono está vazio, mas o Código Vermelho paralisou dezesseis estados em minutos.",
+      "partA": "O trono está vazio, mas...",
+      "partB": "...o Código Vermelho paralisou dezesseis estados em minutos."
+    },
+    "title": "O Dia que o México Parou",
+    "oneSentencePromise": "Como um protocolo fantasma paralisou 16 estados.",
+    "shockContrastBeat": {
+      "type": "reversal",
+      "description": "A morte do líder (vácuo de poder) resultando em paralisia coordenada (excesso de controle)."
+    },
+    "primaryCuriosityGap": "Como uma máquina sem líder conseguiu paralisar um país inteiro?",
+    "miniClimaxBeats": [],
+    "expectedRetentionCurve": {
+      "hookRate": 72,
+      "midpointRetention": 55,
+      "climaxRetention": 45,
+      "rationale": "O hook de paralisia sistêmica (Código Vermelho) gera curiosidade imediata sobre 'como'. O uso de artefatos visuais de silêncio (rodovias vazias) cria um contraste tenso que sustenta o meio do vídeo até o loop."
+    }
+  },
+  "rawContent": ""
+}
